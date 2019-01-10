@@ -1,23 +1,23 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.SymbolicModelcheckCommand;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
-
 import javafx.fxml.FXML;
 
+import java.util.ResourceBundle;
 
+
+@FXMLInjected
 @Singleton
 public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicCheckingFormulaItem> {
 	
@@ -35,67 +35,67 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 	
 	protected void setCheckListeners() {
 		btAdd.setOnAction(e -> addFormula(false));
-		btCheck.setOnAction(e -> {
-			SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getExecutionType();
-			SymbolicCheckingFormulaItem formulaItem = null;
-			addFormula(true);
-			switch(checkingType) {
-				case INVARIANT: 
-					symbolicCheckingFormulaHandler.handleInvariant(cbOperations.getSelectionModel().getSelectedItem(), false);
-					break;
-				case CHECK_ALL_OPERATIONS:
-					events.forEach(event -> symbolicCheckingFormulaHandler.handleInvariant(event, true));
-					break;
-				case DEADLOCK:
-					symbolicCheckingFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false);
-					break;
-				default:
-					formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
-					switch(checkingType) {
-						case CHECK_ASSERTIONS: 
-							symbolicCheckingFormulaHandler.handleAssertions(formulaItem, false);
-							break;
-						case CHECK_REFINEMENT: 
-							symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false); 
-							break;
-						case FIND_REDUNDANT_INVARIANTS:
-							symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false);
-							break;
-						default:
-							SymbolicModelcheckCommand.Algorithm algorithm = checkingType.getAlgorithm();
-							if(algorithm != null) {
-								symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, algorithm, false);
-							}
-							break;
-				}
-			}
-			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
-		});
+		btCheck.setOnAction(e -> checkFormula());
 	}
-	
-	private void addFormula(boolean checking) {
+
+	@Override
+	public void checkFormula() {
 		SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getExecutionType();
 		if(checkingType == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
-			injector.getInstance(SymbolicCheckingChoosingStage.class).close();
+			return;
+		}
+		SymbolicCheckingFormulaItem formulaItem = null;
+		addFormula(true);
+		switch(checkingType) {
+			case INVARIANT:
+				String selectedEvent = cbOperations.getSelectionModel().getSelectedItem();
+				symbolicCheckingFormulaHandler.handleInvariant(selectedEvent, false);
+				break;
+			case CHECK_ALL_OPERATIONS:
+				events.forEach(event -> symbolicCheckingFormulaHandler.handleInvariant(event, true));
+				break;
+			case DEADLOCK:
+				symbolicCheckingFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false);
+				break;
+			default:
+				formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
+				switch(checkingType) {
+					case CHECK_ASSERTIONS:
+						symbolicCheckingFormulaHandler.handleAssertions(formulaItem, false);
+						break;
+					case CHECK_REFINEMENT:
+						symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false);
+						break;
+					case FIND_REDUNDANT_INVARIANTS:
+						symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false);
+						break;
+					default:
+						SymbolicModelcheckCommand.Algorithm algorithm = checkingType.getAlgorithm();
+						if(algorithm != null) {
+							symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, algorithm, false);
+						}
+						break;
+				}
+		}
+		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
+	}
+
+	@Override
+	protected void addFormula(boolean checking) {
+		SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getExecutionType();
+		if(checkingType == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
 			return;
 		}
 		SymbolicGUIType guiType = injector.getInstance(SymbolicCheckingChoosingStage.class).getGUIType();
 		switch(guiType) {
 			case CHOICE_BOX:
-				switch(checkingType) {
-					case INVARIANT:
-						String item = cbOperations.getSelectionModel().getSelectedItem();
-						symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicExecutionType.INVARIANT, checking);
-						break;
-					case CHECK_ALL_OPERATIONS:
-						for(String event : events) {
-							symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicExecutionType.INVARIANT, checking);
-						}
-						break;
-					default:
-						throw new AssertionError("Unhandled checking type: " + checkingType);
+				if (checkingType == SymbolicExecutionType.INVARIANT) {
+					String item = cbOperations.getSelectionModel().getSelectedItem();
+					symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicExecutionType.INVARIANT, checking);
+					break;
+				} else {
+					throw new AssertionError("Unhandled checking type: " + checkingType);
 				}
-				break;
 			case TEXT_FIELD:
 				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
 				break;

@@ -3,6 +3,7 @@ package de.prob2.ui.project;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -16,6 +17,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.StackPane;
 
+@FXMLInjected
 @Singleton
 public final class ProjectView extends StackPane {
 	@FXML

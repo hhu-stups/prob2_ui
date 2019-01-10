@@ -9,7 +9,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
@@ -18,15 +17,12 @@ import netscape.javascript.JSObject;
 import java.net.URISyntaxException;
 
 public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
-
-	@FXML
-	private TextField tfName;
-	
-	@FXML
-	private TextArea taDescription;
 	
 	@FXML
 	private WebView taCode;
+	
+	@FXML
+	private TextArea taDescription;
 	
 	protected WebEngine engine;
 
@@ -40,9 +36,9 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 				final JSObject editor = (JSObject) engine.executeScript("editor");
 				String code = editor.call("getValue").toString();
 				if(clazz == LTLPatternItem.class) {
-					return new LTLPatternItem(tfName.getText(), taDescription.getText(), code);	
+					return new LTLPatternItem(code, taDescription.getText());	
 				}
-				return new LTLFormulaItem(tfName.getText(), taDescription.getText(), code);	
+				return new LTLFormulaItem(code, taDescription.getText());	
 			}
 		});
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -61,13 +57,11 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 	}
 		
 	public void setData(String name, String description, String code) {
-		tfName.setText(name);
 		taDescription.setText(description);
 		setTextEditor(code);
 	}
 	
 	public void clear() {
-		this.tfName.clear();
 		this.taDescription.clear();
 	}
 

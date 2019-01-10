@@ -11,8 +11,8 @@ public class LTLFormulaItem extends AbstractCheckableItem {
 
 	private transient ObjectProperty<Trace> counterExample;
 
-	public LTLFormulaItem(String name, String description, String code) {
-		super(name, description, code);
+	public LTLFormulaItem(String code, String description) {
+		super("", description, code);
 		this.counterExample = new SimpleObjectProperty<>(null);
 	}
 	
@@ -43,12 +43,12 @@ public class LTLFormulaItem extends AbstractCheckableItem {
 			return false;
 		}
 		LTLFormulaItem otherFormulaItem = (LTLFormulaItem) other;
-		return this.name.equals(otherFormulaItem.getName());
+		return this.code.equals(otherFormulaItem.getCode()) && this.description.equals(otherFormulaItem.getDescription());
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name);
+		return Objects.hash(code, description);
 	}
 
 }

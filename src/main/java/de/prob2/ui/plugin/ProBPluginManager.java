@@ -25,8 +25,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 
@@ -58,6 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author  Christoph Heinzen
  * @since   10.08.2017
  */
+@FXMLInjected
 @Singleton
 public class ProBPluginManager {
 
@@ -84,7 +89,7 @@ public class ProBPluginManager {
 	 * @param bundle {@link ResourceBundle} used in the prob2-ui application
 	 */
 	@Inject
-	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) throws IOException {
+	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions, final Config config) throws IOException {
 		this.proBPluginHelper = proBPluginHelper;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -93,6 +98,17 @@ public class ProBPluginManager {
 		this.fileChooserManager = fileChooserManager;
 		// Do not convert this to a method reference! Otherwise it won't work correctly if the plugin manager changes.
 		stopActions.add(() -> this.getPluginManager().stopPlugins());
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				setPluginDirectory(configData.pluginDirectory);
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.pluginDirectory = getPluginDirectory();
+			}
+		});
 	}
 
 	/**

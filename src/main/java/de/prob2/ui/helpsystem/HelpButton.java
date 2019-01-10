@@ -12,12 +12,14 @@ import com.google.inject.Injector;
 import de.prob.Main;
 
 import de.prob2.ui.ProB2;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 public class HelpButton extends Button{
 	private final Injector injector;
 	private File helpContent;

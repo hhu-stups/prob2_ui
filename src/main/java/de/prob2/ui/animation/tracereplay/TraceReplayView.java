@@ -11,6 +11,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -42,6 +43,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
+@FXMLInjected
 @Singleton
 public class TraceReplayView extends ScrollPane {
 	private static final String TRACE_FILE_ENDING = "*.prob2trace";

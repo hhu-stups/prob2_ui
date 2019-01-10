@@ -10,6 +10,7 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -28,6 +29,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 
+@FXMLInjected
 @Singleton
 public final class HistoryView extends VBox {
 	private final class TransitionRow extends TableRow<HistoryItem> {
@@ -128,4 +130,5 @@ public final class HistoryView extends VBox {
 					currentProject.getCurrentMachine());
 		}
 	}
+
 }

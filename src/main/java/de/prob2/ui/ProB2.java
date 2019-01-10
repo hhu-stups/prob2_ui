@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -56,6 +58,26 @@ public class ProB2 extends Application {
 
 	private Stage primaryStage;
 
+	private static boolean isJavaVersionOk(final String javaVersion) {
+		final Matcher javaVersionMatcher = Pattern.compile("(?:1\\.)?(\\d+).*_(\\d+).*").matcher(javaVersion);
+		if (javaVersionMatcher.matches()) {
+			final int majorVersion;
+			final int updateNumber;
+			try {
+				majorVersion = Integer.parseInt(javaVersionMatcher.group(1));
+				updateNumber = Integer.parseInt(javaVersionMatcher.group(2));
+			} catch (NumberFormatException e) {
+				LOGGER.warn("Failed to parse Java version; skipping version check", e);
+				return true;
+			}
+			
+			return majorVersion > 8 || (majorVersion == 8 && updateNumber >= 60);
+		} else {
+			LOGGER.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
+			return true;
+		}
+	}
+
 	public static void main(String... args) {
 		Application.launch(args);
 	}
@@ -69,49 +91,54 @@ public class ProB2 extends Application {
 				Locale.setDefault(localeOverride);
 			}
 		}
-		ProB2Module module = new ProB2Module(runtimeOptions);
-		Platform.runLater(() -> {
-			injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
-			bundle = injector.getInstance(ResourceBundle.class);
-			injector.getInstance(StopActions.class)
-					.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
-			StageManager stageManager = injector.getInstance(StageManager.class);
-			Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
-				LOGGER.error("Uncaught exception on thread {}", thread, exc);
-				Platform.runLater(() -> {
-					try {
-						stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
-					} catch (Throwable t) {
-						LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
-					}
-				});
-			});
 
-			System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
-
-			// Load config file
-			injector.getInstance(Config.class);
-
-			CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-			currentProject.addListener((observable, from, to) -> this.updateTitle());
-			currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle());
-			CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
-			currentTrace.addListener((observable, from, to) -> this.updateTitle());
-		});
-
+		System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
 	}
 
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
+
+		ProB2Module module = new ProB2Module(runtimeOptions);
+		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+		bundle = injector.getInstance(ResourceBundle.class);
+		injector.getInstance(StopActions.class)
+			.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
+		StageManager stageManager = injector.getInstance(StageManager.class);
+		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
+			LOGGER.error("Uncaught exception on thread {}", thread, exc);
+			Platform.runLater(() -> {
+				try {
+					stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
+				} catch (Throwable t) {
+					LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
+				}
+			});
+		});
+
+		final String javaVersion = System.getProperty("java.version");
+		if (!isJavaVersionOk(javaVersion)) {
+			stageManager.makeAlert(
+				Alert.AlertType.ERROR,
+				"internal.javaVersionTooOld.header",
+				"internal.javaVersionTooOld.content",
+				javaVersion
+			).showAndWait();
+			throw die("Java version too old: " + javaVersion, 1);
+		}
+
+		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
+		currentProject.addListener((observable, from, to) -> this.updateTitle());
+		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle());
+		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
+		currentTrace.addListener((observable, from, to) -> this.updateTitle());
 		this.updateTitle();
+
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
 		primaryStage.setScene(mainScene);
-		StageManager stageManager = injector.getInstance(StageManager.class);
 		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 
-		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
 
 		this.notifyPreloader(new Preloader.ProgressNotification(100));

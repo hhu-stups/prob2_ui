@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 
 import de.prob.exception.ProBError;
 import de.prob.statespace.Transition;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -26,6 +27,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 public final class ExecuteByPredicateStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExecuteByPredicateStage.class);
 	

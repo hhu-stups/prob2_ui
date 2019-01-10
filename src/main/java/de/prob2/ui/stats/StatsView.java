@@ -15,6 +15,7 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
 
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -30,6 +31,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
+@FXMLInjected
 @Singleton
 public class StatsView extends ScrollPane {
 	@FXML

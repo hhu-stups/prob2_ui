@@ -71,15 +71,24 @@ public class BInterpreter implements Executable {
 	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
 	private static final Pattern MESSAGE_WITH_POSITIONS_PATTERN = Pattern.compile("^\\[(\\d+),(\\d+)\\] (.*)$");
 	
+	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;
 	private final ResourceBundle bundle;
-	private final Trace defaultTrace;
+	private Trace defaultTrace;
 
 	@Inject
 	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+		this.machineLoader = machineLoader;
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
-		this.defaultTrace = new Trace(machineLoader.getEmptyStateSpace());
+		this.defaultTrace = null;
+	}
+	
+	private Trace getDefaultTrace() {
+		if (defaultTrace == null) {
+			defaultTrace = new Trace(machineLoader.getEmptyStateSpace());
+		}
+		return defaultTrace;
 	}
 	
 	// The exceptions thrown while parsing are not standardized in any way.
@@ -183,7 +192,7 @@ public class BInterpreter implements Executable {
 		if (":clear".equals(source)) {
 			return new ConsoleExecResult("","", ConsoleExecResultType.CLEAR);
 		}
-		final Trace trace = currentTrace.exists() ? currentTrace.get() : defaultTrace;
+		final Trace trace = currentTrace.exists() ? currentTrace.get() : this.getDefaultTrace();
 		final IEvalElement formula;
 		try {
 			formula = trace.getModel().parseFormula(source, FormulaExpand.EXPAND);

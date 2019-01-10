@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.StateError;
 
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -15,6 +16,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 
+@FXMLInjected
 @Singleton
 public final class StateErrorsView extends AnchorPane {
 	private final class StateErrorCell extends ListCell<StateError> {

@@ -26,6 +26,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob.translator.Translator;
 import de.prob.translator.types.BObject;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -44,6 +45,7 @@ import javafx.scene.control.ButtonType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FXMLInjected
 @Singleton
 public class TraceChecker {
 

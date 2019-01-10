@@ -58,7 +58,6 @@
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
 			<columns>
-				<TableColumn fx:id="showDetailsColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
 				<TableColumn fx:id="strategyColumn" minWidth="260.0" maxWidth="320.0" prefWidth="260.0" text="%verifications.common.columns.strategy" />

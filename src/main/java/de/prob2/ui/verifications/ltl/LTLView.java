@@ -1,14 +1,11 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -39,15 +36,19 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
 
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+@FXMLInjected
 @Singleton
-public class LTLView extends ScrollPane {
+public class LTLView extends AnchorPane {
 	
 	@FXML 
 	private MenuButton addMenuButton;
@@ -66,7 +67,7 @@ public class LTLView extends ScrollPane {
 	@FXML
 	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
 	@FXML
-	private TableColumn<LTLPatternItem, String> patternNameColumn;
+	private TableColumn<LTLPatternItem, String> patternColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
 	@FXML
@@ -74,7 +75,7 @@ public class LTLView extends ScrollPane {
 	@FXML
 	private TableColumn<LTLFormulaItem, FontAwesomeIconView> formulaStatusColumn;
 	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaNameColumn;
+	private TableColumn<LTLFormulaItem, String> formulaColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
@@ -182,7 +183,7 @@ public class LTLView extends ScrollPane {
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.LTLView.contextMenu.showParsingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -198,10 +199,10 @@ public class LTLView extends ScrollPane {
 
 	private void setBindings() {
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		patternNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		patternColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.LTL, injector));
 		

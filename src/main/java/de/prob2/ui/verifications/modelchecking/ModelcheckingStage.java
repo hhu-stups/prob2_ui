@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingOptions.Options;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -20,6 +21,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+@FXMLInjected
 @Singleton
 public class ModelcheckingStage extends Stage {
 	

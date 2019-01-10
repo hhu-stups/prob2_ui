@@ -3,14 +3,13 @@ package de.prob2.ui.visualisation;
 import java.io.FileNotFoundException;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -18,6 +17,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@FXMLInjected
 @Singleton
 public class VisualisationView extends AnchorPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationView.class);

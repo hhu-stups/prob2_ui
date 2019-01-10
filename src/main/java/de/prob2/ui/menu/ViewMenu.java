@@ -4,12 +4,14 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
+@FXMLInjected
 public class ViewMenu extends Menu {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;

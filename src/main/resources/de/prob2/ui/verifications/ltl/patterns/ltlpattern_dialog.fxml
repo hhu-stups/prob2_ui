@@ -26,10 +26,6 @@
 					<padding>
 						<Insets topRightBottomLeft="15.0"/>
 					</padding>
-					<HBox spacing="10.0" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-						<Label text="%verifications.ltl.pattern.ltlPatternDialog.enterPattern" HBox.hgrow="NEVER"/>
-						<TextField fx:id="tfName" HBox.hgrow="ALWAYS"/>
-					</HBox>
 					<Label text="%verifications.ltl.pattern.ltlPatternDialog.pattern" VBox.vgrow="NEVER"/>
 					<WebView fx:id="taCode" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 					<Label text="%verifications.ltl.pattern.ltlPatternDialog.description" VBox.vgrow="NEVER"/>

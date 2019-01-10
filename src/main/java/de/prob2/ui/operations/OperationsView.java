@@ -21,15 +21,17 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
@@ -66,6 +68,7 @@ import org.slf4j.LoggerFactory;
 
 import se.sawano.java.text.AlphanumericComparator;
 
+@FXMLInjected
 @Singleton
 public final class OperationsView extends VBox {
 	public enum SortMode {
@@ -197,6 +200,7 @@ public final class OperationsView extends VBox {
 	private final ResourceBundle bundle;
 	private final StatusBar statusBar;
 	private final StageManager stageManager;
+	private final Config config;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final ExecutorService updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
@@ -204,7 +208,7 @@ public final class OperationsView extends VBox {
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
 						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar,
-						   final StopActions stopActions) {
+						   final StopActions stopActions, final Config config) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
 		this.currentTrace = currentTrace;
@@ -213,6 +217,7 @@ public final class OperationsView extends VBox {
 		this.bundle = bundle;
 		this.statusBar = statusBar;
 		this.stageManager = stageManager;
+		this.config = config;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		stopActions.add(this.updater::shutdownNow);
@@ -272,6 +277,23 @@ public final class OperationsView extends VBox {
 			doSort();
 			opsListView.getItems().setAll(applyFilter(searchBar.getText()));
 		});
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.operationsSortMode != null) {
+					setSortMode(configData.operationsSortMode);
+				}
+				
+				setShowDisabledOps(configData.operationsShowNotEnabled);
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.operationsSortMode = getSortMode();
+				configData.operationsShowNotEnabled = getShowDisabledOps();
+			}
+		});
 	}
 
 	private void executeOperationIfPossible(final OperationItem item) {
@@ -280,6 +302,11 @@ public final class OperationsView extends VBox {
 			&& item.getStatus() == OperationItem.Status.ENABLED
 			&& item.getTrace().equals(currentTrace.get())
 		) {
+			Trace forward = currentTrace.forward();
+			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
+				currentTrace.set(currentTrace.forward());
+				return;
+			}
 			currentTrace.set(currentTrace.get().add(item.getTransition().getId()));
 		}
 	}
@@ -354,14 +381,10 @@ public final class OperationsView extends VBox {
 		}
 	}
 
-	private static String stripString(final String param) {
-		return param.replaceAll("\\{", "").replaceAll("\\}", "");
-	}
-
 	private int compareParams(final List<String> left, final List<String> right) {
 		int minSize = left.size() < right.size() ? left.size() : right.size();
 		for (int i = 0; i < minSize; i++) {
-			int cmp = alphanumericComparator.compare(stripString(left.get(i)), stripString(right.get(i)));
+			int cmp = alphanumericComparator.compare(left.get(i), right.get(i));
 			if (cmp != 0) {
 				return cmp;
 			}
@@ -384,7 +407,13 @@ public final class OperationsView extends VBox {
 		if (left.getName().equals(right.getName())) {
 			return compareParams(left.getParameterValues(), right.getParameterValues());
 		} else {
-			return Integer.compare(opNames.indexOf(left.getName()), opNames.indexOf(right.getName()));
+			final int leftIndex = opNames.indexOf(left.getName());
+			final int rightIndex = opNames.indexOf(right.getName());
+			if (leftIndex == -1 && rightIndex == -1) {
+				return left.getName().compareTo(right.getName());
+			} else {
+				return Integer.compare(leftIndex, rightIndex);
+			}
 		}
 	}
 
@@ -500,19 +529,19 @@ public final class OperationsView extends VBox {
 	}
 	
 
-	public OperationsView.SortMode getSortMode() {
+	private OperationsView.SortMode getSortMode() {
 		return this.sortMode.get();
 	}
 
-	public void setSortMode(final OperationsView.SortMode sortMode) {
+	private void setSortMode(final OperationsView.SortMode sortMode) {
 		this.sortMode.set(sortMode);
 	}
 	
-	public boolean getShowDisabledOps() {
+	private boolean getShowDisabledOps() {
 		return this.showDisabledOps.get();
 	}
 
-	public void setShowDisabledOps(boolean showDisabledOps) {
+	private void setShowDisabledOps(boolean showDisabledOps) {
 		this.showDisabledOps.set(showDisabledOps);
 	}
 }

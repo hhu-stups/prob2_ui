@@ -137,6 +137,7 @@ import de.be4.classicalb.core.parser.node.TWhen;
 import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
 import de.be4.classicalb.core.parser.node.Token;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.concurrent.Task;
@@ -167,6 +168,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@FXMLInjected
 public class BEditor extends CodeArea {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
 

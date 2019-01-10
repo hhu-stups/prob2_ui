@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -29,6 +30,7 @@ import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
 
+@FXMLInjected
 @Singleton
 public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaItem> {
 	
@@ -103,7 +105,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	protected void openItem(SymbolicCheckingFormulaItem item) {
 		SymbolicCheckingFormulaInput formulaInput = injector.getInstance(SymbolicCheckingFormulaInput.class);
 		formulaInput.changeFormula(item, injector.getInstance(SymbolicCheckingView.class), injector.getInstance(SymbolicCheckingResultHandler.class),
-									injector.getInstance(SymbolicCheckingFormulaHandler.class), injector.getInstance(SymbolicCheckingChoosingStage.class));
+									injector.getInstance(SymbolicCheckingChoosingStage.class));
 	}
 		
 }

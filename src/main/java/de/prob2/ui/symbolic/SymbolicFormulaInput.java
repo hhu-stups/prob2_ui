@@ -1,13 +1,7 @@
 package de.prob2.ui.symbolic;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.PredicateBuilderView;
@@ -22,6 +16,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extends VBox {
 	
@@ -130,6 +129,12 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		} else {
 			newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
 		}
+		if(choosingStage.getExecutionType() == SymbolicExecutionType.CHECK_ALL_OPERATIONS) {
+			return true;
+		}
+		if(choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
+			return true;
+		}
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
 			SymbolicExecutionType type = choosingStage.getExecutionType();
 			item.setData(formula, type.getName(), formula, type);
@@ -140,11 +145,10 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		return false;
 	}
 	
-	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, 
-			SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage<T> stage) {
+	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
-		setChangeListeners(item, view, resultHandler, formulaHandler, stage);
+		setChangeListeners(item, view, resultHandler, stage);
 		stage.select(item);
 		if(stage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
@@ -158,26 +162,31 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 				}
 			});
 		}
-		stage.showAndWait();
+		stage.show();
 	}
 	
-	protected void setChangeListeners(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, 
-									SymbolicFormulaHandler<T> formulaHandler, SymbolicChoosingStage<T> stage) {
+	protected void setChangeListeners(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setOnAction(e -> {
-			if(!updateFormula(item, view, stage)) {
+			if(updateFormula(item, view, stage)) {
+				addFormula(false);
+			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
 			stage.close();
 		});
 		
 		btCheck.setOnAction(e-> {
-			if(!updateFormula(item, view, stage)) {
-				formulaHandler.handleItem(item, false);
+			if(updateFormula(item, view, stage)) {
+				checkFormula();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
 			stage.close();
 		});
 	}
+
+	public abstract void checkFormula();
+
+	protected abstract void addFormula(boolean checking);
 	
 }
