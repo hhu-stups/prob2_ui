@@ -6,6 +6,9 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.hildan.fxgson.FxGson;
+import org.hildan.fxgson.adapters.extras.ColorTypeAdapter;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
@@ -18,36 +21,38 @@ import com.google.inject.util.Providers;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.config.RuntimeOptions;
-
+import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
+import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.BoundingBox;
+import javafx.scene.paint.Color;
 import javafx.util.BuilderFactory;
-
-import org.hildan.fxgson.FxGson;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
-	
+
 	private final RuntimeOptions runtimeOptions;
 	private final BuilderFactory javafxDefaultBuilderFactory;
-	
+
 	public ProB2Module(final RuntimeOptions runtimeOptions) {
 		super();
 		this.runtimeOptions = runtimeOptions;
 		this.javafxDefaultBuilderFactory = new JavaFXBuilderFactory();
 	}
-	
+
 	@Override
 	protected void configure() {
 		install(new MainModule());
-		
+
 		// General stuff
 		final Locale locale = Locale.getDefault();
 		bind(Locale.class).toInstance(locale);
 		final ResourceBundle bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale);
 		bind(ResourceBundle.class).toInstance(bundle);
-		final MenuToolkit toolkit = IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true")) ? MenuToolkit.toolkit(locale) : null;
+		final MenuToolkit toolkit = IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true"))
+				? MenuToolkit.toolkit(locale)
+				: null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		bind(Gson.class).toInstance(FxGson.coreBuilder()
@@ -67,11 +72,13 @@ public class ProB2Module extends AbstractModule {
 				}
 				return new BoundingBox(array[0], array[1], array[2], array[3]);
 			})
+			.registerTypeAdapter(Color.class, new ColorTypeAdapter())
 			.create());
+		bind(MagicGraphI.class).to(MagicGraphFX.class);
 	}
 
 	@Provides
-	public FXMLLoader provideLoader(final Injector injector, ResourceBundle bundle) { 
+	public FXMLLoader provideLoader(final Injector injector, ResourceBundle bundle) {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setBuilderFactory(type -> {
 			if (injector.getExistingBinding(Key.get(type)) != null || type.isAnnotationPresent(FXMLInjected.class)) {

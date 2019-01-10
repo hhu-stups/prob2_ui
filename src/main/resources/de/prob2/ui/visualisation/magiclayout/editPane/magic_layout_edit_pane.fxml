@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.collections.*?>
+<?import java.lang.String?>
+<?import java.lang.Double?>
+
+<fx:root type="VBox" spacing="10"
+	xmlns:fx="http://javafx.com/fxml/1">
+	<ListView fx:id="listView" prefHeight="200" VBox.vgrow="NEVER" />
+	<TextArea fx:id="expressionTextArea" VBox.vgrow="ALWAYS"
+		styleClass="text-area-with-border" wrapText="true">
+		<VBox.margin>
+			<Insets left="5.0" right="5.0" />
+		</VBox.margin>
+	</TextArea>
+	<FlowPane fx:id="flowPane" VBox.vgrow="NEVER" hgap="5"
+		vgap="5">
+		<VBox.margin>
+			<Insets left="5.0" right="5.0" />
+		</VBox.margin>
+	</FlowPane>
+	<padding>
+		<Insets bottom="20.0" />
+	</padding>
+</fx:root>
