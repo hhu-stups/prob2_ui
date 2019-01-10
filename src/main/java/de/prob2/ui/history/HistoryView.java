@@ -8,7 +8,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.TraceSaver;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -123,9 +123,9 @@ public final class HistoryView extends VBox {
 
 	@FXML
 	private void saveTrace() {
-		TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
+		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 		if (currentTrace.get() != null) {
-			traceSaver.saveTrace(
+			traceSaver.save(
 					new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1),
 					currentProject.getCurrentMachine());
 		}

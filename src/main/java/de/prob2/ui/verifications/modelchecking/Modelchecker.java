@@ -16,7 +16,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage.SearchStrategy;
 import javafx.application.Platform;
@@ -57,8 +56,8 @@ public class Modelchecker implements IModelCheckListener {
 	private final CurrentProject currentProject;
 	
 	private final Injector injector;
-	
-	private Object lock = new Object();
+
+	private final Object lock = new Object();
 	
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -75,7 +74,7 @@ public class Modelchecker implements IModelCheckListener {
 	}
 
 	public void checkItem(ModelCheckingItem item, boolean checkAll) {
-		if(!item.shouldExecute()) {
+		if(!item.selected()) {
 			return;
 		}
 		
@@ -83,10 +82,14 @@ public class Modelchecker implements IModelCheckListener {
 			synchronized(lock) {
 				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);
 				startModelchecking(checkAll);
+				currentJobThreads.remove(Thread.currentThread());
 			}
-			currentJobThreads.remove(Thread.currentThread());
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		currentJobThreads.add(currentJobThread);
+		//Adding a new thread for model checking must be done before the thread is started, but it has to be
+		//synchronized with other threads accessing the list containing all threads
+		synchronized(lock) {
+			currentJobThreads.add(currentJobThread);
+		}
 		currentJobThread.start();
 	}
 	
@@ -98,7 +101,11 @@ public class Modelchecker implements IModelCheckListener {
 				currentJobThreads.remove(Thread.currentThread());
 			}
 		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		currentJobThreads.add(currentJobThread);
+		//Adding a new thread for model checking must be done before the thread is started, but it has to be
+		//synchronized with other threads accessing the list containing all threads
+		synchronized(lock) {
+			currentJobThreads.add(currentJobThread);
+		}
 		currentJobThread.start();
 	}
 	
@@ -107,8 +114,6 @@ public class Modelchecker implements IModelCheckListener {
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy));
 		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
-		} else {
-			modelcheckingItem = getItemIfAlreadyExists(modelcheckingItem);
 		}
 		currentStats.updateItem(modelcheckingItem);
 		injector.getInstance(ModelcheckingView.class).selectLast();
@@ -214,15 +219,6 @@ public class Modelchecker implements IModelCheckListener {
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
-	}
-
-	private ModelCheckingItem getItemIfAlreadyExists(ModelCheckingItem item) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		int index = currentMachine.getModelcheckingItems().indexOf(item);
-		if(index > -1) {
-			item = currentMachine.getModelcheckingItems().get(index);
-		}
-		return item;
 	}
 
 	public void setCurrentStats(ModelCheckStats currentStats) {

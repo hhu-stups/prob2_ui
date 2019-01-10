@@ -18,8 +18,8 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	}
 
 	@Override
-	public void initializeStatus() {
-		super.initializeStatus();
+	public void initialize() {
+		super.initialize();
 		this.example = new SimpleObjectProperty<>(null);
 	}
 	
@@ -37,7 +37,7 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	
 	@Override
 	public void reset() {
-		this.initializeStatus();
+		this.initialize();
 		this.example = new SimpleObjectProperty<>(null);
 	}
 	

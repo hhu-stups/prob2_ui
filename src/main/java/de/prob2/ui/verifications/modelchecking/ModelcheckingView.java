@@ -15,7 +15,7 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.ItemSelectedFactory;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -102,12 +102,12 @@ public final class ModelcheckingView extends ScrollPane {
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		
 
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.MODELCHECKING, injector));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.MODELCHECKING, injector));
 		CheckBox selectAll = new CheckBox();
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
 			for(IExecutableItem item : tvItems.getItems()) {
-				item.setShouldExecute(to);
+				item.setSelected(to);
 				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 				tvItems.refresh();
@@ -198,7 +198,7 @@ public final class ModelcheckingView extends ScrollPane {
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
 							.or(checker.currentJobThreadsProperty().emptyProperty().not())
-							.or(to.shouldExecuteProperty().not()));
+							.or(to.selectedProperty().not()));
 				}
 			});
 			

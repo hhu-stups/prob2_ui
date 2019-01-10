@@ -7,7 +7,7 @@ import java.util.Objects;
 public class LTLPatternItem extends AbstractCheckableItem {
 	
 	public LTLPatternItem(String code, String description) {
-		super(code, description, code);
+		super("", description, code);
 	}	
 		
 	@Override

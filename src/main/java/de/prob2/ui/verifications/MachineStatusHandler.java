@@ -23,7 +23,7 @@ public final class MachineStatusHandler {
 	public void updateMachineStatus(Machine machine, CheckingType type) {
 		List<? extends IExecutableItem> items = getItems(machine, type);
 		for(IExecutableItem item : items) {
-			if(!item.shouldExecute()) {
+			if(!item.selected()) {
 				continue;
 			}
 			if(item.getChecked() == Checked.FAIL) {

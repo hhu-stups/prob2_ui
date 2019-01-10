@@ -44,6 +44,23 @@
 					</tooltip>
 				</Button>
 				<Spacer/>
+				<Button fx:id="saveLTLButton" onAction="#saveLTL">
+					<graphic>
+						<FontAwesomeIconView styleClass="icon-dark"
+											 glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%common.buttons.save" />
+					</tooltip>
+				</Button>
+				<Button fx:id="loadLTLButton" onAction="#loadLTL">
+					<graphic>
+						<FontAwesomeIconView styleClass="icon-dark" glyphName="FOLDER_OPEN" glyphSize="${fontSize.fontSize + 2}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%common.buttons.load" />
+					</tooltip>
+				</Button>
 				<MenuButton fx:id="addMenuButton">
 					<items>
 						<MenuItem fx:id="addFormulaButton" onAction="#addFormula"
@@ -68,7 +85,7 @@
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 						</columnResizePolicy>
 						<columns>
-							<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
+							<TableColumn fx:id="formulaSelectedColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 							<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
 							<TableColumn fx:id="formulaColumn" minWidth="120.0" text="%common.columns.formula" />
 							<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
@@ -82,6 +99,7 @@
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 						</columnResizePolicy>
 						<columns>
+							<TableColumn fx:id="patternSelectedColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 							<TableColumn fx:id="patternStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
 							<TableColumn fx:id="patternColumn" minWidth="140.0" text="%verifications.common.columns.pattern" />
 							<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%common.columns.description" />

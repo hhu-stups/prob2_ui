@@ -75,7 +75,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	}
 	
 	public void handleItem(SymbolicAnimationFormulaItem item, boolean checkAll) {
-		if(!item.shouldExecute()) {
+		if(!item.selected()) {
 			return;
 		}
 		SymbolicExecutionType type = item.getType();

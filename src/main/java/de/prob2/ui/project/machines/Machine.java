@@ -43,7 +43,7 @@ public class Machine {
 	}
 
 	public enum Type {
-		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp"}),
+		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}),
 		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}),
 		CSP(Api::csp_load, new String[] {"*.csp", "*.cspm"}),
 		TLA(Api::tla_load, new String[] {"*.tla"}),
@@ -160,18 +160,18 @@ public class Machine {
 	
 	public void resetStatus() {
 		if (ltlFormulas != null) {
-			ltlFormulas.forEach(LTLFormulaItem::initializeStatus);
+			ltlFormulas.forEach(LTLFormulaItem::initialize);
 		}
 		if (ltlPatterns != null) {
-			ltlPatterns.forEach(LTLPatternItem::initializeStatus);
+			ltlPatterns.forEach(LTLPatternItem::initialize);
 		}
 		patternManager = new PatternManager();
 		if (symbolicCheckingFormulas != null) {
-			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeStatus);
+			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initialize);
 			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
 		}
 		if (symbolicAnimationFormulas != null) {
-			symbolicAnimationFormulas.forEach(SymbolicAnimationFormulaItem::initializeStatus);
+			symbolicAnimationFormulas.forEach(SymbolicAnimationFormulaItem::initialize);
 		}
 		if (modelcheckingItems != null) {
 			modelcheckingItems.forEach(ModelCheckingItem::initializeStatus);

@@ -4,8 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -17,7 +19,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
-import de.prob2.ui.verifications.ShouldExecuteValueFactory;
+import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -42,13 +44,22 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
 public class LTLView extends AnchorPane {
+
+	private static final String LTL_FILE_ENDING = "*.ltl";
+
+	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	@FXML 
 	private MenuButton addMenuButton;
@@ -61,17 +72,17 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private Button cancelButton;
 	@FXML
+	private Button saveLTLButton;
+	@FXML
+	private Button loadLTLButton;
+	@FXML
 	private HelpButton helpButton;
 	@FXML
 	private TableView<LTLPatternItem> tvPattern;
 	@FXML
-	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
-	@FXML
-	private TableColumn<LTLPatternItem, String> patternColumn;
-	@FXML
-	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
-	@FXML
 	private TableView<LTLFormulaItem> tvFormula;
+	@FXML
+	private TableColumn<IExecutableItem, CheckBox> formulaSelectedColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, FontAwesomeIconView> formulaStatusColumn;
 	@FXML
@@ -79,8 +90,15 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
-	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
-	
+	private TableColumn<IExecutableItem, CheckBox> patternSelectedColumn;
+	@FXML
+	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
+	@FXML
+	private TableColumn<LTLPatternItem, String> patternColumn;
+	@FXML
+	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
+
+	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -89,9 +107,16 @@ public class LTLView extends AnchorPane {
 	private final LTLPatternParser patternParser;
 	private final LTLResultHandler resultHandler;
 	private final ListProperty<Thread> currentJobThreads;
+	private final LTLFileHandler ltlFileHandler;
+	private final FileChooserManager fileChooserManager;
 				
 	@Inject
-	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,final CurrentTrace currentTrace, final CurrentProject currentProject, final LTLFormulaChecker checker, final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
+	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,
+					final CurrentTrace currentTrace, final CurrentProject currentProject,
+					final LTLFormulaChecker checker, final LTLPatternParser patternParser,
+					final LTLResultHandler resultHandler, final LTLFileHandler ltlFileHandler,
+					final FileChooserManager fileChooserManager) {
+		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.injector = injector;
 		this.currentTrace = currentTrace;
@@ -100,6 +125,8 @@ public class LTLView extends AnchorPane {
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+		this.ltlFileHandler = ltlFileHandler;
+		this.fileChooserManager = fileChooserManager;
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
@@ -162,7 +189,7 @@ public class LTLView extends AnchorPane {
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
 							.or(currentJobThreads.emptyProperty().not())
-							.or(to.shouldExecuteProperty().not()));
+							.or(to.selectedProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
 					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
@@ -198,34 +225,51 @@ public class LTLView extends AnchorPane {
 	}
 
 	private void setBindings() {
-		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		patternColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
-		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ShouldExecuteValueFactory(CheckingType.LTL, injector));
-		
-		CheckBox selectAll = new CheckBox();
-		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
+		patternSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector));
+		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+
+		CheckBox formulaSelectAll = new CheckBox();
+		formulaSelectAll.setSelected(true);
+		formulaSelectAll.selectedProperty().addListener((observable, from, to) -> {
 			for(IExecutableItem item : tvFormula.getItems()) {
-				item.setShouldExecute(to);
+				item.setSelected(to);
 				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 				tvFormula.refresh();
 			}
 		});
-		shouldExecuteColumn.setGraphic(selectAll);
-		
+
+		CheckBox patternSelectAll = new CheckBox();
+		patternSelectAll.setSelected(true);
+		patternSelectAll.selectedProperty().addListener((observable, from, to) -> {
+			for(IExecutableItem item : tvPattern.getItems()) {
+				item.setSelected(to);
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				tvPattern.refresh();
+			}
+		});
+		formulaSelectedColumn.setGraphic(formulaSelectAll);
+		patternSelectedColumn.setGraphic(patternSelectAll);
+
 		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
 		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+		saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
+		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
 				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(currentJobThreads.emptyProperty().not()));
+				saveLTLButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
 			} else {
 				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+				saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}
 		});
 		
@@ -343,7 +387,7 @@ public class LTLView extends AnchorPane {
 	private void loadLTLDialog(LTLDialog dialog, AbstractCheckableItem item) {
 		dialog.getEngine().getLoadWorker().stateProperty().addListener((observable, from, to) -> {
 			if(to == Worker.State.SUCCEEDED && item != null) {
-				dialog.setData(item.getName(), item.getDescription(), item.getCode());
+				dialog.setData(item.getDescription(), item.getCode());
 			}
 		});
 	}
@@ -410,7 +454,48 @@ public class LTLView extends AnchorPane {
 	
 	private void parseMachine(Machine machine) {
 		patternParser.parseMachine(machine);
-	}		
+	}
+
+	@FXML
+	private void saveLTL() {
+		ltlFileHandler.save();
+	}
+
+	@FXML
+	private void loadLTL() {
+		Machine machine = currentProject.getCurrentMachine();
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.loadLTL.title"));
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
+		fileChooser.getExtensionFilters()
+				.add(new FileChooser.ExtensionFilter(
+						String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_ENDING),
+						LTL_FILE_ENDING));
+		Path ltlFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
+		if(ltlFile == null) {
+			return;
+		}
+		LTLData data = null;
+		try {
+			data = ltlFileHandler.load(ltlFile);
+		} catch (IOException | InvalidFileFormatException e) {
+			logger.error("Could not load LTL file: ", e);
+			return;
+		}
+		data.getFormulas().stream()
+				.filter(formula -> !machine.getLTLFormulas().contains(formula))
+				.forEach(formula -> {
+					formula.initialize();
+					machine.addLTLFormula(formula);
+				});
+		data.getPatterns().stream()
+				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
+				.forEach(pattern -> {
+					pattern.initialize();
+					machine.addLTLPattern(pattern);
+					patternParser.parsePattern(pattern, machine);
+				});
+	}
 
 	public ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;

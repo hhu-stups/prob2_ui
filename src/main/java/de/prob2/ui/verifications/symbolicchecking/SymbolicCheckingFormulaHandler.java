@@ -105,7 +105,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	}
 	
 	public void handleItem(SymbolicCheckingFormulaItem item, boolean checkAll) {
-		if(!item.shouldExecute()) {
+		if(!item.selected()) {
 			return;
 		}
 		SymbolicExecutionType type = item.getType();

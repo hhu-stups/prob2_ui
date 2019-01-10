@@ -1,9 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.Objects;
-
 import com.google.inject.Injector;
-
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckingResult;
@@ -13,7 +10,6 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -21,16 +17,15 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
-
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+
+import java.util.Objects;
 
 
 public final class ModelCheckStats extends AnchorPane {
@@ -110,7 +105,7 @@ public final class ModelCheckStats extends AnchorPane {
 		Objects.requireNonNull(modelChecker, "modelChecker");
 		Objects.requireNonNull(result, "result");
 		Platform.runLater(() -> elapsedTime.setText(String.format("%.3f",timeElapsed/1000.0) + " s"));
-		
+
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
 			item.setCheckedSuccessful();
 			item.setChecked(Checked.SUCCESS);
@@ -123,7 +118,7 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 
 		item.setStats(this);
-		
+
 		Platform.runLater(() -> {
 			Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
@@ -182,10 +177,6 @@ public final class ModelCheckStats extends AnchorPane {
 	
 	public Trace getTrace() {
 		return trace;
-	}
-	
-	public void setBackgroundOnClick(EventHandler<? super MouseEvent> eventHandler) {
-		resultBackground.setOnMouseClicked(eventHandler);
 	}
 	
 	public void updateItem(ModelCheckingItem item) {
