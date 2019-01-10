@@ -43,7 +43,7 @@ public class Machine {
 	}
 
 	public enum Type {
-		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp"}),
+		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}),
 		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}),
 		CSP(Api::csp_load, new String[] {"*.csp", "*.cspm"}),
 		TLA(Api::tla_load, new String[] {"*.tla"}),
