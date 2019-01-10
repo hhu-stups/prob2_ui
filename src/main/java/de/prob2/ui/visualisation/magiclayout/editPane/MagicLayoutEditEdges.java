@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
@@ -19,6 +20,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.paint.Color;
 
+@FXMLInjected
 public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 
 	private Spinner<Integer> textSizeSpinner;

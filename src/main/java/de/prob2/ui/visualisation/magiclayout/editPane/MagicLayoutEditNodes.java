@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
@@ -24,6 +25,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.paint.Color;
 
+@FXMLInjected
 public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 
 	private class MagicShapeListCell extends ListCell<MagicShape> {
