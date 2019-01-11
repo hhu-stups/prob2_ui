@@ -32,7 +32,7 @@ public abstract class AbstractFileHandler<T> {
 	
     private final Class<T> clazz;
     
-	protected final Gson gson;
+    protected final Gson gson;
     protected final CurrentProject currentProject;
     protected final StageManager stageManager;
     protected final ResourceBundle bundle;
@@ -88,10 +88,8 @@ public abstract class AbstractFileHandler<T> {
 				gson.toJson(metadata, writer);
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create file", exc);
-				return;
 			} catch (IOException exc) {
 				LOGGER.warn("Failed to save file", exc);
-				return;
 			}
     	}
     }
