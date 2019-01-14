@@ -81,6 +81,7 @@ if (JavaVersion.current().java11Compatible) {
 			"javafx.controls",
 			"javafx.fxml",
 			"javafx.graphics",
+			"javafx.swing",
 			"javafx.web",
 		]
 	}
