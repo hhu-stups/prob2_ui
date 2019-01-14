@@ -14,16 +14,16 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaDialog;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternDialog;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import javafx.application.Platform;
@@ -51,7 +51,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -295,21 +294,11 @@ public class LTLView extends AnchorPane {
 		
 	@FXML
 	public void addFormula() {
-		Machine machine = currentProject.getCurrentMachine();
-		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
-		loadLTLDialog(formulaDialog, null);
-		formulaDialog
-				.showAndWait()
-				.ifPresent(item -> addFormula(machine, (LTLFormulaItem) item));
-	}
-	
-	private void addFormula(Machine machine, LTLFormulaItem item) {
-		if(!machine.getLTLFormulas().contains(item)) {
-			machine.addLTLFormula(item);
-			updateProject();
-		} else {
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
-		}
+		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
+		loadLTLStage(formulaStage, null);
+		formulaStage.setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.ADD, null));
+		formulaStage.showAndWait();
+		tvFormula.refresh();
 	}
 	
 	private void removeFormula() {
@@ -321,22 +310,11 @@ public class LTLView extends AnchorPane {
 	
 	@FXML
 	public void addPattern() {
-		Machine machine = currentProject.getCurrentMachine();
-		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
-		loadLTLDialog(patternDialog, null);
-		patternDialog
-				.showAndWait()
-				.ifPresent(item -> addPattern(machine, (LTLPatternItem) item));
-	}
-	
-	private void addPattern(Machine machine, LTLPatternItem item) {
-		if(!machine.getLTLPatterns().contains(item)) {
-			machine.addLTLPattern(item);
-			updateProject();
-			patternParser.parsePattern(item, machine);
-		} else {
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
-		}
+		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
+		loadLTLStage(patternStage, null);
+		patternStage.setHandleItem(new LTLHandleItem<LTLPatternItem>(LTLHandleItem.HandleType.ADD, null));
+		patternStage.showAndWait();
+		tvPattern.refresh();
 	}
 	
 	private void removePattern() {
@@ -347,65 +325,34 @@ public class LTLView extends AnchorPane {
 		updateProject();
 	}
 	
-				
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
 		return checker.checkFormula(item, machine);
 	}
 			
 	private void showCurrentItemDialog(LTLFormulaItem item) {
-		LTLFormulaDialog formulaDialog = injector.getInstance(LTLFormulaDialog.class);
-		loadLTLDialog(formulaDialog, item);
-		formulaDialog.showAndWait()
-					.ifPresent(result-> changeFormula(item, (LTLFormulaItem) result));
-		formulaDialog.clear();
-	}
-	
-	private void changeFormula(LTLFormulaItem item, LTLFormulaItem result) {
-		Machine machine = currentProject.getCurrentMachine();
-		if(!machine.getLTLFormulas().stream()
-				.filter(formula -> !formula.equals(item))
-				.collect(Collectors.toList())
-				.contains(result)) {
-			item.setData(result.getName(), result.getDescription(), result.getCode());
-			item.setCounterExample(null);
-			item.setResultItem(null);
-			currentProject.setSaved(false);
-			tvFormula.refresh();
-		} else {
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
-		}
+		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
+		loadLTLStage(formulaStage, item);
+		formulaStage.setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
+		formulaStage.showAndWait();
+		formulaStage.clear();
+		tvFormula.refresh();
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
-		LTLPatternDialog patternDialog = injector.getInstance(LTLPatternDialog.class);
-		loadLTLDialog(patternDialog, item);
-		patternDialog.showAndWait()
-					.ifPresent(result-> changePattern(item, (LTLPatternItem) result));
-		patternDialog.clear();
+		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
+		loadLTLStage(patternStage, item);
+		patternStage.setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, item));
+		patternStage.showAndWait();
+		patternStage.clear();
+		tvPattern.refresh();
 	}
 
-	private void loadLTLDialog(LTLDialog dialog, AbstractCheckableItem item) {
-		dialog.getEngine().getLoadWorker().stateProperty().addListener((observable, from, to) -> {
+	private void loadLTLStage(LTLItemStage stage, AbstractCheckableItem item) {
+		stage.getEngine().getLoadWorker().stateProperty().addListener((observable, from, to) -> {
 			if(to == Worker.State.SUCCEEDED && item != null) {
-				dialog.setData(item.getDescription(), item.getCode());
+				stage.setData(item.getDescription(), item.getCode());
 			}
 		});
-	}
-	
-	private void changePattern(LTLPatternItem item, LTLPatternItem result) {
-		Machine machine = currentProject.getCurrentMachine();
-		if(!machine.getLTLPatterns().stream()
-				.filter(pattern -> !pattern.equals(item))
-				.collect(Collectors.toList())
-				.contains(result)) {
-			machine.getPatternManager().removePattern(machine.getPatternManager().getUserPattern(item.getName()));
-			item.setData(result.getName(), result.getDescription(), result.getCode());
-			patternParser.parsePattern(item, machine);
-			currentProject.setSaved(false);
-			tvPattern.refresh();
-		} else {
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
-		}
 	}
 	
 	private void updateProject() {
@@ -494,6 +441,7 @@ public class LTLView extends AnchorPane {
 					pattern.initialize();
 					machine.addLTLPattern(pattern);
 					patternParser.parsePattern(pattern, machine);
+					patternParser.addPattern(pattern, machine);
 				});
 	}
 

@@ -12,11 +12,12 @@ import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import netscape.javascript.JSObject;
 
 import java.net.URISyntaxException;
 
-public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
+public abstract class LTLItemStage extends Stage {
 	
 	@FXML
 	private WebView taCode;
@@ -27,21 +28,8 @@ public abstract class LTLDialog extends Dialog<AbstractCheckableItem> {
 	protected WebEngine engine;
 
 			
-	public LTLDialog(Class<? extends AbstractCheckableItem> clazz) {
+	public LTLItemStage(Class<? extends AbstractCheckableItem> clazz) {
 		super();
-		this.setResultConverter(type -> {
-			if(type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
-				return null;
-			} else {
-				final JSObject editor = (JSObject) engine.executeScript("editor");
-				String code = editor.call("getValue").toString();
-				if(clazz == LTLPatternItem.class) {
-					return new LTLPatternItem(code, taDescription.getText());	
-				}
-				return new LTLFormulaItem(code, taDescription.getText());	
-			}
-		});
-		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
 	@FXML

@@ -9,9 +9,12 @@ import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Singleton;
+
 import javax.inject.Inject;
 import java.util.stream.Collectors;
 
+@Singleton
 public class LTLPatternParser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLPatternParser.class);
@@ -26,9 +29,14 @@ public class LTLPatternParser {
 	public void parsePattern(LTLPatternItem item, Machine machine) {
 		logger.trace("Parse ltl pattern");
 		Pattern pattern = itemToPattern(item);
-		machine.getPatternManager().getPatterns().add(pattern);
 		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
 		item.setName(pattern.getName());
+	}
+	
+	public void addPattern(LTLPatternItem item, Machine machine) {
+		Pattern pattern = itemToPattern(item);
+		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
+		machine.getPatternManager().getPatterns().add(pattern);
 	}
 	
 	private LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
@@ -65,7 +73,10 @@ public class LTLPatternParser {
 	}
 	
 	public void parseMachine(Machine machine) {
-		machine.getLTLPatterns().forEach(item-> this.parsePattern(item, machine));
+		machine.getLTLPatterns().forEach(item-> {
+			this.parsePattern(item, machine);
+			this.addPattern(item, machine);
+		});
 	}
 	
 }

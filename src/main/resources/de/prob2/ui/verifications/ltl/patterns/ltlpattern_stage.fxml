@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.web.WebView?>
+<?import javafx.geometry.Insets?>
+
+<fx:root type="LTLPatternStage" title="%verifications.ltl.pattern.ltlPatternStage.title" width="800" height="600" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<AnchorPane>
+				<children>
+					<VBox styleClass="border" spacing="10.0" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+						<padding>
+							<Insets topRightBottomLeft="15.0"/>
+						</padding>
+						<Label text="%verifications.ltl.pattern.ltlPatternStage.pattern" VBox.vgrow="NEVER"/>
+						<WebView fx:id="taCode" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+						<Label text="%verifications.ltl.pattern.ltlPatternStage.description" VBox.vgrow="NEVER"/>
+						<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
+						<Label text="%verifications.ltl.pattern.ltlPatternStage.errors" VBox.vgrow="NEVER"/>
+						<TextArea fx:id="taErrors" editable="false" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
+						<HBox>
+							<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyPattern"/>
+						</HBox>
+					</VBox>
+				</children>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>
