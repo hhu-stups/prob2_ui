@@ -14,7 +14,7 @@ buildscript {
 plugins {
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
 	id "org.openjfx.javafxplugin" version "0.0.6" apply false
-	id "org.sonarqube" version "2.6.2"
+	id "org.sonarqube" version "2.7"
 }
 
 apply plugin: 'application'
@@ -81,6 +81,7 @@ if (JavaVersion.current().java11Compatible) {
 			"javafx.controls",
 			"javafx.fxml",
 			"javafx.graphics",
+			"javafx.swing",
 			"javafx.web",
 		]
 	}
