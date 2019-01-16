@@ -25,8 +25,6 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 
 	private Spinner<Integer> textSizeSpinner;
 
-	MagicGraphI magicGraph;
-
 	@Inject
 	public MagicLayoutEditEdges(final StageManager stageManager, final ResourceBundle bundle,
 			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
