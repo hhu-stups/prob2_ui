@@ -58,14 +58,11 @@ public class LayeredLayout implements Layout {
 				}
 			});
 		});
-		
+
 		// update Style of part edges when style of edge changes
-		splittedEdges.keySet().forEach(edge -> {
-			edge.edgeStyleProperty().addListener((observable, from, to) -> {
-				splittedEdges.get(edge).forEach(partEdge -> partEdge.setStyle(to));
-			});
-		});
-		
+		splittedEdges.keySet().forEach(edge -> edge.edgeStyleProperty().addListener(
+				(observable, from, to) -> splittedEdges.get(edge).forEach(partEdge -> partEdge.setStyle(to))));
+
 //		positionEdges();
 	}
 
@@ -425,7 +422,8 @@ public class LayeredLayout implements Layout {
 	 * (Georg Sander, 'Graph layout for applications in compiler construction'.
 	 * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
 	 * pp. 192-193.)
-	 * @param acyclicEdges 
+	 * 
+	 * @param acyclicEdges
 	 * 
 	 */
 	private Set<Set<Vertex>> calculateRegions(List<Vertex> layer, Set<Edge> acyclicEdges) {
@@ -492,15 +490,13 @@ public class LayeredLayout implements Layout {
 	}
 
 	private boolean isSink(Vertex vertex, Set<Edge> edges) {
-		return getOutgoingEdges(vertex, edges).size() == 0;
+		return getOutgoingEdges(vertex, edges).isEmpty();
 	}
 
 	private Set<Edge> reverseEdges(Set<Edge> edges) {
 		Set<Edge> reversedEdges = new HashSet<>();
 
-		edges.forEach(edge -> {
-			reversedEdges.add(new Edge(edge.getTarget(), edge.getSource(), edge.getCaption()));
-		});
+		edges.forEach(edge -> reversedEdges.add(new Edge(edge.getTarget(), edge.getSource(), edge.getCaption())));
 
 		return reversedEdges;
 	}

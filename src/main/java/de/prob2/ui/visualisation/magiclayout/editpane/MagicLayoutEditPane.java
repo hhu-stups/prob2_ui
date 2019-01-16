@@ -296,7 +296,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 							break;
 						}
 					}
-					;
+					
 					if (draggedComponent == null) {
 						return;
 					}

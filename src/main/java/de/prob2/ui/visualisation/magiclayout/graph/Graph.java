@@ -24,7 +24,7 @@ public class Graph extends Pane {
 		model.getVertices().forEach(vertex -> this.getChildren().add(vertex));
 		model.getEdges().forEach(edge -> this.getChildren().add(edge));
 
-		if (this.getChildren().size() > 0) {
+		if (!this.getChildren().isEmpty()) {
 			layout.drawGraph(this);
 		}
 		model.finishUpdate();
@@ -37,7 +37,7 @@ public class Graph extends Pane {
 		model.getAddedVertices().forEach(vertex -> this.getChildren().add(vertex));
 		model.getAddedEdges().forEach(edge -> this.getChildren().add(edge));
 
-		if (this.getChildren().size() > 0) {
+		if (!this.getChildren().isEmpty()) {
 			layout.updateGraph(this);
 		}
 		model.finishUpdate();

@@ -78,8 +78,8 @@ public class Model {
 	}
 
 	public boolean isChanged() {
-		return addedVertices.size() > 0 || removedVertices.size() > 0 || addedEdges.size() > 0
-				|| removedEdges.size() > 0;
+		return !addedVertices.isEmpty() || !removedVertices.isEmpty() || !addedEdges.isEmpty()
+				|| !removedEdges.isEmpty();
 	}
 
 	void finishUpdate() {

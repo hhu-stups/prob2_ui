@@ -41,13 +41,13 @@ public class MagicGraphFX implements MagicGraphI {
 
 	@Override
 	public List<MagicLayout> getSupportedLayouts() {
-		MagicLayout shapes[] = new MagicLayout[] { MagicLayout.LAYERED, MagicLayout.RANDOM };
+		MagicLayout[] shapes = new MagicLayout[] { MagicLayout.LAYERED, MagicLayout.RANDOM };
 		return Arrays.asList(shapes);
 	}
 
 	@Override
 	public List<MagicShape> getSupportedShapes() {
-		MagicShape shapes[] = new MagicShape[] { MagicShape.RECTANGLE, MagicShape.CIRCLE, MagicShape.ELLIPSE,
+		MagicShape[] shapes = new MagicShape[] { MagicShape.RECTANGLE, MagicShape.CIRCLE, MagicShape.ELLIPSE,
 //				MagicShape.TRIANGLE 
 		};
 		return Arrays.asList(shapes);
@@ -55,14 +55,14 @@ public class MagicGraphFX implements MagicGraphI {
 
 	@Override
 	public List<MagicLineType> getSupportedLineTypes() {
-		MagicLineType lineTypes[] = new MagicLineType[] { MagicLineType.CONTINUOUS, MagicLineType.DASHED,
+		MagicLineType[] lineTypes = new MagicLineType[] { MagicLineType.CONTINUOUS, MagicLineType.DASHED,
 				MagicLineType.DOTTED };
 		return Arrays.asList(lineTypes);
 	}
 
 	@Override
 	public List<MagicLineWidth> getSupportedLineWidths() {
-		MagicLineWidth lineWidths[] = new MagicLineWidth[] { MagicLineWidth.NARROW, MagicLineWidth.DEFAULT,
+		MagicLineWidth[] lineWidths = new MagicLineWidth[] { MagicLineWidth.NARROW, MagicLineWidth.DEFAULT,
 				MagicLineWidth.WIDE, MagicLineWidth.EXTRA_WIDE };
 		return Arrays.asList(lineWidths);
 	}
