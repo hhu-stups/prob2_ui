@@ -4,8 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
@@ -15,15 +13,18 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.slf4j.LoggerFactory;
 
 public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 
 	@Inject
-    public TraceFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
+	public TraceFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
 		super(gson, currentProject, stageManager, bundle, versionInfo, PersistentTrace.class);
-    	this.LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
-    	this.FILE_ENDING = "*.prob2trace";
+		this.LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
+		this.FILE_ENDING = "*.prob2trace";
 	}
 	
 	public void save(PersistentTrace trace, Machine machine) {
