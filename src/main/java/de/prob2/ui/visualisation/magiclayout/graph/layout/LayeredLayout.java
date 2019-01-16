@@ -494,11 +494,11 @@ public class LayeredLayout implements Layout {
 	}
 
 	private Set<Edge> reverseEdges(Set<Edge> edges) {
-		Set<Edge> reversedEdges = new HashSet<>();
+		Set<Edge> edgesReversed = new HashSet<>();
 
-		edges.forEach(edge -> reversedEdges.add(new Edge(edge.getTarget(), edge.getSource(), edge.getCaption())));
+		edges.forEach(edge -> edgesReversed.add(new Edge(edge.getTarget(), edge.getSource(), edge.getCaption())));
 
-		return reversedEdges;
+		return edgesReversed;
 	}
 
 	private Set<Edge> getIncomingEdges(Vertex vertex, Set<Edge> edges) {

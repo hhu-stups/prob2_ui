@@ -47,6 +47,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 	}
 
 	@FXML
+	@Override
 	public void initialize() {
 		super.initialize();
 

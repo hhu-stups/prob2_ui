@@ -32,6 +32,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 	}
 
 	@FXML
+	@Override
 	public void initialize() {
 		super.initialize();
 
