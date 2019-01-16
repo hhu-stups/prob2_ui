@@ -1,7 +1,7 @@
 package de.prob2.ui.visualisation.magiclayout.graph.layout;
 
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 
 public class RandomLayout implements Layout {
 

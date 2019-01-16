@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 
 public class Model {
 	private Set<Vertex> vertices = new HashSet<>();

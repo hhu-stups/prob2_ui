@@ -1,7 +1,7 @@
 package de.prob2.ui.visualisation.magiclayout.graph;
 
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.Layout;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 import javafx.scene.layout.Pane;
 
 public class Graph extends Pane {

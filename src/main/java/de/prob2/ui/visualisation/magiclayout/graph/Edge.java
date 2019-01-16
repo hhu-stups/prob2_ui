@@ -3,8 +3,8 @@ package de.prob2.ui.visualisation.magiclayout.graph;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.DummyVertex;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.DummyVertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;

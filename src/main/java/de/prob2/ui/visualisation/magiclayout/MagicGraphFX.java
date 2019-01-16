@@ -21,10 +21,10 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
 import de.prob2.ui.visualisation.magiclayout.graph.Model;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.LayeredLayout;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.Layout;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.RandomLayout;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 import javafx.scene.Node;
 
 public class MagicGraphFX implements MagicGraphI {

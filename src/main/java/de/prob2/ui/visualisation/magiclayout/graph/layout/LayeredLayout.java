@@ -14,8 +14,8 @@ import java.util.TreeMap;
 import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
 import de.prob2.ui.visualisation.magiclayout.graph.Model;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.DummyVertex;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.DummyVertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 
 /**
  * The implementations of a layered graph layout in this class are based on the
