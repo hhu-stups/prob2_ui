@@ -131,7 +131,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 	}
 
 	void updateValues(MagicComponent selectedComponent) {
-		listView.getItems().forEach(i -> i.unbindAll());
+		listView.getItems().forEach(T::unbindAll);
 
 		if (selectedComponent != null) {
 			expressionTextArea.setText(selectedComponent.getExpression());

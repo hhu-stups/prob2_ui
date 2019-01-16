@@ -116,9 +116,9 @@ public class MagicGraphFX implements MagicGraphI {
 
 		// determine which vertices and edges have to be removed and remove them
 		verticesBefore.removeAll(transformedNewModel.getVertices());
-		verticesBefore.forEach(vertex -> graphModel.removeVertex(vertex));
+		verticesBefore.forEach(graphModel::removeVertex);
 		edgesBefore.removeAll(transformedNewModel.getEdges());
-		edgesBefore.forEach(edge -> graphModel.removeEdge(edge));
+		edgesBefore.forEach(graphModel::removeEdge);
 
 		// add the new vertices and edges
 		combineModel(graphModel, transformedNewModel);
