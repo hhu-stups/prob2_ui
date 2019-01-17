@@ -1,4 +1,4 @@
-package de.prob2.ui.visualisation.magiclayout.editPane;
+package de.prob2.ui.visualisation.magiclayout.editpane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +47,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 	}
 
 	@FXML
+	@Override
 	public void initialize() {
 		super.initialize();
 

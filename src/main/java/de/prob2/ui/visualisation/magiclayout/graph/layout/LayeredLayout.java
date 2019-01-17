@@ -14,8 +14,8 @@ import java.util.TreeMap;
 import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
 import de.prob2.ui.visualisation.magiclayout.graph.Model;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.DummyVertex;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.DummyVertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 
 /**
  * The implementations of a layered graph layout in this class are based on the
@@ -58,14 +58,11 @@ public class LayeredLayout implements Layout {
 				}
 			});
 		});
-		
+
 		// update Style of part edges when style of edge changes
-		splittedEdges.keySet().forEach(edge -> {
-			edge.edgeStyleProperty().addListener((observable, from, to) -> {
-				splittedEdges.get(edge).forEach(partEdge -> partEdge.setStyle(to));
-			});
-		});
-		
+		splittedEdges.keySet().forEach(edge -> edge.edgeStyleProperty().addListener(
+				(observable, from, to) -> splittedEdges.get(edge).forEach(partEdge -> partEdge.setStyle(to))));
+
 //		positionEdges();
 	}
 
@@ -269,7 +266,7 @@ public class LayeredLayout implements Layout {
 		});
 
 		List<Vertex> permutedLayer = new ArrayList<>();
-		baryMap.values().forEach(vertex -> permutedLayer.add(vertex));
+		baryMap.values().forEach(permutedLayer::add);
 
 		layers.put(permuteLayerNr, permutedLayer);
 	}
@@ -425,7 +422,8 @@ public class LayeredLayout implements Layout {
 	 * (Georg Sander, 'Graph layout for applications in compiler construction'.
 	 * Technical Report A/01/96, FB 14 Informatik, Universität des Saarlandes, 1996,
 	 * pp. 192-193.)
-	 * @param acyclicEdges 
+	 * 
+	 * @param acyclicEdges
 	 * 
 	 */
 	private Set<Set<Vertex>> calculateRegions(List<Vertex> layer, Set<Edge> acyclicEdges) {
@@ -492,17 +490,15 @@ public class LayeredLayout implements Layout {
 	}
 
 	private boolean isSink(Vertex vertex, Set<Edge> edges) {
-		return getOutgoingEdges(vertex, edges).size() == 0;
+		return getOutgoingEdges(vertex, edges).isEmpty();
 	}
 
 	private Set<Edge> reverseEdges(Set<Edge> edges) {
-		Set<Edge> reversedEdges = new HashSet<>();
+		Set<Edge> edgesReversed = new HashSet<>();
 
-		edges.forEach(edge -> {
-			reversedEdges.add(new Edge(edge.getTarget(), edge.getSource(), edge.getCaption()));
-		});
+		edges.forEach(edge -> edgesReversed.add(new Edge(edge.getTarget(), edge.getSource(), edge.getCaption())));
 
-		return reversedEdges;
+		return edgesReversed;
 	}
 
 	private Set<Edge> getIncomingEdges(Vertex vertex, Set<Edge> edges) {

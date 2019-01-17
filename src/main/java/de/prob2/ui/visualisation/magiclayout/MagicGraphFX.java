@@ -21,10 +21,10 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
 import de.prob2.ui.visualisation.magiclayout.graph.Model;
-import de.prob2.ui.visualisation.magiclayout.graph.Vertex.Vertex;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.LayeredLayout;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.Layout;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.RandomLayout;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 import javafx.scene.Node;
 
 public class MagicGraphFX implements MagicGraphI {
@@ -41,13 +41,13 @@ public class MagicGraphFX implements MagicGraphI {
 
 	@Override
 	public List<MagicLayout> getSupportedLayouts() {
-		MagicLayout shapes[] = new MagicLayout[] { MagicLayout.LAYERED, MagicLayout.RANDOM };
+		MagicLayout[] shapes = new MagicLayout[] { MagicLayout.LAYERED, MagicLayout.RANDOM };
 		return Arrays.asList(shapes);
 	}
 
 	@Override
 	public List<MagicShape> getSupportedShapes() {
-		MagicShape shapes[] = new MagicShape[] { MagicShape.RECTANGLE, MagicShape.CIRCLE, MagicShape.ELLIPSE,
+		MagicShape[] shapes = new MagicShape[] { MagicShape.RECTANGLE, MagicShape.CIRCLE, MagicShape.ELLIPSE,
 //				MagicShape.TRIANGLE 
 		};
 		return Arrays.asList(shapes);
@@ -55,14 +55,14 @@ public class MagicGraphFX implements MagicGraphI {
 
 	@Override
 	public List<MagicLineType> getSupportedLineTypes() {
-		MagicLineType lineTypes[] = new MagicLineType[] { MagicLineType.CONTINUOUS, MagicLineType.DASHED,
+		MagicLineType[] lineTypes = new MagicLineType[] { MagicLineType.CONTINUOUS, MagicLineType.DASHED,
 				MagicLineType.DOTTED };
 		return Arrays.asList(lineTypes);
 	}
 
 	@Override
 	public List<MagicLineWidth> getSupportedLineWidths() {
-		MagicLineWidth lineWidths[] = new MagicLineWidth[] { MagicLineWidth.NARROW, MagicLineWidth.DEFAULT,
+		MagicLineWidth[] lineWidths = new MagicLineWidth[] { MagicLineWidth.NARROW, MagicLineWidth.DEFAULT,
 				MagicLineWidth.WIDE, MagicLineWidth.EXTRA_WIDE };
 		return Arrays.asList(lineWidths);
 	}
@@ -116,9 +116,9 @@ public class MagicGraphFX implements MagicGraphI {
 
 		// determine which vertices and edges have to be removed and remove them
 		verticesBefore.removeAll(transformedNewModel.getVertices());
-		verticesBefore.forEach(vertex -> graphModel.removeVertex(vertex));
+		verticesBefore.forEach(graphModel::removeVertex);
 		edgesBefore.removeAll(transformedNewModel.getEdges());
-		edgesBefore.forEach(edge -> graphModel.removeEdge(edge));
+		edgesBefore.forEach(graphModel::removeEdge);
 
 		// add the new vertices and edges
 		combineModel(graphModel, transformedNewModel);

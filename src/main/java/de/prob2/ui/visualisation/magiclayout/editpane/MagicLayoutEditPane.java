@@ -1,4 +1,4 @@
-package de.prob2.ui.visualisation.magiclayout.editPane;
+package de.prob2.ui.visualisation.magiclayout.editpane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +131,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 	}
 
 	void updateValues(MagicComponent selectedComponent) {
-		listView.getItems().forEach(i -> i.unbindAll());
+		listView.getItems().forEach(T::unbindAll);
 
 		if (selectedComponent != null) {
 			expressionTextArea.setText(selectedComponent.getExpression());
@@ -296,7 +296,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 							break;
 						}
 					}
-					;
+					
 					if (draggedComponent == null) {
 						return;
 					}

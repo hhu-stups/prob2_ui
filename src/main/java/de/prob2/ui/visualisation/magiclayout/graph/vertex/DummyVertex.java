@@ -1,4 +1,4 @@
-package de.prob2.ui.visualisation.magiclayout.graph.Vertex;
+package de.prob2.ui.visualisation.magiclayout.graph.vertex;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -12,6 +12,7 @@ public class DummyVertex extends Vertex {
 		circle.setFill(Color.TRANSPARENT);
 	}
 
+	@Override
 	void updateProperties() {
 		centerX.set(getLayoutX() + circle.getLayoutBounds().getWidth() / 2.0);
 		centerY.set(getLayoutY() + circle.getLayoutBounds().getHeight() / 2.0);

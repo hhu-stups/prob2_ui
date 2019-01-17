@@ -1,4 +1,4 @@
-package de.prob2.ui.visualisation.magiclayout.editPane;
+package de.prob2.ui.visualisation.magiclayout.editpane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +25,6 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 
 	private Spinner<Integer> textSizeSpinner;
 
-	MagicGraphI magicGraph;
-
 	@Inject
 	public MagicLayoutEditEdges(final StageManager stageManager, final ResourceBundle bundle,
 			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
@@ -34,6 +32,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 	}
 
 	@FXML
+	@Override
 	public void initialize() {
 		super.initialize();
 

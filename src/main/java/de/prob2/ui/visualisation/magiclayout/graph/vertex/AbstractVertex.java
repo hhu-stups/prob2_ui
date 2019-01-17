@@ -1,4 +1,4 @@
-package de.prob2.ui.visualisation.magiclayout.graph.Vertex;
+package de.prob2.ui.visualisation.magiclayout.graph.vertex;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;

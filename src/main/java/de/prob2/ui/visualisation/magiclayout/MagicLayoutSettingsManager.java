@@ -70,13 +70,11 @@ public class MagicLayoutSettingsManager {
 				stageManager.makeExceptionAlert(exc,
 						"visualisation.magicLayout.settingsManager.alert.failedToCreateLayoutSettingsFile.content")
 						.showAndWait();
-				return;
 			} catch (IOException exc) {
 				LOGGER.warn("Failed to save layout settings", exc);
 				stageManager.makeExceptionAlert(exc,
 						"visualisation.magicLayout.settingsManager.alert.failedToCreateLayoutSettingsFile.content")
 						.showAndWait();
-				return;
 			}
 		}
 	}
