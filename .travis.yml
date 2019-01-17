@@ -60,5 +60,5 @@ after_success:
   then
     git fetch --unshallow
     ./gradlew sonarqube --info --stacktrace --warning-mode=all
-    travis-custom-deploy sftp build/distributions/*.zip
+    travis-custom-deploy sftp build/distributions/*.zip build/libs/*-all.jar
   fi
