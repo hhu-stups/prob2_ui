@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import de.prob2.ui.menu.*?>
-<?import de.prob2.ui.visualisation.magiclayout.editPane.*?>
+<?import de.prob2.ui.visualisation.magiclayout.editpane.*?>
 <?import javafx.collections.*?>
 <?import java.lang.String?>
 <?import javafx.scene.Group?>
