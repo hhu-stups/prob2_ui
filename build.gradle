@@ -12,6 +12,7 @@ buildscript {
 }
 
 plugins {
+	id "com.github.johnrengelman.shadow" version "4.0.3"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
 	id "org.openjfx.javafxplugin" version "0.0.6" apply false
 	id "org.sonarqube" version "2.7"
@@ -52,22 +53,35 @@ applicationDefaultJvmArgs += [
 	"-Djavafx.preloader=${preloaderClassName}".toString(),
 ]
 
+// Module export/open declarations for Java 9+
+def exports = []
+def opens = []
+
+// Required by centerdevice-nsmenufx (as of version 2.1.6; see https://github.com/codecentric/NSMenuFX/issues/29)
+exports += [
+	"javafx.controls/com.sun.javafx.scene.control",
+	"javafx.graphics/com.sun.glass.ui",
+	"javafx.graphics/com.sun.javafx.menu",
+	"javafx.graphics/com.sun.javafx.tk",
+]
+opens += [
+	"javafx.graphics/com.sun.glass.ui.mac",
+	"javafx.graphics/com.sun.javafx.tk.quantum",
+]
+
+// Required by richtextfx (as of version 0.9.x; planned to be fixed in 0.10, see https://github.com/FXMisc/RichTextFX/issues/776)
+exports += [
+	"javafx.graphics/com.sun.javafx.geom",
+	"javafx.graphics/com.sun.javafx.scene.text",
+]
+opens += [
+	"javafx.graphics/com.sun.javafx.text",
+	"javafx.graphics/javafx.scene.text",
+]
+
 if (JavaVersion.current().java9Compatible) {
-	applicationDefaultJvmArgs += [
-		// Required by centerdevice-nsmenufx (as of version 2.1.6; see https://github.com/codecentric/NSMenuFX/issues/29)
-		"--add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED",
-		"--add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED",
-		"--add-opens=javafx.graphics/com.sun.glass.ui.mac=ALL-UNNAMED",
-		"--add-exports=javafx.graphics/com.sun.javafx.menu=ALL-UNNAMED",
-		"--add-exports=javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED",
-		"--add-opens=javafx.graphics/com.sun.javafx.tk.quantum=ALL-UNNAMED",
-		
-		// Required by richtextfx (as of version 0.9.x; planned to be fixed in 0.10, see https://github.com/FXMisc/RichTextFX/issues/776)
-		"--add-exports=javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED",
-		"--add-exports=javafx.graphics/com.sun.javafx.scene.text=ALL-UNNAMED",
-		"--add-opens=javafx.graphics/com.sun.javafx.text=ALL-UNNAMED",
-		"--add-opens=javafx.graphics/javafx.scene.text=ALL-UNNAMED",
-	]
+	applicationDefaultJvmArgs += exports.collect {"--add-exports=${it}=ALL-UNNAMED".toString()}
+	applicationDefaultJvmArgs += opens.collect {"--add-opens=${it}=ALL-UNNAMED".toString()}
 }
 
 tasks.withType(JavaCompile) {
@@ -132,6 +146,17 @@ processResources {
 		f.delete()
 		f.append("version=${project.version}\n")
 		f.append("commit=${readCurrentGitCommit()}\n")
+	}
+}
+
+jar {
+	manifest {
+		attributes([
+			"JavaFX-Preloader-Class": preloaderClassName,
+			"JavaFX-Application-Class": mainClassName,
+			"Add-Exports": exports.join(" "),
+			"Add-Opens": opens.join(" "),
+		])
 	}
 }
 
