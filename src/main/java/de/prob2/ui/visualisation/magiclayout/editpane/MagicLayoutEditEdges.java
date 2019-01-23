@@ -7,7 +7,6 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -16,6 +15,7 @@ import de.prob2.ui.visualisation.magiclayout.MagicComponent;
 import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.paint.Color;
@@ -52,15 +52,15 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 	void addMachineElements() {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if (stateSpace != null) {
-			List<IEvalElement> constantEvalElements = stateSpace.getLoadedMachine().getConstantEvalElements();
-			constantEvalElements.forEach(element -> {
-				MagicEdgegroup edgegroup = new MagicEdgegroup(element.toString(), element.toString());
+			List<String> constantNames = stateSpace.getLoadedMachine().getConstantNames();
+			constantNames.forEach(name -> {
+				MagicEdgegroup edgegroup = new MagicEdgegroup(name, name);
 				edgegroup.lineColorProperty().set(Color.hsb(new Random().nextDouble() * 360, 0.7, 0.5));
 				listView.getItems().add(edgegroup);
 			});
-			List<IEvalElement> variableEvalElements = stateSpace.getLoadedMachine().getVariableEvalElements();
-			variableEvalElements.forEach(element -> {
-				MagicEdgegroup edgegroup = new MagicEdgegroup(element.toString(), element.toString());
+			List<String> variableNames = stateSpace.getLoadedMachine().getVariableNames();
+			variableNames.forEach(name -> {
+				MagicEdgegroup edgegroup = new MagicEdgegroup(name, name);
 				edgegroup.lineColorProperty().set(Color.hsb(new Random().nextDouble() * 360, 0.7, 0.5));
 
 				listView.getItems().add(edgegroup);

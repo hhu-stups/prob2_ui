@@ -188,15 +188,15 @@ public class MagicGraphFX implements MagicGraphI {
 	private Model addStateValuesToModel(State state) {
 		Model model = new Model();
 
-		List<IEvalElement> setEvalElements = state.getStateSpace().getLoadedMachine().getSetEvalElements();
+		List<IEvalElement> setEvalElements = state.getStateSpace().getLoadedMachine().getSetEvalElements(FormulaExpand.EXPAND);
 		Map<String, BObject> translatedSetsMap = translateMap(state.evalFormulas(setEvalElements));
 		translatedSetsMap.forEach((string, obj) -> combineModel(model, getModel(string, obj)));
 
-		Map<IEvalElement, AbstractEvalResult> constantResultMap = state.getConstantValues();
+		Map<IEvalElement, AbstractEvalResult> constantResultMap = state.getConstantValues(FormulaExpand.EXPAND);
 		Map<String, BObject> translatedConstantsMap = translateMap(constantResultMap);
 		translatedConstantsMap.forEach((string, obj) -> combineModel(model, getModel(string, obj)));
 
-		Map<IEvalElement, AbstractEvalResult> variableResultMap = state.getVariableValues();
+		Map<IEvalElement, AbstractEvalResult> variableResultMap = state.getVariableValues(FormulaExpand.EXPAND);
 		Map<String, BObject> translatedVariableMap = translateMap(variableResultMap);
 		translatedVariableMap.forEach((string, obj) -> combineModel(model, getModel(string, obj)));
 
