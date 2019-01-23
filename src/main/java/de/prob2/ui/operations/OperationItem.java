@@ -56,14 +56,13 @@ public class OperationItem {
 		this.variables = Objects.requireNonNull(variables);
 	}
 
-	private static LinkedHashMap<String, String> getNextStateValues(Transition transition,
-			List<IEvalElement> formulas) {
+	private static Map<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas) {
 		// It seems that there is no way to easily find out the
 		// constant/variable values which a specific $setup_constants or
 		// $initialise_machine transition would set.
 		// So we look at the values of all constants/variables in the
 		// transition's destination state.
-		final LinkedHashMap<String, String> values = new LinkedHashMap<>();
+		final Map<String, String> values = new LinkedHashMap<>();
 		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
 		for (int i = 0; i < formulas.size(); i++) {
 			final AbstractEvalResult value = results.get(i);
