@@ -26,11 +26,7 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -105,7 +101,6 @@ public class LTLView extends AnchorPane {
 	private final LTLFormulaChecker checker;
 	private final LTLPatternParser patternParser;
 	private final LTLResultHandler resultHandler;
-	private final ListProperty<Thread> currentJobThreads;
 	private final LTLFileHandler ltlFileHandler;
 	private final FileChooserManager fileChooserManager;
 				
@@ -123,7 +118,6 @@ public class LTLView extends AnchorPane {
 		this.checker = checker;
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;
-		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		this.ltlFileHandler = ltlFileHandler;
 		this.fileChooserManager = fileChooserManager;
 		stageManager.loadFXML(this, "ltl_view.fxml");
@@ -154,7 +148,8 @@ public class LTLView extends AnchorPane {
 		tvFormula.setOnMouseClicked(e-> {
 			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.exists()) {
-				checkItem(item);
+				checker.checkFormula(item);
+				tvFormula.refresh();
 			}
 		});
 	}
@@ -182,12 +177,15 @@ public class LTLView extends AnchorPane {
 
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.check"));
 			checkItem.setDisable(true);
-			checkItem.setOnAction(e-> checkItem(row.getItem()));
+			checkItem.setOnAction(e-> {
+				checker.checkFormula(row.getItem());
+				tvFormula.refresh();
+			});
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
 					checkItem.disableProperty().bind(row.emptyProperty()
-							.or(currentJobThreads.emptyProperty().not())
+							.or(checker.currentJobThreadsProperty().emptyProperty().not())
 							.or(to.selectedProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
@@ -258,21 +256,21 @@ public class LTLView extends AnchorPane {
 		patternSelectedColumn.setGraphic(patternSelectAll);
 
 		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not());
-		cancelButton.disableProperty().bind(currentJobThreads.emptyProperty());
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
 		saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(currentJobThreads.emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(checker.currentJobThreadsProperty().emptyProperty().not()));
 				saveLTLButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
 				saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}
 		});
 		
-		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(currentJobThreads.emptyProperty().not()));
+		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
 	}
 	
 	public void bindMachine(Machine machine) {
@@ -362,40 +360,13 @@ public class LTLView extends AnchorPane {
 	
 	@FXML
 	public void checkMachine() {
-		Machine machine = currentProject.getCurrentMachine();
-		Thread checkingThread = new Thread(() -> {
-			checker.checkMachine(machine);
-			Platform.runLater(() -> {
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-				tvFormula.refresh();
-			});
-			currentJobThreads.remove(Thread.currentThread());
-		}, "LTL Checking Thread");
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
-	}
-	
-	private void checkItem(LTLFormulaItem item) {
-		Machine machine = currentProject.getCurrentMachine();
-		Thread checkingThread = new Thread(() -> {
-			Checked result = checkFormula(item, machine);
-			item.setChecked(result);
-			Platform.runLater(() -> {
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-				tvFormula.refresh();
-			});
-			if(item.getCounterExample() != null) {
-				currentTrace.set(item.getCounterExample());
-			}
-			currentJobThreads.remove(Thread.currentThread());
-		}, "LTL Checking Thread");
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		checker.checkMachine();
+		tvFormula.refresh();
 	}
 	
 	@FXML
 	public void cancel() {
-		currentJobThreads.forEach(Thread::interrupt);
+		checker.currentJobThreadsProperty().forEach(Thread::interrupt);
 		currentTrace.getStateSpace().sendInterrupt();
 	}
 	
@@ -443,10 +414,6 @@ public class LTLView extends AnchorPane {
 					patternParser.parsePattern(pattern, machine);
 					patternParser.addPattern(pattern, machine);
 				});
-	}
-
-	public ListProperty<Thread> currentJobThreadsProperty() {
-		return currentJobThreads;
 	}
 
 }

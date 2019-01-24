@@ -10,14 +10,21 @@ import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import javafx.application.Platform;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,15 +39,21 @@ public class LTLFormulaChecker {
 				
 	private final CurrentTrace currentTrace;
 	
+	private final CurrentProject currentProject;
+	
+	private final ListProperty<Thread> currentJobThreads;
+	
 	private final LTLResultHandler resultHandler;
 	
 	private final Injector injector;
 	
 	@Inject
-	private LTLFormulaChecker(final CurrentTrace currentTrace, final LTLResultHandler resultHandler,
-								final Injector injector) {
+	private LTLFormulaChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
+			final LTLResultHandler resultHandler, final Injector injector) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
+		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		this.injector = injector;
 	}
 	
@@ -62,6 +75,19 @@ public class LTLFormulaChecker {
 	
 	}
 	
+	public void checkMachine() {
+		Machine machine = currentProject.getCurrentMachine();
+		Thread checkingThread = new Thread(() -> {
+			checkMachine(machine);
+			Platform.runLater(() -> {
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+			});
+			currentJobThreads.remove(Thread.currentThread());
+		}, "LTL Checking Thread");
+		currentJobThreads.add(checkingThread);
+		checkingThread.start();
+	}
+	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
 		if(!item.selected()) {
 			return Checked.NOT_CHECKED;
@@ -70,6 +96,23 @@ public class LTLFormulaChecker {
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
 		return resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
+	}
+	
+	public void checkFormula(LTLFormulaItem item) {
+		Machine machine = currentProject.getCurrentMachine();
+		Thread checkingThread = new Thread(() -> {
+			Checked result = checkFormula(item, machine);
+			item.setChecked(result);
+			Platform.runLater(() -> {
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+			});
+			if(item.getCounterExample() != null) {
+				currentTrace.set(item.getCounterExample());
+			}
+			currentJobThreads.remove(Thread.currentThread());
+		}, "LTL Checking Thread");
+		currentJobThreads.add(checkingThread);
+		checkingThread.start();
 	}
 	
 	private Object getResult(LtlParser parser, LTLFormulaItem item) {
@@ -100,6 +143,10 @@ public class LTLFormulaChecker {
 		parser.addWarningListener(parseListener);
 		parser.parse();
 		return parseListener;
+	}
+	
+	public ListProperty<Thread> currentJobThreadsProperty() {
+		return currentJobThreads;
 	}
 		
 }

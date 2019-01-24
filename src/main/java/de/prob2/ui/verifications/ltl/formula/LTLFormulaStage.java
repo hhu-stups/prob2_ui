@@ -8,6 +8,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
@@ -21,7 +22,12 @@ public class LTLFormulaStage extends LTLItemStage {
 	@FXML
 	private TextArea taDescription;
 	
+	@FXML
+	private TextArea taErrors;
+	
 	private final CurrentProject currentProject;
+	
+	private final LTLFormulaChecker formulaChecker;
 	
 	private final LTLResultHandler resultHandler;
 	
@@ -29,9 +35,10 @@ public class LTLFormulaStage extends LTLItemStage {
 			
 	@Inject
 	public LTLFormulaStage(final StageManager stageManager, final CurrentProject currentProject, 
-			final LTLResultHandler resultHandler) {
+			final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler) {
 		super(LTLFormulaItem.class);
 		this.currentProject = currentProject;
+		this.formulaChecker = formulaChecker;
 		this.resultHandler = resultHandler;
 		stageManager.loadFXML(this, "ltlformula_stage.fxml"); 
 	}
@@ -51,6 +58,12 @@ public class LTLFormulaStage extends LTLItemStage {
 		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
 			updateProject();
+			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
+			formulaChecker.checkFormula(item);
+			if(item.getChecked() == Checked.PARSE_ERROR) {
+				taErrors.setText(item.getResultItem().getMessage());
+				return;
+			}
 			this.close();
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
@@ -67,6 +80,12 @@ public class LTLFormulaStage extends LTLItemStage {
 			item.setCounterExample(null);
 			item.setResultItem(null);
 			currentProject.setSaved(false);
+			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, result));
+			formulaChecker.checkFormula(item);
+			if(item.getChecked() == Checked.PARSE_ERROR) {
+				taErrors.setText(item.getResultItem().getMessage());
+				return;
+			}
 			this.close();
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
