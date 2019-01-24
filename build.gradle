@@ -182,7 +182,18 @@ sonarqube {
 		property("sonar.projectKey", "prob2-ui")
 		property("sonar.projectName", "prob2-ui")
 		
-		property("sonar.exclusions", "gradle/wrapper/*,build/**,scrapbook/*,src/main/resources/codemirror/clike.js,src/main/resources/codemirror/closebrackets.js,src/main/resources/codemirror/codemirror.css,src/main/resources/codemirror/codemirror.js,src/main/resources/codemirror/jquery.js,src/main/resources/codemirror/matchbrackets.js")
+		property("sonar.exclusions", [
+			"gradle/wrapper/*",
+			"build/**",
+			// Sonar currently throws exceptions when parsing ProB2Module.java, so it's excluded for now.
+			"src/main/java/de/prob2/ui/internal/ProB2Module.java",
+			"src/main/resources/codemirror/clike.js",
+			"src/main/resources/codemirror/closebrackets.js",
+			"src/main/resources/codemirror/codemirror.css",
+			"src/main/resources/codemirror/codemirror.js",
+			"src/main/resources/codemirror/jquery.js",
+			"src/main/resources/codemirror/matchbrackets.js",
+		].join(","))
 		
 		property("sonar.login", System.getenv("SONAR_TOKEN"))
 	}

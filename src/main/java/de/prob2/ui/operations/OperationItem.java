@@ -56,14 +56,13 @@ public class OperationItem {
 		this.variables = Objects.requireNonNull(variables);
 	}
 
-	private static LinkedHashMap<String, String> getNextStateValues(Transition transition,
-			List<IEvalElement> formulas) {
+	private static Map<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas) {
 		// It seems that there is no way to easily find out the
 		// constant/variable values which a specific $setup_constants or
 		// $initialise_machine transition would set.
 		// So we look at the values of all constants/variables in the
 		// transition's destination state.
-		final LinkedHashMap<String, String> values = new LinkedHashMap<>();
+		final Map<String, String> values = new LinkedHashMap<>();
 		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
 		for (int i = 0; i < formulas.size(); i++) {
 			final AbstractEvalResult value = results.get(i);
@@ -95,12 +94,12 @@ public class OperationItem {
 		final Map<String, String> variables;
 		switch (transition.getName()) {
 		case SETUP_CONSTANTS:
-			constants = getNextStateValues(transition, getConstantsAsTruncatedEvalElements(stateSpace));
+			constants = getNextStateValues(transition, loadedMachine.getConstantEvalElements(FormulaExpand.TRUNCATE));
 			variables = Collections.emptyMap();
 			break;
 
 		case INITIALISE_MACHINE:
-			variables = getNextStateValues(transition, getVariablesAsTruncatedEvalElements(stateSpace));
+			variables = getNextStateValues(transition, loadedMachine.getVariableEvalElements(FormulaExpand.TRUNCATE));
 			constants = Collections.emptyMap();
 			break;
 
@@ -121,22 +120,6 @@ public class OperationItem {
 
 		return new OperationItem(trace, transition, transition.getName(), Status.ENABLED, paramNames,
 				transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables);
-	}
-
-	private static List<IEvalElement> getConstantsAsTruncatedEvalElements(StateSpace sp) {
-		List<IEvalElement> constantEvalElements = new ArrayList<>();
-		for (String string : sp.getLoadedMachine().getConstantNames()) {
-			constantEvalElements.add(sp.getModel().parseFormula(string, FormulaExpand.TRUNCATE));
-		}
-		return constantEvalElements;
-	}
-
-	private static List<IEvalElement> getVariablesAsTruncatedEvalElements(StateSpace sp) {
-		List<IEvalElement> variableEvalElements = new ArrayList<>();
-		for (String string : sp.getLoadedMachine().getVariableNames()) {
-			variableEvalElements.add(sp.getModel().parseFormula(string, FormulaExpand.TRUNCATE));
-		}
-		return variableEvalElements;
 	}
 
 	public static OperationItem forDisabled(final Trace trace, final String name, final Status status,
