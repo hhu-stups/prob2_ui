@@ -185,6 +185,8 @@ sonarqube {
 		property("sonar.exclusions", [
 			"gradle/wrapper/*",
 			"build/**",
+			// Sonar currently throws exceptions when parsing ProB2Module.java, so it's excluded for now.
+			"src/main/java/de/prob2/ui/internal/ProB2Module.java",
 			"src/main/resources/codemirror/clike.js",
 			"src/main/resources/codemirror/closebrackets.js",
 			"src/main/resources/codemirror/codemirror.css",
