@@ -3,11 +3,7 @@ package de.prob2.ui.verifications.ltl;
 
 import de.prob2.ui.ProB2;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.fxml.FXML;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -30,6 +26,7 @@ public abstract class LTLItemStage extends Stage {
 			
 	public LTLItemStage(Class<? extends AbstractCheckableItem> clazz) {
 		super();
+		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
 	@FXML

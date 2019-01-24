@@ -56,15 +56,16 @@ public class LTLPatternStage extends LTLItemStage {
 	
 	private void addPattern(Machine machine, LTLPatternItem item) {
 		patternParser.parsePattern(item, machine);
-		CheckingResultItem resultItem = item.getResultItem();
-		if(resultItem != null) {
-			taErrors.setText(resultItem.getMessage());
-			return;
-		}
 		if(!machine.getLTLPatterns().contains(item)) {
 			patternParser.addPattern(item, machine);
 			machine.addLTLPattern(item);
 			updateProject();
+			setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, item));
+			CheckingResultItem resultItem = item.getResultItem();
+			if(resultItem != null) {
+				taErrors.setText(resultItem.getMessage());
+				return;
+			}
 			this.close();
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
@@ -73,20 +74,21 @@ public class LTLPatternStage extends LTLItemStage {
 	
 	private void changePattern(LTLPatternItem item, LTLPatternItem result) {
 		Machine machine = currentProject.getCurrentMachine();
+		patternParser.removePattern(item, machine);
 		patternParser.parsePattern(result, machine);
-		CheckingResultItem resultItem = result.getResultItem();
-		if(resultItem != null) {
-			taErrors.setText(resultItem.getMessage());
-			return;
-		}
 		if(!machine.getLTLPatterns().stream()
 				.filter(pattern -> !pattern.equals(item))
 				.collect(Collectors.toList())
 				.contains(result)) {
-			machine.getPatternManager().removePattern(machine.getPatternManager().getUserPattern(item.getName()));
 			item.setData(result.getName(), result.getDescription(), result.getCode());
 			patternParser.addPattern(item, machine);
 			currentProject.setSaved(false);
+			setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, result));
+			CheckingResultItem resultItem = result.getResultItem();
+			if(resultItem != null) {
+				taErrors.setText(resultItem.getMessage());
+				return;
+			}
 			this.close();
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);

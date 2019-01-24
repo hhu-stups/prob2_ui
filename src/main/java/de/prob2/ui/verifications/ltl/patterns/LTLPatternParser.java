@@ -2,17 +2,21 @@ package de.prob2.ui.verifications.ltl.patterns;
 
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
-import de.prob.ltl.parser.semantic.PatternDefinition;
+import de.prob.ltl.parser.LtlParser.Pattern_defContext;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
+
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Singleton;
 
 import javax.inject.Inject;
-import java.util.stream.Collectors;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public class LTLPatternParser {
@@ -36,15 +40,22 @@ public class LTLPatternParser {
 	public void addPattern(LTLPatternItem item, Machine machine) {
 		Pattern pattern = itemToPattern(item);
 		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
+		item.setName(pattern.getName());
 		machine.getPatternManager().getPatterns().add(pattern);
 	}
 	
 	private LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
 		LTLParseListener parseListener = initializeParseListener(pattern);
 		pattern.updateDefinitions(machine.getPatternManager());
-		pattern.setName(String.join("/", pattern.getDefinitions().stream()
-				.map(PatternDefinition::getSimpleName)
-				.collect(Collectors.toList())));
+		ParseTree ast = pattern.getAst();
+		List<String> patternNames = new ArrayList<>();
+		for(int i = 0; i < ast.getChildCount(); i++) {
+			ParseTree child = ast.getChild(i);
+			if(child instanceof Pattern_defContext && ((Pattern_defContext) child).ID() != null) {
+				patternNames.add(((Pattern_defContext) child).ID().getText());
+			}
+		}
+		pattern.setName(String.join("/", patternNames));
 		return parseListener;
 	}
 	
@@ -61,7 +72,10 @@ public class LTLPatternParser {
 	
 	public void removePattern(LTLPatternItem item, Machine machine) {
 		PatternManager patternManager = machine.getPatternManager();
-		patternManager.removePattern(patternManager.getUserPattern(item.getName()));
+		Pattern pattern = patternManager.getUserPattern(item.getName());
+		if(pattern != null) {
+			patternManager.removePattern(pattern);
+		}
 	}
 	
 	private Pattern itemToPattern(LTLPatternItem item) {
