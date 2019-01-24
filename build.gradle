@@ -185,7 +185,6 @@ sonarqube {
 		property("sonar.exclusions", [
 			"gradle/wrapper/*",
 			"build/**",
-			"scrapbook/*",
 			"src/main/resources/codemirror/clike.js",
 			"src/main/resources/codemirror/closebrackets.js",
 			"src/main/resources/codemirror/codemirror.css",
