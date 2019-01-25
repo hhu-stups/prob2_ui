@@ -28,7 +28,6 @@ public class StatusBar extends HBox {
 	public enum LoadingStatus {
 		NOT_LOADING("common.noModelLoaded"),
 		LOADING_FILE("statusbar.loadStatus.loadingFile"),
-		REMOVING_OLD_ANIMATION("statusbar.loadStatus.removingOldAnimation"),
 		ADDING_ANIMATION("statusbar.loadStatus.addingAnimation"),
 		;
 		

@@ -7,9 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -23,7 +20,6 @@ import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.Api;
 import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
@@ -32,10 +28,14 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.scene.control.Alert.AlertType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachineLoader {
@@ -56,7 +56,6 @@ public class MachineLoader {
 	private final Api api;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final StatusBar statusBar;
@@ -65,14 +64,12 @@ public class MachineLoader {
 
 	@Inject
 	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
-			final AnimationSelector animations, final CurrentTrace currentTrace,
-			final GlobalPreferences globalPreferences, final StatusBar statusBar) {
+			final CurrentTrace currentTrace, final GlobalPreferences globalPreferences, final StatusBar statusBar) {
 
 		this.api = api;
 		this.openLock = new Object();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.animations = animations;
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.statusBar = statusBar;
@@ -136,11 +133,6 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			try {
-				setLoadingStatus(StatusBar.LoadingStatus.REMOVING_OLD_ANIMATION);
-				if (currentTrace.exists()) {
-					this.animations.removeTrace(currentTrace.get());
-				}
-
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_FILE);
 				final Path path = getPathToMachine(machine);
 
@@ -148,7 +140,7 @@ public class MachineLoader {
 				allPrefs.putAll(prefs);
 				final StateSpace stateSpace = machine.getType().getLoader().load(api, path.toString(), allPrefs);
 				setLoadingStatus(StatusBar.LoadingStatus.ADDING_ANIMATION);
-				this.animations.addNewAnimation(new Trace(stateSpace));
+				this.currentTrace.set(new Trace(stateSpace));
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}
