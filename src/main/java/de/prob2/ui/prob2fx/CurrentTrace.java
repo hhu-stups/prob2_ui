@@ -196,6 +196,9 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		}
 		if (oldTrace != null) {
 			this.animationSelector.removeTrace(oldTrace);
+			if (trace == null || !trace.getStateSpace().equals(oldTrace.getStateSpace())) {
+				oldTrace.getStateSpace().kill();
+			}
 		}
 	}
 	
