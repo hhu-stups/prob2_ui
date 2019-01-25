@@ -9,8 +9,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.AnimationSelector;
-import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -59,15 +57,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final ObjectProperty<Path> defaultLocation;
 	private final StageManager stageManager;
 	private final Injector injector;
-	private final AnimationSelector animations;
 	private final CurrentTrace currentTrace;
 
 	@Inject
-	private CurrentProject(final StageManager stageManager, final Injector injector, final AnimationSelector animations,
-							final CurrentTrace currentTrace, final Config config) {
+	private CurrentProject(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace, final Config config) {
 		this.stageManager = stageManager;
 		this.injector = injector;
-		this.animations = animations;
 		this.currentTrace = currentTrace;
 
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
@@ -173,10 +168,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			this.saved.set(false);
 			this.currentMachine.set(null);
 			this.currentPreference.set(null);
-			final Trace trace = currentTrace.get();
-			if (trace != null) {
-				animations.removeTrace(trace);
-			}
+			this.currentTrace.set(null);
 		}
 		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
 	}
@@ -227,9 +219,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (!saved.get() && !confirmReplacingProject()) {
 			return;
 		}
-		if (currentTrace.exists()) {
-			animations.removeTrace(currentTrace.get());
-		}
+		currentTrace.set(null);
 		update(project);
 		initializeMachines();
 	}
@@ -238,9 +228,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (!saved.get() && !confirmReplacingProject()) {
 			return;
 		}
-		if (currentTrace.exists()) {
-			animations.removeTrace(currentTrace.get());
-		}
+		currentTrace.set(null);
 		update(project);
 		initializeMachines();
 		this.setSaved(!newProject);
