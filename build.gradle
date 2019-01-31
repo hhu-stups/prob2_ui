@@ -51,6 +51,7 @@ mainClassName = "de.prob2.ui.ProB2"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [
 	"-Djavafx.preloader=${preloaderClassName}".toString(),
+    "-Xss2M",
 ]
 
 // Module export/open declarations for Java 9+
