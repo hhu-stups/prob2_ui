@@ -18,6 +18,7 @@ import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
+import de.prob2.ui.verifications.ltl.ILTLItemHandler;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import javafx.application.Platform;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 
 @FXMLInjected
 @Singleton
-public class LTLFormulaChecker {
+public class LTLFormulaChecker implements ILTLItemHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLFormulaChecker.class);
 				
