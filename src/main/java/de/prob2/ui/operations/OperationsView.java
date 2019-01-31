@@ -222,7 +222,7 @@ public final class OperationsView extends VBox {
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		stopActions.add(this.updater::shutdownNow);
 
-		stageManager.loadFXML(this, "ops_view.fxml");
+		stageManager.loadFXML(this, "operations_view.fxml");
 	}
 
 	@FXML
