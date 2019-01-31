@@ -471,38 +471,44 @@ public final class OperationsView extends VBox {
 
 	@FXML
 	public void random(ActionEvent event) {
-		if (currentTrace.exists()) {
-			Thread executionThread = new Thread(() -> {
-				String randomInput = randomText.getText();
-				try {
-					Trace newTrace = null;
-					if (event.getSource().equals(randomText)) {
-						if (randomInput.isEmpty()) {
-							return;
-						}
-						newTrace = currentTrace.get().randomAnimation(Integer.parseInt(randomInput));
-					} else if (event.getSource().equals(oneRandomEvent)) {
-						newTrace = currentTrace.get().randomAnimation(1);
-					} else if (event.getSource().equals(fiveRandomEvents)) {
-						newTrace = currentTrace.get().randomAnimation(5);
-					} else if (event.getSource().equals(tenRandomEvents)) {
-						newTrace = currentTrace.get().randomAnimation(10);
-					}
-					currentTrace.set(newTrace);
-					randomExecutionThread.set(null);
-				} catch (NumberFormatException e) {
-					LOGGER.error("Invalid input for executing random number of events",e);
-					Platform.runLater(() -> stageManager
-							.makeAlert(Alert.AlertType.WARNING,
-									"operations.operationsView.alerts.invalidNumberOfOparations.header",
-									"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput)
-							.showAndWait());
-					randomExecutionThread.set(null);
-				}
-			});
-			randomExecutionThread.set(executionThread);
-			executionThread.start();
+		final int operationCount;
+		if (event.getSource().equals(randomText)) {
+			final String randomInput = randomText.getText();
+			if (randomInput.isEmpty()) {
+				return;
+			}
+			try {
+				operationCount = Integer.parseInt(randomInput);
+			} catch (NumberFormatException e) {
+				LOGGER.error("Invalid input for executing random number of events",e);
+				stageManager.makeAlert(Alert.AlertType.WARNING,
+					"operations.operationsView.alerts.invalidNumberOfOparations.header",
+					"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput)
+					.showAndWait();
+				return;
+			}
+		} else if (event.getSource().equals(oneRandomEvent)) {
+			operationCount = 1;
+		} else if (event.getSource().equals(fiveRandomEvents)) {
+			operationCount = 5;
+		} else if (event.getSource().equals(tenRandomEvents)) {
+			operationCount = 10;
+		} else {
+			throw new AssertionError("Unhandled random animation event source: " + event.getSource());
 		}
+		
+		final Thread executionThread = new Thread(() -> {
+			try {
+				final Trace trace = currentTrace.get();
+				if (trace != null) {
+					currentTrace.set(trace.randomAnimation(operationCount));
+				}
+			} finally {
+				randomExecutionThread.set(null);
+			}
+		}, "Random Operation Executor");
+		randomExecutionThread.set(executionThread);
+		executionThread.start();
 	}
 
 	@FXML
