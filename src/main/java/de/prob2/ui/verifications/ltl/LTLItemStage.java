@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.ltl;
 
 
 import de.prob2.ui.ProB2;
-import de.prob2.ui.verifications.AbstractCheckableItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
@@ -24,7 +23,7 @@ public abstract class LTLItemStage extends Stage {
 	protected WebEngine engine;
 
 			
-	public LTLItemStage(Class<? extends AbstractCheckableItem> clazz) {
+	public LTLItemStage() {
 		super();
 		this.initModality(Modality.APPLICATION_MODAL);
 	}

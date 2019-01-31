@@ -174,6 +174,7 @@ public class LTLView extends AnchorPane {
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
+			showMessage.disableProperty().bind(row.emptyProperty());
 
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.check"));
 			checkItem.setDisable(true);
@@ -209,6 +210,7 @@ public class LTLView extends AnchorPane {
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.LTLView.contextMenu.showParsingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
+			showMessage.disableProperty().bind(row.emptyProperty());
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {

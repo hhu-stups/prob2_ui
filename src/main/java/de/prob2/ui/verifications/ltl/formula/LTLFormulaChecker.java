@@ -79,9 +79,7 @@ public class LTLFormulaChecker {
 		Machine machine = currentProject.getCurrentMachine();
 		Thread checkingThread = new Thread(() -> {
 			checkMachine(machine);
-			Platform.runLater(() -> {
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-			});
+			Platform.runLater(() -> injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL));
 			currentJobThreads.remove(Thread.currentThread());
 		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);
@@ -103,9 +101,7 @@ public class LTLFormulaChecker {
 		Thread checkingThread = new Thread(() -> {
 			Checked result = checkFormula(item, machine);
 			item.setChecked(result);
-			Platform.runLater(() -> {
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-			});
+			Platform.runLater(() -> injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL));
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}

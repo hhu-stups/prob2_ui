@@ -36,7 +36,7 @@ public class LTLPatternStage extends LTLItemStage {
 	@Inject
 	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, 
 			final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
-		super(LTLPatternItem.class);
+		super();
 		this.currentProject = currentProject;
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;

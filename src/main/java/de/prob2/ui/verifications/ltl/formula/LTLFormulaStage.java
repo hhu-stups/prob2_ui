@@ -36,7 +36,7 @@ public class LTLFormulaStage extends LTLItemStage {
 	@Inject
 	public LTLFormulaStage(final StageManager stageManager, final CurrentProject currentProject, 
 			final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler) {
-		super(LTLFormulaItem.class);
+		super();
 		this.currentProject = currentProject;
 		this.formulaChecker = formulaChecker;
 		this.resultHandler = resultHandler;
