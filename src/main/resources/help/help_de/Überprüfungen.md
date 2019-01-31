@@ -24,6 +24,23 @@ Wählen Sie eine der Suchstrategien (Gemischte Breiten-/Tiefensuche, Breitensuch
 
 Durch Drücken von "LTL-Formel hinzufügen" oder "LTL-Pattern hinzufügen" wird ein Editor für das jeweilige geöffnet und man kann LTL-Formeln oder -Patterns zu den Listen hinzufügen, um diese zu checken.
 
+### Zusammenfassung der von ProB unterstützten LTL Syntax
+*   Schreibe {...} für B Prädikate,
+*   G,F,X,U,W,R,true,false,not,&,or and => sind in der unterstützten LTL Syntax enthalten,
+*   Schreibe e(op) umzu überprüfen. ob die Operation op is verfügbar ist,
+*   Schreibe deadlock umzu überprüfen ob der Zustand gedeadlockt ist,
+*   Schreibe deadlock(op1,...,opk) mit k>0 umzu überprüfen ob alle Operationen opi nicht verfügbar sind,
+*   Schreibe controller(op1,...,opk) mit k>0 umzu prüfen, ob es genau eine Operation opi existiert, die verfügbar ist,
+*   Schreibe deterministic(op1,...,opk) mit k>0 umzu überprüfen, ob alle Operationen opi determinstisch sind,
+*   Schreibe sink umzu überprüfen, ob keine Operation verfügbar ist, dessen Ausführung in einen anderen Zustand führt,
+*   Schreibe [], umzu überprüfen was die nächste Operation ist z.B. [reset] => X{db={}},
+*   Past-LTL wird ebenfalls unterstützt: Y,H,O,S,T sind dual zu X,G,F,U,R.
+
+#### Fairness Constraints
+*   Schreibe Fairness Constraints als Implikation: fair => f, wobei "fair" die Fairness Constraints sind und "f" die zu überprüfende LTL Formel,
+*   Schreibe WF(-) und SF(-) um aktionsbasierte schwache bzw. aktionsbasierte starke Fairness Constraints überprüfen,
+*   Schreibe WEF und SEF um schlechte Pfade zu suchen, die schwach fair bzw. stark fair bezüglich allen Transitionen ist
+
 ## <a id="Symbolic"> Symbolic Checking </a>
 
 ![Symbolic Checking](../screenshots/Verifications/Symbolic%20Checking.png)
