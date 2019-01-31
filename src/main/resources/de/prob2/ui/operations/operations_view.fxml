@@ -54,6 +54,9 @@
 					<FontAwesomeIconView styleClass="icon-dark"
 						glyphName="EYE" glyphSize="${fontSize.fontSize + 2}" />
 				</graphic>
+				<tooltip>
+					<Tooltip text="%operations.operationsView.tooltips.showDisabled"/>
+				</tooltip>
 			</ToggleButton>
 			<MenuButton fx:id="randomButton">
 				<items>
@@ -81,6 +84,9 @@
 				<graphic>
 					<FontAwesomeIconView styleClass="icon-dark" glyphName="STOP" glyphSize="${fontSize.fontSize + 2}"/>
 				</graphic>
+				<tooltip>
+					<Tooltip text="%operations.operationsView.tooltips.cancelRandom"/>
+				</tooltip>
 			</Button>
 		</HBox>
 	</VBox>
