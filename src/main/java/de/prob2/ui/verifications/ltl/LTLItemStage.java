@@ -2,6 +2,9 @@ package de.prob2.ui.verifications.ltl;
 
 
 import de.prob2.ui.ProB2;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.Project;
+import de.prob2.ui.project.machines.Machine;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
@@ -12,19 +15,30 @@ import netscape.javascript.JSObject;
 
 import java.net.URISyntaxException;
 
-public abstract class LTLItemStage extends Stage {
+public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	@FXML
-	private WebView taCode;
+	protected WebView taCode;
 	
 	@FXML
-	private TextArea taDescription;
+	protected TextArea taDescription;
+	
+	@FXML
+	protected TextArea taErrors;
+	
+	protected final CurrentProject currentProject;
+	
+	protected final ILTLItemHandler ltlItemHandler;
+	
+	protected LTLHandleItem<T> handleItem;
 	
 	protected WebEngine engine;
 
 			
-	public LTLItemStage() {
+	public LTLItemStage(final CurrentProject currentProject, final ILTLItemHandler ltlItemHandler) {
 		super();
+		this.currentProject = currentProject;
+		this.ltlItemHandler = ltlItemHandler;
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
@@ -52,5 +66,18 @@ public abstract class LTLItemStage extends Stage {
 	public WebEngine getEngine() {
 		return engine;
 	}
+	
+	protected void updateProject() {
+		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
+				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getLocation()));
+	}
+	
+	public void setHandleItem(LTLHandleItem<T> handleItem) {
+		this.handleItem = handleItem;
+	}
+	
+	protected abstract void addItem(Machine machine, T item);
+	
+	protected abstract void changeItem(T item, T result);
 		
 }

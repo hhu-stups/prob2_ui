@@ -1,8 +1,6 @@
 package de.prob2.ui.verifications.ltl;
 
-import de.prob2.ui.verifications.AbstractCheckableItem;
-
-public class LTLHandleItem<T extends AbstractCheckableItem> {
+public class LTLHandleItem<T extends ILTLItem> {
 
 	public enum HandleType {
 		ADD, CHANGE

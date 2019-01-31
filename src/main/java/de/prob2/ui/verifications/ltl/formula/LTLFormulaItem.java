@@ -2,12 +2,13 @@ package de.prob2.ui.verifications.ltl.formula;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ltl.ILTLItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 import java.util.Objects;
 
-public class LTLFormulaItem extends AbstractCheckableItem {
+public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 
 	private transient ObjectProperty<Trace> counterExample;
 

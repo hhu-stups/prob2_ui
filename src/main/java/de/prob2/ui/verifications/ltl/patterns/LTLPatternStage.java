@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -14,31 +13,16 @@ import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
 import netscape.javascript.JSObject;
 
-public class LTLPatternStage extends LTLItemStage {
-	
-	@FXML
-	private TextArea taDescription;
-	
-	@FXML
-	private TextArea taErrors;
-	
-	private final CurrentProject currentProject;
-	
-	private final LTLPatternParser patternParser;
+public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	
 	private final LTLResultHandler resultHandler;
-	
-	private LTLHandleItem<LTLPatternItem> handleItem;
 		
 	@Inject
 	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, 
 			final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
-		super();
-		this.currentProject = currentProject;
-		this.patternParser = patternParser;
+		super(currentProject, patternParser);
 		this.resultHandler = resultHandler;
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}
@@ -48,13 +32,15 @@ public class LTLPatternStage extends LTLItemStage {
 		final JSObject editor = (JSObject) engine.executeScript("editor");
 		String code = editor.call("getValue").toString();
 		if(handleItem.getHandleType() == HandleType.ADD) {
-			addPattern(currentProject.getCurrentMachine(), new LTLPatternItem(code, taDescription.getText()));
+			addItem(currentProject.getCurrentMachine(), new LTLPatternItem(code, taDescription.getText()));
 		} else {
-			changePattern(handleItem.getItem(), new LTLPatternItem(code, taDescription.getText()));
+			changeItem(handleItem.getItem(), new LTLPatternItem(code, taDescription.getText()));
 		}
 	}
 	
-	private void addPattern(Machine machine, LTLPatternItem item) {
+	@Override
+	protected void addItem(Machine machine, LTLPatternItem item) {
+		LTLPatternParser patternParser = (LTLPatternParser) ltlItemHandler;
 		patternParser.parsePattern(item, machine);
 		if(!machine.getLTLPatterns().contains(item)) {
 			patternParser.addPattern(item, machine);
@@ -72,7 +58,9 @@ public class LTLPatternStage extends LTLItemStage {
 		}
 	}
 	
-	private void changePattern(LTLPatternItem item, LTLPatternItem result) {
+	@Override
+	protected void changeItem(LTLPatternItem item, LTLPatternItem result) {
+		LTLPatternParser patternParser = (LTLPatternParser) ltlItemHandler;
 		Machine machine = currentProject.getCurrentMachine();
 		patternParser.removePattern(item, machine);
 		patternParser.parsePattern(result, machine);
@@ -94,13 +82,5 @@ public class LTLPatternStage extends LTLItemStage {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}
 	}
-	
-	private void updateProject() {
-		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getLocation()));
-	}
-	
-	public void setHandleItem(LTLHandleItem<LTLPatternItem> handleItem) {
-		this.handleItem = handleItem;
-	}
+
 }

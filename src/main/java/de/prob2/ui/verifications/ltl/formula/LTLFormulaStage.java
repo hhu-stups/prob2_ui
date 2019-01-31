@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
@@ -14,31 +13,16 @@ import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
 import netscape.javascript.JSObject;
 
-public class LTLFormulaStage extends LTLItemStage {
-	
-	@FXML
-	private TextArea taDescription;
-	
-	@FXML
-	private TextArea taErrors;
-	
-	private final CurrentProject currentProject;
-	
-	private final LTLFormulaChecker formulaChecker;
+public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	
 	private final LTLResultHandler resultHandler;
-	
-	private LTLHandleItem<LTLFormulaItem> handleItem;
 			
 	@Inject
 	public LTLFormulaStage(final StageManager stageManager, final CurrentProject currentProject, 
 			final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler) {
-		super();
-		this.currentProject = currentProject;
-		this.formulaChecker = formulaChecker;
+		super(currentProject, formulaChecker);
 		this.resultHandler = resultHandler;
 		stageManager.loadFXML(this, "ltlformula_stage.fxml"); 
 	}
@@ -48,13 +32,14 @@ public class LTLFormulaStage extends LTLItemStage {
 		final JSObject editor = (JSObject) engine.executeScript("editor");
 		String code = editor.call("getValue").toString();
 		if(handleItem.getHandleType() == HandleType.ADD) {
-			addFormula(currentProject.getCurrentMachine(), new LTLFormulaItem(code, taDescription.getText()));
+			addItem(currentProject.getCurrentMachine(), new LTLFormulaItem(code, taDescription.getText()));
 		} else {
-			changeFormula(handleItem.getItem(), new LTLFormulaItem(code, taDescription.getText()));
+			changeItem(handleItem.getItem(), new LTLFormulaItem(code, taDescription.getText()));
 		}
 	}
 	
-	private void addFormula(Machine machine, LTLFormulaItem item) {
+	protected void addItem(Machine machine, LTLFormulaItem item) {
+		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
 			updateProject();
@@ -70,7 +55,8 @@ public class LTLFormulaStage extends LTLItemStage {
 		}
 	}
 	
-	private void changeFormula(LTLFormulaItem item, LTLFormulaItem result) {
+	protected void changeItem(LTLFormulaItem item, LTLFormulaItem result) {
+		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		Machine machine = currentProject.getCurrentMachine();
 		if(!machine.getLTLFormulas().stream()
 				.filter(formula -> !formula.equals(item))
@@ -90,15 +76,6 @@ public class LTLFormulaStage extends LTLItemStage {
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
-	}
-	
-	private void updateProject() {
-		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getLocation()));
-	}
-	
-	public void setHandleItem(LTLHandleItem<LTLFormulaItem> handleItem) {
-		this.handleItem = handleItem;
 	}
 	
 }

@@ -4,6 +4,7 @@ import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.ltl.parser.LtlParser.Pattern_defContext;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.ltl.ILTLItemHandler;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class LTLPatternParser {
+public class LTLPatternParser implements ILTLItemHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLPatternParser.class);
 	
