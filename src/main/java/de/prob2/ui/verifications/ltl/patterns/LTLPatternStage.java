@@ -16,14 +16,11 @@ import javafx.fxml.FXML;
 import netscape.javascript.JSObject;
 
 public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
-	
-	private final LTLResultHandler resultHandler;
 		
 	@Inject
 	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, 
 			final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
-		super(currentProject, patternParser);
-		this.resultHandler = resultHandler;
+		super(currentProject, patternParser, resultHandler);
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}
 	

@@ -16,14 +16,11 @@ import javafx.fxml.FXML;
 import netscape.javascript.JSObject;
 
 public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
-	
-	private final LTLResultHandler resultHandler;
 			
 	@Inject
 	public LTLFormulaStage(final StageManager stageManager, final CurrentProject currentProject, 
 			final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler) {
-		super(currentProject, formulaChecker);
-		this.resultHandler = resultHandler;
+		super(currentProject, formulaChecker, resultHandler);
 		stageManager.loadFXML(this, "ltlformula_stage.fxml"); 
 	}
 	
@@ -38,6 +35,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		}
 	}
 	
+	@Override
 	protected void addItem(Machine machine, LTLFormulaItem item) {
 		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		if(!machine.getLTLFormulas().contains(item)) {
@@ -55,6 +53,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		}
 	}
 	
+	@Override
 	protected void changeItem(LTLFormulaItem item, LTLFormulaItem result) {
 		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		Machine machine = currentProject.getCurrentMachine();

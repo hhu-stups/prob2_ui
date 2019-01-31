@@ -30,15 +30,18 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected final ILTLItemHandler ltlItemHandler;
 	
+	protected final LTLResultHandler resultHandler;
+	
 	protected LTLHandleItem<T> handleItem;
 	
 	protected WebEngine engine;
 
 			
-	public LTLItemStage(final CurrentProject currentProject, final ILTLItemHandler ltlItemHandler) {
+	public LTLItemStage(final CurrentProject currentProject, final ILTLItemHandler ltlItemHandler, final LTLResultHandler resultHandler) {
 		super();
 		this.currentProject = currentProject;
 		this.ltlItemHandler = ltlItemHandler;
+		this.resultHandler = resultHandler;
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
