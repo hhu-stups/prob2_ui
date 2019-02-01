@@ -6,7 +6,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import de.prob.check.ModelCheckingOptions;
-
+import de.prob.check.ModelCheckingOptions.Options;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.BooleanProperty;
@@ -16,9 +16,21 @@ import javafx.scene.paint.Color;
 public class ModelCheckingItem implements IExecutableItem {
 
 	private ModelCheckingOptions options;
+	
 	private transient ModelCheckStats stats;
 	
 	private transient FontAwesomeIconView status;
+	
+	private transient FontAwesomeIconView deadlocks;
+	
+	private transient FontAwesomeIconView invariantViolations;
+	
+	private transient FontAwesomeIconView assertionViolations;
+	
+	private transient FontAwesomeIconView goals;
+	
+	private transient FontAwesomeIconView stopWhenAllOperationsCovered;
+	
 	private Checked checked;
 	
 	private String strategy;
@@ -26,7 +38,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	private BooleanProperty shouldExecute;
 
 	public ModelCheckingItem(ModelCheckingOptions options, ModelCheckStats stats, String strategy) {
-		initializeStatus();
 		Objects.requireNonNull(options);
 		Objects.requireNonNull(stats);
 		
@@ -34,10 +45,13 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.stats = stats;
 		this.strategy = strategy;
 		this.shouldExecute = new SimpleBooleanProperty(true);
+		
+		initialize();
 	}
 	
 	public void setOptions(ModelCheckingOptions options) {
 		this.options = options;
+		initializeOptionIcons(options);
 	}
 
 	public ModelCheckingOptions getOptions() {
@@ -73,11 +87,46 @@ public class ModelCheckingItem implements IExecutableItem {
 		return shouldExecute;
 	}
 	
-	public void initializeStatus() {
+	public void initialize() {
+		initializeStatus();
+		initializeOptionIcons(options);
+	}
+	
+	private void initializeStatus() {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
 		this.stats = null;
+	}
+	
+	private void initializeOptionIcons(ModelCheckingOptions options) {
+		this.deadlocks = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.invariantViolations = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.assertionViolations = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.goals = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.stopWhenAllOperationsCovered = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		
+		this.deadlocks.setFill(Color.BLUE);
+		this.invariantViolations.setFill(Color.BLUE);
+		this.assertionViolations.setFill(Color.BLUE);
+		this.goals.setFill(Color.BLUE);
+		this.stopWhenAllOperationsCovered.setFill(Color.BLUE);
+		
+		initializeOptionIcon(this.deadlocks, options, Options.FIND_DEADLOCKS);
+		initializeOptionIcon(this.invariantViolations, options, Options.FIND_INVARIANT_VIOLATIONS);
+		initializeOptionIcon(this.assertionViolations, options, Options.FIND_ASSERTION_VIOLATIONS);
+		initializeOptionIcon(this.goals, options, Options.FIND_GOAL);
+		initializeOptionIcon(this.stopWhenAllOperationsCovered, options, Options.STOP_AT_FULL_COVERAGE);
+	}
+	
+	private void initializeOptionIcon(FontAwesomeIconView icon, ModelCheckingOptions options, Options option) {
+		if(options.getPrologOptions().contains(option)) {
+			icon.setIcon(FontAwesomeIcon.CHECK);
+			icon.setFill(Color.GREEN);
+		} else {
+			icon.setIcon(FontAwesomeIcon.REMOVE);
+			icon.setFill(Color.RED);
+		}
 	}
 	
 	public FontAwesomeIconView getStatus() {
@@ -111,6 +160,26 @@ public class ModelCheckingItem implements IExecutableItem {
 	@Override
 	public Checked getChecked() {
 		return checked;
+	}
+	
+	public FontAwesomeIconView getDeadlocks() {
+		return deadlocks;
+	}
+	
+	public FontAwesomeIconView getInvariantViolations() {
+		return invariantViolations;
+	}
+	
+	public FontAwesomeIconView getAssertionViolations() {
+		return assertionViolations;
+	}
+	
+	public FontAwesomeIconView getGoals() {
+		return goals;
+	}
+	
+	public FontAwesomeIconView getStopWhenAllOperationsCovered() {
+		return stopWhenAllOperationsCovered;
 	}
 	
 	@Override

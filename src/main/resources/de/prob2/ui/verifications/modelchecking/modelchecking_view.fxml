@@ -60,7 +60,12 @@
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-				<TableColumn fx:id="strategyColumn" minWidth="260.0" maxWidth="320.0" prefWidth="260.0" text="%verifications.common.columns.strategy" />
+				<TableColumn fx:id="strategyColumn" minWidth="130.0" prefWidth="130.0" text="%verifications.common.columns.strategy" />
+				<TableColumn fx:id="deadlockColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.deadlocks" />
+				<TableColumn fx:id="invariantsViolationsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.invariants" />
+				<TableColumn fx:id="assertionViolationsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.assertions" />
+				<TableColumn fx:id="goalsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.goals" />
+				<TableColumn fx:id="stopAtFullCoverageColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" prefWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.stopFullCoverage" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
