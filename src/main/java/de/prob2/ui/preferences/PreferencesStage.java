@@ -36,6 +36,7 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 		Locale.FRENCH,
 		Locale.GERMAN,
 		new Locale("pt"),
+		new Locale("ru"),
 	};
 
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
