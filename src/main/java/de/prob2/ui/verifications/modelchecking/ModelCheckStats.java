@@ -119,6 +119,7 @@ public final class ModelCheckStats extends AnchorPane {
 
 		item.setStats(this);
 
+		
 		Platform.runLater(() -> {
 			Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);

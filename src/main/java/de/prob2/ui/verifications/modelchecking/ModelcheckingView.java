@@ -135,19 +135,6 @@ public final class ModelcheckingView extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
-		tvItems.getFocusModel().focusedItemProperty().addListener((observable, from, to) -> {
-			ModelCheckingItem item = tvItems.getFocusModel().getFocusedItem();
-			Platform.runLater(() -> {
-				if (item != null) {
-					if (item.getStats() == null) {
-						resetView();
-					} else {
-						checker.setCurrentStats(item.getStats());
-						statsPane.getChildren().setAll(item.getStats());
-					}
-				}	
-			});
-		});
 	}
 	
 	private void setListeners() {
@@ -285,8 +272,8 @@ public final class ModelcheckingView extends ScrollPane {
 		tvItems.refresh();
 	}
 	
-	public void selectLast() {
-		tvItems.getSelectionModel().selectLast();
+	public void selectItem(ModelCheckingItem item) {
+		tvItems.getSelectionModel().select(item);
 	}
 	
 }

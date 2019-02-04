@@ -114,9 +114,12 @@ public class Modelchecker implements IModelCheckListener {
 		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy));
 		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
+		} else {
+			int index = currentProject.getCurrentMachine().getModelcheckingItems().indexOf(modelcheckingItem);
+			modelcheckingItem = currentProject.getCurrentMachine().getModelcheckingItems().get(index);
 		}
 		currentStats.updateItem(modelcheckingItem);
-		injector.getInstance(ModelcheckingView.class).selectLast();
+		injector.getInstance(ModelcheckingView.class).selectItem(modelcheckingItem);
 	}
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
@@ -182,8 +185,7 @@ public class Modelchecker implements IModelCheckListener {
 
 		jobs.put(job.getJobId(), job);
 		currentStats.startJob();
-		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(currentStats));
-
+		
 		final IModelCheckingResult result;
 		try {
 			result = job.call();
@@ -194,6 +196,8 @@ public class Modelchecker implements IModelCheckListener {
 		} finally {
 			modelcheckingStage.setDisableStart(false);
 		}
+		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(currentStats));
+		
 		// The consistency checker sometimes doesn't call isFinished, so
 		// we call it manually here with some dummy information.
 		// If the checker already called isFinished, this call won't do
@@ -220,9 +224,4 @@ public class Modelchecker implements IModelCheckListener {
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
 	}
-
-	public void setCurrentStats(ModelCheckStats currentStats) {
-		this.currentStats = currentStats;
-	}
-
 }
