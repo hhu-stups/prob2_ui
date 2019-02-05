@@ -208,7 +208,7 @@ public class LTLView extends AnchorPane {
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			openEditor.disableProperty().bind(row.emptyProperty());
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.LTLView.contextMenu.showParsingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showParsingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 			showMessage.disableProperty().bind(row.emptyProperty());
 			
