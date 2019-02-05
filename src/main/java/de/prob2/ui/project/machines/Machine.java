@@ -174,7 +174,7 @@ public class Machine {
 			symbolicAnimationFormulas.forEach(SymbolicAnimationFormulaItem::initialize);
 		}
 		if (modelcheckingItems != null) {
-			modelcheckingItems.forEach(ModelCheckingItem::initializeStatus);
+			modelcheckingItems.forEach(ModelCheckingItem::initialize);
 		}
 	}
 	

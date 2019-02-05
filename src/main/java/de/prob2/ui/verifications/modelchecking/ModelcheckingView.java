@@ -16,7 +16,6 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
@@ -62,6 +61,21 @@ public final class ModelcheckingView extends ScrollPane {
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
 	
 	@FXML
+	private TableColumn<ModelCheckingItem, FontAwesomeIconView> deadlockColumn;
+	
+	@FXML
+	private TableColumn<ModelCheckingItem, FontAwesomeIconView> invariantsViolationsColumn;
+	
+	@FXML
+	private TableColumn<ModelCheckingItem, FontAwesomeIconView> assertionViolationsColumn;
+	
+	@FXML
+	private TableColumn<ModelCheckingItem, FontAwesomeIconView> goalsColumn;
+	
+	@FXML
+	private TableColumn<ModelCheckingItem, FontAwesomeIconView> stopAtFullCoverageColumn;
+	
+	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 
 	private final CurrentTrace currentTrace;
@@ -100,7 +114,11 @@ public final class ModelcheckingView extends ScrollPane {
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
-		
+		deadlockColumn.setCellValueFactory(new PropertyValueFactory<>("deadlocks"));
+		invariantsViolationsColumn.setCellValueFactory(new PropertyValueFactory<>("invariantViolations"));
+		assertionViolationsColumn.setCellValueFactory(new PropertyValueFactory<>("assertionViolations"));
+		goalsColumn.setCellValueFactory(new PropertyValueFactory<>("goals"));
+		stopAtFullCoverageColumn.setCellValueFactory(new PropertyValueFactory<>("stopWhenAllOperationsCovered"));
 
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.MODELCHECKING, injector));
 		CheckBox selectAll = new CheckBox();
@@ -116,19 +134,6 @@ public final class ModelcheckingView extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
-		tvItems.getFocusModel().focusedItemProperty().addListener((observable, from, to) -> {
-			ModelCheckingItem item = tvItems.getFocusModel().getFocusedItem();
-			Platform.runLater(() -> {
-				if (item != null) {
-					if (item.getStats() == null) {
-						resetView();
-					} else {
-						checker.setCurrentStats(item.getStats());
-						statsPane.getChildren().setAll(item.getStats());
-					}
-				}	
-			});
-		});
 	}
 	
 	private void setListeners() {
@@ -202,14 +207,6 @@ public final class ModelcheckingView extends ScrollPane {
 				}
 			});
 			
-			MenuItem showDetailsItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.showDetails"));
-			showDetailsItem.setOnAction(e-> {
-				ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				modelcheckingStage.show(item.getOptions());
-			});
-			showDetailsItem.disableProperty().bind(row.emptyProperty());
-			
 			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
 			searchForNewErrorsItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
@@ -225,7 +222,7 @@ public final class ModelcheckingView extends ScrollPane {
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(showDetailsItem, showTraceToErrorItem, checkItem, searchForNewErrorsItem, removeItem))
+				.otherwise(new ContextMenu(showTraceToErrorItem, checkItem, searchForNewErrorsItem, removeItem))
 			);
 			return row;
 		});
@@ -234,7 +231,6 @@ public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	public void addModelCheck() {
 		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
-		stageController.setDisableModelcheck(false);
 		if (!stageController.isShowing()) {
 			stageController.showAndWait();
 		}
@@ -275,8 +271,8 @@ public final class ModelcheckingView extends ScrollPane {
 		tvItems.refresh();
 	}
 	
-	public void selectLast() {
-		tvItems.getSelectionModel().selectLast();
+	public void selectItem(ModelCheckingItem item) {
+		tvItems.getSelectionModel().select(item);
 	}
 	
 }
