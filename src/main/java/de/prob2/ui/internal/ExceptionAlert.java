@@ -13,6 +13,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
+import de.prob2.ui.beditor.BEditorView;
 
 
 import javafx.beans.binding.Bindings;
@@ -76,7 +77,7 @@ public final class ExceptionAlert extends Alert {
 		}
 	}
 	
-	private static class ErrorLocationsCell extends TableCell<ErrorItem, ErrorItem> {
+	private class ErrorLocationsCell extends TableCell<ErrorItem, ErrorItem> {
 		@Override
 		protected void updateItem(final ErrorItem item, final boolean empty) {
 			super.updateItem(item, empty);
@@ -88,7 +89,11 @@ public final class ExceptionAlert extends Alert {
 				for (final ErrorItem.Location location : item.getLocations()) {
 					final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
 					openLocationButton.setOnAction(event -> {
-						// TODO Jump to error location in file
+						final BEditorView bEditorView = injector.getInstance(BEditorView.class);
+						bEditorView.selectRange(
+							location.getStartLine()-1, location.getStartColumn(),
+							location.getEndLine()-1, location.getEndColumn()
+						);
 					});
 					final Label label = new Label(location.toString());
 					label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
@@ -111,6 +116,7 @@ public final class ExceptionAlert extends Alert {
 	@FXML private TableColumn<ErrorItem, ErrorItem> locationsColumn;
 	@FXML private TextArea stackTraceTextArea;
 	
+	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final String text;
@@ -121,6 +127,7 @@ public final class ExceptionAlert extends Alert {
 		
 		Objects.requireNonNull(exc);
 		
+		this.injector = injector;
 		this.stageManager = injector.getInstance(StageManager.class);
 		this.bundle = injector.getInstance(ResourceBundle.class);
 		this.text = text;

@@ -284,4 +284,7 @@ public class BEditorView extends BorderPane {
 		injector.getInstance(ExternalEditor.class).open(this.getPath());
 	}
 	
+	public void selectRange(int anchorParagraph, int anchorColumn, int caretPositionParagraph, int caretPositionColumn) {
+		beditor.selectRange(anchorParagraph, anchorColumn, caretPositionParagraph, caretPositionColumn);
+	}
 }
