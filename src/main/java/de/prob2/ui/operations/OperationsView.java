@@ -296,14 +296,14 @@ public final class OperationsView extends VBox {
 					setSortMode(configData.operationsSortMode);
 				}
 				
-				setShowDisabledOps(configData.operationsShowNotEnabled);
+				setShowDisabledOps(configData.operationsShowDisabled);
 				setShowUnambiguous(configData.operationsShowUnambiguous);
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.operationsSortMode = getSortMode();
-				configData.operationsShowNotEnabled = getShowDisabledOps();
+				configData.operationsShowDisabled = getShowDisabledOps();
 				configData.operationsShowUnambiguous = getShowUnambiguous();
 			}
 		});
