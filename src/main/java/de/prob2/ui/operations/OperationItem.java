@@ -18,7 +18,6 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 
 public class OperationItem {
@@ -29,7 +28,6 @@ public class OperationItem {
 	private static final String SETUP_CONSTANTS = "$setup_constants";
 	private static final String INITIALISE_MACHINE = "$initialise_machine";
 	
-	private final Trace trace;
 	private final Transition transition;
 	private final String name;
 	private final OperationItem.Status status;
@@ -40,11 +38,10 @@ public class OperationItem {
 	private final Map<String, String> constants;
 	private final Map<String, String> variables;
 
-	public OperationItem(final Trace trace, final Transition transition, final String name, final Status status,
+	public OperationItem(final Transition transition, final String name, final Status status,
 			final List<String> parameterNames, final List<String> parameterValues,
 			final List<String> returnParameterNames, final List<String> returnParameterValues,
 			final Map<String, String> constants, final Map<String, String> variables) {
-		this.trace = Objects.requireNonNull(trace);
 		this.transition = transition;
 		this.name = Objects.requireNonNull(name);
 		this.status = Objects.requireNonNull(status);
@@ -79,8 +76,7 @@ public class OperationItem {
 		return values;
 	}
 
-	public static OperationItem forTransition(final Trace trace, final Transition transition) {
-		final StateSpace stateSpace = trace.getStateSpace();
+	public static OperationItem forTransition(final StateSpace stateSpace, final Transition transition) {
 		final LoadedMachine loadedMachine = stateSpace.getLoadedMachine();
 		OperationInfo opInfo;
 		try {
@@ -110,7 +106,7 @@ public class OperationItem {
 			} else {
 				variables = getNextStateValues(transition,
 						opInfo.getNonDetWrittenVariables().stream()
-								.map(var -> trace.getStateSpace().getModel().parseFormula(var, FormulaExpand.TRUNCATE))
+								.map(var -> stateSpace.getModel().parseFormula(var, FormulaExpand.TRUNCATE))
 								.collect(Collectors.toList()));
 			}
 		}
@@ -118,18 +114,13 @@ public class OperationItem {
 		final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
 		final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
 
-		return new OperationItem(trace, transition, transition.getName(), Status.ENABLED, paramNames,
+		return new OperationItem(transition, transition.getName(), Status.ENABLED, paramNames,
 				transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables);
 	}
 
-	public static OperationItem forDisabled(final Trace trace, final String name, final Status status,
-			final List<String> parameters) {
-		return new OperationItem(trace, null, name, status, Collections.emptyList(), parameters,
+	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters) {
+		return new OperationItem(null, name, status, Collections.emptyList(), parameters,
 				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
-	}
-
-	public Trace getTrace() {
-		return this.trace;
 	}
 
 	public Transition getTransition() {
@@ -183,7 +174,7 @@ public class OperationItem {
 
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("trace", this.getTrace()).add("transition", this.getTransition())
+		return MoreObjects.toStringHelper(this).add("transition", this.getTransition())
 				.add("name", this.getName()).add("status", this.getStatus())
 				.add("parameterNames", this.getParameterNames()).add("parameterValues", this.getParameterValues())
 				.add("returnParameterNames", this.getReturnParameterNames())

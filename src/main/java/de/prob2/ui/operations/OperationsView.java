@@ -300,7 +300,7 @@ public final class OperationsView extends VBox {
 		if (
 			item != null
 			&& item.getStatus() == OperationItem.Status.ENABLED
-			&& item.getTrace().equals(currentTrace.get())
+			&& item.getTransition().getSource().equals(currentTrace.getCurrentState())
 		) {
 			Trace forward = currentTrace.forward();
 			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
@@ -338,9 +338,9 @@ public final class OperationsView extends VBox {
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		for (Transition transition : operations) {
 			disabled.remove(transition.getName());
-			events.add(OperationItem.forTransition(trace, transition));
+			events.add(OperationItem.forTransition(trace.getStateSpace(), transition));
 		}
-		showDisabledAndWithTimeout(trace, disabled, withTimeout);
+		showDisabledAndWithTimeout(disabled, withTimeout);
 
 		doSort();
 
@@ -363,20 +363,19 @@ public final class OperationsView extends VBox {
 		});
 	}
 
-	private void showDisabledAndWithTimeout(final Trace trace, final Set<String> notEnabled,
-			final Set<String> withTimeout) {
+	private void showDisabledAndWithTimeout(final Set<String> notEnabled, final Set<String> withTimeout) {
 		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
 				if (!"$initialise_machine".equals(s)) {
 					events.add(OperationItem.forDisabled(
-						trace, s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, opToParams.get(s)
+						s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, opToParams.get(s)
 					));
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			if (!notEnabled.contains(s)) {
-				events.add(OperationItem.forDisabled(trace, s, OperationItem.Status.TIMEOUT, Collections.emptyList()));
+				events.add(OperationItem.forDisabled(s, OperationItem.Status.TIMEOUT, Collections.emptyList()));
 			}
 		}
 	}

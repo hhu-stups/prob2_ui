@@ -13,7 +13,7 @@ public class HistoryItem {
 	
 	public HistoryItem(final Trace trace) {
 		this.trace = trace;
-		this.operationItem = trace.canGoBack() ? OperationItem.forTransition(trace.back(), trace.getCurrentTransition()) : null;
+		this.operationItem = trace.canGoBack() ? OperationItem.forTransition(trace.getStateSpace(), trace.getCurrentTransition()) : null;
 	}
 	
 	public static List<HistoryItem> itemsForTrace(final Trace trace) {
