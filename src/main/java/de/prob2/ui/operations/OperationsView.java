@@ -260,7 +260,7 @@ public final class OperationsView extends VBox {
 		});
 
 		showUnambiguous.addListener((o, from, to) -> {
-			((FontAwesomeIconView)unambiguousToggle.getGraphic()).setIcon(to ? FontAwesomeIcon.MINUS_SQUARE : FontAwesomeIcon.PLUS_SQUARE);
+			((FontAwesomeIconView)unambiguousToggle.getGraphic()).setIcon(to ? FontAwesomeIcon.PLUS_SQUARE : FontAwesomeIcon.MINUS_SQUARE);
 			unambiguousToggle.setSelected(to);
 			update(currentTrace.get());
 		});

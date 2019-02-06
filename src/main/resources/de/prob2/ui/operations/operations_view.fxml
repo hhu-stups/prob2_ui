@@ -61,7 +61,7 @@
 			<ToggleButton fx:id="unambiguousToggle" onAction="#handleUnambiguousToggle">
 				<graphic>
 					<FontAwesomeIconView styleClass="icon-dark"
-						glyphName="PLUS_SQUARE" glyphSize="${fontSize.fontSize + 2}" />
+						glyphName="MINUS_SQUARE" glyphSize="${fontSize.fontSize + 2}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%operations.operationsView.tooltips.showUnambiguous"/>
