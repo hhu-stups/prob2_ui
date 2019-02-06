@@ -1,12 +1,17 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.base.MoreObjects;
 
@@ -23,6 +28,56 @@ import de.prob.statespace.Transition;
 public class OperationItem {
 	public enum Status {
 		DISABLED, ENABLED, TIMEOUT
+	}
+	
+	/**
+	 * Internal helper class that holds an operation's name and parameter values. Used for grouping in {@link #removeUnambiguousConstantsAndVariables(Collection)}.
+	 */
+	private static final class OperationNameAndParameterValues {
+		final String name;
+		final List<String> parameterValues;
+		
+		private OperationNameAndParameterValues(final String name, final List<String> parameterValues) {
+			this.name = name;
+			this.parameterValues = parameterValues;
+		}
+		
+		private OperationNameAndParameterValues(final OperationItem item) {
+			this(item.getName(), item.getParameterValues());
+		}
+		
+		private String getName() {
+			return this.name;
+		}
+		
+		private List<String> getParameterValues() {
+			return this.parameterValues;
+		}
+		
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || this.getClass() != o.getClass()) {
+				return false;
+			}
+			final OperationNameAndParameterValues other = (OperationNameAndParameterValues)o;
+			return this.getName().equals(other.getName()) && this.getParameterValues().equals(other.getParameterValues());
+		}
+		
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.getName(), this.getParameterValues());
+		}
+		
+		@Override
+		public String toString() {
+			return MoreObjects.toStringHelper(this)
+				.add("name", name)
+				.add("parameterValues", parameterValues)
+				.toString();
+		}
 	}
 	
 	private static final String SETUP_CONSTANTS = "$setup_constants";
@@ -76,51 +131,100 @@ public class OperationItem {
 		return values;
 	}
 
-	public static OperationItem forTransition(final StateSpace stateSpace, final Transition transition) {
+	public static Collection<OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions) {
 		final LoadedMachine loadedMachine = stateSpace.getLoadedMachine();
-		OperationInfo opInfo;
-		try {
-			opInfo = loadedMachine.getMachineOperationInfo(transition.getName());
-		} catch (ProBError e) {
-			// fallback solution if getMachineOperationInfo throws a ProBError
-			opInfo = null;
-		}
-
-		final Map<String, String> constants;
-		final Map<String, String> variables;
-		switch (transition.getName()) {
-		case SETUP_CONSTANTS:
-			constants = getNextStateValues(transition, loadedMachine.getConstantEvalElements(FormulaExpand.TRUNCATE));
-			variables = Collections.emptyMap();
-			break;
-
-		case INITIALISE_MACHINE:
-			variables = getNextStateValues(transition, loadedMachine.getVariableEvalElements(FormulaExpand.TRUNCATE));
-			constants = Collections.emptyMap();
-			break;
-
-		default:
-			constants = Collections.emptyMap();
-			if (opInfo == null) {
-				variables = Collections.emptyMap();
-			} else {
-				variables = getNextStateValues(transition,
-						opInfo.getNonDetWrittenVariables().stream()
+		final List<OperationItem> items = new ArrayList<>();
+		for (final Transition transition : transitions) {
+			OperationInfo opInfo;
+			try {
+				opInfo = loadedMachine.getMachineOperationInfo(transition.getName());
+			} catch (ProBError e) {
+				// fallback solution if getMachineOperationInfo throws a ProBError
+				opInfo = null;
+			}
+			
+			final Map<String, String> constants;
+			final Map<String, String> variables;
+			switch (transition.getName()) {
+				case SETUP_CONSTANTS:
+					constants = getNextStateValues(transition, loadedMachine.getConstantEvalElements(FormulaExpand.TRUNCATE));
+					variables = Collections.emptyMap();
+					break;
+				
+				case INITIALISE_MACHINE:
+					variables = getNextStateValues(transition, loadedMachine.getVariableEvalElements(FormulaExpand.TRUNCATE));
+					constants = Collections.emptyMap();
+					break;
+				
+				default:
+					constants = Collections.emptyMap();
+					if (opInfo == null) {
+						variables = Collections.emptyMap();
+					} else {
+						variables = getNextStateValues(transition,
+							opInfo.getNonDetWrittenVariables().stream()
 								.map(var -> stateSpace.getModel().parseFormula(var, FormulaExpand.TRUNCATE))
 								.collect(Collectors.toList()));
+					}
 			}
+			
+			final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
+			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
+			
+			items.add(new OperationItem(transition, transition.getName(), Status.ENABLED, paramNames,
+				transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables));
 		}
+		return items;
+	}
 
-		final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
-		final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
-
-		return new OperationItem(transition, transition.getName(), Status.ENABLED, paramNames,
-				transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables);
+	public static OperationItem forTransition(final StateSpace stateSpace, final Transition transition) {
+		final Collection<OperationItem> items = forTransitions(stateSpace, Collections.singletonList(transition));
+		assert items.size() == 1;
+		return items.iterator().next();
 	}
 
 	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters) {
 		return new OperationItem(null, name, status, Collections.emptyList(), parameters,
 				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+	}
+
+	private static <K, V> Map<K, V> withoutKeys(final Map<K, V> map, final Set<K> toRemove) {
+		final Map<K, V> newMap = new HashMap<>(map);
+		toRemove.forEach(newMap::remove);
+		return newMap;
+	}
+
+	private static Stream<OperationItem> removeUnambiguousConstantsAndVariablesInternal(final Collection<OperationItem> items) {
+		assert !items.isEmpty();
+		final OperationItem first = items.iterator().next();
+		final Set<String> unambiguousConstants = new HashSet<>(first.getConstants().keySet());
+		final Set<String> unambiguousVariables = new HashSet<>(first.getVariables().keySet());
+		for (final OperationItem item : items) {
+			assert item.getName().equals(first.getName());
+			assert item.getParameterValues().equals(first.getParameterValues());
+			unambiguousConstants.removeIf(name -> !item.getConstants().get(name).equals(first.getConstants().get(name)));
+			unambiguousVariables.removeIf(name -> !item.getVariables().get(name).equals(first.getVariables().get(name)));
+		}
+		
+		return items.stream()
+			.map(item -> new OperationItem(
+				item.getTransition(), item.getName(), item.getStatus(),
+				item.getParameterNames(), item.getParameterValues(),
+				item.getReturnParameterNames(), item.getReturnParameterValues(),
+				withoutKeys(item.getConstants(), unambiguousConstants), withoutKeys(item.getVariables(), unambiguousVariables)
+			));
+	}
+	
+	public static Collection<OperationItem> removeUnambiguousConstantsAndVariables(final Collection<OperationItem> items) {
+		// Group by operation name and parameter values, remove unambiguous constants/variables inside each group, then combine them again.
+		// The grouping step ensures that only operations with the same name and parameter values are considered when checking for ambiguity.
+		// Otherwise operations that change the same variables, but have different names or parameters, would be incorrectly detected as ambiguous.
+		return items.stream()
+			.collect(Collectors.groupingBy(OperationNameAndParameterValues::new))
+			.values()
+			.stream()
+			.flatMap(OperationItem::removeUnambiguousConstantsAndVariablesInternal)
+			.collect(Collectors.toList());
 	}
 
 	public Transition getTransition() {

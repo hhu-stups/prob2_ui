@@ -1,6 +1,7 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -171,6 +172,8 @@ public final class OperationsView extends VBox {
 	@FXML
 	private ToggleButton disabledOpsToggle;
 	@FXML
+	private ToggleButton unambiguousToggle;
+	@FXML
 	private TextField searchBar;
 	@FXML
 	private TextField randomText;
@@ -194,6 +197,7 @@ public final class OperationsView extends VBox {
 	private final Map<String, List<String>> opToParams = new HashMap<>();
 	private final List<OperationItem> events = new ArrayList<>();
 	private final BooleanProperty showDisabledOps;
+	private final BooleanProperty showUnambiguous;
 	private final ObjectProperty<OperationsView.SortMode> sortMode;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
@@ -210,6 +214,7 @@ public final class OperationsView extends VBox {
 						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar,
 						   final StopActions stopActions, final Config config) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
+		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
@@ -254,6 +259,12 @@ public final class OperationsView extends VBox {
 			update(currentTrace.get());
 		});
 
+		showUnambiguous.addListener((o, from, to) -> {
+			((FontAwesomeIconView)unambiguousToggle.getGraphic()).setIcon(to ? FontAwesomeIcon.MINUS_SQUARE : FontAwesomeIcon.PLUS_SQUARE);
+			unambiguousToggle.setSelected(to);
+			update(currentTrace.get());
+		});
+
 		sortMode.addListener((o, from, to) -> {
 			final FontAwesomeIcon icon;
 			switch (to) {
@@ -286,12 +297,14 @@ public final class OperationsView extends VBox {
 				}
 				
 				setShowDisabledOps(configData.operationsShowNotEnabled);
+				setShowUnambiguous(configData.operationsShowUnambiguous);
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.operationsSortMode = getSortMode();
 				configData.operationsShowNotEnabled = getShowDisabledOps();
+				configData.operationsShowUnambiguous = getShowUnambiguous();
 			}
 		});
 	}
@@ -334,12 +347,15 @@ public final class OperationsView extends VBox {
 
 		events.clear();
 		final Set<Transition> operations = trace.getNextTransitions(true, FormulaExpand.TRUNCATE);
-		final Set<String> disabled = new HashSet<>(opNames);
-		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
-		for (Transition transition : operations) {
-			disabled.remove(transition.getName());
-			events.add(OperationItem.forTransition(trace.getStateSpace(), transition));
+		Collection<OperationItem> operationItems = OperationItem.forTransitions(trace.getStateSpace(), operations);
+		if (!unambiguousToggle.isSelected()) {
+			operationItems = OperationItem.removeUnambiguousConstantsAndVariables(operationItems);
 		}
+		events.addAll(operationItems);
+		
+		final Set<String> disabled = new HashSet<>(opNames);
+		disabled.removeAll(operations.stream().map(Transition::getName).collect(Collectors.toSet()));
+		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		showDisabledAndWithTimeout(disabled, withTimeout);
 
 		doSort();
@@ -419,6 +435,11 @@ public final class OperationsView extends VBox {
 	@FXML
 	private void handleDisabledOpsToggle() {
 		this.setShowDisabledOps(disabledOpsToggle.isSelected());
+	}
+
+	@FXML
+	private void handleUnambiguousToggle() {
+		this.setShowUnambiguous(unambiguousToggle.isSelected());
 	}
 
 	private List<OperationItem> applyFilter(final String filter) {
@@ -548,5 +569,13 @@ public final class OperationsView extends VBox {
 
 	private void setShowDisabledOps(boolean showDisabledOps) {
 		this.showDisabledOps.set(showDisabledOps);
+	}
+	
+	private boolean getShowUnambiguous() {
+		return this.showUnambiguous.get();
+	}
+
+	private void setShowUnambiguous(final boolean showUnambiguous) {
+		this.showUnambiguous.set(showUnambiguous);
 	}
 }
