@@ -1,18 +1,8 @@
-import org.gradle.plugins.ide.eclipse.model.AccessRule 
-
-buildscript {
-	repositories {
-		mavenLocal()
-		jcenter()
-	}
-	
-	dependencies {
-		classpath group: "de.dynamicfiles.projects.gradle.plugins", name: "javafx-gradle-plugin", version: "8.8.2"
-	}
-}
+import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 plugins {
 	id "com.github.johnrengelman.shadow" version "4.0.3"
+	id "edu.sc.seis.macAppBundle" version "2.3.0"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
 	id "org.openjfx.javafxplugin" version "0.0.6" apply false
 	id "org.sonarqube" version "2.7"
@@ -50,9 +40,13 @@ repositories {
 mainClassName = "de.prob2.ui.ProB2"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [
-	"-Djavafx.preloader=${preloaderClassName}".toString(),
 	"-Xss2M",
 ]
+
+def systemProperties = [
+	"javafx.preloader": preloaderClassName,
+]
+applicationDefaultJvmArgs += systemProperties.collect {k, v -> "-D${k}=${v}".toString()}
 
 // Module export/open declarations for Java 9+
 def exports = []
@@ -161,20 +155,15 @@ jar {
 	}
 }
 
-if (JavaVersion.current() <= JavaVersion.VERSION_1_9) {
-	apply plugin: 'javafx-gradle-plugin'
-	jfx {
-		mainClass = project.mainClassName
-		jfxMainAppJarName = project.name + "-jfx.jar"
-		preLoader = preloaderClassName
-		identifier = project.group + "." + project.name
-		vendor = project.group
-		nativeReleaseVersion = project.version
-		appName = project.name
-		skipNativeVersionNumberSanitizing = true
-		skipMainClassScanning = true
-	}
+macAppBundle {
+	dmgName = project.name + "-" + project.version + "-mac"
+	icon = "src/main/deploy/package/macosx/prob2-ui.icns"
+	bundleJRE = false
+	jreHome = null
+	javaProperties = systemProperties
 }
+
+macAppBundle.mainClassName = mainClassName
 
 sonarqube {
 	properties {
