@@ -58,7 +58,11 @@ after_success:
 - |
   if [[ "${DO_AFTER_SUCCESS}" == "true" ]]
   then
+    # Start uploading in the background while SonarQube runs
+    travis-custom-deploy sftp build/distributions/*.zip build/libs/*-all.jar &
+    
     git fetch --unshallow
     ./gradlew sonarqube --info --stacktrace --warning-mode=all
-    travis-custom-deploy sftp build/distributions/*.zip build/libs/*-all.jar
+    
+    wait # Wait for travis-custom-deploy (started in the background) to finish
   fi
