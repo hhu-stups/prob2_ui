@@ -43,7 +43,7 @@ install:
 - gem install travis-custom-deploy
 
 script:
-- ./gradlew assemble --refresh-dependencies --stacktrace --warning-mode=all
+- ./gradlew distZip shadowJar --stacktrace --warning-mode=all
 
 before_cache:
 - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
