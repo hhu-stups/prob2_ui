@@ -11,11 +11,11 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
@@ -102,7 +102,7 @@ public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		showStats(new ModelCheckStats(this, stageManager, injector));
+		showStats(new ModelCheckStats(stageManager, injector));
 		setBindings();
 		setListeners();
 		setContextMenus();
@@ -134,6 +134,18 @@ public final class ModelcheckingView extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+		
+		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to != null) {
+				Platform.runLater(() -> {
+					if(to.getStats() != null) {
+						showStats(to.getStats());
+					} else {
+						resetView();
+					}
+				});
+			}
+		});
 	}
 	
 	private void setListeners() {
@@ -164,6 +176,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		if (item != null && e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
+			item.setOptions(item.getOptions().recheckExisting(true));
 			checker.checkItem(item, false);
 		}
 	}
@@ -180,16 +193,8 @@ public final class ModelcheckingView extends ScrollPane {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
 			row.setOnMouseClicked(this::tvItemsClicked);
 			final BooleanBinding disableErrorItemsBinding = Bindings.createBooleanBinding(
-				() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || row.getItem().getStats().getTrace() == null,
+				() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null,
 				row.emptyProperty(), row.itemProperty());
-			
-			MenuItem showTraceToErrorItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.showTraceToError"));
-			showTraceToErrorItem.setOnAction(e-> {
-				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				currentTrace.set(item.getStats().getTrace());
-				injector.getInstance(StatsView.class).update(item.getStats().getTrace());
-			});
-			showTraceToErrorItem.disableProperty().bind(disableErrorItemsBinding);
 			
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setDisable(true);
@@ -222,8 +227,7 @@ public final class ModelcheckingView extends ScrollPane {
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(showTraceToErrorItem, checkItem, searchForNewErrorsItem, removeItem))
-			);
+				.otherwise(new ContextMenu(checkItem, searchForNewErrorsItem, removeItem)));
 			return row;
 		});
 	}
@@ -264,7 +268,7 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	public void resetView() {
-		showStats(new ModelCheckStats(this, stageManager, injector));
+		showStats(new ModelCheckStats(stageManager, injector));
 	}
 	
 	public void refresh() {

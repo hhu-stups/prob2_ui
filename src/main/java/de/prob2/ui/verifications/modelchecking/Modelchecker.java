@@ -117,6 +117,9 @@ public class Modelchecker implements IModelCheckListener {
 		} else {
 			int index = currentProject.getCurrentMachine().getModelcheckingItems().indexOf(modelcheckingItem);
 			modelcheckingItem = currentProject.getCurrentMachine().getModelcheckingItems().get(index);
+			if(modelcheckingItem.getStats() != null) {
+				currentStats = modelcheckingItem.getStats();
+			}
 		}
 		currentStats.updateItem(modelcheckingItem);
 		injector.getInstance(ModelcheckingView.class).selectItem(modelcheckingItem);
@@ -124,13 +127,18 @@ public class Modelchecker implements IModelCheckListener {
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
 		currentOptions = options;
-		currentStats = new ModelCheckStats(injector.getInstance(ModelcheckingView.class), stageManager, injector);
+		if(options.getPrologOptions().contains(ModelCheckingOptions.Options.INSPECT_EXISTING_NODES) || currentStats == null) {
+			currentStats = new ModelCheckStats(stageManager, injector);
+		}
 		IModelCheckJob job = new ConsistencyChecker(stateSpace, options, null, this);
 		currentJobs.add(job);
 	}
 	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, ModelCheckingItem item) {
 		updateCurrentValues(options, stateSpace);
+		if(item.getStats() != null) {
+			currentStats = item.getStats();
+		}
 		currentStats.updateItem(item);
 	}
 	

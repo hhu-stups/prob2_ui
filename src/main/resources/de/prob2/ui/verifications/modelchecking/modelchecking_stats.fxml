@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox spacing="8.0" AnchorPane.bottomAnchor="10.0"
-		AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0"
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<VBox spacing="0.0" AnchorPane.bottomAnchor="0.0"
+		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 		AnchorPane.topAnchor="0.0">
-		<AnchorPane fx:id="resultBackground" styleClass="mcheckNoCheck"
-			stylesheets="@/prob.css">
-			<Text fx:id="resultText" fill="#8a8a8a" strokeType="OUTSIDE"
-				strokeWidth="0.0" text="%verifications.modelchecking.modelcheckingStats.resultText.noJobDone"
-				AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0"
-				AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" styleClass="bold" />
-		</AnchorPane>
+		<TableView fx:id="tvChecks" minHeight="150">
+			<columnResizePolicy>
+				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+			</columnResizePolicy>
+			<columns>
+				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
+				<TableColumn fx:id="indexColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="Index" />
+				<TableColumn fx:id="messageColumn" minWidth="130.0" prefWidth="130.0" text="Message" />
+			</columns>
+			<placeholder>
+				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
+			</placeholder>
+		</TableView>
 		<AnchorPane>
 			<VBox fx:id="statsBox" spacing="13.0" visible="false"
 				AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
