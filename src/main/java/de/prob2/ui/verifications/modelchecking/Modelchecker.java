@@ -20,14 +20,12 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingStage.SearchStrategy;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,25 +48,21 @@ public class Modelchecker implements IModelCheckListener {
 	private final ModelcheckingStage modelcheckingStage;
 	private ModelCheckingItem currentItem;
 	
-	private ModelCheckingOptions currentOptions;
 	private ModelCheckStats currentStats;
 
 	private final StageManager stageManager;
 	
 	private final CurrentTrace currentTrace;
 	
-	private final CurrentProject currentProject;
-	
 	private final Injector injector;
 
 	private final Object lock = new Object();
 	
 	@Inject
-	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-						 final ModelcheckingStage modelcheckingStage, final Injector injector) {
+	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, 
+			final ModelcheckingStage modelcheckingStage, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.modelcheckingStage = modelcheckingStage;
 		this.injector = injector;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
@@ -99,37 +93,7 @@ public class Modelchecker implements IModelCheckListener {
 		currentJobThread.start();
 	}
 	
-	public void checkItem(ModelCheckingOptions options, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
-		Thread currentJobThread = new Thread(() -> {
-			synchronized(lock) {
-				updateCurrentValues(options, currentTrace.getStateSpace(), converter, strategy);
-				startModelchecking(false);
-				currentJobThreads.remove(Thread.currentThread());
-			}
-		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		//Adding a new thread for model checking must be done before the thread is started, but it has to be
-		//synchronized with other threads accessing the list containing all threads
-		synchronized(lock) {
-			currentJobThreads.add(currentJobThread);
-		}
-		currentJobThread.start();
-	}
-	
-	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
-		updateCurrentValues(options, stateSpace);
-		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, converter.toString(strategy));
-		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
-			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
-		} else {
-			int index = currentProject.getCurrentMachine().getModelcheckingItems().indexOf(modelcheckingItem);
-			modelcheckingItem = currentProject.getCurrentMachine().getModelcheckingItems().get(index);
-		}
-		currentItem = modelcheckingItem;
-		injector.getInstance(ModelcheckingView.class).selectItem(modelcheckingItem);
-	}
-	
 	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
-		currentOptions = options;
 		currentStats = new ModelCheckStats(stageManager, injector);
 		IModelCheckJob job = new ConsistencyChecker(stateSpace, options, null, this);
 		currentJobs.add(job);
