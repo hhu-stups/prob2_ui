@@ -1,7 +1,5 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.Objects;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.statespace.Trace;
@@ -22,10 +20,7 @@ public class ModelCheckingJobItem {
 	
 	private String message;
 	
-	public ModelCheckingJobItem(ModelCheckStats stats, int index, String message) {
-		Objects.requireNonNull(stats);
-		
-		this.stats = stats;
+	public ModelCheckingJobItem(int index, String message) {
 		this.index = index;
 		this.message = message;
 		
@@ -33,6 +28,10 @@ public class ModelCheckingJobItem {
 		this.status.setFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
 		this.trace = null;
+	}
+	
+	public void setStats(ModelCheckStats stats) {
+		this.stats = stats;
 	}
 	
 	public ModelCheckStats getStats() {

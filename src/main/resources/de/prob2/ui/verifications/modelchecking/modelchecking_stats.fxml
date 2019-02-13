@@ -12,19 +12,6 @@
 	<VBox spacing="0.0" AnchorPane.bottomAnchor="0.0"
 		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 		AnchorPane.topAnchor="0.0">
-		<TableView fx:id="tvChecks" minHeight="150">
-			<columnResizePolicy>
-				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-			</columnResizePolicy>
-			<columns>
-				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-				<TableColumn fx:id="indexColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="Index" />
-				<TableColumn fx:id="messageColumn" minWidth="130.0" prefWidth="130.0" text="Message" />
-			</columns>
-			<placeholder>
-				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
-			</placeholder>
-		</TableView>
 		<AnchorPane>
 			<VBox fx:id="statsBox" spacing="13.0" visible="false"
 				AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
