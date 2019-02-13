@@ -15,3 +15,4 @@ de.prob2.ui.beditor.BEditorView,Main View/Editor.html
 de.prob2.ui.dynamic.table.ExpressionTableView,Main View/Formula Table Visualisation.html
 de.prob2.ui.dynamic.dotty.DotView,Graph Visualisation.html
 de.prob2.ui.chart.HistoryChartStage,History Chart.html
+de.prob2.ui.visualisation.magiclayout.MagicLayoutView,Magic Layout.html
