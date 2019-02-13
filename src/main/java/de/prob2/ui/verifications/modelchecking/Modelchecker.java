@@ -16,7 +16,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
@@ -140,10 +139,10 @@ public class Modelchecker implements IModelCheckListener {
 		List<ModelCheckingJobItem> jobItems = currentItem.getItems();
 		
 		boolean failed = jobItems.stream()
-				.map(item -> item.getChecked())
+				.map(ModelCheckingJobItem::getChecked)
 				.anyMatch(checked -> checked == Checked.FAIL);
-		boolean success = !failed & jobItems.stream()
-				.map(item -> item.getChecked())
+		boolean success = !failed && jobItems.stream()
+				.map(ModelCheckingJobItem::getChecked)
 				.anyMatch(checked -> checked == Checked.SUCCESS);
 		
 		if (success) {
