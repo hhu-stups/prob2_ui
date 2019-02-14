@@ -31,7 +31,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -195,14 +194,6 @@ public final class ModelcheckingView extends ScrollPane {
 			}
 		});
 	}
-
-	private void tvItemsClicked(MouseEvent e) {
-		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-		if (item != null && e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-			item.setOptions(item.getOptions().recheckExisting(true));
-			checker.checkItem(item, false);
-		}
-	}
 	
 	public void bindMachine(Machine machine) {
 		machine.getModelcheckingItems().forEach(item -> item.getItems().clear());
@@ -218,8 +209,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private void setContextMenus() {
 		tvItems.setRowFactory(table -> {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
-			row.setOnMouseClicked(this::tvItemsClicked);
-			
+		
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
@@ -245,10 +235,28 @@ public final class ModelcheckingView extends ScrollPane {
 				item.setOptions(item.getOptions().recheckExisting(false));
 				checker.checkItem(item, false);
 			});
-			searchForNewErrorsItem.disableProperty().bind(Bindings.createBooleanBinding(
+			BooleanBinding disableSearchForNewErrorsProperty = Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || row.getItem().getItems().isEmpty() || 
-						row.getItem().getItems().get(0).getTrace() == null || !row.getItem().getItems().stream().filter(item -> item.getChecked() == Checked.SUCCESS).collect(Collectors.toList()).isEmpty(), 
-						row.emptyProperty(), row.itemProperty()));
+					!row.getItem().getItems().stream().filter(item -> item.getChecked() == Checked.SUCCESS).collect(Collectors.toList()).isEmpty(), 
+					row.emptyProperty(), row.itemProperty());
+			searchForNewErrorsItem.disableProperty().bind(disableSearchForNewErrorsProperty);
+			
+			row.setOnMouseClicked(e -> {
+				ModelCheckingItem item = row.getItem();
+				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
+					if(item.getItems().size() == 0) {
+						item.setOptions(item.getOptions().recheckExisting(true));
+					} else if (item.getItems().size() > 0 && item.getItems()
+							.stream()
+							.filter(job -> job.getChecked() == Checked.SUCCESS)
+							.collect(Collectors.toList()).isEmpty()) {
+						item.setOptions(item.getOptions().recheckExisting(false));
+					} else {
+						return;
+					}
+					checker.checkItem(item, false);
+				}
+			});
 			
 			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeItem());

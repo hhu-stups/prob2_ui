@@ -78,8 +78,7 @@ public class Modelchecker implements IModelCheckListener {
 		
 		Thread currentJobThread = new Thread(() -> {
 			synchronized(lock) {
-				currentItem = item;
-				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace());
+				updateCurrentValues(item, currentTrace.getStateSpace());
 				startModelchecking(checkAll);
 				currentJobThreads.remove(Thread.currentThread());
 			}
@@ -92,9 +91,10 @@ public class Modelchecker implements IModelCheckListener {
 		currentJobThread.start();
 	}
 	
-	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
+	private void updateCurrentValues(ModelCheckingItem item, StateSpace stateSpace) {
+		currentItem = item;
 		currentStats = new ModelCheckStats(stageManager, injector);
-		IModelCheckJob job = new ConsistencyChecker(stateSpace, options, null, this);
+		IModelCheckJob job = new ConsistencyChecker(stateSpace, item.getOptions(), null, this);
 		currentJobs.add(job);
 	}
 	
@@ -135,26 +135,6 @@ public class Modelchecker implements IModelCheckListener {
 			lastResult.set(result);
 			injector.getInstance(ModelcheckingView.class).refresh();
 		});
-		
-		List<ModelCheckingJobItem> jobItems = currentItem.getItems();
-		
-		boolean failed = jobItems.stream()
-				.map(ModelCheckingJobItem::getChecked)
-				.anyMatch(checked -> checked == Checked.FAIL);
-		boolean success = !failed && jobItems.stream()
-				.map(ModelCheckingJobItem::getChecked)
-				.anyMatch(checked -> checked == Checked.SUCCESS);
-		
-		if (success) {
-			currentItem.setCheckedSuccessful();
-			currentItem.setChecked(Checked.SUCCESS);
-		} else if (failed) {
-			currentItem.setCheckedFailed();
-			currentItem.setChecked(Checked.FAIL);
-		} else {
-			currentItem.setTimeout();
-			currentItem.setChecked(Checked.TIMEOUT);
-		}
 	}
 	
 	public ObjectProperty<IModelCheckingResult> resultProperty() {
@@ -218,13 +198,10 @@ public class Modelchecker implements IModelCheckListener {
 		ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, result.getMessage());
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
 			jobItem.setCheckedSuccessful();
-			jobItem.setChecked(Checked.SUCCESS);
 		} else if (result instanceof ITraceDescription) {
 			jobItem.setCheckedFailed();
-			jobItem.setChecked(Checked.FAIL);
 		} else {
 			jobItem.setTimeout();
-			jobItem.setChecked(Checked.TIMEOUT);
 		}
 		jobItem.setStats(currentStats);
 		jobItems.add(jobItem);
@@ -233,5 +210,20 @@ public class Modelchecker implements IModelCheckListener {
 			jobItem.setTrace(trace);
 		}
 		modelCheckingView.selectJobItem(jobItem);
+		
+		boolean failed = jobItems.stream()
+				.map(ModelCheckingJobItem::getChecked)
+				.anyMatch(checked -> checked == Checked.FAIL);
+		boolean success = !failed && jobItems.stream()
+				.map(ModelCheckingJobItem::getChecked)
+				.anyMatch(checked -> checked == Checked.SUCCESS);
+		
+		if (success) {
+			currentItem.setCheckedSuccessful();
+		} else if (failed) {
+			currentItem.setCheckedFailed();
+		} else {
+			currentItem.setTimeout();
+		}
 	}
 }

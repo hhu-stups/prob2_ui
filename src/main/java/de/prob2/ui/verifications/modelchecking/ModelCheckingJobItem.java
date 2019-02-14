@@ -54,22 +54,21 @@ public class ModelCheckingJobItem {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
 		icon.setFill(Color.GREEN);
 		this.status = icon;
+		this.checked = Checked.SUCCESS;
 	}
 
 	public void setCheckedFailed() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
 		this.status = icon;
+		this.checked = Checked.FAIL;
 	}
 	
 	public void setTimeout() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
 		icon.setFill(Color.YELLOW);
 		this.status = icon;
-	}
-	
-	public void setChecked(Checked checked) {
-		this.checked = checked;
+		this.checked = Checked.TIMEOUT;
 	}
 	
 	public Checked getChecked() {
