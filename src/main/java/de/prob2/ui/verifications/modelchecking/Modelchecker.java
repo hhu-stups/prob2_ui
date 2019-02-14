@@ -9,7 +9,6 @@ import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLOk;
 import de.prob.check.ModelCheckOk;
-import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;

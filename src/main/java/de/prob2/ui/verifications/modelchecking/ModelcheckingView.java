@@ -31,6 +31,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -206,10 +207,28 @@ public final class ModelcheckingView extends ScrollPane {
 		tvItems.refresh();
 	}
 	
+	private void tvItemsClicked(MouseEvent e) {
+		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+		if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
+			if(item.getItems().isEmpty()) {
+				item.setOptions(item.getOptions().recheckExisting(true));
+			} else if (item.getItems()
+					.stream()
+					.filter(job -> job.getChecked() == Checked.SUCCESS)
+					.collect(Collectors.toList()).isEmpty()) {
+				item.setOptions(item.getOptions().recheckExisting(false));
+			} else {
+				return;
+			}
+			checker.checkItem(item, false);
+		}
+	}
+	
 	private void setContextMenus() {
 		tvItems.setRowFactory(table -> {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
-		
+			row.setOnMouseClicked(this::tvItemsClicked);
+			
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
@@ -240,23 +259,6 @@ public final class ModelcheckingView extends ScrollPane {
 					!row.getItem().getItems().stream().filter(item -> item.getChecked() == Checked.SUCCESS).collect(Collectors.toList()).isEmpty(), 
 					row.emptyProperty(), row.itemProperty());
 			searchForNewErrorsItem.disableProperty().bind(disableSearchForNewErrorsProperty);
-			
-			row.setOnMouseClicked(e -> {
-				ModelCheckingItem item = row.getItem();
-				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-					if(item.getItems().size() == 0) {
-						item.setOptions(item.getOptions().recheckExisting(true));
-					} else if (item.getItems().size() > 0 && item.getItems()
-							.stream()
-							.filter(job -> job.getChecked() == Checked.SUCCESS)
-							.collect(Collectors.toList()).isEmpty()) {
-						item.setOptions(item.getOptions().recheckExisting(false));
-					} else {
-						return;
-					}
-					checker.checkItem(item, false);
-				}
-			});
 			
 			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeItem());
