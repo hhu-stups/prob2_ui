@@ -133,6 +133,7 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			try {
+				this.currentTrace.set(null);
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_FILE);
 				final Path path = getPathToMachine(machine);
 
