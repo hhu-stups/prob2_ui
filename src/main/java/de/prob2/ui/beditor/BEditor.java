@@ -1,6 +1,20 @@
 package de.prob2.ui.beditor;
 
+import java.io.IOException;
+import java.io.PushbackReader;
+import java.io.StringReader;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.google.inject.Inject;
+
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
@@ -140,11 +154,13 @@ import de.be4.classicalb.core.parser.node.Token;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.concurrent.Task;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
@@ -154,19 +170,6 @@ import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.PushbackReader;
-import java.io.StringReader;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @FXMLInjected
 public class BEditor extends CodeArea {
@@ -229,32 +232,40 @@ public class BEditor extends CodeArea {
 		this.currentProject = currentProject;
 		this.bundle = bundle;
 		initialize();
-		initializeContextMenu(bundle);
+		initializeContextMenu();
 	}
 
-	private void initializeContextMenu(ResourceBundle bundle){
-		ContextMenu contextMenu = new ContextMenu();
-		MenuItem menuItem = new MenuItem(bundle.getString("common.contextMenu.undo"));
-		menuItem.setOnAction(e -> this.getUndoManager().undo());
-		contextMenu.getItems().add(menuItem);
-		menuItem = new MenuItem(bundle.getString("common.contextMenu.redo"));
-		menuItem.setOnAction(e -> this.getUndoManager().redo());
-		contextMenu.getItems().add(menuItem);
-		menuItem = new MenuItem(bundle.getString("common.contextMenu.cut"));
-		menuItem.setOnAction(e -> this.cut());
-		contextMenu.getItems().add(menuItem);
-		menuItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
-		menuItem.setOnAction(e -> this.copy());
-		contextMenu.getItems().add(menuItem);
-		menuItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
-		menuItem.setOnAction(e -> this.paste());
-		contextMenu.getItems().add(menuItem);
-		menuItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
-		menuItem.setOnAction(e -> this.deleteText(this.getSelection()));
-		contextMenu.getItems().add(menuItem);
-		menuItem = new MenuItem(bundle.getString("common.contextMenu.selectAll"));
-		menuItem.setOnAction(e -> this.selectAll());
-		contextMenu.getItems().add(menuItem);
+	private void initializeContextMenu() {
+		final ContextMenu contextMenu = new ContextMenu();
+		
+		final MenuItem undoItem = new MenuItem(bundle.getString("common.contextMenu.undo"));
+		undoItem.setOnAction(e -> this.getUndoManager().undo());
+		contextMenu.getItems().add(undoItem);
+		
+		final MenuItem redoItem = new MenuItem(bundle.getString("common.contextMenu.redo"));
+		redoItem.setOnAction(e -> this.getUndoManager().redo());
+		contextMenu.getItems().add(redoItem);
+		
+		final MenuItem cutItem = new MenuItem(bundle.getString("common.contextMenu.cut"));
+		cutItem.setOnAction(e -> this.cut());
+		contextMenu.getItems().add(cutItem);
+		
+		final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
+		copyItem.setOnAction(e -> this.copy());
+		contextMenu.getItems().add(copyItem);
+		
+		final MenuItem pasteItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
+		pasteItem.setOnAction(e -> this.paste());
+		contextMenu.getItems().add(pasteItem);
+		
+		final MenuItem deleteItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
+		deleteItem.setOnAction(e -> this.deleteText(this.getSelection()));
+		contextMenu.getItems().add(deleteItem);
+		
+		final MenuItem selectAllItem = new MenuItem(bundle.getString("common.contextMenu.selectAll"));
+		selectAllItem.setOnAction(e -> this.selectAll());
+		contextMenu.getItems().add(selectAllItem);
+		
 		this.setContextMenu(contextMenu);
 	}
 	
