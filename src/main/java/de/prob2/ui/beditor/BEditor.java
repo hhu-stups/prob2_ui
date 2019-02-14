@@ -158,16 +158,11 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.concurrent.Task;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
 
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.fxmisc.wellbehaved.event.InputMap;
-import org.fxmisc.wellbehaved.event.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -292,27 +287,6 @@ public class BEditor extends CodeArea {
 		fontSize.fontSizeProperty().addListener((observable, from, to) ->
 			this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
 		);
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.Z, KeyCombination.CONTROL_DOWN), e-> {
-			int oldLength = this.getText().length();
-			int caret = this.getCaretPosition();
-			this.undo();
-			int currentLength = this.getText().length();
-			int diff = currentLength - oldLength;
-			if(caret + diff >= 0 && caret + diff <= this.getText().length()) {
-				this.moveTo(caret + diff);
-			}
-		}));
-		
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.Z, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN), e-> {
-			int oldLength = this.getText().length();
-			int caret = this.getCaretPosition();
-			this.redo();
-			int currentLength = this.getText().length();
-			int diff = currentLength - oldLength;
-			if(caret + diff >= 0 && caret + diff <= this.getText().length()) {
-				this.moveTo(caret + diff);
-			}
-		}));
 	}
 
 	public void startHighlighting() {
