@@ -1,13 +1,11 @@
 package de.prob2.ui.preferences;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Injector;
 
 import de.prob2.ui.dynamic.DynamicTableCell;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
+
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Cell;
@@ -18,6 +16,9 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends Cell<PrefItem>> {
 	
@@ -169,7 +170,7 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 	public void updateItem(final String item) {
 		if (row != null && row.getItem() != null) {
 			// Item is available, which means we can do fancy stuff!
-			changeToItem((PrefItem) row.getItem());
+			changeToItem(row.getItem());
 		} else {
 			// Row or item is null, so display the item text as is.
 			cell.setGraphic(null);

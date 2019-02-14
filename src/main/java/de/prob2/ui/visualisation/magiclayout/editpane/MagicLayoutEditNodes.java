@@ -125,13 +125,11 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 			nodes = new MagicNodegroup("nodes" + i);
 			i++;
 		}
-		super.addMagicComponent(nodes);
+		addMagicComponent(nodes);
 	}
 
 	public List<MagicNodegroup> getNodegroups() {
-		List<MagicNodegroup> nodesList = new ArrayList<>();
-		listView.getItems().forEach(comp -> nodesList.add((MagicNodegroup) comp));
-		return nodesList;
+		return new ArrayList<>(listView.getItems());
 	}
 
 	@Override

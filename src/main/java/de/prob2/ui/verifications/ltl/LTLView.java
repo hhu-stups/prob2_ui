@@ -1,8 +1,13 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -17,15 +22,16 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
+
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -41,12 +47,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -347,7 +350,7 @@ public class LTLView extends AnchorPane {
 		tvPattern.refresh();
 	}
 
-	private void loadLTLStage(LTLItemStage stage, AbstractCheckableItem item) {
+	private void loadLTLStage(LTLItemStage<?> stage, AbstractCheckableItem item) {
 		stage.getEngine().getLoadWorker().stateProperty().addListener((observable, from, to) -> {
 			if(to == Worker.State.SUCCEEDED && item != null) {
 				stage.setData(item.getDescription(), item.getCode());
@@ -395,7 +398,7 @@ public class LTLView extends AnchorPane {
 		if(ltlFile == null) {
 			return;
 		}
-		LTLData data = null;
+		LTLData data;
 		try {
 			data = ltlFileHandler.load(ltlFile);
 		} catch (IOException | InvalidFileFormatException e) {

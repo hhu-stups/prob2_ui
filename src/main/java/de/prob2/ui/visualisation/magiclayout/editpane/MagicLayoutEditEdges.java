@@ -96,13 +96,11 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 			edges = new MagicEdgegroup("edges" + i);
 			i++;
 		}
-		super.addMagicComponent(edges);
+		addMagicComponent(edges);
 	}
 
 	public List<MagicEdgegroup> getEdgegroups() {
-		List<MagicEdgegroup> edgesList = new ArrayList<>();
-		listView.getItems().forEach(comp -> edgesList.add((MagicEdgegroup) comp));
-		return edgesList;
+		return new ArrayList<>(listView.getItems());
 	}
 
 	@Override
