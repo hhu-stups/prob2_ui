@@ -8,7 +8,7 @@ Die Ansicht teilt sich auf in die [Graph Ansicht](#graph) auf der rechten Seite 
 
 ## <a name="graph"></a>Graph Ansicht
 
-Der angezeigte Ausschnitt kann durch Zoomen sowie Scrollen angepasst werden. Zum Zoomen werden in der Regel der Plus- und der Minusknopf  verwendet. Bei Verwendung eines Laptops kann auch durch eine Zoomgeste auf dem Touchpad hinein- und herausgezoomed werden.
+Der angezeigte Ausschnitt kann durch Zoomen sowie Scrollen angepasst werden. Zum Zoomen werden in der Regel der Plus- und der Minusknopf  verwendet. Bei Verwendung eines Touchfähigen Gerätes, beispielsweise eines Laptops mit Touchpad, kann auch durch eine Zoomgeste mit zwei Fingern hinein- und herausgezoomed werden.
 
 Durch Klicken des Aktualisieren-Knopf werden die gewählten Layout Einstellungen für den Graphen übernommen. Über den Layout-Knopf werden zusätzlich alle Knoten entsprechend des gewählten Layout Algorithmus neu platziert. Derzeit hat der Nutzer die Wahl zwischen einem hierarchischen Layout, bei dem die Knoten in verschiedenen Ebenen untereinander angeordnet werden, und einem zufälligen Layout, bei welchem die Position der Knoten zufällig bestimmt wird. Die Knoten lassen sich zudem per Drag-and-Drop verschieben, sodass auch ein individuelles Graph Layout möglich ist.
 
