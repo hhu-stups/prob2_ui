@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.List;
 import java.util.Objects;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -10,14 +11,15 @@ import de.prob.check.ModelCheckingOptions.Options;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
 
 public class ModelCheckingItem implements IExecutableItem {
 
 	private ModelCheckingOptions options;
-	
-	private transient ModelCheckStats stats;
 	
 	private transient FontAwesomeIconView status;
 	
@@ -36,15 +38,16 @@ public class ModelCheckingItem implements IExecutableItem {
 	private String strategy;
 	
 	private BooleanProperty shouldExecute;
+	
+	private transient ListProperty<ModelCheckingJobItem> items;
 
-	public ModelCheckingItem(ModelCheckingOptions options, ModelCheckStats stats, String strategy) {
+	public ModelCheckingItem(ModelCheckingOptions options, String strategy) {
 		Objects.requireNonNull(options);
-		Objects.requireNonNull(stats);
 		
 		this.options = options;
-		this.stats = stats;
 		this.strategy = strategy;
 		this.shouldExecute = new SimpleBooleanProperty(true);
+		this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 		
 		initialize();
 	}
@@ -56,14 +59,6 @@ public class ModelCheckingItem implements IExecutableItem {
 
 	public ModelCheckingOptions getOptions() {
 		return this.options;
-	}
-	
-	public void setStats(ModelCheckStats stats) {
-		this.stats = stats;
-	}
-
-	public ModelCheckStats getStats() {
-		return this.stats;
 	}
 	
 	public void setStrategy(String strategy) {
@@ -88,6 +83,9 @@ public class ModelCheckingItem implements IExecutableItem {
 	}
 	
 	public void initialize() {
+		if(this.items == null) {
+			this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
+		}
 		initializeStatus();
 		initializeOptionIcons(options);
 	}
@@ -96,7 +94,6 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
-		this.stats = null;
 	}
 	
 	private void initializeOptionIcons(ModelCheckingOptions options) {
@@ -138,23 +135,21 @@ public class ModelCheckingItem implements IExecutableItem {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
 		icon.setFill(Color.GREEN);
 		this.status = icon;
+		this.checked = Checked.SUCCESS;
 	}
 
 	public void setCheckedFailed() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
 		icon.setFill(Color.RED);
 		this.status = icon;
+		this.checked = Checked.FAIL;
 	}
 	
 	public void setTimeout() {
 		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
 		icon.setFill(Color.YELLOW);
 		this.status = icon;
-	}
-
-	
-	public void setChecked(Checked checked) {
-		this.checked = checked;
+		this.checked = Checked.TIMEOUT;
 	}
 	
 	@Override
@@ -180,6 +175,14 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	public FontAwesomeIconView getStopWhenAllOperationsCovered() {
 		return stopWhenAllOperationsCovered;
+	}
+	
+	public ListProperty<ModelCheckingJobItem> itemsProperty() {
+		return items;
+	}
+	
+	public List<ModelCheckingJobItem> getItems() {
+		return items.get();
 	}
 	
 	@Override

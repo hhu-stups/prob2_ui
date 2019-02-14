@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -67,14 +68,17 @@ public class ModelcheckingStage extends Stage {
 	
 	private final CurrentTrace currentTrace;
 	
+	private final CurrentProject currentProject;
+	
 	private final Injector injector;
 
 	@Inject
 	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, 
-							final CurrentTrace currentTrace, final Injector injector) {
+							final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
 	}
@@ -100,7 +104,14 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private void startModelCheck() {
 		if (currentTrace.exists()) {
-			injector.getInstance(Modelchecker.class).checkItem(getOptions(), selectSearchStrategy.getConverter(), selectSearchStrategy.getValue());
+			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(getOptions(), selectSearchStrategy.getConverter().toString(selectSearchStrategy.getValue()));
+			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
+				injector.getInstance(Modelchecker.class).checkItem(modelcheckingItem, false);
+				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
+			} else {
+				stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked").showAndWait();
+				this.hide();
+			}
 		} else {
 			stageManager.makeAlert(Alert.AlertType.ERROR, "",
 					"verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content")

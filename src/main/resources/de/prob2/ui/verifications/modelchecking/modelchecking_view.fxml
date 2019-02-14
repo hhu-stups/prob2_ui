@@ -71,6 +71,19 @@
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
 			</placeholder>
 		</TableView>
+		<TableView fx:id="tvChecks" minHeight="150">
+			<columnResizePolicy>
+				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+			</columnResizePolicy>
+			<columns>
+				<TableColumn fx:id="jobStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
+				<TableColumn fx:id="indexColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.index" />
+				<TableColumn fx:id="messageColumn" minWidth="130.0" prefWidth="130.0" text="%common.columns.message" />
+			</columns>
+			<placeholder>
+				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
+			</placeholder>
+		</TableView>
 		<AnchorPane fx:id="statsPane">
 			<VBox.margin>
 				<Insets top="5.0" />

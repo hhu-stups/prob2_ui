@@ -1,11 +1,10 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import com.google.inject.Injector;
+
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckingResult;
-import de.prob.check.LTLOk;
-import de.prob.check.ModelCheckOk;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
@@ -14,7 +13,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.application.Platform;
@@ -22,52 +20,27 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
-
 import java.util.Objects;
 
 
 public final class ModelCheckStats extends AnchorPane {
 	
-	@FXML private AnchorPane resultBackground;
-	@FXML private Text resultText;
 	@FXML private VBox statsBox;
 	@FXML private Label elapsedTime;
 	@FXML private Label processedStates;
 	@FXML private Label totalStates;
 	@FXML private Label totalTransitions;
-
-	private Trace trace;
-
-	
-	private ModelCheckingItem item;
 	
 	private final Injector injector;
 	
-	private final ModelcheckingView modelcheckingView;
 	
-	
-	public ModelCheckStats(final ModelcheckingView modelcheckingView, final StageManager stageManager, final Injector injector) {
-		this.modelcheckingView = modelcheckingView;
+	public ModelCheckStats(final StageManager stageManager, final Injector injector) {
 		this.injector = injector;
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
-	@FXML
-	private void initialize() {
-		modelcheckingView.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-			if (newValue == null) {
-				resultText.setWrappingWidth(0);
-				return;
-			}
-			resultText.setWrappingWidth(newValue.doubleValue() - 60);
-		});
-	}
-
 	void startJob() {
 		statsBox.setVisible(true);
-		resultBackground.setVisible(false);
 	}
 
 	public void updateStats(final IModelCheckJob modelChecker, final long timeElapsed, final StateSpaceStats stats) {
@@ -101,32 +74,17 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 	}
 
-	public void isFinished(final IModelCheckJob modelChecker, final long timeElapsed, final IModelCheckingResult result) {
-		Objects.requireNonNull(modelChecker, "modelChecker");
+	public void isFinished(final IModelCheckJob job, final long timeElapsed, final IModelCheckingResult result) {
+		Objects.requireNonNull(job, "modelChecker");
 		Objects.requireNonNull(result, "result");
-		Platform.runLater(() -> elapsedTime.setText(String.format("%.3f",timeElapsed/1000.0) + " s"));
-
-		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
-			item.setCheckedSuccessful();
-			item.setChecked(Checked.SUCCESS);
-		} else if (result instanceof ITraceDescription) {
-			item.setCheckedFailed();
-			item.setChecked(Checked.FAIL);
-		} else {
-			item.setTimeout();
-			item.setChecked(Checked.TIMEOUT);
-		}
-
-		item.setStats(this);
-
 		
 		Platform.runLater(() -> {
+			elapsedTime.setText(String.format("%.3f",timeElapsed/1000.0) + " s");
 			Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 		});
-		String message = result.getMessage();
-
-		final StateSpace stateSpace = modelChecker.getStateSpace();
+		
+		final StateSpace stateSpace = job.getStateSpace();
 		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
 		stateSpace.execute(cmd);
 		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
@@ -143,45 +101,10 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 		
 		if (result instanceof ITraceDescription) {
-			trace = ((ITraceDescription) result).getTrace(stateSpace);
+			Trace trace = ((ITraceDescription) result).getTrace(stateSpace);
 			injector.getInstance(StatsView.class).update(trace);
 		}
-		showResult(message);
 	}
 	
 
-
-	private void showResult(String message) {
-		resultBackground.setVisible(true);
-		resultText.setText(message);
-		resultText.setWrappingWidth(modelcheckingView.widthProperty().doubleValue() - 60);
-		switch (item.getChecked()) {
-			case SUCCESS:
-				resultBackground.getStyleClass().setAll("mcheckSuccess");
-				resultText.setFill(Color.web("#5e945e"));
-				break;
-
-			case FAIL:
-				resultBackground.getStyleClass().setAll("mcheckDanger");
-				resultText.setFill(Color.web("#b95050ff"));
-				break;
-
-			case TIMEOUT:
-				resultBackground.getStyleClass().setAll("mcheckWarning");
-				resultText.setFill(Color.web("#96904e"));
-				break;
-
-			default:
-				throw new IllegalArgumentException("Unknown result: " + item.getChecked());
-		}
-	}
-	
-	public Trace getTrace() {
-		return trace;
-	}
-	
-	public void updateItem(ModelCheckingItem item) {
-		this.item = item;
-	}
-	
 }

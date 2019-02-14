@@ -7,6 +7,8 @@ import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
+import de.prob.check.LTLOk;
+import de.prob.check.ModelCheckOk;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
@@ -14,17 +16,15 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingStage.SearchStrategy;
+import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,32 +45,30 @@ public class Modelchecker implements IModelCheckListener {
 	private final List<IModelCheckJob> currentJobs;
 	private final ObjectProperty<IModelCheckingResult> lastResult;
 	private final ModelcheckingStage modelcheckingStage;
+	private ModelCheckingItem currentItem;
 	
-	private ModelCheckingOptions currentOptions;
 	private ModelCheckStats currentStats;
 
 	private final StageManager stageManager;
 	
 	private final CurrentTrace currentTrace;
 	
-	private final CurrentProject currentProject;
-	
 	private final Injector injector;
 
 	private final Object lock = new Object();
 	
 	@Inject
-	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-						 final ModelcheckingStage modelcheckingStage, final Injector injector) {
+	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, 
+			final ModelcheckingStage modelcheckingStage, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.modelcheckingStage = modelcheckingStage;
 		this.injector = injector;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		this.currentJobs = new ArrayList<>();
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		this.jobs = new HashMap<>();
+		this.currentItem = null;
 	}
 
 	public void checkItem(ModelCheckingItem item, boolean checkAll) {
@@ -80,7 +78,7 @@ public class Modelchecker implements IModelCheckListener {
 		
 		Thread currentJobThread = new Thread(() -> {
 			synchronized(lock) {
-				updateCurrentValues(item.getOptions(), currentTrace.getStateSpace(), item);
+				updateCurrentValues(item, currentTrace.getStateSpace());
 				startModelchecking(checkAll);
 				currentJobThreads.remove(Thread.currentThread());
 			}
@@ -93,45 +91,11 @@ public class Modelchecker implements IModelCheckListener {
 		currentJobThread.start();
 	}
 	
-	public void checkItem(ModelCheckingOptions options, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
-		Thread currentJobThread = new Thread(() -> {
-			synchronized(lock) {
-				updateCurrentValues(options, currentTrace.getStateSpace(), converter, strategy);
-				startModelchecking(false);
-				currentJobThreads.remove(Thread.currentThread());
-			}
-		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		//Adding a new thread for model checking must be done before the thread is started, but it has to be
-		//synchronized with other threads accessing the list containing all threads
-		synchronized(lock) {
-			currentJobThreads.add(currentJobThread);
-		}
-		currentJobThread.start();
-	}
-	
-	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, StringConverter<SearchStrategy> converter, SearchStrategy strategy) {
-		updateCurrentValues(options, stateSpace);
-		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(currentOptions, currentStats, converter.toString(strategy));
-		if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
-			currentProject.getCurrentMachine().addModelcheckingItem(modelcheckingItem);
-		} else {
-			int index = currentProject.getCurrentMachine().getModelcheckingItems().indexOf(modelcheckingItem);
-			modelcheckingItem = currentProject.getCurrentMachine().getModelcheckingItems().get(index);
-		}
-		currentStats.updateItem(modelcheckingItem);
-		injector.getInstance(ModelcheckingView.class).selectItem(modelcheckingItem);
-	}
-	
-	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace) {
-		currentOptions = options;
-		currentStats = new ModelCheckStats(injector.getInstance(ModelcheckingView.class), stageManager, injector);
-		IModelCheckJob job = new ConsistencyChecker(stateSpace, options, null, this);
+	private void updateCurrentValues(ModelCheckingItem item, StateSpace stateSpace) {
+		currentItem = item;
+		currentStats = new ModelCheckStats(stageManager, injector);
+		IModelCheckJob job = new ConsistencyChecker(stateSpace, item.getOptions(), null, this);
 		currentJobs.add(job);
-	}
-	
-	private void updateCurrentValues(ModelCheckingOptions options, StateSpace stateSpace, ModelCheckingItem item) {
-		updateCurrentValues(options, stateSpace);
-		currentStats.updateItem(item);
 	}
 	
 	@Override
@@ -160,7 +124,10 @@ public class Modelchecker implements IModelCheckListener {
 			// isFinished was already called for this job
 			return;
 		}
+		
 		currentStats.isFinished(job, timeElapsed, result);
+		showResult(result, job.getStateSpace());
+		
 		Platform.runLater(() -> {
 			modelcheckingStage.hide();
 			injector.getInstance(OperationsView.class).update(currentTrace.get());
@@ -223,5 +190,40 @@ public class Modelchecker implements IModelCheckListener {
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
+	}
+	
+	private void showResult(IModelCheckingResult result, StateSpace stateSpace) {
+		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
+		List<ModelCheckingJobItem> jobItems = currentItem.getItems();
+		ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, result.getMessage());
+		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
+			jobItem.setCheckedSuccessful();
+		} else if (result instanceof ITraceDescription) {
+			jobItem.setCheckedFailed();
+		} else {
+			jobItem.setTimeout();
+		}
+		jobItem.setStats(currentStats);
+		jobItems.add(jobItem);
+		if (result instanceof ITraceDescription) {
+			Trace trace = ((ITraceDescription) result).getTrace(stateSpace);
+			jobItem.setTrace(trace);
+		}
+		modelCheckingView.selectJobItem(jobItem);
+		
+		boolean failed = jobItems.stream()
+				.map(ModelCheckingJobItem::getChecked)
+				.anyMatch(checked -> checked == Checked.FAIL);
+		boolean success = !failed && jobItems.stream()
+				.map(ModelCheckingJobItem::getChecked)
+				.anyMatch(checked -> checked == Checked.SUCCESS);
+		
+		if (success) {
+			currentItem.setCheckedSuccessful();
+		} else if (failed) {
+			currentItem.setCheckedFailed();
+		} else {
+			currentItem.setTimeout();
+		}
 	}
 }
