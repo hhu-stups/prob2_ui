@@ -124,13 +124,6 @@ public class BEditorView extends BorderPane {
 			machineChoice.getItems().clear();
 			if (to == null) {
 				this.setHint();
-			} else {
-				final Path machinePath = currentProject.getLocation().resolve(to.getPath());
-				MachineFileInformation fileInformation = machineChoice.getSelectionModel().getSelectedItem();
-				if(fileInformation != null && currentProject.getCurrentMachine().getName().equals(fileInformation.getName())) {
-					registerFile(machinePath);
-					loadText(machinePath);
-				}
 			}
 		});
 		
