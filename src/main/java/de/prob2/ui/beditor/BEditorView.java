@@ -1,6 +1,5 @@
 package de.prob2.ui.beditor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
@@ -24,7 +23,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetAllUsedFilenamesCommand;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob.animator.domainobjects.MachineFileInformation;
-import de.prob.model.eventb.EventBModel;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -32,6 +31,8 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -121,9 +122,14 @@ public class BEditorView extends BorderPane {
 		setHint();
 		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			machineChoice.getItems().clear();
 			if (to == null) {
+				machineChoice.getItems().clear();
 				this.setHint();
+			} else {
+				// The correct list of included machines is available once the machine is fully loaded.
+				// Until that happens, display only the main machine.
+				machineChoice.getItems().setAll(currentMachineFileInformation());
+				machineChoice.getSelectionModel().selectFirst();
 			}
 		});
 		
@@ -147,26 +153,33 @@ public class BEditorView extends BorderPane {
 	}
 	
 	private void loadText(Path machinePath) {
-		if(currentTrace.getModel() instanceof EventBModel) {
-			GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
-			currentTrace.getStateSpace().execute(cmd);
-			this.setEditorText(cmd.getPrettyPrint(), machinePath);
-			beditor.setEditable(false);
+		if(currentProject.getCurrentMachine().getType() == Machine.Type.EVENTB) {
+			final StateSpace stateSpace = currentTrace.getStateSpace();
+			if (stateSpace == null) {
+				setHint();
+			} else {
+				GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+				stateSpace.execute(cmd);
+				this.setEditorText(cmd.getPrettyPrint(), machinePath);
+				beditor.setEditable(false);
+			}
 		} else {
 			setText(machinePath);
 		}
+	}
+	
+	private MachineFileInformation currentMachineFileInformation() {
+		final Path machinePath = currentProject.getCurrentMachine().getPath();
+		final String[] split = machinePath.getFileName().toString().split("\\.", 2);
+		assert split.length == 2;
+		return new MachineFileInformation(split[0], split[1], machinePath.toString());
 	}
 	
 	private void updateIncludedMachines() {
 		GetAllUsedFilenamesCommand cmd = new GetAllUsedFilenamesCommand();
 		currentTrace.getStateSpace().execute(cmd);
 		if(cmd.getFiles().isEmpty()) {
-			String machinePath = currentProject.getCurrentMachine().getPath().toString();
-			String[] machinePathSeparated = machinePath.split(File.separator);
-			String[] fileSeparated = machinePathSeparated[machinePathSeparated.length - 1].split("\\.");
-			String file = fileSeparated[0];
-			String extension = fileSeparated[1];
-			machineChoice.getItems().add(new MachineFileInformation(file, extension, machinePath));
+			machineChoice.getItems().setAll(currentMachineFileInformation());
 		} else {
 			machineChoice.getItems().setAll(cmd.getFiles());
 		}
