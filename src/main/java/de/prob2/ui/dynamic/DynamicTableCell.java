@@ -23,7 +23,10 @@ public class DynamicTableCell extends TableCell<PrefItem, String> {
 	@Override
 	public void updateItem(final String item, final boolean empty) {
 		super.updateItem(item, empty);
-		provider.setRow(this.getTableRow());
+		// getTableRow() returns a raw type in JDK 8, this is fixed in later versions.
+		@SuppressWarnings({"unchecked", "RedundantSuppression"})
+		final TableRow<PrefItem> row = this.getTableRow();
+		provider.setRow(row);
 		provider.updateItem(item);
 	}
 }

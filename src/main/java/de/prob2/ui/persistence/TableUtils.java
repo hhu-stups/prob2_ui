@@ -15,8 +15,9 @@ public final class TableUtils {
 	}
 
 	public static List<Double> getAbsoluteColumnWidths(List<? extends TableColumnBase<?, ?>> columns) {
+		// noinspection Convert2MethodRef // Using a method reference causes a raw type warning.
 		return columns.stream()
-			.map(TableColumnBase::getWidth)
+			.map(c -> c.getWidth())
 			.collect(Collectors.toList());
 	}
 	
@@ -27,7 +28,8 @@ public final class TableUtils {
 	}
 
 	public static List<Double> getRelativeColumnWidths(List<? extends TableColumnBase<?, ?>> columns) {
-		final double sum = columns.stream().mapToDouble(TableColumnBase::getWidth).sum();
+		// noinspection Convert2MethodRef // Using a method reference causes a raw type warning.
+		final double sum = columns.stream().mapToDouble(c -> c.getWidth()).sum();
 		return columns.stream()
 			.map(col -> col.getWidth() / sum)
 			.collect(Collectors.toList());
@@ -51,8 +53,9 @@ public final class TableUtils {
 	}
 
 	public static List<String> getColumnsOrder(List<? extends TableColumnBase<?, ?>> columns) {
+		// noinspection Convert2MethodRef // Using a method reference causes a raw type warning.
 		return columns.stream()
-			.map(TableColumnBase::getId)
+			.map(c -> c.getId())
 			.collect(Collectors.toList());
 	}
 }
