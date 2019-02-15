@@ -15,12 +15,12 @@
 					<Label fx:id="label" VBox.vgrow="NEVER"/>
 					<TableView fx:id="proBErrorTable" minHeight="160" prefHeight="160" VBox.vgrow="ALWAYS">
 						<columns>
-							<TableColumn fx:id="typeColumn" editable="false" minWidth="80" text="%internal.exceptionAlert.proBErrorTable.columns.type"/>
-							<TableColumn fx:id="messageColumn" editable="false" minWidth="80" prefWidth="320" text="%internal.exceptionAlert.proBErrorTable.columns.message"/>
-							<TableColumn fx:id="locationsColumn" editable="false" minWidth="80" prefWidth="160" text="%internal.exceptionAlert.proBErrorTable.columns.locations"/>
+							<TableColumn fx:id="typeColumn" editable="false" minWidth="80" text="%error.exceptionAlert.proBErrorTable.columns.type"/>
+							<TableColumn fx:id="messageColumn" editable="false" minWidth="80" prefWidth="320" text="%error.exceptionAlert.proBErrorTable.columns.message"/>
+							<TableColumn fx:id="locationsColumn" editable="false" minWidth="80" prefWidth="160" text="%error.exceptionAlert.proBErrorTable.columns.locations"/>
 						</columns>
 						<placeholder>
-							<Label text="%internal.exceptionAlert.proBErrorTable.placeholder"/>
+							<Label text="%error.exceptionAlert.proBErrorTable.placeholder"/>
 						</placeholder>
 					</TableView>
 				</VBox>

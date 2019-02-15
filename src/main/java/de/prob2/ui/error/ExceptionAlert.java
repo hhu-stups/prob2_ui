@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.error;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
@@ -7,107 +7,23 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-import de.prob2.ui.beditor.BEditorView;
-
+import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.OverrunStyle;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 public final class ExceptionAlert extends Alert {
-	private class ErrorTypeCell extends TableCell<ErrorItem, ErrorItem> {
-		@Override
-		protected void updateItem(final ErrorItem item, final boolean empty) {
-			super.updateItem(item, empty);
-			
-			if (empty || item == null) {
-				this.setText(null);
-			} else {
-				final String typeName;
-				switch (item.getType()) {
-					case WARNING:
-						typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.warning");
-						break;
-					
-					case ERROR:
-						typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.error");
-						break;
-					
-					case INTERNAL_ERROR:
-						typeName = bundle.getString("internal.exceptionAlert.proBErrorTable.type.internalError");
-						break;
-					
-					default:
-						typeName = item.getType().name();
-				}
-				this.setText(typeName);
-			}
-		}
-	}
-	
-	private static class ErrorMessageCell extends TableCell<ErrorItem, ErrorItem> {
-		@Override
-		protected void updateItem(final ErrorItem item, final boolean empty) {
-			super.updateItem(item, empty);
-			
-			if (empty || item == null) {
-				this.setText(null);
-			} else {
-				this.setText(item.getMessage());
-			}
-		}
-	}
-	
-	private class ErrorLocationsCell extends TableCell<ErrorItem, ErrorItem> {
-		@Override
-		protected void updateItem(final ErrorItem item, final boolean empty) {
-			super.updateItem(item, empty);
-			
-			if (empty || item == null) {
-				this.setGraphic(null);
-			} else {
-				final VBox vbox = new VBox();
-				for (final ErrorItem.Location location : item.getLocations()) {
-					final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
-					openLocationButton.setOnAction(event -> {
-						final BEditorView bEditorView = injector.getInstance(BEditorView.class);
-						bEditorView.selectRange(
-							location.getStartLine()-1, location.getStartColumn(),
-							location.getEndLine()-1, location.getEndColumn()
-						);
-					});
-					final Label label = new Label(location.toString());
-					label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
-					final HBox hbox = new HBox(openLocationButton, label);
-					HBox.setHgrow(openLocationButton, Priority.NEVER);
-					HBox.setHgrow(label, Priority.ALWAYS);
-					hbox.setAlignment(Pos.CENTER_LEFT);
-					vbox.getChildren().add(hbox);
-				}
-				this.setGraphic(vbox);
-			}
-		}
-	}
-	
 	@FXML private VBox contentVBox;
 	@FXML private Label label;
 	@FXML private TableView<ErrorItem> proBErrorTable;
@@ -152,7 +68,7 @@ public final class ExceptionAlert extends Alert {
 		}
 		final String message;
 		if (cliError != null) {
-			message = bundle.getString("internal.exceptionAlert.cliErrorExplanation");
+			message = bundle.getString("error.exceptionAlert.cliErrorExplanation");
 		} else if (proBError != null) {
 			message = proBError.getOriginalMessage();
 		} else {
@@ -169,9 +85,9 @@ public final class ExceptionAlert extends Alert {
 		this.messageColumn.setCellValueFactory(cellValueFactory);
 		this.locationsColumn.setCellValueFactory(cellValueFactory);
 		
-		this.typeColumn.setCellFactory(col -> new ErrorTypeCell());
-		this.messageColumn.setCellFactory(col -> new ErrorMessageCell());
-		this.locationsColumn.setCellFactory(col -> new ErrorLocationsCell());
+		this.typeColumn.setCellFactory(col -> injector.getInstance(TypeCell.class));
+		this.messageColumn.setCellFactory(col -> injector.getInstance(MessageCell.class));
+		this.locationsColumn.setCellFactory(col -> injector.getInstance(LocationsCell.class));
 		
 		try (final CharArrayWriter caw = new CharArrayWriter(); final PrintWriter pw = new PrintWriter(caw)) {
 			exc.printStackTrace(pw);

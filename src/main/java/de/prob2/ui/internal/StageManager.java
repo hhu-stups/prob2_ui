@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.machines.Machine;
