@@ -6,9 +6,9 @@ import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.ErrorItem;
 
-import javafx.scene.control.TableCell;
+import javafx.scene.control.TreeTableCell;
 
-final class TypeCell extends TableCell<ErrorItem, ErrorItem> {
+final class TypeCell extends TreeTableCell<Object, Object> {
 	private final ResourceBundle bundle;
 	
 	@Inject
@@ -17,14 +17,14 @@ final class TypeCell extends TableCell<ErrorItem, ErrorItem> {
 	}
 	
 	@Override
-	protected void updateItem(final ErrorItem item, final boolean empty) {
+	protected void updateItem(final Object item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		if (empty || item == null) {
+		if (empty || item == null || item instanceof String) {
 			this.setText(null);
-		} else {
+		} else if (item instanceof ErrorItem) {
 			final String typeName;
-			switch (item.getType()) {
+			switch (((ErrorItem)item).getType()) {
 				case WARNING:
 					typeName = bundle.getString("error.exceptionAlert.proBErrorTable.type.warning");
 					break;
@@ -38,9 +38,11 @@ final class TypeCell extends TableCell<ErrorItem, ErrorItem> {
 					break;
 				
 				default:
-					typeName = item.getType().name();
+					typeName = ((ErrorItem)item).getType().name();
 			}
 			this.setText(typeName);
+		} else {
+			throw new AssertionError("Invalid table element type: " + item.getClass());
 		}
 	}
 }

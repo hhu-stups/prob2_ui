@@ -2,8 +2,13 @@ package de.prob2.ui.error;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import com.google.inject.Injector;
 
@@ -17,19 +22,20 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 public final class ExceptionAlert extends Alert {
 	@FXML private VBox contentVBox;
 	@FXML private Label label;
-	@FXML private TableView<ErrorItem> proBErrorTable;
-	@FXML private TableColumn<ErrorItem, ErrorItem> typeColumn;
-	@FXML private TableColumn<ErrorItem, ErrorItem> messageColumn;
-	@FXML private TableColumn<ErrorItem, ErrorItem> locationsColumn;
+	@FXML private TreeTableView<Object> proBErrorTable;
+	@FXML private TreeTableColumn<Object, Object> typeColumn;
+	@FXML private TreeTableColumn<Object, Object> messageColumn;
+	@FXML private TreeTableColumn<Object, Object> locationsColumn;
 	@FXML private TextArea stackTraceTextArea;
 	
 	private final Injector injector;
@@ -50,6 +56,16 @@ public final class ExceptionAlert extends Alert {
 		this.exc = exc;
 		
 		stageManager.loadFXML(this, "exception_alert.fxml");
+	}
+	
+	private static Map<String, List<ErrorItem>> groupErrorItemsByFile(final List<ErrorItem> errorItems) {
+		final Map<String, List<ErrorItem>> grouped = new HashMap<>();
+		for (final ErrorItem errorItem : errorItems) {
+			for (final ErrorItem.Location location : errorItem.getLocations()) {
+				grouped.computeIfAbsent(location.getFilename(), k -> new ArrayList<>()).add(errorItem);
+			}
+		}
+		return grouped;
 	}
 	
 	@FXML
@@ -80,7 +96,7 @@ public final class ExceptionAlert extends Alert {
 			this.label.setText(this.label.getText() + message);
 		}
 		
-		final Callback<TableColumn.CellDataFeatures<ErrorItem, ErrorItem>, ObservableValue<ErrorItem>> cellValueFactory = features -> Bindings.createObjectBinding(features::getValue);
+		final Callback<TreeTableColumn.CellDataFeatures<Object, Object>, ObservableValue<Object>> cellValueFactory = features -> Bindings.createObjectBinding(() -> features.getValue().getValue());
 		this.typeColumn.setCellValueFactory(cellValueFactory);
 		this.messageColumn.setCellValueFactory(cellValueFactory);
 		this.locationsColumn.setCellValueFactory(cellValueFactory);
@@ -95,7 +111,17 @@ public final class ExceptionAlert extends Alert {
 		}
 		
 		if (proBError != null && proBError.getErrors() != null) {
-			this.proBErrorTable.getItems().setAll(proBError.getErrors());
+			final TreeItem<Object> root = new TreeItem<>();
+			final Map<String, List<ErrorItem>> grouped = groupErrorItemsByFile(proBError.getErrors());
+			grouped.keySet().stream().sorted().forEach(fileName -> {
+				final TreeItem<Object> ti = new TreeItem<>(fileName);
+				root.getChildren().add(ti);
+				grouped.get(fileName).stream()
+					.map(TreeItem<Object>::new)
+					.collect(Collectors.toCollection(ti::getChildren));
+				ti.setExpanded(true);
+			});
+			this.proBErrorTable.setRoot(root);
 		} else {
 			this.contentVBox.getChildren().remove(this.proBErrorTable);
 		}

@@ -3,9 +3,9 @@
 <?import javafx.scene.control.Alert?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="Alert" resizable="true" alertType="ERROR" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
@@ -13,16 +13,16 @@
 			<content>
 				<VBox fx:id="contentVBox">
 					<Label fx:id="label" VBox.vgrow="NEVER"/>
-					<TableView fx:id="proBErrorTable" minHeight="160" prefHeight="160" VBox.vgrow="ALWAYS">
+					<TreeTableView fx:id="proBErrorTable" minHeight="160" prefHeight="160" showRoot="false" VBox.vgrow="ALWAYS">
 						<columns>
-							<TableColumn fx:id="typeColumn" editable="false" minWidth="80" text="%error.exceptionAlert.proBErrorTable.columns.type"/>
-							<TableColumn fx:id="messageColumn" editable="false" minWidth="80" prefWidth="320" text="%error.exceptionAlert.proBErrorTable.columns.message"/>
-							<TableColumn fx:id="locationsColumn" editable="false" minWidth="80" prefWidth="160" text="%error.exceptionAlert.proBErrorTable.columns.locations"/>
+							<TreeTableColumn fx:id="typeColumn" editable="false" minWidth="80" prefWidth="120" text="%error.exceptionAlert.proBErrorTable.columns.type"/>
+							<TreeTableColumn fx:id="messageColumn" editable="false" minWidth="80" prefWidth="320" text="%error.exceptionAlert.proBErrorTable.columns.message"/>
+							<TreeTableColumn fx:id="locationsColumn" editable="false" minWidth="80" prefWidth="160" text="%error.exceptionAlert.proBErrorTable.columns.locations"/>
 						</columns>
 						<placeholder>
 							<Label text="%error.exceptionAlert.proBErrorTable.placeholder"/>
 						</placeholder>
-					</TableView>
+					</TreeTableView>
 				</VBox>
 			</content>
 			<expandableContent>

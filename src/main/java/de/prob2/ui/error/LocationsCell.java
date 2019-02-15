@@ -11,13 +11,12 @@ import de.prob2.ui.beditor.BEditorView;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.OverrunStyle;
-import javafx.scene.control.TableCell;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-final class LocationsCell extends TableCell<ErrorItem, ErrorItem> {
+final class LocationsCell extends TreeTableCell<Object, Object> {
 	private final Provider<BEditorView> bEditorViewProvider;
 	
 	@Inject
@@ -26,14 +25,14 @@ final class LocationsCell extends TableCell<ErrorItem, ErrorItem> {
 	}
 	
 	@Override
-	protected void updateItem(final ErrorItem item, final boolean empty) {
+	protected void updateItem(final Object item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		if (empty || item == null) {
+		if (empty || item == null || item instanceof String) {
 			this.setGraphic(null);
-		} else {
+		} else if (item instanceof ErrorItem) {
 			final VBox vbox = new VBox();
-			for (final ErrorItem.Location location : item.getLocations()) {
+			for (final ErrorItem.Location location : ((ErrorItem)item).getLocations()) {
 				final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
 				openLocationButton.setOnAction(event -> {
 					this.bEditorViewProvider.get().selectRange(
@@ -41,8 +40,20 @@ final class LocationsCell extends TableCell<ErrorItem, ErrorItem> {
 						location.getEndLine()-1, location.getEndColumn()
 					);
 				});
-				final Label label = new Label(location.toString());
-				label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
+				
+				final StringBuilder sb = new StringBuilder();
+				sb.append(location.getStartLine());
+				sb.append(':');
+				sb.append(location.getStartColumn());
+				
+				if (location.getStartLine() != location.getEndLine() || location.getStartColumn() != location.getEndColumn()) {
+					sb.append(" to ");
+					sb.append(location.getEndLine());
+					sb.append(':');
+					sb.append(location.getEndColumn());
+				}
+				
+				final Label label = new Label(sb.toString());
 				final HBox hbox = new HBox(openLocationButton, label);
 				HBox.setHgrow(openLocationButton, Priority.NEVER);
 				HBox.setHgrow(label, Priority.ALWAYS);
@@ -50,6 +61,8 @@ final class LocationsCell extends TableCell<ErrorItem, ErrorItem> {
 				vbox.getChildren().add(hbox);
 			}
 			this.setGraphic(vbox);
+		} else {
+			throw new AssertionError("Invalid table element type: " + item.getClass());
 		}
 	}
 }
