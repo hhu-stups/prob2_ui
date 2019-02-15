@@ -202,7 +202,9 @@ task createHelp(type: Exec) {
 	outputs.dir("src/main/resources/help")
 	commandLine './help.sh'
 }
-processResources.dependsOn(createHelp)
+if (!project.hasProperty("skipHelp") || project.skipHelp != "true") {
+	processResources.dependsOn(createHelp)
+}
 
 tasks.withType(JavaCompile) {
 	options.compilerArgs += ["-proc:none"]
