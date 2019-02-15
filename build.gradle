@@ -196,14 +196,20 @@ if( rootProject == project) {
 	}
 }
 
-
+final helpDir = file("src/main/resources/help")
 task createHelp(type: Exec) {
-	inputs.dir("src/main/resources/help")
-	outputs.dir("src/main/resources/help")
+	inputs.dir(helpDir)
+	outputs.dir(helpDir)
 	commandLine './help.sh'
 }
+
+task cleanHelp(type: Delete) {
+	delete(fileTree(dir: helpDir, include: ["**/*.adoc", "**/*.html"]))
+}
+
 if (!project.hasProperty("skipHelp") || project.skipHelp != "true") {
 	processResources.dependsOn(createHelp)
+	cleanProcessResources.dependsOn(cleanHelp)
 }
 
 tasks.withType(JavaCompile) {
