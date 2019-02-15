@@ -209,7 +209,7 @@ task cleanHelp(type: Delete) {
 
 if (!project.hasProperty("skipHelp") || project.skipHelp != "true") {
 	processResources.dependsOn(createHelp)
-	cleanProcessResources.dependsOn(cleanHelp)
+	clean.dependsOn(cleanHelp)
 }
 
 tasks.withType(JavaCompile) {
