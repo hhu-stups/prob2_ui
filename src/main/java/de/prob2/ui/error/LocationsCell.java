@@ -34,12 +34,12 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 			final VBox vbox = new VBox();
 			for (final ErrorItem.Location location : ((ErrorItem)item).getLocations()) {
 				final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
-				openLocationButton.setOnAction(event -> {
+				openLocationButton.setOnAction(event -> 
 					this.bEditorViewProvider.get().selectRange(
 						location.getStartLine()-1, location.getStartColumn(),
 						location.getEndLine()-1, location.getEndColumn()
-					);
-				});
+					)
+				);
 				
 				final StringBuilder sb = new StringBuilder();
 				sb.append(location.getStartLine());
