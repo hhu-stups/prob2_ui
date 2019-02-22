@@ -16,6 +16,15 @@ function conversion {
 }
 
 function recursive_search {
+if ! which pandoc &> /dev/null; then
+	echo "pandoc is not installed. Aborting..."
+	return
+elif ! which sed &> /dev/null; then
+	echo "sed is not installed. Aborting..."
+	return
+else
+	converting=true
+fi
 cd "$1"
 echo $PWD
 conversion
@@ -28,6 +37,9 @@ fi
 cd ..
 }
 
+converting=false
 start=src/main/resources/help
 recursive_search $start
-echo "All converting done"
+if $converting = true; then
+	echo "All converting done"
+fi
