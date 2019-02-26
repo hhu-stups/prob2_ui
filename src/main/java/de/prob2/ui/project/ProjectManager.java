@@ -19,6 +19,7 @@ import java.util.ResourceBundle;
 
 import com.google.gson.Gson;
 
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -138,8 +139,18 @@ public class ProjectManager {
 				Platform.runLater(() -> recentProjects.remove(path.toString()));
 			}
 			return null;
-		} catch (IOException exc) {
+		} catch (IOException | JsonSyntaxException exc) {
 			LOGGER.warn("Failed to open project file", exc);
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(ButtonType.YES);
+			buttons.add(ButtonType.NO);
+			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
+					"project.projectManager.alerts.couldNotOpenFile.header",
+					"project.projectManager.alerts.couldNotOpenFile.content", path);
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+				Platform.runLater(() -> recentProjects.remove(path.toString()));
+			}
 			return null;
 		}
 		return project;
