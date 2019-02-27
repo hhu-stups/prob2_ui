@@ -27,17 +27,8 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -182,7 +173,7 @@ public class TraceReplayView extends ScrollPane {
 		});
 		
 		nameColumn.setCellValueFactory(
-				features -> new SimpleStringProperty(features.getValue().getLocation().toString()));
+				features -> new SimpleStringProperty(features.getValue().getLocation().getFileName().toString()));
 	}
 
 	private void initTableRows() {
@@ -211,7 +202,7 @@ public class TraceReplayView extends ScrollPane {
 			showErrorItem.setDisable(true);
 
 			final MenuItem deleteTraceItem = new MenuItem(
-					bundle.getString("animation.tracereplay.view.contextMenu.deleteTrace"));
+					bundle.getString("animation.tracereplay.view.contextMenu.removeTrace"));
 			deleteTraceItem.setOnAction(
 					event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 
@@ -222,6 +213,7 @@ public class TraceReplayView extends ScrollPane {
 				showErrorItem.disableProperty().unbind();
 				if (t != null) {
 					showErrorItem.disableProperty().bind(t.statusProperty().isNotEqualTo(Checked.FAIL));
+					row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 				}
 			});
 
@@ -230,6 +222,7 @@ public class TraceReplayView extends ScrollPane {
 					this.traceChecker.check(row.getItem(), true);
 				}
 			});
+
 			return row;
 		});
 	}
@@ -255,7 +248,8 @@ public class TraceReplayView extends ScrollPane {
 				TRACE_FILE_ENDING));
 		Path traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
-			currentProject.getCurrentMachine().addTraceFile(traceFile);
+			Path relative = currentProject.getLocation().relativize(traceFile);
+			currentProject.getCurrentMachine().addTraceFile(relative);
 		}
 	}
 	
