@@ -219,7 +219,7 @@ tasks.withType(JavaCompile) {
 if (project.hasProperty("probHome")) {
 	allprojects {
 		tasks.withType(JavaForkOptions) {
-			systemProperties["prob.home"] = project.probHome
+			delegate.systemProperties["prob.home"] = project.probHome
 		}
 	}
 }
