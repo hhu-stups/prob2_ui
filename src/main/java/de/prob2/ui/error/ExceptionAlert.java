@@ -61,8 +61,12 @@ public final class ExceptionAlert extends Alert {
 	private static Map<String, List<ErrorItem>> groupErrorItemsByFile(final List<ErrorItem> errorItems) {
 		final Map<String, List<ErrorItem>> grouped = new HashMap<>();
 		for (final ErrorItem errorItem : errorItems) {
-			for (final ErrorItem.Location location : errorItem.getLocations()) {
-				grouped.computeIfAbsent(location.getFilename(), k -> new ArrayList<>()).add(errorItem);
+			if (errorItem.getLocations().isEmpty()) {
+				grouped.computeIfAbsent("(location unknown)", k -> new ArrayList<>()).add(errorItem);
+			} else {
+				for (final ErrorItem.Location location : errorItem.getLocations()) {
+					grouped.computeIfAbsent(location.getFilename(), k -> new ArrayList<>()).add(errorItem);
+				}
 			}
 		}
 		return grouped;
