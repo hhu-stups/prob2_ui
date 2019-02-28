@@ -1,5 +1,7 @@
 package de.prob2.ui.error;
 
+import java.util.Collections;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -35,10 +37,7 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 			for (final ErrorItem.Location location : ((ErrorItem)item).getLocations()) {
 				final Button openLocationButton = new Button(null, new FontAwesomeIconView(FontAwesomeIcon.PENCIL));
 				openLocationButton.setOnAction(event -> 
-					this.bEditorViewProvider.get().selectRange(
-						location.getStartLine()-1, location.getStartColumn(),
-						location.getEndLine()-1, location.getEndColumn()
-					)
+					this.bEditorViewProvider.get().highlightErrorLocations(Collections.singletonList(location))
 				);
 				
 				final StringBuilder sb = new StringBuilder();

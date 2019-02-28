@@ -151,10 +151,14 @@ import de.be4.classicalb.core.parser.node.TWhen;
 import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
 import de.be4.classicalb.core.parser.node.Token;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -220,12 +224,14 @@ public class BEditor extends CodeArea {
 	
 	private final ResourceBundle bundle;
 
+	private final ObservableList<ErrorItem.Location> errorLocations;
 
 	@Inject
 	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject) {
 		this.fontSize = fontSize;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
+		this.errorLocations = FXCollections.observableArrayList();
 		initialize();
 		initializeContextMenu();
 	}
@@ -271,7 +277,7 @@ public class BEditor extends CodeArea {
 		});
 		this.setParagraphGraphicFactory(LineNumberFactory.get(this));
 		this.richChanges()
-			.filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
+			.filter(ch -> !ch.isPlainTextIdentity())
 			.successionEnds(Duration.ofMillis(100))
 			.supplyTask(this::computeHighlightingAsync)
 			.awaitLatest(this.richChanges())
@@ -282,7 +288,13 @@ public class BEditor extends CodeArea {
 					LOGGER.info("Highlighting failed", t.getFailure());
 					return Optional.empty();
 				}
-		}).subscribe(this::applyHighlighting);
+			}).subscribe(highlighting -> {
+				this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
+				this.applyHighlighting(highlighting);
+			});
+		this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>)change ->
+			this.applyHighlighting(computeHighlighting(this.getText()))
+		);
 
 		fontSize.fontSizeProperty().addListener((observable, from, to) ->
 			this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
@@ -311,7 +323,10 @@ public class BEditor extends CodeArea {
 
 	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
 		this.setStyleSpans(0, highlighting);
-		
+		for (final ErrorItem.Location location : this.getErrorLocations()) {
+			assert location.getStartLine() == location.getEndLine() : "TODO multiline errors";
+			this.setStyle(location.getStartLine()-1, location.getStartColumn(), location.getEndColumn(), Collections.singletonList("error"));
+		}
 	}
 
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
@@ -361,5 +376,9 @@ public class BEditor extends CodeArea {
 	
 	public void clearHistory() {
 		this.getUndoManager().forgetHistory();
+	}
+	
+	public ObservableList<ErrorItem.Location> getErrorLocations() {
+		return this.errorLocations;
 	}
 }
