@@ -336,7 +336,7 @@ public class BEditor extends CodeArea {
 			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
 				@Override
 				protected StyleSpans<Collection<String>> call() {
-					return new StyleSpansBuilder<Collection<String>>().add(Collections.singleton("default"), text.length()).create();
+					return StyleSpans.singleton(Collections.singleton("default"), text.length());
 				}
 			};
 			task.run();
