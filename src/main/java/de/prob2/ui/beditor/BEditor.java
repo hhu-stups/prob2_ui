@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -323,9 +324,20 @@ public class BEditor extends CodeArea {
 
 	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
 		this.setStyleSpans(0, highlighting);
+		final List<String> errorStyle = Collections.singletonList("error");
 		for (final ErrorItem.Location location : this.getErrorLocations()) {
-			assert location.getStartLine() == location.getEndLine() : "TODO multiline errors";
-			this.setStyle(location.getStartLine()-1, location.getStartColumn(), location.getEndColumn(), Collections.singletonList("error"));
+			final int startParagraph = location.getStartLine() - 1;
+			final int endParagraph = location.getEndLine() - 1;
+			if (startParagraph == endParagraph) {
+				final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
+				this.setStyle(startParagraph, location.getStartColumn(), displayedEndColumn, errorStyle);
+			} else {
+				this.setStyle(startParagraph, location.getStartColumn(), this.getParagraphLength(startParagraph), errorStyle);
+				for (int para = startParagraph + 1; para < endParagraph; para++) {
+					this.setStyle(para, errorStyle);
+				}
+				this.setStyle(endParagraph, 0, location.getEndColumn(), errorStyle);
+			}
 		}
 	}
 
