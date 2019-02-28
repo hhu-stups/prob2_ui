@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -151,10 +152,14 @@ import de.be4.classicalb.core.parser.node.TWhen;
 import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
 import de.be4.classicalb.core.parser.node.Token;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -220,12 +225,14 @@ public class BEditor extends CodeArea {
 	
 	private final ResourceBundle bundle;
 
+	private final ObservableList<ErrorItem.Location> errorLocations;
 
 	@Inject
 	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject) {
 		this.fontSize = fontSize;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
+		this.errorLocations = FXCollections.observableArrayList();
 		initialize();
 		initializeContextMenu();
 	}
@@ -271,7 +278,7 @@ public class BEditor extends CodeArea {
 		});
 		this.setParagraphGraphicFactory(LineNumberFactory.get(this));
 		this.richChanges()
-			.filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
+			.filter(ch -> !ch.isPlainTextIdentity())
 			.successionEnds(Duration.ofMillis(100))
 			.supplyTask(this::computeHighlightingAsync)
 			.awaitLatest(this.richChanges())
@@ -282,7 +289,13 @@ public class BEditor extends CodeArea {
 					LOGGER.info("Highlighting failed", t.getFailure());
 					return Optional.empty();
 				}
-		}).subscribe(this::applyHighlighting);
+			}).subscribe(highlighting -> {
+				this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
+				this.applyHighlighting(highlighting);
+			});
+		this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>)change ->
+			this.applyHighlighting(computeHighlighting(this.getText()))
+		);
 
 		fontSize.fontSizeProperty().addListener((observable, from, to) ->
 			this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
@@ -311,7 +324,21 @@ public class BEditor extends CodeArea {
 
 	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
 		this.setStyleSpans(0, highlighting);
-		
+		final List<String> errorStyle = Collections.singletonList("error");
+		for (final ErrorItem.Location location : this.getErrorLocations()) {
+			final int startParagraph = location.getStartLine() - 1;
+			final int endParagraph = location.getEndLine() - 1;
+			if (startParagraph == endParagraph) {
+				final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
+				this.setStyle(startParagraph, location.getStartColumn(), displayedEndColumn, errorStyle);
+			} else {
+				this.setStyle(startParagraph, location.getStartColumn(), this.getParagraphLength(startParagraph), errorStyle);
+				for (int para = startParagraph + 1; para < endParagraph; para++) {
+					this.setStyle(para, errorStyle);
+				}
+				this.setStyle(endParagraph, 0, location.getEndColumn(), errorStyle);
+			}
+		}
 	}
 
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
@@ -321,7 +348,7 @@ public class BEditor extends CodeArea {
 			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
 				@Override
 				protected StyleSpans<Collection<String>> call() {
-					return new StyleSpansBuilder<Collection<String>>().add(Collections.singleton("default"), text.length()).create();
+					return StyleSpans.singleton(Collections.singleton("default"), text.length());
 				}
 			};
 			task.run();
@@ -361,5 +388,9 @@ public class BEditor extends CodeArea {
 	
 	public void clearHistory() {
 		this.getUndoManager().forgetHistory();
+	}
+	
+	public ObservableList<ErrorItem.Location> getErrorLocations() {
+		return this.errorLocations;
 	}
 }

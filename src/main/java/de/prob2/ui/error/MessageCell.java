@@ -15,7 +15,7 @@ final class MessageCell extends TreeTableCell<Object, Object> {
 	protected void updateItem(final Object item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		if (empty || item == null) {
+		if (empty) {
 			this.setText(null);
 		} else if (item instanceof String) {
 			this.setText((String)item);

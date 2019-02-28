@@ -460,6 +460,12 @@
 	-fx-font-style: italic
 }
 
+.editor .error {
+	-rtfx-underline-color: red;
+	-rtfx-underline-width: 2px;
+	-rtfx-underline-dash-array: 3px;
+}
+
 /************************************************************************************
  * TabPane																		  *
  ************************************************************************************/

@@ -11,6 +11,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetAllUsedFilenamesCommand;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.MachineFileInformation;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -290,7 +292,7 @@ public class BEditorView extends BorderPane {
 		injector.getInstance(ExternalEditor.class).open(this.getPath());
 	}
 	
-	public void selectRange(int anchorParagraph, int anchorColumn, int caretPositionParagraph, int caretPositionColumn) {
-		beditor.selectRange(anchorParagraph, anchorColumn, caretPositionParagraph, caretPositionColumn);
+	public void highlightErrorLocations(final Collection<ErrorItem.Location> locations) {
+		beditor.getErrorLocations().setAll(locations);
 	}
 }
