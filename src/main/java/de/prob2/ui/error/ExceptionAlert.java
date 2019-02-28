@@ -2,6 +2,7 @@ package de.prob2.ui.error;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.google.inject.Injector;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
+import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.binding.Bindings;
@@ -125,6 +127,15 @@ public final class ExceptionAlert extends Alert {
 					.collect(Collectors.toCollection(ti::getChildren));
 				ti.setExpanded(true);
 			});
+			final BEditorView bEditorView = injector.getInstance(BEditorView.class);
+			final Path editorPath = bEditorView.getPath();
+			if (editorPath != null && grouped.containsKey(editorPath.toString())) {
+				bEditorView.highlightErrorLocations(
+					grouped.get(editorPath.toString()).stream()
+						.flatMap(item -> item.getLocations().stream())
+						.collect(Collectors.toList())
+				);
+			}
 			this.proBErrorTable.setRoot(root);
 		} else {
 			this.contentVBox.getChildren().remove(this.proBErrorTable);
