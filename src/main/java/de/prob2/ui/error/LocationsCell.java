@@ -30,7 +30,7 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 	protected void updateItem(final Object item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		if (empty || item == null || item instanceof String) {
+		if (empty || item instanceof String) {
 			this.setGraphic(null);
 		} else if (item instanceof ErrorItem) {
 			final VBox vbox = new VBox();

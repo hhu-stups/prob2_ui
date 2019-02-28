@@ -20,7 +20,7 @@ final class TypeCell extends TreeTableCell<Object, Object> {
 	protected void updateItem(final Object item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		if (empty || item == null || item instanceof String) {
+		if (empty || item instanceof String) {
 			this.setText(null);
 		} else if (item instanceof ErrorItem) {
 			final String typeName;
