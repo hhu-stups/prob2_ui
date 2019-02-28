@@ -102,7 +102,7 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
-		
+
 		initTableColumns();
 		initTableRows();
 
@@ -114,7 +114,7 @@ public class TraceReplayView extends ScrollPane {
 				removeFromTraceTableView(c.getElementRemoved());
 			}
 		};
-		
+
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (from != null) {
 				from.getTraceFiles().removeListener(listener);
@@ -123,7 +123,7 @@ public class TraceReplayView extends ScrollPane {
 			if (to != null) {
 				to.getTraceFiles().forEach(tracePath -> {
 					traceTableView.getItems().add(new ReplayTrace(tracePath));
-					if(!tracePath.toString().endsWith(TRACE_FILE_ENDING.substring(1))) {
+					if (!tracePath.toString().endsWith(TRACE_FILE_ENDING.substring(1))) {
 						stageManager.makeAlert(AlertType.WARNING, "",
 								"animation.tracereplay.view.alerts.wrongFileExtensionWarning.content",
 								TRACE_FILE_ENDING, tracePath).showAndWait();
@@ -132,7 +132,7 @@ public class TraceReplayView extends ScrollPane {
 				to.getTraceFiles().addListener(listener);
 			}
 		});
-		
+
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -151,13 +151,13 @@ public class TraceReplayView extends ScrollPane {
 		CheckBox selectAll = new CheckBox();
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			for(ReplayTrace item : traceTableView.getItems()) {
+			for (ReplayTrace item : traceTableView.getItems()) {
 				item.setSelected(to);
 				traceTableView.refresh();
 			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
-		
+
 		statusColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
 
@@ -171,7 +171,7 @@ public class TraceReplayView extends ScrollPane {
 			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon)
 					.otherwise(replayProgress);
 		});
-		
+
 		nameColumn.setCellValueFactory(
 				features -> new SimpleStringProperty(features.getValue().getLocation().getFileName().toString()));
 	}
@@ -184,14 +184,6 @@ public class TraceReplayView extends ScrollPane {
 					bundle.getString("animation.tracereplay.view.contextMenu.replayTrace"));
 			replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
 			replayTraceItem.setDisable(true);
-			
-			row.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					replayTraceItem.disableProperty().bind(row.emptyProperty()
-							.or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
-							.or(row.getItem().selectedProperty().not()));
-				}
-			});
 
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("animation.tracereplay.view.contextMenu.showError"));
@@ -209,10 +201,13 @@ public class TraceReplayView extends ScrollPane {
 			final ContextMenu menu = new ContextMenu(replayTraceItem, showErrorItem, deleteTraceItem);
 			row.setContextMenu(menu);
 
-			row.itemProperty().addListener((o, f, t) -> {
+			row.itemProperty().addListener((observable, from, to) -> {
 				showErrorItem.disableProperty().unbind();
-				if (t != null) {
-					showErrorItem.disableProperty().bind(t.statusProperty().isNotEqualTo(Checked.FAIL));
+				if (to != null) {
+					replayTraceItem.disableProperty()
+							.bind(row.emptyProperty().or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
+									.or(row.getItem().selectedProperty().not()));
+					showErrorItem.disableProperty().bind(to.statusProperty().isNotEqualTo(Checked.FAIL));
 					row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 				}
 			});
