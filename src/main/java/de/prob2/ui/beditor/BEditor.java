@@ -363,7 +363,7 @@ public class BEditor extends CodeArea {
 			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
 				@Override
 				protected StyleSpans<Collection<String>> call() {
-					return StyleSpans.singleton(Collections.singleton("default"), text.length());
+					return StyleSpans.singleton(Collections.emptySet(), text.length());
 				}
 			};
 			task.run();
@@ -393,7 +393,7 @@ public class BEditor extends CodeArea {
 				if (t instanceof TStringLiteral) {
 					length += 2;
 				}
-				spansBuilder.add(Collections.singleton(string == null ? "default" : string), length);
+				spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), length);
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
 			LOGGER.info("Failed to lex", e);
