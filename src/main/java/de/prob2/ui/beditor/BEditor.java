@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -322,23 +322,38 @@ public class BEditor extends CodeArea {
 		}
 	}
 
-	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
-		this.setStyleSpans(0, highlighting);
-		final List<String> errorStyle = Collections.singletonList("error");
+	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
+		final Collection<T> ret = new ArrayList<>(a);
+		ret.addAll(b);
+		return ret;
+	}
+
+	private StyleSpans<Collection<String>> addErrorHighlighting(final StyleSpans<Collection<String>> highlighting) {
+		StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
 		for (final ErrorItem.Location location : this.getErrorLocations()) {
 			final int startParagraph = location.getStartLine() - 1;
 			final int endParagraph = location.getEndLine() - 1;
+			final int startIndex = this.getAbsolutePosition(startParagraph, location.getStartColumn());
+			final int endIndex;
 			if (startParagraph == endParagraph) {
 				final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
-				this.setStyle(startParagraph, location.getStartColumn(), displayedEndColumn, errorStyle);
+				endIndex = this.getAbsolutePosition(startParagraph, displayedEndColumn);
 			} else {
-				this.setStyle(startParagraph, location.getStartColumn(), this.getParagraphLength(startParagraph), errorStyle);
-				for (int para = startParagraph + 1; para < endParagraph; para++) {
-					this.setStyle(para, errorStyle);
-				}
-				this.setStyle(endParagraph, 0, location.getEndColumn(), errorStyle);
+				endIndex = this.getAbsolutePosition(endParagraph, location.getEndColumn());
 			}
+			highlightingWithErrors = highlightingWithErrors.overlay(
+				new StyleSpansBuilder<Collection<String>>()
+					.add(Collections.emptyList(), startIndex)
+					.add(Collections.singletonList("error"), endIndex-startIndex)
+					.create(),
+				BEditor::combineCollections
+			);
 		}
+		return highlightingWithErrors;
+	}
+
+	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
+		this.setStyleSpans(0, addErrorHighlighting(highlighting));
 	}
 
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
