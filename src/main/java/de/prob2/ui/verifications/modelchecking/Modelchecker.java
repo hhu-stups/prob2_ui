@@ -152,6 +152,9 @@ public class Modelchecker implements IModelCheckListener {
 		jobs.put(job.getJobId(), job);
 		currentStats.startJob();
 		
+		//This must be executed before executing model checking job
+		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(currentStats));
+		
 		final IModelCheckingResult result;
 		try {
 			result = job.call();
@@ -162,7 +165,6 @@ public class Modelchecker implements IModelCheckListener {
 		} finally {
 			modelcheckingStage.setDisableStart(false);
 		}
-		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(currentStats));
 		
 		// The consistency checker sometimes doesn't call isFinished, so
 		// we call it manually here with some dummy information.
