@@ -37,7 +37,7 @@
 				<Accordion fx:id="rightAccordion1" expandedPane="$statsTP">
 					<panes>
 						<TitledPane text="%common.views.stats" id="statsTP" fx:id="statsTP">
-							<StatsView/>
+							<StatsView fx:id="statsView"/>
 						</TitledPane>
 						<TitledPane text="%common.views.verifications" id="verificationsTP" fx:id="verificationsTP">
 							<VerificationsView/>

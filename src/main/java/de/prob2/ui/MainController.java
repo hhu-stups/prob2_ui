@@ -18,7 +18,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
-
+import de.prob2.ui.stats.StatsView;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
@@ -36,6 +36,8 @@ import javafx.scene.layout.BorderPane;
 public class MainController extends BorderPane {
 	@FXML private TitledPane historyTP;
 	@FXML private HistoryView historyView;
+	@FXML private TitledPane statsTP;
+	@FXML private StatsView statsView;
 	@FXML private TitledPane projectTP;
 	@FXML private ProjectView projectView;
 	@FXML private SplitPane horizontalSP;
@@ -61,11 +63,16 @@ public class MainController extends BorderPane {
 	@FXML
 	private void initialize() {
 		accordions.forEach(acc -> acc.getPanes().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> tp.getContent().setVisible(true)));
-		final ObservableIntegerValue size = historyView.getObservableHistorySize();
-		final ObservableValue<Number> current = historyView.getCurrentHistoryPositionProperty();
+		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
+		final ObservableValue<Number> currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
-				.bind(Bindings.format(this.resourceBundle.getString("common.views.historyWithState"), current, size));
+				.bind(Bindings.format(this.resourceBundle.getString("common.views.historyWithState"), currentHistoryValue, historySize));
 
+		final ObservableIntegerValue currentStatesNumber = statsView.getStatesNumber();
+		final ObservableValue<Number> currentProcessedStates = statsView.getProcessedStates();
+		this.statsTP.textProperty()
+				.bind(Bindings.format(this.resourceBundle.getString("common.views.statsWithState"), currentProcessedStates, currentStatesNumber));
+		
 		Platform.runLater(() -> injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
 			if (to != null) {
 				projectTP.setExpanded(true);

@@ -39,7 +39,7 @@
 						<HistoryView fx:id="historyView"/>
 					</TitledPane>
 					<TitledPane text="%common.views.stats" fx:id="statsTP" id="statsTP">
-						<StatsView/>
+						<StatsView fx:id="statsView"/>
 					</TitledPane>
 				</panes>
 			</Accordion>

@@ -30,7 +30,7 @@
 						<VerificationsView/>
 					</TitledPane>
 					<TitledPane text="%common.views.stats" fx:id="statsTP" id="statsTP">
-						<StatsView/>
+						<StatsView fx:id="statsView"/>
 					</TitledPane>
 					<TitledPane text="%common.views.project" fx:id="projectTP" id="projectTP">
 						<ProjectView fx:id="projectView"/>

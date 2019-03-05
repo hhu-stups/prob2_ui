@@ -21,6 +21,10 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.NumberBinding;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -68,6 +72,8 @@ public class StatsView extends ScrollPane {
 	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
 	private final FontSize fontSize;
+	
+	private final SimpleObjectProperty<StateSpaceStats> lastResult;
 
 	@Inject
 	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace,
@@ -75,6 +81,7 @@ public class StatsView extends ScrollPane {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
+		this.lastResult = new SimpleObjectProperty<StateSpaceStats>(this, "lastResult", null);
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
@@ -137,6 +144,8 @@ public class StatsView extends ScrollPane {
 	}
 
 	private void updateSimpleStats(StateSpaceStats result) {
+		lastResult.set(result);
+		
 		int nrTotalNodes = result.getNrTotalNodes();
 		int nrTotalTransitions = result.getNrTotalTransitions();
 		int nrProcessedNodes = result.getNrProcessedNodes();
@@ -183,4 +192,15 @@ public class StatsView extends ScrollPane {
 			}
 		});
 	}
+	
+	public NumberBinding getProcessedStates() {
+		return Bindings.createIntegerBinding(
+				() -> lastResult.get() == null ? 0 : lastResult.get().getNrProcessedNodes(), lastResult);
+	}
+
+	public ObservableIntegerValue getStatesNumber() {
+		return Bindings.createIntegerBinding(
+				() -> lastResult.get() == null ? 0 : lastResult.get().getNrTotalNodes(), lastResult);
+	}
+	
 }
