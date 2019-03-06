@@ -137,12 +137,17 @@ public class ProB2 extends Application {
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root, 1024, 768);
 		primaryStage.setScene(mainScene);
+		primaryStage.sizeToScene();
+
 		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
 
 		this.notifyPreloader(new Preloader.ProgressNotification(100));
-		this.primaryStage.show();
+		primaryStage.show();
+
+		primaryStage.setMinWidth(primaryStage.getWidth());
+		primaryStage.setMinHeight(primaryStage.getHeight());
 
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
 		uiPersistence.open();
