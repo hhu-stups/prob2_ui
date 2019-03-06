@@ -83,10 +83,10 @@ public abstract class SymbolicExecutor {
 				LOGGER.error("Exception during symbolic checking", e);
 				exception = e;
 			}
-			injector.getInstance(StatsView.class).update(currentTrace.get());
 			Thread currentThread = Thread.currentThread();
 			final RuntimeException finalException = exception;
 			Platform.runLater(() -> {
+				injector.getInstance(StatsView.class).update(currentTrace.get());
 				if (finalException == null) {
 					resultHandler.handleFormulaResult(currentItem, cmd);
 				} else {
@@ -113,9 +113,9 @@ public abstract class SymbolicExecutor {
 				LOGGER.error("Could not check CBC Deadlock", e);
 				result = e;
 			}
-			injector.getInstance(StatsView.class).update(currentTrace.get());
 			final Object finalResult = result;
 			Platform.runLater(() -> {
+				injector.getInstance(StatsView.class).update(currentTrace.get());
 				resultHandler.handleFormulaResult(item, finalResult);
 				updateMachine(currentProject.getCurrentMachine());
 				if(!checkAll) {

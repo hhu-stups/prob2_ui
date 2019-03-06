@@ -102,9 +102,7 @@ public final class ModelCheckStats extends AnchorPane {
 		
 		if (result instanceof ITraceDescription) {
 			Trace trace = ((ITraceDescription) result).getTrace(stateSpace);
-			Platform.runLater(() -> {
-				injector.getInstance(StatsView.class).update(trace);
-			});
+			Platform.runLater(() -> injector.getInstance(StatsView.class).update(trace));
 		}
 	}
 	

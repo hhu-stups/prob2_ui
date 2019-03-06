@@ -106,6 +106,7 @@ public class ModelcheckingStage extends Stage {
 		if (currentTrace.exists()) {
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(getOptions(), selectSearchStrategy.getConverter().toString(selectSearchStrategy.getValue()));
 			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
+				this.hide();
 				injector.getInstance(Modelchecker.class).checkItem(modelcheckingItem, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
 			} else {
@@ -149,7 +150,6 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void cancel() {
-		injector.getInstance(ModelcheckingView.class).cancelModelcheck();
 		this.hide();
 	}
 

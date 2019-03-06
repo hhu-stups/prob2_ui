@@ -81,7 +81,7 @@ public class StatsView extends ScrollPane {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
-		this.lastResult = new SimpleObjectProperty<StateSpaceStats>(this, "lastResult", null);
+		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
