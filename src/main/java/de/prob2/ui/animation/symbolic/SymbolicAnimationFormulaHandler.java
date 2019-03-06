@@ -8,10 +8,10 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.check.CBCInvariantChecker;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -64,8 +64,9 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	
 	public void handleSequence(String sequence, boolean checkAll) {
 		List<String> events = Arrays.asList(sequence.replaceAll(" ", "").split(";"));
-		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), events);
-		symbolicChecker.executeCheckingItem(checker, sequence, SymbolicExecutionType.SEQUENCE, checkAll);
+		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new EventB("true", FormulaExpand.EXPAND));
+		SymbolicAnimationFormulaItem item = new SymbolicAnimationFormulaItem(sequence, SymbolicExecutionType.SEQUENCE);
+		symbolicChecker.checkItem(item, cmd, currentTrace.getStateSpace(), checkAll);
 	}
 	
 	public void findValidState(SymbolicAnimationFormulaItem item, boolean checkAll) {

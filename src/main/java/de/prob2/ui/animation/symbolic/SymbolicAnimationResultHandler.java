@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.AbstractCommand;
+import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CheckError;
@@ -73,8 +74,33 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		}
 	}
 	
+	public void handleSequence(SymbolicAnimationFormulaItem item, ConstraintBasedSequenceCheckCommand cmd) {
+		ConstraintBasedSequenceCheckCommand.ResultType result = cmd.getResult();
+		item.setExample(null);
+		switch(result) {
+			case PATH_FOUND:
+				showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found");
+				item.setExample(cmd.getTrace());
+				break;
+			case NO_PATH_FOUND:
+				showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound");
+				break;
+			case TIMEOUT: 
+				showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.timeout");
+				break;
+			case INTERRUPTED: 
+				showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted");
+				break;
+			case ERROR:
+				showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.error");
+				break;
+			default:
+				break;
+		}
+	}
+	
 	private void showCheckingResult(SymbolicAnimationFormulaItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
-		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams ));
+		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams));
 		handleItem(item, checked);
 	}
 	
@@ -128,6 +154,8 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if(item.getType() == SymbolicExecutionType.FIND_VALID_STATE) {
 			handleFindValidState((SymbolicAnimationFormulaItem) item, (FindStateCommand) cmd, stateSpace);
+		} else if(item.getType() == SymbolicExecutionType.SEQUENCE) {
+			handleSequence((SymbolicAnimationFormulaItem) item, (ConstraintBasedSequenceCheckCommand) cmd);
 		}
 	}
 	
