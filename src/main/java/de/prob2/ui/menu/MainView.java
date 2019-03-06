@@ -11,15 +11,21 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.TabPersistenceHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.TitledPane;
+import javafx.scene.layout.StackPane;
 
 @FXMLInjected
 @Singleton
-public class MainView extends AnchorPane {
+public class MainView extends StackPane {
 
 	@FXML
 	private TabPane tabPane;
+	@FXML
+	private TitledPane consolePane;
+	@FXML
+	private SplitPane splitPane;
 
 	private final Config config;
 
@@ -35,17 +41,20 @@ public class MainView extends AnchorPane {
 	@FXML
 	private void initialize() {
 		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
+		consolePane.expandedProperty().addListener((observable, from, to) -> splitPane.setDividerPositions(to ? 0.5 : 0.8));
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentMainTab != null) {
 					getTabPersistenceHandler().setCurrentTab(configData.currentMainTab);
+					consolePane.setExpanded(configData.bConsoleExpanded);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.currentMainTab = getTabPersistenceHandler().getCurrentTab();
+				configData.bConsoleExpanded = consolePane.isExpanded();
 			}
 		});
 	}

@@ -7,20 +7,32 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import de.prob2.ui.beditor.BEditorView?>
-<fx:root type="AnchorPane" minWidth="240" minHeight="70" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
+<?import de.prob2.ui.consoles.b.BConsoleView?>
+<?import javafx.scene.layout.StackPane?>
+
+<fx:root type="StackPane" xmlns:fx="http://javafx.com/fxml/1">
 	<!-- TabPane *obviously* does not extend Pane, so we have to wrap it in a AnchorPane so we can add the menu bar to it on Mac. -->
-	<TabPane fx:id="tabPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.91">
-		<Tab fx:id="statesTab" id="states" text="%menu.mainView.tabs.states">
-			<StatesView/>
-		</Tab>
-		<Tab fx:id="statesErrorTab" id="statesError" text="%menu.mainView.tabs.stateErrors">
-			<StateErrorsView/>
-		</Tab>
-		<Tab fx:id="visualisationTab" id="visualisation" text="%menu.mainView.tabs.visualisation">
-			<VisualisationView/>
-		</Tab>
-		<Tab fx:id="beditorTab" id="beditorTab" text="%menu.mainView.tabs.beditor">
-			<BEditorView/>
-		</Tab>
-	</TabPane>
+	<SplitPane fx:id="splitPane" orientation="VERTICAL" dividerPositions="0.8">
+		<StackPane>
+			<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+				<Tab fx:id="statesTab" id="states" text="%menu.mainView.tabs.states">
+					<StatesView/>
+				</Tab>
+				<Tab fx:id="statesErrorTab" id="statesError" text="%menu.mainView.tabs.stateErrors">
+					<StateErrorsView/>
+				</Tab>
+				<Tab fx:id="visualisationTab" id="visualisation" text="%menu.mainView.tabs.visualisation">
+					<VisualisationView/>
+				</Tab>
+				<Tab fx:id="beditorTab" id="beditorTab" text="%menu.mainView.tabs.beditor">
+					<BEditorView/>
+				</Tab>
+			</TabPane>
+		</StackPane>
+		<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title" expanded="false" animated="false">
+			<BConsoleView/>
+		</TitledPane>
+	</SplitPane>
 </fx:root>

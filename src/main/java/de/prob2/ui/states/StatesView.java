@@ -51,9 +51,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
@@ -98,12 +96,6 @@ public final class StatesView extends StackPane {
 	private TreeTableColumn<StateItem<?>, StateItem<?>> tvPreviousValue;
 	@FXML
 	private TreeItem<StateItem<?>> tvRootItem;
-	
-	@FXML
-	private TitledPane consolePane;
-	
-	@FXML
-	private SplitPane splitPane;
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -147,8 +139,6 @@ public final class StatesView extends StackPane {
 	private void initialize() {
 		helpButton.setHelpContent(this.getClass());
 		
-		consolePane.expandedProperty().addListener((observable, from, to) -> splitPane.setDividerPositions(to ? 0.5 : 0.8));
-		
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell());
@@ -180,8 +170,6 @@ public final class StatesView extends StackPane {
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
-				consolePane.setExpanded(configData.bConsoleExpanded);
-				
 				if (configData.statesViewColumnsWidth != null) {
 					// The table columns cannot be resized until the table view is shown on screen (before then, the resizing always fails).
 					// So we can't restore the column widths yet - that is done later using the restoreColumnWidths() method, which is called by the UI startup code once the main stage is visible.
@@ -191,7 +179,6 @@ public final class StatesView extends StackPane {
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.bConsoleExpanded = consolePane.isExpanded();
 				configData.statesViewColumnsWidth = TableUtils.getAbsoluteColumnWidths(tv.getColumns());
 			}
 		});
