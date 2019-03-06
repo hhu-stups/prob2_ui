@@ -192,6 +192,9 @@ public class BInterpreter implements Executable {
 		if (":clear".equals(source)) {
 			return new ConsoleExecResult("","", ConsoleExecResultType.CLEAR);
 		}
+		if(source.replaceAll(" ", "").isEmpty()) {
+			return new ConsoleExecResult("","", ConsoleExecResultType.PASSED);
+		}
 		final Trace trace = currentTrace.exists() ? currentTrace.get() : this.getDefaultTrace();
 		final IEvalElement formula;
 		try {
