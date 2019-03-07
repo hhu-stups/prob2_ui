@@ -389,11 +389,7 @@ public class BEditor extends CodeArea {
 			do {
 				t = lexer.next();
 				String string = syntaxClasses.get(t.getClass());
-				int length = t.getText().length();
-				if (t instanceof TStringLiteral) {
-					length += 2;
-				}
-				spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), length);
+				spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
 			LOGGER.info("Failed to lex", e);
