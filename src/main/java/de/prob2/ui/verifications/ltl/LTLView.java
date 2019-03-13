@@ -9,6 +9,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
+import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
@@ -18,6 +20,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
@@ -32,7 +35,9 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
 
+import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -260,22 +265,31 @@ public class LTLView extends AnchorPane {
 		formulaSelectedColumn.setGraphic(formulaSelectAll);
 		patternSelectedColumn.setGraphic(patternSelectAll);
 
-		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not());
+		ObservableValue<? extends Boolean> disableChecking = currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not())
+				.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
+				.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
+				.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
+				.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not());
+		addMenuButton.disableProperty().bind(disableChecking);
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+		checkMachineButton.disableProperty().bind(disableChecking);
 		saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(checker.currentJobThreadsProperty().emptyProperty().not())
+						.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
+						.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
+						.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
+						.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not()));
 				saveLTLButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(disableChecking);
 				saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}
 		});
 		
-		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+		tvFormula.disableProperty().bind(disableChecking);
 	}
 	
 	public void bindMachine(Machine machine) {

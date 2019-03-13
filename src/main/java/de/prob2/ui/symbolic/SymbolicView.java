@@ -1,11 +1,10 @@
 package de.prob2.ui.symbolic;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Injector;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.statespace.FormalismType;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
+import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -13,9 +12,11 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-
+import de.prob2.ui.verifications.MachineStatusHandler;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
+import de.prob2.ui.verifications.modelchecking.Modelchecker;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
@@ -29,6 +30,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+
+import java.util.ResourceBundle;
 
 public abstract class SymbolicView<T extends SymbolicFormulaItem> extends ScrollPane {
 	
@@ -148,9 +151,19 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	protected abstract void removeFormula(Machine machine, T item);
 	
 	protected void setBindings() {
+		SymbolicExecutor otherSymbolicExecutor = null;
+		if(executor instanceof SymbolicFormulaChecker) {
+			otherSymbolicExecutor = injector.getInstance(SymbolicAnimationChecker.class);
+		} else {
+			otherSymbolicExecutor = injector.getInstance(SymbolicFormulaChecker.class);
+		}
 		final BooleanBinding disableBinding = currentTrace.existsProperty().not()
 			.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()))
-			.or(executor.currentJobThreadsProperty().emptyProperty().not());
+			.or(executor.currentJobThreadsProperty().emptyProperty().not())
+			.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
+			.or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
+			.or(otherSymbolicExecutor.currentJobThreadsProperty().emptyProperty().not())
+			.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not());
 		addFormulaButton.disableProperty().bind(disableBinding);
 		checkMachineButton.disableProperty().bind(disableBinding);
 		cancelButton.disableProperty().bind(executor.currentJobThreadsProperty().emptyProperty());

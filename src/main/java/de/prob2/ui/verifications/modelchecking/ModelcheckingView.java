@@ -5,6 +5,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
+import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -15,11 +17,14 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+import de.prob2.ui.verifications.MachineStatusHandler;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -33,6 +38,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -123,8 +129,13 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 	
 	private void setBindings() {
-		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+		ObservableValue<? extends Boolean> disableChecking = currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not())
+				.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
+				.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
+				.or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
+				.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not());
+		addModelCheckButton.disableProperty().bind(disableChecking);
+		checkMachineButton.disableProperty().bind(disableChecking);
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
@@ -151,8 +162,8 @@ public final class ModelcheckingView extends ScrollPane {
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
 		
-		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
-		tvChecks.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+		tvItems.disableProperty().bind(disableChecking);
+		tvChecks.disableProperty().bind(disableChecking);
 
 
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {

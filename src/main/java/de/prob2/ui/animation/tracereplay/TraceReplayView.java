@@ -4,10 +4,12 @@ import java.nio.file.Path;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -20,6 +22,9 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
+import de.prob2.ui.verifications.modelchecking.Modelchecker;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -62,17 +67,19 @@ public class TraceReplayView extends ScrollPane {
 	private final TraceChecker traceChecker;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
+	private final Injector injector;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
 			final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
-			final FileChooserManager fileChooserManager) {
+			final FileChooserManager fileChooserManager, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
+		this.injector = injector;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
@@ -140,6 +147,10 @@ public class TraceReplayView extends ScrollPane {
 				checkButton.disableProperty()
 						.bind(currentTrace.stateSpaceProperty().isNull()
 								.or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
+								.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
+								.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
+								.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
+								.or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
 								.or(to.tracesProperty().emptyProperty()));
 			}
 		});

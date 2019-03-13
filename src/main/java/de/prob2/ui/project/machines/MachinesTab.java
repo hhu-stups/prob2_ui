@@ -5,6 +5,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
+import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
@@ -231,7 +233,9 @@ public class MachinesTab extends Tab {
 		});
 		machinesList.disableProperty().bind(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()
 					.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
-					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()));
+					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
+					.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not()
+					.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not())));
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof MachineDescriptionView && !to.contains(((MachineDescriptionView) node).getMachine())) {
