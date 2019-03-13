@@ -1,25 +1,20 @@
 package de.prob2.ui.stats;
 
-import java.util.List;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
@@ -34,6 +29,9 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+
+import java.util.List;
+import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -72,16 +70,18 @@ public class StatsView extends ScrollPane {
 	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
 	private final FontSize fontSize;
+	private final Injector injector;
 	
 	private final SimpleObjectProperty<StateSpaceStats> lastResult;
 
 	@Inject
 	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace,
-			final FontSize fontSize) {
+			final FontSize fontSize, final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
+		this.injector = injector;
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
@@ -130,7 +130,7 @@ public class StatsView extends ScrollPane {
 	}
 
 	public void update(Trace trace) {
-		if (trace != null) {
+		if (trace != null && injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().get()) {
 			final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
 			trace.getStateSpace().execute(stateSpaceStatsCmd);
 			updateSimpleStats(stateSpaceStatsCmd.getResult());
@@ -143,14 +143,14 @@ public class StatsView extends ScrollPane {
 		}
 	}
 
-	private void updateSimpleStats(StateSpaceStats result) {
-		lastResult.set(result);
-		
-		int nrTotalNodes = result.getNrTotalNodes();
-		int nrTotalTransitions = result.getNrTotalTransitions();
-		int nrProcessedNodes = result.getNrProcessedNodes();
-
+	public void updateSimpleStats(StateSpaceStats result) {
 		Platform.runLater(() -> {
+			lastResult.set(result);
+
+			int nrTotalNodes = result.getNrTotalNodes();
+			int nrTotalTransitions = result.getNrTotalTransitions();
+			int nrProcessedNodes = result.getNrProcessedNodes();
+
 			totalStates.setText(Integer.toString(nrTotalNodes));
 			totalTransitions.setText(Integer.toString(nrTotalTransitions));
 			processedStates.setText(Integer.toString(nrProcessedNodes));

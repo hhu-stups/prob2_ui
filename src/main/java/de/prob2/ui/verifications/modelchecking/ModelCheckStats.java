@@ -57,6 +57,7 @@ public final class ModelCheckStats extends AnchorPane {
 				processedStates.setText(nrProcessedNodes + " (" + percent + " %)");
 				totalStates.setText(String.valueOf(nrTotalNodes));
 				totalTransitions.setText(String.valueOf(nrTotalTransitions));
+				injector.getInstance(StatsView.class).updateSimpleStats(stats);
 			});
 		}
 		
@@ -68,7 +69,7 @@ public final class ModelCheckStats extends AnchorPane {
 			return;
 		}
 		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
-		
+
 		if (coverage != null) {
 			Platform.runLater(() -> injector.getInstance(StatsView.class).updateExtendedStats(coverage));
 		}
