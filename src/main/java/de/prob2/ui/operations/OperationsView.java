@@ -237,13 +237,7 @@ public final class OperationsView extends VBox {
 			}
 		});
 
-		injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable,from,to) -> {
-			if(to) {
-				opsListView.setDisable(false);
-			} else {
-				opsListView.setDisable(true);
-			}
-		});
+		injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable,from,to) -> opsListView.setDisable(!to));
 
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 

@@ -159,6 +159,7 @@ public final class ModelcheckingView extends ScrollPane {
 			if(to != null && (from == null || !from.getOptions().recheckExisting(false).equals(to.getOptions().recheckExisting(false)))) {
 				tvChecks.itemsProperty().unbind();
 				tvChecks.itemsProperty().bind(to.itemsProperty());
+				tvChecks.getSelectionModel().selectFirst();
 			}
 		});
 		
