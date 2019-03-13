@@ -38,6 +38,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import de.prob2.ui.internal.DisablePropertyController;
 
 @FXMLInjected
 @Singleton
@@ -144,14 +145,7 @@ public class TraceReplayView extends ScrollPane {
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				checkButton.disableProperty()
-						.bind(currentTrace.stateSpaceProperty().isNull()
-								.or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
-								.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
-								.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
-								.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-								.or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-								.or(to.tracesProperty().emptyProperty()));
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkButton.disableProperty(), currentTrace.stateSpaceProperty().isNull().or(to.tracesProperty().emptyProperty()));
 			}
 		});
 		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
@@ -215,9 +209,7 @@ public class TraceReplayView extends ScrollPane {
 			row.itemProperty().addListener((observable, from, to) -> {
 				showErrorItem.disableProperty().unbind();
 				if (to != null) {
-					replayTraceItem.disableProperty()
-							.bind(row.emptyProperty().or(traceChecker.currentJobThreadsProperty().emptyProperty().not())
-									.or(row.getItem().selectedProperty().not()));
+					injector.getInstance(DisablePropertyController.class).addDisableProperty(replayTraceItem.disableProperty(), row.emptyProperty().or(row.getItem().selectedProperty().not()));
 					showErrorItem.disableProperty().bind(to.statusProperty().isNotEqualTo(Checked.FAIL));
 					row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 				}

@@ -13,6 +13,7 @@ import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
@@ -265,31 +266,22 @@ public class LTLView extends AnchorPane {
 		formulaSelectedColumn.setGraphic(formulaSelectAll);
 		patternSelectedColumn.setGraphic(patternSelectAll);
 
-		ObservableValue<? extends Boolean> disableChecking = currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not());
-		addMenuButton.disableProperty().bind(disableChecking);
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(addMenuButton.disableProperty(), currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
-		checkMachineButton.disableProperty().bind(disableChecking);
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty());
 		saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(checker.currentJobThreadsProperty().emptyProperty().not())
-						.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-						.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
-						.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
-						.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not()));
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
 				saveLTLButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
 			} else {
-				checkMachineButton.disableProperty().bind(disableChecking);
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty());
 				saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 			}
 		});
-		
-		tvFormula.disableProperty().bind(disableChecking);
+
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvFormula.disableProperty(), currentTrace.existsProperty().not());
 	}
 	
 	public void bindMachine(Machine machine) {

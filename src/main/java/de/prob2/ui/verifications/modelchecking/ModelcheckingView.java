@@ -8,6 +8,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -134,8 +135,8 @@ public final class ModelcheckingView extends ScrollPane {
 				.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
 				.or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
 				.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not());
-		addModelCheckButton.disableProperty().bind(disableChecking);
-		checkMachineButton.disableProperty().bind(disableChecking);
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(addModelCheckButton.disableProperty(), currentTrace.existsProperty().not());
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
@@ -161,9 +162,9 @@ public final class ModelcheckingView extends ScrollPane {
 			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
-		
-		tvItems.disableProperty().bind(disableChecking);
-		tvChecks.disableProperty().bind(disableChecking);
+
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvItems.disableProperty(), currentTrace.existsProperty().not());
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvChecks.disableProperty(), currentTrace.existsProperty().not());
 
 
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {

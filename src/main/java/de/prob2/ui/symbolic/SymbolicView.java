@@ -6,6 +6,7 @@ import de.prob.statespace.FormalismType;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
@@ -19,6 +20,7 @@ import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -151,23 +153,12 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	protected abstract void removeFormula(Machine machine, T item);
 	
 	protected void setBindings() {
-		SymbolicExecutor otherSymbolicExecutor = null;
-		if(executor instanceof SymbolicFormulaChecker) {
-			otherSymbolicExecutor = injector.getInstance(SymbolicAnimationChecker.class);
-		} else {
-			otherSymbolicExecutor = injector.getInstance(SymbolicFormulaChecker.class);
-		}
-		final BooleanBinding disableBinding = currentTrace.existsProperty().not()
-			.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()))
-			.or(executor.currentJobThreadsProperty().emptyProperty().not())
-			.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
-			.or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-			.or(otherSymbolicExecutor.currentJobThreadsProperty().emptyProperty().not())
-			.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not());
-		addFormulaButton.disableProperty().bind(disableBinding);
-		checkMachineButton.disableProperty().bind(disableBinding);
+		final BooleanBinding partOfDisableBinding = currentTrace.existsProperty().not()
+				.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()));
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(addFormulaButton.disableProperty(), partOfDisableBinding);
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), partOfDisableBinding);
 		cancelButton.disableProperty().bind(executor.currentJobThreadsProperty().emptyProperty());
-		tvFormula.disableProperty().bind(disableBinding);
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvFormula.disableProperty(), partOfDisableBinding);
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
