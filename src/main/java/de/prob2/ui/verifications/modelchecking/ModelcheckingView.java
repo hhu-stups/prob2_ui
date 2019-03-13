@@ -41,18 +41,6 @@ import java.util.stream.Collectors;
 @Singleton
 public final class ModelcheckingView extends ScrollPane {
 	
-	@FXML 
-	private TableView<ModelCheckingJobItem> tvChecks;
-	
-	@FXML 
-	private TableColumn<ModelCheckingJobItem, FontAwesomeIconView> jobStatusColumn;
-	
-	@FXML 
-	private TableColumn<ModelCheckingJobItem, Integer> indexColumn;
-	
-	@FXML 
-	private TableColumn<ModelCheckingJobItem, String> messageColumn;
-	
 	@FXML
 	private AnchorPane statsPane;
 
@@ -91,6 +79,18 @@ public final class ModelcheckingView extends ScrollPane {
 	
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
+
+	@FXML
+	private TableView<ModelCheckingJobItem> tvChecks;
+
+	@FXML
+	private TableColumn<ModelCheckingJobItem, FontAwesomeIconView> jobStatusColumn;
+
+	@FXML
+	private TableColumn<ModelCheckingJobItem, Integer> indexColumn;
+
+	@FXML
+	private TableColumn<ModelCheckingJobItem, String> messageColumn;
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
@@ -152,12 +152,13 @@ public final class ModelcheckingView extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
-		
+		tvChecks.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+
+
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null && (from == null || !from.getOptions().recheckExisting(false).equals(to.getOptions().recheckExisting(false)))) {
 				tvChecks.itemsProperty().unbind();
 				tvChecks.itemsProperty().bind(to.itemsProperty());
-				tvChecks.getSelectionModel().selectFirst();
 			}
 		});
 		
@@ -305,6 +306,11 @@ public final class ModelcheckingView extends ScrollPane {
 		Machine machine = currentProject.getCurrentMachine();
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		machine.removeModelcheckingItem(item);
+		if(tvItems.getItems().isEmpty()) {
+			tvChecks.getItems().clear();
+		} else {
+			tvItems.getSelectionModel().selectFirst();
+		}
 	}
 	
 	@FXML

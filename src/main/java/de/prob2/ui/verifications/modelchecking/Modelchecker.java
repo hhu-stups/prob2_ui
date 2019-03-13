@@ -210,6 +210,7 @@ public class Modelchecker implements IModelCheckListener {
 			Trace trace = ((ITraceDescription) result).getTrace(stateSpace);
 			jobItem.setTrace(trace);
 		}
+		modelCheckingView.selectItem(currentItem);
 		modelCheckingView.selectJobItem(jobItem);
 		
 		boolean failed = jobItems.stream()
