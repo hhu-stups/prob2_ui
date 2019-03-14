@@ -9,7 +9,6 @@ import com.google.inject.Singleton;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -22,9 +21,6 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
-import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
