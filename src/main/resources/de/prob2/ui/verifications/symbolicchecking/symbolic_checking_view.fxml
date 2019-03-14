@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.internal.Spacer?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
 <?import javafx.scene.control.Button?>
@@ -21,8 +21,7 @@
 		<HBox styleClass="border" alignment="CENTER">
 			<Button fx:id="checkMachineButton" onAction="#checkMachine">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark"
-						glyphName="CHECK_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%common.checkMachine" />
@@ -30,8 +29,7 @@
 			</Button>
 			<Button fx:id="cancelButton" onAction="#cancel">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark"
-						glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%common.buttons.cancel" />
@@ -41,8 +39,7 @@
 			<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"
 				contentDisplay="GRAPHIC_ONLY">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark"
-						glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
 			</Button>
 			<HelpButton fx:id="helpButton" />

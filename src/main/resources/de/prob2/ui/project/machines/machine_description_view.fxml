@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -36,7 +36,7 @@
 	</VBox>
 	<Button AnchorPane.topAnchor="2.0" AnchorPane.rightAnchor="2.0" onAction="#closeMachineView">
 		<graphic>
-			<FontAwesomeIconView fill="#555560" glyphName="CLOSE" glyphSize="${fontSize.fontSize}"/>
+			<BindableGlyph textFill="#555560" fontFamily="FontAwesome" icon="CLOSE" bindableFontSize="${fontSize.fontSize}"/>
 		</graphic>
 	</Button>
 </fx:root>

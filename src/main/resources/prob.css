@@ -72,11 +72,11 @@
 }
 
 .icon-basic {
-	-fx-fill: -prob-lightgrey;
+	-fx-text-fill: -prob-lightgrey;
 }
 
 .icon-dark {
-	-fx-fill: -prob-grey;
+	-fx-text-fill: -prob-grey;
 	-fx-opacity: 0.85;
 }
 
@@ -894,22 +894,22 @@
 	-fx-text-fill: white;
 }
 
-.operations-cell.errored .glyph-icon,
-.operations-cell.unexplored .glyph-icon,
-.operations-cell.normal .glyph-icon {
-	-fx-fill: limegreen;
+.operations-cell.errored .glyph-font,
+.operations-cell.unexplored .glyph-font,
+.operations-cell.normal .glyph-font {
+	-fx-text-fill: limegreen;
 }
 
-.operations-cell.skip .glyph-icon {
-	-fx-fill: -prob-lightblue;
+.operations-cell.skip .glyph-font {
+	-fx-text-fill: -prob-lightblue;
 }
 
-.operations-cell.timeout .glyph-icon {
-	-fx-fill: orange;
+.operations-cell.timeout .glyph-font {
+	-fx-text-fill: orange;
 }
 
-.operations-cell.disabled .glyph-icon {
-	-fx-fill: red;
+.operations-cell.disabled .glyph-font {
+	-fx-text-fill: red;
 }
 
 /* =================== PROJECT VIEW ================== */
@@ -928,13 +928,11 @@
 	-fx-font-style: italic;
 	-fx-font-size: 0.9em;
 }
-.machines-item .icon {
-	-glyph-name: "PLAY";
-	-fx-fill: darkgray;
+.machines-item .status-icon {
+	-fx-text-fill: darkgray;
 }
-.machines-item .icon.running {
-	-glyph-name: "SPINNER";
-	-fx-fill: limegreen;
+.machines-item .status-icon.running {
+	-fx-text-fill: limegreen;
 }
 .project-location {
 	-fx-font-family: ARIAL;

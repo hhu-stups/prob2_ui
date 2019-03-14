@@ -25,8 +25,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.Main;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
@@ -95,7 +93,6 @@ public class HelpSystem extends StackPane {
 		}
 
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
-		external.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.EXTERNAL_LINK_SQUARE));
 	}
 
 	private TreeItem<String> createNode(final File file) {

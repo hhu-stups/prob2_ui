@@ -1,10 +1,12 @@
 package de.prob2.ui.stats;
 
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
@@ -12,9 +14,11 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
@@ -30,8 +34,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
-import java.util.List;
-import java.util.ResourceBundle;
+import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
@@ -98,7 +101,7 @@ public class StatsView extends ScrollPane {
 		this.currentTrace.addListener((observable, from, to) -> this.update(to));
 		this.update(currentTrace.get());
 
-		((FontAwesomeIconView) helpButton.getGraphic()).glyphSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
+		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
 
 		numberOfStatesAnchorPane.widthProperty().addListener((observable, from, to) -> {
 			stateStats.getColumnConstraints().get(1).setMinWidth(to.doubleValue());
@@ -113,18 +116,18 @@ public class StatsView extends ScrollPane {
 
 	@FXML
 	private void handleExtendedStatsToggle() {
-		final FontAwesomeIcon icon;
+		final FontAwesome.Glyph icon;
 		final String text;
 		if (extendedStatsToggle.isSelected()) {
 			this.update(currentTrace.get());
 
-			icon = FontAwesomeIcon.CLOSE;
+			icon = FontAwesome.Glyph.CLOSE;
 			text = bundle.getString("stats.statsView.hideExtendedStats");
 		} else {
-			icon = FontAwesomeIcon.PLUS_CIRCLE;
+			icon = FontAwesome.Glyph.PLUS_CIRCLE;
 			text = bundle.getString("stats.statsView.showExtendedStats");
 		}
-		((FontAwesomeIconView)extendedStatsToggle.getGraphic()).setIcon(icon);
+		((BindableGlyph)extendedStatsToggle.getGraphic()).setIcon(icon);
 		extendedStatsToggle.setText(text);
 		extendedStatsToggle.setTooltip(new Tooltip(text));
 	}

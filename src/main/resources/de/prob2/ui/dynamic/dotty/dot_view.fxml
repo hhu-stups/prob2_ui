@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.dynamic.dotty.DotView?>
-<?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.dynamic.DynamicCommandStatusBar?>
-<?import de.prob2.ui.dynamic.DynamicPreferencesTableView?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.menu.ViewMenu?>
 <?import de.prob2.ui.menu.WindowMenu?>
@@ -22,7 +21,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.web.WebView?>
-
 <fx:root type="DotView" title="%dotty.stage.title" minWidth="800" minHeight="600" width="1600.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -48,12 +46,12 @@
 								<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />
 								<Button fx:id="saveButton" onAction="#save" HBox.hgrow="NEVER">
 									<graphic>
-										<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 									</graphic>
 								</Button>
 								<Button fx:id="cancelButton" onAction="#cancel" HBox.hgrow="NEVER">
 									<graphic>
-										<FontAwesomeIconView styleClass="icon-dark" glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}"/>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
@@ -82,12 +80,12 @@
 							<HBox alignment="TOP_RIGHT" style="-fx-background-color: transparent;">
 								<Button fx:id="zoomInButton" onAction="#zoomIn">
 									<graphic>
-										<FontAwesomeIconView styleClass="icon-dark" glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
 								<Button fx:id="zoomOutButton" onAction="#zoomOut">
 									<graphic>
-										<FontAwesomeIconView styleClass="icon-dark" glyphName="MINUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}"/>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
 							</HBox>

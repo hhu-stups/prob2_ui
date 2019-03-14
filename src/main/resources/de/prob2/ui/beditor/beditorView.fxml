@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.beditor.BEditor?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -20,7 +20,7 @@
 		<HBox styleClass="border" alignment="CENTER_LEFT">
 			<Button fx:id="saveButton" onAction="#handleSave">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark" glyphName="SAVE" glyphSize="${fontSize.fontSize + 4}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 4}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%menu.file.items.saveMachine"/>
@@ -28,7 +28,7 @@
 			</Button>
 			<Button fx:id="openExternalButton" onAction="#handleOpenExternal">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark" glyphName="EXTERNAL_LINK" glyphSize="${fontSize.fontSize + 4}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="EXTERNAL_LINK" bindableFontSize="${fontSize.fontSize + 4}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%beditor.tooltips.openMachine"/>

@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListCell?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.VBox?>
 <fx:root type="ListCell" stylesheets="@/prob.css" styleClass="machines-item" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
+		<FontSize fx:id="fontSize"/>
 		<ContextMenu fx:id="contextMenu">
 			<items>
-				<!--<MenuItem text="%project.machines.machinesItem.contextMenu.items.editMachineFile" onAction="#handleEditFile"/>-->
 				<MenuItem text="%project.machines.machinesItem.contextMenu.items.editMachineFileInExternalEditor" onAction="#handleEditFileExternal"/>
 				<MenuItem fx:id="showInternalItem" text="%project.machines.machinesItem.contextMenu.items.showInternalRepresentation" onAction="#handleShowInternal"/>
 				<SeparatorMenuItem />
@@ -28,7 +29,7 @@
 		<VBox>
 			<Label fx:id="nameLabel" styleClass="name">
 				<graphic>
-					<FontAwesomeIconView fx:id="runningIcon" styleClass="icon"/>
+					<BindableGlyph fx:id="statusIcon" styleClass="status-icon" fontFamily="FontAwesome" icon="PLAY" fontSize="${fontSize.fontSize}"/>
 				</graphic>
 			</Label>
 			<Label fx:id="locationLabel" styleClass="location" />

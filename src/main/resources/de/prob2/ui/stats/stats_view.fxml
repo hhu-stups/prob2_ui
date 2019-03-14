@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
@@ -50,7 +50,7 @@
 					<ToggleButton onAction="#handleExtendedStatsToggle"
 						fx:id="extendedStatsToggle" text="%stats.statsView.showExtendedStats">
 						<graphic>
-							<FontAwesomeIconView fill="#555560" glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 1.2}" />
+							<BindableGlyph textFill="#555560" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 1.2}" />
 						</graphic>
 						<tooltip>
 							<Tooltip text="%stats.statsView.showExtendedStats" />
