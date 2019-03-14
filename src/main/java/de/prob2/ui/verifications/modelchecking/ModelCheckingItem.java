@@ -17,11 +17,9 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
 
-public class ModelCheckingItem implements IExecutableItem {
+public class ModelCheckingItem extends AbstractModelCheckingItem implements IExecutableItem {
 
 	private ModelCheckingOptions options;
-	
-	private transient FontAwesomeIconView status;
 	
 	private transient FontAwesomeIconView deadlocks;
 	
@@ -33,8 +31,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private transient FontAwesomeIconView stopWhenAllOperationsCovered;
 	
-	private Checked checked;
-	
 	private String strategy;
 	
 	private BooleanProperty shouldExecute;
@@ -42,13 +38,12 @@ public class ModelCheckingItem implements IExecutableItem {
 	private transient ListProperty<ModelCheckingJobItem> items;
 
 	public ModelCheckingItem(ModelCheckingOptions options, String strategy) {
+		super();
 		Objects.requireNonNull(options);
-		
 		this.options = options;
 		this.strategy = strategy;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
-		
 		initialize();
 	}
 	
@@ -81,21 +76,34 @@ public class ModelCheckingItem implements IExecutableItem {
 	public BooleanProperty selectedProperty() {
 		return shouldExecute;
 	}
-	
+
+
+	/*
+	* This function is needed for initializing status and checked for items that are loaded via JSON and might not contain
+	* these fields.
+	*/
 	public void initialize() {
 		if(this.items == null) {
 			this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 		}
-		initializeStatus();
+		if(this.checked == null || this.status == null) {
+			initializeStatus();
+		}
 		initializeOptionIcons(options);
 	}
-	
+
+	/*
+	* Required in initialize
+	*/
 	private void initializeStatus() {
 		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.status.setFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
 	}
-	
+
+	/*
+	* Required in initialize
+	*/
 	private void initializeOptionIcons(ModelCheckingOptions options) {
 		this.deadlocks = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
 		this.invariantViolations = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
@@ -126,35 +134,9 @@ public class ModelCheckingItem implements IExecutableItem {
 		}
 	}
 	
-	public FontAwesomeIconView getStatus() {
-		return status;
-	}
-	
-	
-	public void setCheckedSuccessful() {
-		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
-		icon.setFill(Color.GREEN);
-		this.status = icon;
-		this.checked = Checked.SUCCESS;
-	}
-
-	public void setCheckedFailed() {
-		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
-		icon.setFill(Color.RED);
-		this.status = icon;
-		this.checked = Checked.FAIL;
-	}
-	
-	public void setTimeout() {
-		FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
-		icon.setFill(Color.YELLOW);
-		this.status = icon;
-		this.checked = Checked.TIMEOUT;
-	}
-	
 	@Override
 	public Checked getChecked() {
-		return checked;
+		return super.getChecked();
 	}
 	
 	public FontAwesomeIconView getDeadlocks() {
