@@ -1,9 +1,19 @@
 package de.prob2.ui.project.machines;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
@@ -11,6 +21,7 @@ import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -21,6 +32,7 @@ import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -38,25 +50,17 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+
+import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
 public class MachinesTab extends Tab {
 	private final class MachinesItem extends ListCell<Machine> {
 		@FXML private Label nameLabel;
-		@FXML private FontAwesomeIconView runningIcon;
+		@FXML private BindableGlyph statusIcon;
 		@FXML private Label locationLabel;
 		@FXML private ContextMenu contextMenu;
 		@FXML private Menu startAnimationMenu;
@@ -126,11 +130,13 @@ public class MachinesTab extends Tab {
 		
 		private void refresh() {
 			if (Objects.equals(this.machineProperty.get(), currentProject.getCurrentMachine())) {
-				if (!runningIcon.getStyleClass().contains("running")) {
-					runningIcon.getStyleClass().add("running");
+				if (!statusIcon.getStyleClass().contains("running")) {
+					statusIcon.getStyleClass().add("running");
 				}
+				statusIcon.setIcon(FontAwesome.Glyph.SPINNER);
 			} else {
-				runningIcon.getStyleClass().remove("running");
+				statusIcon.getStyleClass().remove("running");
+				statusIcon.setIcon(FontAwesome.Glyph.PLAY);
 			}
 		}
 		
@@ -166,7 +172,7 @@ public class MachinesTab extends Tab {
 				this.machineProperty.set(null);
 				this.nameLabel.textProperty().unbind();
 				this.nameLabel.setText(null);
-				this.runningIcon.setVisible(false);
+				this.statusIcon.setVisible(false);
 				this.locationLabel.setText(null);
 				this.setContextMenu(null);
 			} else {
@@ -177,7 +183,7 @@ public class MachinesTab extends Tab {
 					Bindings.selectString(machineProperty.get().lastUsedProperty(), "name"),
 					machineProperty.get().nameProperty()
 				));
-				this.runningIcon.setVisible(true);
+				this.statusIcon.setVisible(true);
 				this.locationLabel.setText(machineProperty.get().getPath().toString());
 				this.setContextMenu(contextMenu);
 			}

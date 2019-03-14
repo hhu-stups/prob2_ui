@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.internal.NavigationButtons?>
 <?import de.prob2.ui.internal.Spacer?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.operations.OperationsView?>
 <?import javafx.geometry.Insets?>
@@ -42,8 +42,7 @@
 			<Spacer/>
 			<Button fx:id="sortButton" onAction="#handleSortButton">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark"
-						glyphName="SORT" glyphSize="${fontSize.fontSize + 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SORT" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%operations.operationsView.tooltips.sort" />
@@ -51,8 +50,7 @@
 			</Button>
 			<ToggleButton fx:id="disabledOpsToggle" onAction="#handleDisabledOpsToggle" selected="true">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark"
-						glyphName="EYE" glyphSize="${fontSize.fontSize + 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="EYE" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%operations.operationsView.tooltips.showDisabled"/>
@@ -60,8 +58,7 @@
 			</ToggleButton>
 			<ToggleButton fx:id="unambiguousToggle" onAction="#handleUnambiguousToggle">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark"
-						glyphName="MINUS_SQUARE" glyphSize="${fontSize.fontSize + 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_SQUARE" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%operations.operationsView.tooltips.showUnambiguous"/>
@@ -82,8 +79,7 @@
 					</CustomMenuItem>
 				</items>
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark"
-						glyphName="RANDOM" glyphSize="${fontSize.fontSize + 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RANDOM" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
 				<tooltip>
 					<Tooltip text="%operations.operationsView.tooltips.random" />
@@ -91,7 +87,7 @@
 			</MenuButton>
 			<Button fx:id="cancelButton" onAction="#cancel">
 				<graphic>
-					<FontAwesomeIconView styleClass="icon-dark" glyphName="STOP" glyphSize="${fontSize.fontSize + 2}"/>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="STOP" bindableFontSize="${fontSize.fontSize + 2}"/>
 				</graphic>
 				<tooltip>
 					<Tooltip text="%operations.operationsView.tooltips.cancelRandom"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.states.StatesView?>
 <?import javafx.geometry.Insets?>
@@ -13,7 +13,6 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
 <fx:root type="StatesView" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -28,7 +27,7 @@
 					<Insets left="10.0" right="10.0"/>
 				</HBox.margin>
 				<graphic>
-					<FontAwesomeIconView glyphName="SEARCH" styleClass="icon-basic" glyphSize="${fontSize.fontSize}"/>
+					<BindableGlyph styleClass="icon-basic" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize}"/>
 				</graphic>
 			</Button>
 			<TextField fx:id="filterState" onAction="#handleSearchButton" promptText="%states.statesView.search.prompt" HBox.hgrow="ALWAYS" />

@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.internal.Spacer?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.AnchorPane?>
-
 <fx:root type="LTLView"
 	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -27,8 +26,7 @@
 			<HBox styleClass="border" alignment="CENTER">
 				<Button fx:id="checkMachineButton" disable="true" onAction="#checkMachine">
 					<graphic>
-						<FontAwesomeIconView styleClass="icon-dark"
-							glyphName="CHECK_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 					</graphic>
 					<tooltip>
 						<Tooltip text="%common.checkMachine" />
@@ -36,8 +34,7 @@
 				</Button>
 				<Button fx:id="cancelButton" onAction="#cancel">
 					<graphic>
-						<FontAwesomeIconView styleClass="icon-dark"
-							glyphName="TIMES_CIRCLE_ALT" glyphSize="${fontSize.fontSize * 2}" />
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 					</graphic>
 					<tooltip>
 						<Tooltip text="%common.buttons.cancel" />
@@ -46,8 +43,7 @@
 				<Spacer/>
 				<Button fx:id="saveLTLButton" onAction="#saveLTL">
 					<graphic>
-						<FontAwesomeIconView styleClass="icon-dark"
-											 glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 					</graphic>
 					<tooltip>
 						<Tooltip text="%common.buttons.save" />
@@ -55,7 +51,7 @@
 				</Button>
 				<Button fx:id="loadLTLButton" onAction="#loadLTL">
 					<graphic>
-						<FontAwesomeIconView styleClass="icon-dark" glyphName="FOLDER_OPEN" glyphSize="${fontSize.fontSize + 2}" />
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
 					</graphic>
 					<tooltip>
 						<Tooltip text="%common.buttons.load" />
@@ -69,8 +65,7 @@
 							text="%verifications.ltl.ltlView.addPattern" />
 					</items>
 					<graphic>
-						<FontAwesomeIconView styleClass="icon-dark"
-							glyphName="PLUS_CIRCLE" glyphSize="${fontSize.fontSize * 2}" />
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 					</graphic>
 					<tooltip>
 						<Tooltip text="%verifications.ltl.ltlView.tooltips.addFormulaOrPattern" />

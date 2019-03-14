@@ -1,10 +1,25 @@
 package de.prob2.ui.operations;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.LoadedMachine;
@@ -19,12 +34,14 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -49,25 +66,12 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+
+import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.sawano.java.text.AlphanumericComparator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
@@ -111,16 +115,16 @@ public final class OperationsView extends VBox {
 			if (item != null && !empty) {
 				setText(item.toPrettyString());
 				setDisable(true);
-				final FontAwesomeIconView icon;
+				final FontAwesome.Glyph icon;
 				switch (item.getStatus()) {
 				case TIMEOUT:
-					icon = new FontAwesomeIconView(FontAwesomeIcon.CLOCK_ALT);
+					icon = FontAwesome.Glyph.CLOCK_ALT;
 					getStyleClass().add("timeout");
 					setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.timeout")));
 					break;
 
 				case ENABLED:
-					icon = new FontAwesomeIconView(item.isSkip() ? FontAwesomeIcon.REPEAT : FontAwesomeIcon.PLAY);
+					icon = item.isSkip() ? FontAwesome.Glyph.REPEAT : FontAwesome.Glyph.PLAY;
 					setDisable(false);
 					getStyleClass().add("enabled");
 					if (!item.isExplored()) {
@@ -139,7 +143,7 @@ public final class OperationsView extends VBox {
 					break;
 
 				case DISABLED:
-					icon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
+					icon = FontAwesome.Glyph.MINUS_CIRCLE;
 					getStyleClass().add("disabled");
 					setTooltip(null);
 					break;
@@ -147,9 +151,9 @@ public final class OperationsView extends VBox {
 				default:
 					throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
-				FontSize fontsize = injector.getInstance(FontSize.class);
-				icon.glyphSizeProperty().bind(fontsize.fontSizeProperty());
-				setGraphic(icon);
+				final BindableGlyph graphic = new BindableGlyph("FontAwesome", icon);
+				graphic.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
+				setGraphic(graphic);
 			} else {
 				setDisable(true);
 				setGraphic(null);
@@ -261,36 +265,36 @@ public final class OperationsView extends VBox {
 		cancelButton.disableProperty().bind(randomExecutionThread.isNull());
 
 		showDisabledOps.addListener((o, from, to) -> {
-			((FontAwesomeIconView)disabledOpsToggle.getGraphic()).setIcon(to ? FontAwesomeIcon.EYE : FontAwesomeIcon.EYE_SLASH);
+			((BindableGlyph)disabledOpsToggle.getGraphic()).setIcon(to ? FontAwesome.Glyph.EYE : FontAwesome.Glyph.EYE_SLASH);
 			disabledOpsToggle.setSelected(to);
 			update(currentTrace.get());
 		});
 
 		showUnambiguous.addListener((o, from, to) -> {
-			((FontAwesomeIconView)unambiguousToggle.getGraphic()).setIcon(to ? FontAwesomeIcon.PLUS_SQUARE : FontAwesomeIcon.MINUS_SQUARE);
+			((BindableGlyph)unambiguousToggle.getGraphic()).setIcon(to ? FontAwesome.Glyph.PLUS_SQUARE : FontAwesome.Glyph.MINUS_SQUARE);
 			unambiguousToggle.setSelected(to);
 			update(currentTrace.get());
 		});
 
 		sortMode.addListener((o, from, to) -> {
-			final FontAwesomeIcon icon;
+			final FontAwesome.Glyph icon;
 			switch (to) {
 				case A_TO_Z:
-					icon = FontAwesomeIcon.SORT_ALPHA_ASC;
+					icon = FontAwesome.Glyph.SORT_ALPHA_ASC;
 					break;
 				
 				case Z_TO_A:
-					icon = FontAwesomeIcon.SORT_ALPHA_DESC;
+					icon = FontAwesome.Glyph.SORT_ALPHA_DESC;
 					break;
 				
 				case MODEL_ORDER:
-					icon = FontAwesomeIcon.SORT;
+					icon = FontAwesome.Glyph.SORT;
 					break;
 				
 				default:
 					throw new IllegalStateException("Unhandled sort mode: " + to);
 			}
-			((FontAwesomeIconView)sortButton.getGraphic()).setIcon(icon);
+			((BindableGlyph)sortButton.getGraphic()).setIcon(icon);
 			
 			doSort();
 			opsListView.getItems().setAll(applyFilter(searchBar.getText()));

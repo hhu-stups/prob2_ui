@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.internal.NavigationButtons?>
 <?import de.prob2.ui.internal.Spacer?>
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -26,8 +26,7 @@
 		<Spacer/>
 		<Button fx:id="saveTraceButton" onAction="#saveTrace">
 			<graphic>
-				<FontAwesomeIconView styleClass="icon-dark"
-					glyphName="SAVE" glyphSize="${fontSize.fontSize + 2}" />
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 			</graphic>
 			<tooltip>
 				<Tooltip text="%history.buttons.saveTrace.tooltip" />
