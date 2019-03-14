@@ -64,6 +64,11 @@ opens += [
 	"javafx.graphics/com.sun.javafx.tk.quantum",
 ]
 
+// Required by controlsfx (as of version 11.0.0-RC2; see https://github.com/controlsfx/controlsfx/issues/1100)
+exports += [
+	"javafx.graphics/com.sun.javafx.css",
+]
+
 // Required by richtextfx (as of version 0.9.x; planned to be fixed in 0.10, see https://github.com/FXMisc/RichTextFX/issues/776)
 exports += [
 	"javafx.graphics/com.sun.javafx.geom",
@@ -95,6 +100,7 @@ dependencies {
 	compile group: "de.jensd", name: "fontawesomefx-commons", version: "9.1.2-jpms"
 	// Cannot update to the next higher version (4.7.0-9), because its class files are compiled for Java 9.
 	compile group: "de.jensd", name: "fontawesomefx-fontawesome", version: "4.7.0-5"
+	compile group: "org.controlsfx", name: "controlsfx", version: "11.0.0-RC2"
 	compile group: "org.fxmisc.richtext", name: "richtextfx", version: "0.9.2"
 	compile group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
 	compile group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.2"
