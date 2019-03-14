@@ -134,11 +134,6 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 		}
 	}
 	
-	@Override
-	public Checked getChecked() {
-		return super.getChecked();
-	}
-	
 	public FontAwesomeIconView getDeadlocks() {
 		return deadlocks;
 	}

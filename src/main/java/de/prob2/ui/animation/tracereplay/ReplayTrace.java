@@ -38,7 +38,7 @@ public class ReplayTrace implements IExecutableItem {
 	public ObjectProperty<Checked> statusProperty() {
 		return status;
 	}
-	
+
 	@Override
 	public Checked getChecked() {
 		return this.status.get();

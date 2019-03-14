@@ -1,10 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob.statespace.Trace;
-import de.prob2.ui.verifications.Checked;
-import javafx.scene.paint.Color;
 
 public class ModelCheckingJobItem extends AbstractModelCheckingItem {
 
@@ -37,10 +33,6 @@ public class ModelCheckingJobItem extends AbstractModelCheckingItem {
 	
 	public String getMessage() {
 		return message;
-	}
-	
-	public Checked getChecked() {
-		return super.getChecked();
 	}
 	
 	public void setTrace(Trace trace) {
