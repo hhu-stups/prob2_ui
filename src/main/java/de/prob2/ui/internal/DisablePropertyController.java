@@ -8,7 +8,6 @@ import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 
@@ -20,13 +19,10 @@ import javafx.beans.property.BooleanProperty;
 @Singleton
 public class DisablePropertyController {
 
-    private final Injector injector;
-
     private final BooleanExpression disableProperty;
 
     @Inject
     public DisablePropertyController(final Injector injector) {
-        this.injector = injector;
         this.disableProperty = injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not()
                 .or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
                 .or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
