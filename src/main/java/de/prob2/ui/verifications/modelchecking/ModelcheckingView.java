@@ -130,11 +130,6 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 	
 	private void setBindings() {
-		ObservableValue<? extends Boolean> disableChecking = currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not());
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(addModelCheckButton.disableProperty(), currentTrace.existsProperty().not());
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
