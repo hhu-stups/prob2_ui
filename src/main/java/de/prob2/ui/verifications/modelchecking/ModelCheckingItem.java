@@ -3,13 +3,12 @@ package de.prob2.ui.verifications.modelchecking;
 import java.util.List;
 import java.util.Objects;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingOptions.Options;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -17,19 +16,21 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
 
+import org.controlsfx.glyphfont.FontAwesome;
+
 public class ModelCheckingItem extends AbstractModelCheckingItem implements IExecutableItem {
 
 	private ModelCheckingOptions options;
 	
-	private transient FontAwesomeIconView deadlocks;
+	private transient BindableGlyph deadlocks;
 	
-	private transient FontAwesomeIconView invariantViolations;
+	private transient BindableGlyph invariantViolations;
 	
-	private transient FontAwesomeIconView assertionViolations;
+	private transient BindableGlyph assertionViolations;
 	
-	private transient FontAwesomeIconView goals;
+	private transient BindableGlyph goals;
 	
-	private transient FontAwesomeIconView stopWhenAllOperationsCovered;
+	private transient BindableGlyph stopWhenAllOperationsCovered;
 	
 	private String strategy;
 	
@@ -96,8 +97,8 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 	* Required in initialize
 	*/
 	private void initializeStatus() {
-		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		this.status.setFill(Color.BLUE);
+		this.status = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		this.status.setTextFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
 	}
 
@@ -105,17 +106,17 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 	* Required in initialize
 	*/
 	private void initializeOptionIcons(ModelCheckingOptions options) {
-		this.deadlocks = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		this.invariantViolations = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		this.assertionViolations = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		this.goals = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		this.stopWhenAllOperationsCovered = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
+		this.deadlocks = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		this.invariantViolations = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		this.assertionViolations = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		this.goals = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		this.stopWhenAllOperationsCovered = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
 		
-		this.deadlocks.setFill(Color.BLUE);
-		this.invariantViolations.setFill(Color.BLUE);
-		this.assertionViolations.setFill(Color.BLUE);
-		this.goals.setFill(Color.BLUE);
-		this.stopWhenAllOperationsCovered.setFill(Color.BLUE);
+		this.deadlocks.setTextFill(Color.BLUE);
+		this.invariantViolations.setTextFill(Color.BLUE);
+		this.assertionViolations.setTextFill(Color.BLUE);
+		this.goals.setTextFill(Color.BLUE);
+		this.stopWhenAllOperationsCovered.setTextFill(Color.BLUE);
 		
 		initializeOptionIcon(this.deadlocks, options, Options.FIND_DEADLOCKS);
 		initializeOptionIcon(this.invariantViolations, options, Options.FIND_INVARIANT_VIOLATIONS);
@@ -124,33 +125,33 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 		initializeOptionIcon(this.stopWhenAllOperationsCovered, options, Options.STOP_AT_FULL_COVERAGE);
 	}
 	
-	private void initializeOptionIcon(FontAwesomeIconView icon, ModelCheckingOptions options, Options option) {
+	private void initializeOptionIcon(BindableGlyph icon, ModelCheckingOptions options, Options option) {
 		if(options.getPrologOptions().contains(option)) {
-			icon.setIcon(FontAwesomeIcon.CHECK);
-			icon.setFill(Color.GREEN);
+			icon.setIcon(FontAwesome.Glyph.CHECK);
+			icon.setTextFill(Color.GREEN);
 		} else {
-			icon.setIcon(FontAwesomeIcon.REMOVE);
-			icon.setFill(Color.RED);
+			icon.setIcon(FontAwesome.Glyph.REMOVE);
+			icon.setTextFill(Color.RED);
 		}
 	}
 	
-	public FontAwesomeIconView getDeadlocks() {
+	public BindableGlyph getDeadlocks() {
 		return deadlocks;
 	}
 	
-	public FontAwesomeIconView getInvariantViolations() {
+	public BindableGlyph getInvariantViolations() {
 		return invariantViolations;
 	}
 	
-	public FontAwesomeIconView getAssertionViolations() {
+	public BindableGlyph getAssertionViolations() {
 		return assertionViolations;
 	}
 	
-	public FontAwesomeIconView getGoals() {
+	public BindableGlyph getGoals() {
 		return goals;
 	}
 	
-	public FontAwesomeIconView getStopWhenAllOperationsCovered() {
+	public BindableGlyph getStopWhenAllOperationsCovered() {
 		return stopWhenAllOperationsCovered;
 	}
 	

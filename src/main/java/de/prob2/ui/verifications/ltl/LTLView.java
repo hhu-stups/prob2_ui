@@ -8,13 +8,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
@@ -83,7 +83,7 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> formulaSelectedColumn;
 	@FXML
-	private TableColumn<LTLFormulaItem, FontAwesomeIconView> formulaStatusColumn;
+	private TableColumn<LTLFormulaItem, BindableGlyph> formulaStatusColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaColumn;
 	@FXML
@@ -91,7 +91,7 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> patternSelectedColumn;
 	@FXML
-	private TableColumn<LTLPatternItem, FontAwesomeIconView> patternStatusColumn;
+	private TableColumn<LTLPatternItem, BindableGlyph> patternStatusColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternColumn;
 	@FXML

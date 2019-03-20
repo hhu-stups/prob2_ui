@@ -1,25 +1,25 @@
 package de.prob2.ui.verifications.modelchecking;
 
-
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.verifications.Checked;
+
 import javafx.scene.paint.Color;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import org.controlsfx.glyphfont.FontAwesome;
 
 public abstract class AbstractModelCheckingItem {
 
-    protected transient FontAwesomeIconView status;
+    protected transient BindableGlyph status;
 
     protected Checked checked;
 
     public AbstractModelCheckingItem() {
-        this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-        this.status.setFill(Color.BLUE);
+        this.status = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+        this.status.setTextFill(Color.BLUE);
         this.checked = Checked.NOT_CHECKED;
     }
 
-    public FontAwesomeIconView getStatus() {
+    public BindableGlyph getStatus() {
         return status;
     }
 
@@ -28,23 +28,20 @@ public abstract class AbstractModelCheckingItem {
     }
 
     public void setCheckedSuccessful() {
-        FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
-        icon.setFill(Color.GREEN);
-        this.status = icon;
+        this.status.setIcon(FontAwesome.Glyph.CHECK);
+        this.status.setTextFill(Color.GREEN);
         this.checked = Checked.SUCCESS;
     }
 
     public void setCheckedFailed() {
-        FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.REMOVE);
-        icon.setFill(Color.RED);
-        this.status = icon;
+        this.status.setIcon(FontAwesome.Glyph.REMOVE);
+        this.status.setTextFill(Color.RED);
         this.checked = Checked.FAIL;
     }
 
     public void setTimeout() {
-        FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
-        icon.setFill(Color.YELLOW);
-        this.status = icon;
+        this.status.setIcon(FontAwesome.Glyph.EXCLAMATION_TRIANGLE);
+        this.status.setTextFill(Color.YELLOW);
         this.checked = Checked.TIMEOUT;
     }
 

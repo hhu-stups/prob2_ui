@@ -1,14 +1,18 @@
 package de.prob2.ui.verifications.modelchecking;
 
 
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -18,6 +22,7 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -34,9 +39,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 
 @FXMLInjected
@@ -59,25 +61,25 @@ public final class ModelcheckingView extends ScrollPane {
 	private TableView<ModelCheckingItem> tvItems;
 	
 	@FXML
-	private TableColumn<ModelCheckingItem, FontAwesomeIconView> statusColumn;
+	private TableColumn<ModelCheckingItem, BindableGlyph> statusColumn;
 	
 	@FXML
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
 	
 	@FXML
-	private TableColumn<ModelCheckingItem, FontAwesomeIconView> deadlockColumn;
+	private TableColumn<ModelCheckingItem, BindableGlyph> deadlockColumn;
 	
 	@FXML
-	private TableColumn<ModelCheckingItem, FontAwesomeIconView> invariantsViolationsColumn;
+	private TableColumn<ModelCheckingItem, BindableGlyph> invariantsViolationsColumn;
 	
 	@FXML
-	private TableColumn<ModelCheckingItem, FontAwesomeIconView> assertionViolationsColumn;
+	private TableColumn<ModelCheckingItem, BindableGlyph> assertionViolationsColumn;
 	
 	@FXML
-	private TableColumn<ModelCheckingItem, FontAwesomeIconView> goalsColumn;
+	private TableColumn<ModelCheckingItem, BindableGlyph> goalsColumn;
 	
 	@FXML
-	private TableColumn<ModelCheckingItem, FontAwesomeIconView> stopAtFullCoverageColumn;
+	private TableColumn<ModelCheckingItem, BindableGlyph> stopAtFullCoverageColumn;
 	
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -86,7 +88,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private TableView<ModelCheckingJobItem> tvChecks;
 
 	@FXML
-	private TableColumn<ModelCheckingJobItem, FontAwesomeIconView> jobStatusColumn;
+	private TableColumn<ModelCheckingJobItem, BindableGlyph> jobStatusColumn;
 
 	@FXML
 	private TableColumn<ModelCheckingJobItem, Integer> indexColumn;

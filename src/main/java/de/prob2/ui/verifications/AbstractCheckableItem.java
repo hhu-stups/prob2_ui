@@ -1,16 +1,17 @@
 package de.prob2.ui.verifications;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.prob2.ui.layout.BindableGlyph;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
+import org.controlsfx.glyphfont.FontAwesome;
+
 public abstract class AbstractCheckableItem implements IExecutableItem {
-	
-	protected transient FontAwesomeIconView status;
+	protected transient BindableGlyph status;
 	protected Checked checked;
 	protected String name;
 	protected String description;
@@ -35,8 +36,8 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		
 	public void initialize() {
 		replaceMissingWithDefaults();
-		this.status = new FontAwesomeIconView(FontAwesomeIcon.QUESTION_CIRCLE);
-		this.status.setFill(Color.BLUE);
+		this.status = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		this.status.setTextFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
 		this.resultItem = new SimpleObjectProperty<>(null);
 	}
@@ -47,7 +48,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		}
 	}
 
-	public FontAwesomeIconView getStatus() {
+	public BindableGlyph getStatus() {
 		return status;
 	}
 	
@@ -105,23 +106,23 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	}
 	
 	public void setCheckedSuccessful() {
-		status.setIcon(FontAwesomeIcon.CHECK);
-		status.setFill(Color.GREEN);
+		status.setIcon(FontAwesome.Glyph.CHECK);
+		status.setTextFill(Color.GREEN);
 	}
 
 	public void setCheckedFailed() {
-		status.setIcon(FontAwesomeIcon.REMOVE);
-		status.setFill(Color.RED);
+		status.setIcon(FontAwesome.Glyph.REMOVE);
+		status.setTextFill(Color.RED);
 	}
 	
 	public void setCheckInterrupted() {
-		status.setIcon(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
-		status.setFill(Color.YELLOW);
+		status.setIcon(FontAwesome.Glyph.EXCLAMATION_TRIANGLE);
+		status.setTextFill(Color.YELLOW);
 	}
 
 	public void setParseError() {
-		status.setIcon(FontAwesomeIcon.EXCLAMATION_TRIANGLE);
-		status.setFill(Color.ORANGE);
+		status.setIcon(FontAwesome.Glyph.EXCLAMATION_TRIANGLE);
+		status.setTextFill(Color.ORANGE);
 	}
 	
 	public void setChecked(Checked checked) {

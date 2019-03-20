@@ -4,10 +4,9 @@ import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 
@@ -17,6 +16,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import org.controlsfx.glyphfont.FontAwesome;
+
 @FXMLInjected
 @Singleton
 public class MachineTableView extends TableView<Machine> {
@@ -25,7 +26,7 @@ public class MachineTableView extends TableView<Machine> {
 			super();
 			
 			this.setText(null);
-			final FontAwesomeIconView iconView = new FontAwesomeIconView();
+			final BindableGlyph iconView = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
 			iconView.setVisible(false);
 			iconView.getStyleClass().addAll("status-icon", "unknown");
 			this.setGraphic(iconView);
@@ -35,29 +36,35 @@ public class MachineTableView extends TableView<Machine> {
 		protected void updateItem(final Machine.CheckingStatus item, final boolean empty) {
 			super.updateItem(item, empty);
 			
-			this.getGraphic().getStyleClass().removeAll("unknown", "successful", "failed");
+			final BindableGlyph graphic = (BindableGlyph)this.getGraphic();
+			graphic.getStyleClass().removeAll("unknown", "successful", "failed");
 			if (empty || item == null) {
-				this.getGraphic().setVisible(false);
+				graphic.setVisible(false);
 			} else {
-				this.getGraphic().setVisible(true);
+				graphic.setVisible(true);
 				final String styleClass;
+				final FontAwesome.Glyph icon;
 				switch (item) {
 					case UNKNOWN:
 						styleClass = "unknown";
+						icon = FontAwesome.Glyph.QUESTION_CIRCLE;
 						break;
 					
 					case SUCCESSFUL:
 						styleClass = "successful";
+						icon = FontAwesome.Glyph.CHECK;
 						break;
 					
 					case FAILED:
 						styleClass = "failed";
+						icon = FontAwesome.Glyph.REMOVE;
 						break;
 					
 					default:
 						throw new IllegalArgumentException("Unknown checking status: " + item);
 				}
-				this.getGraphic().getStyleClass().add(styleClass);
+				graphic.getStyleClass().add(styleClass);
+				graphic.setIcon(icon);
 			}
 		}
 	}

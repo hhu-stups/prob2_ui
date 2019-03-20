@@ -1,10 +1,13 @@
 package de.prob2.ui.symbolic;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Injector;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
@@ -13,6 +16,7 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
@@ -26,8 +30,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-
-import java.util.ResourceBundle;
 
 public abstract class SymbolicView<T extends SymbolicFormulaItem> extends ScrollPane {
 	
@@ -70,7 +72,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	protected TableView<T> tvFormula;
 	
 	@FXML
-	protected TableColumn<T, FontAwesomeIconView> formulaStatusColumn;
+	protected TableColumn<T, BindableGlyph> formulaStatusColumn;
 	
 	@FXML
 	protected TableColumn<T, String> formulaNameColumn;

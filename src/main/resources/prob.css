@@ -636,9 +636,8 @@
 .table-row-cell:focused .table-cell {
 	-fx-font-weight: bold;
 }
-.table-row-cell:disabled .text,
-.table-row-cell:disabled .status-icon {
-	-fx-fill: -prob-lightgrey;
+.table-row-cell:disabled {
+	-fx-text-fill: -prob-lightgrey;
 }
 
 .tree-table-row-cell:focused .check-box > .box {
@@ -941,16 +940,13 @@
 }
 
 .machine-table-view .status-icon.unknown {
-	-glyph-name: "QUESTION_CIRCLE";
-	-fx-fill: blue;
+	-fx-text-fill: blue;
 }
 .machine-table-view .status-icon.successful {
-	-glyph-name: "CHECK";
-	-fx-fill: green;
+	-fx-text-fill: green;
 }
 .machine-table-view .status-icon.failed {
-	-glyph-name: "REMOVE";
-	-fx-fill: red;
+	-fx-text-fill: red;
 }
 
 /* =================== STATES VIEW =================== */

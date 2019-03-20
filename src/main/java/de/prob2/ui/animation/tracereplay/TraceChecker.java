@@ -120,8 +120,8 @@ public class TraceChecker {
 			return;
 		}
 
+		replayTrace.setChecked(Checked.NOT_CHECKED);
 		Thread replayThread = new Thread(() -> {
-			replayTrace.setChecked(Checked.NOT_CHECKED);
 			StateSpace stateSpace = currentTrace.getStateSpace();
 			Trace trace = new Trace(stateSpace);
 			trace.setExploreStateByDefault(false);
