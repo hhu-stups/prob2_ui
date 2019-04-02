@@ -3,6 +3,7 @@ package de.prob2.ui.beditor;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,6 +46,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -255,8 +257,12 @@ public class BEditorView extends BorderPane {
 		try (final Stream<String> lines = Files.lines(path)) {
 			text = lines.collect(Collectors.joining(System.lineSeparator()));
 		} catch (IOException | UncheckedIOException e) {
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path).showAndWait();
 			LOGGER.error(String.format("Could not read file: %s", path), e);
+			if (e.getCause() instanceof MalformedInputException) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "beditor.encodingError.header", "beditor.encodingError.content", path, e).show();
+			} else {
+				stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path).show();
+			}
 			return;
 		}
 		this.setEditorText(text, path);
