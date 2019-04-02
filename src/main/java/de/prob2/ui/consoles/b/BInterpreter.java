@@ -158,7 +158,7 @@ public class BInterpreter implements Executable {
 		Objects.requireNonNull(result);
 		final StringBuilder sb = new StringBuilder();
 		if (result instanceof EvalResult) {
-			sb.append(((EvalResult)result).getValue());
+			sb.append(result);
 		} else if (result instanceof EvaluationErrorResult) {
 			if (result instanceof IdentifierNotInitialised) {
 				sb.append(bundle.getString("consoles.b.interpreter.result.notInitialized"));
