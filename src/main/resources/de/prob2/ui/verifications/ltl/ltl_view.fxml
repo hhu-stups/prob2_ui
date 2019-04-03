@@ -94,7 +94,6 @@
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 						</columnResizePolicy>
 						<columns>
-							<TableColumn fx:id="patternSelectedColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
 							<TableColumn fx:id="patternStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
 							<TableColumn fx:id="patternColumn" minWidth="140.0" text="%verifications.common.columns.pattern" />
 							<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%common.columns.description" />

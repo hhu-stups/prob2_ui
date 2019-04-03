@@ -89,8 +89,6 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
-	private TableColumn<IExecutableItem, CheckBox> patternSelectedColumn;
-	@FXML
 	private TableColumn<LTLPatternItem, BindableGlyph> patternStatusColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternColumn;
@@ -232,7 +230,6 @@ public class LTLView extends AnchorPane {
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		patternSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector));
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -248,18 +245,7 @@ public class LTLView extends AnchorPane {
 			}
 		});
 
-		CheckBox patternSelectAll = new CheckBox();
-		patternSelectAll.setSelected(true);
-		patternSelectAll.selectedProperty().addListener((observable, from, to) -> {
-			for(IExecutableItem item : tvPattern.getItems()) {
-				item.setSelected(to);
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-				tvPattern.refresh();
-			}
-		});
 		formulaSelectedColumn.setGraphic(formulaSelectAll);
-		patternSelectedColumn.setGraphic(patternSelectAll);
 
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(addMenuButton.disableProperty(), currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
