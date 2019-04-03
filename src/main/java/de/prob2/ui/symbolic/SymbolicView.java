@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -31,6 +32,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+@FXMLInjected
 public abstract class SymbolicView<T extends SymbolicFormulaItem> extends ScrollPane {
 	
 	public abstract class SymbolicCellFactory {
@@ -130,7 +132,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		});
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().symbolicCheckingFormulasProperty().emptyProperty().or(executor.currentJobThreadsProperty().emptyProperty().not()));
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), formulasProperty(currentProject.getCurrentMachine()).emptyProperty().or(executor.currentJobThreadsProperty().emptyProperty().not()));
 			} else {
 				checkMachineButton.disableProperty().unbind();
 				checkMachineButton.setDisable(true);

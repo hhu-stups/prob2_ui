@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -80,7 +81,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
-	
+
 	protected ListProperty<SymbolicCheckingFormulaItem> formulasProperty(Machine machine) {
 		return machine.symbolicCheckingFormulasProperty();
 	}

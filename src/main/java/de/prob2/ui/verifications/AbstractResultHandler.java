@@ -4,6 +4,7 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
@@ -100,15 +101,17 @@ public abstract class AbstractResultHandler {
 	
 	protected void handleItem(AbstractCheckableItem item, Checked checked) {
 		item.setChecked(checked);
-		if(checked == Checked.SUCCESS) {
-			item.setCheckedSuccessful();
-		} else if(checked == Checked.FAIL) {
-			item.setCheckedFailed();
-		} else if(checked == Checked.INTERRUPTED || checked == Checked.TIMEOUT) {
-			item.setCheckInterrupted();
-		} else if(checked == Checked.PARSE_ERROR) {
-			item.setParseError();
-		}
+		Platform.runLater(() -> {
+			if (checked == Checked.SUCCESS) {
+				item.setCheckedSuccessful();
+			} else if (checked == Checked.FAIL) {
+				item.setCheckedFailed();
+			} else if (checked == Checked.INTERRUPTED || checked == Checked.TIMEOUT) {
+				item.setCheckInterrupted();
+			} else if (checked == Checked.PARSE_ERROR) {
+				item.setParseError();
+			}
+		});
 	}
 
 }

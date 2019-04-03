@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -64,7 +65,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
-	
+
 	protected ListProperty<SymbolicAnimationFormulaItem> formulasProperty(Machine machine) {
 		return machine.symbolicAnimationFormulasProperty();
 	}

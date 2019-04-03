@@ -291,7 +291,7 @@ public class LTLView extends AnchorPane {
 			formula.setResultItem(null);
 		}
 		if(currentTrace.existsProperty().get()) {
-			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty());
+			injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), machine.ltlFormulasProperty().emptyProperty());
 		}
 		parseMachine(machine);
 	}
@@ -300,7 +300,7 @@ public class LTLView extends AnchorPane {
 	public void addFormula() {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
 		loadLTLStage(formulaStage, null);
-		formulaStage.setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.ADD, null));
+		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.ADD, null));
 		formulaStage.showAndWait();
 		tvFormula.refresh();
 	}
@@ -316,7 +316,7 @@ public class LTLView extends AnchorPane {
 	public void addPattern() {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
 		loadLTLStage(patternStage, null);
-		patternStage.setHandleItem(new LTLHandleItem<LTLPatternItem>(LTLHandleItem.HandleType.ADD, null));
+		patternStage.setHandleItem(new LTLHandleItem<>(LTLHandleItem.HandleType.ADD, null));
 		patternStage.showAndWait();
 		tvPattern.refresh();
 	}
@@ -336,7 +336,7 @@ public class LTLView extends AnchorPane {
 	private void showCurrentItemDialog(LTLFormulaItem item) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
 		loadLTLStage(formulaStage, item);
-		formulaStage.setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
+		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		formulaStage.showAndWait();
 		formulaStage.clear();
 		tvFormula.refresh();
@@ -345,7 +345,7 @@ public class LTLView extends AnchorPane {
 	private void showCurrentItemDialog(LTLPatternItem item) {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
 		loadLTLStage(patternStage, item);
-		patternStage.setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, item));
+		patternStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		patternStage.showAndWait();
 		patternStage.clear();
 		tvPattern.refresh();
