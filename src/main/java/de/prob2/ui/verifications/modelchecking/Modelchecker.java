@@ -43,13 +43,12 @@ public class Modelchecker implements IModelCheckListener {
 	private static final AtomicInteger threadCounter = new AtomicInteger(0);
 	
 	private final Map<String, IModelCheckJob> jobs;
+	private final Map<String, ModelCheckingItem> idToItem;
+	private final Map<String, ModelCheckStats> idToStats;
 	private final ListProperty<Thread> currentJobThreads;
 	private final List<IModelCheckJob> currentJobs;
 	private final ObjectProperty<IModelCheckingResult> lastResult;
 	private final ModelcheckingStage modelcheckingStage;
-	private ModelCheckingItem currentItem;
-	
-	private ModelCheckStats currentStats;
 
 	private final StageManager stageManager;
 	
@@ -70,7 +69,8 @@ public class Modelchecker implements IModelCheckListener {
 		this.currentJobs = new ArrayList<>();
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		this.jobs = new HashMap<>();
-		this.currentItem = null;
+		this.idToItem = new HashMap<>();
+		this.idToStats = new HashMap<>();
 	}
 
 	public void checkItem(ModelCheckingItem item, boolean checkAll) {
@@ -94,9 +94,9 @@ public class Modelchecker implements IModelCheckListener {
 	}
 	
 	private void updateCurrentValues(ModelCheckingItem item, StateSpace stateSpace) {
-		currentItem = item;
-		currentStats = new ModelCheckStats(stageManager, injector);
 		IModelCheckJob job = new ConsistencyChecker(stateSpace, item.getOptions(), null, this);
+		idToItem.put(job.getJobId(), item);
+		idToStats.put(job.getJobId(), new ModelCheckStats(stageManager, injector));
 		currentJobs.add(job);
 	}
 	
@@ -108,7 +108,7 @@ public class Modelchecker implements IModelCheckListener {
 				LOGGER.error("Model check job for ID {} is missing or null", jobId);
 				return;
 			}
-			currentStats.updateStats(job, timeElapsed, stats);
+			idToStats.get(jobId).updateStats(job, timeElapsed, stats);
 		} catch (RuntimeException e) {
 			LOGGER.error("Exception in updateStats", e);
 			Platform.runLater(
@@ -127,10 +127,11 @@ public class Modelchecker implements IModelCheckListener {
 			return;
 		}
 		
-		currentStats.isFinished(job, timeElapsed, result);
-		
+		idToStats.get(jobId).isFinished(job, timeElapsed, result);
 		Platform.runLater(() -> {
-			showResult(result, job.getStateSpace());
+			showResult(jobId, result, job.getStateSpace());
+			idToItem.remove(jobId);
+			idToStats.remove(jobId);
 			modelcheckingStage.hide();
 			injector.getInstance(OperationsView.class).update(currentTrace.get());
 			injector.getInstance(StatsView.class).update(currentTrace.get());
@@ -153,6 +154,7 @@ public class Modelchecker implements IModelCheckListener {
 		IModelCheckJob job = currentJobs.get(size - 1);
 
 		jobs.put(job.getJobId(), job);
+		ModelCheckStats currentStats = idToStats.get(job.getJobId());
 		currentStats.startJob();
 		
 		//This must be executed before executing model checking job
@@ -196,8 +198,9 @@ public class Modelchecker implements IModelCheckListener {
 		currentJobs.removeAll(removedJobs);
 	}
 	
-	private void showResult(IModelCheckingResult result, StateSpace stateSpace) {
+	private void showResult(String jobID, IModelCheckingResult result, StateSpace stateSpace) {
 		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
+		ModelCheckingItem currentItem = idToItem.get(jobID);
 		List<ModelCheckingJobItem> jobItems = currentItem.getItems();
 		ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, result.getMessage());
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
@@ -207,7 +210,7 @@ public class Modelchecker implements IModelCheckListener {
 		} else {
 			jobItem.setTimeout();
 		}
-		jobItem.setStats(currentStats);
+		jobItem.setStats(idToStats.get(jobID));
 		jobItems.add(jobItem);
 		if (result instanceof ITraceDescription) {
 			Trace trace = ((ITraceDescription) result).getTrace(stateSpace);
