@@ -166,6 +166,12 @@ public class TraceReplayView extends ScrollPane {
 				item.setSelected(to);
 				traceTableView.refresh();
 			}
+			if(!to) {
+				checkButton.disableProperty().unbind();
+				checkButton.setDisable(true);
+			} else {
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkButton.disableProperty(), currentProject.getCurrentMachine().tracesProperty().emptyProperty());
+			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
 

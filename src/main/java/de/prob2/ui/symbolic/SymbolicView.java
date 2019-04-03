@@ -170,6 +170,12 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
 				tvFormula.refresh();
 			}
+			if(!to) {
+				checkMachineButton.disableProperty().unbind();
+				checkMachineButton.setDisable(true);
+			} else {
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), formulasProperty(currentProject.getCurrentMachine()).emptyProperty());
+			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvFormula.setOnMouseClicked(e-> {

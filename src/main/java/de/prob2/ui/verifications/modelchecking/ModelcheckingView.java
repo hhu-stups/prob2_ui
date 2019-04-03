@@ -152,6 +152,12 @@ public final class ModelcheckingView extends ScrollPane {
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 				tvItems.refresh();
 			}
+			if(!to) {
+				checkMachineButton.disableProperty().unbind();
+				checkMachineButton.setDisable(true);
+			} else {
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty());
+			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
 
