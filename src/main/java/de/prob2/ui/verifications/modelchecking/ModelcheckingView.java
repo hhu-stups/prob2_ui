@@ -20,6 +20,7 @@ import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
 
@@ -43,7 +44,7 @@ import javafx.scene.layout.AnchorPane;
 
 @FXMLInjected
 @Singleton
-public final class ModelcheckingView extends ScrollPane {
+public final class ModelcheckingView extends ScrollPane implements ISelectableCheckingView {
 	
 	@FXML
 	private AnchorPane statsPane;
@@ -103,6 +104,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private final Injector injector;
 	private final ResourceBundle bundle;
 	private final Modelchecker checker;
+	private final CheckBox selectAll;
 
 	@Inject
 	private ModelcheckingView(final CurrentTrace currentTrace,
@@ -114,6 +116,7 @@ public final class ModelcheckingView extends ScrollPane {
 		this.injector = injector;
 		this.bundle = bundle;
 		this.checker = checker;
+		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 	}
 
@@ -137,21 +140,14 @@ public final class ModelcheckingView extends ScrollPane {
 		assertionViolationsColumn.setCellValueFactory(new PropertyValueFactory<>("assertionViolations"));
 		goalsColumn.setCellValueFactory(new PropertyValueFactory<>("goals"));
 		stopAtFullCoverageColumn.setCellValueFactory(new PropertyValueFactory<>("stopWhenAllOperationsCovered"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.MODELCHECKING, injector));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.MODELCHECKING, injector, this));
 		
 		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
 		messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
-		
-		CheckBox selectAll = new CheckBox();
+
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			for(IExecutableItem item : tvItems.getItems()) {
-				item.setSelected(to);
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
-				tvItems.refresh();
-			}
 			if(!to) {
 				checkMachineButton.disableProperty().unbind();
 				checkMachineButton.setDisable(true);
@@ -159,6 +155,15 @@ public final class ModelcheckingView extends ScrollPane {
 				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty());
 			}
 		});
+		selectAll.setOnAction(e -> {
+			for(IExecutableItem item : tvItems.getItems()) {
+				item.setSelected(selectAll.isSelected());
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
+				tvItems.refresh();
+			}
+		});
+
 		shouldExecuteColumn.setGraphic(selectAll);
 
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvItems.disableProperty(), currentTrace.existsProperty().not());
@@ -363,5 +368,14 @@ public final class ModelcheckingView extends ScrollPane {
 	public void selectJobItem(ModelCheckingJobItem item) {
 		tvChecks.getSelectionModel().select(item);
 	}
-	
+
+	public void updateSelectViews() {
+		boolean anySelected = false;
+		for(ModelCheckingItem item : currentProject.getCurrentMachine().getModelcheckingItems()) {
+			if(item.selected()) {
+				anySelected = true;
+			}
+		}
+		selectAll.setSelected(anySelected);
+	}
 }

@@ -19,6 +19,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
@@ -49,7 +50,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
-public class TraceReplayView extends ScrollPane {
+public class TraceReplayView extends ScrollPane implements ISelectableCheckingView {
 	private static final String TRACE_FILE_ENDING = "*.prob2trace";
 
 	@FXML
@@ -76,6 +77,7 @@ public class TraceReplayView extends ScrollPane {
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
+	private final CheckBox selectAll;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
@@ -88,6 +90,7 @@ public class TraceReplayView extends ScrollPane {
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
 		this.injector = injector;
+		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
@@ -158,19 +161,21 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	private void initTableColumns() {
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.REPLAY));
-		CheckBox selectAll = new CheckBox();
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.REPLAY, this));
+
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			for (ReplayTrace item : traceTableView.getItems()) {
-				item.setSelected(to);
-				traceTableView.refresh();
-			}
 			if(!to) {
 				checkButton.disableProperty().unbind();
 				checkButton.setDisable(true);
 			} else {
 				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkButton.disableProperty(), currentProject.getCurrentMachine().tracesProperty().emptyProperty());
+			}
+		});
+		selectAll.setOnAction(e -> {
+			for (ReplayTrace item : traceTableView.getItems()) {
+				item.setSelected(selectAll.isSelected());
+				traceTableView.refresh();
 			}
 		});
 		shouldExecuteColumn.setGraphic(selectAll);
@@ -275,5 +280,15 @@ public class TraceReplayView extends ScrollPane {
 
 	private void removeFromTraceTableView(Path tracePath) {
 		traceTableView.getItems().removeIf(trace -> trace.getLocation().equals(tracePath));
+	}
+
+	public void updateSelectViews() {
+		boolean anySelected = false;
+		for(ReplayTrace item : traceTableView.getItems()) {
+			if(item.selected()) {
+				anySelected = true;
+			}
+		}
+		selectAll.setSelected(anySelected);
 	}
 }

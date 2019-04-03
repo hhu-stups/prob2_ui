@@ -15,6 +15,7 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
 
@@ -33,7 +34,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
-public abstract class SymbolicView<T extends SymbolicFormulaItem> extends ScrollPane {
+public abstract class SymbolicView<T extends SymbolicFormulaItem> extends ScrollPane implements ISelectableCheckingView {
 	
 	public abstract class SymbolicCellFactory {
 
@@ -105,6 +106,8 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	protected final SymbolicExecutor executor;
 	
 	protected final SymbolicFormulaHandler<T> formulaHandler;
+
+	protected final CheckBox selectAll;
 	
 	public SymbolicView(final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor executor,
@@ -115,6 +118,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		this.injector = injector;
 		this.executor = executor;
 		this.formulaHandler = formulaHandler;
+		this.selectAll = new CheckBox();
 	}
 	
 	@FXML
@@ -160,16 +164,10 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.SYMBOLIC, injector));
-		CheckBox selectAll = new CheckBox();
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.SYMBOLIC, injector, this));
+
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			for(IExecutableItem item : tvFormula.getItems()) {
-				item.setSelected(to);
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
-				tvFormula.refresh();
-			}
 			if(!to) {
 				checkMachineButton.disableProperty().unbind();
 				checkMachineButton.setDisable(true);
@@ -177,6 +175,15 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), formulasProperty(currentProject.getCurrentMachine()).emptyProperty());
 			}
 		});
+		selectAll.setOnAction(e-> {
+			for(IExecutableItem item : tvFormula.getItems()) {
+				item.setSelected(selectAll.isSelected());
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
+				tvFormula.refresh();
+			}
+		});
+
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvFormula.setOnMouseClicked(e-> {
 			T item = tvFormula.getSelectionModel().getSelectedItem();
@@ -220,5 +227,16 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	}
 
 	protected abstract void openItem(T item);
+
+	@Override
+	public void updateSelectViews() {
+		boolean anySelected = false;
+		for(T item : formulasProperty(currentProject.getCurrentMachine()).get()) {
+			if(item.selected()) {
+				anySelected = true;
+			}
+		}
+		selectAll.setSelected(anySelected);
+	}
 	
 }

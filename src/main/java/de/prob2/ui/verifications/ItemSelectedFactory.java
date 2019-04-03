@@ -15,15 +15,19 @@ public class ItemSelectedFactory implements Callback<TableColumn.CellDataFeature
 	private CheckingType type;
 	
 	private final Injector injector;
+
+	private final ISelectableCheckingView view;
 	
-	public ItemSelectedFactory(CheckingType type) {
+	public ItemSelectedFactory(CheckingType type, final ISelectableCheckingView view) {
 		this.type = type;
 		this.injector = null;
+		this.view = view;
 	}
 	
-	public ItemSelectedFactory(CheckingType type, final Injector injector) {
+	public ItemSelectedFactory(CheckingType type, final Injector injector, final ISelectableCheckingView view) {
 		this.injector = injector;
 		this.type = type;
+		this.view = view;
 	}
 	
 	@Override
@@ -37,6 +41,7 @@ public class ItemSelectedFactory implements Callback<TableColumn.CellDataFeature
 				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, type);
 			}
+			view.updateSelectViews();
 		});
 		return new SimpleObjectProperty<>(checkBox);
 	}

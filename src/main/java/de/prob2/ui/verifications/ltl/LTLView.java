@@ -23,6 +23,7 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
@@ -54,7 +55,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class LTLView extends AnchorPane {
+public class LTLView extends AnchorPane implements ISelectableCheckingView {
 
 	private static final String LTL_FILE_ENDING = "*.ltl";
 
@@ -105,6 +106,7 @@ public class LTLView extends AnchorPane {
 	private final LTLResultHandler resultHandler;
 	private final LTLFileHandler ltlFileHandler;
 	private final FileChooserManager fileChooserManager;
+	private final CheckBox formulaSelectAll;
 				
 	@Inject
 	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,
@@ -122,6 +124,7 @@ public class LTLView extends AnchorPane {
 		this.resultHandler = resultHandler;
 		this.ltlFileHandler = ltlFileHandler;
 		this.fileChooserManager = fileChooserManager;
+		this.formulaSelectAll = new CheckBox();
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
@@ -226,7 +229,7 @@ public class LTLView extends AnchorPane {
 	}
 
 	private void setBindings() {
-		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector));
+		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector, this));
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -234,20 +237,21 @@ public class LTLView extends AnchorPane {
 		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-		CheckBox formulaSelectAll = new CheckBox();
 		formulaSelectAll.setSelected(true);
 		formulaSelectAll.selectedProperty().addListener((observable, from, to) -> {
-			for(IExecutableItem item : tvFormula.getItems()) {
-				item.setSelected(to);
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-				tvFormula.refresh();
-			}
 			if(!to) {
 				checkMachineButton.disableProperty().unbind();
 				checkMachineButton.setDisable(true);
 			} else {
 				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
+			}
+		});
+		formulaSelectAll.setOnAction(e -> {
+			for(IExecutableItem item : tvFormula.getItems()) {
+				item.setSelected(formulaSelectAll.isSelected());
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				tvFormula.refresh();
 			}
 		});
 
@@ -413,6 +417,16 @@ public class LTLView extends AnchorPane {
 					patternParser.parsePattern(pattern, machine);
 					patternParser.addPattern(pattern, machine);
 				});
+	}
+
+	public void updateSelectViews() {
+		boolean anySelected = false;
+		for(LTLFormulaItem item : currentProject.getCurrentMachine().getLTLFormulas()) {
+			if(item.selected()) {
+				anySelected = true;
+			}
+		}
+		formulaSelectAll.setSelected(anySelected);
 	}
 
 }

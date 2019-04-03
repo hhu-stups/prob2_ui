@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 
 
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
