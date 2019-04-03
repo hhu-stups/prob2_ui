@@ -196,6 +196,8 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 			} else {
 				tvItems.getItems().clear();
 				tvItems.itemsProperty().unbind();
+				tvChecks.getItems().clear();
+				tvChecks.itemsProperty().unbind();
 			}
 		});
 		

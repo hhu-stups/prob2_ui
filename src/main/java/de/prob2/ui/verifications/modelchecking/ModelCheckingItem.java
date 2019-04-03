@@ -87,9 +87,7 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 		if(this.items == null) {
 			this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 		}
-		if(this.checked == null || this.status == null) {
-			initializeStatus();
-		}
+		initializeStatus();
 		initializeOptionIcons(options);
 	}
 
