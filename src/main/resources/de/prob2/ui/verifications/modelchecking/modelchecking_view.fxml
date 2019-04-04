@@ -50,7 +50,7 @@
 			</Button>
 			<HelpButton fx:id="helpButton" />
 		</HBox>
-		<TableView fx:id="tvItems" minHeight="150">
+		<TableView fx:id="tvItems" minHeight="80">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
@@ -68,7 +68,7 @@
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
 			</placeholder>
 		</TableView>
-		<TableView fx:id="tvChecks" minHeight="150">
+		<TableView fx:id="tvChecks" minHeight="80">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
