@@ -51,14 +51,12 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	private final StageManager stageManager;
 	private final Injector injector;
 
-	private final CheckingType type;
 	
 	@Inject
 	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
-		this.type = CheckingType.SYMBOLIC_ANIMATION;
 		this.stageManager = stageManager;
 		this.success = new ArrayList<>();
 		this.error = new ArrayList<>();
@@ -188,11 +186,6 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		alert.setTitle(item.getName());
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
-	}
-
-	public void updateMachine(Machine machine) {
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_ANIMATION);
-		injector.getInstance(SymbolicCheckingView.class).refresh();
 	}
 
 }
