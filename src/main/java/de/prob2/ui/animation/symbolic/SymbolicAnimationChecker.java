@@ -29,7 +29,7 @@ public class SymbolicAnimationChecker extends SymbolicExecutor {
 	
 	public void updateMachine(Machine machine) {
 		this.items = machine.getSymbolicAnimationFormulas();
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_ANIMATION);
 		injector.getInstance(SymbolicAnimationView.class).refresh();
 	}
 	

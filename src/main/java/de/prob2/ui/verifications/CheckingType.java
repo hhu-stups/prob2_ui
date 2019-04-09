@@ -3,7 +3,8 @@ package de.prob2.ui.verifications;
 public enum CheckingType {
 	REPLAY("verifications.checkingType.replay"),
 	LTL("verifications.checkingType.ltl"),
-	SYMBOLIC("verifications.checkingType.symbolic"),
+	SYMBOLIC_CHECKING("verifications.checkingType.symbolic.checking"),
+	SYMBOLIC_ANIMATION("verifications.checkingType.symbolic.animation"),
 	MODELCHECKING("verifications.checkingType.modelchecking")
 	;
 	

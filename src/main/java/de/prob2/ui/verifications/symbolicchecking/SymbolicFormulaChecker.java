@@ -28,7 +28,7 @@ public class SymbolicFormulaChecker extends SymbolicExecutor {
 	
 	public void updateMachine(Machine machine) {
 		this.items = machine.getSymbolicCheckingFormulas();
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_CHECKING);
 		injector.getInstance(SymbolicCheckingView.class).refresh();
 	}
 	

@@ -41,8 +41,11 @@ public final class MachineStatusHandler {
 			case LTL:
 				injector.getInstance(StatusBar.class).setLtlStatus(status);
 				break;
-			case SYMBOLIC:
-				injector.getInstance(StatusBar.class).setSymbolicStatus(status);
+			case SYMBOLIC_CHECKING:
+				injector.getInstance(StatusBar.class).setSymbolicCheckingStatus(status);
+				break;
+			case SYMBOLIC_ANIMATION:
+				injector.getInstance(StatusBar.class).setSymbolicAnimationStatus(status);
 				break;
 			case MODELCHECKING:
 				injector.getInstance(StatusBar.class).setModelcheckingStatus(status);
@@ -57,8 +60,11 @@ public final class MachineStatusHandler {
 			case LTL:
 				machine.setLtlStatus(status);
 				break;
-			case SYMBOLIC:
+			case SYMBOLIC_CHECKING:
 				machine.setSymbolicCheckingStatus(status);
+				break;
+			case SYMBOLIC_ANIMATION:
+				machine.setSymbolicAnimationStatus(status);
 				break;
 			case MODELCHECKING:
 				machine.setModelcheckingStatus(status);
@@ -73,8 +79,10 @@ public final class MachineStatusHandler {
 		switch(type) {
 			case LTL:
 				return machine.getLTLFormulas();
-			case SYMBOLIC:
+			case SYMBOLIC_CHECKING:
 				return machine.getSymbolicCheckingFormulas();
+			case SYMBOLIC_ANIMATION:
+				return machine.getSymbolicAnimationFormulas();
 			case MODELCHECKING:
 				return machine.getModelcheckingItems();
 			default:

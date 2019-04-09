@@ -19,6 +19,8 @@ import de.prob2.ui.symbolic.SymbolicView;
 import de.prob2.ui.verifications.Checked;
 
 
+import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
@@ -77,7 +79,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	public SymbolicCheckingView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler, 
 					final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
-		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
+		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicCheckingFormulaItem.class);
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
 
@@ -88,6 +90,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	@Override
 	protected void removeFormula(Machine machine, SymbolicCheckingFormulaItem item) {
 		machine.removeSymbolicCheckingFormula(item);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_CHECKING);
 	}
 	
 	@Override

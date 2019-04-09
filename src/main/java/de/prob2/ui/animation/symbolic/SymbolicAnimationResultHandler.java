@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.AbstractCommand;
@@ -19,6 +20,7 @@ import de.prob.check.NotYetFinished;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaItem;
@@ -26,6 +28,9 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.MachineStatusHandler;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
@@ -44,11 +49,16 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	protected ArrayList<Class<?>> interrupted;
 
 	private final StageManager stageManager;
+	private final Injector injector;
+
+	private final CheckingType type;
 	
 	@Inject
-	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final StageManager stageManager) {
+	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
+		this.injector = injector;
+		this.type = CheckingType.SYMBOLIC_ANIMATION;
 		this.stageManager = stageManager;
 		this.success = new ArrayList<>();
 		this.error = new ArrayList<>();
@@ -178,6 +188,11 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		alert.setTitle(item.getName());
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
+	}
+
+	public void updateMachine(Machine machine) {
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_ANIMATION);
+		injector.getInstance(SymbolicCheckingView.class).refresh();
 	}
 
 }

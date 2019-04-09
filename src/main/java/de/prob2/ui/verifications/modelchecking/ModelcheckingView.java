@@ -329,6 +329,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		} else {
 			tvItems.getSelectionModel().selectFirst();
 		}
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 	}
 	
 	@FXML

@@ -101,6 +101,7 @@ public class Machine {
 	
 	private transient ObjectProperty<CheckingStatus> ltlStatus;
 	private transient ObjectProperty<CheckingStatus> symbolicCheckingStatus;
+	private transient ObjectProperty<CheckingStatus> symbolicAnimationStatus;
 	private transient ObjectProperty<CheckingStatus> modelcheckingStatus;
 	private StringProperty name;
 	private StringProperty description;
@@ -189,17 +190,29 @@ public class Machine {
 	public void setLtlStatus(final CheckingStatus status) {
 		this.ltlStatusProperty().set(status);
 	}
-	
+
 	public ObjectProperty<CheckingStatus> symbolicCheckingStatusProperty() {
 		return this.symbolicCheckingStatus;
 	}
-	
+
 	public CheckingStatus getSymbolicCheckingStatus() {
 		return this.symbolicCheckingStatusProperty().get();
 	}
-	
+
 	public void setSymbolicCheckingStatus(final CheckingStatus status) {
 		this.symbolicCheckingStatusProperty().set(status);
+	}
+
+	public ObjectProperty<CheckingStatus> symbolicAnimationStatusProperty() {
+		return this.symbolicAnimationStatus;
+	}
+
+	public CheckingStatus getSymbolicAnimationStatus() {
+		return this.symbolicAnimationStatusProperty().get();
+	}
+
+	public void setSymbolicAnimationStatus(final CheckingStatus status) {
+		this.symbolicAnimationStatusProperty().set(status);
 	}
 	
 	public ObjectProperty<CheckingStatus> modelcheckingStatusProperty() {
@@ -355,6 +368,9 @@ public class Machine {
 		}
 		if (symbolicCheckingStatus == null) {
 			this.symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", CheckingStatus.UNKNOWN);
+		}
+		if (symbolicAnimationStatus == null) {
+			this.symbolicAnimationStatus = new SimpleObjectProperty<>(this, "symbolicAnimationStatus", CheckingStatus.UNKNOWN);
 		}
 		if (modelcheckingStatus == null) {
 			this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);

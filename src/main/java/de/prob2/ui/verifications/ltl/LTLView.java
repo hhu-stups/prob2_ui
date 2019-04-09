@@ -306,6 +306,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		Machine machine = currentProject.getCurrentMachine();
 		LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 		machine.removeLTLFormula(item);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 		updateProject();
 	}
 	

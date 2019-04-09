@@ -48,7 +48,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 		super(stageManager, bundle);
 		this.currentTrace = currentTrace;
 		this.injector = injector;
-		this.type = CheckingType.SYMBOLIC;
+		this.type = CheckingType.SYMBOLIC_CHECKING;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
@@ -206,7 +206,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 	}
 	
 	public void updateMachine(Machine machine) {
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_CHECKING);
 		injector.getInstance(SymbolicCheckingView.class).refresh();
 	}
 	

@@ -19,6 +19,7 @@ import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
 
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
@@ -45,7 +46,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				formulaHandler.handleItem(row.getItem(), false);
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), getSymbolicType());
 			});
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -107,17 +108,20 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	
 	protected final SymbolicFormulaHandler<T> formulaHandler;
 
+	protected final Class<T> clazz;
+
 	protected final CheckBox selectAll;
 	
 	public SymbolicView(final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor executor,
-					final SymbolicFormulaHandler<T> formulaHandler) {
+					final SymbolicFormulaHandler<T> formulaHandler, final Class<T> clazz) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.executor = executor;
 		this.formulaHandler = formulaHandler;
+		this.clazz = clazz;
 		this.selectAll = new CheckBox();
 	}
 	
@@ -164,7 +168,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.SYMBOLIC, injector, this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(getSymbolicType(), injector, this));
 
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
@@ -179,7 +183,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 			for(IExecutableItem item : tvFormula.getItems()) {
 				item.setSelected(selectAll.isSelected());
 				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, getSymbolicType());
 				tvFormula.refresh();
 			}
 		});
@@ -189,7 +193,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 			T item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
 				formulaHandler.handleItem(item, false);
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), CheckingType.SYMBOLIC);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), getSymbolicType());
 			}
 		});
 
@@ -204,12 +208,13 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	
 	public void refresh() {
 		tvFormula.refresh();
-	}	
+	}
+
 	@FXML
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
 		formulaHandler.handleMachine(machine);
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC);
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, getSymbolicType());
 		refresh();
 	}
 	
@@ -237,6 +242,14 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 			}
 		}
 		selectAll.setSelected(anySelected);
+	}
+
+	private CheckingType getSymbolicType() {
+		if(clazz == SymbolicCheckingFormulaItem.class) {
+			return CheckingType.SYMBOLIC_CHECKING;
+		} else {
+			return CheckingType.SYMBOLIC_ANIMATION;
+		}
 	}
 	
 }
