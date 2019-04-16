@@ -125,7 +125,9 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 
 		final SetChangeListener<Path> listener = c -> {
 			if (c.wasAdded()) {
-				traceTableView.getItems().add(new ReplayTrace(c.getElementAdded()));
+				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded());
+				traceTableView.getItems().add(replayTrace);
+				this.traceChecker.check(replayTrace, true);
 			}
 			if (c.wasRemoved()) {
 				removeFromTraceTableView(c.getElementRemoved());
