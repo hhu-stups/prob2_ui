@@ -52,14 +52,16 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
-		this.error.addAll(Arrays.asList(CheckError.class));
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
+		this.parseErrors.addAll(Arrays.asList(CheckError.class));
 	}
 	
 	public void handleFormulaResult(SymbolicFormulaItem item, Object result) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
+		} else if(parseErrors.contains(clazz)) {
+			handleItem(item, Checked.PARSE_ERROR);
 		} else if(error.contains(clazz) || counterExample.contains(clazz) || result instanceof Throwable) {
 			handleItem(item, Checked.FAIL);
 		} else {
