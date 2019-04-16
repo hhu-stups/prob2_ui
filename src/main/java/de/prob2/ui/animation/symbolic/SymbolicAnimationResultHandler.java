@@ -11,7 +11,6 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
-import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CheckError;
 import de.prob.exception.ProBError;
 import de.prob.animator.domainobjects.EvaluationException;
