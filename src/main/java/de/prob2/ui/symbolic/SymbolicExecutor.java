@@ -3,7 +3,6 @@ package de.prob2.ui.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
