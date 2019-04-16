@@ -20,7 +20,11 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	@Override
 	public void initialize() {
 		super.initialize();
-		this.example = new SimpleObjectProperty<>(null);
+		if(this.example == null) {
+			this.example = new SimpleObjectProperty<>(null);
+		} else {
+			this.example.set(null);
+		}
 	}
 	
 	public void setExample(Trace example) {
@@ -38,7 +42,11 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	@Override
 	public void reset() {
 		this.initialize();
-		this.example = new SimpleObjectProperty<>(null);
+		if(this.example == null) {
+			this.example = new SimpleObjectProperty<>(null);
+		} else {
+			this.example.set(null);
+		}
 	}
 	
 	@Override

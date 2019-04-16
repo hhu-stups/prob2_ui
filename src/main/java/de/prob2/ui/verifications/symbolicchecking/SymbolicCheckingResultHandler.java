@@ -192,12 +192,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 	}
 		
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String header, String msg, Checked checked, Object... messageParams) {
-		ArrayList<Trace> traces = new ArrayList<>();
 		item.setResultItem(new CheckingResultItem(checked, header, msg, messageParams));
-		item.getCounterExamples().clear();
-		for(Trace trace: traces) {
-			item.getCounterExamples().add(trace);
-		}
 		handleItem(item, checked);
 	}
 	

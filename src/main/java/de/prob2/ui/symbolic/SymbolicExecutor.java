@@ -3,6 +3,7 @@ package de.prob2.ui.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,11 +94,11 @@ public abstract class SymbolicExecutor {
 					resultHandler.handleFormulaResult(currentItem, finalException);
 				}
 				updateMachine(currentProject.getCurrentMachine());
-				currentJobThreads.remove(currentThread);
 				if(!checkAll) {
-					updateTrace(item);
+					updateTrace(currentItem);
 				}
 			});
+			currentJobThreads.remove(currentThread);
 		}, "Symbolic Formula Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();

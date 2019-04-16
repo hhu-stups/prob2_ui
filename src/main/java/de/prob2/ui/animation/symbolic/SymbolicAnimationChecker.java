@@ -40,5 +40,6 @@ public class SymbolicAnimationChecker extends SymbolicExecutor {
 			currentTrace.set(example);
 		}
 	}
+
 	
 }

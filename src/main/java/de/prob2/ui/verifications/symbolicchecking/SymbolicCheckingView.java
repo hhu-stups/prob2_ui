@@ -71,7 +71,6 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 				traceItem.setOnAction(e-> currentTrace.set((counterExamples.get(index))));
 				counterExampleItem.getItems().add(traceItem);
 			}
-
 		}
 	}
 
