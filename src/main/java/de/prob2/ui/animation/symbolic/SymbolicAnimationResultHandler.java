@@ -13,6 +13,8 @@ import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CheckError;
+import de.prob.exception.ProBError;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
@@ -41,7 +43,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	private final CurrentTrace currentTrace;
 	
 	protected ArrayList<Class<?>> success;
-	protected ArrayList<Class<?>> error;
+	protected ArrayList<Class<?>> parseErrors;
 	protected ArrayList<Class<?>> interrupted;
 
 	private final StageManager stageManager;
@@ -53,10 +55,10 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.success = new ArrayList<>();
-		this.error = new ArrayList<>();
+		this.parseErrors = new ArrayList<>();
 		this.interrupted = new ArrayList<>();
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.error.addAll(Arrays.asList(CBCDeadlockFound.class, CheckError.class));
+		this.parseErrors.addAll(Arrays.asList(ProBError.class, CheckError.class, EvaluationException.class));
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
 	}
 	
@@ -72,7 +74,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
 			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted");
 		} else {
-			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.error");
+			showCheckingResult(item, Checked.PARSE_ERROR, "animation.symbolic.resultHandler.findValidState.result.error");
 		}
 	}
 	
@@ -94,7 +96,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 				showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted");
 				break;
 			case ERROR:
-				showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.error");
+				showCheckingResult(item, Checked.PARSE_ERROR, "animation.symbolic.resultHandler.sequence.result.error");
 				break;
 			default:
 				break;
@@ -114,6 +116,8 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		item.setChecked(checked);
 		if(checked == Checked.SUCCESS) {
 			item.setCheckedSuccessful();
+		} else if(checked == Checked.PARSE_ERROR) {
+			item.setParseError();
 		} else if(checked == Checked.FAIL) {
 			item.setCheckedFailed();
 		} else if(checked == Checked.INTERRUPTED || checked == Checked.TIMEOUT) {
@@ -125,8 +129,8 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
-		} else if(error.contains(clazz) || result instanceof Throwable) {
-			handleItem(item, Checked.FAIL);
+		} else if(parseErrors.contains(clazz)) {
+			handleItem(item, Checked.PARSE_ERROR);
 		} else {
 			handleItem(item, Checked.INTERRUPTED);
 		}
@@ -139,11 +143,8 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		if(success.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.result.succeeded.header",
 					"animation.symbolic.result.succeeded.message");
-		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.error.header",
-					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
-		} else if(result instanceof Throwable) {
-			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.couldNotParseFormula.header",
+		} else if(parseErrors.contains(result.getClass())) {
+			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
 					GENERAL_RESULT_MESSAGE, result);
 		} else if(interrupted.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",

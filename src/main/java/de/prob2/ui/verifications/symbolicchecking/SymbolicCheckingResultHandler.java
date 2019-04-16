@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.symbolicchecking;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
@@ -53,7 +54,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
 		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
-		this.parseErrors.addAll(Arrays.asList(CheckError.class));
+		this.parseErrors.addAll(Arrays.asList(CheckError.class, EvaluationException.class));
 	}
 	
 	public void handleFormulaResult(SymbolicFormulaItem item, Object result) {
