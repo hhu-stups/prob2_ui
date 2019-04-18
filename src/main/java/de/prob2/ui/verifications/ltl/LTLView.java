@@ -167,7 +167,6 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.removeFormula"));
 			removeItem.setOnAction(e -> removeFormula());
-			removeItem.disableProperty().bind(row.emptyProperty());
 						
 			MenuItem showCounterExampleItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e-> currentTrace.set(tvFormula.getSelectionModel().getSelectedItem().getCounterExample()));
@@ -175,11 +174,9 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 
 			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
-			openEditor.disableProperty().bind(row.emptyProperty());
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
-			showMessage.disableProperty().bind(row.emptyProperty());
 
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.check"));
 			checkItem.setDisable(true);
@@ -190,16 +187,18 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					checkItem.disableProperty().bind(row.emptyProperty()
-							.or(checker.currentJobThreadsProperty().emptyProperty().not())
+					checkItem.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty().not()
 							.or(to.selectedProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
-					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
-							.or(to.counterExampleProperty().isNull()));
+					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
 				}
 			});
-			row.setContextMenu(new ContextMenu(checkItem, openEditor, removeItem, showCounterExampleItem, showMessage));
+			
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+					.then((ContextMenu) null)
+					.otherwise(new ContextMenu(checkItem, openEditor, removeItem, showCounterExampleItem, showMessage)));
 			return row;
 		});
 		
@@ -207,15 +206,12 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.removePattern"));
 			removeItem.setOnAction(e -> removePattern());
-			removeItem.disableProperty().bind(row.emptyProperty());
 
 			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
-			openEditor.disableProperty().bind(row.emptyProperty());
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showParsingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
-			showMessage.disableProperty().bind(row.emptyProperty());
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
@@ -223,7 +219,10 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
 				}
 			});
-			row.setContextMenu(new ContextMenu(openEditor, showMessage, removeItem));
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+					.then((ContextMenu) null)
+					.otherwise(new ContextMenu(openEditor, showMessage, removeItem)));
 			return row;
 		});
 	}

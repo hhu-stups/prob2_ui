@@ -24,6 +24,7 @@ import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
@@ -52,13 +53,19 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 				if(to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
-					showCounterExampleItem.disableProperty().bind(row.emptyProperty()
-							.or(to.counterExamplesProperty().emptyProperty()));
+					showCounterExampleItem.disableProperty().bind(to.counterExamplesProperty().emptyProperty());
 					showCounterExamples(to, showCounterExampleItem);
 				}
 			});
 			
-			row.getContextMenu().getItems().addAll(showMessage, showCounterExampleItem);
+			ContextMenu contextMenu = row.getContextMenu();
+			contextMenu.getItems().addAll(showMessage, showCounterExampleItem);
+	
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+					.then((ContextMenu) null)
+					.otherwise(contextMenu));			
+			
 			return row;
 		}
 		
