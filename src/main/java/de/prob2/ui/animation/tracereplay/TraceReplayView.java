@@ -223,13 +223,15 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			deleteTraceItem.setOnAction(
 					event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 
-			final ContextMenu menu = new ContextMenu(replayTraceItem, showErrorItem, deleteTraceItem);
-			row.setContextMenu(menu);
-
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+					.then((ContextMenu) null)
+					.otherwise(new ContextMenu(replayTraceItem, showErrorItem, deleteTraceItem)));
+			
 			row.itemProperty().addListener((observable, from, to) -> {
 				showErrorItem.disableProperty().unbind();
 				if (to != null) {
-					injector.getInstance(DisablePropertyController.class).addDisableProperty(replayTraceItem.disableProperty(), row.emptyProperty().or(row.getItem().selectedProperty().not()));
+					injector.getInstance(DisablePropertyController.class).addDisableProperty(replayTraceItem.disableProperty(), row.getItem().selectedProperty().not());
 					showErrorItem.disableProperty().bind(to.statusProperty().isNotEqualTo(Checked.FAIL));
 					row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 				}

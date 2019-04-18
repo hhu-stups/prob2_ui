@@ -20,6 +20,7 @@ import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 
 import javafx.scene.control.TableRow;
@@ -47,14 +48,21 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 				if(to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
-					showStateItem.disableProperty().bind(row.emptyProperty()
-							.or(to.exampleProperty().isNull()));
+					showStateItem.disableProperty().bind(to.exampleProperty().isNull());
 					if(to.getExample() != null) {
 						showStateItem.setOnAction(event-> currentTrace.set(to.getExample()));
 					}
 				}
 			});
-			row.getContextMenu().getItems().addAll(showMessage, showStateItem);
+			
+			ContextMenu contextMenu = row.getContextMenu();
+			contextMenu.getItems().addAll(showMessage, showStateItem);
+			
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+					.then((ContextMenu) null)
+					.otherwise(contextMenu));			
+
 			return row;
 		}
 	}
