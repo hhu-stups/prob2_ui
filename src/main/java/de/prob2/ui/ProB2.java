@@ -50,11 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProB2 extends Application {
-	static {
-		// This must be set before any logger (like the one below) is constructed.
-		System.setProperty("logback.configurationFile", "de/prob2/ui/logback_config.xml");
-	}
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
+	private Logger logger;
 
 	private RuntimeOptions runtimeOptions;
 	private Injector injector;
@@ -62,7 +58,7 @@ public class ProB2 extends Application {
 
 	private Stage primaryStage;
 
-	private static boolean isJavaVersionOk(final String javaVersion) {
+	private boolean isJavaVersionOk(final String javaVersion) {
 		final Matcher javaVersionMatcher = Pattern.compile("(?:1\\.)?(\\d+).*_(\\d+).*").matcher(javaVersion);
 		if (javaVersionMatcher.matches()) {
 			final int majorVersion;
@@ -71,13 +67,13 @@ public class ProB2 extends Application {
 				majorVersion = Integer.parseInt(javaVersionMatcher.group(1));
 				updateNumber = Integer.parseInt(javaVersionMatcher.group(2));
 			} catch (NumberFormatException e) {
-				LOGGER.warn("Failed to parse Java version; skipping version check", e);
+				logger.warn("Failed to parse Java version; skipping version check", e);
 				return true;
 			}
 			
 			return majorVersion > 8 || (majorVersion == 8 && updateNumber >= 60);
 		} else {
-			LOGGER.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
+			logger.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
 			return true;
 		}
 	}
@@ -88,6 +84,9 @@ public class ProB2 extends Application {
 
 	@Override
 	public void init() {
+		System.setProperty("logback.configurationFile", "de/prob2/ui/logback_config.xml");
+		logger = LoggerFactory.getLogger(ProB2.class);
+		
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
 		if (runtimeOptions.isLoadConfig()) {
 			final Locale localeOverride = Config.getLocaleOverride();
@@ -110,12 +109,12 @@ public class ProB2 extends Application {
 			.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
 		StageManager stageManager = injector.getInstance(StageManager.class);
 		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
-			LOGGER.error("Uncaught exception on thread {}", thread, exc);
+			logger.error("Uncaught exception on thread {}", thread, exc);
 			Platform.runLater(() -> {
 				try {
 					stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
 				} catch (Throwable t) {
-					LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
+					logger.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
 				}
 			});
 		});
@@ -230,8 +229,8 @@ public class ProB2 extends Application {
 		return new IllegalStateException(message);
 	}
 
-	private static RuntimeOptions parseRuntimeOptions(final String[] args) {
-		LOGGER.info("Parsing arguments: {}", (Object) args);
+	private RuntimeOptions parseRuntimeOptions(final String[] args) {
+		logger.info("Parsing arguments: {}", (Object) args);
 
 		final Options options = new Options();
 
@@ -247,10 +246,10 @@ public class ProB2 extends Application {
 		try {
 			cl = clParser.parse(options, args);
 		} catch (ParseException e) {
-			LOGGER.error("Failed to parse command line", e);
+			logger.error("Failed to parse command line", e);
 			throw die(e.getLocalizedMessage(), 2);
 		}
-		LOGGER.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
+		logger.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
 
 		if (cl.hasOption("help")) {
 			final HelpFormatter hf = new HelpFormatter();
@@ -277,7 +276,7 @@ public class ProB2 extends Application {
 			!cl.hasOption("no-load-config"), 
 			!cl.hasOption("no-save-config")
 		);
-		LOGGER.info("Created runtime options: {}", runtimeOpts);
+		logger.info("Created runtime options: {}", runtimeOpts);
 
 		return runtimeOpts;
 	}
