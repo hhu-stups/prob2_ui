@@ -48,7 +48,7 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	@FXML
 	public void initialize() throws URISyntaxException {
 		engine = taCode.getEngine();
-		engine.load(LTLItemStage.class.getResource("/de/prob2/ui/codemirror/LTLEditor.html").toURI().toString());
+		engine.load(LTLItemStage.class.getResource("LTLEditor.html").toURI().toString());
 		engine.setJavaScriptEnabled(true);
 	}
 	
