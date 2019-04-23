@@ -164,11 +164,11 @@ sonarqube {
 			"build/**",
 			// Sonar currently throws exceptions when parsing ProB2Module.java, so it's excluded for now.
 			"src/main/java/de/prob2/ui/internal/ProB2Module.java",
-			"src/main/resources/codemirror/closebrackets.js",
-			"src/main/resources/codemirror/codemirror.css",
-			"src/main/resources/codemirror/codemirror.js",
-			"src/main/resources/codemirror/jquery.js",
-			"src/main/resources/codemirror/matchbrackets.js",
+			"src/main/resources/de/prob2/ui/codemirror/closebrackets.js",
+			"src/main/resources/de/prob2/ui/codemirror/codemirror.css",
+			"src/main/resources/de/prob2/ui/codemirror/codemirror.js",
+			"src/main/resources/de/prob2/ui/codemirror/jquery.js",
+			"src/main/resources/de/prob2/ui/codemirror/matchbrackets.js",
 		].join(","))
 		
 		property("sonar.login", System.getenv("SONAR_TOKEN"))

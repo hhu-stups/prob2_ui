@@ -1,19 +1,19 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.net.URISyntaxException;
 
-import de.prob2.ui.ProB2;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import netscape.javascript.JSObject;
 
-import java.net.URISyntaxException;
+import netscape.javascript.JSObject;
 
 public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
@@ -48,7 +48,7 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	@FXML
 	public void initialize() throws URISyntaxException {
 		engine = taCode.getEngine();
-		engine.load(ProB2.class.getClassLoader().getResource("codemirror/LTLEditor.html").toURI().toString());
+		engine.load(LTLItemStage.class.getResource("/de/prob2/ui/codemirror/LTLEditor.html").toURI().toString());
 		engine.setJavaScriptEnabled(true);
 	}
 	
