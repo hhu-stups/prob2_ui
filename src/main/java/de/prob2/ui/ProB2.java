@@ -50,6 +50,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProB2 extends Application {
+	static {
+		// This must be set before any logger (like the one below) is constructed.
+		System.setProperty("logback.configurationFile", "de/prob2/ui/logback_config.xml");
+	}
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
 
 	private RuntimeOptions runtimeOptions;
