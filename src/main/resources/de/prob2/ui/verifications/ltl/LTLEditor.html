@@ -20,13 +20,13 @@
 			<textarea id="code"></textarea>
 		</div>
 		<script>
-			var code = document.getElementById('code');
-			var editor = CodeMirror.fromTextArea(code, {
+			const code = document.getElementById('code');
+			const editor = CodeMirror.fromTextArea(code, {
 				lineNumbers: true,
 				indentUnit: 4,
 				autoCloseBrackets: true,
 				matchBrackets: true,
-				mode: "text/ltl"
+				mode: "text/ltl",
 			});
 		</script>
 	</body>

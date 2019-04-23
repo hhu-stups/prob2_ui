@@ -1,7 +1,5 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.net.URISyntaxException;
-
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
@@ -36,7 +34,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected WebEngine engine;
 
-			
 	public LTLItemStage(final CurrentProject currentProject, final ILTLItemHandler ltlItemHandler, final LTLResultHandler resultHandler) {
 		super();
 		this.currentProject = currentProject;
@@ -46,9 +43,9 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	}
 	
 	@FXML
-	public void initialize() throws URISyntaxException {
+	public void initialize() {
 		engine = taCode.getEngine();
-		engine.load(LTLItemStage.class.getResource("LTLEditor.html").toURI().toString());
+		engine.load(LTLItemStage.class.getResource("LTLEditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
 	}
 	
@@ -82,5 +79,4 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	protected abstract void addItem(Machine machine, T item);
 	
 	protected abstract void changeItem(T item, T result);
-		
 }
