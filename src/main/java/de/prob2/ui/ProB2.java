@@ -10,6 +10,8 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ch.qos.logback.classic.util.ContextInitializer;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -84,7 +86,7 @@ public class ProB2 extends Application {
 
 	@Override
 	public void init() {
-		System.setProperty("logback.configurationFile", "de/prob2/ui/logback_config.xml");
+		System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "de/prob2/ui/logback_config.xml");
 		logger = LoggerFactory.getLogger(ProB2.class);
 		
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
