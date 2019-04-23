@@ -199,10 +199,6 @@ if (!project.hasProperty("skipHelp") || project.skipHelp != "true") {
 	clean.dependsOn(cleanHelp)
 }
 
-tasks.withType(JavaCompile) {
-	options.compilerArgs += ["-proc:none"]
-}
-
 if (project.hasProperty("probHome")) {
 	allprojects {
 		tasks.withType(JavaForkOptions) {
