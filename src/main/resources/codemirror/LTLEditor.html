@@ -1,33 +1,37 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<!-- CSS -->
-		<link rel="stylesheet" href="codemirror.css"/>
-		<link rel="stylesheet" href="editor.css"/>
-		<link rel="stylesheet" href="ltl.css"/>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>LTL editor</title>
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1, maximum-scale=1">
 		
-		<!-- JavaScript -->
-		<script type="text/javascript" src="codemirror.js"></script>
-		<script type="text/javascript" src="jquery.js"></script>
-		<script type="text/javascript" src="ltl.js"></script>
-		<script type="text/javascript" src="matchbrackets.js"></script>
-		<script type="text/javascript" src="closebrackets.js"></script>
-		<script type="text/javascript" src="ltl-hint.js"></script>
-		<script type="text/javascript" src="LTLEditor.js"></script>
-	</head>
-	<body>
-		<div class="container">
-			<textarea id="code"></textarea>
-		</div>
-		<script>
-			var code = document.getElementById('code');
-			var editor = CodeMirror.fromTextArea(code, {
-				lineNumbers: true,
-				indentUnit: 4,
-				autoCloseBrackets: true,
-				matchBrackets: true,
-				mode: "text/ltl"
-			});
-		</script>
-	</body>
+<!-- CSS -->
+	<link rel="stylesheet" href="codemirror.css">
+	<link rel="stylesheet" href="editor.css">
+	
+<!-- JavaScript -->
+	<script type="text/javascript" src="codemirror.js"></script>
+	<script type="text/javascript" src="ltl.js"></script>
+	<script type="text/javascript" src="mark-selection.js"></script>
+	<script type="text/javascript" src="ltl-hint.js"></script>
+	<script type="text/javascript" src="LTLEditor.js"></script>
+	<script type="text/javascript" src="Util.js"></script>
+</head>
+<body style="height: 100%;">
+	<textarea id="code" name="code">
+	</textarea>
+	<script>
+		var settings = {
+			lineNumbers: true,
+			matchBrackets: true,
+			styleSelectedText: true,
+			continueComments: "Enter",
+			extraKeys: {"Ctrl-Q": "toggleComment"},
+			gutters: ["CodeMirror-linenumbers", "markers"]
+		};
+		
+		var editor = CodeMirror.fromTextArea(document.getElementById("code"), settings);
+    </script>
+</body>
 </html>
