@@ -86,7 +86,9 @@ public class ProB2 extends Application {
 
 	@Override
 	public void init() {
-		System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "de/prob2/ui/logback_config.xml");
+		if (!System.getProperties().containsKey(ContextInitializer.CONFIG_FILE_PROPERTY)) {
+			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "de/prob2/ui/logback_config.xml");
+		}
 		logger = LoggerFactory.getLogger(ProB2.class);
 		
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
