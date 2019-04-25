@@ -191,20 +191,21 @@ public class TraceChecker {
 	private Transition replayPersistentTransition(ReplayTrace replayTrace, Trace t,
 			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
 		StateSpace stateSpace = t.getStateSpace();
-		String predicate = new PredicateBuilder().addMap(persistentTransition.getParameters()).toString();
-		final IEvalElement pred = stateSpace.getModel().parseFormula(predicate, FormulaExpand.EXPAND);
+		PredicateBuilder predicateBuilder = new PredicateBuilder().addMap(persistentTransition.getParameters());
+		predicateBuilder.addMap(persistentTransition.getDestinationStateVariables());
+		final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.EXPAND);
 		final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
 				t.getCurrentState().getId(), persistentTransition.getOperationName(), pred, 1);
 		stateSpace.execute(command);
 		if (command.hasErrors()) {
 			replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage");
-			replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicate, String.join(", ", command.getErrors()));
+			replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicateBuilder, String.join(", ", command.getErrors()));
 			return null;
 		}
 		List<Transition> possibleTransitions = command.getNewTransitions();
 		if (possibleTransitions.isEmpty()) {
 			replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage.operationNotPossible");
-			replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicate);
+			replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicateBuilder);
 			return null;
 		}
 		Transition trans = possibleTransitions.get(0);

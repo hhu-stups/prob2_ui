@@ -1,16 +1,18 @@
 CodeMirror.defineMode("ltl", function() {
-	
-	var keywordGroups = { 
+	const keywordGroups = {
 		"keyword": words("def count up down to end without seq num var"),
 		"scope": words("before after between after_until"),
-		"atom": words("true false sink deadlock current"),  
-		"ltl": words("G F X N H O Y U W R S T"),  
-		"boolean": words("not and or")
+		"atom": words("true false sink deadlock current"),
+		"ltl": words("G F X N H O Y U W R S T"),
+		"boolean": words("not and or"),
 	};
 	
 	function words(str) {
-		var obj = {}, words = str.split(" ");
-		for (var i = 0; i < words.length; ++i) obj[words[i]] = true;
+		let obj = {};
+		const words = str.split(" ");
+		for (let i = 0; i < words.length; ++i) {
+			obj[words[i]] = true;
+		}
 		return obj;
 	}
 
@@ -20,9 +22,9 @@ CodeMirror.defineMode("ltl", function() {
 			stream.next();
 			return null;
 		}
-		var word = stream.current();
-		for (var token in keywordGroups) {
-			var words = keywordGroups[token];
+		const word = stream.current();
+		for (const token in keywordGroups) {
+			const words = keywordGroups[token];
 			if (words.propertyIsEnumerable(word)) {
 				return token;
 			}
@@ -43,7 +45,6 @@ CodeMirror.defineMode("ltl", function() {
 		stream.skipToEnd();
 		return "comment";
 	}
-
 
 	return {
 		startState: function() {
@@ -76,9 +77,9 @@ CodeMirror.defineMode("ltl", function() {
 						return null;
 					}
 					return "number";
-				}  else if (/[!&|=]/.test(stream.peek())) {
+				} else if (/[!&|=]/.test(stream.peek())) {
 					// Boolean operator symbols
-					if (stream.next() == '=' && !stream.eat('>')) {
+					if (stream.next() === '=' && !stream.eat('>')) {
 						return null;
 					}
 					return "boolean";
