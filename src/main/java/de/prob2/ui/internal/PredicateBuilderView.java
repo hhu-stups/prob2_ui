@@ -98,6 +98,7 @@ public final class PredicateBuilderView extends VBox {
 			final String rhs = assignment[1];
 			items.put(lhs, rhs);
 		}
+		table.refresh();
 		this.predicateField.setText(predicates[predicates.length-1]);
 	}
 	
@@ -114,5 +115,9 @@ public final class PredicateBuilderView extends VBox {
 			builder.addList(Collections.singletonList(this.predicateField.getText()));
 		}
 		return builder.toString();
+	}
+	
+	public void reset() {
+		this.setFromPredicate("");
 	}
 }

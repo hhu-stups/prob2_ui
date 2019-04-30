@@ -108,6 +108,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.addAndCheck"));
 		setCheckListeners();
 		tfFormula.clear();
+		predicateBuilderView.reset();
 		cbOperations.getSelectionModel().clearSelection();
 	}
 	
