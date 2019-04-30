@@ -201,5 +201,3 @@ if (project.hasProperty("probHome")) {
 		}
 	}
 }
-
-apply(from: "../common.gradle")
