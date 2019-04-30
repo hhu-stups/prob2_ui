@@ -1,8 +1,12 @@
 package de.prob2.ui.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
@@ -89,17 +93,28 @@ public final class PredicateBuilderView extends VBox {
 	}
 	
 	public void setFromPredicate(final String predicate) {
-		items.clear();
 		final String[] predicates = predicate.split(" & ");
-		for (int i = 0; i < predicates.length-1; i++) {
+		//Copy elements of items.keySet(), otherwise they will be lost due to items.clear()
+		Set<String> keys = items.keySet().stream().collect(Collectors.toSet());
+		int size = Math.min(items.size(), predicates.length);
+		List<String> restPredicates = new ArrayList<>();
+		items.clear();
+		for (int i = 0; i < size; i++) {
 			final String part = predicates[i];
 			final String[] assignment = part.split("=");
 			final String lhs = assignment[0];
+			if(assignment.length <= 1 || !keys.contains(lhs)) {
+				restPredicates.add(part);
+				continue;
+			}
 			final String rhs = assignment[1];
 			items.put(lhs, rhs);
 		}
 		table.refresh();
-		this.predicateField.setText(predicates[predicates.length-1]);
+		for (int i = size; i < predicates.length; i++) {
+			restPredicates.add(predicates[i]);
+		}
+		this.predicateField.setText(String.join(" & ", restPredicates));
 	}
 	
 	public String getPredicate() {
