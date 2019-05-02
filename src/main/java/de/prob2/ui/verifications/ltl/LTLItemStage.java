@@ -50,7 +50,7 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	}
 	
 	private void setTextEditor(String text) {
-		final JSObject editor = (JSObject) engine.executeScript("editor");
+		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
 		editor.call("setValue", text);
 	}
 		

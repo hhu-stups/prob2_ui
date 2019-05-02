@@ -21,13 +21,16 @@
 		</div>
 		<script>
 			const code = document.getElementById('code');
-			const editor = CodeMirror.fromTextArea(code, {
+			LtlEditor.setCodeMirror(code, {
 				lineNumbers: true,
 				indentUnit: 4,
 				autoCloseBrackets: true,
 				matchBrackets: true,
 				mode: "text/ltl",
+				gutters: ["CodeMirror-linenumbers", "markers"],
 			});
+			LtlEditor.registerChangeHandlers();
+			LtlEditor.parseInput();
 		</script>
 	</body>
 </html>

@@ -26,7 +26,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	
 	@FXML
 	private void applyFormula() {
-		final JSObject editor = (JSObject) engine.executeScript("editor");
+		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
 		String code = editor.call("getValue").toString();
 		if(handleItem.getHandleType() == HandleType.ADD) {
 			addItem(currentProject.getCurrentMachine(), new LTLFormulaItem(code, taDescription.getText()));

@@ -134,7 +134,6 @@ LtlEditor = function() {
 	}
 	
 	/* Gutter- and text-markers */
-
 	function addMarkers(markers, textmarker = true) {
 		for (let i = 0; i < markers.length; i++) {
 			const marker = markers[i];

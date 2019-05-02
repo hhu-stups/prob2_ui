@@ -20,6 +20,7 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLParseError;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternCheckingResultItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,8 +80,9 @@ public class LTLResultHandler extends AbstractResultHandler {
 		if(parseListener.getErrorMarkers().isEmpty()) {
 			item.setCheckedSuccessful();
 		} else {
+			List<LTLMarker> errorMarkers = parseListener.getErrorMarkers();
 			final String msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
-			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "verifications.result.couldNotParsePattern.header",
+			resultItem = new LTLPatternCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header",
 					"common.result.message", msg);
 			item.setParseError();
 		}
