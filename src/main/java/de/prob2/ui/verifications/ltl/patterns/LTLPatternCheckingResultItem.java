@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.prob2.ui.verifications.Checked;

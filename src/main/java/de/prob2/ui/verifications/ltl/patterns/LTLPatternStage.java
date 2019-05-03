@@ -41,7 +41,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 				LTLMark mark = marker.getMark();
 				int line = mark.getLine() - 1;				
 				JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");
-				JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + String.valueOf(mark.getPos() + mark.getLength()) +"}");
+				JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + (mark.getPos() + mark.getLength()) +"}");
 				JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
 				editor.call("markText", from, to, style);
 			}
