@@ -36,16 +36,6 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		} else {
 			changeItem(handleItem.getItem(), item);
 		}
-		if(item.getResultItem() != null) {
-			for(LTLMarker marker : ((LTLPatternCheckingResultItem) item.getResultItem()).getErrorMarkers()) {
-				LTLMark mark = marker.getMark();
-				int line = mark.getLine() - 1;				
-				JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");
-				JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + (mark.getPos() + mark.getLength()) +"}");
-				JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
-				editor.call("markText", from, to, style);
-			}
-		}
 	}
 	
 	@Override
@@ -60,6 +50,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 			CheckingResultItem resultItem = item.getResultItem();
 			if(resultItem != null) {
 				taErrors.setText(resultItem.getMessage());
+				markText(item);
 				return;
 			}
 			this.close();
@@ -85,11 +76,25 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 			CheckingResultItem resultItem = result.getResultItem();
 			if(resultItem != null) {
 				taErrors.setText(resultItem.getMessage());
+				markText(item);
 				return;
 			}
 			this.close();
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
+		}
+	}
+	
+	
+	private void markText(LTLPatternItem item) {
+		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
+		for(LTLMarker marker : ((LTLPatternCheckingResultItem) item.getResultItem()).getErrorMarkers()) {
+			LTLMark mark = marker.getMark();
+			int line = mark.getLine() - 1;				
+			JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");
+			JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + (mark.getPos() + mark.getLength()) +"}");
+			JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
+			editor.call("markText", from, to, style);
 		}
 	}
 
