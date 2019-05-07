@@ -112,6 +112,28 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		checkingThread.start();
 	}
 	
+	public void checkFormula(LTLFormulaItem item, LTLFormulaStage formulaStage) {
+		Machine machine = currentProject.getCurrentMachine();
+		Thread checkingThread = new Thread(() -> {
+			Checked result = checkFormula(item, machine);
+			Platform.runLater(() -> {
+				if(item.getChecked() == Checked.PARSE_ERROR) {
+					formulaStage.setErrors(item.getResultItem().getMessage());
+					return;
+				}
+				formulaStage.close();
+			});
+			item.setChecked(result);
+			Platform.runLater(() -> injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL));
+			if(item.getCounterExample() != null) {
+				currentTrace.set(item.getCounterExample());
+			}
+			currentJobThreads.remove(Thread.currentThread());
+		}, "LTL Checking Thread");
+		currentJobThreads.add(checkingThread);
+		checkingThread.start();
+	}
+	
 	private Object getResult(LtlParser parser, LTLFormulaItem item) {
 		State stateid = currentTrace.getCurrentState();
 		LTLParseListener parseListener = parseFormula(parser);

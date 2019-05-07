@@ -42,12 +42,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			machine.addLTLFormula(item);
 			updateProject();
 			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
-			formulaChecker.checkFormula(item);
-			if(item.getChecked() == Checked.PARSE_ERROR) {
-				taErrors.setText(item.getResultItem().getMessage());
-				return;
-			}
-			this.close();
+			formulaChecker.checkFormula(item, this);
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
@@ -66,15 +61,14 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			item.setResultItem(null);
 			currentProject.setSaved(false);
 			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, result));
-			formulaChecker.checkFormula(item);
-			if(item.getChecked() == Checked.PARSE_ERROR) {
-				taErrors.setText(item.getResultItem().getMessage());
-				return;
-			}
-			this.close();
+			formulaChecker.checkFormula(item, this);
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
+	}
+	
+	public void setErrors(String text) {
+		taErrors.setText(text);
 	}
 	
 }
