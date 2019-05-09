@@ -11,9 +11,6 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
-import de.prob2.ui.verifications.ltl.LTLMark;
-import de.prob2.ui.verifications.ltl.LTLMarker;
-import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import javafx.fxml.FXML;
 import netscape.javascript.JSObject;
@@ -86,17 +83,4 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		}
 	}
 	
-	
-	private void markText(LTLPatternItem item) {
-		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		for(LTLMarker marker : ((LTLCheckingResultItem) item.getResultItem()).getErrorMarkers()) {
-			LTLMark mark = marker.getMark();
-			int line = mark.getLine() - 1;				
-			JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");
-			JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + (mark.getPos() + mark.getLength()) +"}");
-			JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
-			editor.call("markText", from, to, style);
-		}
-	}
-
 }

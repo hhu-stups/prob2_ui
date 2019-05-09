@@ -5,7 +5,6 @@ import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.command.EvaluationCommand;
-import de.prob.animator.command.LtlCheckingCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;

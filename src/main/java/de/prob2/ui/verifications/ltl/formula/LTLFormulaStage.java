@@ -8,11 +8,8 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.CheckingResultItem;
-import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
-import de.prob2.ui.verifications.ltl.LTLMark;
-import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import javafx.fxml.FXML;
@@ -84,15 +81,4 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		taErrors.setText(text);
 	}
 
-	private void markText(LTLFormulaItem item) {
-		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		for(LTLMarker marker : ((LTLCheckingResultItem) item.getResultItem()).getErrorMarkers()) {
-			LTLMark mark = marker.getMark();
-			int line = mark.getLine() - 1;				
-			JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");
-			JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + (mark.getPos() + mark.getLength()) +"}");
-			JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
-			editor.call("markText", from, to, style);
-		}
-	}
 }

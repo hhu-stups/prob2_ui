@@ -3,7 +3,6 @@ package de.prob2.ui.verifications.ltl;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
@@ -79,4 +78,16 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	protected abstract void addItem(Machine machine, T item);
 	
 	protected abstract void changeItem(T item, T result);
+	
+	protected void markText(T item) {
+		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
+		for(LTLMarker marker : item.getResultItem().getErrorMarkers()) {
+			LTLMark mark = marker.getMark();
+			int line = mark.getLine() - 1;				
+			JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");
+			JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + (mark.getPos() + mark.getLength()) +"}");
+			JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
+			editor.call("markText", from, to, style);
+		}
+	}
 }
