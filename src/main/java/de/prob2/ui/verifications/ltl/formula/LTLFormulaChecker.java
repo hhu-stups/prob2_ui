@@ -165,7 +165,7 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
-			ProBError parseError = (ProBError) error;
+			ProBError parseError = error;
 			List<ErrorItem.Location> errorLocations = parseError.getErrors().stream()
 					.map(ErrorItem::getLocations)
 					.reduce(new ArrayList<ErrorItem.Location>(), (acc, locations) -> {
@@ -179,7 +179,7 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			return error;
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
-			LtlParseException parseError = (LtlParseException) error;
+			LtlParseException parseError = error;
 			errorMarkers.add(new LTLMarker("error", parseError.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), parseError.getMessage()));
 			return error;
 		}

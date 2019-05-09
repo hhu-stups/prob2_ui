@@ -82,6 +82,7 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	protected void showErrors(LTLCheckingResultItem resultItem) {
 		if(resultItem == null) {
 			this.close();
+			return;
 		}
 		taErrors.setText(resultItem.getMessage());
 		markText(resultItem);
