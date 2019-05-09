@@ -79,9 +79,17 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected abstract void changeItem(T item, T result);
 	
-	protected void markText(T item) {
+	protected void showErrors(LTLCheckingResultItem resultItem) {
+		if(resultItem == null) {
+			this.close();
+		}
+		taErrors.setText(resultItem.getMessage());
+		markText(resultItem);
+	}
+	
+	private void markText(LTLCheckingResultItem resultItem) {
 		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		for(LTLMarker marker : item.getResultItem().getErrorMarkers()) {
+		for(LTLMarker marker : resultItem.getErrorMarkers()) {
 			LTLMark mark = marker.getMark();
 			int line = mark.getLine() - 1;				
 			JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");

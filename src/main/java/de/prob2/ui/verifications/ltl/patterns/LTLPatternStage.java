@@ -7,7 +7,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
@@ -45,13 +45,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 			machine.addLTLPattern(item);
 			updateProject();
 			setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, item));
-			CheckingResultItem resultItem = item.getResultItem();
-			if(resultItem != null) {
-				taErrors.setText(resultItem.getMessage());
-				markText(item);
-				return;
-			}
-			this.close();
+			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}
@@ -71,13 +65,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 			patternParser.addPattern(item, machine);
 			currentProject.setSaved(false);
 			setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, result));
-			CheckingResultItem resultItem = result.getResultItem();
-			if(resultItem != null) {
-				taErrors.setText(resultItem.getMessage());
-				markText(item);
-				return;
-			}
-			this.close();
+			showErrors((LTLCheckingResultItem) result.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}

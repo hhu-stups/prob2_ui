@@ -7,7 +7,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
@@ -43,11 +43,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			updateProject();
 			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
-			CheckingResultItem resultItem = item.getResultItem();
-			if(resultItem != null) {
-				taErrors.setText(resultItem.getMessage());
-				markText(item);
-			}
+			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
@@ -67,11 +63,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			currentProject.setSaved(false);
 			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, result));
 			formulaChecker.checkFormula(item, this);
-			CheckingResultItem resultItem = item.getResultItem();
-			if(resultItem != null) {
-				taErrors.setText(resultItem.getMessage());
-				markText(item);
-			}
+			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}

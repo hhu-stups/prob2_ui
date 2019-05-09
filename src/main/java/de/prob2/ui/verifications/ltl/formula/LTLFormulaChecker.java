@@ -125,8 +125,6 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		Checked result = checkFormula(item, machine);
 		item.setChecked(result);
 		Thread checkingThread = new Thread(() -> {
-
-
 			Platform.runLater(() -> {
 				if(item.getChecked() == Checked.PARSE_ERROR) {
 					formulaStage.setErrors(item.getResultItem().getMessage());
