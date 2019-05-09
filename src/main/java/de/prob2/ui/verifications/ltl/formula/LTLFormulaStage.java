@@ -50,7 +50,6 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			if(resultItem != null) {
 				taErrors.setText(resultItem.getMessage());
 				markText(item);
-				return;
 			}
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
@@ -75,7 +74,6 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			if(resultItem != null) {
 				taErrors.setText(resultItem.getMessage());
 				markText(item);
-				return;
 			}
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
@@ -88,7 +86,6 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	private void markText(LTLFormulaItem item) {
 		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		System.out.println("ABC :" + ((LTLCheckingResultItem) item.getResultItem()).getErrorMarkers());
 		for(LTLMarker marker : ((LTLCheckingResultItem) item.getResultItem()).getErrorMarkers()) {
 			LTLMark mark = marker.getMark();
 			int line = mark.getLine() - 1;				
