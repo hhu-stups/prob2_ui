@@ -167,11 +167,8 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			logger.error("Could not parse LTL formula: ", error);
 			ProBError parseError = error;
 			List<ErrorItem.Location> errorLocations = parseError.getErrors().stream()
-					.map(ErrorItem::getLocations)
-					.reduce(new ArrayList<ErrorItem.Location>(), (acc, locations) -> {
-						acc.addAll(locations);
-						return acc;
-					});
+					.flatMap(err -> err.getLocations().stream())
+					.collect(Collectors.toList());
 			errorMarkers.addAll(errorLocations
 				.stream()
 				.map(location -> new LTLMarker("error", location.getStartLine(), location.getStartColumn(), location.getEndColumn() - location.getStartColumn(), error.getMessage()))
