@@ -24,6 +24,11 @@ LtlEditor = function() {
 			extern.mode = options.mode || "parseFormula";
 			extern.ignorePatternName = options.ignorePatternName || null;
 			
+			extern.cm.on("change", function(cm, obj) {
+				const marks = extern.cm.getAllMarks();
+				marks.forEach(marker => marker.clear());
+			});
+			
 			if (options.parseOnChange) {
 				// Enable parse on change
 				let delay;
