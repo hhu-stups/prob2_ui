@@ -13,6 +13,7 @@ import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLMark;
 import de.prob2.ui.verifications.ltl.LTLMarker;
+import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import javafx.fxml.FXML;
 import netscape.javascript.JSObject;
@@ -88,7 +89,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	
 	private void markText(LTLPatternItem item) {
 		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		for(LTLMarker marker : ((LTLPatternCheckingResultItem) item.getResultItem()).getErrorMarkers()) {
+		for(LTLMarker marker : ((LTLCheckingResultItem) item.getResultItem()).getErrorMarkers()) {
 			LTLMark mark = marker.getMark();
 			int line = mark.getLine() - 1;				
 			JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");

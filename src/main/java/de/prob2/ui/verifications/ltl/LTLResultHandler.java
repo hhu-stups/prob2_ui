@@ -20,7 +20,6 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLParseError;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternCheckingResultItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +40,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		this.parseErrors.addAll(Arrays.asList(LTLParseError.class, LtlParseException.class, ProBError.class, LTLError.class));
 	}
 	
-	public Checked handleFormulaResult(LTLFormulaItem item, Object result, State stateid) {
+	public Checked handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, State stateid) {
 		if(result instanceof EvaluationCommand)  {
 			if (((EvaluationCommand) result).isInterrupted()) {
 				handleItem(item, Checked.INTERRUPTED);
@@ -63,13 +62,13 @@ public class LTLResultHandler extends AbstractResultHandler {
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
 
-		item.setResultItem(resultItem);	
 		if(!traces.isEmpty()) {
 			item.setCounterExample(traces.get(0));
 		} else {
 			item.setCounterExample(null);
 		}
 		if(resultItem != null) {
+			item.setResultItem(new LTLCheckingResultItem(resultItem.getChecked(), errorMarkers, resultItem.getHeaderBundleKey(), resultItem.getMessageBundleKey(), resultItem.getMessageParams()));
 			return resultItem.getChecked();
 		}
 		return Checked.FAIL;
@@ -82,7 +81,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 		} else {
 			List<LTLMarker> errorMarkers = parseListener.getErrorMarkers();
 			final String msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
-			resultItem = new LTLPatternCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header",
+			resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header",
 					"common.result.message", msg);
 			item.setParseError();
 		}

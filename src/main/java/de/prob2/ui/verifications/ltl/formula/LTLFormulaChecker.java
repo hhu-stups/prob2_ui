@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.command.EvaluationCommand;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
@@ -19,6 +20,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.ILTLItemHandler;
+import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import javafx.application.Platform;
@@ -31,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -94,7 +98,9 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
-		return resultHandler.handleFormulaResult(item, getResult(parser, item), stateid);
+		List<LTLMarker> errorMarkers = new ArrayList<>();
+		Object result = getResult(parser, errorMarkers, item);
+		return resultHandler.handleFormulaResult(item, errorMarkers, result, stateid);
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {
@@ -114,17 +120,19 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 	
 	public void checkFormula(LTLFormulaItem item, LTLFormulaStage formulaStage) {
 		Machine machine = currentProject.getCurrentMachine();
+		Checked result = checkFormula(item, machine);
+		item.setChecked(result);
 		Thread checkingThread = new Thread(() -> {
-			Checked result = checkFormula(item, machine);
+
+
 			Platform.runLater(() -> {
 				if(item.getChecked() == Checked.PARSE_ERROR) {
 					formulaStage.setErrors(item.getResultItem().getMessage());
 					return;
 				}
 				formulaStage.close();
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 			});
-			item.setChecked(result);
-			Platform.runLater(() -> injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL));
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}
@@ -134,9 +142,10 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		checkingThread.start();
 	}
 	
-	private Object getResult(LtlParser parser, LTLFormulaItem item) {
+	private Object getResult(LtlParser parser, List<LTLMarker> errorMarkers, LTLFormulaItem item) {
 		State stateid = currentTrace.getCurrentState();
 		LTLParseListener parseListener = parseFormula(parser);
+		errorMarkers.addAll(parseListener.getErrorMarkers());
 		EvaluationCommand lcc = null;
 		LTL formula = null;
 		try {
@@ -150,6 +159,24 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			injector.getInstance(StatsView.class).update(currentTrace.get());
 		} catch (ProBError | LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
+			if(error instanceof LtlParseException) {
+				LtlParseException parseError = (LtlParseException) error;
+				errorMarkers.add(new LTLMarker("error", parseError.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), parseError.getMessage()));
+			} else {
+				ProBError parseError = (ProBError) error;
+				List<ErrorItem.Location> errorLocations = parseError.getErrors().stream()
+						.map(err -> err.getLocations())
+						.reduce(new ArrayList<ErrorItem.Location>(), (acc, locations) -> {
+							acc.addAll(locations);
+							return acc;
+						});
+				errorMarkers.addAll(errorLocations
+					.stream()
+					.map(location -> {
+						return new LTLMarker("error", location.getStartLine(), location.getStartColumn(), location.getEndColumn() - location.getStartColumn(), error.getMessage());	
+					})
+					.collect(Collectors.toList()));
+			}
 			return error;
 		}
 		return lcc;

@@ -7,9 +7,12 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
+import de.prob2.ui.verifications.ltl.LTLMark;
+import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import javafx.fxml.FXML;
@@ -43,6 +46,12 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			updateProject();
 			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
+			CheckingResultItem resultItem = item.getResultItem();
+			if(resultItem != null) {
+				taErrors.setText(resultItem.getMessage());
+				markText(item);
+				return;
+			}
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
@@ -62,6 +71,12 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			currentProject.setSaved(false);
 			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, result));
 			formulaChecker.checkFormula(item, this);
+			CheckingResultItem resultItem = item.getResultItem();
+			if(resultItem != null) {
+				taErrors.setText(resultItem.getMessage());
+				markText(item);
+				return;
+			}
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
@@ -70,5 +85,17 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	public void setErrors(String text) {
 		taErrors.setText(text);
 	}
-	
+
+	private void markText(LTLFormulaItem item) {
+		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
+		System.out.println("ABC :" + ((LTLCheckingResultItem) item.getResultItem()).getErrorMarkers());
+		for(LTLMarker marker : ((LTLCheckingResultItem) item.getResultItem()).getErrorMarkers()) {
+			LTLMark mark = marker.getMark();
+			int line = mark.getLine() - 1;				
+			JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");
+			JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + (mark.getPos() + mark.getLength()) +"}");
+			JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
+			editor.call("markText", from, to, style);
+		}
+	}
 }
