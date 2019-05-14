@@ -21,6 +21,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferenceType;
+
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -196,7 +198,10 @@ public abstract class DynamicCommandStage extends Stage {
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
 		cancelButton.disableProperty().bind(currentThread.isNull());
-		editPreferencesButton.disableProperty().bind(lvChoice.getSelectionModel().selectedItemProperty().isNull().or(preferences.emptyProperty()));
+		editPreferencesButton.disableProperty().bind(Bindings.createBooleanBinding(() -> {
+			final DynamicCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
+			return item == null || item.getRelevantPreferences().isEmpty();
+		}, lvChoice.getSelectionModel().selectedItemProperty()));
 	}
 	
 	private void updatePreferences(List<String> relevantPreferences) {
