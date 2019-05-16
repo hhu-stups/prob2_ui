@@ -1,13 +1,12 @@
 package de.prob2.ui.dynamic;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.ProBPreferences;
-import de.prob2.ui.project.MachineLoader;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -33,16 +32,12 @@ public class DynamicPreferencesTableView extends TableView<PrefItem> {
 	@FXML
 	private TableColumn<PrefItem, String> tvDescription;
 	
-	private final ObjectProperty<ProBPreferences> proBPreferences;
-	
-	private final Injector injector;
+	private final ObjectProperty<ProBPreferences> preferences;
 	
 	@Inject
-	public DynamicPreferencesTableView(final StageManager stageManager, final ProBPreferences probPreferences,
-									   final MachineLoader machineLoader, final Injector injector) {
+	public DynamicPreferencesTableView(final StageManager stageManager) {
 		super();
-		this.proBPreferences = new SimpleObjectProperty<>(this, "preferences", probPreferences);
-		this.injector = injector;
+		this.preferences = new SimpleObjectProperty<>(this, "preferences");
 		stageManager.loadFXML(this, "dynamic_preferences_table_view.fxml");
 	}
 	
@@ -51,16 +46,28 @@ public class DynamicPreferencesTableView extends TableView<PrefItem> {
 	private void initialize() {
 		tvName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		tvChanged.setCellValueFactory(new PropertyValueFactory<>("changed"));
-		tvValue.setCellFactory(col -> new DynamicTableCell(proBPreferences, injector));
+		tvValue.setCellFactory(col -> new DynamicTableCell(preferences));
 		tvValue.setCellValueFactory(new PropertyValueFactory<>("value"));
 		tvDefaultValue.setCellValueFactory(new PropertyValueFactory<>("defaultValue"));
 		tvDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
 	}
 	
+	public ObjectProperty<ProBPreferences> preferencesProperty() {
+		return this.preferences;
+	}
+	
+	public ProBPreferences getPreferences() {
+		return this.preferencesProperty().get();
+	}
+	
+	public void setPreferences(final ProBPreferences preferences) {
+		this.preferencesProperty().set(preferences);
+	}
+	
 	@Override
 	public void refresh() {
 		for (PrefItem item : this.getItems()) {
-			String value = proBPreferences.get().getPreferenceValue(item.getName());
+			String value = preferences.get().getPreferenceValue(item.getName());
 			item.setValue(value);
 			item.setChanged(value.equals(item.getDefaultValue()) ? "" : "*");
 		}

@@ -1,11 +1,5 @@
 package de.prob2.ui.preferences;
 
-import com.google.inject.Injector;
-
-import de.prob2.ui.dynamic.DynamicTableCell;
-import de.prob2.ui.dynamic.dotty.DotView;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
-
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Cell;
@@ -26,16 +20,13 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 	
 	private final ReadOnlyObjectProperty<ProBPreferences>  preferences;
 	
-	private final Injector injector;
-	
 	private T cell;
 	
 	private R row;
 	
-	public PreferencesCellProvider(final T cell, final Injector injector, final ReadOnlyObjectProperty<ProBPreferences> preferences) {
+	public PreferencesCellProvider(final T cell, final ReadOnlyObjectProperty<ProBPreferences> preferences) {
 		super();
 		this.cell = cell;
-		this.injector = injector;
 		this.preferences = preferences;
 	}
 	
@@ -44,12 +35,6 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 			return;
 		}
 		this.preferences.get().setPreferenceValue(row.getItem().getName(), newValue);
-		if(cell instanceof DynamicTableCell) {
-			injector.getInstance(PreferencesView.class).refresh();
-		} else if(cell instanceof MultiTreeTableCell) {
-			injector.getInstance(DotView.class).refresh();
-			injector.getInstance(ExpressionTableView.class).refresh();
-		}
 	}
 	
 	private void changeToSpinner(final int min, final int max, final String initial) {

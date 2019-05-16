@@ -6,11 +6,10 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.AbstractPreferencesStage;
-import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PrefItem;
 import de.prob2.ui.preferences.PreferencesHandler;
 import de.prob2.ui.preferences.ProBPreferences;
-import de.prob2.ui.project.MachineLoader;
+import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
 
@@ -20,11 +19,17 @@ public class DynamicPreferencesStage extends AbstractPreferencesStage {
 	protected DynamicPreferencesTableView preferences;
 	
 	@Inject
-	private DynamicPreferencesStage(final StageManager stageManager, final ProBPreferences globalProBPrefs, 
-			final GlobalPreferences globalPreferences, final MachineLoader machineLoader, 
-			final PreferencesHandler preferencesHandler) {
-		super(globalProBPrefs, globalPreferences, preferencesHandler, machineLoader);
+	private DynamicPreferencesStage(final StageManager stageManager, final ProBPreferences globalProBPrefs, final PreferencesHandler preferencesHandler, final CurrentTrace currentTrace) {
+		super(globalProBPrefs, preferencesHandler);
+		this.globalProBPrefs.stateSpaceProperty().bind(currentTrace.stateSpaceProperty());
 		stageManager.loadFXML(this, "dynamic_preferences_view.fxml");
+	}
+	
+	@Override
+	protected void initialize() {
+		super.initialize();
+		
+		this.preferences.setPreferences(this.globalProBPrefs);
 	}
 	
 	public void clear() {
@@ -38,5 +43,17 @@ public class DynamicPreferencesStage extends AbstractPreferencesStage {
 	
 	public void addAll(List<PrefItem> items) {
 		preferences.getItems().addAll(items);
+	}
+	
+	@Override
+	protected void handleUndoChanges() {
+		super.handleUndoChanges();
+		this.refresh();
+	}
+	
+	@Override
+	protected void handleRestoreDefaults() {
+		super.handleRestoreDefaults();
+		this.refresh();
 	}
 }

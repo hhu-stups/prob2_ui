@@ -13,14 +13,12 @@ import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.PrefItem;
+import de.prob2.ui.preferences.ProBPreferenceType;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.preferences.PrefItem;
-import de.prob2.ui.preferences.PreferencesView;
-import de.prob2.ui.preferences.ProBPreferenceType;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -132,8 +130,6 @@ public abstract class DynamicCommandStage extends Stage {
 				return;
 			}
 			updatePreferences(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
-			preferences.refresh();
-			injector.getInstance(PreferencesView.class).refresh();
 		});
 		
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {

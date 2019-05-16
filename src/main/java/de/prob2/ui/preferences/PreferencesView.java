@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @FXMLInjected
-@Singleton
 public final class PreferencesView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesView.class);
 	private static final Pattern EMPTY_PATTERN = Pattern.compile("", Pattern.CASE_INSENSITIVE);
@@ -44,7 +43,6 @@ public final class PreferencesView extends BorderPane {
 	
 	private final ObjectProperty<ProBPreferences> preferences;
 	private final InvalidationListener refreshIL;
-	private final Injector injector;
 	
 	@Inject
 	private PreferencesView(final StageManager stageManager, final Injector injector) {
@@ -52,7 +50,6 @@ public final class PreferencesView extends BorderPane {
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
 		this.refreshIL = o -> this.refresh();
-		this.injector = injector;
 		stageManager.loadFXML(this, "preferences_view.fxml");
 	}
 	
@@ -79,7 +76,7 @@ public final class PreferencesView extends BorderPane {
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefItem, String> cell = new MultiTreeTableCell(this.preferencesProperty(), injector);
+			TreeTableCell<PrefItem, String> cell = new MultiTreeTableCell(this.preferencesProperty());
 			cell.tableRowProperty().addListener((observable, from, to) ->
 				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)
