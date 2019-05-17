@@ -74,10 +74,9 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 		final ResourceBundle bundle,
 		final CurrentProject currentProject,
 		final UIState uiState,
-		final PreferencesHandler preferencesHandler,
 		final Config config
 	) {
-		super(globalProBPrefs, preferencesHandler);
+		super(stageManager, globalProBPrefs);
 		this.recentProjects = recentProjects;
 		this.bundle = bundle;
 		this.currentProject = currentProject;

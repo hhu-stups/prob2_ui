@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.AbstractPreferencesStage;
 import de.prob2.ui.preferences.PrefItem;
-import de.prob2.ui.preferences.PreferencesHandler;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -19,8 +18,8 @@ public class DynamicPreferencesStage extends AbstractPreferencesStage {
 	protected DynamicPreferencesTableView preferences;
 	
 	@Inject
-	private DynamicPreferencesStage(final StageManager stageManager, final ProBPreferences globalProBPrefs, final PreferencesHandler preferencesHandler, final CurrentTrace currentTrace) {
-		super(globalProBPrefs, preferencesHandler);
+	private DynamicPreferencesStage(final StageManager stageManager, final ProBPreferences globalProBPrefs, final CurrentTrace currentTrace) {
+		super(stageManager, globalProBPrefs);
 		this.globalProBPrefs.stateSpaceProperty().bind(currentTrace.stateSpaceProperty());
 		stageManager.loadFXML(this, "dynamic_preferences_view.fxml");
 	}
