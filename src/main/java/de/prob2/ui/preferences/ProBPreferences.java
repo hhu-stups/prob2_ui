@@ -5,7 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
@@ -16,18 +19,23 @@ import de.prob.animator.command.SetPreferenceCommand;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.statespace.StateSpace;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 
 public final class ProBPreferences {
 	
 	private final ObjectProperty<StateSpace> stateSpace;
+	private final SetProperty<String> includedPreferenceNames;
 	private final ObservableMap<String, ProBPreference> cachedPreferences;
 	private final ObservableMap<String, String> cachedPreferenceValues;
 	private final ObservableMap<String, String> changedPreferences;
@@ -37,6 +45,7 @@ public final class ProBPreferences {
 	@Inject
 	private ProBPreferences() {
 		this.stateSpace = new SimpleObjectProperty<>(this, "stateSpace", null);
+		this.includedPreferenceNames = new SimpleSetProperty<>(this, "includedPreferenceNames", null);
 		this.cachedPreferences = FXCollections.observableHashMap();
 		this.cachedPreferenceValues = FXCollections.observableHashMap();
 		this.changedPreferences = FXCollections.observableHashMap();
@@ -53,6 +62,7 @@ public final class ProBPreferences {
 				this.apply();
 			}
 		});
+		this.includedPreferenceNamesProperty().addListener((InvalidationListener)o -> this.apply());
 	}
 	
 	/**
@@ -124,8 +134,37 @@ public final class ProBPreferences {
 	}
 	
 	/**
+	 * A property containing a set of preference names that this instance should operate on. If the property's value is {@code null}, all available preferences are included.
+	 * Preferences whose names are not in this set will be ignored by this instance.
+	 * 
+	 * @return a property containing a set of preference names that this instance should operate on
+	 */
+	public SetProperty<String> includedPreferenceNamesProperty() {
+		return this.includedPreferenceNames;
+	}
+	
+	/**
+	 * Get the current value of {@link #includedPreferenceNamesProperty()} (possibly {@code null}).
+	 * 
+	 * @return the current value of {@link #includedPreferenceNamesProperty()} (possibly {@code null})
+	 */
+	public ObservableSet<String> getIncludedPreferenceNames() {
+		return this.includedPreferenceNamesProperty().get();
+	}
+	
+	/**
+	 * Set the value of {@link #includedPreferenceNamesProperty()}.
+	 * 
+	 * @param includedPreferenceNames the new value for {@link #includedPreferenceNamesProperty()}
+	 */
+	public void setIncludedPreferenceNames(final ObservableSet<String> includedPreferenceNames) {
+		this.includedPreferenceNamesProperty().set(includedPreferenceNames);
+	}
+	
+	/**
 	 * Get information about all available preferences.
 	 * The returned {@link ProBPreference} objects do not include the current values of the preferences. To get these values, use {@link #getPreferenceValue(String)} or {@link #getPreferenceValues()}.
+	 * The returned map is filtered according to {@link #includedPreferenceNamesProperty()}.
 	 * 
 	 * @return information about all available preferences
 	 * 
@@ -140,6 +179,7 @@ public final class ProBPreferences {
 	
 	/**
 	 * Get the current value of the given preference.
+	 * Only preferences included in {@link #includedPreferenceNamesProperty()} may be queried.
 	 * 
 	 * @param name the preference to get the value for
 	 * @return the preference's current value
@@ -155,6 +195,7 @@ public final class ProBPreferences {
 	
 	/**
 	 * Get the current values of all preferences.
+	 * The returned map is filtered according to {@link #includedPreferenceNamesProperty()}.
 	 * 
 	 * @return the current values of all preferences
 	 * 
@@ -172,6 +213,7 @@ public final class ProBPreferences {
 	/**
 	 * Set the value of the given preference.
 	 * Note that for some preferences to take effect, the current model needs to be reloaded.
+	 * Only preferences included in {@link #includedPreferenceNamesProperty()} may be set.
 	 * 
 	 * @param name the preference to set
 	 * @param value the value to set the preference to
@@ -180,6 +222,10 @@ public final class ProBPreferences {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(value);
 		this.checkStateSpace();
+		
+		if (!this.cachedPreferenceValues.containsKey(name)) {
+			throw new NoSuchElementException("Unknown preference name: " + name);
+		}
 		
 		this.changedPreferences.put(name, value);
 		if (value.equals(this.cachedPreferenceValues.get(name))) {
@@ -213,15 +259,23 @@ public final class ProBPreferences {
 		try {
 			this.getStateSpace().execute(new ComposedCommand(setCmds));
 		} finally {
+			final Set<String> included = this.getIncludedPreferenceNames();
+			
 			final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
 			this.getStateSpace().execute(cmd1);
-			for (ProBPreference pref : cmd1.getPreferences()) {
-				this.cachedPreferences.put(pref.name, pref);
-			}
+			this.cachedPreferences.clear();
+			this.cachedPreferences.putAll(cmd1.getPreferences().stream()
+				.filter(pref -> included == null || included.contains(pref.name))
+				.collect(Collectors.toMap(pref -> pref.name, pref -> pref)));
 			
 			final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
 			this.getStateSpace().execute(cmd2);
-			this.cachedPreferenceValues.putAll(cmd2.getPreferences());
+			final Map<String, String> prefValues = new HashMap<>(cmd2.getPreferences());
+			if (included != null) {
+				prefValues.keySet().retainAll(included);
+			}
+			this.cachedPreferenceValues.clear();
+			this.cachedPreferenceValues.putAll(prefValues);
 			this.changedPreferences.clear();
 		}
 	}

@@ -7,7 +7,6 @@ import java.util.regex.PatternSyntaxException;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob2.ui.internal.FXMLInjected;
@@ -97,10 +96,12 @@ public final class PreferencesView extends BorderPane {
 		this.preferencesProperty().addListener((observable, from, to) -> {
 			if (from != null) {
 				from.stateSpaceProperty().removeListener(this.refreshIL);
+				from.includedPreferenceNamesProperty().removeListener(this.refreshIL);
 			}
 			
 			if (to != null) {
 				to.stateSpaceProperty().addListener(this.refreshIL);
+				to.includedPreferenceNamesProperty().addListener(this.refreshIL);
 			}
 			this.refresh();
 		});
@@ -133,18 +134,17 @@ public final class PreferencesView extends BorderPane {
 		}
 		generateTreeItems(searchPattern);
 		
-		if (!searchPattern.pattern().isEmpty()) {
-			for (Iterator<TreeItem<PrefItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext();) {
-				final TreeItem<PrefItem> category = itcat.next();
-				// Remove all items whose name and description don't match the search
-				category.getChildren().removeIf(item ->
-					!searchPattern.matcher(item.getValue().getName()).find()
-						&& !searchPattern.matcher(item.getValue().getDescription()).find()
-				);
-				if (category.getChildren().isEmpty()) {
-					// Category has no visible preferences, remove it
-					itcat.remove();
-				}
+		for (Iterator<TreeItem<PrefItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext();) {
+			final TreeItem<PrefItem> category = itcat.next();
+			// Remove all items whose name and description don't match the search or which are no longer present in the ProBPreferences object
+			category.getChildren().removeIf(item ->
+				(!searchPattern.matcher(item.getValue().getName()).find()
+					&& !searchPattern.matcher(item.getValue().getDescription()).find())
+				|| !this.getPreferences().getPreferences().containsKey(item.getValue().getName())
+			);
+			if (category.getChildren().isEmpty()) {
+				// Category has no visible preferences, remove it
+				itcat.remove();
 			}
 		}
 		
