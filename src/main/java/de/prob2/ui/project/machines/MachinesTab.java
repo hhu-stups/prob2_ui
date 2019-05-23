@@ -24,6 +24,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.ViewCodeStage;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.preferences.Preference;
@@ -241,7 +242,8 @@ public class MachinesTab extends Tab {
 					.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
 					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
 					.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not()
-					.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not())));
+					.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not()))
+					.or(injector.getInstance(OperationsView.class).randomExecutionThreadProperty().isNotNull()));
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof MachineDescriptionView && !to.contains(((MachineDescriptionView) node).getMachine())) {

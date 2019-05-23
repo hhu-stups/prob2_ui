@@ -561,7 +561,6 @@ public final class OperationsView extends VBox {
 			OperationInfo machineOperationInfo = loadedMachine.getMachineOperationInfo(opName);
 			opNames.add(opName);
 			opToParams.put(opName, machineOperationInfo.getParameterNames());
-
 		}
 	}
 	
@@ -588,5 +587,9 @@ public final class OperationsView extends VBox {
 
 	private void setShowUnambiguous(final boolean showUnambiguous) {
 		this.showUnambiguous.set(showUnambiguous);
+	}
+	
+	public ObjectProperty<Thread> randomExecutionThreadProperty() {
+		return randomExecutionThread;
 	}
 }
