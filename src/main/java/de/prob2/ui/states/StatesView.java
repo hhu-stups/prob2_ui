@@ -80,8 +80,6 @@ public final class StatesView extends StackPane {
 	}
 
 	@FXML
-	private Button searchButton;
-	@FXML
 	private TextField filterState;
 	@FXML
 	private HelpButton helpButton;
