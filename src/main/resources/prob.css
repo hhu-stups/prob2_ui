@@ -96,9 +96,11 @@
 	-fx-background-color: transparent;
 	-fx-border-radius: 5.0;
 	-fx-border-color: -prob-grey;
+	-fx-padding: 0.1em 0.1em 0.15em 0.15em ;
 }
 .check-box > .box > .mark {
 	-fx-background-color: none;
+	-fx-padding: 0.25em 0.25em 0.3em 0.3em;
 }
 .check-box:selected > .box > .mark {
 	-fx-background-color: -prob-grey;
@@ -225,10 +227,13 @@
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.2em 0.0 0.2em 0.0;
 }
+.list-cell {
+	-fx-cell-size: 1.5em;
+	-fx-padding: 0em 1em 0.05em 1em;
+}
 .list-cell:odd {
 	-fx-background: -prob-grey-odd;
 }
-
 .list-cell:selected {
 	-fx-background-color: -prob-aqua;
 	-fx-text-fill: white;
@@ -591,7 +596,6 @@
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.2em 0.0 0.2em 0.0;
 }
-
 .tree-table-view {
 	-fx-padding: -1.0;
 	-fx-border-width: 0.0;
@@ -608,30 +612,31 @@
 .tree-table-view > .virtual-flow > .corner {
 	-fx-background-color: white;
 }
-.table-row-cell {
+
+.table-row-cell,
+.tree-table-row-cell {
 	-fx-background: white;
 	-fx-border-color: transparent;
 	-fx-border-width: 0.0;
-} 
-
-.tree-table-row-cell:odd {
-	-fx-background: -prob-grey-odd;
+	-fx-cell-size: 1.5em;
 }
-
+.tree-table-row-cell:odd,
 .table-row-cell:odd {
 	-fx-background: -prob-grey-odd;
 }
-
-.table-row-cell:empty:hover {
-	-fx-background-color: white;
-}
-
 .table-row-cell:hover {
 	-fx-background-color: -prob-grey-20;
 }
-.table-view .table-cell {
+.table-row-cell:empty:hover {
+	-fx-background-color: white;
+}
+.table-row-cell:odd:empty:hover {
+	-fx-background-color: -prob-grey-odd;
+}
+.table-view .table-cell,
+.tree-table-view .tree-table-cell {
 	-fx-border-color: transparent;
-	-fx-padding: 0.2em 0.166667em 0.166667em 1.0em;
+	-fx-padding: 0em 1em 0.05em 1em;
 }
 .table-row-cell:focused .table-cell {
 	-fx-font-weight: bold;
@@ -639,7 +644,6 @@
 .table-row-cell:disabled {
 	-fx-text-fill: -prob-lightgrey;
 }
-
 .tree-table-row-cell:focused .check-box > .box {
 	-fx-border-color: white;
 }
@@ -649,7 +653,6 @@
 .tree-table-row-cell:focused .check-box:selected > .box > .mark {
 	-fx-background-color: white;
 }
-
 .table-view .column-header-background,
 .tree-table-view > .column-header-background {
 	-fx-background-color: white;
@@ -868,7 +871,6 @@
 	-fx-border-color: transparent;
 	-fx-border-width: 0.0 0.0 0.0 0.3em;
 	-fx-graphic-text-gap: 10;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
 }
 
 .operations-cell.enabled {
@@ -916,6 +918,9 @@
 /* Machines Tab, Preferences Tab */
 .details-title {
 	-fx-font-size: 1.2em; 
+}
+.machines-item {
+	-fx-cell-size: 2.8em;
 }
 .machines-item .name {
 	-fx-font-family: ARIAL;
