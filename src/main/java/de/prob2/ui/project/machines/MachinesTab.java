@@ -21,6 +21,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -85,6 +86,7 @@ public class MachinesTab extends Tab {
 			this.updatePreferences(currentProject.getPreferences());
 			currentProject.currentMachineProperty().addListener((observable, from, to) -> showInternalItem.setDisable(to == null || machineProperty.get() != to));
 			machineProperty.addListener((observable, from, to) -> showInternalItem.setDisable(to == null || to != currentProject.getCurrentMachine()));
+			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
 		}
 		
 		@FXML

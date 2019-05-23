@@ -14,6 +14,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -178,6 +179,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 
 			final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
 			statusIcon.getStyleClass().add("status-icon");
+			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
 			trace.statusProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
 			updateStatusIcon(statusIcon, trace.getChecked());
 
