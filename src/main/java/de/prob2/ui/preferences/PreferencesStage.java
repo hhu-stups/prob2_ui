@@ -25,19 +25,22 @@ import de.prob2.ui.project.MachineLoader;
 import javafx.beans.InvalidationListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public final class PreferencesStage extends AbstractPreferencesStage {
+public final class PreferencesStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesStage.class);
 	
 	// The locales to show in the language selection menu. This needs to be updated when new translations are added.
@@ -54,13 +57,19 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 	@FXML private TextField defaultLocationField;
 	@FXML private ChoiceBox<Locale> localeOverrideBox;
 	@FXML private PreferencesView globalPrefsView;
+	@FXML private Button undoButton;
+	@FXML private Button resetButton;
+	@FXML private Button applyButton;
+	@FXML private Label applyWarning;
 	@FXML private TabPane tabPane;
 
+	private final StageManager stageManager;
 	private final RecentProjects recentProjects;
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final UIState uiState;
 	private final GlobalPreferences globalPreferences;
+	private final ProBPreferences globalProBPrefs;
 	private final Config config;
 	private TabPersistenceHandler tabPersistenceHandler;
 
@@ -76,22 +85,21 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 		final UIState uiState,
 		final Config config
 	) {
-		super(stageManager, globalProBPrefs);
+		this.stageManager = stageManager;
 		this.recentProjects = recentProjects;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.uiState = uiState;
 		this.globalPreferences = globalPreferences;
+		this.globalProBPrefs = globalProBPrefs;
 		this.config = config;
 		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace());
 
 		stageManager.loadFXML(this, "preferences_stage.fxml");
 	}
 
-	@Override
 	@FXML
 	public void initialize() {
-		super.initialize();
 		// General	
 		final SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 50);
 		
@@ -140,6 +148,15 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 
 		this.globalPrefsView.setPreferences(this.globalProBPrefs);
 
+		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
+		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
+		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
+
+		// prevent text on buttons from being abbreviated
+		undoButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
+		applyButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
+		resetButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
+
 		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 		config.addListener(new ConfigListener() {
 			@Override
@@ -173,23 +190,28 @@ public final class PreferencesStage extends AbstractPreferencesStage {
 		this.hide();
 	}
 
-	@Override
-	protected void handleUndoChanges() {
-		super.handleUndoChanges();
+	@FXML
+	private void handleUndoChanges() {
+		this.globalProBPrefs.rollback();
 		this.globalPrefsView.refresh();
 	}
 
-	@Override
-	protected void handleRestoreDefaults() {
-		super.handleRestoreDefaults();
+	@FXML
+	private void handleRestoreDefaults() {
+		this.globalProBPrefs.restoreDefaults();
 		this.globalPrefsView.refresh();
 	}
 	
-	@Override
-	protected void handleApply() {
+	@FXML
+	private void handleApply() {
 		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getChangedPreferences());
 		
-		super.handleApply();
+		try {
+			this.globalProBPrefs.apply();
+		} catch (final ProBError e) {
+			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
+			stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content").show();
+		}
 		
 		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
 		for (final Map.Entry<String, String> entry : changed.entrySet()) {
