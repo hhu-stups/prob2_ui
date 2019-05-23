@@ -93,13 +93,4 @@ public class PrefItem {
 			.add("description", this.getDescription())
 			.toString();
 	}
-	
-	public void setValue(String value) {
-		this.value.set(value);
-	}
-	
-	public void setChanged(String changed) {
-		this.changed.set(changed);
-	}
-
 }
