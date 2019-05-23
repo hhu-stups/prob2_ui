@@ -27,6 +27,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -106,6 +107,9 @@ public abstract class DynamicCommandStage extends Stage {
 			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, 
 			final Injector injector) {
 		this.preferences = preferences;
+		this.preferences.initOwner(this);
+		this.preferences.initModality(Modality.WINDOW_MODAL);
+		this.preferences.setToRefresh(this);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;		
 		this.injector = injector;
