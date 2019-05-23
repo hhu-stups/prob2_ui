@@ -3,6 +3,7 @@
 <?import de.prob2.ui.dynamic.DynamicPreferencesStage?>
 <?import de.prob2.ui.internal.Spacer?>
 <?import de.prob2.ui.preferences.PreferencesView?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -10,9 +11,12 @@
 <fx:root type="DynamicPreferencesStage" maxWidth="Infinity" maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1" height="600.0" width="800.0">
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<VBox alignment="CENTER" spacing="10.0">
-				<PreferencesView fx:id="preferences"/>
-				<HBox spacing="10.0">
+			<VBox>
+				<PreferencesView VBox.vgrow="ALWAYS" fx:id="preferences"/>
+				<HBox spacing="10.0" VBox.vgrow="NEVER">
+					<padding>
+						<Insets topRightBottomLeft="10.0"/>
+					</padding>
 					<Button fx:id="resetButton" styleClass="button-blue" text="%preferences.stage.tabs.globalPreferences.buttons.restoreDefaults" HBox.hgrow="NEVER" onAction="#handleRestoreDefaults" />
 					<Spacer/>
 					<Button fx:id="cancelButton" styleClass="button-blue" text="%common.buttons.cancel" HBox.hgrow="NEVER" onAction="#handleCancel" />
