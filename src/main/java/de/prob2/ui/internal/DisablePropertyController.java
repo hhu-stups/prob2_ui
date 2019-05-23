@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
@@ -27,7 +28,9 @@ public class DisablePropertyController {
                 .or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
                 .or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
                 .or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-                .or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not());
+                .or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()
+                .or(injector.getInstance(OperationsView.class).randomExecutionThreadProperty().isNotNull())
+                .or(injector.getInstance(OperationsView.class).runningProperty()));
     }
 
     public void addDisableProperty(final BooleanProperty guiDisableProperty) {

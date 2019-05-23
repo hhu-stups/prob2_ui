@@ -15,24 +15,19 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.ViewCodeStage;
-import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
-import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -238,12 +233,7 @@ public class MachinesTab extends Tab {
 				startMachine(machinesList.getSelectionModel().getSelectedItem());
 			}
 		});
-		machinesList.disableProperty().bind(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()
-					.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
-					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-					.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not()
-					.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not()))
-					.or(injector.getInstance(OperationsView.class).randomExecutionThreadProperty().isNotNull()));
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(machinesList.disableProperty());
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof MachineDescriptionView && !to.contains(((MachineDescriptionView) node).getMachine())) {
