@@ -290,4 +290,10 @@ public final class ProBPreferences {
 		
 		this.changedPreferences.clear();
 	}
+	
+	public void restoreDefaults() {
+		this.checkStateSpace();
+		
+		this.getPreferences().values().forEach(pref -> this.setPreferenceValue(pref.name, pref.defaultValue));
+	}
 }

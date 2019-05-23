@@ -2,7 +2,6 @@ package de.prob2.ui.preferences;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 
@@ -59,9 +58,7 @@ public abstract class AbstractPreferencesStage extends Stage {
 
 	@FXML
 	protected void handleRestoreDefaults() {
-		for (ProBPreference pref : this.globalProBPrefs.getPreferences().values()) {
-			this.globalProBPrefs.setPreferenceValue(pref.name, pref.defaultValue);
-		}
+		this.globalProBPrefs.restoreDefaults();
 	}
 	
 	@FXML
