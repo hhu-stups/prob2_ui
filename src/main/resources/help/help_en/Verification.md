@@ -41,6 +41,67 @@ By pressing the "Add LTL Formula" or "Add LTL Pattern" buttons an editor for eac
 *   Use WF(-) and SF(-) to set action-based weak and strong fairness constraints, respectively,
 *   use WEF and SEF to search for bad paths that are weakly and strongly fair with respect to all transitions, respectively.
 
+### Summary of LTL Patterns
+
+* Supported types: Non negative whole numbers, sequences, LTL formula
+* Definition of variables: `<type>` `<identifier>`: `<value>`
+* Assignment of variables: `<identifier>`: `<value>`
+* Scopes for variables: Loop, pattern, global (a lookup for a variable checks the inner scopes first until the variable is found)
+
+* Definition of a Pattern:
+
+```
+	def `<name>` ( `<parameters>` ):
+		`<body>`
+```
+
+>The parameters are separated by a comma. Each parameter is of the form `<identifier>` : `<type>`
+The body contains statements such as definition or assignment of variables as well as loops. Patterns can be overloaded.
+
+* Pattern Invocation: `<name>`( `<arguments>` )
+
+>Remark: Pattern Invocations do not depend on the order of the definitions of the used patterns. So patterns can be invocated before they are defined.
+Patterns can only be defined in the global scope. It is not possible to define patterns within other patterns.
+
+* Loops:
+
+```
+	count `<identifier>`: `<start>` `<up/down>` to `<end>`:
+		`<body>`
+	end
+```
+
+>The body must at least define or assign a variable.
+
+* Definition of a sequence: ( `<formulae>` )
+
+>A sequence contains many formulae that must be true in different states. It is not required that the states must come one after another.
+<formulae> must at least contain two formulae.
+
+* Definition of a sequence with condition:
+
+( `<formulae>` without `<condition>` )
+`<identifier>` without `<condition>`
+
+>The first use case extends the definition of a sequence by an additional condition. The second use case requires <identifier> to be a name
+of a variable with the datatype seq. The sequence stored in the variable are used to define a new sequence where the condition is true.
+
+* Invocation of a sequence: seq( `<argument>` )
+
+><argument> is a variable of the type seq or a definition of a sequence. Invoking a sequence returns a LTL formula.
+
+* Scopes:
+
+>before(`<right endpoint>`, `<property>`)
+after(`<left endpoint>`, `<property>`)
+between(`<left endpoint>`, `<right endpoint>`, `<property>`)
+after_until(`<left endpoint>`, `<right endpoint>`, `<property>`)
+
+>The endpoints and properties must be regular LTL formulae. The return value of a scope is a regular LTL formula where the given conditions are true.
+
+* One-line comment : // comment
+* Multiline comment: /* comment */
+
 
 ## <a id="Symbolic"> Symbolic Checking </a>
 
