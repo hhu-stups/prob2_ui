@@ -34,6 +34,8 @@
 								<FXCollections fx:factory="observableArrayList">
 									<SymbolicExecutionItem executionType="SEQUENCE" guiType="TEXT_FIELD"/>
 									<SymbolicExecutionItem executionType="FIND_VALID_STATE" guiType="PREDICATE"/>
+									<SymbolicExecutionItem executionType="MCDC" guiType="MCDC"/>
+									<SymbolicExecutionItem executionType="COVERED_OPERATIONS" guiType="OPERATIONS"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

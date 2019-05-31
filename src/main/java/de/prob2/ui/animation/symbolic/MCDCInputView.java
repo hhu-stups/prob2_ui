@@ -1,0 +1,46 @@
+package de.prob2.ui.animation.symbolic;
+
+
+import com.google.inject.Inject;
+
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.StageManager;
+import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+
+
+@FXMLInjected
+public class MCDCInputView extends VBox {
+
+    @FXML
+    private TextField levelField;
+
+    @FXML
+    private TextField depthField;
+
+    @Inject
+    private MCDCInputView(final StageManager stageManager) {
+        super();
+        stageManager.loadFXML(this, "test_case_generation_mcdc.fxml");
+    }
+
+    public String getLevel() {
+        return levelField.getText();
+    }
+
+    public String getDepth() {
+        return depthField.getText();
+    }
+
+    public void reset() {
+        levelField.clear();
+        depthField.clear();
+    }
+
+    public void setItem(MCDCItem item) {
+        levelField.setText(item.getLevel());
+        depthField.setText(item.getDepth());
+    }
+
+}

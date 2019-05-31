@@ -12,6 +12,7 @@ import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
 import javafx.fxml.FXML;
 
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 @FXMLInjected
@@ -20,7 +21,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 	
 	
 	private final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler;
-	
+
 	@Inject
 	public SymbolicAnimationFormulaInput(final StageManager stageManager, 
 										final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler,
@@ -52,6 +53,15 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 						SymbolicExecutionType.FIND_VALID_STATE);
 				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
 				break;
+			case MCDC:
+				formulaItem = new MCDCItem(mcdcInputView.getLevel(), mcdcInputView.getDepth());
+				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
+				break;
+			case COVERED_OPERATIONS:
+				ArrayList<String> operations = new ArrayList<>(currentTrace.getStateSpace().getLoadedMachine().getOperationNames());
+				formulaItem = new SymbolicAnimationFormulaItem("OPERATION:" + String.join(", ", operations), SymbolicExecutionType.COVERED_OPERATIONS);
+				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
+				break;
 			default:
 				break;
 		}
@@ -72,6 +82,9 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				break;
 			case NONE:
 				symbolicAnimationFormulaHandler.addFormula(checkingType.name(), checkingType, checking);
+				break;
+			case MCDC:
+				symbolicAnimationFormulaHandler.addMCDCTestCaseGeneration(mcdcInputView.getLevel(), mcdcInputView.getDepth(), checking);
 				break;
 			default:
 				break;

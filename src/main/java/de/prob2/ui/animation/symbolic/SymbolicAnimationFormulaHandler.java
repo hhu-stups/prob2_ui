@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.symbolic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,12 +14,17 @@ import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.AbstractResultHandler;
+
+import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 
 @Singleton
 public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<SymbolicAnimationFormulaItem> {
@@ -61,6 +67,11 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 			}
 		}
 	}
+
+	public void addMCDCTestCaseGeneration(String level, String depth, boolean checking) {
+		SymbolicAnimationFormulaItem formula = new MCDCItem(level, depth);
+		addFormula(formula,checking);
+	}
 	
 	public void handleSequence(SymbolicAnimationFormulaItem item, boolean checkAll) {
 		List<String> events = Arrays.asList(item.getCode().replaceAll(" ", "").split(";"));
@@ -72,6 +83,18 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode(), FormulaExpand.EXPAND), true);
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
+	}
+
+	public void generateTestCases(SymbolicAnimationFormulaItem item, boolean checkAll) {
+		AbstractModel model = currentTrace.getModel();
+		if(!(model instanceof ClassicalBModel)) {
+			return;
+		}
+		ClassicalBModel bModel = (ClassicalBModel) model;
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, item.getName(), 50, new ArrayList<>());
+		TestCaseGeneratorResult result = testCaseGenerator.generateTestCases();
+		System.out.println(result.getTestTraces());
 	}
 	
 	public void handleItem(SymbolicAnimationFormulaItem item, boolean checkAll) {
@@ -85,6 +108,9 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 				break;
 			case FIND_VALID_STATE:
 				findValidState(item, checkAll);
+				break;
+			case MCDC:
+				generateTestCases(item, checkAll);
 				break;
 			default:
 				break;

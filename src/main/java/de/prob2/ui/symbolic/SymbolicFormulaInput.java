@@ -3,6 +3,8 @@ package de.prob2.ui.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.statespace.LoadedMachine;
+import de.prob2.ui.animation.symbolic.MCDCInputView;
+import de.prob2.ui.animation.symbolic.MCDCItem;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
@@ -40,6 +42,10 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	
 	@FXML
 	protected PredicateBuilderView predicateBuilderView;
+
+	@FXML
+	protected MCDCInputView mcdcInputView;
+
 	
 	protected final Injector injector;
 	
@@ -98,6 +104,9 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			case PREDICATE:
 				this.getChildren().add(0, predicateBuilderView);
 				break;
+			case MCDC:
+				this.getChildren().add(0, mcdcInputView);
+				break;
 			default:
 				throw new AssertionError("Unhandled GUI type: " + guiType);
 		}
@@ -109,6 +118,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		setCheckListeners();
 		tfFormula.clear();
 		predicateBuilderView.reset();
+		mcdcInputView.reset();
 		cbOperations.getSelectionModel().clearSelection();
 	}
 	
@@ -121,11 +131,15 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			formula = cbOperations.getSelectionModel().getSelectedItem();
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
+			formula = "MCDC:" + mcdcInputView.getLevel();
 		} else {
 			formula = choosingStage.getExecutionType().getName();
 		}
 		SymbolicFormulaItem newItem;
-		if(item.getClass() == SymbolicAnimationFormulaItem.class) {
+		if(item.getClass() == MCDCItem.class) {
+			newItem = new MCDCItem(mcdcInputView.getLevel(), mcdcInputView.getDepth());
+		} else if(item.getClass() == SymbolicAnimationFormulaItem.class) {
 			newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType());
 		} else {
 			newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
@@ -162,6 +176,8 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 					return;
 				}
 			});
+		} else if(stage.getGUIType() == SymbolicGUIType.MCDC) {
+			mcdcInputView.setItem((MCDCItem) item);
 		}
 		stage.show();
 	}
