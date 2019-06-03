@@ -69,8 +69,13 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	}
 
 	public void addMCDCTestCaseGeneration(String level, String depth, boolean checking) {
-		SymbolicAnimationFormulaItem formula = new MCDCItem(level, depth);
-		addFormula(formula,checking);
+		MCDCItem formula = new MCDCItem(level, depth);
+		addFormula(formula, checking);
+	}
+
+	public void addOperationCoverageTestCaseGeneration(List<String> operations, String depth, boolean checking) {
+		OperationCoverageItem formula = new OperationCoverageItem(operations, depth);
+		addFormula(formula, checking);
 	}
 	
 	public void handleSequence(SymbolicAnimationFormulaItem item, boolean checkAll) {
@@ -92,8 +97,9 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		}
 		ClassicalBModel bModel = (ClassicalBModel) model;
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, item.getName(), 50, new ArrayList<>());
+		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, item.getName(), Integer.parseInt(((ITestCaseGenerationItem) item).getDepth()), new ArrayList<>());
 		TestCaseGeneratorResult result = testCaseGenerator.generateTestCases();
+		symbolicChecker.updateMachine(currentProject.getCurrentMachine());
 		System.out.println(result.getTestTraces());
 	}
 	
@@ -110,6 +116,9 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 				findValidState(item, checkAll);
 				break;
 			case MCDC:
+				generateTestCases(item, checkAll);
+				break;
+			case COVERED_OPERATIONS:
 				generateTestCases(item, checkAll);
 				break;
 			default:

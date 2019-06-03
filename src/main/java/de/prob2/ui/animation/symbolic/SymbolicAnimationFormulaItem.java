@@ -17,6 +17,11 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		this.example = new SimpleObjectProperty<>(null);
 	}
 
+	public SymbolicAnimationFormulaItem(String name, String description, SymbolicExecutionType type) {
+		super(name, description, name, type);
+		this.example = new SimpleObjectProperty<>(null);
+	}
+
 	@Override
 	public void initialize() {
 		super.initialize();
@@ -66,12 +71,6 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	@Override
 	public int hashCode() {
 		 return Objects.hash(name, code, type);
-	}
-	
-	@Override
-	public void setData(String name, String description, String code, SymbolicExecutionType type) {
-		super.setData(name, description, code);
-		this.type = type;
 	}
 	
 	

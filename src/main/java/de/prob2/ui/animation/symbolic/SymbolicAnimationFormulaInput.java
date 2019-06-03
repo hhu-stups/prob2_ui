@@ -13,6 +13,7 @@ import de.prob2.ui.symbolic.SymbolicGUIType;
 import javafx.fxml.FXML;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 @FXMLInjected
@@ -58,8 +59,8 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			case COVERED_OPERATIONS:
-				ArrayList<String> operations = new ArrayList<>(currentTrace.getStateSpace().getLoadedMachine().getOperationNames());
-				formulaItem = new SymbolicAnimationFormulaItem("OPERATION:" + String.join(", ", operations), SymbolicExecutionType.COVERED_OPERATIONS);
+				List<String> operations = new ArrayList<>(currentTrace.getStateSpace().getLoadedMachine().getOperationNames());
+				formulaItem = new OperationCoverageItem(operations, operationCoverageInputView.getDepth());
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			default:
@@ -85,6 +86,9 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				break;
 			case MCDC:
 				symbolicAnimationFormulaHandler.addMCDCTestCaseGeneration(mcdcInputView.getLevel(), mcdcInputView.getDepth(), checking);
+				break;
+			case OPERATIONS:
+				symbolicAnimationFormulaHandler.addOperationCoverageTestCaseGeneration(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth(), checking);
 				break;
 			default:
 				break;

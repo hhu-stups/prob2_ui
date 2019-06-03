@@ -3,8 +3,11 @@ package de.prob2.ui.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.statespace.LoadedMachine;
+import de.prob2.ui.animation.symbolic.ITestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.MCDCInputView;
 import de.prob2.ui.animation.symbolic.MCDCItem;
+import de.prob2.ui.animation.symbolic.OperationCoverageInputView;
+import de.prob2.ui.animation.symbolic.OperationCoverageItem;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
@@ -46,7 +49,9 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	@FXML
 	protected MCDCInputView mcdcInputView;
 
-	
+	@FXML
+	protected OperationCoverageInputView operationCoverageInputView;
+
 	protected final Injector injector;
 	
 	protected final ResourceBundle bundle;
@@ -86,12 +91,13 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		}
 		cbOperations.getItems().setAll(events);
 		predicateBuilderView.setItems(items);
+		operationCoverageInputView.setTable(events);
 	}
 	
 	protected abstract void setCheckListeners();
 	
 	public void changeGUIType(final SymbolicGUIType guiType) {
-		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView);
+		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView, mcdcInputView, operationCoverageInputView);
 		switch (guiType) {
 			case NONE:
 				break;
@@ -107,6 +113,9 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			case MCDC:
 				this.getChildren().add(0, mcdcInputView);
 				break;
+			case OPERATIONS:
+				this.getChildren().add(0, operationCoverageInputView);
+				break;
 			default:
 				throw new AssertionError("Unhandled GUI type: " + guiType);
 		}
@@ -119,6 +128,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		tfFormula.clear();
 		predicateBuilderView.reset();
 		mcdcInputView.reset();
+		operationCoverageInputView.reset();
 		cbOperations.getSelectionModel().clearSelection();
 	}
 	
@@ -133,12 +143,16 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			formula = predicateBuilderView.getPredicate();
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
 			formula = "MCDC:" + mcdcInputView.getLevel();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
+			formula = "OPERATION:" + String.join(",", operationCoverageInputView.getOperations());
 		} else {
 			formula = choosingStage.getExecutionType().getName();
 		}
 		SymbolicFormulaItem newItem;
 		if(item.getClass() == MCDCItem.class) {
 			newItem = new MCDCItem(mcdcInputView.getLevel(), mcdcInputView.getDepth());
+		} else if(item.getClass() == OperationCoverageItem.class) {
+			newItem = new OperationCoverageItem(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth());
 		} else if(item.getClass() == SymbolicAnimationFormulaItem.class) {
 			newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType());
 		} else {
@@ -150,9 +164,19 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		if(choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
 			return true;
 		}
-		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
+		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem) && !currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
 			SymbolicExecutionType type = choosingStage.getExecutionType();
-			item.setData(formula, type.getName(), formula, type);
+			if(newItem instanceof ITestCaseGenerationItem) {
+				item.setData(formula, "DEPTH: " + ((ITestCaseGenerationItem) newItem).getDepth() + ", " + type.getName(), formula, type);
+				((ITestCaseGenerationItem) item).setDepth(((ITestCaseGenerationItem) newItem).getDepth());
+				if(item instanceof MCDCItem) {
+					((MCDCItem) item).setLevel(((MCDCItem) newItem).getLevel());
+				} else if(item instanceof OperationCoverageItem) {
+					((OperationCoverageItem) item).setOperations(((OperationCoverageItem) newItem).getOperations());
+				}
+			} else {
+				item.setData(formula, type.getName(), formula, type);
+			}
 			item.reset();
 			view.refresh();
 			return true;
@@ -178,6 +202,8 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			});
 		} else if(stage.getGUIType() == SymbolicGUIType.MCDC) {
 			mcdcInputView.setItem((MCDCItem) item);
+		} else if(stage.getGUIType() == SymbolicGUIType.OPERATIONS) {
+			operationCoverageInputView.setItem((OperationCoverageItem) item);
 		}
 		stage.show();
 	}
