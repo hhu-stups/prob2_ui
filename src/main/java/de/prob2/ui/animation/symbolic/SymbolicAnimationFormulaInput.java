@@ -3,6 +3,7 @@ package de.prob2.ui.animation.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -23,13 +24,16 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 	
 	private final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler;
 
+	private final TestCaseGenerationFormulaExtractor extractor;
+
 	@Inject
-	public SymbolicAnimationFormulaInput(final StageManager stageManager, 
-										final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler,
-										final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
-										final CurrentTrace currentTrace) {
-		super(stageManager, currentProject, injector, bundle, currentTrace);
+	public SymbolicAnimationFormulaInput(final StageManager stageManager,
+										 final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler,
+										 final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
+										 final CurrentTrace currentTrace, final TestCaseGenerationFormulaExtractor extractor) {
+		super(stageManager, currentProject, injector, bundle, currentTrace, extractor);
 		this.symbolicAnimationFormulaHandler = symbolicAnimationFormulaHandler;
+		this.extractor = extractor;
 		stageManager.loadFXML(this, "symbolic_animation_formula_input.fxml");
 	}
 	
@@ -55,12 +59,12 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
 				break;
 			case MCDC:
-				formulaItem = new MCDCItem(mcdcInputView.getLevel(), mcdcInputView.getDepth());
+				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractMCDCFormula(mcdcInputView.getLevel()), extractor.extractMCDCDescription(mcdcInputView.getDepth()), SymbolicExecutionType.MCDC);
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			case COVERED_OPERATIONS:
 				List<String> operations = new ArrayList<>(currentTrace.getStateSpace().getLoadedMachine().getOperationNames());
-				formulaItem = new OperationCoverageItem(operations, operationCoverageInputView.getDepth());
+				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractOperationCoverageFormula(operations), extractor.extractOperationCoverageDescription(operationCoverageInputView.getDepth()), SymbolicExecutionType.COVERED_OPERATIONS);
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			default:

@@ -16,6 +16,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -38,17 +39,19 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	private final Injector injector;
 	
 	private final CurrentProject currentProject;
-	
+
+	private final TestCaseGenerationFormulaExtractor extractor;
 	
 	@Inject
 	public SymbolicAnimationFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
-											final Injector injector, final SymbolicAnimationChecker symbolicChecker,
-											final SymbolicAnimationResultHandler resultHandler) {
+										   final Injector injector, final SymbolicAnimationChecker symbolicChecker,
+										   final SymbolicAnimationResultHandler resultHandler, final TestCaseGenerationFormulaExtractor extractor) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.symbolicChecker = symbolicChecker;
 		this.resultHandler = resultHandler;
+		this.extractor = extractor;
 	}
 	
 	public void addFormula(String name, SymbolicExecutionType type, boolean checking) {
@@ -69,13 +72,13 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	}
 
 	public void addMCDCTestCaseGeneration(String level, String depth, boolean checking) {
-		MCDCItem formula = new MCDCItem(level, depth);
-		addFormula(formula, checking);
+		SymbolicAnimationFormulaItem formulaItem = new SymbolicAnimationFormulaItem(extractor.extractMCDCFormula(level), extractor.extractMCDCDescription(depth) ,SymbolicExecutionType.MCDC);
+		addFormula(formulaItem, checking);
 	}
 
 	public void addOperationCoverageTestCaseGeneration(List<String> operations, String depth, boolean checking) {
-		OperationCoverageItem formula = new OperationCoverageItem(operations, depth);
-		addFormula(formula, checking);
+		SymbolicAnimationFormulaItem formulaItem = new SymbolicAnimationFormulaItem(extractor.extractOperationCoverageFormula(operations), extractor.extractOperationCoverageDescription(depth), SymbolicExecutionType.COVERED_OPERATIONS);
+		addFormula(formulaItem, checking);
 	}
 	
 	public void handleSequence(SymbolicAnimationFormulaItem item, boolean checkAll) {
@@ -97,7 +100,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		}
 		ClassicalBModel bModel = (ClassicalBModel) model;
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, item.getName(), Integer.parseInt(((ITestCaseGenerationItem) item).getDepth()), new ArrayList<>());
+		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, item.getName(), Integer.parseInt(extractor.extractDepth(item.getDescription())), new ArrayList<>());
 		TestCaseGeneratorResult result = testCaseGenerator.generateTestCases();
 		symbolicChecker.updateMachine(currentProject.getCurrentMachine());
 		System.out.println(result.getTestTraces());

@@ -1,7 +1,8 @@
-package de.prob2.ui.animation.symbolic;
+package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 
 import com.google.inject.Inject;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
@@ -30,9 +31,12 @@ public class OperationCoverageInputView extends VBox {
     @FXML
     private TextField depthField;
 
+    private final TestCaseGenerationFormulaExtractor extractor;
+
     @Inject
-    private OperationCoverageInputView(final StageManager stageManager) {
+    private OperationCoverageInputView(final StageManager stageManager, final TestCaseGenerationFormulaExtractor extractor) {
         super();
+        this.extractor = extractor;
         stageManager.loadFXML(this, "test_case_generation_operation_coverage.fxml");
     }
 
@@ -57,12 +61,13 @@ public class OperationCoverageInputView extends VBox {
         depthField.clear();
     }
 
-    public void setItem(OperationCoverageItem item) {
+    public void setItem(SymbolicAnimationFormulaItem item) {
         tvOperations.getItems().clear();
-        tvOperations.getItems().addAll(item.getOperations().stream()
+        tvOperations.getItems().addAll(extractor.extractOperations(item.getName())
+                .stream()
                 .map(operation -> new OperationTableItem(operation, true))
                 .collect(Collectors.toList()));
-        depthField.setText(item.getDepth());
+        depthField.setText(extractor.extractDepth(item.getDescription()));
     }
 
     public void setTable(List<String> operations) {

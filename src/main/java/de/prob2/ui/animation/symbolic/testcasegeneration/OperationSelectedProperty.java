@@ -1,4 +1,4 @@
-package de.prob2.ui.animation.symbolic;
+package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 
 import javafx.beans.property.SimpleObjectProperty;

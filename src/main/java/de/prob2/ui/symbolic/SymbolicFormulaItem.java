@@ -8,7 +8,7 @@ public abstract class SymbolicFormulaItem extends AbstractCheckableItem {
 	protected SymbolicExecutionType type;
 
 	public SymbolicFormulaItem(String name, String description, String code, SymbolicExecutionType type) {
-		super(name, description + ", " + type.getName(), code);
+		super(name, description, code);
 		this.type = type;
 	}
 

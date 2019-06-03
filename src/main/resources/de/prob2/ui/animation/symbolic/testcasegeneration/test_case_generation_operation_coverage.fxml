@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import de.prob2.ui.animation.symbolic.OperationCoverageInputView?>
+<?import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView?>
 
 <fx:root type="OperationCoverageInputView" stylesheets="@/prob.css" spacing="5.0" xmlns:fx="http://javafx.com/fxml/1">
 	<TableView fx:id="tvOperations" minHeight="80.0" prefHeight="160.0" VBox.vgrow="ALWAYS">
