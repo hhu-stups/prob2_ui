@@ -146,18 +146,14 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
-			formula = "MCDC:" + mcdcInputView.getLevel();
+			formula = extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth());
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
-			formula = "OPERATION:" + String.join(",", operationCoverageInputView.getOperations());
+			formula = extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth());
 		} else {
 			formula = choosingStage.getExecutionType().getName();
 		}
 		SymbolicFormulaItem newItem;
-		if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
-			newItem = new SymbolicAnimationFormulaItem(extractor.extractMCDCFormula(mcdcInputView.getLevel()), extractor.extractMCDCDescription(mcdcInputView.getDepth()) ,SymbolicExecutionType.MCDC);
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
-			newItem = new SymbolicAnimationFormulaItem(extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations()), extractor.extractOperationCoverageDescription(operationCoverageInputView.getDepth()), SymbolicExecutionType.COVERED_OPERATIONS);
-		} else if(item.getClass() == SymbolicAnimationFormulaItem.class) {
+		if(item.getClass() == SymbolicAnimationFormulaItem.class) {
 			newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType());
 		} else {
 			newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
@@ -170,11 +166,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		}
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
 			SymbolicExecutionType type = choosingStage.getExecutionType();
-			if(newItem.getType() == SymbolicExecutionType.MCDC || newItem.getType() == SymbolicExecutionType.COVERED_OPERATIONS) {
-				item.setData(formula, newItem.getDescription(), formula, type);
-			} else {
-				item.setData(formula, type.getName(), formula, type);
-			}
+			item.setData(formula, type.getName(), formula, type);
 			item.reset();
 			view.refresh();
 			return true;

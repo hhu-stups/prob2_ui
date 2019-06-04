@@ -11,31 +11,30 @@ import com.google.inject.Singleton;
 @Singleton
 public class TestCaseGenerationFormulaExtractor {
 
-    public String extractMCDCFormula(String level) {
-        return "MCDC:" + level;
+    public String extractRawFormula(String formula) {
+        return formula.replaceAll(" ", "").split("/")[0];
     }
 
-    public String extractMCDCDescription(String depth) {
-        return "DEPTH: " + depth + ", " + SymbolicExecutionType.MCDC.getName();
+    public String extractMCDCFormula(String level, String depth) {
+        return "MCDC:" + level + "/" + "DEPTH:" + depth;
     }
 
-    public String extractOperationCoverageFormula(List<String> operations) {
-        return "OPERATION:" + String.join(",", operations);
+    public String extractOperationCoverageFormula(List<String> operations, String depth) {
+        return "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
     }
 
-    public String extractOperationCoverageDescription(String depth) {
-        return "DEPTH: " + depth + ", " + SymbolicExecutionType.COVERED_OPERATIONS.getName();
-    }
-
-    public String extractDepth(String description) {
-        return description.split(",")[0].split(":")[1].replaceAll(" ","");
+    public String extractDepth(String formula) {
+        String[] splittedString = formula.replaceAll(" ", "").split("/");
+        return splittedString[1].split(":")[1];
     }
 
     public String extractLevel(String formula) {
-        return formula.split(":")[1].replaceAll(" ", "");
+        String[] splittedString = formula.replaceAll(" ", "").split("/");
+        return splittedString[0].split(":")[1];
     }
 
     public List<String> extractOperations(String formula) {
-        return Arrays.asList(formula.split(":")[1].replaceAll(" ","").split(","));
+        String[] splittedString = formula.replaceAll(" ", "").split("/");
+        return Arrays.asList(splittedString[1].split(":")[1].split(","));
     }
 }

@@ -62,7 +62,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
 				break;
 			case MCDC:
-				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractMCDCFormula(mcdcInputView.getLevel()), extractor.extractMCDCDescription(mcdcInputView.getDepth()), SymbolicExecutionType.MCDC);
+				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth()), SymbolicExecutionType.MCDC);
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			case COVERED_OPERATIONS:
@@ -74,7 +74,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 					alert.showAndWait();
 					break;
 				}
-				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractOperationCoverageFormula(operations), extractor.extractOperationCoverageDescription(operationCoverageInputView.getDepth()), SymbolicExecutionType.COVERED_OPERATIONS);
+				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractOperationCoverageFormula(operations, operationCoverageInputView.getDepth()), SymbolicExecutionType.COVERED_OPERATIONS);
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			default:
@@ -99,14 +99,14 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.addFormula(checkingType.name(), checkingType, checking);
 				break;
 			case MCDC:
-				symbolicAnimationFormulaHandler.addMCDCTestCaseGeneration(mcdcInputView.getLevel(), mcdcInputView.getDepth(), checking);
+				symbolicAnimationFormulaHandler.addFormula(extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth()), checkingType, checking);
 				break;
 			case OPERATIONS:
 				List<String> operations = operationCoverageInputView.getOperations();
 				if(operations.isEmpty()) {
 					break;
 				}
-				symbolicAnimationFormulaHandler.addOperationCoverageTestCaseGeneration(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth(), checking);
+				symbolicAnimationFormulaHandler.addFormula(extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth()), checkingType, checking);
 				break;
 			default:
 				break;

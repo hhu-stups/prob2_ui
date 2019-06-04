@@ -63,11 +63,11 @@ public class OperationCoverageInputView extends VBox {
 
     public void setItem(SymbolicAnimationFormulaItem item) {
         tvOperations.getItems().clear();
-        tvOperations.getItems().addAll(extractor.extractOperations(item.getName())
+        tvOperations.getItems().addAll(extractor.extractOperations(item.getCode())
                 .stream()
                 .map(operation -> new OperationTableItem(operation, true))
                 .collect(Collectors.toList()));
-        depthField.setText(extractor.extractDepth(item.getDescription()));
+        depthField.setText(extractor.extractDepth(item.getCode()));
     }
 
     public void setTable(List<String> operations) {

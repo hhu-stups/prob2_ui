@@ -168,9 +168,9 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	public void handleTestCaseGenerationResult(SymbolicAnimationFormulaItem item, TestCaseGeneratorResult result) {
 		List<TestTrace> traces = result.getTestTraces();
 		if(traces.isEmpty()) {
-			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.found");
+			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.notFound");
 		} else {
-			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.notFound");
+			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.found");
 		}
 	}
 	

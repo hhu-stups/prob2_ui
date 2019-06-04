@@ -43,8 +43,8 @@ public class MCDCInputView extends VBox {
     }
 
     public void setItem(SymbolicAnimationFormulaItem item) {
-        levelField.setText(extractor.extractLevel(item.getName()));
-        depthField.setText(extractor.extractDepth(item.getDescription()));
+        levelField.setText(extractor.extractLevel(item.getCode()));
+        depthField.setText(extractor.extractDepth(item.getCode()));
     }
 
 }
