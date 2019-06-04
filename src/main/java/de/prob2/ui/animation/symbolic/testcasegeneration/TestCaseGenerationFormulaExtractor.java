@@ -35,6 +35,6 @@ public class TestCaseGenerationFormulaExtractor {
 
     public List<String> extractOperations(String formula) {
         String[] splittedString = formula.replaceAll(" ", "").split("/");
-        return Arrays.asList(splittedString[1].split(":")[1].split(","));
+        return Arrays.asList(splittedString[0].split(":")[1].split(","));
     }
 }

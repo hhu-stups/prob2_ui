@@ -172,6 +172,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		} else {
 			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.found");
 		}
+		System.out.println("Traces: " + traces);
 	}
 	
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
