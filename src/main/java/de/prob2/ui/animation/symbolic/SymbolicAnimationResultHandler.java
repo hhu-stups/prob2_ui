@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.symbolic;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
@@ -19,6 +20,9 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.statespace.StateSpace;
+import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
+import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
@@ -151,13 +155,22 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		}
 		return resultItem;
 	}
-	
+
 	public void handleFormulaResult(SymbolicFormulaItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if(item.getType() == SymbolicExecutionType.FIND_VALID_STATE) {
 			handleFindValidState((SymbolicAnimationFormulaItem) item, (FindStateCommand) cmd, stateSpace);
 		} else if(item.getType() == SymbolicExecutionType.SEQUENCE) {
 			handleSequence((SymbolicAnimationFormulaItem) item, (ConstraintBasedSequenceCheckCommand) cmd);
+		}
+	}
+
+	public void handleTestCaseGenerationResult(SymbolicAnimationFormulaItem item, TestCaseGeneratorResult result) {
+		List<TestTrace> traces = result.getTestTraces();
+		if(traces.isEmpty()) {
+			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.found");
+		} else {
+			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.notFound");
 		}
 	}
 	

@@ -12,8 +12,11 @@ import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -63,7 +66,14 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			case COVERED_OPERATIONS:
-				List<String> operations = new ArrayList<>(currentTrace.getStateSpace().getLoadedMachine().getOperationNames());
+				List<String> operations = operationCoverageInputView.getOperations();
+				if(operations.isEmpty()) {
+					Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
+							"animation.symbolic.alerts.testcasegeneration.operations.header",
+							"animation.symbolic.alerts.testcasegeneration.operations.content");
+					alert.showAndWait();
+					break;
+				}
 				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractOperationCoverageFormula(operations), extractor.extractOperationCoverageDescription(operationCoverageInputView.getDepth()), SymbolicExecutionType.COVERED_OPERATIONS);
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
@@ -92,6 +102,10 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.addMCDCTestCaseGeneration(mcdcInputView.getLevel(), mcdcInputView.getDepth(), checking);
 				break;
 			case OPERATIONS:
+				List<String> operations = operationCoverageInputView.getOperations();
+				if(operations.isEmpty()) {
+					break;
+				}
 				symbolicAnimationFormulaHandler.addOperationCoverageTestCaseGeneration(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth(), checking);
 				break;
 			default:

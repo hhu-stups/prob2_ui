@@ -50,6 +50,8 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	@FXML
 	protected OperationCoverageInputView operationCoverageInputView;
 
+	protected final StageManager stageManager;
+
 	protected final Injector injector;
 	
 	protected final ResourceBundle bundle;
@@ -64,6 +66,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	public SymbolicFormulaInput(final StageManager stageManager, final CurrentProject currentProject,
 								final Injector injector, final ResourceBundle bundle,
 								final CurrentTrace currentTrace, final TestCaseGenerationFormulaExtractor extractor) {
+		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.events = new ArrayList<>();

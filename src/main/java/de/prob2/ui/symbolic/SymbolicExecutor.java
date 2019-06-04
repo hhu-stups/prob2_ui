@@ -3,6 +3,8 @@ package de.prob2.ui.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,8 @@ import com.google.inject.Injector;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.statespace.StateSpace;
+import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -123,6 +127,19 @@ public abstract class SymbolicExecutor {
 				}
 			});
 			currentJobs.remove(checker);
+			currentJobThreads.remove(Thread.currentThread());
+		}, "Symbolic Formula Checking Thread");
+		currentJobThreads.add(checkingThread);
+		checkingThread.start();
+	}
+
+	public void checkItem(SymbolicAnimationFormulaItem item, ConstraintBasedTestCaseGenerator testCaseGenerator, boolean checkAll) {
+		Thread checkingThread = new Thread(() -> {
+			TestCaseGeneratorResult result = testCaseGenerator.generateTestCases();
+			Platform.runLater(() -> {
+				((SymbolicAnimationResultHandler) resultHandler).handleTestCaseGenerationResult(item, result);
+				updateMachine(currentProject.getCurrentMachine());
+			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "Symbolic Formula Checking Thread");
 		currentJobThreads.add(checkingThread);
