@@ -1,26 +1,18 @@
 package de.prob2.ui.dynamic;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import com.google.inject.Injector;
 
 import de.prob.animator.command.AbstractGetDynamicCommands;
-import de.prob.animator.command.GetCurrentPreferencesCommand;
-import de.prob.animator.command.GetDefaultPreferencesCommand;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.preferences.PrefItem;
-import de.prob2.ui.preferences.PreferencesView;
-import de.prob2.ui.preferences.ProBPreferenceType;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -35,6 +27,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -114,6 +107,9 @@ public abstract class DynamicCommandStage extends Stage {
 			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, 
 			final Injector injector) {
 		this.preferences = preferences;
+		this.preferences.initOwner(this);
+		this.preferences.initModality(Modality.WINDOW_MODAL);
+		this.preferences.setToRefresh(this);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;		
 		this.injector = injector;
@@ -127,17 +123,13 @@ public abstract class DynamicCommandStage extends Stage {
 	protected void initialize() {
 		fillCommands();
 		currentTrace.addListener((observable, from, to) -> {
-			preferences.clear();
 			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
-			updatePreferences(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
-			preferences.refresh();
-			injector.getInstance(PreferencesView.class).refresh();
+			preferences.setIncludedPreferenceNames(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
 		});
 		
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			preferences.clear();
 			if (to == null || currentTrace.get() == null) {
 				return;
 			}
@@ -146,7 +138,7 @@ public abstract class DynamicCommandStage extends Stage {
 			} else {
 				lbDescription.setText(to.getDescription());
 			}
-			updatePreferences(to.getRelevantPreferences());
+			preferences.setIncludedPreferenceNames(to.getRelevantPreferences());
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
 			if(lastItem != null && !lastItem.getCommand().equals(to.getCommand())) {
@@ -204,18 +196,6 @@ public abstract class DynamicCommandStage extends Stage {
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
 	}
 	
-	private void updatePreferences(List<String> relevantPreferences) {
-		GetCurrentPreferencesCommand cmd = new GetCurrentPreferencesCommand();
-		currentTrace.getStateSpace().execute(cmd);
-		GetDefaultPreferencesCommand cmd2 = new GetDefaultPreferencesCommand();
-		currentTrace.getStateSpace().execute(cmd2);
-		preferences.addAll(cmd2.getPreferences().stream()
-				.filter(preference -> relevantPreferences.contains(preference.name))
-				.map(preference -> new PrefItem(preference.name, "", preference.defaultValue, ProBPreferenceType.fromProBPreference(preference), preference.defaultValue, preference.description))
-				.collect(Collectors.toList()));
-		preferences.refresh();
-	}
-	
 	protected void fillCommands(AbstractGetDynamicCommands cmd) {
 		if(currentTrace.get() == null) {
 			return;
@@ -243,7 +223,6 @@ public abstract class DynamicCommandStage extends Stage {
 		} else {
 			lvChoice.getSelectionModel().select(index);
 		}
-		preferences.refresh();
 	}
 	
 	protected void interrupt() {

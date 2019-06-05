@@ -137,6 +137,8 @@ public class BEditorView extends BorderPane {
 			}
 		});
 		
+		currentProject.addListener((observable, from, to) -> resetWatching());
+		
 		machineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to == null) {
 				return;

@@ -7,7 +7,6 @@ import java.util.regex.PatternSyntaxException;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob2.ui.internal.FXMLInjected;
@@ -29,22 +28,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @FXMLInjected
-@Singleton
 public final class PreferencesView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesView.class);
 	private static final Pattern EMPTY_PATTERN = Pattern.compile("", Pattern.CASE_INSENSITIVE);
 	
 	@FXML private TextField prefSearchField;
-	@FXML private TreeTableView<PrefItem> tv;
-	@FXML private TreeTableColumn<PrefItem, String> tvName;
-	@FXML private TreeTableColumn<PrefItem, String> tvChanged;
-	@FXML private TreeTableColumn<PrefItem, String> tvValue;
-	@FXML private TreeTableColumn<PrefItem, String> tvDefaultValue;
-	@FXML private TreeTableColumn<PrefItem, String> tvDescription;
+	@FXML private TreeTableView<PrefTreeItem> tv;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvValue;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
+	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
 	private final ObjectProperty<ProBPreferences> preferences;
 	private final InvalidationListener refreshIL;
-	private final Injector injector;
 	
 	@Inject
 	private PreferencesView(final StageManager stageManager, final Injector injector) {
@@ -52,7 +49,6 @@ public final class PreferencesView extends BorderPane {
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
 		this.refreshIL = o -> this.refresh();
-		this.injector = injector;
 		stageManager.loadFXML(this, "preferences_view.fxml");
 	}
 	
@@ -79,10 +75,10 @@ public final class PreferencesView extends BorderPane {
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefItem, String> cell = new MultiTreeTableCell(this.preferencesProperty(), injector);
+			TreeTableCell<PrefTreeItem, String> cell = new PreferenceValueCell(this.preferencesProperty());
 			cell.tableRowProperty().addListener((observable, from, to) ->
 				to.treeItemProperty().addListener((observable1, from1, to1) ->
-					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof RealPrefTreeItem)
+					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof PrefTreeItem.Preference)
 				)
 			);
 			return cell;
@@ -95,15 +91,17 @@ public final class PreferencesView extends BorderPane {
 		
 		tvDescription.setCellValueFactory(new TreeItemPropertyValueFactory<>("description"));
 		
-		tv.getRoot().setValue(new CategoryPrefTreeItem("Preferences (this should be invisible)"));
+		tv.getRoot().setValue(new PrefTreeItem.Category("Preferences (this should be invisible)"));
 		
 		this.preferencesProperty().addListener((observable, from, to) -> {
 			if (from != null) {
 				from.stateSpaceProperty().removeListener(this.refreshIL);
+				from.includedPreferenceNamesProperty().removeListener(this.refreshIL);
 			}
 			
 			if (to != null) {
 				to.stateSpaceProperty().addListener(this.refreshIL);
+				to.includedPreferenceNamesProperty().addListener(this.refreshIL);
 			}
 			this.refresh();
 		});
@@ -136,24 +134,23 @@ public final class PreferencesView extends BorderPane {
 		}
 		generateTreeItems(searchPattern);
 		
-		if (!searchPattern.pattern().isEmpty()) {
-			for (Iterator<TreeItem<PrefItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext();) {
-				final TreeItem<PrefItem> category = itcat.next();
-				// Remove all items whose name and description don't match the search
-				category.getChildren().removeIf(item ->
-					!searchPattern.matcher(item.getValue().getName()).find()
-						&& !searchPattern.matcher(item.getValue().getDescription()).find()
-				);
-				if (category.getChildren().isEmpty()) {
-					// Category has no visible preferences, remove it
-					itcat.remove();
-				}
+		for (Iterator<TreeItem<PrefTreeItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext();) {
+			final TreeItem<PrefTreeItem> category = itcat.next();
+			// Remove all items whose name and description don't match the search or which are no longer present in the ProBPreferences object
+			category.getChildren().removeIf(item ->
+				(!searchPattern.matcher(item.getValue().getName()).find()
+					&& !searchPattern.matcher(item.getValue().getDescription()).find())
+				|| !this.getPreferences().getPreferences().containsKey(item.getValue().getName())
+			);
+			if (category.getChildren().isEmpty()) {
+				// Category has no visible preferences, remove it
+				itcat.remove();
 			}
 		}
 		
 		this.tv.getRoot().getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
 		
-		for (TreeItem<PrefItem> ti : this.tv.getRoot().getChildren()) {
+		for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
 			ti.getChildren().sort(Comparator.comparing(c -> c.getValue().getName()));
 		}
 	}
@@ -165,27 +162,27 @@ public final class PreferencesView extends BorderPane {
 				continue;
 			}
 
-			final TreeItem<PrefItem> category = this.tv.getRoot().getChildren().stream()
+			final TreeItem<PrefTreeItem> category = this.tv.getRoot().getChildren().stream()
 				.filter(ti -> ti.getValue().getName().equals(pref.category))
 				.findAny()
 				.orElseGet(() -> {
-					final TreeItem<PrefItem> ti = new TreeItem<>(new CategoryPrefTreeItem(pref.category));
+					final TreeItem<PrefTreeItem> ti = new TreeItem<>(new PrefTreeItem.Category(pref.category));
 					this.tv.getRoot().getChildren().add(ti);
 					ti.setExpanded(true);
 					return ti;
 				});
 
-			final TreeItem<PrefItem> item = category.getChildren().stream()
+			final TreeItem<PrefTreeItem> item = category.getChildren().stream()
 				.filter(ti -> ti.getValue().getName().equals(pref.name))
 				.findAny()
 				.orElseGet(() -> {
-					final TreeItem<PrefItem> ti = new TreeItem<>();
+					final TreeItem<PrefTreeItem> ti = new TreeItem<>();
 					category.getChildren().add(ti);
 					return ti;
 				});
 
 			final String value = this.getPreferences().getPreferenceValue(pref.name);
-			item.setValue(new RealPrefTreeItem(
+			item.setValue(new PrefTreeItem.Preference(
 				pref.name,
 				value.equals(pref.defaultValue) ? "" : "*",
 				value,

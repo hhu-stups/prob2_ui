@@ -26,7 +26,7 @@
 		</ContextMenu>
 	</fx:define>
 	<graphic>
-		<VBox>
+		<VBox alignment="CENTER_LEFT">
 			<Label fx:id="nameLabel" styleClass="name">
 				<graphic>
 					<BindableGlyph fx:id="statusIcon" styleClass="status-icon" fontFamily="FontAwesome" icon="PLAY" fontSize="${fontSize.fontSize}"/>

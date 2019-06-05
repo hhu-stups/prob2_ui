@@ -212,6 +212,7 @@ public final class OperationsView extends VBox {
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final ExecutorService updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
+	private final BooleanProperty runningProperty;
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
@@ -229,6 +230,7 @@ public final class OperationsView extends VBox {
 		this.config = config;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
+		this.runningProperty = new SimpleBooleanProperty(this, "running", false);
 		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "operations_view.fxml");
@@ -350,6 +352,7 @@ public final class OperationsView extends VBox {
 		Platform.runLater(() -> {
 			this.statusBar.setOperationsViewUpdating(true);
 			this.opsListView.setDisable(true);
+			this.runningProperty.set(true);
 		});
 
 		if (!trace.getModel().equals(currentModel)) {
@@ -386,6 +389,7 @@ public final class OperationsView extends VBox {
 		Platform.runLater(() -> {
 			opsListView.getItems().setAll(filtered);
 			this.opsListView.setDisable(false);
+			this.runningProperty.set(false);
 			this.statusBar.setOperationsViewUpdating(false);
 		});
 	}
@@ -561,7 +565,6 @@ public final class OperationsView extends VBox {
 			OperationInfo machineOperationInfo = loadedMachine.getMachineOperationInfo(opName);
 			opNames.add(opName);
 			opToParams.put(opName, machineOperationInfo.getParameterNames());
-
 		}
 	}
 	
@@ -588,5 +591,13 @@ public final class OperationsView extends VBox {
 
 	private void setShowUnambiguous(final boolean showUnambiguous) {
 		this.showUnambiguous.set(showUnambiguous);
+	}
+	
+	public ObjectProperty<Thread> randomExecutionThreadProperty() {
+		return randomExecutionThread;
+	}
+	
+	public BooleanProperty runningProperty() {
+		return runningProperty;
 	}
 }

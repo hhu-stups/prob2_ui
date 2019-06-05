@@ -15,10 +15,9 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
@@ -29,9 +28,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
-import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -237,11 +233,7 @@ public class MachinesTab extends Tab {
 				startMachine(machinesList.getSelectionModel().getSelectedItem());
 			}
 		});
-		machinesList.disableProperty().bind(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()
-					.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
-					.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-					.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not()
-					.or(injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not())));
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(machinesList.disableProperty());
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof MachineDescriptionView && !to.contains(((MachineDescriptionView) node).getMachine())) {
@@ -258,15 +250,6 @@ public class MachinesTab extends Tab {
 		}
 		final String[] split = selected.getFileName().toString().split("\\.");
 		final String machineName = split[0];
-		
-		try {
-			Files.write(selected, Arrays.asList("MACHINE " + machineName, "END"));
-		} catch (IOException e) {
-			LOGGER.error("Could not create machine file", e);
-			stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
-			return;
-		}
-		final Path relative = currentProject.getLocation().relativize(selected);
 		final Set<String> machineNamesSet = currentProject.getMachines().stream()
 			.map(Machine::getName)
 			.collect(Collectors.toSet());
@@ -276,7 +259,25 @@ public class MachinesTab extends Tab {
 			nameInProject = String.format("%s (%d)", machineName, i);
 			i++;
 		}
-		currentProject.addMachine(new Machine(nameInProject, "", relative));
+		final Path relative = currentProject.getLocation().relativize(selected);
+		final Machine machine;
+		try {
+			machine = new Machine(nameInProject, "", relative);
+		} catch (IllegalArgumentException e) {
+			LOGGER.info("User tried to create a machine with an invalid extension", e);
+			final String extension = StageManager.getExtension(relative.getFileName().toString());
+			stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.machines.machinesTab.alerts.invalidMachineExtension.content", extension).show();
+			return;
+		}
+		
+		try {
+			Files.write(selected, Arrays.asList("MACHINE " + machineName, "END"));
+		} catch (IOException e) {
+			LOGGER.error("Could not create machine file", e);
+			stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
+			return;
+		}
+		currentProject.addMachine(machine);
 	}
 
 	@FXML

@@ -1,55 +1,32 @@
 package de.prob2.ui.preferences;
 
-import com.google.inject.Injector;
-
-import de.prob2.ui.dynamic.DynamicTableCell;
-import de.prob2.ui.dynamic.dotty.DotView;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
-
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.control.Cell;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.paint.Color;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends Cell<PrefItem>> {
+class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PreferenceValueCell.class);
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesCellProvider.class);
+	private final ReadOnlyObjectProperty<ProBPreferences> preferences;
 	
-	private final ReadOnlyObjectProperty<ProBPreferences>  preferences;
-	
-	private final Injector injector;
-	
-	private T cell;
-	
-	private R row;
-	
-	public PreferencesCellProvider(final T cell, final Injector injector, final ReadOnlyObjectProperty<ProBPreferences> preferences) {
+	PreferenceValueCell(final ReadOnlyObjectProperty<ProBPreferences> preferences) {
 		super();
-		this.cell = cell;
-		this.injector = injector;
+		
 		this.preferences = preferences;
 	}
 	
 	private void setPreferenceValue(final String newValue) {
-		if(cell.getItem() == null) {
-			return;
-		}
-		this.preferences.get().setPreferenceValue(row.getItem().getName(), newValue);
-		if(cell instanceof DynamicTableCell) {
-			injector.getInstance(PreferencesView.class).refresh();
-		} else if(cell instanceof MultiTreeTableCell) {
-			injector.getInstance(DotView.class).refresh();
-			injector.getInstance(ExpressionTableView.class).refresh();
-		}
+		this.preferences.get().setPreferenceValue(this.getTreeTableRow().getItem().getName(), newValue);
 	}
 	
 	private void changeToSpinner(final int min, final int max, final String initial) {
@@ -72,31 +49,31 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 			}
 		});
 		spinner.getEditor().setText(initial);
-		cell.setText(null);
-		cell.setGraphic(spinner);
+		this.setText(null);
+		this.setGraphic(spinner);
 	}
 	
-	private void changeToTextField(final PrefItem item) {
+	private void changeToTextField(final PrefTreeItem item) {
 		final TextField textField = new TextField(item.getValue());
 		textField.textProperty().addListener((o, from, to) -> this.setPreferenceValue(to));
-		cell.setText(null);
-		cell.setGraphic(textField);
+		this.setText(null);
+		this.setGraphic(textField);
 	}
 	
 	private void changeToText() {
-		cell.setGraphic(null);
-		cell.setText(row.getItem().getValue());
+		this.setGraphic(null);
+		this.setText(this.getTreeTableRow().getItem().getValue());
 	}
 	
-	private void changeToCheckBox(final PrefItem pti) {
+	private void changeToCheckBox(final PrefTreeItem pti) {
 		final CheckBox checkBox = new CheckBox();
 		checkBox.setSelected("true".equals(pti.getValue()));
 		checkBox.setOnAction(event -> this.setPreferenceValue(Boolean.toString(checkBox.isSelected())));
-		cell.setText(null);
-		cell.setGraphic(checkBox);
+		this.setText(null);
+		this.setGraphic(checkBox);
 	}
 	
-	private void changeToColorPicker(final PrefItem pti) {
+	private void changeToColorPicker(final PrefTreeItem pti) {
 		Color color;
 		try {
 			color = Color.web(pti.getValue());
@@ -117,11 +94,11 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 				(int)(selected.getBlue()*255)
 			));
 		});
-		cell.setText(null);
-		cell.setGraphic(colorPicker);
+		this.setText(null);
+		this.setGraphic(colorPicker);
 	}
 	
-	private void changeToComboBox(final PrefItem pti, final String type) {
+	private void changeToComboBox(final PrefTreeItem pti, final String type) {
 		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(
 			"[]".equals(type)
 				? pti.getValueType().getValues()
@@ -129,11 +106,11 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 		));
 		comboBox.getSelectionModel().select(pti.getValue());
 		comboBox.setOnAction(event -> this.setPreferenceValue(comboBox.getValue()));
-		cell.setText(null);
-		cell.setGraphic(comboBox);
+		this.setText(null);
+		this.setGraphic(comboBox);
 	}
 	
-	public void changeToItem(final PrefItem pti) {
+	private void changeToItem(final PrefTreeItem pti) {
 		if (pti.getValueType() == null) {
 			// If there is no value type (for categories for example), just display the value text.
 			changeToText();
@@ -167,18 +144,17 @@ public class PreferencesCellProvider<T extends Cell<? extends Object>, R extends
 		}
 	}
 	
-	public void updateItem(final String item) {
-		if (row != null && row.getItem() != null) {
+	@Override
+	public void updateItem(final String item, final boolean empty) {
+		super.updateItem(item, empty);
+		
+		if (this.getTreeTableRow() != null && this.getTreeTableRow().getItem() != null) {
 			// Item is available, which means we can do fancy stuff!
-			changeToItem(row.getItem());
+			changeToItem(this.getTreeTableRow().getItem());
 		} else {
 			// Row or item is null, so display the item text as is.
-			cell.setGraphic(null);
-			cell.setText(item);
+			this.setGraphic(null);
+			this.setText(item);
 		}
-	}
-	
-	public void setRow(R row) {
-		this.row = row;
 	}
 }

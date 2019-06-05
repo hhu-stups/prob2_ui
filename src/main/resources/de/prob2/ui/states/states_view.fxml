@@ -20,16 +20,8 @@
 	<VBox minWidth="240" minHeight="240">
 		<HBox alignment="CENTER">
 			<padding>
-				<Insets top="5.0"/>
+				<Insets top="5.0" left="5.0"/>
 			</padding>
-			<Button fx:id="searchButton" styleClass="button-dark" alignment="CENTER" onAction="#handleSearchButton" HBox.hgrow="NEVER" prefHeight="${searchButton.width}">
-				<HBox.margin>
-					<Insets left="10.0" right="10.0"/>
-				</HBox.margin>
-				<graphic>
-					<BindableGlyph styleClass="icon-basic" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize}"/>
-				</graphic>
-			</Button>
 			<TextField fx:id="filterState" onAction="#handleSearchButton" promptText="%states.statesView.search.prompt" HBox.hgrow="ALWAYS" />
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 		</HBox>
