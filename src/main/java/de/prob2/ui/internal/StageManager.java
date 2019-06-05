@@ -32,6 +32,7 @@ import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
@@ -190,6 +191,43 @@ public final class StageManager {
 		stage.getProperties().putIfAbsent(PropertiesKey.USE_GLOBAL_MAC_MENU_BAR, true);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
+
+		// If possible, make the stage respect the minimum size of its content.
+		// For some reason, this is not the default behavior in JavaFX.
+		// Loosely based on https://community.oracle.com/thread/2511660
+		final ChangeListener<Parent> rootListener = (o, from, to) -> {
+			if (to instanceof Region) {
+				final Region region = (Region)to;
+				stage.minWidthProperty().bind(
+					Bindings.max(0, stage.widthProperty().subtract(stage.getScene().widthProperty()))
+						.add(Bindings.createDoubleBinding(
+							() -> region.minWidth(-1),
+							region.minWidthProperty()
+						))
+				);
+				stage.minHeightProperty().bind(
+					Bindings.max(0, stage.heightProperty().subtract(stage.getScene().heightProperty()))
+						.add(Bindings.createDoubleBinding(
+							() -> region.minHeight(-1),
+							region.minHeightProperty()
+						))
+				);
+			} else {
+				stage.minWidthProperty().unbind();
+				stage.minHeightProperty().unbind();
+			}
+		};
+		final ChangeListener<Scene> sceneListener = (o, from, to) -> {
+			if (from != null) {
+				from.rootProperty().removeListener(rootListener);
+			}
+			if (to != null) {
+				to.rootProperty().addListener(rootListener);
+				rootListener.changed(to.rootProperty(), null, to.getRoot());
+			}
+		};
+		stage.sceneProperty().addListener(sceneListener);
+		sceneListener.changed(stage.sceneProperty(), null, stage.getScene());
 
 		stage.focusedProperty().addListener(e -> {
 			final String stageId = getPersistenceID(stage);
