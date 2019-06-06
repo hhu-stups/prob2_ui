@@ -199,18 +199,24 @@ public final class StageManager {
 			if (to instanceof Region) {
 				final Region region = (Region)to;
 				stage.minWidthProperty().bind(
-					Bindings.max(0, stage.widthProperty().subtract(stage.getScene().widthProperty()))
-						.add(Bindings.createDoubleBinding(
-							() -> region.minWidth(-1),
-							region.minWidthProperty()
-						))
+					Bindings.when(stage.getScene().widthProperty().isEqualTo(0)).then(0).otherwise(
+						Bindings.max(0, stage.widthProperty().subtract(stage.getScene().widthProperty()))
+							.add(Bindings.createDoubleBinding(
+								() -> region.minWidth(-1),
+								region.minWidthProperty(),
+								stage.widthProperty()
+							))
+					)
 				);
 				stage.minHeightProperty().bind(
-					Bindings.max(0, stage.heightProperty().subtract(stage.getScene().heightProperty()))
-						.add(Bindings.createDoubleBinding(
-							() -> region.minHeight(-1),
-							region.minHeightProperty()
-						))
+					Bindings.when(stage.getScene().heightProperty().isEqualTo(0)).then(0).otherwise(
+						Bindings.max(0, stage.heightProperty().subtract(stage.getScene().heightProperty()))
+							.add(Bindings.createDoubleBinding(
+								() -> region.minHeight(-1),
+								region.minHeightProperty(),
+								stage.heightProperty()
+							))
+					)
 				);
 			} else {
 				stage.minWidthProperty().unbind();
