@@ -25,7 +25,6 @@ import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.AbstractResultHandler;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
-import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 
 @Singleton
 public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<SymbolicAnimationFormulaItem> {

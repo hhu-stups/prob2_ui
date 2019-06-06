@@ -13,10 +13,7 @@ import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -27,8 +24,6 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 	
 	private final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler;
 
-	private final TestCaseGenerationFormulaExtractor extractor;
-
 	@Inject
 	public SymbolicAnimationFormulaInput(final StageManager stageManager,
 										 final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler,
@@ -36,7 +31,6 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 										 final CurrentTrace currentTrace, final TestCaseGenerationFormulaExtractor extractor) {
 		super(stageManager, currentProject, injector, bundle, currentTrace, extractor);
 		this.symbolicAnimationFormulaHandler = symbolicAnimationFormulaHandler;
-		this.extractor = extractor;
 		stageManager.loadFXML(this, "symbolic_animation_formula_input.fxml");
 	}
 	

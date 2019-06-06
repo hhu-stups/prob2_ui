@@ -9,8 +9,6 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationResultHandler;
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 
@@ -23,8 +21,6 @@ import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.application.Platform;
-
-import de.prob.statespace.Trace;
 
 @Singleton
 public class SymbolicAnimationChecker extends SymbolicExecutor {

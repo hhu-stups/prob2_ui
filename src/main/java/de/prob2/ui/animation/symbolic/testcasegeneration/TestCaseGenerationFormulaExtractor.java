@@ -1,8 +1,5 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-
-import de.prob2.ui.symbolic.SymbolicExecutionType;
-
 import java.util.Arrays;
 import java.util.List;
 

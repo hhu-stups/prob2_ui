@@ -21,7 +21,6 @@ import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
