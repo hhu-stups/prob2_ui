@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.internal.BetterTabPane?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.menu.ViewMenu?>
@@ -16,7 +17,6 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -62,7 +62,7 @@
 				</top>
 				<center>
 					<SplitPane dividerPositions="0.2">
-						<TabPane fx:id="editTabPane" side="LEFT" prefWidth="200">
+						<BetterTabPane fx:id="editTabPane" side="LEFT" prefWidth="200">
 							<Tab fx:id="editNodesTab"
 								text="%visualisation.magicLayout.view.tabs.nodes"
 								closable="false">
@@ -75,7 +75,7 @@
 								<MagicLayoutEditEdges
 									fx:id="magicLayoutEditEdges" />
 							</Tab>
-						</TabPane>
+						</BetterTabPane>
 						<VBox>
 							<HBox>
 								<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS"

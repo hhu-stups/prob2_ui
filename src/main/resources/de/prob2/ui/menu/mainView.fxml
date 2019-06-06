@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.beditor.BEditorView?>
+<?import de.prob2.ui.consoles.b.BConsoleView?>
+<?import de.prob2.ui.internal.BetterTabPane?>
 <?import de.prob2.ui.states.StateErrorsView?>
 <?import de.prob2.ui.states.StatesView?>
 <?import de.prob2.ui.visualisation.VisualisationView?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import de.prob2.ui.beditor.BEditorView?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TitledPane?>
-<?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import javafx.scene.layout.StackPane?>
-
 <fx:root type="StackPane" xmlns:fx="http://javafx.com/fxml/1">
 	<!-- TabPane *obviously* does not extend Pane, so we have to wrap it in a AnchorPane so we can add the menu bar to it on Mac. -->
 	<SplitPane fx:id="splitPane" orientation="VERTICAL" dividerPositions="0.8">
 		<StackPane>
-			<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+			<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
 				<Tab fx:id="statesTab" id="states" text="%menu.mainView.tabs.states">
 					<StatesView/>
 				</Tab>
@@ -29,7 +27,7 @@
 				<Tab fx:id="beditorTab" id="beditorTab" text="%menu.mainView.tabs.beditor">
 					<BEditorView/>
 				</Tab>
-			</TabPane>
+			</BetterTabPane>
 		</StackPane>
 		<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title" expanded="false" animated="false">
 			<BConsoleView/>

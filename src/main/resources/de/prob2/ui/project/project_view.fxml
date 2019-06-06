@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.internal.BetterTabPane?>
 <?import de.prob2.ui.project.machines.MachinesTab?>
 <?import de.prob2.ui.project.preferences.PreferencesTab?>
 <?import de.prob2.ui.project.ProjectTab?>
@@ -7,7 +8,6 @@
 <?import de.prob2.ui.project.verifications.VerificationsTab?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="ProjectView" minHeight="70.0" minWidth="200" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox spacing="5.0" alignment="CENTER">
@@ -18,10 +18,10 @@
 		<MenuButton fx:id="recentProjectButton" text="%menu.file.items.openRecentProject"
 			styleClass="button-blue" />
 	</VBox>
-	<TabPane fx:id="projectTabPane" minWidth="300">
+	<BetterTabPane fx:id="projectTabPane" minWidth="300">
 		<MachinesTab fx:id="machinesTab" />
 		<VerificationsTab fx:id="verificationsTab" />
 		<PreferencesTab fx:id="preferencesTab" />
 		<ProjectTab fx:id="projectTab" />
-	</TabPane>
+	</BetterTabPane>
 </fx:root>

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import de.prob2.ui.internal.BetterTabPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
@@ -9,7 +13,7 @@
 		<Scene stylesheets="@/prob.css" height="600.0" width="800.0">
 			<!-- TabPane *obviously* does not extend Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
 			<StackPane>
-				<TabPane prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+				<BetterTabPane prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 					<Tab text="%consoles.groovy.class.tabs.class">
 						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 							<TableView fx:id="tvClass" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -71,7 +75,7 @@
 							</TableView>
 						</AnchorPane>
 					</Tab>
-				</TabPane>
+				</BetterTabPane>
 			</StackPane>
 		</Scene>
 	</scene>
