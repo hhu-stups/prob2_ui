@@ -2,6 +2,7 @@ package de.prob2.ui.animation.symbolic;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -22,6 +23,8 @@ import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.application.Platform;
+
+import de.prob.statespace.Trace;
 
 @Singleton
 public class SymbolicAnimationChecker extends SymbolicExecutor {
@@ -52,12 +55,12 @@ public class SymbolicAnimationChecker extends SymbolicExecutor {
 		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_ANIMATION);
 		injector.getInstance(SymbolicAnimationView.class).refresh();
 	}
-	
+
 	@Override
 	protected void updateTrace(SymbolicFormulaItem item) {
-		Trace example = ((SymbolicAnimationFormulaItem) item).getExample();
-		if(example != null) {
-			currentTrace.set(example);
+		List<Trace> examples = ((SymbolicAnimationFormulaItem) item).getExamples();
+		if(!examples.isEmpty()) {
+			currentTrace.set(examples.get(0));
 		}
 	}
 

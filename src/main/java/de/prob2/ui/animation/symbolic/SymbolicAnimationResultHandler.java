@@ -20,9 +20,9 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
-import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
@@ -67,11 +67,11 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	
 	public void handleFindValidState(SymbolicAnimationFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
 		FindStateCommand.ResultType result = cmd.getResult();
-		item.setExample(null);
+		item.getExamples().clear();
 		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
 		if (result == FindStateCommand.ResultType.STATE_FOUND) {
 			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found");
-			item.setExample(cmd.getTrace(stateSpace));
+			item.getExamples().add(cmd.getTrace(stateSpace));
 		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
 			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound");
 		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
@@ -83,11 +83,11 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	
 	public void handleSequence(SymbolicAnimationFormulaItem item, ConstraintBasedSequenceCheckCommand cmd) {
 		ConstraintBasedSequenceCheckCommand.ResultType result = cmd.getResult();
-		item.setExample(null);
+		item.getExamples().clear();
 		switch(result) {
 			case PATH_FOUND:
 				showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found");
-				item.setExample(cmd.getTrace());
+				item.getExamples().add(cmd.getTrace());
 				break;
 			case NO_PATH_FOUND:
 				showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound");
@@ -166,13 +166,14 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	}
 
 	public void handleTestCaseGenerationResult(SymbolicAnimationFormulaItem item, TestCaseGeneratorResult result) {
-		List<TestTrace> traces = result.getTestTraces();
+		List<Trace> traces = result.getTraces();
+		item.getExamples().clear();
 		if(traces.isEmpty()) {
 			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.notFound");
 		} else {
 			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.found");
 		}
-		System.out.println("Traces: " + traces);
+		item.getExamples().addAll(traces);
 	}
 	
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
