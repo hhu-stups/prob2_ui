@@ -16,20 +16,13 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane styleClass="dialog">
-				<VBox spacing="10" alignment="CENTER">
+				<VBox spacing="10.0" alignment="CENTER">
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
-					<Label text="%animation.symbolic.choice.text">
-						<VBox.margin>
-							<Insets left="10" right="10" />
-						</VBox.margin>
-					</Label>
-					<HBox alignment="CENTER" prefHeight="47.0" prefWidth="200.0">
-						<VBox.margin>
-							<Insets top="30"/>
-						</VBox.margin>
-						<ChoiceBox fx:id="cbChoice" prefWidth="250.0">
+					<Label text="%animation.symbolic.choice.text"/>
+					<HBox alignment="CENTER">
+						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
 									<SymbolicExecutionItem executionType="SEQUENCE" guiType="TEXT_FIELD"/>
