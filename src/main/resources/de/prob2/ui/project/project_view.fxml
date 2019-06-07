@@ -9,7 +9,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="ProjectView" minHeight="70.0" minWidth="200" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="ProjectView" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox spacing="5.0" alignment="CENTER">
 		<Button fx:id="newProjectButton" text="%menu.file.items.newProject"
 			onAction="#createNewProject" styleClass="button-blue" />
@@ -18,7 +18,7 @@
 		<MenuButton fx:id="recentProjectButton" text="%menu.file.items.openRecentProject"
 			styleClass="button-blue" />
 	</VBox>
-	<BetterTabPane fx:id="projectTabPane" minWidth="300">
+	<BetterTabPane fx:id="projectTabPane">
 		<MachinesTab fx:id="machinesTab" />
 		<VerificationsTab fx:id="verificationsTab" />
 		<PreferencesTab fx:id="preferencesTab" />

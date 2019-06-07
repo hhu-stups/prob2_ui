@@ -49,10 +49,10 @@
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
 			<columns>
-				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
-				<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-				<TableColumn fx:id="formulaNameColumn" minWidth="140.0" prefWidth="240.0" text="%common.columns.formula" />
-				<TableColumn fx:id="formulaDescriptionColumn" minWidth="180.0" prefWidth="180.0" text="%common.columns.description" />
+				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
+				<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
+				<TableColumn fx:id="formulaNameColumn" minWidth="80.0" text="%common.columns.formula" />
+				<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.symbolicchecking.view.noSymbolicFormulas" />
