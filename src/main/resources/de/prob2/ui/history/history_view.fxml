@@ -34,7 +34,7 @@
 		</Button>
 		<HelpButton fx:id="helpButton" />
 	</HBox>
-	<TableView fx:id="historyTableView" VBox.vgrow="ALWAYS">
+	<TableView fx:id="historyTableView" prefHeight="200.0" VBox.vgrow="ALWAYS">
 		<columns>
 			<TableColumn fx:id="positionColumn" minWidth="${fontSize.fontSize * 6}"
 				maxWidth="${fontSize.fontSize * 6}" text="%history.tableView.position" />

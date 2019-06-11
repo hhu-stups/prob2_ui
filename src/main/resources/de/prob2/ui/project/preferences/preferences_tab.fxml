@@ -24,7 +24,7 @@
 			<HelpButton fx:id="helpButton"/>
 		</HBox>
 		<SplitPane fx:id="splitPane" VBox.vgrow="ALWAYS">
-			<ListView fx:id="preferencesListView" styleClass="no-border">
+			<ListView fx:id="preferencesListView" styleClass="no-border" prefHeight="200.0">
 				<placeholder>
 					<Label text="%project.preferences.preferencesTab.noPreferences" />
 				</placeholder>

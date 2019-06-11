@@ -3,7 +3,7 @@
 <?import de.prob2.ui.project.verifications.MachineTableView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
-<fx:root type="MachineTableView" stylesheets="@/prob.css" styleClass="machine-table-view" minHeight="150" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="MachineTableView" stylesheets="@/prob.css" styleClass="machine-table-view" prefHeight="200.0" xmlns:fx="http://javafx.com/fxml/1">
 	<columns>
 		<TableColumn fx:id="machineNameColumn" minWidth="80.0" text="%project.verifications.machineTableView.columns.machine" />
 		<TableColumn fx:id="machineModelcheckColumn" minWidth="120.0" maxWidth="120.0" text="%project.verifications.machineTableView.columns.modelChecking" />
