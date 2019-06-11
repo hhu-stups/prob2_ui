@@ -75,7 +75,7 @@ public final class PreferencesView extends BorderPane {
 		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
 		
 		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefTreeItem, String> cell = new MultiTreeTableCell(this.preferencesProperty());
+			TreeTableCell<PrefTreeItem, String> cell = new PreferenceValueCell(this.preferencesProperty());
 			cell.tableRowProperty().addListener((observable, from, to) ->
 				to.treeItemProperty().addListener((observable1, from1, to1) ->
 					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof PrefTreeItem.Preference)

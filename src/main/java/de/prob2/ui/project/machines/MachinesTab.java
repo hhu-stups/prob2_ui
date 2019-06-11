@@ -252,15 +252,6 @@ public class MachinesTab extends Tab {
 		}
 		final String[] split = selected.getFileName().toString().split("\\.");
 		final String machineName = split[0];
-		
-		try {
-			Files.write(selected, Arrays.asList("MACHINE " + machineName, "END"));
-		} catch (IOException e) {
-			LOGGER.error("Could not create machine file", e);
-			stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
-			return;
-		}
-		final Path relative = currentProject.getLocation().relativize(selected);
 		final Set<String> machineNamesSet = currentProject.getMachines().stream()
 			.map(Machine::getName)
 			.collect(Collectors.toSet());
@@ -270,7 +261,25 @@ public class MachinesTab extends Tab {
 			nameInProject = String.format("%s (%d)", machineName, i);
 			i++;
 		}
-		currentProject.addMachine(new Machine(nameInProject, "", relative));
+		final Path relative = currentProject.getLocation().relativize(selected);
+		final Machine machine;
+		try {
+			machine = new Machine(nameInProject, "", relative);
+		} catch (IllegalArgumentException e) {
+			LOGGER.info("User tried to create a machine with an invalid extension", e);
+			final String extension = StageManager.getExtension(relative.getFileName().toString());
+			stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.machines.machinesTab.alerts.invalidMachineExtension.content", extension).show();
+			return;
+		}
+		
+		try {
+			Files.write(selected, Arrays.asList("MACHINE " + machineName, "END"));
+		} catch (IOException e) {
+			LOGGER.error("Could not create machine file", e);
+			stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
+			return;
+		}
+		currentProject.addMachine(machine);
 	}
 
 	@FXML

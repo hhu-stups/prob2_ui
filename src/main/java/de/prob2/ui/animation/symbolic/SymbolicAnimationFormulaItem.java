@@ -5,48 +5,41 @@ import java.util.Objects;
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaItem;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
-	
-	private transient ObjectProperty<Trace> example;
+
+	private transient ListProperty<Trace> examples;
 
 	public SymbolicAnimationFormulaItem(String name, SymbolicExecutionType type) {
 		super(name, type);
-		this.example = new SimpleObjectProperty<>(null);
+		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 	}
 
 	@Override
 	public void initialize() {
 		super.initialize();
-		if(this.example == null) {
-			this.example = new SimpleObjectProperty<>(null);
+		if(this.examples == null) {
+			this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		} else {
-			this.example.set(null);
+			this.examples.setValue(FXCollections.observableArrayList());
 		}
 	}
-	
-	public void setExample(Trace example) {
-		this.example.set(example);
+
+	public ObservableList<Trace> getExamples() {
+		return examples.get();
 	}
-	
-	public Trace getExample() {
-		return example.get();
-	}
-	
-	public ObjectProperty<Trace> exampleProperty() {
-		return example;
+
+	public ListProperty<Trace> examplesProperty() {
+		return examples;
 	}
 	
 	@Override
 	public void reset() {
 		this.initialize();
-		if(this.example == null) {
-			this.example = new SimpleObjectProperty<>(null);
-		} else {
-			this.example.set(null);
-		}
 	}
 	
 	@Override
@@ -66,12 +59,6 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	@Override
 	public int hashCode() {
 		 return Objects.hash(name, code, type);
-	}
-	
-	@Override
-	public void setData(String name, String description, String code, SymbolicExecutionType type) {
-		super.setData(name, description, code);
-		this.type = type;
 	}
 	
 	

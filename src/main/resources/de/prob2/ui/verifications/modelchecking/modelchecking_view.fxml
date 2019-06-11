@@ -50,38 +50,38 @@
 			</Button>
 			<HelpButton fx:id="helpButton" />
 		</HBox>
-		<TableView fx:id="tvItems" minHeight="80">
+		<TableView fx:id="tvItems" minHeight="80.0" prefWidth="240.0">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
 			<columns>
-				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}"/>
-				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-				<TableColumn fx:id="strategyColumn" minWidth="130.0" prefWidth="130.0" text="%verifications.common.columns.strategy" />
-				<TableColumn fx:id="deadlockColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.deadlocks" />
-				<TableColumn fx:id="invariantsViolationsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.invariants" />
-				<TableColumn fx:id="assertionViolationsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.assertions" />
+				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
+				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
+				<TableColumn fx:id="strategyColumn" minWidth="120.0" text="%verifications.common.columns.strategy" />
+				<TableColumn fx:id="deadlockColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}" text="%verifications.modelchecking.modelcheckingView.column.deadlocks" />
+				<TableColumn fx:id="invariantsViolationsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}" text="%verifications.modelchecking.modelcheckingView.column.invariants" />
+				<TableColumn fx:id="assertionViolationsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}" text="%verifications.modelchecking.modelcheckingView.column.assertions" />
 				<TableColumn fx:id="goalsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.goals" />
-				<TableColumn fx:id="stopAtFullCoverageColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" prefWidth="${fontSize.fontSize * 4}" text="%verifications.modelchecking.modelcheckingView.column.stopFullCoverage" />
+				<TableColumn fx:id="stopAtFullCoverageColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}" text="%verifications.modelchecking.modelcheckingView.column.stopFullCoverage" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
 			</placeholder>
 		</TableView>
-		<TableView fx:id="tvChecks" minHeight="80">
+		<TableView fx:id="tvChecks" minHeight="80.0">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
 			<columns>
-				<TableColumn fx:id="jobStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-				<TableColumn fx:id="indexColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.index" />
-				<TableColumn fx:id="messageColumn" minWidth="130.0" prefWidth="130.0" text="%common.columns.message" />
+				<TableColumn fx:id="jobStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
+				<TableColumn fx:id="indexColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.index" />
+				<TableColumn fx:id="messageColumn" minWidth="120.0" text="%common.columns.message" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
 			</placeholder>
 		</TableView>
-		<AnchorPane fx:id="statsPane">
+		<AnchorPane fx:id="statsPane" minHeight="80.0">
 			<VBox.margin>
 				<Insets top="5.0" />
 			</VBox.margin>

@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.symbolic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,12 +14,17 @@ import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.representation.AbstractModel;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.AbstractResultHandler;
+
+import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 
 @Singleton
 public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<SymbolicAnimationFormulaItem> {
@@ -32,17 +38,19 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	private final Injector injector;
 	
 	private final CurrentProject currentProject;
-	
+
+	private final TestCaseGenerationFormulaExtractor extractor;
 	
 	@Inject
 	public SymbolicAnimationFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
-											final Injector injector, final SymbolicAnimationChecker symbolicChecker,
-											final SymbolicAnimationResultHandler resultHandler) {
+										   final Injector injector, final SymbolicAnimationChecker symbolicChecker,
+										   final SymbolicAnimationResultHandler resultHandler, final TestCaseGenerationFormulaExtractor extractor) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.symbolicChecker = symbolicChecker;
 		this.resultHandler = resultHandler;
+		this.extractor = extractor;
 	}
 	
 	public void addFormula(String name, SymbolicExecutionType type, boolean checking) {
@@ -73,6 +81,17 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode(), FormulaExpand.EXPAND), true);
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
+
+	public void generateTestCases(SymbolicAnimationFormulaItem item, boolean checkAll) {
+		AbstractModel model = currentTrace.getModel();
+		if(!(model instanceof ClassicalBModel)) {
+			return;
+		}
+		ClassicalBModel bModel = (ClassicalBModel) model;
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, extractor.extractRawFormula(item.getCode()), Integer.parseInt(extractor.extractDepth(item.getCode())), new ArrayList<>());
+		symbolicChecker.checkItem(item, testCaseGenerator, checkAll);
+	}
 	
 	public void handleItem(SymbolicAnimationFormulaItem item, boolean checkAll) {
 		if(!item.selected()) {
@@ -85,6 +104,12 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 				break;
 			case FIND_VALID_STATE:
 				findValidState(item, checkAll);
+				break;
+			case MCDC:
+				generateTestCases(item, checkAll);
+				break;
+			case COVERED_OPERATIONS:
+				generateTestCases(item, checkAll);
 				break;
 			default:
 				break;

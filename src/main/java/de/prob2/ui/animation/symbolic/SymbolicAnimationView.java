@@ -21,11 +21,15 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
+
+import java.util.List;
+import de.prob.statespace.Trace;
 
 
 @FXMLInjected
@@ -38,7 +42,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		public TableRow<SymbolicAnimationFormulaItem> call(TableView<SymbolicAnimationFormulaItem> param) {
 			TableRow<SymbolicAnimationFormulaItem> row = createRow();
 			
-			MenuItem showStateItem = new MenuItem(bundle.getString("animation.symbolic.view.contextMenu.showFoundState"));
+			Menu showStateItem = new Menu(bundle.getString("animation.symbolic.view.contextMenu.showFoundStates"));
 			showStateItem.setDisable(true);
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("symbolic.view.contextMenu.showCheckingMessage"));
@@ -48,10 +52,8 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 				if(to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
-					showStateItem.disableProperty().bind(to.exampleProperty().isNull());
-					if(to.getExample() != null) {
-						showStateItem.setOnAction(event-> currentTrace.set(to.getExample()));
-					}
+					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
+					showExamples(to, showStateItem);
 				}
 			});
 			
@@ -64,6 +66,17 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 					.otherwise(contextMenu));			
 
 			return row;
+		}
+
+		private void showExamples(SymbolicAnimationFormulaItem item, Menu exampleItem) {
+			exampleItem.getItems().clear();
+			List<Trace> examples = item.getExamples();
+			for(int i = 0; i < examples.size(); i++) {
+				MenuItem traceItem = new MenuItem(String.format(bundle.getString("animation.symbolic.view.contextMenu.showExample"), i + 1));
+				final int index = i;
+				traceItem.setOnAction(e-> currentTrace.set((examples.get(index))));
+				exampleItem.getItems().add(traceItem);
+			}
 		}
 	}
 	

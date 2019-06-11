@@ -636,7 +636,7 @@
 .table-view .table-cell,
 .tree-table-view .tree-table-cell {
 	-fx-border-color: transparent;
-	-fx-padding: 0em 1em 0.05em 1em;
+	-fx-padding: 0em 0.25em 0.05em 0.25em;
 }
 .table-row-cell:focused .table-cell {
 	-fx-font-weight: bold;

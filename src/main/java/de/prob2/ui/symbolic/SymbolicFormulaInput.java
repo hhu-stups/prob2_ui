@@ -3,7 +3,10 @@ package de.prob2.ui.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.statespace.LoadedMachine;
+import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCInputView;
+import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -40,24 +43,36 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	
 	@FXML
 	protected PredicateBuilderView predicateBuilderView;
-	
+
+	@FXML
+	protected MCDCInputView mcdcInputView;
+
+	@FXML
+	protected OperationCoverageInputView operationCoverageInputView;
+
+	protected final StageManager stageManager;
+
 	protected final Injector injector;
 	
 	protected final ResourceBundle bundle;
 	
 	protected final CurrentTrace currentTrace;
+
+	protected final TestCaseGenerationFormulaExtractor extractor;
 	
 	protected ArrayList<String> events;
 	
 	@Inject
-	public SymbolicFormulaInput(final StageManager stageManager, final CurrentProject currentProject, 
+	public SymbolicFormulaInput(final StageManager stageManager, final CurrentProject currentProject,
 								final Injector injector, final ResourceBundle bundle,
-								final CurrentTrace currentTrace) {
+								final CurrentTrace currentTrace, final TestCaseGenerationFormulaExtractor extractor) {
+		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.events = new ArrayList<>();
 		this.injector = injector;
 		this.bundle = bundle;
+		this.extractor = extractor;
 	}
 
 	@FXML
@@ -80,12 +95,13 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		}
 		cbOperations.getItems().setAll(events);
 		predicateBuilderView.setItems(items);
+		operationCoverageInputView.setTable(events);
 	}
 	
 	protected abstract void setCheckListeners();
 	
 	public void changeGUIType(final SymbolicGUIType guiType) {
-		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView);
+		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView, mcdcInputView, operationCoverageInputView);
 		switch (guiType) {
 			case NONE:
 				break;
@@ -98,6 +114,12 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			case PREDICATE:
 				this.getChildren().add(0, predicateBuilderView);
 				break;
+			case MCDC:
+				this.getChildren().add(0, mcdcInputView);
+				break;
+			case OPERATIONS:
+				this.getChildren().add(0, operationCoverageInputView);
+				break;
 			default:
 				throw new AssertionError("Unhandled GUI type: " + guiType);
 		}
@@ -109,6 +131,8 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		setCheckListeners();
 		tfFormula.clear();
 		predicateBuilderView.reset();
+		mcdcInputView.reset();
+		operationCoverageInputView.reset();
 		cbOperations.getSelectionModel().clearSelection();
 	}
 	
@@ -121,6 +145,10 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			formula = cbOperations.getSelectionModel().getSelectedItem();
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
+			formula = extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth());
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
+			formula = extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth());
 		} else {
 			formula = choosingStage.getExecutionType().getName();
 		}
@@ -162,6 +190,10 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 					return;
 				}
 			});
+		} else if(stage.getGUIType() == SymbolicGUIType.MCDC) {
+			mcdcInputView.setItem((SymbolicAnimationFormulaItem) item);
+		} else if(stage.getGUIType() == SymbolicGUIType.OPERATIONS) {
+			operationCoverageInputView.setItem((SymbolicAnimationFormulaItem) item);
 		}
 		stage.show();
 	}

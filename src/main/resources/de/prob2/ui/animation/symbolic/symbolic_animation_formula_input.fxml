@@ -7,11 +7,15 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCInputView?>
+<?import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView?>
 <fx:root type="SymbolicAnimationFormulaInput" spacing="10.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<TextField fx:id="tfFormula" VBox.vgrow="NEVER"/>
 		<ChoiceBox fx:id="cbOperations" VBox.vgrow="NEVER"/>
 		<PredicateBuilderView fx:id="predicateBuilderView" VBox.vgrow="NEVER"/>
+		<MCDCInputView fx:id="mcdcInputView" VBox.vgrow="NEVER"/>
+		<OperationCoverageInputView fx:id="operationCoverageInputView" VBox.vgrow="NEVER"/>
 	</fx:define>
 	<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
 		<Button fx:id="btAdd" text="%common.buttons.add" styleClass="button-blue"/>

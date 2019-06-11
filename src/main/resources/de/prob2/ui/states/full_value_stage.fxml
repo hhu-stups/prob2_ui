@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.internal.BetterTabPane?>
 <?import de.prob2.ui.internal.Spacer?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -21,7 +21,7 @@
 					<Insets top="1.0" right="0.0" bottom="10.0" left="0.0" />
 				</padding>
 				<center>
-					<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+					<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
 						<Tab fx:id="currentValueTab" text="%states.fullValueStage.tabs.current">
 							<TextArea fx:id="currentValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
@@ -31,7 +31,7 @@
 						<Tab fx:id="diffTab" text="%states.fullValueStage.tabs.diff">
 							<StyleClassedTextArea fx:id="diffTextarea" editable="false" wrapText="true" styleClass="difftextarea" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
-					</TabPane>
+					</BetterTabPane>
 				</center>
 				<bottom>
 					<HBox spacing="10.0">

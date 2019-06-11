@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
-<?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
+<?import de.prob2.ui.internal.BetterTabPane?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
+<?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
+<?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
 <?import de.prob2.ui.verifications.VerificationsView?>
 <?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
-
 <fx:root type="VerificationsView" xmlns:fx="http://javafx.com/fxml/1">
-	<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+	<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 		<Tab fx:id="tabModelchecking" id="modelchecking" text="%verifications.verificationsView.tabs.modelchecking">
 			<ModelcheckingView />
@@ -20,5 +19,5 @@
 		<Tab fx:id="tabSymbolic" id="symbolic" text="%verifications.verificationsView.tabs.symbolic">
 			<SymbolicCheckingView />
 		</Tab>
-	</TabPane>
+	</BetterTabPane>
 </fx:root>

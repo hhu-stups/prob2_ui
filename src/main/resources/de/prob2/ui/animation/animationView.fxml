@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.animation.AnimationView?>
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationView?>
 <?import de.prob2.ui.animation.tracereplay.TraceReplayView?>
-<?import de.prob2.ui.animation.AnimationView?>
+<?import de.prob2.ui.internal.BetterTabPane?>
 <?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
-
 <fx:root type="AnimationView" xmlns:fx="http://javafx.com/fxml/1">
-	<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+	<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
 		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 		<Tab fx:id="tabTraceReplay" text="%animation.view.tabs.tracereplay">
 			<TraceReplayView />
@@ -16,6 +15,6 @@
 		<Tab fx:id="tabSymbolic" id="symbolic" text="%animation.view.tabs.symbolic">
 			<SymbolicAnimationView />
 		</Tab>
-	</TabPane>
+	</BetterTabPane>
 </fx:root>
 

@@ -14,12 +14,12 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MultiTreeTableCell extends TreeTableCell<PrefTreeItem, String> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(MultiTreeTableCell.class);
+class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PreferenceValueCell.class);
 	
 	private final ReadOnlyObjectProperty<ProBPreferences> preferences;
 	
-	public MultiTreeTableCell(final ReadOnlyObjectProperty<ProBPreferences> preferences) {
+	PreferenceValueCell(final ReadOnlyObjectProperty<ProBPreferences> preferences) {
 		super();
 		
 		this.preferences = preferences;

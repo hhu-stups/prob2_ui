@@ -17,7 +17,7 @@
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<VBox minWidth="240" minHeight="240">
+	<VBox>
 		<HBox alignment="CENTER">
 			<padding>
 				<Insets top="5.0" left="5.0"/>

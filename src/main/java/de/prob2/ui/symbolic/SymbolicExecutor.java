@@ -11,6 +11,7 @@ import com.google.inject.Injector;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.statespace.StateSpace;
+
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -30,12 +31,12 @@ public abstract class SymbolicExecutor {
 	protected final CurrentProject currentProject;
 	
 	protected final Injector injector;
+
+	protected final ISymbolicResultHandler resultHandler;
+
+	protected final List<IModelCheckJob> currentJobs;
 	
-	private final ISymbolicResultHandler resultHandler;
-	
-	private final List<IModelCheckJob> currentJobs;
-	
-	private final ListProperty<Thread> currentJobThreads;
+	protected final ListProperty<Thread> currentJobThreads;
 	
 	protected List<? extends SymbolicFormulaItem> items;
 	
@@ -133,7 +134,7 @@ public abstract class SymbolicExecutor {
 	
 	protected abstract void updateMachine(Machine machine);
 	
-	private SymbolicFormulaItem getItemIfAlreadyExists(SymbolicFormulaItem item) {
+	protected SymbolicFormulaItem getItemIfAlreadyExists(SymbolicFormulaItem item) {
 		List<? extends SymbolicFormulaItem> formulas = getItems();
 		int index = formulas.indexOf(item);
 		if(index > -1) {
