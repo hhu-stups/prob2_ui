@@ -29,8 +29,10 @@ import de.prob2.ui.project.machines.Machine;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
@@ -76,6 +78,8 @@ public final class StageManager {
 	private final Map<Stage, Void> registered;
 	private MenuBar globalMacMenuBar;
 	private Stage mainStage;
+	private final DoubleProperty stageSceneWidthDifference;
+	private final DoubleProperty stageSceneHeightDifference;
 
 	@Inject
 	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
@@ -83,11 +87,13 @@ public final class StageManager {
 		this.menuToolkit = menuToolkit;
 		this.uiState = uiState;
 		this.bundle = bundle;
+		this.fileChooserManager = fileChooserManager;
 
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
 		this.globalMacMenuBar = null;
-		this.fileChooserManager = fileChooserManager;
+		this.stageSceneWidthDifference = new SimpleDoubleProperty(this, "stageSceneWidthDifference", 0.0);
+		this.stageSceneHeightDifference = new SimpleDoubleProperty(this, "stageSceneHeightDifference", 0.0);
 	}
 
 	/**
@@ -199,24 +205,18 @@ public final class StageManager {
 			if (to instanceof Region) {
 				final Region region = (Region)to;
 				stage.minWidthProperty().bind(
-					Bindings.when(stage.getScene().widthProperty().isEqualTo(0)).then(0).otherwise(
-						Bindings.max(0, stage.widthProperty().subtract(stage.getScene().widthProperty()))
-							.add(Bindings.createDoubleBinding(
-								() -> region.minWidth(-1),
-								region.minWidthProperty(),
-								stage.widthProperty()
-							))
-					)
+					Bindings.createDoubleBinding(
+						() -> region.minWidth(-1),
+						region.minWidthProperty(),
+						region.widthProperty()
+					).add(this.stageSceneWidthDifference)
 				);
 				stage.minHeightProperty().bind(
-					Bindings.when(stage.getScene().heightProperty().isEqualTo(0)).then(0).otherwise(
-						Bindings.max(0, stage.heightProperty().subtract(stage.getScene().heightProperty()))
-							.add(Bindings.createDoubleBinding(
-								() -> region.minHeight(-1),
-								region.minHeightProperty(),
-								stage.heightProperty()
-							))
-					)
+					Bindings.createDoubleBinding(
+						() -> region.minHeight(-1),
+						region.minHeightProperty(),
+						region.heightProperty()
+					).add(this.stageSceneHeightDifference)
 				);
 			} else {
 				stage.minWidthProperty().unbind();
@@ -278,6 +278,11 @@ public final class StageManager {
 
 	public void registerMainStage(Stage primaryStage, String name) {
 		this.mainStage = primaryStage;
+		primaryStage.setOnShown(event -> {
+			this.stageSceneWidthDifference.set(primaryStage.getWidth() - primaryStage.getScene().getWidth());
+			this.stageSceneHeightDifference.set(primaryStage.getHeight() - primaryStage.getScene().getHeight());
+			primaryStage.setOnShown(null);
+		});
 		this.register(primaryStage, name);
 	}
 
