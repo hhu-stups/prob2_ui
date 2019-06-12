@@ -42,7 +42,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		public TableRow<SymbolicAnimationFormulaItem> call(TableView<SymbolicAnimationFormulaItem> param) {
 			TableRow<SymbolicAnimationFormulaItem> row = createRow();
 			
-			Menu showStateItem = new Menu(bundle.getString("animation.symbolic.view.contextMenu.showFoundStates"));
+			Menu showStateItem = new Menu(bundle.getString("animation.symbolic.view.contextMenu.showFoundPaths"));
 			showStateItem.setDisable(true);
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("symbolic.view.contextMenu.showCheckingMessage"));
