@@ -262,6 +262,9 @@ public final class StageManager {
 				}
 			}
 		});
+		// Workaround for JavaFX bug JDK-8224260 (https://bugs.openjdk.java.net/browse/JDK-8224260):
+		// Add a second ChangeListener that does nothing.
+		stage.showingProperty().addListener((o, from, to) -> {});
 
 		stage.focusedProperty().addListener((observable, from, to) -> {
 			if (to) {
