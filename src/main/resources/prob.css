@@ -758,10 +758,7 @@
 
 /* ================== DOTTY VIEW ================= */
 .dynamic-command-cell {
-	-fx-border-color: transparent;
-	-fx-border-width: 0.0 0.0 0.0 0.3em;
-	-fx-graphic-text-gap: 10;
-	-fx-padding: 0.4em 0.0 0.4em 1.0em;
+	-fx-cell-size: 1.8em;
 }
 
 .dynamic-command-cell.dynamiccommandenabled {
