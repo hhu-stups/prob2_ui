@@ -3,20 +3,13 @@
 <?import de.prob2.ui.consoles.b.BConsole?>
 <?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import javafx.geometry.Insets?>
-
-<!--
-The prefHeight is set to Infinity, because the BConsoleView is used inside a TitledPane in a SplitPane,
-and the maxHeight of a TitledPane depends on the prefHeight of its contents.
-If we don't do this, the BConsoleView TitledPane can only be resized up to the default prefHeight,
-which is not very high.
--->
-<fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="Infinity" maxWidth="Infinity"
+<fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="200.0" maxWidth="Infinity"
 	maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
