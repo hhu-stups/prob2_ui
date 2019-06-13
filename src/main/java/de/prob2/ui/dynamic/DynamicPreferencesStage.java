@@ -1,12 +1,15 @@
 package de.prob2.ui.dynamic;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import com.google.inject.Inject;
 
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -36,13 +39,15 @@ public class DynamicPreferencesStage extends Stage {
 	
 	private final StageManager stageManager;
 	private final ProBPreferences proBPreferences;
+	private final GlobalPreferences globalPreferences;
 	
 	private DynamicCommandStage toRefresh;
 	
 	@Inject
-	private DynamicPreferencesStage(final StageManager stageManager, final ProBPreferences proBPreferences, final CurrentTrace currentTrace) {
+	private DynamicPreferencesStage(final StageManager stageManager, final ProBPreferences proBPreferences, final GlobalPreferences globalPreferences, final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
 		this.proBPreferences = proBPreferences;
+		this.globalPreferences = globalPreferences;
 		
 		this.proBPreferences.stateSpaceProperty().bind(currentTrace.stateSpaceProperty());
 		stageManager.loadFXML(this, "dynamic_preferences_view.fxml");
@@ -81,6 +86,7 @@ public class DynamicPreferencesStage extends Stage {
 	
 	@FXML
 	private void handleOk() {
+		final Map<String, String> changedPreferences = new HashMap<>(this.proBPreferences.getChangedPreferences());
 		try {
 			this.proBPreferences.apply();
 		} catch (final ProBError e) {
@@ -88,6 +94,7 @@ public class DynamicPreferencesStage extends Stage {
 			stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content").show();
 			return;
 		}
+		this.globalPreferences.get().putAll(changedPreferences);
 		this.toRefresh.refresh();
 		this.close();
 	}
