@@ -138,7 +138,5 @@ public final class Config {
 		} catch (IOException exc) {
 			logger.warn("Failed to save config file", exc);
 		}
-		
-		this.currentConfigData = configData;
 	}
 }
