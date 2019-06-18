@@ -26,6 +26,7 @@ import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
@@ -185,6 +186,8 @@ public class ProB2 extends Application {
 
 		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
 		pluginManager.start();
+
+		new Thread(() -> injector.getInstance(MachineLoader.class).getEmptyStateSpace(), "Empty State Space Loader").start();
 	}
 
 	private void updateTitle() {
