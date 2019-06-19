@@ -82,7 +82,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 
-	public void generateTestCases(SymbolicAnimationFormulaItem item, boolean checkAll) {
+	public void generateTestCases(SymbolicAnimationFormulaItem item) {
 		AbstractModel model = currentTrace.getModel();
 		if(!(model instanceof ClassicalBModel)) {
 			return;
@@ -90,7 +90,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		ClassicalBModel bModel = (ClassicalBModel) model;
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, extractor.extractRawFormula(item.getCode()), Integer.parseInt(extractor.extractDepth(item.getCode())), new ArrayList<>());
-		symbolicChecker.checkItem(item, testCaseGenerator, checkAll);
+		symbolicChecker.checkItem(item, testCaseGenerator);
 	}
 	
 	public void handleItem(SymbolicAnimationFormulaItem item, boolean checkAll) {
@@ -106,10 +106,10 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 				findValidState(item, checkAll);
 				break;
 			case MCDC:
-				generateTestCases(item, checkAll);
+				generateTestCases(item);
 				break;
 			case COVERED_OPERATIONS:
-				generateTestCases(item, checkAll);
+				generateTestCases(item);
 				break;
 			default:
 				break;
