@@ -9,12 +9,14 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.exception.CliError;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.check.CheckError;
 import de.prob.exception.ProBError;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.command.NoTraceFoundException;
 import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
@@ -60,8 +62,8 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		this.parseErrors = new ArrayList<>();
 		this.interrupted = new ArrayList<>();
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.parseErrors.addAll(Arrays.asList(ProBError.class, CheckError.class, EvaluationException.class));
-		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
+		this.parseErrors.addAll(Arrays.asList(ProBError.class, CliError.class, CheckError.class, EvaluationException.class));
+		this.interrupted.addAll(Arrays.asList(NoTraceFoundException.class, NotYetFinished.class, CheckInterrupted.class));
 	}
 	
 	public void handleFindValidState(SymbolicAnimationFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
@@ -165,13 +167,16 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	}
 
 	public void handleTestCaseGenerationResult(SymbolicAnimationFormulaItem item, Object result) {
+		item.getExamples().clear();
 		if(parseErrors.contains(result.getClass())) {
 			showCheckingResult(item, Checked.PARSE_ERROR, "animation.symbolic.resultHandler.testcasegeneration.result.error");
+			return;
+		} else if(interrupted.contains(result.getClass())) {
+			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.testcasegeneration.result.interrupted");
 			return;
 		}
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
 		List<Trace> traces = testCaseGeneratorResult.getTraces();
-		item.getExamples().clear();
 		if(testCaseGeneratorResult.isInterrupted()) {
 			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.testcasegeneration.result.interrupted");
 		} else if(traces.isEmpty()) {
