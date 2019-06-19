@@ -10,7 +10,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
-import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -37,7 +36,7 @@ public class SymbolicAnimationChecker extends SymbolicExecutor {
 		this.items = new ArrayList<>();
 	}
 
-	public void checkItem(SymbolicAnimationFormulaItem item, ConstraintBasedTestCaseGenerator testCaseGenerator, boolean checkAll) {
+	public void checkItem(SymbolicAnimationFormulaItem item, ConstraintBasedTestCaseGenerator testCaseGenerator) {
 		final SymbolicAnimationFormulaItem currentItem = (SymbolicAnimationFormulaItem) getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			Object result;
