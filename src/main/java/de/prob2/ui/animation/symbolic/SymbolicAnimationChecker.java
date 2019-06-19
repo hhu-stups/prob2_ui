@@ -22,8 +22,13 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.application.Platform;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public class SymbolicAnimationChecker extends SymbolicExecutor {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationChecker.class);
 
 	@Inject
 	public SymbolicAnimationChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -35,9 +40,16 @@ public class SymbolicAnimationChecker extends SymbolicExecutor {
 	public void checkItem(SymbolicAnimationFormulaItem item, ConstraintBasedTestCaseGenerator testCaseGenerator, boolean checkAll) {
 		final SymbolicAnimationFormulaItem currentItem = (SymbolicAnimationFormulaItem) getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
-			TestCaseGeneratorResult result = testCaseGenerator.generateTestCases();
+			Object result;
+			try {
+				result = testCaseGenerator.generateTestCases();
+			} catch (RuntimeException e) {
+				LOGGER.error("Exception during generating test cases", e);
+				result = e;
+			}
+			final Object finalResult = result;
 			Platform.runLater(() -> {
-				((SymbolicAnimationResultHandler) resultHandler).handleTestCaseGenerationResult(currentItem, result);
+				((SymbolicAnimationResultHandler) resultHandler).handleTestCaseGenerationResult(currentItem, finalResult);
 				updateMachine(currentProject.getCurrentMachine());
 			});
 			currentJobThreads.remove(Thread.currentThread());
