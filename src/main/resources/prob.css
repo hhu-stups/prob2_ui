@@ -129,7 +129,7 @@
 /************************************************************************************
  * ColorPicker																	  *
  ************************************************************************************/
- .color-picker {
+.color-picker {
 	-fx-background-color: transparent;
 	-fx-text-fill: -prob-grey;
 	-fx-border-radius: 5.0;
@@ -140,12 +140,35 @@
 	-fx-background-radius: 5.0;
 }
 
+.table-view .color-picker,
+.list-view .color-picker,
+.tree-table-view .color-picker {
+	-fx-color-rect-width: 0.6em;
+	-fx-color-rect-height: 0.6em;
+}
+.table-view .color-picker > .arrow-button,
+.list-view .color-picker > .arrow-button,
+.tree-table-view .color-picker > .arrow-button {
+	-fx-padding: 0.02em 0.5em 0.02em 0em;
+}
+.table-view .color-picker > .label,
+.list-view .color-picker > .label,
+.tree-table-view .color-picker > .label {
+	-fx-padding: 0.02em 0.5em 0.02em 0.5em;
+	-fx-font-size: 0.8em;
+}
+.table-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
+.list-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
+.tree-table-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect {
+	-fx-stroke: -prob-grey;
+}
+
 /* =============== CUSTOM COLOR DIALOG =============== */
 .custom-color-dialog .button {
 	-fx-background-color: transparent;
 	-fx-border-color: -prob-grey;
 	-fx-border-radius: 6.0;
-	-fx-background-insets: 0.0,1.0,2.0;
+	-fx-background-insets: 2em;
 	-fx-text-fill: -prob-grey;
 	-fx-font-weight: bold;
 }
