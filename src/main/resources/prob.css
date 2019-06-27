@@ -197,24 +197,23 @@
  * ComboBox																		  *
  ************************************************************************************/
 .combo-box {
-	-fx-background-color: transparent;	
+	-fx-background-radius: 5.0;
+	-fx-background-color: transparent;
 	-fx-border-radius: 5.0;
 	-fx-border-color: -prob-grey;
 }
-
 .combo-box > .list-cell {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
     -fx-text-fill: -prob-grey;
-    -fx-background-radius: 5.0 0 0 5.0;
+    -fx-background-radius: 5.0em 0 0 5.0em;
 }
-
 .combo-box:hover {
 	-fx-background-color: -prob-grey-20;
-	-fx-background-radius: 5.0;
 }
+
 .combo-box-popup > .list-view {
 	-fx-background-color: -prob-grey-75;
-	-fx-background-radius: 3.0 3.0 3.0 3.0;
+	-fx-background-radius: 3.0em 3.0em 3.0em 3.0em;
 }
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
 	-fx-background: transparent;
@@ -222,6 +221,23 @@
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
 	-fx-background: -fx-accent;
 	-fx-background-color: -prob-white-20;
+}
+
+.table-view .combo-box,
+.list-view .combo-box,
+.tree-table-view .combo-box {
+	-fx-pref-height: 0;
+}
+.table-view .combo-box > .list-cell,
+.list-view .combo-box > .list-cell,
+.tree-table-view .combo-box > .list-cell {
+	-fx-font-size: 0.8em;
+	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
+}
+.table-view .combo-box-base > *.arrow-button,
+.list-view .combo-box-base > *.arrow-button,
+.tree-table-view .combo-box-base > *.arrow-button {
+	-fx-padding: 0.02em 0.5em 0.02em 0.25em;
 }
 
 /************************************************************************************
@@ -395,6 +411,28 @@
 .spinner .increment-arrow-button:pressed,
 .spinner .decrement-arrow-button:pressed {
 	-fx-background-color: -prob-aqua;
+}
+
+.table-view .spinner,
+.list-view .spinner,
+.tree-table-view .spinner {
+	-fx-pref-height: 0;
+}
+.table-view .spinner > .text-field,
+.list-view .spinner > .text-field,
+.tree-table-view .spinner > .text-field {
+	-fx-font-size: 0.8em;
+	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
+}
+.table-view .spinner .increment-arrow-button .increment-arrow,
+.list-view .spinner .increment-arrow-button .increment-arrow,
+.tree-table-view .spinner .increment-arrow-button .increment-arrow {
+	-fx-padding: 0.05em 0.25em 0.05em 0.25em;
+}
+.table-view .decrement-arrow-button .decrement-arrow,
+.list-view .decrement-arrow-button .decrement-arrow,
+.tree-table-view .spinner .decrement-arrow-button .decrement-arrow {
+	-fx-padding: 0.05em 0.25em 0.05em 0.25em;
 }
 
 /************************************************************************************
@@ -582,6 +620,13 @@
 
 .text-field-error {
 	-fx-border-color: red;
+}
+
+.table-view .text-field,
+.list-view .text-field,
+.tree-table-view .text-field {
+	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
+	-fx-font-size: 0.8em;
 }
 
 /************************************************************************************
