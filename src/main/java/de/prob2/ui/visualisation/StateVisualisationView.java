@@ -1,9 +1,5 @@
 package de.prob2.ui.visualisation;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +7,8 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
-import de.prob.Main;
 import de.prob.animator.command.ExecuteRightClickCommand;
 import de.prob.animator.command.GetAnimationMatrixForStateCommand;
-import de.prob.animator.command.GetImagesForMachineCommand;
 import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.statespace.State;
@@ -29,7 +23,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -43,7 +36,6 @@ public class StateVisualisationView extends AnchorPane {
 	@FXML
 	private GridPane visualisationGridPane;
 
-	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
@@ -52,19 +44,10 @@ public class StateVisualisationView extends AnchorPane {
 
 	@Inject
 	public StateVisualisationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace) {
-		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.machineImages = new HashMap<>();
-		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			this.machineImages.clear();
-			if (to != null) {
-				final GetImagesForMachineCommand cmd = new GetImagesForMachineCommand();
-				to.execute(cmd);
-				this.loadMachineImages(cmd.getImages());
-			}
-		});
 		stageManager.loadFXML(this, "state_visualisation_view.fxml");
 	}
 
@@ -79,6 +62,10 @@ public class StateVisualisationView extends AnchorPane {
 
 	public BooleanProperty visualisationPossibleProperty() {
 		return visualisationPossible;
+	}
+
+	public Map<Integer, Image> getMachineImages() {
+		return this.machineImages;
 	}
 
 	private void showMatrix(State state) {
@@ -157,42 +144,6 @@ public class StateVisualisationView extends AnchorPane {
 			return getTraceToState(trace.back(), state);
 		} else {
 			return null;
-		}
-	}
-
-	private void loadMachineImages(final Map<Integer, String> imageNames) {
-		final Path projectDirectory = currentProject.get().getLocation();
-		final Path machineFile = currentProject.getCurrentMachine().getPath();
-		final Path machineDirectory = projectDirectory.resolve(machineFile).getParent();
-		final Path proBDirectory = Paths.get(Main.getProBDirectory());
-		final List<Path> imageDirectories = Arrays.asList(machineDirectory, projectDirectory, proBDirectory);
-		
-		final List<String> notFoundImages = new ArrayList<>();
-		imageNames.forEach((number, name) -> {
-			boolean found = false;
-			for (final Path dir : imageDirectories) {
-				final Path imagePath = dir.resolve(name);
-				if (imagePath.toFile().exists()) {
-					this.machineImages.put(number, new Image(imagePath.toUri().toString()));
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				notFoundImages.add(name);
-			}
-		});
-		
-		if (!notFoundImages.isEmpty()) {
-			this.stageManager.makeAlert(
-				Alert.AlertType.WARNING,
-				"visualisation.stateVisualisationView.alerts.imagesNotFound.header",
-				"visualisation.stateVisualisationView.alerts.imagesNotFound.content",
-				String.join("\n", notFoundImages),
-				machineDirectory,
-				projectDirectory,
-				proBDirectory
-			).show();
 		}
 	}
 }
