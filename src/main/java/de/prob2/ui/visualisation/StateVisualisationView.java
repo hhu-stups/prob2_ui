@@ -21,21 +21,16 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 
 @FXMLInjected
-public class StateVisualisationView extends AnchorPane {
-	@FXML
-	private GridPane visualisationGridPane;
-
+public class StateVisualisationView extends GridPane {
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
@@ -52,7 +47,7 @@ public class StateVisualisationView extends AnchorPane {
 	}
 
 	public void visualiseState(State state) {
-		visualisationGridPane.getChildren().clear();
+		this.getChildren().clear();
 		visualisationPossible.set(false);
 		if (state == null || !state.isInitialised() || currentProject.getCurrentMachine() == null) {
 			return;
@@ -102,7 +97,7 @@ public class StateVisualisationView extends AnchorPane {
 				if (view != null) {
 					view.setOnContextMenuRequested(e -> getContextMenu(state, entry)
 						.show(view, e.getScreenX(), e.getScreenY()));
-					visualisationGridPane.add(view, c, r);
+					this.add(view, c, r);
 				}
 			}
 		}

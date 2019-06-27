@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
-<fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
-	<GridPane fx:id="visualisationGridPane" alignment="CENTER"
-				AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0"
-				AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />
+<?import de.prob2.ui.visualisation.StateVisualisationView?>
+<?import javafx.geometry.Insets?>
+<fx:root type="StateVisualisationView" xmlns:fx="http://javafx.com/fxml/1">
+	<padding>
+		<Insets topRightBottomLeft="10.0"/>
+	</padding>
 </fx:root>
 
