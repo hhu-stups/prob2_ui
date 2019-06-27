@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.visualisation.StateVisualisationView?>
-<?import javafx.geometry.Insets?>
-<fx:root type="StateVisualisationView" xmlns:fx="http://javafx.com/fxml/1">
-	<padding>
-		<Insets topRightBottomLeft="10.0"/>
-	</padding>
-</fx:root>
+<fx:root type="StateVisualisationView" styleClass="state-visualisation-view" xmlns:fx="http://javafx.com/fxml/1"/>
 

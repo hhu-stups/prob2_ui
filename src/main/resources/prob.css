@@ -1034,6 +1034,13 @@
 	-fx-text-fill: -prob-orange;
 }
 
+/* State Visualisation View */
+
+.state-visualisation-view {
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 0.2em;
+}
+
 /* ==================== STATS VIEW =================== */
 
 .stats-titel {
