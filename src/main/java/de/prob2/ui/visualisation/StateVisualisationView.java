@@ -1,9 +1,10 @@
 package de.prob2.ui.visualisation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -19,7 +20,6 @@ import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -29,10 +29,10 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -48,6 +48,7 @@ public class StateVisualisationView extends AnchorPane {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private BooleanProperty visualisationPossible = new SimpleBooleanProperty(false);
+	private final Map<Integer, Image> machineImages;
 
 	@Inject
 	public StateVisualisationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace) {
@@ -55,27 +56,32 @@ public class StateVisualisationView extends AnchorPane {
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.machineImages = new HashMap<>();
+		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
+			this.machineImages.clear();
+			if (to != null) {
+				final GetImagesForMachineCommand cmd = new GetImagesForMachineCommand();
+				to.execute(cmd);
+				this.loadMachineImages(cmd.getImages());
+			}
+		});
 		stageManager.loadFXML(this, "state_visualisation_view.fxml");
 	}
 
-	public void visualiseState(State state) throws FileNotFoundException {
+	public void visualiseState(State state) {
 		visualisationGridPane.getChildren().clear();
 		visualisationPossible.set(false);
 		if (state == null || !state.isInitialised() || currentProject.getCurrentMachine() == null) {
 			return;
 		}
-		StateSpace stateSpace = state.getStateSpace();
-		GetImagesForMachineCommand getImagesForMachineCommand = new GetImagesForMachineCommand();
-		stateSpace.execute(getImagesForMachineCommand);
-		Map<Integer, String> images = getImagesForMachineCommand.getImages();
-		showMatrix(state, images);
+		showMatrix(state);
 	}
 
 	public BooleanProperty visualisationPossibleProperty() {
 		return visualisationPossible;
 	}
 
-	private void showMatrix(State state, Map<Integer, String> images) throws FileNotFoundException {
+	private void showMatrix(State state) {
 		final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
 		state.getStateSpace().execute(cmd);
 		final List<List<AnimationMatrixEntry>> matrix = cmd.getMatrix();
@@ -94,7 +100,12 @@ public class StateVisualisationView extends AnchorPane {
 				if (entry == null) {
 					view = null;
 				} else if (entry instanceof AnimationMatrixEntry.Image) {
-					view = new ImageView(getImage(images.get(((AnimationMatrixEntry.Image)entry).getImageNumber())));
+					final int number = ((AnimationMatrixEntry.Image)entry).getImageNumber(); 
+					if (this.machineImages.containsKey(number)) {
+						view = new ImageView(this.machineImages.get(number));
+					} else {
+						view = null;
+					}
 				} else if (entry instanceof AnimationMatrixEntry.Text) {
 					view = new Label(((AnimationMatrixEntry.Text)entry).getText());
 				} else {
@@ -149,36 +160,39 @@ public class StateVisualisationView extends AnchorPane {
 		}
 	}
 
-	private Image getImage(String imageURL) throws FileNotFoundException {
-		final Path projectFolder = currentProject.get().getLocation();
-		// look in machine folder
+	private void loadMachineImages(final Map<Integer, String> imageNames) {
+		final Path projectDirectory = currentProject.get().getLocation();
 		final Path machineFile = currentProject.getCurrentMachine().getPath();
-		final Path machineFolder = projectFolder.resolve(machineFile).getParent();
-		File imagePath = machineFolder.resolve(imageURL).toFile();
-		final File imageInMachineFolder = imagePath;
-		// look in project folder
-		if (!imageInMachineFolder.exists()) {
-			imagePath = projectFolder.resolve(imageURL).toFile();
-			final File imageInProjectFolder = imagePath;
-			if (!imageInProjectFolder.exists()) {
-				// look in ProB folder
-				imagePath = Paths.get(Main.getProBDirectory()).resolve(imageURL).toFile();
-				final File imageInProbFolder = imagePath;
-				if (!imageInProbFolder.exists()) {
-					stageManager.makeAlert(AlertType.WARNING,
-									"visualisation.stateVisualisationView.alerts.visualisationNotPossible.header",
-									"visualisation.stateVisualisationView.alerts.visualisationNotPossible.content",
-									imagePath.getName(), imageInMachineFolder.getParent(), imageInProjectFolder.getParent(),
-									imageInProbFolder.getParent())
-							.showAndWait();
-					visualisationPossible.set(false);
-					throw new FileNotFoundException(String.format(
-							"Image %s not found in machine folder (%s) and project folder (%s) and ProB folder (%s)",
-							imagePath.getName(), imageInMachineFolder.getParent(), imageInProjectFolder.getParent(),
-							imageInProbFolder.getParent()));
+		final Path machineDirectory = projectDirectory.resolve(machineFile).getParent();
+		final Path proBDirectory = Paths.get(Main.getProBDirectory());
+		final List<Path> imageDirectories = Arrays.asList(machineDirectory, projectDirectory, proBDirectory);
+		
+		final List<String> notFoundImages = new ArrayList<>();
+		imageNames.forEach((number, name) -> {
+			boolean found = false;
+			for (final Path dir : imageDirectories) {
+				final Path imagePath = dir.resolve(name);
+				if (imagePath.toFile().exists()) {
+					this.machineImages.put(number, new Image(imagePath.toUri().toString()));
+					found = true;
+					break;
 				}
 			}
+			if (!found) {
+				notFoundImages.add(name);
+			}
+		});
+		
+		if (!notFoundImages.isEmpty()) {
+			this.stageManager.makeAlert(
+				Alert.AlertType.WARNING,
+				"visualisation.stateVisualisationView.alerts.imagesNotFound.header",
+				"visualisation.stateVisualisationView.alerts.imagesNotFound.content",
+				String.join("\n", notFoundImages),
+				machineDirectory,
+				projectDirectory,
+				proBDirectory
+			).show();
 		}
-		return new Image(imagePath.toURI().toString());
 	}
 }

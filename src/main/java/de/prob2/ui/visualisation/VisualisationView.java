@@ -1,6 +1,5 @@
 package de.prob2.ui.visualisation;
 
-import java.io.FileNotFoundException;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -55,23 +54,12 @@ public class VisualisationView extends AnchorPane {
 		probLogoStackPane.visibleProperty().bind(currentStateVisualisation.visualisationPossibleProperty().not());
 		previousStateVBox.managedProperty().bind(previousStateVisualisation.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
-		
-		String imageNotFoundPlaceholder = bundle.getString("visualisation.view.placeholder.imageNotFound");
 
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
-			if(placeholderLabel.getText().equals(imageNotFoundPlaceholder)) {
-				return;
+			currentStateVisualisation.visualiseState(to);
+			if (to != null && currentTrace.canGoBack()) {
+				previousStateVisualisation.visualiseState(currentTrace.get().getPreviousState());
 			}
-			try {
-				currentStateVisualisation.visualiseState(to);
-				if (to != null && currentTrace.canGoBack()) {
-					previousStateVisualisation.visualiseState(currentTrace.get().getPreviousState());
-				}
-			} catch (FileNotFoundException e) {
-				LOGGER.warn("Failed to open images for visualisation", e);
-				placeholderLabel.setText(imageNotFoundPlaceholder);
-			}
-
 		});
 
 		currentTrace.addListener((observable, from, to) -> {
@@ -79,7 +67,7 @@ public class VisualisationView extends AnchorPane {
 				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
 			} else if (!currentTrace.getCurrentState().isInitialised()) {
 				placeholderLabel.setText(bundle.getString("common.notInitialised"));
-			} else if (!placeholderLabel.getText().equals(imageNotFoundPlaceholder)) {
+			} else {
 				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
 			}
 		});
