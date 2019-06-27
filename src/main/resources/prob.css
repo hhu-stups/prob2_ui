@@ -712,15 +712,7 @@
 .table-row-cell:disabled {
 	-fx-text-fill: -prob-lightgrey;
 }
-.tree-table-row-cell:focused .check-box > .box {
-	-fx-border-color: white;
-}
-.tree-table-row-cell:focused .check-box > .box > .mark {
-	-fx-background-color: none;
-}
-.tree-table-row-cell:focused .check-box:selected > .box > .mark {
-	-fx-background-color: white;
-}
+
 .table-view .column-header-background,
 .tree-table-view > .column-header-background {
 	-fx-background-color: white;
