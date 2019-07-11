@@ -1,12 +1,8 @@
 package de.prob2.ui.animation.tracereplay;
 
-import java.nio.file.Path;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -23,7 +19,6 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -31,14 +26,27 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-
 import org.controlsfx.glyphfont.FontAwesome;
+
+import java.nio.file.Path;
+import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -236,8 +244,12 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			});
 
 			row.setOnMouseClicked(event -> {
+				ReplayTrace item = row.getItem();
+				if(item == null) {
+					return;
+				}
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					this.traceChecker.check(row.getItem(), true);
+					this.traceChecker.check(item, true);
 				}
 			});
 
