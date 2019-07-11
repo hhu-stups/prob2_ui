@@ -1013,7 +1013,11 @@
 
 /* =================== STATES VIEW =================== */
 
-.changed .tree-table-cell {
+.tree-table-row-cell.changed {
+	-fx-background-color: lightblue;
+}
+
+.tree-table-row-cell.changed .tree-table-cell {
 	-fx-font-weight: bold;
 }
 
