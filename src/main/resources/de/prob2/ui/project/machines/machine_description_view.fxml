@@ -9,6 +9,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.HBox?>
+<?import de.prob2.ui.internal.Spacer?>
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1"
 		 stylesheets="@/prob.css">
 	<fx:define>
@@ -17,11 +19,22 @@
 	<VBox spacing="5" AnchorPane.topAnchor="6"
 		AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
 		AnchorPane.rightAnchor="0">
-		<Label fx:id="titelLabel" styleClass="details-title">
-			<VBox.margin>
-				<Insets left="10" right="10" />
-			</VBox.margin>
-		</Label>
+		<HBox spacing="5">
+			<Label fx:id="titelLabel" styleClass="details-title" >
+				<HBox.margin>
+					<Insets left="10"/>
+				</HBox.margin>
+			</Label>
+			<Spacer/>
+			<Button onAction="#closeMachineView">
+				<graphic>
+					<BindableGlyph textFill="#555560" fontFamily="FontAwesome" icon="CLOSE" bindableFontSize="${fontSize.fontSize}"/>
+				</graphic>
+				<HBox.margin>
+					<Insets top="-5"/>
+				</HBox.margin>
+			</Button>
+		</HBox>
 		<AnchorPane styleClass="border" VBox.vgrow="always">
 			<ScrollPane AnchorPane.leftAnchor="0"
 				AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
@@ -34,10 +47,5 @@
 			</ScrollPane>
 		</AnchorPane>
 	</VBox>
-	<Button AnchorPane.topAnchor="2.0" AnchorPane.rightAnchor="2.0" onAction="#closeMachineView">
-		<graphic>
-			<BindableGlyph textFill="#555560" fontFamily="FontAwesome" icon="CLOSE" bindableFontSize="${fontSize.fontSize}"/>
-		</graphic>
-	</Button>
 </fx:root>
 
