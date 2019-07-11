@@ -80,6 +80,9 @@ public class MachinesTab extends Tab {
 						return;
 					}
 					startMachine(this.machineProperty.get());
+				} else if(showMachineView && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 1) {
+					showMachineView(this.machineProperty.get());
+					this.updateSelected(true);
 				}
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
@@ -188,8 +191,11 @@ public class MachinesTab extends Tab {
 		}
 
 		private void showMachineView(final Machine machine) {
-			closeMachineView();
+			if(showMachineView) {
+				closeMachineView();
+			}
 			splitPane.getItems().add(0, new MachineDescriptionView(machine, stageManager, injector));
+			showMachineView = true;
 		}
 
 		private boolean confirmSave() {
@@ -211,6 +217,8 @@ public class MachinesTab extends Tab {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final Injector injector;
+
+	private boolean showMachineView;
 
 	@Inject
 	private MachinesTab(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
@@ -310,9 +318,10 @@ public class MachinesTab extends Tab {
 	}
 
 	void closeMachineView() {
-		if (splitPane.getItems().get(0) instanceof MachineDescriptionView) {
+		if (showMachineView) {
 			splitPane.getItems().remove(0);
 			machinesList.getSelectionModel().clearSelection();
+			showMachineView = false;
 		}
 	}
 	
