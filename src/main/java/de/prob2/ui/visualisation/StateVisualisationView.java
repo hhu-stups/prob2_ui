@@ -16,7 +16,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.property.BooleanProperty;
@@ -32,15 +31,13 @@ import javafx.scene.layout.GridPane;
 @FXMLInjected
 public class StateVisualisationView extends GridPane {
 	private final ResourceBundle bundle;
-	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private BooleanProperty visualisationPossible = new SimpleBooleanProperty(false);
 	private final Map<Integer, Image> machineImages;
 
 	@Inject
-	public StateVisualisationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+	public StateVisualisationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
 		this.bundle = bundle;
-		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.machineImages = new HashMap<>();
 		stageManager.loadFXML(this, "state_visualisation_view.fxml");
@@ -49,10 +46,16 @@ public class StateVisualisationView extends GridPane {
 	public void visualiseState(State state) {
 		this.getChildren().clear();
 		visualisationPossible.set(false);
-		if (state == null || !state.isInitialised() || currentProject.getCurrentMachine() == null) {
+		if (state == null) {
 			return;
 		}
-		showMatrix(state);
+		final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
+		state.getStateSpace().execute(cmd);
+		final List<List<AnimationMatrixEntry>> matrix = cmd.getMatrix();
+		if (!matrix.isEmpty()) {
+			visualisationPossible.set(true);
+			showMatrix(state, matrix);
+		}
 	}
 
 	public BooleanProperty visualisationPossibleProperty() {
@@ -63,17 +66,7 @@ public class StateVisualisationView extends GridPane {
 		return this.machineImages;
 	}
 
-	private void showMatrix(State state) {
-		final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
-		state.getStateSpace().execute(cmd);
-		final List<List<AnimationMatrixEntry>> matrix = cmd.getMatrix();
-		if (matrix.isEmpty()) {
-			visualisationPossible.set(false);
-			return;
-		} else {
-			visualisationPossible.set(true);
-		}
-
+	private void showMatrix(final State state, final List<List<AnimationMatrixEntry>> matrix) {
 		for (int r = 0; r < matrix.size(); r++) {
 			final List<AnimationMatrixEntry> row = matrix.get(r);
 			for (int c = 0; c < row.size(); c++) {

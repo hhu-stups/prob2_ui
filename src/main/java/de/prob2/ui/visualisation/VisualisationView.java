@@ -65,20 +65,22 @@ public class VisualisationView extends AnchorPane {
 		previousStateVBox.managedProperty().bind(previousStateVisualisation.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
-		currentTrace.currentStateProperty().addListener((observable, from, to) -> {
-			currentStateVisualisation.visualiseState(to);
-			if (to != null && currentTrace.canGoBack()) {
-				previousStateVisualisation.visualiseState(currentTrace.get().getPreviousState());
-			}
-		});
-
 		currentTrace.addListener((observable, from, to) -> {
 			if(to == null) {
 				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
-			} else if (!currentTrace.getCurrentState().isInitialised()) {
-				placeholderLabel.setText(bundle.getString("common.notInitialised"));
+				currentStateVisualisation.visualiseState(null);
+				previousStateVisualisation.visualiseState(null);
 			} else {
-				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
+				if (!currentTrace.getCurrentState().isInitialised()) {
+					placeholderLabel.setText(bundle.getString("common.notInitialised"));
+				} else {
+					placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
+				}
+				
+				currentStateVisualisation.visualiseState(to.getCurrentState());
+				if (to.canGoBack()) {
+					previousStateVisualisation.visualiseState(to.getPreviousState());
+				}
 			}
 		});
 
