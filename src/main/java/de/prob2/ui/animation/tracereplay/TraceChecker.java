@@ -13,7 +13,9 @@ import java.util.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.hhu.stups.prob.translator.BValue;
+import de.hhu.stups.prob.translator.Translator;
+import de.hhu.stups.prob.translator.exceptions.TranslationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
@@ -24,8 +26,6 @@ import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob.translator.Translator;
-import de.prob.translator.types.BObject;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
@@ -223,13 +223,13 @@ public class TraceChecker {
 		if (machineOperationInfo != null && ouputParameters != null) {
 			List<String> outputParameterNames = machineOperationInfo.getOutputParameterNames();
 			try {
-				List<BObject> translatedReturnValues = trans.getTranslatedReturnValues();
+				List<BValue> translatedReturnValues = trans.getTranslatedReturnValues();
 				for (int i = 0; i < outputParameterNames.size(); i++) {
 					String outputParamName = outputParameterNames.get(i);
-					BObject paramValueFromTransition = translatedReturnValues.get(i);
+					BValue paramValueFromTransition = translatedReturnValues.get(i);
 					if (ouputParameters.containsKey(outputParamName)) {
 						String stringValue = ouputParameters.get(outputParamName);
-						BObject bValue = Translator.translate(stringValue);
+						BValue bValue = Translator.translate(stringValue);
 						if (!bValue.equals(paramValueFromTransition)) {
 							// do we need further checks here?
 							// because the value translator does not
@@ -243,10 +243,10 @@ public class TraceChecker {
 					}
 
 				}
-			} catch (BCompoundException e) {
+			} catch (TranslationException e) {
 				Platform.runLater(
 						() -> stageManager
-								.makeExceptionAlert(e.getFirstException(),
+								.makeExceptionAlert(e,
 										TRACE_REPLAY_ALERT_HEADER,
 										"animation.tracereplay.traceChecker.alerts.traceReplayError.content")
 								.showAndWait());
