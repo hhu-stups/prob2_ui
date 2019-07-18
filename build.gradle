@@ -179,11 +179,13 @@ if( rootProject == project) {
 	}
 }
 
+final helpScript = "./help.sh"
 final helpDir = file("src/main/resources/help")
 task createHelp(type: Exec) {
+	inputs.file(helpScript)
 	inputs.dir(helpDir)
 	outputs.dir(helpDir)
-	commandLine './help.sh'
+	commandLine(helpScript)
 }
 
 task cleanHelp(type: Delete) {
