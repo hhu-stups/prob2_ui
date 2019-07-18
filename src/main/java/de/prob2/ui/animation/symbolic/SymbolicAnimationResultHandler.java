@@ -173,8 +173,8 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		}
 	}
 
-	public void handleTestCaseGenerationResult(SymbolicAnimationFormulaItem item, Object result) {
-		boolean doSave = item.getChecked() == Checked.NOT_CHECKED;
+	public void handleTestCaseGenerationResult(SymbolicAnimationFormulaItem item, Object result, boolean checkAll) {
+		boolean doSave = item.getChecked() == Checked.NOT_CHECKED && !checkAll;
 		item.getExamples().clear();
 		if(parseErrors.contains(result.getClass())) {
 			showCheckingResult(item, Checked.PARSE_ERROR, "animation.symbolic.resultHandler.testcasegeneration.result.error");

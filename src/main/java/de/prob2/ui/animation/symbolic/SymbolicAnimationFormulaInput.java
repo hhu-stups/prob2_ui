@@ -57,7 +57,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				break;
 			case MCDC:
 				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth()), SymbolicExecutionType.MCDC);
-				symbolicAnimationFormulaHandler.generateTestCases(formulaItem);
+				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			case COVERED_OPERATIONS:
 				List<String> operations = operationCoverageInputView.getOperations();
@@ -69,7 +69,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 					break;
 				}
 				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractOperationCoverageFormula(operations, operationCoverageInputView.getDepth()), SymbolicExecutionType.COVERED_OPERATIONS);
-				symbolicAnimationFormulaHandler.generateTestCases(formulaItem);
+				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			default:
 				break;

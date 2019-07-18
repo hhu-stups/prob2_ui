@@ -1,21 +1,15 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
+import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.statespace.StateSpace;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -24,7 +18,10 @@ import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.AbstractResultHandler;
 
-import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Singleton
 public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<SymbolicAnimationFormulaItem> {
@@ -82,7 +79,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 
-	public void generateTestCases(SymbolicAnimationFormulaItem item) {
+	public void generateTestCases(SymbolicAnimationFormulaItem item, boolean checkAll) {
 		AbstractModel model = currentTrace.getModel();
 		if(!(model instanceof ClassicalBModel)) {
 			return;
@@ -90,7 +87,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		ClassicalBModel bModel = (ClassicalBModel) model;
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, extractor.extractRawFormula(item.getCode()), Integer.parseInt(extractor.extractDepth(item.getCode())), new ArrayList<>());
-		symbolicChecker.checkItem(item, testCaseGenerator);
+		symbolicChecker.checkItem(item, testCaseGenerator, checkAll);
 	}
 	
 	public void handleItem(SymbolicAnimationFormulaItem item, boolean checkAll) {
@@ -106,10 +103,10 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 				findValidState(item, checkAll);
 				break;
 			case MCDC:
-				generateTestCases(item);
+				generateTestCases(item, checkAll);
 				break;
 			case COVERED_OPERATIONS:
-				generateTestCases(item);
+				generateTestCases(item, checkAll);
 				break;
 			default:
 				break;
