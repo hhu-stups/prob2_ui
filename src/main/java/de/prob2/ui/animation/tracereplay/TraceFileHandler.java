@@ -31,6 +31,18 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		this.FILE_ENDING = "*.prob2trace";
 	}
 
+	private void deleteFile(File file) throws IOException {
+		if(file.isDirectory() && file.exists()) {
+			String[] children = file.list();
+			if(children != null) {
+				for (String child : children) {
+					deleteFile(new File(file, child));
+				}
+			}
+		}
+		Files.deleteIfExists(Paths.get(file.getAbsolutePath()));
+	}
+
 	public void save(List<PersistentTrace> traces, Machine machine) {
 		File file = showSaveDialogForManyFiles(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"), currentProject.getLocation().toFile());
 		if(file == null) {
@@ -38,6 +50,7 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		}
 		int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 		try {
+			deleteFile(file);
 			Files.createDirectory(Paths.get(file.getAbsolutePath()));
 		} catch (IOException e) {
 			LOGGER.warn("Failed to create directory", e);

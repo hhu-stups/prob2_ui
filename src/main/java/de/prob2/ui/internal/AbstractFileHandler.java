@@ -74,7 +74,7 @@ public abstract class AbstractFileHandler<T> {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(title);
 		fileChooser.setInitialDirectory(initialDirectory);
-		return fileChooser.showSaveDialog(stageManager.getMainStage());
+		return fileChooser.showSaveDialog(stageManager.getCurrent());
 	}
 	
 	protected void writeToFile(File file, T data, boolean headerWithMachineName) {
