@@ -22,7 +22,7 @@ public final class BetterTabPane extends TabPane {
 		final Side tabPosition = this.getSide();
 		return Side.TOP.equals(tabPosition) || Side.BOTTOM.equals(tabPosition);
 	}
-	
+
 	private Region getTabHeaderArea() {
 		final Node tabHeaderArea = this.lookup(".tab-header-area");
 		return tabHeaderArea instanceof Region ? (Region)tabHeaderArea : null;

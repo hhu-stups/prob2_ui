@@ -1,5 +1,14 @@
 package de.prob2.ui.internal;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonStreamParser;
+import de.prob2.ui.prob2fx.CurrentProject;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import org.slf4j.Logger;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,18 +21,6 @@ import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonStreamParser;
-
-import de.prob2.ui.prob2fx.CurrentProject;
-
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-
-import org.slf4j.Logger;
 
 public abstract class AbstractFileHandler<T> {
 	
@@ -71,6 +68,15 @@ public abstract class AbstractFileHandler<T> {
 		fileChooser.setInitialFileName(initialFileName);
 		fileChooser.getExtensionFilters().add(filter);
 		return fileChooser.showSaveDialog(stageManager.getCurrent());
+	}
+
+	protected File showSaveDialogForManyFiles(String title, File initialDirectory) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(title);
+		fileChooser.setInitialDirectory(initialDirectory);
+		//fileChooser.setInitialFileName(initialFileName);
+		//fileChooser.getExtensionFilters().add(filter);
+		return fileChooser.showSaveDialog(stageManager.getMainStage());
 	}
 	
 	protected void writeToFile(File file, T data, boolean headerWithMachineName) {

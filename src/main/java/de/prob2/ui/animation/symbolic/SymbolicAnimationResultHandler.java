@@ -1,30 +1,27 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
-import de.prob.exception.CliError;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
-import de.prob.check.CheckError;
-import de.prob.exception.ProBError;
-import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.command.NoTraceFoundException;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.check.CheckError;
 import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.exception.CliError;
+import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
@@ -36,6 +33,12 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 @Singleton
 public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
@@ -51,13 +54,17 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	protected ArrayList<Class<?>> interrupted;
 
 	private final StageManager stageManager;
+	private final CurrentProject currentProject;
+	private final Injector injector;
 
 	
 	@Inject
-	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector) {
+	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final Injector injector) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.injector = injector;
 		this.success = new ArrayList<>();
 		this.parseErrors = new ArrayList<>();
 		this.interrupted = new ArrayList<>();
@@ -167,6 +174,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	}
 
 	public void handleTestCaseGenerationResult(SymbolicAnimationFormulaItem item, Object result) {
+		boolean doSave = item.getChecked() == Checked.NOT_CHECKED;
 		item.getExamples().clear();
 		if(parseErrors.contains(result.getClass())) {
 			showCheckingResult(item, Checked.PARSE_ERROR, "animation.symbolic.resultHandler.testcasegeneration.result.error");
@@ -185,6 +193,19 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.found");
 		}
 		item.getExamples().addAll(traces);
+		if(!item.getExamples().isEmpty() && doSave) {
+			saveTraces(item);
+		}
+	}
+
+	private void saveTraces(SymbolicAnimationFormulaItem item) {
+		List<PersistentTrace> persistentTraces = item.getExamples().stream()
+				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
+				.collect(Collectors.toList());
+		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
+		if (currentTrace.get() != null) {
+			traceSaver.save(persistentTraces, currentProject.getCurrentMachine());
+		}
 	}
 	
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
