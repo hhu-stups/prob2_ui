@@ -198,7 +198,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		}
 	}
 
-	private void saveTraces(SymbolicAnimationFormulaItem item) {
+	public void saveTraces(SymbolicAnimationFormulaItem item) {
 		List<PersistentTrace> persistentTraces = item.getExamples().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
 				.collect(Collectors.toList());

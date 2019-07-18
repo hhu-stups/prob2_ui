@@ -74,8 +74,6 @@ public abstract class AbstractFileHandler<T> {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(title);
 		fileChooser.setInitialDirectory(initialDirectory);
-		//fileChooser.setInitialFileName(initialFileName);
-		//fileChooser.getExtensionFilters().add(filter);
 		return fileChooser.showSaveDialog(stageManager.getMainStage());
 	}
 	
