@@ -241,8 +241,7 @@ public class MagicGraphFX implements MagicGraphI {
 	private Model getModel(String caption, BValue bValue) {
 		Model model = new Model();
 		if (bValue instanceof BTuple) {
-			@SuppressWarnings("unchecked")
-			BTuple tuple = (BTuple<BValue, BValue>) bValue;
+			BTuple<?, ?> tuple = (BTuple<?, ?>) bValue;
 			model.addEdge(new Edge(new Vertex(tuple.getFirst().toString()), new Vertex(tuple.getSecond().toString()),
 				caption));
 		} else if(bValue instanceof BSet<?>) {
