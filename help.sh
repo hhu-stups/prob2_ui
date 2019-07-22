@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -o errexit
+set -o nounset
+set -o pipefail
+
 convert_single() {
 	local file="${1}"
 	local format="${2}"
