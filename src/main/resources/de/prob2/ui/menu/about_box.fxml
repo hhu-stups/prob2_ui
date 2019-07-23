@@ -21,6 +21,7 @@
 				<Label fx:id="kernelInfoLabel" textAlignment="CENTER"/>
 				<Label fx:id="cliInfoLabel" textAlignment="CENTER"/>
 				<Label fx:id="javaInfoLabel" textAlignment="CENTER"/>
+				<Label fx:id="javaFxInfoLabel" textAlignment="CENTER"/>
 			</VBox>
 		</Scene>
 	</scene>
