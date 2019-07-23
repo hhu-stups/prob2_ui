@@ -65,7 +65,7 @@ public final class StageManager {
 	}
 
 	private static final String STYLESHEET = "prob.css";
-	private static final Image ICON = new Image("prob_128.png");
+	private static final Image ICON = new Image(StageManager.class.getResource("/de/prob2/ui/ProB_Icon.png").toExternalForm());
 	private static final String PROJECT_FILE_ENDING = "*.prob2project";
 
 	private final Injector injector;
