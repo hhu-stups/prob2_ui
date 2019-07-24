@@ -227,7 +227,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				DotView formulaStage = injector.getInstance(DotView.class);
-				formulaStage.visualizeFormula((IEvalElement) ((ASTFormula) row.getItem().getContents()).getFormula());
+				formulaStage.visualizeFormula(((ASTFormula) row.getItem().getContents()).getFormula());
 				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
