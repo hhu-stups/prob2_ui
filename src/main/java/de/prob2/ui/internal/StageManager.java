@@ -379,6 +379,7 @@ public final class StageManager {
 				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.csp"), Machine.Type.CSP.getExtensionsAsString()), Machine.Type.CSP.getExtensions()),
 				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.tla"), Machine.Type.TLA.getExtensionsAsString()), Machine.Type.TLA.getExtensions()),
 				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.xtl"), Machine.Type.XTL.getExtensionsAsString()), Machine.Type.XTL.getExtensions()),
+				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.z"), Machine.Type.Z.getExtensionsAsString()), Machine.Type.Z.getExtensions()),
 				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.alloy"), Machine.Type.ALLOY.getExtensionsAsString()), Machine.Type.ALLOY.getExtensions())
 			);
 		}
@@ -435,6 +436,7 @@ public final class StageManager {
 			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.csp"), Machine.Type.CSP.getExtensionsAsString()), Machine.Type.CSP.getExtensions()),
 			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.tla"), Machine.Type.TLA.getExtensionsAsString()), Machine.Type.TLA.getExtensions()),
 			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.xtl"), Machine.Type.XTL.getExtensionsAsString()), Machine.Type.XTL.getExtensions()),
+			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.z"), Machine.Type.Z.getExtensionsAsString()), Machine.Type.Z.getExtensions()),
 			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.alloy"), Machine.Type.ALLOY.getExtensionsAsString()), Machine.Type.ALLOY.getExtensions())
 		);
 		

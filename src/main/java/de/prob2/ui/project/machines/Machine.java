@@ -49,6 +49,7 @@ public class Machine {
 		TLA(Api::tla_load, new String[] {"*.tla"}),
 		BRULES(Api::brules_load, new String[] {"*.rmch"}),
 		XTL(Api::xtl_load, new String[] {"*.P", "*.pl"}),
+		Z(Api::z_load, new String[] {"*.zed", "*.tex"}),
 		ALLOY(Api::alloy_load, new String[] {"*.als"}),
 		;
 		
