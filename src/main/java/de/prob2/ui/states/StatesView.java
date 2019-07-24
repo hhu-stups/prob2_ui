@@ -215,8 +215,7 @@ public final class StatesView extends StackPane {
 		});
 
 		copyItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
-				.or(currentTrace.currentStateProperty().initializedProperty().not()));
+				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty()));
 
 		this.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), () -> {
 			if (tv.getSelectionModel().getSelectedItem() == null) {
