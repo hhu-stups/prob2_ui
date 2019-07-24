@@ -23,14 +23,12 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 	
 	private final ResourceBundle bundle;
 	private final Map<IEvalElement, AbstractEvalResult> values;
-	private final boolean isCurrent;
 	
-	ValueCell(final ResourceBundle bundle, final Map<IEvalElement, AbstractEvalResult> values, final boolean isCurrent) {
+	ValueCell(final ResourceBundle bundle, final Map<IEvalElement, AbstractEvalResult> values) {
 		super();
 		
 		this.bundle = bundle;
 		this.values = values;
-		this.isCurrent = isCurrent;
 		
 		this.setTextOverrun(OverrunStyle.CENTER_WORD_ELLIPSIS);
 	}

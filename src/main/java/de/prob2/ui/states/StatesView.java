@@ -134,8 +134,8 @@ public final class StatesView extends StackPane {
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell());
-		this.tvValue.setCellFactory(col -> new ValueCell(bundle, this.currentValues, true));
-		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle, this.previousValues, false));
+		this.tvValue.setCellFactory(col -> new ValueCell(bundle, this.currentValues));
+		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle, this.previousValues));
 
 		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings
 				.createObjectBinding(data.getValue()::getValue, this.currentTrace);
