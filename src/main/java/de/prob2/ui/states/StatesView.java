@@ -208,14 +208,25 @@ public final class StatesView extends StackPane {
 		final MenuItem copyItem = new MenuItem(bundle.getString("states.statesView.contextMenu.items.copyName"));
 
 		copyItem.setOnAction(e -> {
+			final Object contents = row.getItem().getContents();
+			final String text;
+			if (contents instanceof String) {
+				text = (String)contents;
+			} else if (contents instanceof ASTCategory) {
+				text = ((ASTCategory)contents).getName();
+			} else if (contents instanceof ASTFormula) {
+				text = ((ASTFormula)contents).getFormula(FormulaExpand.EXPAND).getCode();
+			} else {
+				throw new AssertionError("Unhandled node type: " + contents.getClass());
+			}
+			
 			final Clipboard clipboard = Clipboard.getSystemClipboard();
 			final ClipboardContent content = new ClipboardContent();
-			content.putString(((ASTFormula) row.getItem().getContents()).getFormula().getCode());
+			content.putString(text);
 			clipboard.setContent(content);
 		});
 
-		copyItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty()));
+		copyItem.disableProperty().bind(row.itemProperty().isNull());
 
 		this.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), () -> {
 			if (tv.getSelectionModel().getSelectedItem() == null) {
