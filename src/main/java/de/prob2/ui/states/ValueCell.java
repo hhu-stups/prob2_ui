@@ -9,10 +9,10 @@ import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
-import de.prob.animator.domainobjects.StateError;
 import de.prob.animator.domainobjects.WDError;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
+import de.prob.animator.prologast.PrologASTNode;
 
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
@@ -45,16 +45,13 @@ final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
 			this.setText(null);
 			this.setGraphic(null);
 		} else {
-			final Object contents = item.getContents();
+			final PrologASTNode contents = item.getContents();
 			
-			if (contents instanceof String || contents instanceof ASTCategory) {
+			if (contents instanceof ASTCategory) {
 				this.setText(null);
 			} else if (contents instanceof ASTFormula) {
 				final AbstractEvalResult result = this.values.get(((ASTFormula)contents).getFormula());
 				checkResult(result);
-			} else if (contents instanceof StateError) {
-				this.setText(this.isCurrent ? ((StateError)contents).getShortDescription() : null);
-				this.getStyleClass().add(ERROR);
 			} else {
 				throw new IllegalArgumentException("Don't know how to show the value of a " + contents.getClass() + " instance");
 			}

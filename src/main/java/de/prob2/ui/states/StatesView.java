@@ -2,6 +2,7 @@ package de.prob2.ui.states;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,12 +72,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class StatesView extends StackPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatesView.class);
-	private static final TreeItem<StateItem<?>> LOADING_ITEM;
-
-	static {
-		LOADING_ITEM = new TreeItem<>(new StateItem<>("Loading...", false));
-		LOADING_ITEM.getChildren().add(new TreeItem<>(new StateItem<>("Loading", false)));
-	}
 
 	@FXML
 	private TextField filterState;
@@ -148,7 +143,12 @@ public final class StatesView extends StackPane {
 		this.tvValue.setCellValueFactory(cellValueFactory);
 		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
 
-		this.tv.getRoot().setValue(new StateItem<>("Machine (this root item should be invisible)", false));
+		this.tv.getRoot().setValue(new StateItem<>(new ASTCategory(
+			Collections.emptyList(),
+			"Machine (this root item should be invisible)",
+			true,
+			false
+		), false));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updater.execute(() -> {
 			if (to == null) {
@@ -208,11 +208,9 @@ public final class StatesView extends StackPane {
 		final MenuItem copyItem = new MenuItem(bundle.getString("states.statesView.contextMenu.items.copyName"));
 
 		copyItem.setOnAction(e -> {
-			final Object contents = row.getItem().getContents();
+			final PrologASTNode contents = row.getItem().getContents();
 			final String text;
-			if (contents instanceof String) {
-				text = (String)contents;
-			} else if (contents instanceof ASTCategory) {
+			if (contents instanceof ASTCategory) {
 				text = ((ASTCategory)contents).getName();
 			} else if (contents instanceof ASTFormula) {
 				text = ((ASTFormula)contents).getFormula(FormulaExpand.EXPAND).getCode();
@@ -232,7 +230,7 @@ public final class StatesView extends StackPane {
 			if (tv.getSelectionModel().getSelectedItem() == null) {
 				return;
 			}
-			Object formula = tv.getSelectionModel().getSelectedItem().getValue().getContents();
+			final PrologASTNode formula = tv.getSelectionModel().getSelectedItem().getValue().getContents();
 			if (formula instanceof ASTFormula) {
 				final Clipboard clipboard = Clipboard.getSystemClipboard();
 				final ClipboardContent content = new ClipboardContent();

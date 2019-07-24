@@ -2,7 +2,9 @@ package de.prob2.ui.states;
 
 import java.util.Objects;
 
-public class StateItem<T> {
+import de.prob.animator.prologast.PrologASTNode;
+
+public class StateItem<T extends PrologASTNode> {
 	private final T contents;
 	private final boolean errored;
 	
