@@ -207,35 +207,13 @@ public final class StatesView extends StackPane {
 
 		final MenuItem copyItem = new MenuItem(bundle.getString("states.statesView.contextMenu.items.copyName"));
 
-		copyItem.setOnAction(e -> {
-			final PrologASTNode contents = row.getItem().getContents();
-			final String text;
-			if (contents instanceof ASTCategory) {
-				text = ((ASTCategory)contents).getName();
-			} else if (contents instanceof ASTFormula) {
-				text = ((ASTFormula)contents).getFormula(FormulaExpand.EXPAND).getCode();
-			} else {
-				throw new AssertionError("Unhandled node type: " + contents.getClass());
-			}
-			
-			final Clipboard clipboard = Clipboard.getSystemClipboard();
-			final ClipboardContent content = new ClipboardContent();
-			content.putString(text);
-			clipboard.setContent(content);
-		});
-
+		copyItem.setOnAction(e -> handleCopyName(row.getTreeItem()));
 		copyItem.disableProperty().bind(row.itemProperty().isNull());
 
 		this.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), () -> {
-			if (tv.getSelectionModel().getSelectedItem() == null) {
-				return;
-			}
-			final PrologASTNode formula = tv.getSelectionModel().getSelectedItem().getValue().getContents();
-			if (formula instanceof ASTFormula) {
-				final Clipboard clipboard = Clipboard.getSystemClipboard();
-				final ClipboardContent content = new ClipboardContent();
-				content.putString(((ASTFormula) formula).getFormula().getCode());
-				clipboard.setContent(content);
+			final TreeItem<StateItem<?>> item = tv.getSelectionModel().getSelectedItem();
+			if (item != null) {
+				handleCopyName(item);
 			}
 		});
 
@@ -487,6 +465,23 @@ public final class StatesView extends StackPane {
 			this.tv.setDisable(false);
 			this.statusBar.setStatesViewUpdating(false);
 		});
+	}
+
+	private static void handleCopyName(final TreeItem<StateItem<?>> item) {
+		final PrologASTNode contents = item.getValue().getContents();
+		final String text;
+		if (contents instanceof ASTCategory) {
+			text = ((ASTCategory)contents).getName();
+		} else if (contents instanceof ASTFormula) {
+			text = ((ASTFormula)contents).getFormula(FormulaExpand.EXPAND).getCode();
+		} else {
+			throw new AssertionError("Unhandled node type: " + contents.getClass());
+		}
+		
+		final Clipboard clipboard = Clipboard.getSystemClipboard();
+		final ClipboardContent content = new ClipboardContent();
+		content.putString(text);
+		clipboard.setContent(content);
 	}
 
 	private static String getResultValue(final ASTFormula element, final State state) {
