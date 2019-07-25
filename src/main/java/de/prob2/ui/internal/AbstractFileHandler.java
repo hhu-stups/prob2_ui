@@ -77,7 +77,7 @@ public abstract class AbstractFileHandler<T> {
 		return fileChooser.showSaveDialog(stageManager.getCurrent());
 	}
 	
-	protected void writeToFile(File file, T data, boolean headerWithMachineName) {
+	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) {
 		if(file != null) {
 			final Path absolute = file.toPath();
 			
@@ -85,6 +85,7 @@ public abstract class AbstractFileHandler<T> {
 				gson.toJson(data, writer);
 				JsonObject metadata = new JsonObject();
 				metadata.addProperty("Creation Date", ZonedDateTime.now().format(DateTimeFormatter.ofPattern("d MMM yyyy hh:mm:ssa O")));
+				metadata.addProperty("Created by", createdBy);
 				metadata.addProperty("ProB 2.0 kernel Version", versionInfo.getKernelVersion());
 				metadata.addProperty("ProB CLI Version", versionInfo.getFormattedCliVersion());
 				if(headerWithMachineName) {
