@@ -86,7 +86,11 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		}
 		ClassicalBModel bModel = (ClassicalBModel) model;
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, extractor.extractRawFormula(item.getCode()), Integer.parseInt(extractor.extractDepth(item.getCode())), new ArrayList<>());
+		String depth = extractor.extractDepth(item.getCode());
+		if(depth.isEmpty()) {
+			return;
+		}
+		ConstraintBasedTestCaseGenerator testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, stateSpace, extractor.extractRawFormula(item.getCode()), Integer.parseInt(depth), new ArrayList<>());
 		symbolicChecker.checkItem(item, testCaseGenerator, checkAll);
 	}
 	

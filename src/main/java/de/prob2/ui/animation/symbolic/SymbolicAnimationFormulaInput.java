@@ -55,22 +55,18 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 						SymbolicExecutionType.FIND_VALID_STATE);
 				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
 				break;
-			case MCDC:
-				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth()), SymbolicExecutionType.MCDC);
+			case MCDC: {
+				String formula = extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth());
+				formulaItem = new SymbolicAnimationFormulaItem(formula, SymbolicExecutionType.MCDC);
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
-			case COVERED_OPERATIONS:
-				List<String> operations = operationCoverageInputView.getOperations();
-				if(operations.isEmpty()) {
-					Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
-							"animation.symbolic.alerts.testcasegeneration.operations.header",
-							"animation.symbolic.alerts.testcasegeneration.operations.content");
-					alert.showAndWait();
-					break;
-				}
-				formulaItem = new SymbolicAnimationFormulaItem(extractor.extractOperationCoverageFormula(operations, operationCoverageInputView.getDepth()), SymbolicExecutionType.COVERED_OPERATIONS);
+			}
+			case COVERED_OPERATIONS: {
+				String formula = extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth());
+				formulaItem = new SymbolicAnimationFormulaItem(formula, SymbolicExecutionType.COVERED_OPERATIONS);
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
+			}
 			default:
 				break;
 		}
@@ -92,16 +88,37 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 			case NONE:
 				symbolicAnimationFormulaHandler.addFormula(checkingType.name(), checkingType, checking);
 				break;
-			case MCDC:
-				symbolicAnimationFormulaHandler.addFormula(extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth()), checkingType, checking);
+			case MCDC: {
+				String formula = extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth());
+				if(formula.isEmpty()) {
+					stageManager.makeAlert(Alert.AlertType.ERROR,
+							"animation.symbolic.alerts.testcasegeneration.invalid",
+							"animation.symbolic.alerts.testcasegeneration.mcdc.invalid")
+							.showAndWait();
+					return;
+				}
+				symbolicAnimationFormulaHandler.addFormula(formula, checkingType, checking);
 				break;
-			case OPERATIONS:
+			}
+			case OPERATIONS: {
 				List<String> operations = operationCoverageInputView.getOperations();
 				if(operations.isEmpty()) {
-					break;
+					stageManager.makeAlert(Alert.AlertType.ERROR,
+							"animation.symbolic.alerts.testcasegeneration.operations.header",
+							"animation.symbolic.alerts.testcasegeneration.operations.content").showAndWait();
+					return;
 				}
-				symbolicAnimationFormulaHandler.addFormula(extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth()), checkingType, checking);
+				String formula = extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth());
+				if(formula.isEmpty()) {
+					stageManager.makeAlert(Alert.AlertType.ERROR,
+							"animation.symbolic.alerts.testcasegeneration.invalid",
+							"animation.symbolic.alerts.testcasegeneration.coveredoperations.invalid")
+							.showAndWait();
+					return;
+				}
+				symbolicAnimationFormulaHandler.addFormula(formula, checkingType, checking);
 				break;
+			}
 			default:
 				break;
 		}

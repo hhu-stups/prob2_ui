@@ -165,10 +165,12 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			return true;
 		}
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
-			SymbolicExecutionType type = choosingStage.getExecutionType();
-			item.setData(formula, type.getName(), formula, type);
-			item.reset();
-			view.refresh();
+			if(!formula.isEmpty()) {
+				SymbolicExecutionType type = choosingStage.getExecutionType();
+				item.setData(formula, type.getName(), formula, type);
+				item.reset();
+				view.refresh();
+			}
 			return true;
 		}
 		return false;

@@ -13,21 +13,43 @@ public class TestCaseGenerationFormulaExtractor {
     }
 
     public String extractMCDCFormula(String level, String depth) {
+    	try {
+    		Integer.parseInt(level);
+    		Integer.parseInt(depth);
+    	} catch(NumberFormatException e) {
+    		return "";
+    	}
         return "MCDC:" + level + "/" + "DEPTH:" + depth;
     }
 
     public String extractOperationCoverageFormula(List<String> operations, String depth) {
+    	try {
+    		Integer.parseInt(depth);
+    	} catch(NumberFormatException e) {
+    		return "";
+    	}
         return "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
     }
 
     public String extractDepth(String formula) {
-        String[] splittedString = formula.replaceAll(" ", "").split("/");
-        return splittedString[1].split(":")[1];
+        String[] splittedStringBySlash = formula.replaceAll(" ", "").split("/");
+        if(splittedStringBySlash.length < 2) {
+        	return "";
+        }
+        String[] splittedStringByColon = splittedStringBySlash[1].split(":");
+        if(splittedStringByColon.length < 2) {
+        	return "";
+        }
+        return splittedStringByColon[1];
     }
 
     public String extractLevel(String formula) {
-        String[] splittedString = formula.replaceAll(" ", "").split("/");
-        return splittedString[0].split(":")[1];
+        String[] splittedStringBySlash = formula.replaceAll(" ", "").split("/");
+        String[] splittedStringByColon = splittedStringBySlash[0].split(":");
+        if(splittedStringByColon.length < 2) {
+        	return "";
+        }
+        return splittedStringByColon[1];
     }
 
     public List<String> extractOperations(String formula) {
