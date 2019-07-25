@@ -44,7 +44,7 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	}
 
 	public void save(List<PersistentTrace> traces, Machine machine) {
-		File file = showSaveDialogForManyFiles(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"), currentProject.getLocation().toFile());
+		File file = showSaveDialogForManyFiles(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"), currentProject.getLocation().toFile());
 		if(file == null) {
 			return;
 		}
