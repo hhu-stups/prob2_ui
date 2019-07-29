@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +12,6 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -24,11 +20,9 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
-import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
-import de.prob2.ui.project.machines.Machine;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
@@ -52,9 +46,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 
 /**
  * Tracks registered stages to implement UI persistence and the Mac Cmd+W
@@ -69,16 +61,11 @@ public final class StageManager {
 
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image(StageManager.class.getResource("/de/prob2/ui/ProB_Icon.png").toExternalForm());
-	private static final String PROJECT_FILE_ENDING = "*.prob2project";
 
 	private final Injector injector;
 	private final MenuToolkit menuToolkit;
 	private final UIState uiState;
 	private final ResourceBundle bundle;
-	private final FileChooserManager fileChooserManager;
-
-	private final Collection<String> machineExtensions;
-	private final List<FileChooser.ExtensionFilter> machineExtensionFilters;
 
 	private final ObjectProperty<Stage> current;
 	private final Map<Stage, Void> registered;
@@ -88,20 +75,11 @@ public final class StageManager {
 	private final DoubleProperty stageSceneHeightDifference;
 
 	@Inject
-	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final ResourceBundle bundle) {
 		this.injector = injector;
 		this.menuToolkit = menuToolkit;
 		this.uiState = uiState;
 		this.bundle = bundle;
-		this.fileChooserManager = fileChooserManager;
-
-		this.machineExtensions = Machine.Type.getExtensionToTypeMap().keySet();
-		this.machineExtensionFilters = Arrays.stream(Machine.Type.values())
-			.map(type -> new FileChooser.ExtensionFilter(
-				String.format(bundle.getString(type.getFileTypeKey()), String.join(", ", type.getExtensions())),
-				type.getExtensions()
-			))
-			.collect(Collectors.toList());
 
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
@@ -365,82 +343,6 @@ public final class StageManager {
 			alert.setHeaderText(bundle.getString(headerBundleKey));
 		}
 		return alert;
-	}
-	
-	/**
-	 * Show a {@link FileChooser} to ask the user to select a ProB file.
-	 * 
-	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @param projects whether projects should be selectable
-	 * @param machines whether machines should be selectable
-	 * @return the selected {@link Path}, or {@code null} if none was selected
-	 */
-	private Path showOpenFileChooser(final Window window, final boolean projects, final boolean machines) {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
-		
-		final List<String> allExts = new ArrayList<>();
-		if (projects) {
-			allExts.add(PROJECT_FILE_ENDING);
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), PROJECT_FILE_ENDING), PROJECT_FILE_ENDING));
-		}
-		
-		if (machines) {
-			allExts.addAll(this.machineExtensions);
-			fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
-		}
-		
-		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
-		return fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
-	}
-	
-	/**
-	 * Show a {@link FileChooser} to ask the user to select a ProB 2 project.
-	 * 
-	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @return the selected {@link Path}, or {@code null} if none was selected
-	 */
-	public Path showOpenProjectChooser(final Window window) {
-		return showOpenFileChooser(window, true, false);
-	}
-	
-	/**
-	 * Show a {@link FileChooser} to ask the user to select a machine file.
-	 *
-	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @return the selected {@link Path}, or {@code null} if none was selected
-	 */
-	public Path showOpenMachineChooser(final Window window) {
-		return showOpenFileChooser(window, false, true);
-	}
-	
-	/**
-	 * Show a {@link FileChooser} to ask the user to select a ProB 2 project or a machine file.
-	 *
-	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @return the selected {@link Path}, or {@code null} if none was selected
-	 */
-	public Path showOpenProjectOrMachineChooser(final Window window) {
-		return showOpenFileChooser(window, true, true);
-	}
-	
-	/**
-	 * Show a {@link FileChooser} to ask the user to save a machine file.
-	 *
-	 * @param window the {@link Window} on which to show the {@link FileChooser}
-	 * @return the selected {@link Path}, or {@code null} if none was selected
-	 */
-	public Path showSaveMachineChooser(final Window window) {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
-		
-		final List<String> allExts = new ArrayList<>(this.machineExtensions);
-		fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
-		
-		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
-		return fileChooserManager.showSaveDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	
 	/**
