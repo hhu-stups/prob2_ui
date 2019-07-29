@@ -27,9 +27,8 @@ import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -242,8 +241,7 @@ public class MachinesTab extends Tab {
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
 
-		injector.getInstance(StatusBar.class).loadingStatusProperty()
-				.addListener((observable, from, to) -> splitPane.setDisable(to == LoadingStatus.LOADING_FILE));
+		splitPane.disableProperty().bind(injector.getInstance(MachineLoader.class).loadingProperty());
 
 		machinesList.setCellFactory(lv -> this.new MachinesItem());
 		machinesList.itemsProperty().bind(currentProject.machinesProperty());
