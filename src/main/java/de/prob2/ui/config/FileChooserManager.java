@@ -167,21 +167,21 @@ public class FileChooserManager {
 		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 
-	public boolean containsValidInitialDirectory(Kind kind) {
+	private boolean containsValidInitialDirectory(Kind kind) {
 		return initialDirectories.containsKey(kind) && Files.exists(initialDirectories.get(kind));
 	}
 
-	public Path getInitialDirectory(Kind kind) {
+	private Path getInitialDirectory(Kind kind) {
 		return this.initialDirectories.get(kind);
 	}
 
-	public void setInitialDirectory(Kind kind, Path dir) {
+	private void setInitialDirectory(Kind kind, Path dir) {
 		if (dir != null && Files.exists(dir)) {
 			initialDirectories.put(kind, dir);
 		}
 	}
 
-	public Map<Kind, Path> getInitialDirectories() {
+	private Map<Kind, Path> getInitialDirectories() {
 		return initialDirectories;
 	}
 }
