@@ -391,7 +391,7 @@ public final class StageManager {
 		}
 		
 		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.allProB"), String.join(", ", allExts)), allExts));
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
 		return fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	
@@ -439,7 +439,7 @@ public final class StageManager {
 		fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		
 		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.allProB"), String.join(", ", allExts)), allExts));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
 		return fileChooserManager.showSaveDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	
