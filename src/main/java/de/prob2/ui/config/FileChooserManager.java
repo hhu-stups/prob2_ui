@@ -67,7 +67,7 @@ public class FileChooserManager {
 		});
 	}
 
-	public Path showOpenDialog(final FileChooser fileChooser, final Kind kind, final Window window) {
+	public Path showOpenFileChooser(final FileChooser fileChooser, final Kind kind, final Window window) {
 		if (containsValidInitialDirectory(kind)) {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind).toFile());
 		}
@@ -79,7 +79,7 @@ public class FileChooserManager {
 		return path;
 	}
 
-	public Path showSaveDialog(final FileChooser fileChooser, final Kind kind, final Window window) {
+	public Path showSaveFileChooser(final FileChooser fileChooser, final Kind kind, final Window window) {
 		if (containsValidInitialDirectory(kind)) {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind).toFile());
 		}
@@ -99,7 +99,7 @@ public class FileChooserManager {
 	 * @param machines whether machines should be selectable
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
-	private Path showOpenFileChooser(final Window window, final boolean projects, final boolean machines) {
+	private Path showOpenProjectOrMachineChooser(final Window window, final boolean projects, final boolean machines) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
 		
@@ -116,7 +116,7 @@ public class FileChooserManager {
 		
 		allExts.sort(String::compareTo);
 		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
-		return this.showOpenDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
+		return this.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	
 	/**
@@ -126,7 +126,7 @@ public class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenProjectChooser(final Window window) {
-		return showOpenFileChooser(window, true, false);
+		return showOpenProjectOrMachineChooser(window, true, false);
 	}
 	
 	/**
@@ -136,7 +136,7 @@ public class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenMachineChooser(final Window window) {
-		return showOpenFileChooser(window, false, true);
+		return showOpenProjectOrMachineChooser(window, false, true);
 	}
 	
 	/**
@@ -146,7 +146,7 @@ public class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenProjectOrMachineChooser(final Window window) {
-		return showOpenFileChooser(window, true, true);
+		return showOpenProjectOrMachineChooser(window, true, true);
 	}
 	
 	/**
@@ -164,7 +164,7 @@ public class FileChooserManager {
 		
 		allExts.sort(String::compareTo);
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
-		return this.showSaveDialog(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
+		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 
 	public boolean containsValidInitialDirectory(Kind kind) {
