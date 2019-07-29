@@ -1,4 +1,4 @@
- package de.prob2.ui.internal;
+package de.prob2.ui.internal;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -6,6 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -74,6 +77,9 @@ public final class StageManager {
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
 
+	private final Collection<String> machineExtensions;
+	private final List<FileChooser.ExtensionFilter> machineExtensionFilters;
+
 	private final ObjectProperty<Stage> current;
 	private final Map<Stage, Void> registered;
 	private MenuBar globalMacMenuBar;
@@ -88,6 +94,14 @@ public final class StageManager {
 		this.uiState = uiState;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
+
+		this.machineExtensions = Machine.Type.getExtensionToTypeMap().keySet();
+		this.machineExtensionFilters = Arrays.stream(Machine.Type.values())
+			.map(type -> new FileChooser.ExtensionFilter(
+				String.format(bundle.getString(type.getFileTypeKey()), String.join(", ", type.getExtensions())),
+				type.getExtensions()
+			))
+			.collect(Collectors.toList());
 
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
@@ -372,16 +386,8 @@ public final class StageManager {
 		}
 		
 		if (machines) {
-			allExts.addAll(Machine.Type.getExtensionToTypeMap().keySet());
-			fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.classicalB"), Machine.Type.B.getExtensionsAsString()), Machine.Type.B.getExtensions()),
-				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.eventB"), Machine.Type.EVENTB.getExtensionsAsString()), Machine.Type.EVENTB.getExtensions()),
-				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.csp"), Machine.Type.CSP.getExtensionsAsString()), Machine.Type.CSP.getExtensions()),
-				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.tla"), Machine.Type.TLA.getExtensionsAsString()), Machine.Type.TLA.getExtensions()),
-				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.xtl"), Machine.Type.XTL.getExtensionsAsString()), Machine.Type.XTL.getExtensions()),
-				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.z"), Machine.Type.Z.getExtensionsAsString()), Machine.Type.Z.getExtensions()),
-				new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.alloy"), Machine.Type.ALLOY.getExtensionsAsString()), Machine.Type.ALLOY.getExtensions())
-			);
+			allExts.addAll(this.machineExtensions);
+			fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		}
 		
 		allExts.sort(String::compareTo);
@@ -429,16 +435,8 @@ public final class StageManager {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
 		
-		final List<String> allExts = new ArrayList<>(Machine.Type.getExtensionToTypeMap().keySet());
-		fileChooser.getExtensionFilters().addAll(
-			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.classicalB"), Machine.Type.B.getExtensionsAsString()), Machine.Type.B.getExtensions()),
-			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.eventB"), Machine.Type.EVENTB.getExtensionsAsString()), Machine.Type.EVENTB.getExtensions()),
-			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.csp"), Machine.Type.CSP.getExtensionsAsString()), Machine.Type.CSP.getExtensions()),
-			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.tla"), Machine.Type.TLA.getExtensionsAsString()), Machine.Type.TLA.getExtensions()),
-			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.xtl"), Machine.Type.XTL.getExtensionsAsString()), Machine.Type.XTL.getExtensions()),
-			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.z"), Machine.Type.Z.getExtensionsAsString()), Machine.Type.Z.getExtensions()),
-			new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.alloy"), Machine.Type.ALLOY.getExtensionsAsString()), Machine.Type.ALLOY.getExtensions())
-		);
+		final List<String> allExts = new ArrayList<>(this.machineExtensions);
+		fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		
 		allExts.sort(String::compareTo);
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.allProB"), String.join(", ", allExts)), allExts));

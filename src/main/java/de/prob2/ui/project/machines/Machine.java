@@ -43,14 +43,14 @@ public class Machine {
 	}
 
 	public enum Type {
-		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}),
-		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}),
-		CSP(Api::csp_load, new String[] {"*.csp", "*.cspm"}),
-		TLA(Api::tla_load, new String[] {"*.tla"}),
-		BRULES(Api::brules_load, new String[] {"*.rmch"}),
-		XTL(Api::xtl_load, new String[] {"*.P", "*.pl"}),
-		Z(Api::z_load, new String[] {"*.zed", "*.tex"}),
-		ALLOY(Api::alloy_load, new String[] {"*.als"}),
+		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}, "common.fileChooser.fileTypes.classicalB"),
+		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}, "common.fileChooser.fileTypes.eventB"),
+		CSP(Api::csp_load, new String[] {"*.csp", "*.cspm"}, "common.fileChooser.fileTypes.csp"),
+		TLA(Api::tla_load, new String[] {"*.tla"}, "common.fileChooser.fileTypes.tla"),
+		BRULES(Api::brules_load, new String[] {"*.rmch"}, "common.fileChooser.fileTypes.bRules"),
+		XTL(Api::xtl_load, new String[] {"*.P", "*.pl"}, "common.fileChooser.fileTypes.xtl"),
+		Z(Api::z_load, new String[] {"*.zed", "*.tex"}, "common.fileChooser.fileTypes.z"),
+		ALLOY(Api::alloy_load, new String[] {"*.als"}, "common.fileChooser.fileTypes.alloy"),
 		;
 		
 		private static final Map<String, Machine.Type> extensionToTypeMap;
@@ -65,10 +65,12 @@ public class Machine {
 		
 		private final Machine.Loader loader;
 		private final String[] extensions;
+		private final String fileTypeKey;
 		
-		Type(final Machine.Loader loader, final String[] extensions) {
+		Type(final Machine.Loader loader, final String[] extensions, final String fileTypeKey) {
 			this.loader = loader;
 			this.extensions = extensions;
+			this.fileTypeKey = fileTypeKey;
 		}
 		
 		public static Map<String, Machine.Type> getExtensionToTypeMap() {
@@ -91,8 +93,8 @@ public class Machine {
 			return this.extensions.clone();
 		}
 		
-		public String getExtensionsAsString() {
-			return String.join(", ", this.extensions);
+		public String getFileTypeKey() {
+			return this.fileTypeKey;
 		}
 	}
 	
