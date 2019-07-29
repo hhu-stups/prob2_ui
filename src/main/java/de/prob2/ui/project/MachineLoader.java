@@ -135,7 +135,7 @@ public class MachineLoader {
 				final ExtractedModel<?> extract = modelFactory.extract(path.toString());
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
 				final StateSpace stateSpace = extract.load(allPrefs);
-				setLoadingStatus(StatusBar.LoadingStatus.ADDING_ANIMATION);
+				setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
 				this.currentTrace.set(new Trace(stateSpace));
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);

@@ -29,7 +29,7 @@ public class StatusBar extends HBox {
 		NOT_LOADING("common.noModelLoaded"),
 		PARSING_FILE("statusbar.loadStatus.parsingFile"),
 		LOADING_MODEL("statusbar.loadStatus.loadingModel"),
-		ADDING_ANIMATION("statusbar.loadStatus.addingAnimation"),
+		SETTING_CURRENT_MODEL("statusbar.loadStatus.settingCurrentModel"),
 		;
 		
 		private final String messageKey;
