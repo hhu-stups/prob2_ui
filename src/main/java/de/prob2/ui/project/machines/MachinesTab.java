@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob2.ui.beditor.BEditorView;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -26,9 +27,8 @@ import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -216,15 +216,23 @@ public class MachinesTab extends Tab {
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
 
 	private boolean showMachineView;
 
 	@Inject
-	private MachinesTab(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
-		this.stageManager = stageManager;
+	private MachinesTab(
+		final CurrentTrace currentTrace,
+		final CurrentProject currentProject,
+		final StageManager stageManager,
+		final FileChooserManager fileChooserManager,
+		final Injector injector
+	) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.injector = injector;
 		stageManager.loadFXML(this, "machines_tab.fxml");
 	}
@@ -233,8 +241,7 @@ public class MachinesTab extends Tab {
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
 
-		injector.getInstance(StatusBar.class).loadingStatusProperty()
-				.addListener((observable, from, to) -> splitPane.setDisable(to == LoadingStatus.LOADING_FILE));
+		splitPane.disableProperty().bind(injector.getInstance(MachineLoader.class).loadingProperty());
 
 		machinesList.setCellFactory(lv -> this.new MachinesItem());
 		machinesList.itemsProperty().bind(currentProject.machinesProperty());
@@ -254,7 +261,7 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	private void createMachine() {
-		final Path selected = stageManager.showSaveMachineChooser(this.getContent().getScene().getWindow());
+		final Path selected = fileChooserManager.showSaveMachineChooser(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
 		}
@@ -292,7 +299,7 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	void addMachine() {
-		final Path selected = stageManager.showOpenMachineChooser(this.getContent().getScene().getWindow());
+		final Path selected = fileChooserManager.showOpenMachineChooser(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
 		}

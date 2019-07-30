@@ -1,7 +1,5 @@
 package de.prob2.ui.project.machines;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -11,9 +9,15 @@ import java.util.Map;
 import java.util.Objects;
 
 import de.prob.ltl.parser.pattern.PatternManager;
-import de.prob.scripting.Api;
-import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.StateSpace;
+import de.prob.model.brules.RulesModelFactory;
+import de.prob.scripting.AlloyFactory;
+import de.prob.scripting.CSPFactory;
+import de.prob.scripting.ClassicalBFactory;
+import de.prob.scripting.EventBFactory;
+import de.prob.scripting.ModelFactory;
+import de.prob.scripting.TLAFactory;
+import de.prob.scripting.XTLFactory;
+import de.prob.scripting.ZFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.preferences.Preference;
@@ -37,20 +41,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
 public class Machine {
-	@FunctionalInterface
-	public interface Loader extends Serializable {
-		StateSpace load(final Api api, final String file, final Map<String, String> prefs) throws IOException, ModelTranslationError;
-	}
-
 	public enum Type {
-		B(Api::b_load, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}),
-		EVENTB(Api::eventb_load, new String[] {"*.eventb", "*.bum", "*.buc"}),
-		CSP(Api::csp_load, new String[] {"*.csp", "*.cspm"}),
-		TLA(Api::tla_load, new String[] {"*.tla"}),
-		BRULES(Api::brules_load, new String[] {"*.rmch"}),
-		XTL(Api::xtl_load, new String[] {"*.P", "*.pl"}),
-		Z(Api::z_load, new String[] {"*.zed", "*.tex"}),
-		ALLOY(Api::alloy_load, new String[] {"*.als"}),
+		B(ClassicalBFactory.class, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}, "common.fileChooser.fileTypes.classicalB"),
+		EVENTB(EventBFactory.class, new String[] {"*.eventb", "*.bum", "*.buc"}, "common.fileChooser.fileTypes.eventB"),
+		CSP(CSPFactory.class, new String[] {"*.csp", "*.cspm"}, "common.fileChooser.fileTypes.csp"),
+		TLA(TLAFactory.class, new String[] {"*.tla"}, "common.fileChooser.fileTypes.tla"),
+		BRULES(RulesModelFactory.class, new String[] {"*.rmch"}, "common.fileChooser.fileTypes.bRules"),
+		XTL(XTLFactory.class, new String[] {"*.P", "*.pl"}, "common.fileChooser.fileTypes.xtl"),
+		Z(ZFactory.class, new String[] {"*.zed", "*.tex"}, "common.fileChooser.fileTypes.z"),
+		ALLOY(AlloyFactory.class, new String[] {"*.als"}, "common.fileChooser.fileTypes.alloy"),
 		;
 		
 		private static final Map<String, Machine.Type> extensionToTypeMap;
@@ -63,12 +62,14 @@ public class Machine {
 			}
 		}
 		
-		private final Machine.Loader loader;
+		private final Class<? extends ModelFactory<?>> modelFactoryClass;
 		private final String[] extensions;
+		private final String fileTypeKey;
 		
-		Type(final Machine.Loader loader, final String[] extensions) {
-			this.loader = loader;
+		Type(final Class<? extends ModelFactory<?>> modelFactoryClass, final String[] extensions, final String fileTypeKey) {
+			this.modelFactoryClass = modelFactoryClass;
 			this.extensions = extensions;
+			this.fileTypeKey = fileTypeKey;
 		}
 		
 		public static Map<String, Machine.Type> getExtensionToTypeMap() {
@@ -83,16 +84,16 @@ public class Machine {
 			return type;
 		}
 		
-		public Machine.Loader getLoader() {
-			return this.loader;
+		public Class<? extends ModelFactory<?>> getModelFactoryClass() {
+			return this.modelFactoryClass;
 		}
 		
 		public String[] getExtensions() {
 			return this.extensions.clone();
 		}
 		
-		public String getExtensionsAsString() {
-			return String.join(", ", this.extensions);
+		public String getFileTypeKey() {
+			return this.fileTypeKey;
 		}
 	}
 	

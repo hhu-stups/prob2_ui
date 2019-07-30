@@ -1,8 +1,12 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.nio.file.Path;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -19,6 +23,7 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -43,10 +48,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import org.controlsfx.glyphfont.FontAwesome;
 
-import java.nio.file.Path;
-import java.util.ResourceBundle;
+import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
@@ -276,7 +279,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 		.add(new ExtensionFilter(
 				String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_ENDING),
 				TRACE_FILE_ENDING));
-		Path traceFile = fileChooserManager.showOpenDialog(fileChooser, Kind.TRACES, stageManager.getCurrent());
+		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			Path relative = currentProject.getLocation().relativize(traceFile);
 			currentProject.getCurrentMachine().addTraceFile(relative);

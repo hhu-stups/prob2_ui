@@ -330,7 +330,7 @@ public class ProBPluginManager {
 		String proB2PluginFileExtension = "*.jar";
 		fileChooser.getExtensionFilters()
 				.addAll(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Plugin"), proB2PluginFileExtension), proB2PluginFileExtension));
-		return fileChooserManager.showOpenDialog(fileChooser, Kind.PLUGINS, stage);
+		return fileChooserManager.showOpenFileChooser(fileChooser, Kind.PLUGINS, stage);
 	}
 
 	/*

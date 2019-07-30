@@ -27,8 +27,9 @@ import javafx.scene.layout.HBox;
 public class StatusBar extends HBox {
 	public enum LoadingStatus {
 		NOT_LOADING("common.noModelLoaded"),
-		LOADING_FILE("statusbar.loadStatus.loadingFile"),
-		ADDING_ANIMATION("statusbar.loadStatus.addingAnimation"),
+		PARSING_FILE("statusbar.loadStatus.parsingFile"),
+		LOADING_MODEL("statusbar.loadStatus.loadingModel"),
+		SETTING_CURRENT_MODEL("statusbar.loadStatus.settingCurrentModel"),
 		;
 		
 		private final String messageKey;

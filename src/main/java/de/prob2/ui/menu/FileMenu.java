@@ -1,9 +1,17 @@
 package de.prob2.ui.menu;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob2.ui.beditor.BEditorView;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -16,6 +24,7 @@ import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -25,12 +34,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
 
 @FXMLInjected
 public class FileMenu extends Menu {
@@ -58,16 +61,18 @@ public class FileMenu extends Menu {
 	private final BEditorView bEditorView;
 	private final Injector injector;
 	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 
 	@Inject
 	private FileMenu(
-		final StageManager stageManager,
 		final RecentProjects recentProjects,
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace,
 		final BEditorView bEditorView,
 		final Injector injector,
+		final StageManager stageManager,
+		final FileChooserManager fileChooserManager,
 		final ResourceBundle bundle
 	) {
 		this.recentProjects = recentProjects;
@@ -76,6 +81,7 @@ public class FileMenu extends Menu {
 		this.bEditorView = bEditorView;
 		this.injector = injector;
 		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "fileMenu.fxml");
 	}
@@ -114,7 +120,7 @@ public class FileMenu extends Menu {
 
 	@FXML
 	public void handleOpen() {
-		final Path selected = stageManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
+		final Path selected = fileChooserManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
 		if (selected == null) {
 			return;
 		}
