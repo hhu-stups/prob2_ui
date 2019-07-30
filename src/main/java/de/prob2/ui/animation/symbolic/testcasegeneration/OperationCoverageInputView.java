@@ -31,12 +31,9 @@ public class OperationCoverageInputView extends VBox {
     @FXML
     private TextField depthField;
 
-    private final TestCaseGenerationFormulaExtractor extractor;
-
     @Inject
-    private OperationCoverageInputView(final StageManager stageManager, final TestCaseGenerationFormulaExtractor extractor) {
+    private OperationCoverageInputView(final StageManager stageManager) {
         super();
-        this.extractor = extractor;
         stageManager.loadFXML(this, "test_case_generation_operation_coverage.fxml");
     }
 
@@ -62,7 +59,7 @@ public class OperationCoverageInputView extends VBox {
     }
 
     public void setItem(SymbolicAnimationFormulaItem item) {
-        depthField.setText(extractor.extractDepth(item.getCode()));
+        depthField.setText(String.valueOf(item.getAdditionalInformation("maxDepth")));
     }
 
     public void setTable(List<String> operations) {

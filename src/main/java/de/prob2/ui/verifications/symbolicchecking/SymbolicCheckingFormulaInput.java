@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.command.SymbolicModelcheckCommand;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -28,8 +27,8 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 	public SymbolicCheckingFormulaInput(final StageManager stageManager,
 										final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler,
 										final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
-										final CurrentTrace currentTrace, final TestCaseGenerationFormulaExtractor extractor) {
-		super(stageManager, currentProject, injector, bundle, currentTrace, extractor);
+										final CurrentTrace currentTrace) {
+		super(stageManager, currentProject, injector, bundle, currentTrace);
 		this.symbolicCheckingFormulaHandler = symbolicCheckingFormulaHandler;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
 	}

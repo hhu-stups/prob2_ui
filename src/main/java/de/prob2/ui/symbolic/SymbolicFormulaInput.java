@@ -3,10 +3,9 @@ package de.prob2.ui.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.statespace.LoadedMachine;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCInputView;
 import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -21,7 +20,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -57,22 +58,19 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	protected final ResourceBundle bundle;
 	
 	protected final CurrentTrace currentTrace;
-
-	protected final TestCaseGenerationFormulaExtractor extractor;
 	
 	protected ArrayList<String> events;
 	
 	@Inject
 	public SymbolicFormulaInput(final StageManager stageManager, final CurrentProject currentProject,
 								final Injector injector, final ResourceBundle bundle,
-								final CurrentTrace currentTrace, final TestCaseGenerationFormulaExtractor extractor) {
+								final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.events = new ArrayList<>();
 		this.injector = injector;
 		this.bundle = bundle;
-		this.extractor = extractor;
 	}
 
 	@FXML
@@ -139,6 +137,8 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	protected boolean updateFormula(T item, SymbolicView<T> view, SymbolicChoosingStage<T> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = null;
+		Map<String, Object> additionalInformation = new HashMap<>();
+		boolean valid = true;
 		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			formula = tfFormula.getText();
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
@@ -146,15 +146,25 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
-			formula = extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth());
+			String level = mcdcInputView.getLevel();
+			String depth = mcdcInputView.getDepth();
+			formula = "MCDC:" + level + "/" + "DEPTH:" + depth;
+			valid = checkInteger(level) && checkInteger(depth);
+			additionalInformation.put("maxDepth", depth);
+			additionalInformation.put("level", level);
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
-			formula = extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth());
+			List<String> operations = operationCoverageInputView.getOperations();
+			String depth = operationCoverageInputView.getDepth();
+			formula = "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
+			valid = !operations.isEmpty() && checkInteger(depth);
+			additionalInformation.put("maxDepth", depth);
+			additionalInformation.put("operations", operations);
 		} else {
 			formula = choosingStage.getExecutionType().getName();
 		}
 		SymbolicFormulaItem newItem;
 		if(item.getClass() == SymbolicAnimationFormulaItem.class) {
-			newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType());
+			newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType(), additionalInformation);
 		} else {
 			newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
 		}
@@ -164,16 +174,31 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		if(choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
 			return true;
 		}
-		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
-			if(!formula.isEmpty()) {
+		if(item.getClass() == SymbolicCheckingFormulaItem.class && !currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
+			SymbolicExecutionType type = choosingStage.getExecutionType();
+			item.setData(formula, type.getName(), formula, type);
+			item.reset();
+			view.refresh();
+			return true;
+		} else if(item.getClass() == SymbolicAnimationFormulaItem.class && !currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
+			if(valid) {
 				SymbolicExecutionType type = choosingStage.getExecutionType();
-				item.setData(formula, type.getName(), formula, type);
+				((SymbolicAnimationFormulaItem) item).setData(formula, type.getName(), formula, type, additionalInformation);
 				item.reset();
 				view.refresh();
 			}
 			return true;
 		}
 		return false;
+	}
+
+	protected boolean checkInteger(String str) {
+		try {
+			Integer.parseInt(str);
+		} catch(NumberFormatException e) {
+			return false;
+		}
+		return true;
 	}
 	
 	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {

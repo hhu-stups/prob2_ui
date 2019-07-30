@@ -20,12 +20,9 @@ public class MCDCInputView extends VBox {
     @FXML
     private TextField depthField;
 
-    private final TestCaseGenerationFormulaExtractor extractor;
-
     @Inject
-    private MCDCInputView(final StageManager stageManager, final TestCaseGenerationFormulaExtractor extractor) {
+    private MCDCInputView(final StageManager stageManager) {
         super();
-        this.extractor = extractor;
         stageManager.loadFXML(this, "test_case_generation_mcdc.fxml");
     }
 
@@ -43,8 +40,8 @@ public class MCDCInputView extends VBox {
     }
 
     public void setItem(SymbolicAnimationFormulaItem item) {
-        levelField.setText(extractor.extractLevel(item.getCode()));
-        depthField.setText(extractor.extractDepth(item.getCode()));
+        levelField.setText(String.valueOf(item.getAdditionalInformation("level")));
+        depthField.setText(String.valueOf(item.getAdditionalInformation("maxDepth")));
     }
 
 }

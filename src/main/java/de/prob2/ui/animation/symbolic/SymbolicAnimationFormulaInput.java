@@ -3,7 +3,6 @@ package de.prob2.ui.animation.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -28,8 +27,8 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 	public SymbolicAnimationFormulaInput(final StageManager stageManager,
 										 final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler,
 										 final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
-										 final CurrentTrace currentTrace, final TestCaseGenerationFormulaExtractor extractor) {
-		super(stageManager, currentProject, injector, bundle, currentTrace, extractor);
+										 final CurrentTrace currentTrace) {
+		super(stageManager, currentProject, injector, bundle, currentTrace);
 		this.symbolicAnimationFormulaHandler = symbolicAnimationFormulaHandler;
 		stageManager.loadFXML(this, "symbolic_animation_formula_input.fxml");
 	}
@@ -56,14 +55,18 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
 				break;
 			case MCDC: {
-				String formula = extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth());
-				formulaItem = new SymbolicAnimationFormulaItem(formula, SymbolicExecutionType.MCDC);
+				if(!(checkInteger(mcdcInputView.getLevel()) && checkInteger(mcdcInputView.getDepth()))) {
+					return;
+				}
+				formulaItem = new SymbolicAnimationFormulaItem(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()));
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			}
 			case COVERED_OPERATIONS: {
-				String formula = extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth());
-				formulaItem = new SymbolicAnimationFormulaItem(formula, SymbolicExecutionType.COVERED_OPERATIONS);
+				if(operationCoverageInputView.getOperations().isEmpty() || !checkInteger(operationCoverageInputView.getDepth())) {
+					return;
+				}
+				formulaItem = new SymbolicAnimationFormulaItem(Integer.parseInt(operationCoverageInputView.getDepth()), operationCoverageInputView.getOperations());
 				symbolicAnimationFormulaHandler.generateTestCases(formulaItem, false);
 				break;
 			}
@@ -89,15 +92,14 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.addFormula(checkingType.name(), checkingType, checking);
 				break;
 			case MCDC: {
-				String formula = extractor.extractMCDCFormula(mcdcInputView.getLevel(), mcdcInputView.getDepth());
-				if(formula.isEmpty()) {
+				if(!(checkInteger(mcdcInputView.getLevel()) && checkInteger(mcdcInputView.getDepth()))) {
 					stageManager.makeAlert(Alert.AlertType.ERROR,
 							"animation.symbolic.alerts.testcasegeneration.invalid",
 							"animation.symbolic.alerts.testcasegeneration.mcdc.invalid")
 							.showAndWait();
 					return;
 				}
-				symbolicAnimationFormulaHandler.addFormula(formula, checkingType, checking);
+				symbolicAnimationFormulaHandler.addFormula(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()), checking);
 				break;
 			}
 			case OPERATIONS: {
@@ -108,15 +110,14 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 							"animation.symbolic.alerts.testcasegeneration.operations.content").showAndWait();
 					return;
 				}
-				String formula = extractor.extractOperationCoverageFormula(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth());
-				if(formula.isEmpty()) {
+				if(!checkInteger(operationCoverageInputView.getDepth())) {
 					stageManager.makeAlert(Alert.AlertType.ERROR,
 							"animation.symbolic.alerts.testcasegeneration.invalid",
 							"animation.symbolic.alerts.testcasegeneration.coveredoperations.invalid")
 							.showAndWait();
 					return;
 				}
-				symbolicAnimationFormulaHandler.addFormula(formula, checkingType, checking);
+				symbolicAnimationFormulaHandler.addFormula(Integer.parseInt(operationCoverageInputView.getDepth()), operations, checking);
 				break;
 			}
 			default:
