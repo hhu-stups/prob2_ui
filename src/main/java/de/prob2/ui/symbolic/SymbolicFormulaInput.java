@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -131,7 +132,29 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	}
 
 	protected abstract boolean updateFormula(T item, SymbolicView<T> view, SymbolicChoosingStage<T> choosingStage);
-	
+
+	protected String extractFormula(SymbolicChoosingStage<T> choosingStage) {
+		String formula;
+		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
+			formula = tfFormula.getText();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
+			formula = cbOperations.getSelectionModel().getSelectedItem();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
+			formula = predicateBuilderView.getPredicate();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
+			String level = mcdcInputView.getLevel();
+			String depth = mcdcInputView.getDepth();
+			formula = "MCDC:" + level + "/" + "DEPTH:" + depth;
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
+			List<String> operations = operationCoverageInputView.getOperations();
+			String depth = operationCoverageInputView.getDepth();
+			formula = "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
+		} else {
+			formula = choosingStage.getExecutionType().getName();
+		}
+		return formula;
+	}
+
 	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));

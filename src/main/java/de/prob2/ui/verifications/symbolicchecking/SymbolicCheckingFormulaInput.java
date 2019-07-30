@@ -39,16 +39,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 
 	protected boolean updateFormula(SymbolicCheckingFormulaItem item, SymbolicView<SymbolicCheckingFormulaItem> view, SymbolicChoosingStage<SymbolicCheckingFormulaItem> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		String formula = null;
-		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
-			formula = tfFormula.getText();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
-			formula = cbOperations.getSelectionModel().getSelectedItem();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
-			formula = predicateBuilderView.getPredicate();
-		} else {
-			formula = choosingStage.getExecutionType().getName();
-		}
+		String formula = extractFormula(choosingStage);
 		SymbolicFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
 		if(choosingStage.getExecutionType() == SymbolicExecutionType.CHECK_ALL_OPERATIONS || (choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null)) {
 			return true;

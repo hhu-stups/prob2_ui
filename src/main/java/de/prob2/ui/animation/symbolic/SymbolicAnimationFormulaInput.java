@@ -41,46 +41,53 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 	@Override
 	protected boolean updateFormula(SymbolicAnimationFormulaItem item, SymbolicView<SymbolicAnimationFormulaItem> view, SymbolicChoosingStage<SymbolicAnimationFormulaItem> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		String formula = null;
-		Map<String, Object> additionalInformation = new HashMap<>();
+		String formula = extractFormula(choosingStage);
+		Map<String, Object> additionalInformation = extractAdditionalInformation(choosingStage);
+		boolean valid = isValid(choosingStage);
+		SymbolicAnimationFormulaItem newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType(), additionalInformation);
+		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
+			if(valid) {
+				SymbolicExecutionType type = choosingStage.getExecutionType();
+				item.setData(formula, type.getName(), formula, type, additionalInformation);
+				item.reset();
+				view.refresh();
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isValid(SymbolicChoosingStage<SymbolicAnimationFormulaItem> choosingStage) {
 		boolean valid = true;
-		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
-			formula = tfFormula.getText();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
-			formula = cbOperations.getSelectionModel().getSelectedItem();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
-			formula = predicateBuilderView.getPredicate();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
+		if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
 			String level = mcdcInputView.getLevel();
 			String depth = mcdcInputView.getDepth();
-			formula = "MCDC:" + level + "/" + "DEPTH:" + depth;
 			valid = checkInteger(level) && checkInteger(depth);
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
+			List<String> operations = operationCoverageInputView.getOperations();
+			String depth = operationCoverageInputView.getDepth();
+			valid = !operations.isEmpty() && checkInteger(depth);
+		}
+		return valid;
+	}
+
+	private Map<String, Object> extractAdditionalInformation(SymbolicChoosingStage<SymbolicAnimationFormulaItem> choosingStage) {
+		Map<String, Object> additionalInformation = new HashMap<>();
+		if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
+			String level = mcdcInputView.getLevel();
+			String depth = mcdcInputView.getDepth();
 			additionalInformation.put("maxDepth", depth);
 			additionalInformation.put("level", level);
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
 			List<String> operations = operationCoverageInputView.getOperations();
 			String depth = operationCoverageInputView.getDepth();
-			formula = "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
-			valid = !operations.isEmpty() && checkInteger(depth);
 			additionalInformation.put("maxDepth", depth);
 			additionalInformation.put("operations", operations);
-		} else {
-			formula = choosingStage.getExecutionType().getName();
 		}
-		SymbolicAnimationFormulaItem newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType(), additionalInformation);
-		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
-			if (valid) {
-				SymbolicExecutionType type = choosingStage.getExecutionType();
-				item.setData(formula, type.getName(), formula, type, additionalInformation);
-				item.reset();
-				view.refresh();
-				return true;
-			}
-		}
-		return false;
+		return additionalInformation;
 	}
 
-	protected boolean checkInteger(String str) {
+	private boolean checkInteger(String str) {
 		try {
 			Integer.parseInt(str);
 		} catch(NumberFormatException e) {
