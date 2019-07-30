@@ -7,13 +7,18 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
+import de.prob2.ui.symbolic.SymbolicView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 @FXMLInjected
@@ -31,6 +36,57 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 		super(stageManager, currentProject, injector, bundle, currentTrace);
 		this.symbolicAnimationFormulaHandler = symbolicAnimationFormulaHandler;
 		stageManager.loadFXML(this, "symbolic_animation_formula_input.fxml");
+	}
+
+	@Override
+	protected boolean updateFormula(SymbolicAnimationFormulaItem item, SymbolicView<SymbolicAnimationFormulaItem> view, SymbolicChoosingStage<SymbolicAnimationFormulaItem> choosingStage) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		String formula = null;
+		Map<String, Object> additionalInformation = new HashMap<>();
+		boolean valid = true;
+		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
+			formula = tfFormula.getText();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
+			formula = cbOperations.getSelectionModel().getSelectedItem();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
+			formula = predicateBuilderView.getPredicate();
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
+			String level = mcdcInputView.getLevel();
+			String depth = mcdcInputView.getDepth();
+			formula = "MCDC:" + level + "/" + "DEPTH:" + depth;
+			valid = checkInteger(level) && checkInteger(depth);
+			additionalInformation.put("maxDepth", depth);
+			additionalInformation.put("level", level);
+		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
+			List<String> operations = operationCoverageInputView.getOperations();
+			String depth = operationCoverageInputView.getDepth();
+			formula = "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
+			valid = !operations.isEmpty() && checkInteger(depth);
+			additionalInformation.put("maxDepth", depth);
+			additionalInformation.put("operations", operations);
+		} else {
+			formula = choosingStage.getExecutionType().getName();
+		}
+		SymbolicAnimationFormulaItem newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType(), additionalInformation);
+		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
+			if (valid) {
+				SymbolicExecutionType type = choosingStage.getExecutionType();
+				item.setData(formula, type.getName(), formula, type, additionalInformation);
+				item.reset();
+				view.refresh();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected boolean checkInteger(String str) {
+		try {
+			Integer.parseInt(str);
+		} catch(NumberFormatException e) {
+			return false;
+		}
+		return true;
 	}
 	
 	protected void setCheckListeners() {

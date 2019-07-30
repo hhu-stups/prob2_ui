@@ -10,9 +10,7 @@ import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractResultHandler;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -20,9 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -133,73 +129,8 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		operationCoverageInputView.reset();
 		cbOperations.getSelectionModel().clearSelection();
 	}
-	
-	protected boolean updateFormula(T item, SymbolicView<T> view, SymbolicChoosingStage<T> choosingStage) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		String formula = null;
-		Map<String, Object> additionalInformation = new HashMap<>();
-		boolean valid = true;
-		if(choosingStage.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
-			formula = tfFormula.getText();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
-			formula = cbOperations.getSelectionModel().getSelectedItem();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
-			formula = predicateBuilderView.getPredicate();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
-			String level = mcdcInputView.getLevel();
-			String depth = mcdcInputView.getDepth();
-			formula = "MCDC:" + level + "/" + "DEPTH:" + depth;
-			valid = checkInteger(level) && checkInteger(depth);
-			additionalInformation.put("maxDepth", depth);
-			additionalInformation.put("level", level);
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
-			List<String> operations = operationCoverageInputView.getOperations();
-			String depth = operationCoverageInputView.getDepth();
-			formula = "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
-			valid = !operations.isEmpty() && checkInteger(depth);
-			additionalInformation.put("maxDepth", depth);
-			additionalInformation.put("operations", operations);
-		} else {
-			formula = choosingStage.getExecutionType().getName();
-		}
-		SymbolicFormulaItem newItem;
-		if(item.getClass() == SymbolicAnimationFormulaItem.class) {
-			newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType(), additionalInformation);
-		} else {
-			newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
-		}
-		if(choosingStage.getExecutionType() == SymbolicExecutionType.CHECK_ALL_OPERATIONS) {
-			return true;
-		}
-		if(choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
-			return true;
-		}
-		if(item.getClass() == SymbolicCheckingFormulaItem.class && !currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
-			SymbolicExecutionType type = choosingStage.getExecutionType();
-			item.setData(formula, type.getName(), formula, type);
-			item.reset();
-			view.refresh();
-			return true;
-		} else if(item.getClass() == SymbolicAnimationFormulaItem.class && !currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
-			if(valid) {
-				SymbolicExecutionType type = choosingStage.getExecutionType();
-				((SymbolicAnimationFormulaItem) item).setData(formula, type.getName(), formula, type, additionalInformation);
-				item.reset();
-				view.refresh();
-			}
-			return true;
-		}
-		return false;
-	}
 
-	protected boolean checkInteger(String str) {
-		try {
-			Integer.parseInt(str);
-		} catch(NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
+	protected abstract boolean updateFormula(T item, SymbolicView<T> view, SymbolicChoosingStage<T> choosingStage);
 	
 	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
