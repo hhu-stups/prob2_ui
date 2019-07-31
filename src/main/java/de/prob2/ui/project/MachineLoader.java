@@ -19,6 +19,7 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -42,6 +43,7 @@ public class MachineLoader {
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final StatusBar statusBar;
+	private final StopActions stopActions;
 	private final Injector injector;
 
 	private final ReadOnlyBooleanWrapper loading;
@@ -56,6 +58,7 @@ public class MachineLoader {
 		final CurrentTrace currentTrace,
 		final GlobalPreferences globalPreferences,
 		final StatusBar statusBar,
+		final StopActions stopActions,
 		final Injector injector
 	) {
 		this.currentProject = currentProject;
@@ -63,6 +66,7 @@ public class MachineLoader {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.statusBar = statusBar;
+		this.stopActions = stopActions;
 		this.injector = injector;
 
 		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
@@ -89,13 +93,16 @@ public class MachineLoader {
 				} catch (CliError | ProBError e) {
 					throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
 				}
+				if (Thread.currentThread().isInterrupted()) {
+					this.emptyStateSpace.kill();
+				}
 			}
 		}
 		return this.emptyStateSpace;
 	}
 
 	public void loadAsync(Machine machine, Map<String, String> pref) {
-		new Thread(() -> {
+		final Thread machineLoader = new Thread(() -> {
 			try {
 				this.load(machine, pref);
 			} catch (FileNotFoundException e) {
@@ -110,7 +117,9 @@ public class MachineLoader {
 						.makeExceptionAlert(e, "", "project.machineLoader.alerts.couldNotOpen.content", machine.getName())
 						.showAndWait());
 			}
-		} , "Machine Loader").start();
+		}, "Machine Loader");
+		this.stopActions.add(machineLoader::interrupt);
+		machineLoader.start();
 	}
 
 	private void setLoadingStatus(final StatusBar.LoadingStatus loadingStatus) {
@@ -137,8 +146,15 @@ public class MachineLoader {
 				allPrefs.putAll(prefs);
 				final ModelFactory<?> modelFactory = injector.getInstance(machine.getType().getModelFactoryClass());
 				final ExtractedModel<?> extract = modelFactory.extract(path.toString());
+				if (Thread.currentThread().isInterrupted()) {
+					return;
+				}
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
 				final StateSpace stateSpace = extract.load(allPrefs);
+				if (Thread.currentThread().isInterrupted()) {
+					stateSpace.kill();
+					return;
+				}
 				setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
 				this.currentTrace.set(new Trace(stateSpace));
 			} finally {
