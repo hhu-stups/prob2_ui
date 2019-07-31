@@ -1,7 +1,14 @@
 package de.prob2.ui.animation.symbolic;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorMCDCSettings;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorOperationCoverageSettings;
@@ -18,11 +25,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.AbstractResultHandler;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Singleton
 public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<SymbolicAnimationFormulaItem> {
@@ -97,7 +99,6 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		symbolicChecker.checkItem(item, testCaseGenerator, checkAll);
 	}
 
-	@SuppressWarnings("unchecked")
 	private ConstraintBasedTestCaseGenerator getTestCaseGenerator(ClassicalBModel bModel, SymbolicAnimationFormulaItem item) {
 		ConstraintBasedTestCaseGenerator testCaseGenerator = null;
 		if(item.getType() == SymbolicExecutionType.MCDC) {
@@ -106,6 +107,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 			testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorMCDCSettings(depth, level), new ArrayList<>());
 		} else if(item.getType() == SymbolicExecutionType.COVERED_OPERATIONS) {
 			int depth = Integer.parseInt(String.valueOf(item.getAdditionalInformation("maxDepth")));
+			@SuppressWarnings("unchecked")
 			List<String> operations = (List<String>) item.getAdditionalInformation("operations");
 			testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorOperationCoverageSettings(depth, operations), new ArrayList<>());
 		}
