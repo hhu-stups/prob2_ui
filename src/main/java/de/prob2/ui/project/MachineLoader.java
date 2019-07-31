@@ -37,14 +37,16 @@ import org.slf4j.LoggerFactory;
 public class MachineLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachineLoader.class);
 
-	private final Object openLock;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final StatusBar statusBar;
 	private final Injector injector;
+
 	private final ReadOnlyBooleanWrapper loading;
+	private final Object openLock;
+	private final Object emptyStateSpaceLock;
 	private StateSpace emptyStateSpace;
 
 	@Inject
@@ -56,14 +58,16 @@ public class MachineLoader {
 		final StatusBar statusBar,
 		final Injector injector
 	) {
-		this.openLock = new Object();
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.statusBar = statusBar;
 		this.injector = injector;
+
 		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
+		this.openLock = new Object();
+		this.emptyStateSpaceLock = new Object();
 		this.emptyStateSpace = null;
 	}
 
@@ -76,7 +80,7 @@ public class MachineLoader {
 	}
 
 	public StateSpace getEmptyStateSpace() {
-		synchronized (this) {
+		synchronized (this.emptyStateSpaceLock) {
 			if (this.emptyStateSpace == null) {
 				try {
 					this.emptyStateSpace = injector.getInstance(ClassicalBFactory.class)
