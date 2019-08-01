@@ -1,13 +1,11 @@
 matrix:
   include:
-    - jdk: oraclejdk8
+    - jdk: openjdk8
       env: DO_AFTER_SUCCESS=true
-    - jdk: oraclejdk9
-    # We can't test on Java 10. OpenJDK 10 doesn't include JavaFX (and there's no good way to install it). Oracle JDK 10 (which includes JavaFX) is no longer supported by Travis.
     - jdk: openjdk11
       env: REPLACE_CACERTS=true
 
-dist: trusty
+dist: bionic
 
 language: java
 
