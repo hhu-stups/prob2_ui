@@ -3,6 +3,7 @@ matrix:
     - env:
         - DO_AFTER_SUCCESS=true
         - EXTRA_APT_PACKAGES=openjdk-8-jdk
+        - JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
     - jdk: openjdk11
       env: REPLACE_CACERTS=true
 
