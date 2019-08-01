@@ -1,6 +1,9 @@
 matrix:
   include:
-    - jdk: openjdk8
+    - addons:
+        apt:
+          packages:
+            - openjdk-8-jdk
       env: DO_AFTER_SUCCESS=true
     - jdk: openjdk11
       env: REPLACE_CACERTS=true
