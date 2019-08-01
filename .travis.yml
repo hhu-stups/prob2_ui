@@ -7,6 +7,8 @@ matrix:
     - jdk: openjdk11
       env: REPLACE_CACERTS=true
 
+dist: trusty
+
 language: java
 
 branches:
