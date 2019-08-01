@@ -42,7 +42,7 @@ before_install:
   fi
 
 install:
-- rvm install 2.2.10
+- rvm install 2.4.6
 - gem install travis-custom-deploy
 
 script:
