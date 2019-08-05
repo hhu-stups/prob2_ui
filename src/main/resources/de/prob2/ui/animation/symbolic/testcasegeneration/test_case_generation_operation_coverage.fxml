@@ -18,7 +18,7 @@
 			<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 		</columnResizePolicy>
 	</TableView>
-	<HBox>
+	<HBox spacing="10.0">
 		<Label text="%animation.symbolic.testcasegeneration.depth" labelFor="$depthField" VBox.vgrow="NEVER"/>
 		<TextField fx:id="depthField" VBox.vgrow="NEVER"/>
 	</HBox>
