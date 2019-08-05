@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,8 +21,10 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
 
 import javafx.beans.binding.Bindings;
@@ -49,9 +52,13 @@ import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 /**
- * Tracks registered stages to implement UI persistence and the Mac Cmd+W
- * shortcut. Also provides some convenience methods for creating {@link Stage}s
- * and {@link Alert}s and loading FXML files.
+ * This singleton provides common methods for creating and initializing views,
+ * dialogs and stages. These methods ensure that all parts of the ProB 2 UI
+ * use the correct visual styles and are known to internal mechanisms like
+ * the UI persistence and Mac menu bar handling.
+ * 
+ * @see FileChooserManager
+ * @see UIPersistence
  */
 @Singleton
 public final class StageManager {
@@ -89,22 +96,22 @@ public final class StageManager {
 	}
 
 	/**
-	 * Load a FXML file with {@code controller} as the root and controller.
-	 * {@code filename} may be absolute, or relative to {@code controller}'s
-	 * package.
+	 * Load an FXML file with {@code controller} as the root and controller.
+	 * {@code fxmlResource} is the resource name of the FXML file to load.
+	 * If {@code fxmlResource} is a relative name (i. e. one that doesn't start
+	 * with a slash), it is resolved relative to {@code controller}'s class.
 	 *
-	 * @param controller
-	 *            the root and controller to use
-	 * @param filename
-	 *            the FXML file to load
+	 * @param controller the object to use as the FXML file's root
+	 * and controller
+	 * @param fxmlResource the resource name of the FXML file to load
 	 */
-	public void loadFXML(final Object controller, final String filename) {
+	public void loadFXML(final Object controller, final String fxmlResource) {
 		final FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		if (!filename.startsWith("custom")) {
-			loader.setLocation(controller.getClass().getResource(filename));
+		if (!fxmlResource.startsWith("custom")) {
+			loader.setLocation(controller.getClass().getResource(fxmlResource));
 		} else {
 			try {
-				loader.setLocation(new URL(filename.replace("custom ", "")));
+				loader.setLocation(new URL(fxmlResource.replace("custom ", "")));
 			} catch (MalformedURLException e) {
 				throw new IllegalArgumentException(e);
 			}
@@ -132,51 +139,54 @@ public final class StageManager {
 	}
 
 	/**
-	 * Load a FXML file using {@link #loadFXML(Object, String)} and register its
-	 * root/controller using {@link #register(Stage, String)}.
+	 * <p>Load an FXML file with the {@link Stage} {@code controller} as the
+	 * root and controller, initialize it, and register it with the
+	 * UI persistence mechanism.</p>
+	 * 
+	 * <p>This is equivalent to loading the FXML file using
+	 * {@link #loadFXML(Object, String)} and then registering the stage using
+	 * {@link #register(Stage, String)}.</p>
 	 *
-	 * @param controller
-	 *            the root and controller to use
-	 * @param filename
-	 *            the FXML file to load
-	 * @param id
-	 *            a string identifying the stage for UI persistence, or null if the
-	 *            stage should not be persisted
+	 * @param controller the {@link Stage} to use as the FXML file's root
+	 * and controller
+	 * @param fxmlResource the resource name of the FXML file to load
+	 * @param persistenceID a string identifying the stage for UI persistence,
+	 * or {@code null} if the stage should not be persisted
 	 */
-	public void loadFXML(final Stage controller, final String filename, final String id) {
-		this.loadFXML((Object) controller, filename);
-		this.register(controller, id);
+	public void loadFXML(final Stage controller, final String fxmlResource, final String persistenceID) {
+		this.loadFXML((Object) controller, fxmlResource);
+		this.register(controller, persistenceID);
 	}
 
 	/**
-	 * Load a FXML file using {@link #loadFXML(Stage, String, String)} with a
-	 * {@code null} ID (persistence disabled).
+	 * <p>Load an FXML file with the {@link Stage} {@code controller} as the
+	 * root and controller, and initialize it without registering it with the
+	 * UI persistence mechanism.</p>
+	 * 
+	 * <p>This is equivalent to loading the FXML file using
+	 * {@link #loadFXML(Stage, String, String)} with {@code null} as the
+	 * persistence ID (which disables persistence for the stage).</p>
 	 *
-	 * @param controller
-	 *            the root and controller to use
-	 * @param filename
-	 *            the FXML file to load
+	 * @param controller the {@link Stage} to use as the FXML file's root
+	 * and controller
+	 * @param fxmlResource the resource name of the FXML file to load
 	 */
-	public void loadFXML(final Stage controller, final String filename) {
-		this.loadFXML(controller, filename, null);
+	public void loadFXML(final Stage controller, final String fxmlResource) {
+		this.loadFXML(controller, fxmlResource, null);
 	}
 
 	/**
-	 * Register the given stage with the manager. The stage must already have its
-	 * scene {@link Stage#setScene(Scene) set}. This method applies the
-	 * {@link #STYLESHEET} to the stage's scene, sets the stage icon, and adds some
-	 * internal listeners for implementing UI persistence and the Mac Cmd+W
-	 * shortcut.
+	 * Initialize the given stage and register it with the UI persistence
+	 * mechanism. The stage must already have its scene
+	 * {@link Stage#setScene(Scene) set}.
 	 *
-	 * @param stage
-	 *            the stage to register
-	 * @param id
-	 *            a string identifying the stage for UI persistence, or null if the
-	 *            stage should not be persisted
+	 * @param stage the stage to register
+	 * @param persistenceID a string identifying the stage for UI persistence,
+	 * or {@code null} if the stage should not be persisted
 	 */
-	public void register(final Stage stage, final String id) {
+	public void register(final Stage stage, final String persistenceID) {
 		this.registered.put(stage, null);
-		setPersistenceID(stage, id);
+		setPersistenceID(stage, persistenceID);
 		stage.getProperties().putIfAbsent(PropertiesKey.USE_GLOBAL_MAC_MENU_BAR, true);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
@@ -262,48 +272,62 @@ public final class StageManager {
 		}
 	}
 
-	public void registerMainStage(Stage primaryStage, String name) {
-		this.mainStage = primaryStage;
-		primaryStage.setOnShown(event -> {
-			this.stageSceneWidthDifference.set(primaryStage.getWidth() - primaryStage.getScene().getWidth());
-			this.stageSceneHeightDifference.set(primaryStage.getHeight() - primaryStage.getScene().getHeight());
-			primaryStage.setOnShown(null);
+	/**
+	 * Initialize the given stage as the ProB 2 UI's main stage and register
+	 * it with the UI persistence mechanism. The stage must already have its
+	 * scene {@link Stage#setScene(Scene) set}.
+	 *
+	 * @param stage the stage to register as the main stage
+	 * @param persistenceID a string identifying the stage for UI persistence,
+	 * or {@code null} if the stage should not be persisted
+	 */
+	public void registerMainStage(Stage stage, String persistenceID) {
+		this.mainStage = stage;
+		stage.setOnShown(event -> {
+			this.stageSceneWidthDifference.set(stage.getWidth() - stage.getScene().getWidth());
+			this.stageSceneHeightDifference.set(stage.getHeight() - stage.getScene().getHeight());
+			stage.setOnShown(null);
 		});
-		this.register(primaryStage, name);
+		this.register(stage, persistenceID);
 	}
 
 	/**
-	 * Create with the given {@link Scene} as its scene, and register it
-	 * automatically.
+	 * Create a new stage with the given {@link Scene} as its scene,
+	 * initialize it, and register it with the UI persistence mechanism.
 	 *
-	 * @param scene
-	 *            the new scene's stage
-	 * @param id
-	 *            a string identifying the stage for UI persistence, or null if the
-	 *            stage should not be persisted
+	 * @param scene the new stage's scene
+	 * @param persistenceID a string identifying the stage for UI persistence,
+	 * or {@code null} if the stage should not be persisted
 	 * @return a new stage with the given scene
 	 */
-	public Stage makeStage(final Scene scene, final String id) {
+	public Stage makeStage(final Scene scene, final String persistenceID) {
 		final Stage stage = new Stage();
 		stage.setScene(scene);
-		this.register(stage, id);
+		this.register(stage, persistenceID);
 		return stage;
 	}
 
 	/**
-	 * Register the given dialog with the manager. Currently this only applies the
-	 * {@link #STYLESHEET} to the dialog's dialog pane.
+	 * Initialize the given dialog.
 	 *
-	 * @param dialog
-	 *            the dialog to register
+	 * @param dialog the dialog to register
 	 */
 	public void register(final Dialog<?> dialog) {
 		dialog.getDialogPane().getStylesheets().add(STYLESHEET);
 	}
 
 	/**
-	 * Create and register a new alert.
+	 * Create and initialize a new alert with custom buttons.
 	 *
+	 * @param alertType the alert type
+	 * @param buttons the custom buttons
+	 * @param headerBundleKey the resource bundle key for the alert header
+	 * text, or {@code ""} for the default header text provided by JavaFX
+	 * @param contentBundleKey the resource bundle key for the alert content
+	 * text, whose localized value may contain {@link Formatter}-style
+	 * placeholders
+	 * @param contentParams the objects to insert into the placeholders in
+	 * {@code contentBundleKey}'s localized value
 	 * @return a new alert
 	 */
 	public Alert makeAlert(final Alert.AlertType alertType, final List<ButtonType> buttons,
@@ -318,15 +342,53 @@ public final class StageManager {
 		return alert;
 	}
 	
+	/**
+	 * Create and initialize a new alert with the default buttons provided by
+	 * JavaFX (OK and Cancel).
+	 *
+	 * @param alertType the alert type
+	 * @param headerBundleKey the resource bundle key for the alert header
+	 * text, or {@code ""} for the default header text provided by JavaFX
+	 * @param contentBundleKey the resource bundle key for the alert content
+	 * text, whose localized value may contain {@link Formatter}-style
+	 * placeholders
+	 * @param contentParams the objects to insert into the placeholders in
+	 * {@code contentBundleKey}'s localized value
+	 * @return a new alert
+	 */
 	public Alert makeAlert(final Alert.AlertType alertType, final String headerBundleKey, final String contentBundleKey,
 			final Object... contentParams) {
 		return makeAlert(alertType, new ArrayList<>(), headerBundleKey, contentBundleKey, contentParams);
 	}
 
+	/**
+	 * Create and initialize an {@link ExceptionAlert}.
+	 *
+	 * @param exc the {@link Throwable} for which to make an alert
+	 * @param contentBundleKey the resource bundle key for the alert content
+	 * text, whose localized value may contain {@link Formatter}-style
+	 * placeholders
+	 * @param contentParams the objects to insert into the placeholders in
+	 * {@code contentBundleKey}'s localized value
+	 * @return a new exception alert
+	 */
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {
 		return new ExceptionAlert(this.injector, String.format(bundle.getString(contentBundleKey), contentParams), exc);
 	}
 
+	/**
+	 * Create and initialize an {@link ExceptionAlert}.
+	 *
+	 * @param exc the {@link Throwable} for which to make an alert
+	 * @param headerBundleKey the resource bundle key for the alert header
+	 * text, or {@code ""} for the default header text provided by JavaFX
+	 * @param contentBundleKey the resource bundle key for the alert content
+	 * text, whose localized value may contain {@link Formatter}-style
+	 * placeholders
+	 * @param contentParams the objects to insert into the placeholders in
+	 * {@code contentBundleKey}'s localized value
+	 * @return a new exception alert
+	 */
 	public Alert makeExceptionAlert(final Throwable exc, final String headerBundleKey, final String contentBundleKey,
 			final Object... contentParams) {
 		Alert alert = makeExceptionAlert(exc, contentBundleKey, contentParams);
@@ -369,7 +431,8 @@ public final class StageManager {
 	}
 
 	/**
-	 * Get the main stage.
+	 * Get the main stage, as previously set using
+	 * {@link #registerMainStage(Stage, String)}.
 	 * 
 	 * @return the main stage
 	 */
@@ -391,8 +454,7 @@ public final class StageManager {
 	/**
 	 * Get the persistence ID of the given stage.
 	 * 
-	 * @param stage
-	 *            the stage for which to get the persistence ID
+	 * @param stage the stage for which to get the persistence ID
 	 * @return the stage's persistence ID, or {@code null} if none
 	 */
 	public static String getPersistenceID(final Stage stage) {
@@ -404,18 +466,17 @@ public final class StageManager {
 	/**
 	 * Set the given stage's persistence ID.
 	 * 
-	 * @param stage
-	 *            the stage for which to set the persistence ID
-	 * @param id
-	 *            the persistence ID to set, or {@code null} to remove it
+	 * @param stage the stage for which to set the persistence ID
+	 * @param persistenceID the persistence ID to set, or {@code null} to
+	 * remove it
 	 */
-	public static void setPersistenceID(final Stage stage, final String id) {
+	public static void setPersistenceID(final Stage stage, final String persistenceID) {
 		Objects.requireNonNull(stage);
 
-		if (id == null) {
+		if (persistenceID == null) {
 			stage.getProperties().remove(PropertiesKey.PERSISTENCE_ID);
 		} else {
-			stage.getProperties().put(PropertiesKey.PERSISTENCE_ID, id);
+			stage.getProperties().put(PropertiesKey.PERSISTENCE_ID, persistenceID);
 		}
 	}
 
@@ -423,10 +484,9 @@ public final class StageManager {
 	 * Get whether the given stage uses the global Mac menu bar. On non-Mac systems
 	 * this setting should not be used.
 	 * 
-	 * @param stage
-	 *            the stage for which to get this setting
+	 * @param stage the stage for which to get this setting
 	 * @return whether the given stage uses the global Mac menu bar, or
-	 *         {@code false} if not set
+	 * {@code false} if not set
 	 */
 	public static boolean isUseGlobalMacMenuBar(final Stage stage) {
 		return (boolean) stage.getProperties().getOrDefault(PropertiesKey.USE_GLOBAL_MAC_MENU_BAR, false);
@@ -436,8 +496,8 @@ public final class StageManager {
 	 * On Mac, set the given stage's menu bar. On other systems this method does
 	 * nothing.
 	 *
-	 * @param menuBar
-	 *            the menu bar to use, or {@code null} to use the global menu bar
+	 * @param menuBar the menu bar to use, or {@code null} to use the global
+	 * menu bar
 	 */
 	public void setMacMenuBar(final Stage stage, final MenuBar menuBar) {
 		Objects.requireNonNull(stage);
@@ -467,19 +527,16 @@ public final class StageManager {
 	}
 
 	/**
-	 * <p>
-	 * On Mac, set the given menu bar as the menu bar for all registered stages and
-	 * any stages registered in the future. On other systems this method does
-	 * nothing.
-	 * </p>
-	 * <p>
-	 * This method is similar to {@link MenuToolkit#setGlobalMenuBar(MenuBar)},
-	 * except that it only affects registered stages and handles stages with a null
-	 * scene correctly.
-	 * </p>
+	 * <p>On Mac, set the given menu bar as the menu bar for all registered
+	 * stages and any stages registered in the future. On other systems this
+	 * method does nothing.</p>
 	 * 
-	 * @param menuBar
-	 *            the menu bar to set
+	 * <p>This method is similar to
+	 * {@link MenuToolkit#setGlobalMenuBar(MenuBar)}, except that it only
+	 * affects registered stages and handles stages with a {@code null} scene
+	 * correctly.</p>
+	 * 
+	 * @param menuBar the menu bar to set
 	 */
 	public void setGlobalMacMenuBar(final MenuBar menuBar) {
 		if (this.menuToolkit == null) {
