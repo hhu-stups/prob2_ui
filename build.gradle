@@ -31,7 +31,7 @@ repositories {
 	}
 }
 
-mainClassName = "de.prob2.ui.ProB2"
+mainClassName = "de.prob2.ui.Main"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [
 	"-Xss2M",
