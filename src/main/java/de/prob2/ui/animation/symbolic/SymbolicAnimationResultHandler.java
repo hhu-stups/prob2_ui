@@ -19,6 +19,7 @@ import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -184,6 +185,11 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 			return;
 		}
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
+
+		List<TraceInformationItem> traceInformation = testCaseGeneratorResult.getTestTraces().stream()
+				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.isComplete(), trace.lastTransitionIsFeasible()))
+				.collect(Collectors.toList());
+
 		List<Trace> traces = testCaseGeneratorResult.getTraces();
 		if(testCaseGeneratorResult.isInterrupted()) {
 			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.testcasegeneration.result.interrupted");
@@ -193,8 +199,12 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.found");
 		}
 		item.getExamples().addAll(traces);
-		if(!item.getExamples().isEmpty() && doSave) {
-			saveTraces(item);
+
+		if(!item.getExamples().isEmpty()) {
+			item.putAdditionalInformation("traceInformation", traceInformation);
+			if(doSave) {
+				saveTraces(item);
+			}
 		}
 	}
 

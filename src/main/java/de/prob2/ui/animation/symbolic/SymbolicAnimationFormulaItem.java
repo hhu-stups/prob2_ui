@@ -100,4 +100,8 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	public Object getAdditionalInformation(String key) {
 		return additionalInformation.get(key);
 	}
+
+	public void putAdditionalInformation(String key, Object value) {
+		additionalInformation.put(key, value);
+	}
 }

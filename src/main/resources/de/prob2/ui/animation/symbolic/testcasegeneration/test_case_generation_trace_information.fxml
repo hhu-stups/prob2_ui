@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<fx:root type="Stage" title="%animation.symbolic.traceInformation.title" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css" height="400.0" width="600.0">
+			<!-- TableView does not extend Pane, so we have to wrap it in a Pane so we can add the menu bar to it on Mac. -->
+			<AnchorPane>
+				<TableView fx:id="tvTraces" AnchorPane.bottomAnchor="0.0"
+					AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+					AnchorPane.topAnchor="0.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+					<columns>
+						<TableColumn fx:id="depth" editable="false" prefWidth="89.0" text="%animation.symbolic.traceInformation.column.depth" />
+						<TableColumn fx:id="transitions" editable="false" prefWidth="89.0" text="%animation.symbolic.traceInformation.column.transitions" />
+						<TableColumn fx:id="isComplete" editable="false" prefWidth="89.0" text="%animation.symbolic.traceInformation.column.isComplete" />
+						<TableColumn fx:id="lastTransitionFeasible" editable="false" prefWidth="89.0" text="%animation.symbolic.traceInformation.column.lastTransitionFeasible" />
+					</columns>
+					<columnResizePolicy>
+						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+					</columnResizePolicy>
+				</TableView>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>

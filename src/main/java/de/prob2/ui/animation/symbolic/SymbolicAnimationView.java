@@ -4,6 +4,8 @@ package de.prob2.ui.animation.symbolic;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -15,6 +17,8 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
@@ -37,7 +41,18 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		@Override
 		public TableRow<SymbolicAnimationFormulaItem> call(TableView<SymbolicAnimationFormulaItem> param) {
 			TableRow<SymbolicAnimationFormulaItem> row = createRow();
-			
+
+			MenuItem showDetails = new MenuItem(bundle.getString("symbolic.view.contextMenu.showDetails"));
+			showDetails.setDisable(true);
+			showDetails.setOnAction(e -> {
+				SymbolicAnimationFormulaItem item = row.getItem();
+				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
+				@SuppressWarnings("unchecked")
+				ObservableList<TraceInformationItem> items = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation("traceInformation"));
+				stage.setItems(items);
+				stage.show();
+			});
+
 			Menu showStateItem = new Menu(bundle.getString("animation.symbolic.view.contextMenu.showFoundPaths"));
 			showStateItem.setDisable(true);
 			
@@ -57,11 +72,12 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					saveTraces.disableProperty().bind(showStateItem.disableProperty());
 					showExamples(to, showStateItem);
+					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
 			});
 			
 			ContextMenu contextMenu = row.getContextMenu();
-			contextMenu.getItems().addAll(showMessage, showStateItem, saveTraces);
+			contextMenu.getItems().addAll(showDetails, showMessage, showStateItem, saveTraces);
 			
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
