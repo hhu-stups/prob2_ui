@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.symbolic;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import javafx.beans.property.ListProperty;
@@ -48,8 +49,8 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	}
 
 	@Override
-	public void initialize() {
-		super.initialize();
+	public void replaceMissingWithDefaults() {
+		super.replaceMissingWithDefaults();
 		if(this.examples == null) {
 			this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		} else {
@@ -57,6 +58,21 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		}
 		if(this.additionalInformation == null) {
 			this.additionalInformation = new HashMap<>();
+		}
+		if(type == SymbolicExecutionType.MCDC) {
+			if(additionalInformation.get("maxDepth") == null || additionalInformation.get("level") == null) {
+				int depth = TestCaseGenerationFormulaExtractor.extractDepth(this.code);
+				int level = TestCaseGenerationFormulaExtractor.extractLevel(this.code);
+				additionalInformation.put("maxDepth", depth);
+				additionalInformation.put("level", level);
+			}
+		} else if(type == SymbolicExecutionType.COVERED_OPERATIONS) {
+			if(additionalInformation.get("maxDepth") == null || additionalInformation.get("operations") == null) {
+				int depth = TestCaseGenerationFormulaExtractor.extractDepth(this.code);
+				List<String> operations = TestCaseGenerationFormulaExtractor.extractOperations(this.code);
+				additionalInformation.put("maxDepth", depth);
+				additionalInformation.put("operations", operations);
+			}
 		}
 	}
 
