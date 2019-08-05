@@ -93,6 +93,7 @@ dependencies {
 if (JavaVersion.current().java11Compatible) {
 	apply plugin: "org.openjfx.javafxplugin"
 	javafx {
+		version = "11.0.2"
 		modules = [
 			"javafx.base",
 			"javafx.controls",
