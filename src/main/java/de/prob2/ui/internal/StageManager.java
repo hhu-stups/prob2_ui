@@ -89,15 +89,6 @@ public final class StageManager {
 	}
 
 	/**
-	 * Get a new FXMLLoader from the manager's injector.
-	 *
-	 * @return a new FXMLLoader
-	 */
-	public FXMLLoader makeFXMLLoader() {
-		return injector.getInstance(FXMLLoader.class);
-	}
-
-	/**
 	 * Load a FXML file with {@code controller} as the root and controller.
 	 * {@code filename} may be absolute, or relative to {@code controller}'s
 	 * package.
@@ -108,7 +99,7 @@ public final class StageManager {
 	 *            the FXML file to load
 	 */
 	public void loadFXML(final Object controller, final String filename) {
-		final FXMLLoader loader = this.makeFXMLLoader();
+		final FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		if (!filename.startsWith("custom")) {
 			loader.setLocation(controller.getClass().getResource(filename));
 		} else {
