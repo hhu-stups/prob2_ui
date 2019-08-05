@@ -40,8 +40,9 @@ public class MCDCInputView extends VBox {
     }
 
     public void setItem(SymbolicAnimationFormulaItem item) {
-        levelField.setText(String.valueOf(item.getAdditionalInformation("level")));
-        depthField.setText(String.valueOf(item.getAdditionalInformation("maxDepth")));
+        //An element in the values set of additionalInformation can be from any type. GSON casts an integer to double when saving the project file.
+        levelField.setText(String.valueOf((int) Double.parseDouble(item.getAdditionalInformation("level").toString())));
+        depthField.setText(String.valueOf((int) Double.parseDouble(item.getAdditionalInformation("maxDepth").toString())));
     }
 
 }

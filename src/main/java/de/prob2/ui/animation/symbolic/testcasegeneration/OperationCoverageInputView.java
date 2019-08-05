@@ -59,7 +59,8 @@ public class OperationCoverageInputView extends VBox {
     }
 
     public void setItem(SymbolicAnimationFormulaItem item) {
-        depthField.setText(String.valueOf(item.getAdditionalInformation("maxDepth")));
+        //An element in the values set of additionalInformation can be from any type. GSON casts an integer to double when saving the project file.
+        depthField.setText(String.valueOf((int) Double.parseDouble(item.getAdditionalInformation("maxDepth").toString())));
     }
 
     public void setTable(List<String> operations) {
