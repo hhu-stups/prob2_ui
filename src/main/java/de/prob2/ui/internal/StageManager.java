@@ -399,17 +399,6 @@ public final class StageManager {
 	}
 	
 	/**
-	 * Get the extension of the given file name.
-	 * 
-	 * @param filename the file name for which to get the extension
-	 * @return the file extension
-	 */
-	public static String getExtension(final String filename) {
-		final String[] parts = filename.split("\\.");
-		return parts[parts.length-1];
-	}
-
-	/**
 	 * A read-only property containing the currently focused stage. If a non-JavaFX
 	 * window or an unregistered stage is in focus, the property's value is
 	 * {@code null}.

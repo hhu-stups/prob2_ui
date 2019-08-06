@@ -282,7 +282,7 @@ public class MachinesTab extends Tab {
 			machine = new Machine(nameInProject, "", relative);
 		} catch (IllegalArgumentException e) {
 			LOGGER.info("User tried to create a machine with an invalid extension", e);
-			final String extension = StageManager.getExtension(relative.getFileName().toString());
+			final String extension = com.google.common.io.Files.getFileExtension(relative.getFileName().toString());
 			stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.machines.machinesTab.alerts.invalidMachineExtension.content", extension).show();
 			return;
 		}

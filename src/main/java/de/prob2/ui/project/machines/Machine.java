@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.google.common.io.Files;
+
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.model.brules.RulesModelFactory;
 import de.prob.scripting.AlloyFactory;
@@ -19,7 +21,6 @@ import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -130,7 +131,7 @@ public class Machine {
 	
 	public Machine(String name, String description, Path location) {
 		this(name, description, location,
-			Machine.Type.fromExtension(StageManager.getExtension(location.getFileName().toString())));
+			Machine.Type.fromExtension(Files.getFileExtension(location.getFileName().toString())));
 	}
 	
 	public BooleanProperty changedProperty() {
