@@ -91,11 +91,11 @@ public class MainController extends BorderPane {
 					);
 				}
 				
-				if (configData.horizontalDividerPositions != null) {
+				if (configData.horizontalDividerPositions != null && horizontalSP != null) {
 					horizontalSP.setDividerPositions(configData.horizontalDividerPositions);
 				}
 				
-				if (configData.verticalDividerPositions != null) {
+				if (configData.verticalDividerPositions != null && verticalSP != null) {
 					verticalSP.setDividerPositions(configData.verticalDividerPositions);
 				}
 			}
@@ -106,8 +106,12 @@ public class MainController extends BorderPane {
 					.map(Accordion::getExpandedPane)
 					.map(Node::getId)
 					.collect(Collectors.toList());
-				configData.horizontalDividerPositions = horizontalSP.getDividerPositions();
-				configData.verticalDividerPositions = verticalSP.getDividerPositions();
+				if (horizontalSP != null) {
+					configData.horizontalDividerPositions = horizontalSP.getDividerPositions();
+				}
+				if (verticalSP != null) {
+					configData.verticalDividerPositions = verticalSP.getDividerPositions();
+				}
 			}
 		});
 	}
