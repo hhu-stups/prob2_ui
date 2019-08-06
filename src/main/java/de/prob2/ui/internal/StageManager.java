@@ -2,7 +2,6 @@ package de.prob2.ui.internal;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -138,17 +137,7 @@ public final class StageManager {
 	 * @param fxmlResource the resource name of the FXML file to load
 	 */
 	public void loadFXML(final Object controller, final String fxmlResource) {
-		final URL fxmlUrl;
-		if (!fxmlResource.startsWith("custom")) {
-			fxmlUrl = controller.getClass().getResource(fxmlResource);
-		} else {
-			try {
-				fxmlUrl = new URL(fxmlResource.replace("custom ", ""));
-			} catch (MalformedURLException e) {
-				throw new IllegalArgumentException(e);
-			}
-		}
-		this.loadFXML(controller, fxmlUrl);
+		this.loadFXML(controller, controller.getClass().getResource(fxmlResource));
 	}
 
 	/**
