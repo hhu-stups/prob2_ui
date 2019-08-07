@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -124,7 +125,7 @@ public class FileMenu extends Menu {
 		if (selected == null) {
 			return;
 		}
-		final String ext = StageManager.getExtension(selected.getFileName().toString());
+		final String ext = Files.getFileExtension(selected.getFileName().toString());
 		if ("prob2project".equals(ext)) {
 			this.openProject(selected);
 		} else {

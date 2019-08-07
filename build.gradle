@@ -31,6 +31,8 @@ repositories {
 	}
 }
 
+// Our actual application class is de.prob2.ui.ProB2.
+// See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
 mainClassName = "de.prob2.ui.Main"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [

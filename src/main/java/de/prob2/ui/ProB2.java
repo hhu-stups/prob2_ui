@@ -82,10 +82,6 @@ public class ProB2 extends Application {
 		}
 	}
 
-	public static void main(String... args) {
-		Application.launch(args);
-	}
-
 	@Override
 	public void init() {
 		if (!System.getProperties().containsKey(ContextInitializer.CONFIG_FILE_PROPERTY)) {

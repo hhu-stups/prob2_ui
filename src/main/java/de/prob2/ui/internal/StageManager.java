@@ -2,7 +2,6 @@ package de.prob2.ui.internal;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,25 +96,14 @@ public final class StageManager {
 
 	/**
 	 * Load an FXML file with {@code controller} as the root and controller.
-	 * {@code fxmlResource} is the resource name of the FXML file to load.
-	 * If {@code fxmlResource} is a relative name (i. e. one that doesn't start
-	 * with a slash), it is resolved relative to {@code controller}'s class.
 	 *
 	 * @param controller the object to use as the FXML file's root
 	 * and controller
-	 * @param fxmlResource the resource name of the FXML file to load
+	 * @param fxmlUrl the URL of the FXML file to load
 	 */
-	public void loadFXML(final Object controller, final String fxmlResource) {
+	public void loadFXML(final Object controller, final URL fxmlUrl) {
 		final FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-		if (!fxmlResource.startsWith("custom")) {
-			loader.setLocation(controller.getClass().getResource(fxmlResource));
-		} else {
-			try {
-				loader.setLocation(new URL(fxmlResource.replace("custom ", "")));
-			} catch (MalformedURLException e) {
-				throw new IllegalArgumentException(e);
-			}
-		}
+		loader.setLocation(fxmlUrl);
 		loader.setRoot(controller);
 		loader.setController(controller);
 		try {
@@ -136,6 +124,20 @@ public final class StageManager {
 			Dialog<?> controllerDialog = (Dialog<?>) controller;
 			controllerDialog.getDialogPane().styleProperty().bind(fontSizeCssValue);
 		}
+	}
+
+	/**
+	 * Load an FXML file with {@code controller} as the root and controller.
+	 * {@code fxmlResource} is the resource name of the FXML file to load.
+	 * If {@code fxmlResource} is a relative name (i. e. one that doesn't start
+	 * with a slash), it is resolved relative to {@code controller}'s class.
+	 *
+	 * @param controller the object to use as the FXML file's root
+	 * and controller
+	 * @param fxmlResource the resource name of the FXML file to load
+	 */
+	public void loadFXML(final Object controller, final String fxmlResource) {
+		this.loadFXML(controller, controller.getClass().getResource(fxmlResource));
 	}
 
 	/**
@@ -398,17 +400,6 @@ public final class StageManager {
 		return alert;
 	}
 	
-	/**
-	 * Get the extension of the given file name.
-	 * 
-	 * @param filename the file name for which to get the extension
-	 * @return the file extension
-	 */
-	public static String getExtension(final String filename) {
-		final String[] parts = filename.split("\\.");
-		return parts[parts.length-1];
-	}
-
 	/**
 	 * A read-only property containing the currently focused stage. If a non-JavaFX
 	 * window or an unregistered stage is in focus, the property's value is
