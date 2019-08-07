@@ -5,6 +5,8 @@ import java.util.List;
 
 public class TestCaseGenerationFormulaExtractor {
 
+    private TestCaseGenerationFormulaExtractor(){}
+
     public static int extractDepth(String formula) {
         String[] splittedStringBySlash = formula.replaceAll(" ", "").split("/");
         String[] splittedStringByColon = splittedStringBySlash[1].split(":");

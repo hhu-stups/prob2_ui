@@ -16,6 +16,12 @@ import java.util.Objects;
 
 public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 
+	private static final String MAX_DEPTH = "maxDepth";
+
+	private static final String LEVEL = "level";
+
+	private static final String OPERATIONS = "operations";
+
 	private transient ListProperty<Trace> examples;
 
 	private Map<String, Object> additionalInformation;
@@ -36,16 +42,16 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		super("MCDC:" + level + "/" + "DEPTH:" + maxDepth, SymbolicExecutionType.MCDC);
 		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.additionalInformation = new HashMap<>();
-		additionalInformation.put("maxDepth", maxDepth);
-		additionalInformation.put("level", level);
+		additionalInformation.put(MAX_DEPTH, maxDepth);
+		additionalInformation.put(LEVEL, level);
 	}
 
 	public SymbolicAnimationFormulaItem(int maxDepth, List<String> operations) {
 		super("OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + maxDepth, SymbolicExecutionType.COVERED_OPERATIONS);
 		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.additionalInformation = new HashMap<>();
-		additionalInformation.put("maxDepth", maxDepth);
-		additionalInformation.put("operations", operations);
+		additionalInformation.put(MAX_DEPTH, maxDepth);
+		additionalInformation.put(OPERATIONS, operations);
 	}
 
 	@Override
@@ -60,18 +66,18 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 			this.additionalInformation = new HashMap<>();
 		}
 		if(type == SymbolicExecutionType.MCDC) {
-			if(additionalInformation.get("maxDepth") == null || additionalInformation.get("level") == null) {
+			if(additionalInformation.get(MAX_DEPTH) == null || additionalInformation.get(LEVEL) == null) {
 				int depth = TestCaseGenerationFormulaExtractor.extractDepth(this.code);
 				int level = TestCaseGenerationFormulaExtractor.extractLevel(this.code);
-				additionalInformation.put("maxDepth", depth);
-				additionalInformation.put("level", level);
+				additionalInformation.put(MAX_DEPTH, depth);
+				additionalInformation.put(LEVEL, level);
 			}
 		} else if(type == SymbolicExecutionType.COVERED_OPERATIONS) {
-			if(additionalInformation.get("maxDepth") == null || additionalInformation.get("operations") == null) {
+			if(additionalInformation.get(MAX_DEPTH) == null || additionalInformation.get(OPERATIONS) == null) {
 				int depth = TestCaseGenerationFormulaExtractor.extractDepth(this.code);
 				List<String> operations = TestCaseGenerationFormulaExtractor.extractOperations(this.code);
-				additionalInformation.put("maxDepth", depth);
-				additionalInformation.put("operations", operations);
+				additionalInformation.put(MAX_DEPTH, depth);
+				additionalInformation.put(OPERATIONS, operations);
 			}
 		}
 	}
