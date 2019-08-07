@@ -14,7 +14,7 @@ public class TraceInformationItem {
 
     public TraceInformationItem(int depth, List<String> transitions, boolean complete, boolean lastTransitionFeasible) {
         this.depth = depth;
-        this.transitions = String.join(", ", transitions);
+        this.transitions = String.join(",\n", transitions);
         this.complete = complete;
         this.lastTransitionFeasible = lastTransitionFeasible;
     }
