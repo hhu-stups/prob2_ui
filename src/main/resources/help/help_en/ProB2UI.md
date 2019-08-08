@@ -41,7 +41,7 @@ The Visualisation submenu provides different forms of visualisation. You can ent
 
 ![Advanced Menu](../screenshots/Menu/Advanced.png)
 
-This submenu provides a Groovy console and allows you to manage your plugins and own visualisations. Additionally you can compute [benchmarks](Benchmarks.md) of operations by using this menu.
+This submenu provides a Groovy console and allows you to manage your plugins and own visualisations.
 
 ![Window Menu](../screenshots/Menu/Window.png)
 

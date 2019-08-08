@@ -4,7 +4,7 @@ plugins {
 	id "com.github.johnrengelman.shadow" version "5.0.0"
 	id "edu.sc.seis.macAppBundle" version "2.3.0"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
-	id "org.openjfx.javafxplugin" version "0.0.7" apply false
+	id "org.openjfx.javafxplugin" version "0.0.8" apply false
 	id "org.sonarqube" version "2.7"
 }
 
@@ -13,7 +13,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 
 project.group = "de.hhu.stups"
-project.version = "1.0.0-SNAPSHOT"
+project.version = "1.0.1-SNAPSHOT"
 
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
@@ -31,7 +31,9 @@ repositories {
 	}
 }
 
-mainClassName = "de.prob2.ui.ProB2"
+// Our actual application class is de.prob2.ui.ProB2.
+// See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
+mainClassName = "de.prob2.ui.Main"
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [
 	"-Xss2M",
@@ -58,7 +60,8 @@ opens += [
 	"javafx.graphics/com.sun.javafx.tk.quantum",
 ]
 
-// Required by controlsfx (as of version 11.0.0-RC2; see https://github.com/controlsfx/controlsfx/issues/1100)
+// Required by controlsfx, because we are still using the Java 8-compatible version.
+// This has been fixed as of ControlsFX 11.0.0 (see https://github.com/controlsfx/controlsfx/issues/1100), but that release is only compatible with Java 11.
 exports += [
 	"javafx.graphics/com.sun.javafx.css",
 ]
@@ -80,9 +83,9 @@ dependencies {
 	compile group: "com.google.code.gson", name: "gson", version: "2.8.5"
 	compile group: "com.googlecode.java-diff-utils", name: "diffutils", version: "1.3.0"
 	compile group: "de.codecentric.centerdevice", name: "centerdevice-nsmenufx", version: "2.1.6"
-	compile group: "de.hhu.stups", name: "de.prob2.kernel", version: "3.9.9", changing: true
-	compile group: "org.controlsfx", name: "controlsfx", version: "8.40.14"
-	compile group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.0"
+	compile group: "de.hhu.stups", name: "de.prob2.kernel", version: "4.0.0-SNAPSHOT", changing: true
+	compile group: "org.controlsfx", name: "controlsfx", version: "8.40.15"
+	compile group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.1"
 	compile group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
 	compile group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.2"
 	compile group: "org.pf4j", name: "pf4j", version: "2.6.0"
@@ -92,6 +95,7 @@ dependencies {
 if (JavaVersion.current().java11Compatible) {
 	apply plugin: "org.openjfx.javafxplugin"
 	javafx {
+		version = "11.0.2"
 		modules = [
 			"javafx.base",
 			"javafx.controls",
@@ -162,8 +166,6 @@ sonarqube {
 		property("sonar.exclusions", [
 			"gradle/wrapper/*",
 			"build/**",
-			// Sonar currently throws exceptions when parsing ProB2Module.java, so it's excluded for now.
-			"src/main/java/de/prob2/ui/internal/ProB2Module.java",
 			"src/main/resources/de/prob2/ui/codemirror/**",
 		].join(","))
 		
@@ -178,11 +180,13 @@ if( rootProject == project) {
 	}
 }
 
+final helpScript = "./help.sh"
 final helpDir = file("src/main/resources/help")
 task createHelp(type: Exec) {
+	inputs.file(helpScript)
 	inputs.dir(helpDir)
 	outputs.dir(helpDir)
-	commandLine './help.sh'
+	commandLine(helpScript)
 }
 
 task cleanHelp(type: Delete) {

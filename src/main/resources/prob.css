@@ -686,7 +686,7 @@
 	-fx-background: white;
 	-fx-border-color: transparent;
 	-fx-border-width: 0.0;
-	-fx-cell-size: 1.5em;
+
 }
 .tree-table-row-cell:odd,
 .table-row-cell:odd {

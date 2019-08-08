@@ -26,6 +26,8 @@ public final class AboutBox extends Stage {
 	private Label cliInfoLabel;
 	@FXML
 	private Label javaInfoLabel;
+	@FXML
+	private Label javaFxInfoLabel;
 
 	@Inject
 	private AboutBox(final StageManager stageManager, final ResourceBundle bundle, final VersionInfo versionInfo) {
@@ -78,6 +80,12 @@ public final class AboutBox extends Stage {
 			System.getProperty("java.vm.name"),
 			System.getProperty("java.vm.version"),
 			System.getProperty("java.vm.vendor")
+		));
+		
+		this.javaFxInfoLabel.setText(String.format(
+			this.bundle.getString("menu.aboutBox.javaFxInfo"),
+			System.getProperty("javafx.version"),
+			System.getProperty("javafx.runtime.version")
 		));
 	}
 }

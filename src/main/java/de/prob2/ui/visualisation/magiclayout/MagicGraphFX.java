@@ -1,7 +1,6 @@
 package de.prob2.ui.visualisation.magiclayout;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,13 +9,15 @@ import java.util.Set;
 
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.hhu.stups.prob.translator.BSet;
+import de.hhu.stups.prob.translator.BTuple;
+import de.hhu.stups.prob.translator.BValue;
+import de.hhu.stups.prob.translator.exceptions.TranslationException;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
-import de.prob.translator.Translator;
-import de.prob.translator.types.BObject;
+import de.hhu.stups.prob.translator.Translator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
@@ -135,8 +136,8 @@ public class MagicGraphFX implements MagicGraphI {
 			if (!node.getExpression().isEmpty()) {
 				try {
 					AbstractEvalResult result = state.eval(node.getExpression(), FormulaExpand.EXPAND);
-					BObject bObject = Translator.translate(result.toString());
-					Model modelToStyle = transformModel(getModel(node.getExpression(), bObject), graph.getModel());
+					BValue bValue = Translator.translate(result.toString());
+					Model modelToStyle = transformModel(getModel(node.getExpression(), bValue), graph.getModel());
 
 					Vertex.Style style = new Vertex.Style(node.getNodeColor(), node.getLineColor(),
 							node.getLineWidth().getWidth(), node.getLineType().getDashArrayList(), node.getTextColor());
@@ -145,7 +146,7 @@ public class MagicGraphFX implements MagicGraphI {
 						vertex.setStyle(style);
 						vertex.setType(toVertexType(node.getShape()));
 					});
-				} catch (BCompoundException e) {
+				} catch (TranslationException e) {
 					stageManager.makeExceptionAlert(e, "",
 							"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content", node.getName(),
 							node.getExpression()).showAndWait();
@@ -158,8 +159,8 @@ public class MagicGraphFX implements MagicGraphI {
 				try {
 					AbstractEvalResult result = state.eval(magicEdge.getExpression(), FormulaExpand.EXPAND);
 					if (!result.toString().equals("NOT-INITIALISED: ")) {
-						BObject bObject = Translator.translate(result.toString());
-						Model modelToStyle = transformModel(getModel(magicEdge.getExpression(), bObject),
+						BValue bValue = Translator.translate(result.toString());
+						Model modelToStyle = transformModel(getModel(magicEdge.getExpression(), bValue),
 								graph.getModel());
 
 						Edge.Style style = new Edge.Style(magicEdge.getLineColor(), magicEdge.getLineWidth().getWidth(),
@@ -168,7 +169,7 @@ public class MagicGraphFX implements MagicGraphI {
 
 						modelToStyle.getEdges().forEach(edge -> edge.setStyle(style));
 					}
-				} catch (BCompoundException e) {
+				} catch (TranslationException e) {
 					stageManager.makeExceptionAlert(e, "",
 							"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content",
 							magicEdge.getName(), magicEdge.getExpression()).showAndWait();
@@ -189,15 +190,15 @@ public class MagicGraphFX implements MagicGraphI {
 		Model model = new Model();
 
 		List<IEvalElement> setEvalElements = state.getStateSpace().getLoadedMachine().getSetEvalElements(FormulaExpand.EXPAND);
-		Map<String, BObject> translatedSetsMap = translateMap(state.evalFormulas(setEvalElements));
+		Map<String, BValue> translatedSetsMap = translateMap(state.evalFormulas(setEvalElements));
 		translatedSetsMap.forEach((string, obj) -> combineModel(model, getModel(string, obj)));
 
 		Map<IEvalElement, AbstractEvalResult> constantResultMap = state.getConstantValues(FormulaExpand.EXPAND);
-		Map<String, BObject> translatedConstantsMap = translateMap(constantResultMap);
+		Map<String, BValue> translatedConstantsMap = translateMap(constantResultMap);
 		translatedConstantsMap.forEach((string, obj) -> combineModel(model, getModel(string, obj)));
 
 		Map<IEvalElement, AbstractEvalResult> variableResultMap = state.getVariableValues(FormulaExpand.EXPAND);
-		Map<String, BObject> translatedVariableMap = translateMap(variableResultMap);
+		Map<String, BValue> translatedVariableMap = translateMap(variableResultMap);
 		translatedVariableMap.forEach((string, obj) -> combineModel(model, getModel(string, obj)));
 
 		return model;
@@ -205,22 +206,22 @@ public class MagicGraphFX implements MagicGraphI {
 
 	/**
 	 * Uses the {@link Translator} to translate the values of the specified map to
-	 * {@link BObject}s.
+	 * {@link BValue}s.
 	 * 
 	 * @param evalMap the map to be translated
 	 * @return a map which contains the string representation of the
 	 *         {@link IEvalElement}s as keys and the {@link AbstractEvalResult}s
-	 *         translated to {@link BObject}s as values
+	 *         translated to {@link BValue}s as values
 	 */
-	private Map<String, BObject> translateMap(Map<IEvalElement, AbstractEvalResult> evalMap) {
-		Map<String, BObject> translatedMap = new HashMap<>();
+	private Map<String, BValue> translateMap(Map<IEvalElement, AbstractEvalResult> evalMap) {
+		Map<String, BValue> translatedMap = new HashMap<>();
 
 		evalMap.forEach((eval, result) -> {
 			try {
 				if (!result.toString().equals("NOT-INITIALISED: ")) {
 					translatedMap.put(eval.toString(), Translator.translate(result.toString()));
 				}
-			} catch (BCompoundException e) {
+			} catch (TranslationException e) {
 				stageManager.makeExceptionAlert(e, "",
 						"visualisation.magicLayout.magicGraphFX.alerts.couldNotTranslate.content", result.toString(),
 						eval.toString()).showAndWait();
@@ -231,26 +232,26 @@ public class MagicGraphFX implements MagicGraphI {
 	}
 
 	/**
-	 * Creates a model which represents the specified {@link BObject}.
+	 * Creates a model which represents the specified {@link BValue}.
 	 * 
 	 * @param caption
-	 * @param bObject
-	 * @return a model representing the specified {@link BObject}
+	 * @param bValue
+	 * @return a model representing the specified {@link BValue}
 	 */
-	private Model getModel(String caption, BObject bObject) {
+	private Model getModel(String caption, BValue bValue) {
 		Model model = new Model();
-		if (!(bObject instanceof Collection<?>)) {
-			if (caption.equals(bObject.toString())) {
+		if (bValue instanceof BTuple) {
+			BTuple<?, ?> tuple = (BTuple<?, ?>) bValue;
+			model.addEdge(new Edge(new Vertex(tuple.getFirst().toString()), new Vertex(tuple.getSecond().toString()),
+				caption));
+		} else if(bValue instanceof BSet<?>) {
+			((BSet<?>) bValue).stream().forEach(element -> combineModel(model, getModel(caption, (BValue) element)));
+		} else {
+			if (caption.equals(bValue.toString())) {
 				model.addVertex(new Vertex(caption));
 			} else {
-				model.addEdge(new Edge(new Vertex(caption), new Vertex(bObject.toString()), ""));
+				model.addEdge(new Edge(new Vertex(caption), new Vertex(bValue.toString()), ""));
 			}
-		} else if (bObject instanceof de.prob.translator.types.Tuple) {
-			de.prob.translator.types.Tuple tuple = (de.prob.translator.types.Tuple) bObject;
-			model.addEdge(new Edge(new Vertex(tuple.getFirst().toString()), new Vertex(tuple.getSecond().toString()),
-					caption));
-		} else {
-			((Collection<?>) bObject).forEach(element -> combineModel(model, getModel(caption, (BObject) element)));
 		}
 		return model;
 	}

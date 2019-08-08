@@ -5,14 +5,17 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.command.SymbolicModelcheckCommand;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
+import de.prob2.ui.symbolic.SymbolicFormulaItem;
 import de.prob2.ui.symbolic.SymbolicGUIType;
+import de.prob2.ui.symbolic.SymbolicView;
 import javafx.fxml.FXML;
 
 import java.util.ResourceBundle;
@@ -28,10 +31,27 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 	public SymbolicCheckingFormulaInput(final StageManager stageManager,
 										final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler,
 										final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
-										final CurrentTrace currentTrace, final TestCaseGenerationFormulaExtractor extractor) {
-		super(stageManager, currentProject, injector, bundle, currentTrace, extractor);
+										final CurrentTrace currentTrace) {
+		super(stageManager, currentProject, injector, bundle, currentTrace);
 		this.symbolicCheckingFormulaHandler = symbolicCheckingFormulaHandler;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
+	}
+
+	protected boolean updateFormula(SymbolicCheckingFormulaItem item, SymbolicView<SymbolicCheckingFormulaItem> view, SymbolicChoosingStage<SymbolicCheckingFormulaItem> choosingStage) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		String formula = extractFormula(choosingStage);
+		SymbolicFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
+		if(choosingStage.getExecutionType() == SymbolicExecutionType.CHECK_ALL_OPERATIONS || (choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null)) {
+			return true;
+		}
+		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
+			SymbolicExecutionType type = choosingStage.getExecutionType();
+			item.setData(formula, type.getName(), formula, type);
+			item.reset();
+			view.refresh();
+			return true;
+		}
+		return false;
 	}
 	
 	protected void setCheckListeners() {

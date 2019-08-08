@@ -2,6 +2,7 @@ package de.prob2.ui.states;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,12 +72,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class StatesView extends StackPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatesView.class);
-	private static final TreeItem<StateItem<?>> LOADING_ITEM;
-
-	static {
-		LOADING_ITEM = new TreeItem<>(new StateItem<>("Loading...", false));
-		LOADING_ITEM.getChildren().add(new TreeItem<>(new StateItem<>("Loading", false)));
-	}
 
 	@FXML
 	private TextField filterState;
@@ -139,8 +134,8 @@ public final class StatesView extends StackPane {
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell());
-		this.tvValue.setCellFactory(col -> new ValueCell(bundle, this.currentValues, true));
-		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle, this.previousValues, false));
+		this.tvValue.setCellFactory(col -> new ValueCell(bundle, this.currentValues));
+		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle, this.previousValues));
 
 		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings
 				.createObjectBinding(data.getValue()::getValue, this.currentTrace);
@@ -148,7 +143,12 @@ public final class StatesView extends StackPane {
 		this.tvValue.setCellValueFactory(cellValueFactory);
 		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
 
-		this.tv.getRoot().setValue(new StateItem<>("Machine (this root item should be invisible)", false));
+		this.tv.getRoot().setValue(new StateItem<>(new ASTCategory(
+			Collections.emptyList(),
+			"Machine (this root item should be invisible)",
+			true,
+			false
+		), false));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updater.execute(() -> {
 			if (to == null) {
@@ -205,29 +205,15 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-		final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
+		final MenuItem copyItem = new MenuItem(bundle.getString("states.statesView.contextMenu.items.copyName"));
 
-		copyItem.setOnAction(e -> {
-			final Clipboard clipboard = Clipboard.getSystemClipboard();
-			final ClipboardContent content = new ClipboardContent();
-			content.putString(((ASTFormula) row.getItem().getContents()).getFormula().getCode());
-			clipboard.setContent(content);
-		});
-
-		copyItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
-				.or(currentTrace.currentStateProperty().initializedProperty().not()));
+		copyItem.setOnAction(e -> handleCopyName(row.getTreeItem()));
+		copyItem.disableProperty().bind(row.itemProperty().isNull());
 
 		this.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), () -> {
-			if (tv.getSelectionModel().getSelectedItem() == null) {
-				return;
-			}
-			Object formula = tv.getSelectionModel().getSelectedItem().getValue().getContents();
-			if (formula instanceof ASTFormula) {
-				final Clipboard clipboard = Clipboard.getSystemClipboard();
-				final ClipboardContent content = new ClipboardContent();
-				content.putString(((ASTFormula) formula).getFormula().getCode());
-				clipboard.setContent(content);
+			final TreeItem<StateItem<?>> item = tv.getSelectionModel().getSelectedItem();
+			if (item != null) {
+				handleCopyName(item);
 			}
 		});
 
@@ -241,7 +227,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				DotView formulaStage = injector.getInstance(DotView.class);
-				formulaStage.visualizeFormula((IEvalElement) ((ASTFormula) row.getItem().getContents()).getFormula());
+				formulaStage.visualizeFormula(((ASTFormula) row.getItem().getContents()).getFormula());
 				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -479,6 +465,23 @@ public final class StatesView extends StackPane {
 			this.tv.setDisable(false);
 			this.statusBar.setStatesViewUpdating(false);
 		});
+	}
+
+	private static void handleCopyName(final TreeItem<StateItem<?>> item) {
+		final PrologASTNode contents = item.getValue().getContents();
+		final String text;
+		if (contents instanceof ASTCategory) {
+			text = ((ASTCategory)contents).getName();
+		} else if (contents instanceof ASTFormula) {
+			text = ((ASTFormula)contents).getFormula(FormulaExpand.EXPAND).getCode();
+		} else {
+			throw new AssertionError("Unhandled node type: " + contents.getClass());
+		}
+		
+		final Clipboard clipboard = Clipboard.getSystemClipboard();
+		final ClipboardContent content = new ClipboardContent();
+		content.putString(text);
+		clipboard.setContent(content);
 	}
 
 	private static String getResultValue(final ASTFormula element, final State state) {

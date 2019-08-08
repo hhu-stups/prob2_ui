@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hhu.stups.prob.translator.BValue;
+import de.hhu.stups.prob.translator.exceptions.TranslationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,6 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob.translator.types.BObject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.fx.exception.VisualisationParseException;
@@ -95,9 +96,9 @@ public class VisualisationModel {
 				newValue = (EvalResult) newAbstractValue;
 				//cache value so we don't have to eval it again
 				try {
-					BObject translatedValue = newValue.translate().getValue();
+					BValue translatedValue = newValue.translate().getValue();
 					valueCache.put(formula, translatedValue);
-				} catch (BCompoundException e) {
+				} catch (TranslationException e) {
 					LOGGER.error("Error while translating the value of the formula \"{}\".", formula, e);
 				}
 			} else {

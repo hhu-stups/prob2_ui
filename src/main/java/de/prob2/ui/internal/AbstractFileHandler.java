@@ -1,5 +1,14 @@
 package de.prob2.ui.internal;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonStreamParser;
+import de.prob2.ui.prob2fx.CurrentProject;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import org.slf4j.Logger;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,18 +21,6 @@ import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonStreamParser;
-
-import de.prob2.ui.prob2fx.CurrentProject;
-
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-
-import org.slf4j.Logger;
 
 public abstract class AbstractFileHandler<T> {
 	
@@ -72,8 +69,15 @@ public abstract class AbstractFileHandler<T> {
 		fileChooser.getExtensionFilters().add(filter);
 		return fileChooser.showSaveDialog(stageManager.getCurrent());
 	}
+
+	protected File showSaveDialogForManyFiles(String title, File initialDirectory) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(title);
+		fileChooser.setInitialDirectory(initialDirectory);
+		return fileChooser.showSaveDialog(stageManager.getCurrent());
+	}
 	
-	protected void writeToFile(File file, T data, boolean headerWithMachineName) {
+	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) {
 		if(file != null) {
 			final Path absolute = file.toPath();
 			
@@ -81,6 +85,7 @@ public abstract class AbstractFileHandler<T> {
 				gson.toJson(data, writer);
 				JsonObject metadata = new JsonObject();
 				metadata.addProperty("Creation Date", ZonedDateTime.now().format(DateTimeFormatter.ofPattern("d MMM yyyy hh:mm:ssa O")));
+				metadata.addProperty("Created by", createdBy);
 				metadata.addProperty("ProB 2.0 kernel Version", versionInfo.getKernelVersion());
 				metadata.addProperty("ProB CLI Version", versionInfo.getFormattedCliVersion());
 				if(headerWithMachineName) {

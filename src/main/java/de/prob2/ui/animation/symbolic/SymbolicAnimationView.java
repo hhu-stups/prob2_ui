@@ -1,13 +1,11 @@
 package de.prob2.ui.animation.symbolic;
 
 
-import java.util.ResourceBundle;
-
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
+import de.prob.statespace.Trace;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -19,17 +17,19 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
+import javax.inject.Inject;
 import java.util.List;
-import de.prob.statespace.Trace;
+import java.util.ResourceBundle;
 
 
 @FXMLInjected
@@ -41,24 +41,43 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		@Override
 		public TableRow<SymbolicAnimationFormulaItem> call(TableView<SymbolicAnimationFormulaItem> param) {
 			TableRow<SymbolicAnimationFormulaItem> row = createRow();
-			
+
+			MenuItem showDetails = new MenuItem(bundle.getString("symbolic.view.contextMenu.showDetails"));
+			showDetails.setDisable(true);
+			showDetails.setOnAction(e -> {
+				SymbolicAnimationFormulaItem item = row.getItem();
+				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
+				@SuppressWarnings("unchecked")
+				ObservableList<TraceInformationItem> items = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation("traceInformation"));
+				stage.setItems(items);
+				stage.show();
+			});
+
 			Menu showStateItem = new Menu(bundle.getString("animation.symbolic.view.contextMenu.showFoundPaths"));
 			showStateItem.setDisable(true);
 			
 			MenuItem showMessage = new MenuItem(bundle.getString("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicAnimationResultHandler.class).showResult(row.getItem()));
-			
+
+			MenuItem saveTraces = new MenuItem(bundle.getString("animation.symbolic.view.contextMenu.savePaths"));
+			saveTraces.setOnAction(e -> {
+				SymbolicAnimationFormulaItem item = row.getItem();
+				injector.getInstance(SymbolicAnimationResultHandler.class).saveTraces(item);
+			});
+
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
+					saveTraces.disableProperty().bind(showStateItem.disableProperty());
 					showExamples(to, showStateItem);
+					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
 			});
 			
 			ContextMenu contextMenu = row.getContextMenu();
-			contextMenu.getItems().addAll(showMessage, showStateItem);
+			contextMenu.getItems().addAll(showDetails, showMessage, showStateItem, saveTraces);
 			
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())

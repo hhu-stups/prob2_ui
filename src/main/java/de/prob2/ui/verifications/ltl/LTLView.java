@@ -392,7 +392,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 				.add(new FileChooser.ExtensionFilter(
 						String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_ENDING),
 						LTL_FILE_ENDING));
-		Path ltlFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
+		Path ltlFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if(ltlFile == null) {
 			return;
 		}

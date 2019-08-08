@@ -117,7 +117,7 @@ public class WindowMenu extends Menu {
 		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
 		fileChooser.getExtensionFilters().addAll(
 				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.fxml"), "*.fxml"));
-		Path selectedFile = fileChooserManager.showOpenDialog(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
+		Path selectedFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
 				stageManager.getMainStage());
 		if (selectedFile != null) {
 			try {

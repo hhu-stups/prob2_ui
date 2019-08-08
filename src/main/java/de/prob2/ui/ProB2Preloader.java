@@ -13,7 +13,10 @@ public class ProB2Preloader extends Preloader {
 	
 	@Override
 	public void init() {
-		final Parent root = new BorderPane(new ImageView(ProB2Preloader.class.getResource("/prob_logo.gif").toExternalForm()));
+		final ImageView imageView = new ImageView(ProB2Preloader.class.getResource("ProB_Logo.png").toExternalForm());
+		imageView.setPreserveRatio(true);
+		imageView.setFitHeight(100.0);
+		final Parent root = new BorderPane(imageView);
 		scene = new Scene(root);
 	}
 	

@@ -58,6 +58,7 @@ public class ProB2 extends Application {
 	private RuntimeOptions runtimeOptions;
 	private Injector injector;
 	private ResourceBundle bundle;
+	private StopActions stopActions;
 
 	private Stage primaryStage;
 
@@ -79,10 +80,6 @@ public class ProB2 extends Application {
 			logger.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
 			return true;
 		}
-	}
-
-	public static void main(String... args) {
-		Application.launch(args);
 	}
 
 	@Override
@@ -110,8 +107,8 @@ public class ProB2 extends Application {
 		ProB2Module module = new ProB2Module(runtimeOptions);
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		bundle = injector.getInstance(ResourceBundle.class);
-		injector.getInstance(StopActions.class)
-			.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
+		this.stopActions = injector.getInstance(StopActions.class);
+		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
 		StageManager stageManager = injector.getInstance(StageManager.class);
 		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
 			logger.error("Uncaught exception on thread {}", thread, exc);
@@ -187,7 +184,9 @@ public class ProB2 extends Application {
 		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
 		pluginManager.start();
 
-		new Thread(() -> injector.getInstance(MachineLoader.class).getEmptyStateSpace(), "Empty State Space Loader").start();
+		final Thread emptyStateSpaceLoader = new Thread(() -> injector.getInstance(MachineLoader.class).getEmptyStateSpace(), "Empty State Space Loader");
+		this.stopActions.add(emptyStateSpaceLoader::interrupt);
+		emptyStateSpaceLoader.start();
 	}
 
 	private void updateTitle() {
@@ -290,8 +289,8 @@ public class ProB2 extends Application {
 		// Please don't add any cleanup code for other classes here.
 		// Instead, inject the StopActions singleton and use it to add the cleanup code for your class.
 		// This helps with keeping all code of the class in one place.
-		if (injector != null) {
-			injector.getInstance(StopActions.class).run();
+		if (this.stopActions != null) {
+			this.stopActions.run();
 		}
 	}
 

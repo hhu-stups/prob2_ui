@@ -41,7 +41,7 @@ Das Visualisierungsuntermenü stellt verschiedene Formen der Visualisierung zur 
 
 ![Weitere-Optionen-Menü](../screenshots/Menu/Advanced.png)
 
-Dieses Untermenü stellt eine Groovy-Konsole zur Verfügung und erlaubt es Plugins und eigene Visualisierungen zu verwalten. Zusätzlich kann man dort [Benchmarks](Benchmarks.md) von Operationen erstellen lassen.
+Dieses Untermenü stellt eine Groovy-Konsole zur Verfügung und erlaubt es Plugins und eigene Visualisierungen zu verwalten.
 
 ![Fenster-Menü](../screenshots/Menu/Window.png)
 

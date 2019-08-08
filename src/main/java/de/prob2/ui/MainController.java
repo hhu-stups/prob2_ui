@@ -1,5 +1,7 @@
 package de.prob2.ui;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -19,6 +21,7 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
@@ -31,9 +34,14 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
 @Singleton
 public class MainController extends BorderPane {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
+	
 	@FXML private TitledPane historyTP;
 	@FXML private HistoryView historyView;
 	@FXML private TitledPane statsTP;
@@ -91,11 +99,11 @@ public class MainController extends BorderPane {
 					);
 				}
 				
-				if (configData.horizontalDividerPositions != null) {
+				if (configData.horizontalDividerPositions != null && horizontalSP != null) {
 					horizontalSP.setDividerPositions(configData.horizontalDividerPositions);
 				}
 				
-				if (configData.verticalDividerPositions != null) {
+				if (configData.verticalDividerPositions != null && verticalSP != null) {
 					verticalSP.setDividerPositions(configData.verticalDividerPositions);
 				}
 			}
@@ -106,18 +114,31 @@ public class MainController extends BorderPane {
 					.map(Accordion::getExpandedPane)
 					.map(Node::getId)
 					.collect(Collectors.toList());
-				configData.horizontalDividerPositions = horizontalSP.getDividerPositions();
-				configData.verticalDividerPositions = verticalSP.getDividerPositions();
+				if (horizontalSP != null) {
+					configData.horizontalDividerPositions = horizontalSP.getDividerPositions();
+				}
+				if (verticalSP != null) {
+					configData.verticalDividerPositions = verticalSP.getDividerPositions();
+				}
 			}
 		});
 	}
 
 	public void refresh() {
-		String guiState = "main.fxml";
-		if (!uiState.getGuiState().contains("detached")) {
-			guiState = uiState.getGuiState();
+		URL url;
+		if (uiState.getGuiState().contains("detached")) {
+			url = this.getClass().getResource("main.fxml");
+		} else if (uiState.getGuiState().startsWith("custom ")) {
+			try {
+				url = new URL(uiState.getGuiState().replace("custom ", ""));
+			} catch (final MalformedURLException e) {
+				LOGGER.error("Custom perspective FXML URL is malformed, using default perspective", e);
+				url = this.getClass().getResource("main.fxml");
+			}
+		} else {
+			url = this.getClass().getResource(uiState.getGuiState());
 		}
-		stageManager.loadFXML(this, guiState);
+		stageManager.loadFXML(this, url);
 	}
 
 	public List<Accordion> getAccordions() {

@@ -43,7 +43,7 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 		List<LTLPatternItem> patterns = machine.getLTLPatterns().stream()
 				.filter(LTLPatternItem::selected)
 				.collect(Collectors.toList());
-		writeToFile(file, new LTLData(formulas, patterns), false);
+		writeToFile(file, new LTLData(formulas, patterns), false, "User");
 	}
 
 

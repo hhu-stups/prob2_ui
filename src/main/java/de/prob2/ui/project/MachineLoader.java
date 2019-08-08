@@ -3,26 +3,23 @@ package de.prob2.ui.project;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.node.AAbstractMachineParseUnit;
-import de.be4.classicalb.core.parser.node.AMachineHeader;
-import de.be4.classicalb.core.parser.node.AMachineMachineVariant;
-import de.be4.classicalb.core.parser.node.EOF;
-import de.be4.classicalb.core.parser.node.Start;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
-import de.prob.scripting.Api;
+import de.prob.scripting.ClassicalBFactory;
+import de.prob.scripting.ExtractedModel;
+import de.prob.scripting.ModelFactory;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -40,40 +37,41 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class MachineLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachineLoader.class);
-	private static final Start EMPTY_MACHINE_AST = new Start(
-		new AAbstractMachineParseUnit( // pParseUnit
-			new AMachineMachineVariant(), // variant
-			new AMachineHeader( // header
-				Collections.singletonList(new TIdentifierLiteral("empty", 1, 9)), // name
-				Collections.emptyList() // parameters
-			),
-			Collections.emptyList() // machineClauses
-		),
-		new EOF(1, 18) // eof
-	);
 
-	private final Object openLock;
-	private final Api api;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final StatusBar statusBar;
+	private final StopActions stopActions;
+	private final Injector injector;
+
 	private final ReadOnlyBooleanWrapper loading;
+	private final Object openLock;
+	private final Object emptyStateSpaceLock;
 	private StateSpace emptyStateSpace;
 
 	@Inject
-	public MachineLoader(final Api api, final CurrentProject currentProject, final StageManager stageManager,
-			final CurrentTrace currentTrace, final GlobalPreferences globalPreferences, final StatusBar statusBar) {
-
-		this.api = api;
-		this.openLock = new Object();
+	public MachineLoader(
+		final CurrentProject currentProject,
+		final StageManager stageManager,
+		final CurrentTrace currentTrace,
+		final GlobalPreferences globalPreferences,
+		final StatusBar statusBar,
+		final StopActions stopActions,
+		final Injector injector
+	) {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.statusBar = statusBar;
+		this.stopActions = stopActions;
+		this.injector = injector;
+
 		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
+		this.openLock = new Object();
+		this.emptyStateSpaceLock = new Object();
 		this.emptyStateSpace = null;
 	}
 
@@ -86,12 +84,17 @@ public class MachineLoader {
 	}
 
 	public StateSpace getEmptyStateSpace() {
-		synchronized (this) {
+		synchronized (this.emptyStateSpaceLock) {
 			if (this.emptyStateSpace == null) {
 				try {
-					this.emptyStateSpace = api.b_load(EMPTY_MACHINE_AST, this.globalPreferences);
-				} catch (CliError | IOException | ModelTranslationError | ProBError e) {
+					this.emptyStateSpace = injector.getInstance(ClassicalBFactory.class)
+						.create("empty", "MACHINE empty END")
+						.load(this.globalPreferences);
+				} catch (CliError | ProBError e) {
 					throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
+				}
+				if (Thread.currentThread().isInterrupted()) {
+					this.emptyStateSpace.kill();
 				}
 			}
 		}
@@ -99,7 +102,7 @@ public class MachineLoader {
 	}
 
 	public void loadAsync(Machine machine, Map<String, String> pref) {
-		new Thread(() -> {
+		final Thread machineLoader = new Thread(() -> {
 			try {
 				this.load(machine, pref);
 			} catch (FileNotFoundException e) {
@@ -114,7 +117,9 @@ public class MachineLoader {
 						.makeExceptionAlert(e, "", "project.machineLoader.alerts.couldNotOpen.content", machine.getName())
 						.showAndWait());
 			}
-		} , "Machine Loader").start();
+		}, "Machine Loader");
+		this.stopActions.add(machineLoader::interrupt);
+		machineLoader.start();
 	}
 
 	private void setLoadingStatus(final StatusBar.LoadingStatus loadingStatus) {
@@ -134,13 +139,23 @@ public class MachineLoader {
 		synchronized (this.openLock) {
 			try {
 				this.currentTrace.set(null);
-				setLoadingStatus(StatusBar.LoadingStatus.LOADING_FILE);
+				setLoadingStatus(StatusBar.LoadingStatus.PARSING_FILE);
 				final Path path = getPathToMachine(machine);
 
 				final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 				allPrefs.putAll(prefs);
-				final StateSpace stateSpace = machine.getType().getLoader().load(api, path.toString(), allPrefs);
-				setLoadingStatus(StatusBar.LoadingStatus.ADDING_ANIMATION);
+				final ModelFactory<?> modelFactory = injector.getInstance(machine.getType().getModelFactoryClass());
+				final ExtractedModel<?> extract = modelFactory.extract(path.toString());
+				if (Thread.currentThread().isInterrupted()) {
+					return;
+				}
+				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
+				final StateSpace stateSpace = extract.load(allPrefs);
+				if (Thread.currentThread().isInterrupted()) {
+					stateSpace.kill();
+					return;
+				}
+				setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
 				this.currentTrace.set(new Trace(stateSpace));
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
