@@ -124,8 +124,7 @@ public class WindowMenu extends Menu {
 				reset();
 				loader.setRoot(main);
 				loader.setController(main);
-				Parent root = loader.load();
-				stageManager.getMainStage().getScene().setRoot(root);
+				loader.load();
 			} catch (IOException e) {
 				logger.error("Loading fxml failed", e);
 				stageManager
@@ -143,7 +142,6 @@ public class WindowMenu extends Menu {
 		injector.getInstance(UIState.class).setGuiState(location);
 		final MainController root = injector.getInstance(MainController.class);
 		root.refresh();
-		stageManager.getMainStage().getScene().setRoot(root);
 		injector.getInstance(MenuController.class).setMacMenu();
 
 		return root;
