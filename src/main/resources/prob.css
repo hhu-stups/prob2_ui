@@ -816,7 +816,7 @@
 	-fx-background-color: -prob-white-75;
 }
 
-/* ================== DOTTY VIEW ================= */
+/* ================== DYNAMIC COMMAND VIEW ================= */
 .dynamic-command-cell {
 	-fx-cell-size: 1.8em;
 }
@@ -846,6 +846,17 @@
 .dynamic-command-cell:selected:hover {
 	-fx-background-color: -prob-grey;
 	-fx-text-fill: white;
+}
+
+/* ================== TRACE INFORMATION VIEW ================= */
+.trace-information-cell.replayable {
+	-fx-background-color: lime;
+	-fx-fill: lime;
+}
+
+.trace-information-cell.not-replayable {
+	-fx-background-color: yellow;
+	-fx-fill: yellow;
 }
 
 /* ================= FULL VALUE STAGE ================ */

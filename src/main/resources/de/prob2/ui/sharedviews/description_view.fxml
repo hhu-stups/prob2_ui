@@ -11,7 +11,8 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.layout.HBox?>
 <?import de.prob2.ui.internal.Spacer?>
-<fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1"
+<?import de.prob2.ui.sharedviews.DescriptionView?>
+<fx:root type="DescriptionView" xmlns:fx="http://javafx.com/fxml/1"
 		 stylesheets="@/prob.css">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -26,7 +27,7 @@
 				</HBox.margin>
 			</Label>
 			<Spacer/>
-			<Button onAction="#closeMachineView">
+			<Button onAction="#closeDescriptionView">
 				<graphic>
 					<BindableGlyph textFill="#555560" fontFamily="FontAwesome" icon="CLOSE" bindableFontSize="${fontSize.fontSize}"/>
 				</graphic>

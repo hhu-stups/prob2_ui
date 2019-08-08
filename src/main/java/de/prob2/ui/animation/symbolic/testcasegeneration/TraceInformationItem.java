@@ -1,5 +1,7 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import de.prob.statespace.Trace;
+
 import java.util.List;
 
 public class TraceInformationItem {
@@ -12,11 +14,14 @@ public class TraceInformationItem {
 
     private boolean lastTransitionFeasible;
 
-    public TraceInformationItem(int depth, List<String> transitions, boolean complete, boolean lastTransitionFeasible) {
+    private transient Trace trace;
+
+    public TraceInformationItem(int depth, List<String> transitions, boolean complete, boolean lastTransitionFeasible, Trace trace) {
         this.depth = depth;
         this.transitions = String.join(",\n", transitions);
         this.complete = complete;
         this.lastTransitionFeasible = lastTransitionFeasible;
+        this.trace = trace;
     }
 
     public int getDepth() {
@@ -34,4 +39,9 @@ public class TraceInformationItem {
     public boolean isLastTransitionFeasible() {
         return lastTransitionFeasible;
     }
+
+    public Trace getTrace() {
+        return trace;
+    }
+
 }

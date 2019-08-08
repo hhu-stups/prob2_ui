@@ -22,6 +22,7 @@ import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -41,7 +42,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
-public class Machine {
+public class Machine implements DescriptionView.Describable {
 	public enum Type {
 		B(ClassicalBFactory.class, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}, "common.fileChooser.fileTypes.classicalB"),
 		EVENTB(EventBFactory.class, new String[] {"*.eventb", "*.bum", "*.buc"}, "common.fileChooser.fileTypes.eventB"),

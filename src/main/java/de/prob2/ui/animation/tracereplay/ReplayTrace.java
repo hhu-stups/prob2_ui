@@ -1,8 +1,15 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import com.google.inject.Injector;
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob2.ui.internal.InvalidFileFormatException;
+import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.BooleanProperty;
@@ -12,7 +19,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ReplayTrace implements IExecutableItem {
+public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
 
 	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
@@ -21,12 +28,15 @@ public class ReplayTrace implements IExecutableItem {
 	private BooleanProperty shouldExecute;
 	private Object[] errorMessageParams;
 
-	public ReplayTrace(Path location) {
+	private final Injector injector;
+
+	public ReplayTrace(Path location, Injector injector) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.location = location;
 		this.errorMessageBundleKey = null;
 		this.shouldExecute = new SimpleBooleanProperty(true);
+		this.injector = injector;
 		
 		this.status.addListener((o, from, to) -> {
 			if (to != Checked.FAIL) {
@@ -91,6 +101,29 @@ public class ReplayTrace implements IExecutableItem {
 	
 	public BooleanProperty selectedProperty() {
 		return shouldExecute;
+	}
+
+	public String getName() {
+		return location.getFileName().toString();
+	}
+
+	public String getDescription() {
+		return getPersistentTrace().getDescription();
+	}
+
+	private PersistentTrace getPersistentTrace() {
+		try {
+			return injector.getInstance(TraceFileHandler.class).load(this.getLocation());
+		} catch (FileNotFoundException | NoSuchFileException e) {
+			//LOGGER.warn("Trace file not found", e);
+			return null;
+		} catch (InvalidFileFormatException e) {
+			//LOGGER.warn("Invalid trace file", e);
+			return null;
+		} catch (IOException e) {
+			//LOGGER.warn("Failed to open trace file", e);
+			return null;
+		}
 	}
 	
 	@Override
