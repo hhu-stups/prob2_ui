@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.MainController;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.states.StatesView;
@@ -80,8 +79,6 @@ public final class UIPersistence {
 
 		if (uiState.getGuiState().contains("detached")) {
 			injector.getInstance(DetachViewStageController.class).apply();
-		} else {
-			injector.getInstance(MainController.class).loadMainView(uiState.getGuiState());
 		}
 		
 		injector.getInstance(StatesView.class).restoreColumnWidths();
