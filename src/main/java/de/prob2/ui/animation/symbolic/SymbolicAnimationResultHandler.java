@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
+import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
@@ -38,6 +39,7 @@ import javafx.scene.layout.Region;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -187,10 +189,14 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
 
 		List<TraceInformationItem> traceInformation = testCaseGeneratorResult.getTestTraces().stream()
-				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.isComplete(), trace.lastTransitionIsFeasible()))
+				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.isComplete(), trace.lastTransitionIsFeasible(), trace.getTrace()))
 				.collect(Collectors.toList());
 
-		List<Trace> traces = testCaseGeneratorResult.getTraces();
+		List<Trace> traces = testCaseGeneratorResult.getTestTraces().stream()
+				.map(trace -> trace.getTrace())
+				.filter(Objects::isNull)
+				.collect(Collectors.toList());
+
 		if(testCaseGeneratorResult.isInterrupted()) {
 			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.testcasegeneration.result.interrupted");
 		} else if(traces.isEmpty()) {
