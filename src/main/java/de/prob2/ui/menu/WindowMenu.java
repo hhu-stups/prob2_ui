@@ -140,7 +140,6 @@ public class WindowMenu extends Menu {
 	public void loadPreset(String location) {
 		injector.getInstance(UIState.class).setGuiState(location);
 		injector.getInstance(MainController.class).refresh();
-		injector.getInstance(MenuController.class).setMacMenu();
 	}
 
 	public void enablePerspectivesAndDetatched() {

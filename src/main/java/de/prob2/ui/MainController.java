@@ -17,6 +17,7 @@ import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
@@ -139,6 +140,7 @@ public class MainController extends BorderPane {
 			url = this.getClass().getResource(uiState.getGuiState());
 		}
 		stageManager.loadFXML(this, url);
+		injector.getInstance(MenuController.class).setMacMenu();
 	}
 
 	public List<Accordion> getAccordions() {
