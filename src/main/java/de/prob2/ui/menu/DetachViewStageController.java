@@ -133,10 +133,11 @@ public final class DetachViewStageController extends Stage {
 		}
 	}
 
-	public void resetCheckboxes() {
+	public void attachAllViews() {
 		for (CheckBox cb : checkBoxMap.values()) {
 			cb.setSelected(false);
 		}
+		this.apply();
 	}
 	
 	private void removeTitledPanes(Accordion accordion) {
