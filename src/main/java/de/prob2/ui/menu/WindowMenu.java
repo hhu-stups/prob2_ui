@@ -15,7 +15,6 @@ import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.persistence.UIState;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
@@ -78,19 +77,19 @@ public class WindowMenu extends Menu {
 	@FXML
 	private void handleLoadDefault() {
 		reset();
-		loadPreset("main.fxml");
+		injector.getInstance(MainController.class).changeMainView("main.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
 		reset();
-		loadPreset("separatedHistory.fxml");
+		injector.getInstance(MainController.class).changeMainView("separatedHistory.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
 		reset();
-		loadPreset("separatedHistoryAndStatistics.fxml");
+		injector.getInstance(MainController.class).changeMainView("separatedHistoryAndStatistics.fxml");
 	}
 
 	@FXML
@@ -108,17 +107,12 @@ public class WindowMenu extends Menu {
 				stageManager.getMainStage());
 		if (selectedFile != null) {
 			reset();
-			loadPreset("custom " + selectedFile.toUri());
+			injector.getInstance(MainController.class).changeMainView("custom " + selectedFile.toUri());
 		}
 	}
 
 	private void reset() {
 		injector.getInstance(DetachViewStageController.class).attachAllViews();
-	}
-
-	public void loadPreset(String location) {
-		injector.getInstance(UIState.class).setGuiState(location);
-		injector.getInstance(MainController.class).refresh();
 	}
 
 	public void enablePerspectivesAndDetatched() {

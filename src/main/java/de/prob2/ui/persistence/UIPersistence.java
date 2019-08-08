@@ -6,9 +6,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.MainController;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.menu.DetachViewStageController;
-import de.prob2.ui.menu.WindowMenu;
 import de.prob2.ui.states.StatesView;
 
 import javafx.geometry.BoundingBox;
@@ -74,8 +74,6 @@ public final class UIPersistence {
 	}
 	
 	public void open() {
-		final WindowMenu windowMenu = injector.getInstance(WindowMenu.class);
-		
 		for (final String id : new HashSet<>(uiState.getSavedVisibleStages())) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
@@ -83,7 +81,7 @@ public final class UIPersistence {
 		if (uiState.getGuiState().contains("detached")) {
 			injector.getInstance(DetachViewStageController.class).apply();
 		} else {
-			windowMenu.loadPreset(uiState.getGuiState());
+			injector.getInstance(MainController.class).changeMainView(uiState.getGuiState());
 		}
 		
 		injector.getInstance(StatesView.class).restoreColumnWidths();
