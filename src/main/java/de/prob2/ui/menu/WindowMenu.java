@@ -14,14 +14,9 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.codecentric.centerdevice.util.StageUtils;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.persistence.UIState;
-import de.prob2.ui.project.ProjectView;
-import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.VerificationsView;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -142,11 +137,6 @@ public class WindowMenu extends Menu {
 
 	private void reset() {
 		injector.getInstance(DetachViewStageController.class).attachAllViews();
-		injector.getInstance(OperationsView.class).setVisible(true);
-		injector.getInstance(HistoryView.class).setVisible(true);
-		injector.getInstance(StatsView.class).setVisible(true);
-		injector.getInstance(VerificationsView.class).setVisible(true);
-		injector.getInstance(ProjectView.class).setVisible(true);
 	}
 
 	public Parent loadPreset(String location) {
