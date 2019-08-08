@@ -12,53 +12,62 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.SplitPane?>
+
 <fx:root type="TraceReplayView" fitToHeight="true" fitToWidth="true"
-	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<VBox>
-		<HBox styleClass="border" alignment="CENTER">
-			<Button fx:id="checkButton" onAction="#checkMachine" disable="true">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%animation.tracereplay.view.tooltips.checkMachine" />
-				</tooltip>
-			</Button>
-			<Button fx:id="cancelButton" onAction="#cancel" disable="true">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.buttons.cancel" />
-				</tooltip>
-			</Button>
-			<Spacer/>
-			<Button fx:id="loadTraceButton" onAction="#loadTraceFromFile" disable="true">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%animation.tracereplay.view.tooltips.loadTrace" />
-				</tooltip>
-			</Button>
-			<HelpButton fx:id="helpButton" />
-		</HBox>
-		<TableView fx:id="traceTableView" VBox.vgrow="ALWAYS">
-			<columnResizePolicy>
-				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-			</columnResizePolicy>
-			<columns>
-				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
-				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%animation.tracereplay.view.columns.status" />
-				<TableColumn fx:id="nameColumn" text="%animation.tracereplay.view.columns.name" />
-			</columns>
-			<placeholder>
-				<Label text="%animation.tracereplay.view.placeholder" />
-			</placeholder>
-		</TableView>
-	</VBox>
+	<SplitPane fx:id="splitPane" orientation="VERTICAL">
+		<VBox>
+			<HBox styleClass="border" alignment="CENTER">
+				<Button fx:id="checkButton" onAction="#checkMachine" disable="true">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT"
+									   bindableFontSize="${fontSize.fontSize * 2}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%animation.tracereplay.view.tooltips.checkMachine"/>
+					</tooltip>
+				</Button>
+				<Button fx:id="cancelButton" onAction="#cancel" disable="true">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT"
+									   bindableFontSize="${fontSize.fontSize * 2}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%common.buttons.cancel"/>
+					</tooltip>
+				</Button>
+				<Spacer/>
+				<Button fx:id="loadTraceButton" onAction="#loadTraceFromFile" disable="true">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
+									   bindableFontSize="${fontSize.fontSize + 2}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%animation.tracereplay.view.tooltips.loadTrace"/>
+					</tooltip>
+				</Button>
+				<HelpButton fx:id="helpButton"/>
+			</HBox>
+			<TableView fx:id="traceTableView" VBox.vgrow="ALWAYS">
+				<columnResizePolicy>
+					<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+				</columnResizePolicy>
+				<columns>
+					<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;"
+								 minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
+					<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}"
+								 maxWidth="${fontSize.fontSize * 4}" text="%animation.tracereplay.view.columns.status"/>
+					<TableColumn fx:id="nameColumn" text="%animation.tracereplay.view.columns.name"/>
+				</columns>
+				<placeholder>
+					<Label text="%animation.tracereplay.view.placeholder"/>
+				</placeholder>
+			</TableView>
+		</VBox>
+	</SplitPane>
 </fx:root>
 
