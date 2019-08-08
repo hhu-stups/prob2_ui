@@ -17,6 +17,7 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -36,7 +37,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
-public class Machine {
+public class Machine implements DescriptionView.Describable {
 	@FunctionalInterface
 	public interface Loader extends Serializable {
 		StateSpace load(final Api api, final String file, final Map<String, String> prefs) throws IOException, ModelTranslationError;

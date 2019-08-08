@@ -14,6 +14,7 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -26,19 +27,8 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -69,6 +59,8 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 	private HelpButton helpButton;
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
+	@FXML
+	private SplitPane splitPane;
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
@@ -78,6 +70,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
 	private final CheckBox selectAll;
+	private boolean showDescription;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
@@ -125,7 +118,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 
 		final SetChangeListener<Path> listener = c -> {
 			if (c.wasAdded()) {
-				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded());
+				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(),injector);
 				traceTableView.getItems().add(replayTrace);
 				this.traceChecker.check(replayTrace, true);
 			}
@@ -141,7 +134,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			traceTableView.getItems().clear();
 			if (to != null) {
 				to.getTraceFiles().forEach(tracePath -> {
-					traceTableView.getItems().add(new ReplayTrace(tracePath));
+					traceTableView.getItems().add(new ReplayTrace(tracePath, injector));
 					if (!tracePath.toString().endsWith(TRACE_FILE_ENDING.substring(1))) {
 						stageManager.makeAlert(AlertType.WARNING, "",
 								"animation.tracereplay.view.alerts.wrongFileExtensionWarning.content",
@@ -224,6 +217,12 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			deleteTraceItem.setOnAction(
 					event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 
+			final MenuItem showDescriptionItem = new MenuItem(
+				bundle.getString("animation.tracereplay.view.contextMenu.showDescription"));
+			showDescriptionItem.setOnAction(
+				event -> showDescription(row.getItem()));
+
+
 			final MenuItem openInExternalEditorItem = new MenuItem(
 				bundle.getString("animation.tracereplay.view.contextMenu.openInExternalEditor"));
 			openInExternalEditorItem.setOnAction(
@@ -232,7 +231,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(replayTraceItem, showErrorItem, deleteTraceItem, new SeparatorMenuItem(),openInExternalEditorItem)));
+					.otherwise(new ContextMenu(replayTraceItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(),openInExternalEditorItem)));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				showErrorItem.disableProperty().unbind();
@@ -304,5 +303,21 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			}
 		}
 		selectAll.setSelected(anySelected);
+	}
+
+	public void closeDescription() {
+		if (showDescription) {
+			splitPane.getItems().remove(1);
+			showDescription = false;
+		}
+	}
+
+	private void showDescription(ReplayTrace trace) {
+		if(showDescription) {
+			closeDescription();
+		}
+		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, injector));
+		splitPane.setDividerPositions(0.66);
+		showDescription = true;
 	}
 }

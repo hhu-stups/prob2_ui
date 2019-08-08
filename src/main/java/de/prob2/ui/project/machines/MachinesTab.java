@@ -27,6 +27,7 @@ import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.statusbar.StatusBar.LoadingStatus;
 
@@ -190,14 +191,6 @@ public class MachinesTab extends Tab {
 			}
 		}
 
-		private void showMachineView(final Machine machine) {
-			if(showMachineView) {
-				closeMachineView();
-			}
-			splitPane.getItems().add(0, new MachineDescriptionView(machine, stageManager, injector));
-			showMachineView = true;
-		}
-
 		private boolean confirmSave() {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
 					"common.alerts.unsavedMachineChanges.header",
@@ -246,7 +239,7 @@ public class MachinesTab extends Tab {
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(machinesList.disableProperty());
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
-			if (node instanceof MachineDescriptionView && !to.contains(((MachineDescriptionView) node).getMachine())) {
+			if (node instanceof DescriptionView && !to.contains((Machine) ((DescriptionView) node).getDescribable())) {
 				closeMachineView();
 			}
 		});
@@ -317,12 +310,20 @@ public class MachinesTab extends Tab {
 		currentProject.addMachine(new Machine(name, "", relative));
 	}
 
-	void closeMachineView() {
+	public void closeMachineView() {
 		if (showMachineView) {
 			splitPane.getItems().remove(0);
 			machinesList.getSelectionModel().clearSelection();
 			showMachineView = false;
 		}
+	}
+
+	void showMachineView(final Machine machine) {
+		if(showMachineView) {
+			closeMachineView();
+		}
+		splitPane.getItems().add(0, new DescriptionView(machine, this::closeMachineView, stageManager, injector));
+		showMachineView = true;
 	}
 	
 	private void startMachine(final Machine machine) {
