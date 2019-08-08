@@ -1,6 +1,5 @@
 package de.prob2.ui.menu;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.ResourceBundle;
@@ -19,7 +18,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -27,13 +25,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @FXMLInjected
 public class WindowMenu extends Menu {
-	private static final Logger logger = LoggerFactory.getLogger(WindowMenu.class);
-
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -114,22 +107,8 @@ public class WindowMenu extends Menu {
 		Path selectedFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
 				stageManager.getMainStage());
 		if (selectedFile != null) {
-			try {
-				MainController main = injector.getInstance(MainController.class);
-				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-				loader.setLocation(selectedFile.toUri().toURL());
-				injector.getInstance(UIState.class)
-						.setGuiState("custom " + selectedFile.toUri().toURL().toExternalForm());
-				reset();
-				loader.setRoot(main);
-				loader.setController(main);
-				loader.load();
-			} catch (IOException e) {
-				logger.error("Loading fxml failed", e);
-				stageManager
-						.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", selectedFile)
-						.showAndWait();
-			}
+			reset();
+			loadPreset("custom " + selectedFile.toUri());
 		}
 	}
 
