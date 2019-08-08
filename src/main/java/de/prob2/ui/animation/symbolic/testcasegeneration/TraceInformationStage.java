@@ -22,7 +22,7 @@ public final class TraceInformationStage extends Stage {
 	private final class TraceInformationRow extends TableRow<TraceInformationItem> {
 		private TraceInformationRow() {
 			super();
-			this.getStyleClass().add("trace-information-cell");
+			this.getStyleClass().add("trace-information-row");
 			this.setOnMouseClicked(e -> {
 				TraceInformationItem item = this.getItem();
 				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && item.getTrace() != null) {
