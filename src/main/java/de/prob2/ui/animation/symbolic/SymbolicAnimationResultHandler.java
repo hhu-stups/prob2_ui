@@ -39,7 +39,6 @@ import javafx.scene.layout.Region;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -194,7 +193,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 
 		List<Trace> traces = testCaseGeneratorResult.getTestTraces().stream()
 				.map(trace -> trace.getTrace())
-				.filter(Objects::isNull)
+				.filter(trace -> trace != null)
 				.collect(Collectors.toList());
 
 		if(testCaseGeneratorResult.isInterrupted()) {
