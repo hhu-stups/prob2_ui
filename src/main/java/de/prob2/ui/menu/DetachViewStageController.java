@@ -100,12 +100,8 @@ public final class DetachViewStageController extends Stage {
 
 	@FXML
 	public void apply() {
-		String guiState = uiState.getGuiState();
-		if (guiState.contains(DETACHED)){
-			guiState = guiState.replace(DETACHED,"");
-		}
 		final MainController mainController = injector.getInstance(MainController.class);
-		mainController.changeMainView(guiState);
+		mainController.loadMainView(uiState.getGuiState().replace(DETACHED, ""));
 		mainController.getAccordions().forEach(this::removeTitledPanes);
 		updateWrapperStages();
 		if (!uiState.getGuiState().contains(DETACHED)) {

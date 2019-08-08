@@ -81,7 +81,7 @@ public final class UIPersistence {
 		if (uiState.getGuiState().contains("detached")) {
 			injector.getInstance(DetachViewStageController.class).apply();
 		} else {
-			injector.getInstance(MainController.class).changeMainView(uiState.getGuiState());
+			injector.getInstance(MainController.class).loadMainView(uiState.getGuiState());
 		}
 		
 		injector.getInstance(StatesView.class).restoreColumnWidths();
