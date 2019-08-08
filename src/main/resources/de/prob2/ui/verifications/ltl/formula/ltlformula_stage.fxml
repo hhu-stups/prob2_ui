@@ -22,6 +22,7 @@
 						</padding>
 						<Label text="%verifications.ltl.formula.ltlFormulaStage.formula" VBox.vgrow="NEVER"/>
 						<WebView fx:id="taCode" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+						<Button styleClass="button-blue" text="%verifications.ltl.formula.ltlFormulaStage.showBuiltins" onAction="#showBuiltins" VBox.vgrow="NEVER"/>
 						<Label text="%verifications.ltl.formula.ltlFormulaStage.description" VBox.vgrow="NEVER"/>
 						<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
 						<Label text="%verifications.ltl.formula.ltlFormulaStage.errors" VBox.vgrow="NEVER"/>

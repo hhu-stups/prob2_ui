@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.ltl;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
@@ -29,15 +30,18 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected final LTLResultHandler resultHandler;
 	
+	protected final LTLBuiltinsStage builtinsStage;
+	
 	protected LTLHandleItem<T> handleItem;
 	
 	protected WebEngine engine;
 
-	public LTLItemStage(final CurrentProject currentProject, final ILTLItemHandler ltlItemHandler, final LTLResultHandler resultHandler) {
+	public LTLItemStage(final CurrentProject currentProject, final ILTLItemHandler ltlItemHandler, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
 		super();
 		this.currentProject = currentProject;
 		this.ltlItemHandler = ltlItemHandler;
 		this.resultHandler = resultHandler;
+		this.builtinsStage = builtinsStage;
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
@@ -46,6 +50,11 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 		engine = taCode.getEngine();
 		engine.load(LTLItemStage.class.getResource("LTLEditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);
+	}
+	
+	@FXML
+	protected void showBuiltins() {
+		builtinsStage.show();
 	}
 	
 	private void setTextEditor(String text) {
