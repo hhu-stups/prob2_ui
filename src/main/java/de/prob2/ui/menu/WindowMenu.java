@@ -20,7 +20,6 @@ import de.prob2.ui.persistence.UIState;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -138,13 +137,10 @@ public class WindowMenu extends Menu {
 		injector.getInstance(DetachViewStageController.class).attachAllViews();
 	}
 
-	public Parent loadPreset(String location) {
+	public void loadPreset(String location) {
 		injector.getInstance(UIState.class).setGuiState(location);
-		final MainController root = injector.getInstance(MainController.class);
-		root.refresh();
+		injector.getInstance(MainController.class).refresh();
 		injector.getInstance(MenuController.class).setMacMenu();
-
-		return root;
 	}
 
 	public void enablePerspectivesAndDetatched() {
