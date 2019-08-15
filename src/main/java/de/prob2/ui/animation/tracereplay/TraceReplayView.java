@@ -252,6 +252,9 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 				}
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					this.traceChecker.check(item, true);
+				} else if(showDescription && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 1) {
+					showDescription(row.getItem());
+					row.updateSelected(true);
 				}
 			});
 
