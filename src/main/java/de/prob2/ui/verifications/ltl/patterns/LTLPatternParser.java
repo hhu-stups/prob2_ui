@@ -2,7 +2,11 @@ package de.prob2.ui.verifications.ltl.patterns;
 
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob.ltl.parser.LtlParser.NumVarParamContext;
 import de.prob.ltl.parser.LtlParser.Pattern_defContext;
+import de.prob.ltl.parser.LtlParser.Pattern_def_paramContext;
+import de.prob.ltl.parser.LtlParser.SeqVarParamContext;
+import de.prob.ltl.parser.LtlParser.VarParamContext;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.ILTLItemHandler;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
@@ -18,6 +22,7 @@ import javax.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Singleton
 public class LTLPatternParser implements ILTLItemHandler {
@@ -52,12 +57,31 @@ public class LTLPatternParser implements ILTLItemHandler {
 		List<String> patternNames = new ArrayList<>();
 		for(int i = 0; i < ast.getChildCount(); i++) {
 			ParseTree child = ast.getChild(i);
+			StringBuilder signature = new StringBuilder();
 			if(child instanceof Pattern_defContext && ((Pattern_defContext) child).ID() != null) {
-				patternNames.add(((Pattern_defContext) child).ID().getText());
+				String name = ((Pattern_defContext) child).ID().getText();
+				signature.append(name);
+				signature.append("(");
+				signature.append(String.join(", ", ((Pattern_defContext) child).pattern_def_param().stream()
+					.map(ctx -> extractParameterFromContext(ctx))
+					.collect(Collectors.toList())));
+				signature.append(")");
+				patternNames.add(signature.toString());
 			}
 		}
-		pattern.setName(String.join("/", patternNames));
+		pattern.setName(String.join("\n", patternNames));
 		return parseListener;
+	}
+	
+	private String extractParameterFromContext(Pattern_def_paramContext ctx) {
+		if(ctx instanceof VarParamContext) {
+			return ((VarParamContext) ctx).ID().getText();
+		} else if(ctx instanceof NumVarParamContext) {
+			return ((NumVarParamContext) ctx).ID().getText();
+		} else if(ctx instanceof SeqVarParamContext) {
+			return ((SeqVarParamContext) ctx).ID().getText();
+		}
+		throw new RuntimeException("Unknown parameter context: " + ctx.getClass());
 	}
 	
 	private LTLParseListener initializeParseListener(Pattern pattern) {
