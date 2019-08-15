@@ -89,17 +89,17 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 				new ExtensionFilter(
 						String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), FILE_ENDING),
 						FILE_ENDING));
-		save(trace, machine, file);
-	}
-
-	public void save(PersistentTrace trace, Machine machine, File location) {
-		writeToFile(location, trace, true, "User");
-		if(location != null) {
+		save(trace, file);
+		if(file != null) {
 			final Path projectLocation = currentProject.getLocation();
-			final Path absolute = location.toPath();
+			final Path absolute = file.toPath();
 			final Path relative = projectLocation.relativize(absolute);
 			machine.addTraceFile(relative);
 		}
+	}
+
+	public void save(PersistentTrace trace, File location) {
+		writeToFile(location, trace, true, "User");
 	}
 
 	@Override

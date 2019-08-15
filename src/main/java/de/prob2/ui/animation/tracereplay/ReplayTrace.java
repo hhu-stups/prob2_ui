@@ -115,9 +115,8 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	public void setDescription(String description) {
 		PersistentTrace trace = getPersistentTrace();
 		trace.setDescription(description);
-		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		injector.getInstance(TraceFileHandler.class)
-			.save(trace, currentProject.getCurrentMachine(), currentProject.getLocation().resolve(location).toFile());
+			.save(trace, injector.getInstance(CurrentProject.class).getLocation().resolve(location).toFile());
 	}
 
 	private PersistentTrace getPersistentTrace() {
