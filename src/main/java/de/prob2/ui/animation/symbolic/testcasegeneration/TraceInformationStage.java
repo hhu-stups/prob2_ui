@@ -58,7 +58,10 @@ public final class TraceInformationStage extends Stage {
 	private TableColumn<TraceInformationItem, Boolean> isComplete;
 
 	@FXML
-	private TableColumn<TraceInformationItem, Boolean> lastTransitionFeasible;
+	private TableColumn<TraceInformationItem, String> operation;
+	
+	@FXML
+	private TableColumn<TraceInformationItem, String> guard;
 
 	private ObservableList<TraceInformationItem> items = FXCollections.observableArrayList();
 
@@ -80,7 +83,8 @@ public final class TraceInformationStage extends Stage {
 		depth.setCellValueFactory(new PropertyValueFactory<>("depth"));
 		transitions.setCellValueFactory(new PropertyValueFactory<>("transitions"));
 		isComplete.setCellValueFactory(new PropertyValueFactory<>("complete"));
-		lastTransitionFeasible.setCellValueFactory(new PropertyValueFactory<>("lastTransitionFeasible"));
+		operation.setCellValueFactory(new PropertyValueFactory<>("operation"));
+		guard.setCellValueFactory(new PropertyValueFactory<>("guard"));
 		tvTraces.setItems(items);
 	}
 

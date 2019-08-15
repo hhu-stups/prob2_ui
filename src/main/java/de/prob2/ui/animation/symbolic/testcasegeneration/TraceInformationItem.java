@@ -12,15 +12,18 @@ public class TraceInformationItem {
 
     private boolean complete;
 
-    private boolean lastTransitionFeasible;
+    private String operation;
+    
+    private String guard;
 
     private transient Trace trace;
 
-    public TraceInformationItem(int depth, List<String> transitions, boolean complete, boolean lastTransitionFeasible, Trace trace) {
+    public TraceInformationItem(int depth, List<String> transitions, boolean complete, String operation, String guard, Trace trace) {
         this.depth = depth;
         this.transitions = String.join(",\n", transitions);
         this.complete = complete;
-        this.lastTransitionFeasible = lastTransitionFeasible;
+        this.operation = operation;
+        this.guard = guard;
         this.trace = trace;
     }
 
@@ -36,9 +39,13 @@ public class TraceInformationItem {
         return complete;
     }
 
-    public boolean isLastTransitionFeasible() {
-        return lastTransitionFeasible;
-    }
+    public String getOperation() {
+		return operation;
+	}
+    
+    public String getGuard() {
+		return guard;
+	}
 
     public Trace getTrace() {
         return trace;

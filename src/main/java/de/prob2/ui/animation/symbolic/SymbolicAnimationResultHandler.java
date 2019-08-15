@@ -3,6 +3,9 @@ package de.prob2.ui.animation.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
+import de.be4.classicalb.core.parser.node.PPredicate;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.animator.command.AbstractCommand;
@@ -188,7 +191,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
 
 		List<TraceInformationItem> traceInformation = testCaseGeneratorResult.getTestTraces().stream()
-				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.isComplete(), trace.lastTransitionIsFeasible(), trace.getTrace()))
+				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.isComplete(), trace.getTarget().getOperation(), trace.getTarget().getGuardString(), trace.getTrace()))
 				.collect(Collectors.toList());
 
 		List<Trace> traces = testCaseGeneratorResult.getTestTraces().stream()
