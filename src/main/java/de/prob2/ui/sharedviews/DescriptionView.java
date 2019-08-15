@@ -10,7 +10,9 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.machines.MachinesTab;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 
@@ -19,12 +21,15 @@ public class DescriptionView extends AnchorPane {
 	public interface Describable {
 		String getName();
 		String getDescription();
+		void setDescription(String description);
 	}
 
 	@FXML
 	private Label titelLabel;
 	@FXML
-	private Text descriptionText;
+	private TextArea descriptionText;
+	@FXML
+	private Button saveButton;
 
 	private final Describable describable;
 	private final Runnable closeMethod;
@@ -41,11 +46,31 @@ public class DescriptionView extends AnchorPane {
 	public void initialize() {
 		titelLabel.setText(String.format(bundle.getString("project.machines.machineDescriptionView.title"), describable.getName()));
 		descriptionText.setText(describable.getDescription().isEmpty()? bundle.getString("project.machines.machineDescriptionView.placeholder") : describable.getDescription());
+		saveButton.visibleProperty().bind(descriptionText.editableProperty());
 	}
 
 	@FXML
 	public void closeDescriptionView() {
 		closeMethod.run();
+	}
+
+	@FXML
+	public void editDescription() {
+		descriptionText.setEditable(true);
+		if(descriptionText.getText().equals(bundle.getString("project.machines.machineDescriptionView.placeholder"))) {
+			descriptionText.clear();
+		}
+		descriptionText.requestFocus();
+		descriptionText.positionCaret(descriptionText.getText().length());
+	}
+
+	@FXML
+	public void saveDescription() {
+		descriptionText.setEditable(false);
+		describable.setDescription(descriptionText.getText());
+		if(descriptionText.getText().isEmpty()) {
+			descriptionText.setText(bundle.getString("project.machines.machineDescriptionView.placeholder"));
+		}
 	}
 
 	public Describable getDescribable() {

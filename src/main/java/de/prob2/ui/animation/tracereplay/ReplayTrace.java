@@ -9,6 +9,7 @@ import java.util.Objects;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.internal.InvalidFileFormatException;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -109,6 +110,14 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 
 	public String getDescription() {
 		return getPersistentTrace().getDescription();
+	}
+
+	public void setDescription(String description) {
+		PersistentTrace trace = getPersistentTrace();
+		trace.setDescription(description);
+		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
+		injector.getInstance(TraceFileHandler.class)
+			.save(trace, currentProject.getCurrentMachine(), currentProject.getLocation().resolve(location).toFile());
 	}
 
 	private PersistentTrace getPersistentTrace() {

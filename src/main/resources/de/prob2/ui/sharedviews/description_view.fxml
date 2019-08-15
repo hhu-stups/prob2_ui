@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import de.prob2.ui.internal.Spacer?>
 <?import de.prob2.ui.sharedviews.DescriptionView?>
+<?import javafx.scene.control.TextArea?>
 <fx:root type="DescriptionView" xmlns:fx="http://javafx.com/fxml/1"
 		 stylesheets="@/prob.css">
 	<fx:define>
@@ -20,16 +21,26 @@
 	<VBox spacing="5" AnchorPane.topAnchor="6"
 		AnchorPane.bottomAnchor="-4" AnchorPane.leftAnchor="0"
 		AnchorPane.rightAnchor="0">
-		<HBox spacing="5">
+		<HBox>
 			<Label fx:id="titelLabel" styleClass="details-title" >
 				<HBox.margin>
 					<Insets left="10"/>
 				</HBox.margin>
 			</Label>
 			<Spacer/>
+			<Button minWidth="${fontSize.fontSize * 3}" onAction="#editDescription">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" textFill="#555560" fontFamily="FontAwesome" icon="EDIT"
+								   bindableFontSize="${fontSize.fontSize}"/>
+				</graphic>
+				<HBox.margin>
+					<Insets top="-5" right="-15"/>
+				</HBox.margin>
+			</Button>
 			<Button onAction="#closeDescriptionView">
 				<graphic>
-					<BindableGlyph textFill="#555560" fontFamily="FontAwesome" icon="CLOSE" bindableFontSize="${fontSize.fontSize}"/>
+					<BindableGlyph textFill="#555560" fontFamily="FontAwesome" icon="CLOSE"
+								   bindableFontSize="${fontSize.fontSize}"/>
 				</graphic>
 				<HBox.margin>
 					<Insets top="-5"/>
@@ -37,15 +48,10 @@
 			</Button>
 		</HBox>
 		<AnchorPane styleClass="border" VBox.vgrow="always">
-			<ScrollPane AnchorPane.leftAnchor="0"
-				AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0"
-				AnchorPane.bottomAnchor="0">
-				<AnchorPane>
-					<Text fx:id="descriptionText" AnchorPane.topAnchor="10"
-						AnchorPane.bottomAnchor="4" AnchorPane.leftAnchor="5"
-						AnchorPane.rightAnchor="5" />
-				</AnchorPane>
-			</ScrollPane>
+			<TextArea fx:id="descriptionText" editable="false" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0"
+					  AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0"/>
+			<Button fx:id="saveButton" text="%common.buttons.save" styleClass="button-blue" visible="false"
+					AnchorPane.rightAnchor="2" AnchorPane.bottomAnchor="4" onAction="#saveDescription" />
 		</AnchorPane>
 	</VBox>
 </fx:root>
