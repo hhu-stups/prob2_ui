@@ -12,6 +12,7 @@ import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
+import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 import javafx.fxml.FXML;
 import netscape.javascript.JSObject;
 
@@ -19,8 +20,8 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		
 	@Inject
 	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, 
-			final LTLPatternParser patternParser, final LTLResultHandler resultHandler) {
-		super(currentProject, patternParser, resultHandler);
+			final LTLPatternParser patternParser, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
+		super(currentProject, patternParser, resultHandler, builtinsStage);
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}
 	

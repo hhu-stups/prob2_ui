@@ -1,6 +1,5 @@
 package de.prob2.ui.menu;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.ResourceBundle;
@@ -14,18 +13,10 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.codecentric.centerdevice.util.StageUtils;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.persistence.UIState;
-import de.prob2.ui.project.ProjectView;
-import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.VerificationsView;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -33,13 +24,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @FXMLInjected
 public class WindowMenu extends Menu {
-	private static final Logger logger = LoggerFactory.getLogger(WindowMenu.class);
-
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -91,19 +77,19 @@ public class WindowMenu extends Menu {
 	@FXML
 	private void handleLoadDefault() {
 		reset();
-		loadPreset("main.fxml");
+		injector.getInstance(MainController.class).changeMainView("main.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
 		reset();
-		loadPreset("separatedHistory.fxml");
+		injector.getInstance(MainController.class).changeMainView("separatedHistory.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
 		reset();
-		loadPreset("separatedHistoryAndStatistics.fxml");
+		injector.getInstance(MainController.class).changeMainView("separatedHistoryAndStatistics.fxml");
 	}
 
 	@FXML
@@ -120,44 +106,13 @@ public class WindowMenu extends Menu {
 		Path selectedFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
 				stageManager.getMainStage());
 		if (selectedFile != null) {
-			try {
-				MainController main = injector.getInstance(MainController.class);
-				FXMLLoader loader = injector.getInstance(FXMLLoader.class);
-				loader.setLocation(selectedFile.toUri().toURL());
-				injector.getInstance(UIState.class)
-						.setGuiState("custom " + selectedFile.toUri().toURL().toExternalForm());
-				reset();
-				loader.setRoot(main);
-				loader.setController(main);
-				Parent root = loader.load();
-				stageManager.getMainStage().getScene().setRoot(root);
-			} catch (IOException e) {
-				logger.error("Loading fxml failed", e);
-				stageManager
-						.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", selectedFile)
-						.showAndWait();
-			}
+			reset();
+			injector.getInstance(MainController.class).changeMainView("custom " + selectedFile.toUri());
 		}
 	}
 
 	private void reset() {
-		injector.getInstance(UIState.class).clearDetachedStages();
-		injector.getInstance(DetachViewStageController.class).resetCheckboxes();
-		injector.getInstance(OperationsView.class).setVisible(true);
-		injector.getInstance(HistoryView.class).setVisible(true);
-		injector.getInstance(StatsView.class).setVisible(true);
-		injector.getInstance(VerificationsView.class).setVisible(true);
-		injector.getInstance(ProjectView.class).setVisible(true);
-	}
-
-	public Parent loadPreset(String location) {
-		injector.getInstance(UIState.class).setGuiState(location);
-		final MainController root = injector.getInstance(MainController.class);
-		root.refresh();
-		stageManager.getMainStage().getScene().setRoot(root);
-		injector.getInstance(MenuController.class).setMacMenu();
-
-		return root;
+		injector.getInstance(DetachViewStageController.class).attachAllViews();
 	}
 
 	public void enablePerspectivesAndDetatched() {

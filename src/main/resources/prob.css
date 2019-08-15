@@ -849,14 +849,32 @@
 }
 
 /* ================== TRACE INFORMATION VIEW ================= */
-.trace-information-cell.replayable {
-	-fx-background-color: lime;
-	-fx-fill: lime;
+
+.trace-information-row.replayable .table-cell {
+	-fx-font-family: ARIAL;
+	-fx-fill: white;	
+	-fx-text-fill: -prob-aqua;
 }
 
-.trace-information-cell.not-replayable {
-	-fx-background-color: yellow;
-	-fx-fill: yellow;
+.trace-information-row.replayable .table-cell:selected:hover {
+	-fx-text-fill: white;
+}
+
+.trace-information-row.not-replayable .table-cell {
+	-fx-font-family: ARIAL;
+	-fx-fill: white;	
+	-fx-text-fill: -prob-orange;
+}
+
+.trace-information-row .table-cell:selected {
+	-fx-background-color: -prob-grey-50;
+	-fx-fill: -prob-grey-50;
+	-fx-text-fill: white;
+}
+
+.trace-information-row .table-cell:selected:hover {
+	-fx-background-color: -prob-grey;
+	-fx-text-fill: white;
 }
 
 /* ================= FULL VALUE STAGE ================ */

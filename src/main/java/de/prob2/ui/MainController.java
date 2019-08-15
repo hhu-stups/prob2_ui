@@ -17,6 +17,7 @@ import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
@@ -65,7 +66,7 @@ public class MainController extends BorderPane {
 		this.uiState = uiState;
 		this.resourceBundle = resourceBundle;
 		this.config = config;
-		refresh();
+		this.loadMainView(this.uiState.getGuiState());
 	}
 
 	@FXML
@@ -124,21 +125,27 @@ public class MainController extends BorderPane {
 		});
 	}
 
-	public void refresh() {
+	public void loadMainView(final String guiState) {
 		URL url;
-		if (uiState.getGuiState().contains("detached")) {
+		if (guiState.contains("detached")) {
 			url = this.getClass().getResource("main.fxml");
-		} else if (uiState.getGuiState().startsWith("custom ")) {
+		} else if (guiState.startsWith("custom ")) {
 			try {
-				url = new URL(uiState.getGuiState().replace("custom ", ""));
+				url = new URL(guiState.replace("custom ", ""));
 			} catch (final MalformedURLException e) {
 				LOGGER.error("Custom perspective FXML URL is malformed, using default perspective", e);
 				url = this.getClass().getResource("main.fxml");
 			}
 		} else {
-			url = this.getClass().getResource(uiState.getGuiState());
+			url = this.getClass().getResource(guiState);
 		}
 		stageManager.loadFXML(this, url);
+		injector.getInstance(MenuController.class).setMacMenu();
+	}
+	
+	public void changeMainView(final String guiState) {
+		this.uiState.setGuiState(guiState);
+		this.loadMainView(guiState);
 	}
 
 	public List<Accordion> getAccordions() {

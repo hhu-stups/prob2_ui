@@ -58,7 +58,6 @@ public final class MenuController extends MenuBar {
 			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu(bundle.getString("common.prob2"));
 			this.getMenus().add(0, applicationMenu);
 
-			menuToolkit.setApplicationMenu(applicationMenu);
 			MenuItem quit = menuToolkit.createQuitMenuItem(bundle.getString("common.prob2"));
 			quit.setOnAction(event -> {
 				for (Stage stage : stageManager.getRegistered()) {
@@ -71,7 +70,7 @@ public final class MenuController extends MenuBar {
 					new SeparatorMenuItem(), quit);
 
 			// Make this the global menu bar
-			stageManager.setGlobalMacMenuBar(this);
+			this.setMacMenu();
 		}
 	}
 

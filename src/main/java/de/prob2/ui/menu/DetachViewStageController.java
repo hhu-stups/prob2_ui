@@ -100,12 +100,9 @@ public final class DetachViewStageController extends Stage {
 
 	@FXML
 	public void apply() {
-		String guiState = uiState.getGuiState();
-		if (guiState.contains(DETACHED)){
-			guiState = guiState.replace(DETACHED,"");
-		}
-		final Parent root = injector.getInstance(WindowMenu.class).loadPreset(guiState);
-		((MainController)root).getAccordions().forEach(this::removeTitledPanes);
+		final MainController mainController = injector.getInstance(MainController.class);
+		mainController.loadMainView(uiState.getGuiState().replace(DETACHED, ""));
+		mainController.getAccordions().forEach(this::removeTitledPanes);
 		updateWrapperStages();
 		if (!uiState.getGuiState().contains(DETACHED)) {
 			uiState.setGuiState(uiState.getGuiState() + DETACHED);
@@ -133,10 +130,11 @@ public final class DetachViewStageController extends Stage {
 		}
 	}
 
-	public void resetCheckboxes() {
+	public void attachAllViews() {
 		for (CheckBox cb : checkBoxMap.values()) {
 			cb.setSelected(false);
 		}
+		this.apply();
 	}
 	
 	private void removeTitledPanes(Accordion accordion) {
@@ -153,7 +151,6 @@ public final class DetachViewStageController extends Stage {
 			accordion.setVisible(false);
 			accordion.setMaxWidth(0);
 			accordion.setMaxHeight(0);
-			accordion.setStyle("-fx-padding: 0.0 0.0 0.0 0.0;");
 		}
 	}
 	
@@ -170,7 +167,6 @@ public final class DetachViewStageController extends Stage {
 			accordion.setVisible(true);
 			accordion.setMaxWidth(Double.POSITIVE_INFINITY);
 			accordion.setMaxHeight(Double.POSITIVE_INFINITY);
-			accordion.setStyle("-fx-padding: 1.0em 0.0 0.0 0.0;");
 			if (accordion.getExpandedPane()!=null) {
 				accordion.getExpandedPane().setExpanded(false);
 			}

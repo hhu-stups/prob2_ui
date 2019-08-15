@@ -2,9 +2,7 @@ package de.prob2.ui.persistence;
 
 import java.lang.ref.Reference;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -17,7 +15,6 @@ import com.google.inject.Singleton;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
-import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -26,8 +23,6 @@ import javafx.stage.Stage;
 
 @Singleton
 public class UIState {
-	private static final Set<String> DETACHED = new HashSet<>(Arrays.asList("History", "Operations", "Verifications", "Statistics", "Project"));
-	
 	private final ObjectProperty<Locale> localeOverride;
 	private String guiState;
 	private final Set<String> savedVisibleStages;
@@ -121,15 +116,5 @@ public class UIState {
 				);
 			}
 		}
-	}
-	
-	public void clearDetachedStages() {
-		for (Reference<Stage> stageRef : stages.values()){
-			Stage stage = stageRef.get();
-			if (stage != null && !"de.prob2.ui.ProB2".equals(StageManager.getPersistenceID(stage))) {
-				stage.hide();
-			}
-		}
-		stages.keySet().removeAll(DETACHED);
 	}
 }

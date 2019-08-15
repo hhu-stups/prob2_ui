@@ -11,6 +11,7 @@ import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
+import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import javafx.fxml.FXML;
 import netscape.javascript.JSObject;
@@ -19,8 +20,8 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			
 	@Inject
 	public LTLFormulaStage(final StageManager stageManager, final CurrentProject currentProject, 
-			final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler) {
-		super(currentProject, formulaChecker, resultHandler);
+			final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
+		super(currentProject, formulaChecker, resultHandler, builtinsStage);
 		stageManager.loadFXML(this, "ltlformula_stage.fxml"); 
 	}
 	
