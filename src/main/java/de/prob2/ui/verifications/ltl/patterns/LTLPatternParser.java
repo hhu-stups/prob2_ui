@@ -81,7 +81,7 @@ public class LTLPatternParser implements ILTLItemHandler {
 		} else if(ctx instanceof SeqVarParamContext) {
 			return ((SeqVarParamContext) ctx).ID().getText();
 		}
-		throw new RuntimeException("Unknown parameter context: " + ctx.getClass());
+		return "";
 	}
 	
 	private LTLParseListener initializeParseListener(Pattern pattern) {
