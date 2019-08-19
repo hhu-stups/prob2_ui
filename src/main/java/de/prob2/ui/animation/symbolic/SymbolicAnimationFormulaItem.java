@@ -66,19 +66,27 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 			this.additionalInformation = new HashMap<>();
 		}
 		if(type == SymbolicExecutionType.MCDC) {
-			if(additionalInformation.get(MAX_DEPTH) == null || additionalInformation.get(LEVEL) == null) {
-				int depth = TestCaseGenerationFormulaExtractor.extractDepth(this.code);
-				int level = TestCaseGenerationFormulaExtractor.extractLevel(this.code);
-				additionalInformation.put(MAX_DEPTH, depth);
-				additionalInformation.put(LEVEL, level);
-			}
+			replaceMissingMCDCOptionsByDefaults();
 		} else if(type == SymbolicExecutionType.COVERED_OPERATIONS) {
-			if(additionalInformation.get(MAX_DEPTH) == null || additionalInformation.get(OPERATIONS) == null) {
-				int depth = TestCaseGenerationFormulaExtractor.extractDepth(this.code);
-				List<String> operations = TestCaseGenerationFormulaExtractor.extractOperations(this.code);
-				additionalInformation.put(MAX_DEPTH, depth);
-				additionalInformation.put(OPERATIONS, operations);
-			}
+			replaceMissingCoveredOperationsOptionsByDefaults();
+		}
+	}
+	
+	private void replaceMissingMCDCOptionsByDefaults() {
+		if(additionalInformation.get(MAX_DEPTH) == null || additionalInformation.get(LEVEL) == null) {
+			int depth = TestCaseGenerationFormulaExtractor.extractDepth(this.code);
+			int level = TestCaseGenerationFormulaExtractor.extractLevel(this.code);
+			additionalInformation.put(MAX_DEPTH, depth);
+			additionalInformation.put(LEVEL, level);
+		}
+	}
+	
+	private void replaceMissingCoveredOperationsOptionsByDefaults() {
+		if(additionalInformation.get(MAX_DEPTH) == null || additionalInformation.get(OPERATIONS) == null) {
+			int depth = TestCaseGenerationFormulaExtractor.extractDepth(this.code);
+			List<String> operations = TestCaseGenerationFormulaExtractor.extractOperations(this.code);
+			additionalInformation.put(MAX_DEPTH, depth);
+			additionalInformation.put(OPERATIONS, operations);
 		}
 	}
 
