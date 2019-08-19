@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.animator.command.AbstractCommand;
@@ -188,27 +187,15 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 			return;
 		}
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
-
-		List<TraceInformationItem> traceInformation = testCaseGeneratorResult.getTestTraces().stream()
-				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.isComplete(), trace.getTarget().getOperation(), trace.getTarget().getGuardString(), trace.getTrace()))
-				.collect(Collectors.toList());
-
-		List<Trace> traces = testCaseGeneratorResult.getTestTraces().stream()
-				.map(TestTrace::getTrace)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toList());
-		
-		List<Target> uncoveredTargets = testCaseGeneratorResult.getUncoveredTargets();
-		
-		List<TraceInformationItem> uncoveredOperations = uncoveredTargets.stream()
-				.map(target -> new TraceInformationItem(-1, new ArrayList<>(), true, target.getOperation(), target.getGuardString(), null))
-				.collect(Collectors.toList());
+		List<TraceInformationItem> traceInformation = extractTraceInformation(testCaseGeneratorResult);
+		List<Trace> traces = extractTraces(testCaseGeneratorResult);
+		List<TraceInformationItem> uncoveredOperations = extractUncoveredOperations(testCaseGeneratorResult);
 
 		if(testCaseGeneratorResult.isInterrupted()) {
 			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.testcasegeneration.result.interrupted");
 		} else if(traces.isEmpty()) {
 			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.notFound");
-		} else if(!uncoveredTargets.isEmpty()) {
+		} else if(!uncoveredOperations.isEmpty()) {
 			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.notAllGenerated");
 		} else {
 			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.found");
@@ -222,6 +209,25 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 			}
 		}
 		item.putAdditionalInformation("uncoveredOperations", uncoveredOperations);
+	}
+	
+	private List<TraceInformationItem> extractUncoveredOperations(TestCaseGeneratorResult testCaseGeneratorResult) {
+		return testCaseGeneratorResult.getUncoveredTargets().stream()
+				.map(target -> new TraceInformationItem(-1, new ArrayList<>(), true, target.getOperation(), target.getGuardString(), null))
+				.collect(Collectors.toList());
+	}
+	
+	private List<Trace> extractTraces(TestCaseGeneratorResult testCaseGeneratorResult) {
+		return testCaseGeneratorResult.getTestTraces().stream()
+				.map(TestTrace::getTrace)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+	}
+
+	private List<TraceInformationItem> extractTraceInformation(TestCaseGeneratorResult testCaseGeneratorResult) {
+		return testCaseGeneratorResult.getTestTraces().stream()
+				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.isComplete(), trace.getTarget().getOperation(), trace.getTarget().getGuardString(), trace.getTrace()))
+				.collect(Collectors.toList());
 	}
 
 	public void saveTraces(SymbolicAnimationFormulaItem item) {
