@@ -4,10 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.node.PPredicate;
-import de.be4.classicalb.core.parser.util.PrettyPrinter;
+import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
-import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
@@ -18,7 +16,6 @@ import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
-import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
@@ -198,11 +195,19 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 				.map(trace -> trace.getTrace())
 				.filter(trace -> trace != null)
 				.collect(Collectors.toList());
+		
+		List<Target> uncoveredTargets = testCaseGeneratorResult.getUncoveredTargets();
+		
+		List<TraceInformationItem> uncoveredOperations = uncoveredTargets.stream()
+				.map(target -> new TraceInformationItem(-1, new ArrayList<>(), true, target.getOperation(), target.getGuardString(), null))
+				.collect(Collectors.toList());
 
 		if(testCaseGeneratorResult.isInterrupted()) {
 			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.testcasegeneration.result.interrupted");
 		} else if(traces.isEmpty()) {
 			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.notFound");
+		} else if(!uncoveredTargets.isEmpty()) {
+			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.notAllGenerated");
 		} else {
 			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.found");
 		}
@@ -214,6 +219,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 				saveTraces(item);
 			}
 		}
+		item.putAdditionalInformation("uncoveredOperations", uncoveredOperations);
 	}
 
 	public void saveTraces(SymbolicAnimationFormulaItem item) {

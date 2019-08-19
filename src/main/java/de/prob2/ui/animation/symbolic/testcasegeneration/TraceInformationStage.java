@@ -62,8 +62,19 @@ public final class TraceInformationStage extends Stage {
 	
 	@FXML
 	private TableColumn<TraceInformationItem, String> guard;
+	
+	@FXML
+	private TableView<TraceInformationItem> tvUncovered;
+	
+	@FXML
+	private TableColumn<TraceInformationItem, String> uncoveredOperation;
+	
+	@FXML
+	private TableColumn<TraceInformationItem, String> uncoveredGuard;
 
-	private ObservableList<TraceInformationItem> items = FXCollections.observableArrayList();
+	private ObservableList<TraceInformationItem> traces = FXCollections.observableArrayList();
+	
+	private ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList();
 
 	private final CurrentTrace currentTrace;
 
@@ -73,8 +84,12 @@ public final class TraceInformationStage extends Stage {
 		this.currentTrace = currentTrace;
 	}
 
-	public void setItems(ObservableList<TraceInformationItem> items) {
-		this.items.setAll(items);
+	public void setTraces(ObservableList<TraceInformationItem> traces) {
+		this.traces.setAll(traces);
+	}
+	
+	public void setUncoveredOperations(ObservableList<TraceInformationItem> uncoveredOperations) {
+		this.uncoveredOperations.setAll(uncoveredOperations);
 	}
 
 	@FXML
@@ -85,7 +100,12 @@ public final class TraceInformationStage extends Stage {
 		isComplete.setCellValueFactory(new PropertyValueFactory<>("complete"));
 		operation.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		guard.setCellValueFactory(new PropertyValueFactory<>("guard"));
-		tvTraces.setItems(items);
+		tvTraces.setItems(traces);
+		
+		tvUncovered.setRowFactory(item -> new TraceInformationRow());
+		uncoveredOperation.setCellValueFactory(new PropertyValueFactory<>("operation"));
+		uncoveredGuard.setCellValueFactory(new PropertyValueFactory<>("guard"));
+		tvUncovered.setItems(uncoveredOperations);
 	}
 
 }

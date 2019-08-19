@@ -48,8 +48,13 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 				SymbolicAnimationFormulaItem item = row.getItem();
 				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
 				@SuppressWarnings("unchecked")
-				ObservableList<TraceInformationItem> items = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation("traceInformation"));
-				stage.setItems(items);
+				ObservableList<TraceInformationItem> traces = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation("traceInformation"));
+				stage.setTraces(traces);
+				
+				@SuppressWarnings("unchecked")
+				ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation("uncoveredOperations"));
+				stage.setUncoveredOperations(uncoveredOperations);
+				
 				stage.show();
 			});
 
