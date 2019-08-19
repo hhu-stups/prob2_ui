@@ -100,14 +100,14 @@ public final class TraceInformationStage extends Stage {
 		transitions.setCellValueFactory(new PropertyValueFactory<>("transitions"));
 		isComplete.setCellValueFactory(new PropertyValueFactory<>("complete"));
 		operation.setCellValueFactory(new PropertyValueFactory<>("operation"));
-		guard.setCellFactory(column -> new WrappedTextTableCell<>(column));
+		guard.setCellFactory(WrappedTextTableCell<TraceInformationItem>::new);
 		guard.setCellValueFactory(new PropertyValueFactory<>("guard"));
 		
 		tvTraces.setItems(traces);
 		
 		tvUncovered.setRowFactory(item -> new TraceInformationRow());
 		uncoveredOperation.setCellValueFactory(new PropertyValueFactory<>("operation"));
-		uncoveredGuard.setCellFactory(column -> new WrappedTextTableCell<>(column));
+		uncoveredGuard.setCellFactory(WrappedTextTableCell<TraceInformationItem>::new);
 		uncoveredGuard.setCellValueFactory(new PropertyValueFactory<>("guard"));
 		
 		tvUncovered.setItems(uncoveredOperations);
