@@ -3,8 +3,6 @@ package de.prob2.ui.animation.symbolic;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
-import de.prob.analysis.testcasegeneration.TestCaseGeneratorMCDCSettings;
-import de.prob.analysis.testcasegeneration.TestCaseGeneratorOperationCoverageSettings;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.EventB;
@@ -12,6 +10,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGeneratorCreator;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -20,7 +19,6 @@ import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.AbstractResultHandler;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,6 +28,8 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	private final CurrentTrace currentTrace;
 
 	private final SymbolicAnimationChecker symbolicChecker;
+	
+	private final TestCaseGeneratorCreator testCaseGeneratorCreator;
 
 	private final SymbolicAnimationResultHandler resultHandler;
 
@@ -38,13 +38,15 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	private final CurrentProject currentProject;
 
 	@Inject
-	public SymbolicAnimationFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
+	private SymbolicAnimationFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
 										   final Injector injector, final SymbolicAnimationChecker symbolicChecker,
+										   final TestCaseGeneratorCreator testCaseGeneratorCreator,
 										   final SymbolicAnimationResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.symbolicChecker = symbolicChecker;
+		this.testCaseGeneratorCreator = testCaseGeneratorCreator;
 		this.resultHandler = resultHandler;
 	}
 
@@ -93,24 +95,10 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 			return;
 		}
 		ClassicalBModel bModel = (ClassicalBModel) model;
-		ConstraintBasedTestCaseGenerator testCaseGenerator = getTestCaseGenerator(bModel, item);
+		ConstraintBasedTestCaseGenerator testCaseGenerator = testCaseGeneratorCreator.getTestCaseGenerator(bModel, item);
 		symbolicChecker.checkItem(item, testCaseGenerator, checkAll);
 	}
 
-	private ConstraintBasedTestCaseGenerator getTestCaseGenerator(ClassicalBModel bModel, SymbolicAnimationFormulaItem item) {
-		ConstraintBasedTestCaseGenerator testCaseGenerator = null;
-		if(item.getType() == SymbolicExecutionType.MCDC) {
-			int depth = (int) Double.parseDouble(item.getAdditionalInformation("maxDepth").toString());
-			int level = (int) Double.parseDouble(item.getAdditionalInformation("level").toString());
-			testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorMCDCSettings(depth, level), new ArrayList<>());
-		} else if(item.getType() == SymbolicExecutionType.COVERED_OPERATIONS) {
-			int depth = (int) Double.parseDouble(item.getAdditionalInformation("maxDepth").toString());
-			@SuppressWarnings("unchecked")
-			List<String> operations = (List<String>) item.getAdditionalInformation("operations");
-			testCaseGenerator = new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorOperationCoverageSettings(depth, operations), new ArrayList<>());
-		}
-		return testCaseGenerator;
-	}
 
 	public void handleItem(SymbolicAnimationFormulaItem item, boolean checkAll) {
 		if(!item.selected()) {
