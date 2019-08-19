@@ -50,5 +50,16 @@ public class TraceInformationItem {
     public Trace getTrace() {
         return trace;
     }
+    
+    @Override
+    public String toString() {
+    	StringBuilder sb = new StringBuilder();
+    	sb.append("OPERATION: ");
+    	sb.append(operation);
+    	sb.append(", ");
+    	sb.append("GUARD: ");
+    	sb.append(guard);
+    	return sb.toString();
+    }
 
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.inject.Inject;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
@@ -49,6 +50,11 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		List<PersistentTrace> traces = item.getExamples().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
 				.collect(Collectors.toList());
+		@SuppressWarnings("unchecked")
+		List<TraceInformationItem> traceInformation = ((List<TraceInformationItem>) item.getAdditionalInformation("traceInformation"))
+				.stream()
+				.filter(information -> information.getTrace() != null)
+				.collect(Collectors.toList());
 		File file = showSaveDialogForManyFiles(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"), currentProject.getLocation().toFile());
 		if(file == null) {
 			return;
@@ -68,7 +74,7 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 			sb.append(".prob2trace");
 			String fileName = sb.toString();
 			File traceFile = new File(file.getAbsolutePath() + File.separator + fileName);
-			writeToFile(traceFile, traces.get(i), true, "Test Case Generation(" + item.getName() + ")");
+			writeToFile(traceFile, traces.get(i), true, "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i));
 			final Path projectLocation = currentProject.getLocation();
 			final Path absolute = traceFile.toPath();
 			final Path relative = projectLocation.relativize(absolute);
