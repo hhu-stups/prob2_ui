@@ -25,7 +25,6 @@ import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetDotForVisualizationCommand;
 import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
@@ -168,7 +167,7 @@ public class DotView extends DynamicCommandStage {
 
 	private String getSvgForDotCommand(final Trace trace, final DynamicCommandItem item, final List<IEvalElement> formulas) throws IOException, InterruptedException {
 		if (item.getArity() > 0) {
-			formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
+			formulas.add(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
 		}
 		final Path dotFilePath = Files.createTempFile("prob2-ui", ".dot");
 		

@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetAllTableCommands;
 import de.prob.animator.command.GetTableForVisualizationCommand;
-import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
@@ -113,7 +112,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 					return;
 				}
 				if(item.getArity() > 0) {
-					formulas.add(new ClassicalB(taFormula.getText(), FormulaExpand.EXPAND));
+					formulas.add(currentTrace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
 				}
 				State id = currentTrace.getCurrentState();
 				GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
