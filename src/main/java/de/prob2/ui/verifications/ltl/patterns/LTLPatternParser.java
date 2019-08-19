@@ -63,7 +63,7 @@ public class LTLPatternParser implements ILTLItemHandler {
 				signature.append(name);
 				signature.append("(");
 				signature.append(String.join(", ", ((Pattern_defContext) child).pattern_def_param().stream()
-					.map(ctx -> extractParameterFromContext(ctx))
+					.map(this::extractParameterFromContext)
 					.collect(Collectors.toList())));
 				signature.append(")");
 				patternNames.add(signature.toString());

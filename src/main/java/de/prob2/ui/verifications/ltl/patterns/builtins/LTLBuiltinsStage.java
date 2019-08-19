@@ -40,8 +40,8 @@ public final class LTLBuiltinsStage extends Stage {
 	@FXML
 	public void initialize() {
 		pattern.setCellValueFactory(new PropertyValueFactory<>("pattern"));
-		description.setCellFactory(column -> {
-			return new TableCell<LTLBuiltinsItem, String>() {
+		description.setCellFactory(column -> 
+			new TableCell<LTLBuiltinsItem, String>() {
                 @Override
                 public void updateItem(String item, boolean empty) {
                     super.updateItem(item, empty);
@@ -52,8 +52,7 @@ public final class LTLBuiltinsStage extends Stage {
         				this.setGraphic(text);
                     }
                 }
-			};
-		});
+			});
 		description.setCellValueFactory(new PropertyValueFactory<>("description"));
 		tvPatterns.setItems(FXCollections.observableList(patternManager.getBuiltins().stream()
 			.map(pattern -> new LTLBuiltinsItem(String.join("\n", pattern.getSignatures()), pattern.getDescription()))

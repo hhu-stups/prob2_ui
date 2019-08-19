@@ -1,20 +1,16 @@
 package de.prob2.ui.sharedviews;
 
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 import com.google.inject.Injector;
 
 import de.prob2.ui.internal.StageManager;
 
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.machines.MachinesTab;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.text.Text;
 
 public class DescriptionView extends AnchorPane {
 
