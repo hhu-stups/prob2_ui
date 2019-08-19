@@ -3,6 +3,8 @@ package de.prob2.ui.animation.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationSettingsHandler;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -16,7 +18,6 @@ import de.prob2.ui.symbolic.SymbolicView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -27,14 +28,15 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 	
 	
 	private final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler;
+	
+	private final TestCaseGenerationSettingsHandler testCaseGenerationSettingsHandler;
 
 	@Inject
-	public SymbolicAnimationFormulaInput(final StageManager stageManager,
-										 final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler,
-										 final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
-										 final CurrentTrace currentTrace) {
+	private SymbolicAnimationFormulaInput(final StageManager stageManager, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
+										 final CurrentTrace currentTrace, final SymbolicAnimationFormulaHandler symbolicAnimationFormulaHandler, final TestCaseGenerationSettingsHandler testCaseGenerationSettingsHandler) {
 		super(stageManager, currentProject, injector, bundle, currentTrace);
 		this.symbolicAnimationFormulaHandler = symbolicAnimationFormulaHandler;
+		this.testCaseGenerationSettingsHandler = testCaseGenerationSettingsHandler;
 		stageManager.loadFXML(this, "symbolic_animation_formula_input.fxml");
 	}
 
@@ -42,8 +44,8 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 	protected boolean updateFormula(SymbolicAnimationFormulaItem item, SymbolicView<SymbolicAnimationFormulaItem> view, SymbolicChoosingStage<SymbolicAnimationFormulaItem> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractFormula(choosingStage);
-		Map<String, Object> additionalInformation = extractAdditionalInformation(choosingStage);
-		boolean valid = isValid(choosingStage);
+		Map<String, Object> additionalInformation = testCaseGenerationSettingsHandler.extractAdditionalInformation(choosingStage, mcdcInputView, operationCoverageInputView);
+		boolean valid = testCaseGenerationSettingsHandler.isValid(choosingStage, mcdcInputView, operationCoverageInputView);
 		SymbolicAnimationFormulaItem newItem = new SymbolicAnimationFormulaItem(formula, choosingStage.getExecutionType(), additionalInformation);
 		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
 			if(valid) {
@@ -55,45 +57,6 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 			return true;
 		}
 		return false;
-	}
-
-	private boolean isValid(SymbolicChoosingStage<SymbolicAnimationFormulaItem> choosingStage) {
-		boolean valid = true;
-		if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
-			String level = mcdcInputView.getLevel();
-			String depth = mcdcInputView.getDepth();
-			valid = checkInteger(level) && checkInteger(depth);
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
-			List<String> operations = operationCoverageInputView.getOperations();
-			String depth = operationCoverageInputView.getDepth();
-			valid = !operations.isEmpty() && checkInteger(depth);
-		}
-		return valid;
-	}
-
-	private Map<String, Object> extractAdditionalInformation(SymbolicChoosingStage<SymbolicAnimationFormulaItem> choosingStage) {
-		Map<String, Object> additionalInformation = new HashMap<>();
-		if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
-			String level = mcdcInputView.getLevel();
-			String depth = mcdcInputView.getDepth();
-			additionalInformation.put("maxDepth", depth);
-			additionalInformation.put("level", level);
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
-			List<String> operations = operationCoverageInputView.getOperations();
-			String depth = operationCoverageInputView.getDepth();
-			additionalInformation.put("maxDepth", depth);
-			additionalInformation.put("operations", operations);
-		}
-		return additionalInformation;
-	}
-
-	private boolean checkInteger(String str) {
-		try {
-			Integer.parseInt(str);
-		} catch(NumberFormatException e) {
-			return false;
-		}
-		return true;
 	}
 	
 	protected void setCheckListeners() {
@@ -118,7 +81,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.findValidState(formulaItem, false);
 				break;
 			case MCDC: {
-				if(!(checkInteger(mcdcInputView.getLevel()) && checkInteger(mcdcInputView.getDepth()))) {
+				if(!testCaseGenerationSettingsHandler.checkMCDCSettings(mcdcInputView.getLevel(), mcdcInputView.getDepth())) {
 					return;
 				}
 				formulaItem = new SymbolicAnimationFormulaItem(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()));
@@ -126,7 +89,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				break;
 			}
 			case COVERED_OPERATIONS: {
-				if(operationCoverageInputView.getOperations().isEmpty() || !checkInteger(operationCoverageInputView.getDepth())) {
+				if(!testCaseGenerationSettingsHandler.checkOperationCoverageSettings(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth())) {
 					return;
 				}
 				formulaItem = new SymbolicAnimationFormulaItem(Integer.parseInt(operationCoverageInputView.getDepth()), operationCoverageInputView.getOperations());
@@ -155,7 +118,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 				symbolicAnimationFormulaHandler.addFormula(checkingType.name(), checkingType, checking);
 				break;
 			case MCDC: {
-				if(!(checkInteger(mcdcInputView.getLevel()) && checkInteger(mcdcInputView.getDepth()))) {
+				if(!testCaseGenerationSettingsHandler.checkMCDCSettings(mcdcInputView.getLevel(), mcdcInputView.getDepth())) {
 					stageManager.makeAlert(Alert.AlertType.ERROR,
 							"animation.symbolic.alerts.testcasegeneration.invalid",
 							"animation.symbolic.alerts.testcasegeneration.mcdc.invalid")
@@ -173,7 +136,7 @@ public class SymbolicAnimationFormulaInput extends SymbolicFormulaInput<Symbolic
 							"animation.symbolic.alerts.testcasegeneration.operations.content").showAndWait();
 					return;
 				}
-				if(!checkInteger(operationCoverageInputView.getDepth())) {
+				if(!testCaseGenerationSettingsHandler.checkInteger(operationCoverageInputView.getDepth())) {
 					stageManager.makeAlert(Alert.AlertType.ERROR,
 							"animation.symbolic.alerts.testcasegeneration.invalid",
 							"animation.symbolic.alerts.testcasegeneration.coveredoperations.invalid")
