@@ -57,20 +57,24 @@ public class LTLPatternParser implements ILTLItemHandler {
 		List<String> patternNames = new ArrayList<>();
 		for(int i = 0; i < ast.getChildCount(); i++) {
 			ParseTree child = ast.getChild(i);
-			StringBuilder signature = new StringBuilder();
 			if(child instanceof Pattern_defContext && ((Pattern_defContext) child).ID() != null) {
-				String name = ((Pattern_defContext) child).ID().getText();
-				signature.append(name);
-				signature.append("(");
-				signature.append(String.join(", ", ((Pattern_defContext) child).pattern_def_param().stream()
-					.map(this::extractParameterFromContext)
-					.collect(Collectors.toList())));
-				signature.append(")");
-				patternNames.add(signature.toString());
+				patternNames.add(extractPatternSignature(child));
 			}
 		}
 		pattern.setName(String.join("\n", patternNames));
 		return parseListener;
+	}
+	
+	private String extractPatternSignature(ParseTree tree) {
+		StringBuilder signature = new StringBuilder();
+		String name = ((Pattern_defContext) tree).ID().getText();
+		signature.append(name);
+		signature.append("(");
+		signature.append(String.join(", ", ((Pattern_defContext) tree).pattern_def_param().stream()
+			.map(this::extractParameterFromContext)
+			.collect(Collectors.toList())));
+		signature.append(")");
+		return signature.toString();
 	}
 	
 	private String extractParameterFromContext(Pattern_def_paramContext ctx) {
