@@ -74,7 +74,8 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 			sb.append(".prob2trace");
 			String fileName = sb.toString();
 			File traceFile = new File(file.getAbsolutePath() + File.separator + fileName);
-			writeToFile(traceFile, traces.get(i), true, "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i));
+			String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
+			writeToFile(traceFile, traces.get(i), true, createdBy);
 			final Path projectLocation = currentProject.getLocation();
 			final Path absolute = traceFile.toPath();
 			final Path relative = projectLocation.relativize(absolute);
