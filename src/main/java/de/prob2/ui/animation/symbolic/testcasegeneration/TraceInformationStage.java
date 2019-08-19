@@ -7,11 +7,13 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
@@ -99,12 +101,41 @@ public final class TraceInformationStage extends Stage {
 		transitions.setCellValueFactory(new PropertyValueFactory<>("transitions"));
 		isComplete.setCellValueFactory(new PropertyValueFactory<>("complete"));
 		operation.setCellValueFactory(new PropertyValueFactory<>("operation"));
+		
+		guard.setCellFactory(column -> 
+			new TableCell<TraceInformationItem, String>() {
+	            @Override
+	            public void updateItem(String item, boolean empty) {
+	                super.updateItem(item, empty);
+	                if (!isEmpty()) {
+	    				Text text = new Text(item);
+	    				text.wrappingWidthProperty().bind(column.widthProperty());
+	    				this.setWrapText(true);
+	    				this.setGraphic(text);
+	                }
+	            }
+		});
 		guard.setCellValueFactory(new PropertyValueFactory<>("guard"));
+		
+		
 		tvTraces.setItems(traces);
 		
 		tvUncovered.setRowFactory(item -> new TraceInformationRow());
 		uncoveredOperation.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		uncoveredGuard.setCellValueFactory(new PropertyValueFactory<>("guard"));
+		uncoveredGuard.setCellFactory(column -> 
+		new TableCell<TraceInformationItem, String>() {
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!isEmpty()) {
+    				Text text = new Text(item);
+    				text.wrappingWidthProperty().bind(column.widthProperty());
+    				this.setWrapText(true);
+    				this.setGraphic(text);
+                }
+            }
+		});
 		tvUncovered.setItems(uncoveredOperations);
 	}
 
