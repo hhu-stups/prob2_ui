@@ -7,13 +7,12 @@ import com.google.inject.Singleton;
 
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.WrappedTextTableCell;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 
@@ -40,19 +39,7 @@ public final class LTLBuiltinsStage extends Stage {
 	@FXML
 	public void initialize() {
 		pattern.setCellValueFactory(new PropertyValueFactory<>("pattern"));
-		description.setCellFactory(column -> 
-			new TableCell<LTLBuiltinsItem, String>() {
-                @Override
-                public void updateItem(String item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (!isEmpty()) {
-        				Text text = new Text(item);
-        				text.wrappingWidthProperty().bind(column.widthProperty());
-        				this.setWrapText(true);
-        				this.setGraphic(text);
-                    }
-                }
-			});
+		description.setCellFactory(column -> new WrappedTextTableCell<>(column));
 		description.setCellValueFactory(new PropertyValueFactory<>("description"));
 		tvPatterns.setItems(FXCollections.observableList(patternManager.getBuiltins().stream()
 			.map(pattern -> new LTLBuiltinsItem(String.join("\n", pattern.getSignatures()), pattern.getDescription()))
