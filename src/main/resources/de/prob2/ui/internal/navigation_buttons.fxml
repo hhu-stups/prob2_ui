@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.internal.NavigationButtons?>
+<?import de.prob2.ui.internal.ReloadButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
+
 <fx:root type="NavigationButtons" stylesheets="@/prob.css" alignment="CENTER_LEFT" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -42,12 +44,5 @@
 			<Tooltip text="%internal.navigationButtons.forward.tooltip"/>
 		</tooltip>
 	</Button>
-	<Button fx:id="reloadButton" HBox.hgrow="NEVER" onAction="#handleReloadButton">
-		<graphic>
-			<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}"/>
-		</graphic>
-		<tooltip>
-			<Tooltip text="%internal.navigationButtons.reload.tooltip"/>
-		</tooltip>
-	</Button>
+	<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
 </fx:root>

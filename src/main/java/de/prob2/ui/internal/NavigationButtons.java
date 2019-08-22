@@ -18,17 +18,12 @@ public final class NavigationButtons extends HBox {
 	@FXML private Button fastForwardButton;
 	@FXML private Button reloadButton;
 
-	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
-	private final MachineLoader machineLoader;
 
 	@Inject
-	private NavigationButtons(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final MachineLoader machineLoader) {
+	private NavigationButtons(final StageManager stageManager, final CurrentTrace currentTrace) {
 		super();
-
-		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.machineLoader = machineLoader;
 
 		stageManager.loadFXML(this, "navigation_buttons.fxml");
 	}
@@ -39,7 +34,6 @@ public final class NavigationButtons extends HBox {
 		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
 		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
-		reloadButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
 	}
 
 	@FXML
@@ -68,10 +62,5 @@ public final class NavigationButtons extends HBox {
 		if (currentTrace.exists()) {
 			currentTrace.set(currentTrace.get().gotoPosition(currentTrace.get().size()-1));
 		}
-	}
-
-	@FXML
-	private void handleReloadButton() {
-		currentProject.reloadCurrentMachine();
 	}
 }
