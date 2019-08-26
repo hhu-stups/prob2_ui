@@ -1,28 +1,15 @@
 package de.prob2.ui.states;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
@@ -43,7 +30,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.TableUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
-
+import de.prob2.ui.unsatcore.UnsatCoreCalculator;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -64,9 +51,23 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -95,6 +96,7 @@ public final class StatesView extends StackPane {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final Config config;
+	private final UnsatCoreCalculator unsatCoreCalculator;
 
 	private List<PrologASTNode> rootNodes;
 	private List<PrologASTNode> filteredRootNodes;
@@ -108,7 +110,7 @@ public final class StatesView extends StackPane {
 
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
-			final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config) {
+					   final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config, final UnsatCoreCalculator unsatCoreCalculator) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.statusBar = statusBar;
@@ -122,6 +124,7 @@ public final class StatesView extends StackPane {
 		this.currentValues = new HashMap<>();
 		this.previousValues = new HashMap<>();
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
+		this.unsatCoreCalculator = unsatCoreCalculator;
 		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "states_view.fxml");
@@ -179,6 +182,8 @@ public final class StatesView extends StackPane {
 				configData.statesViewColumnsWidth = TableUtils.getAbsoluteColumnWidths(tv.getColumns());
 			}
 		});
+
+
 	}
 
 	public void restoreColumnWidths() {
@@ -193,6 +198,19 @@ public final class StatesView extends StackPane {
 		row.itemProperty().addListener((observable, from, to) -> {
 			row.getStyleClass().remove("changed");
 			if (to != null && to.getContents() instanceof ASTFormula) {
+				IBEvalElement core = unsatCoreCalculator.unsatCoreProperty().get();
+				if(core != null) {
+					final IEvalElement formula = ((ASTFormula) to.getContents()).getFormula();
+					String code = core.getCode();
+					List<String> coreConjuncts = Arrays.stream(code.split("&"))
+							.map(str -> str.replaceAll(" ", ""))
+							.collect(Collectors.toList());
+					if (coreConjuncts.contains(formula.getCode().replaceAll(" ", ""))) {
+						row.getStyleClass().add("unsatCore");
+					}
+					return;
+				}
+
 				final IEvalElement formula = ((ASTFormula) to.getContents()).getFormula();
 				final AbstractEvalResult current = this.currentValues.get(formula);
 				final AbstractEvalResult previous = this.previousValues.get(formula);
@@ -510,4 +528,5 @@ public final class StatesView extends StackPane {
 		}
 		stage.show();
 	}
+
 }
