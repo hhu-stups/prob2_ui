@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.internal.ReloadButton?>
+
+<?import de.prob2.ui.layout.FontSize?>
+<fx:root type="ReloadButton"
+		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+	<graphic>
+		<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}"/>
+	</graphic>
+	<tooltip>
+		<Tooltip text="%internal.navigationButtons.reload.tooltip"/>
+	</tooltip>
+</fx:root>

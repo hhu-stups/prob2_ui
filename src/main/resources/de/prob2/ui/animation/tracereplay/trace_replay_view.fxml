@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.SplitPane?>
+<?import de.prob2.ui.internal.ReloadButton?>
 
 <fx:root type="TraceReplayView" fitToHeight="true" fitToWidth="true"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
@@ -41,6 +42,7 @@
 					</tooltip>
 				</Button>
 				<Spacer/>
+				<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
 				<Button fx:id="loadTraceButton" onAction="#loadTraceFromFile" disable="true">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
