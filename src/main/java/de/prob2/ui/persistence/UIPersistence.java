@@ -77,7 +77,7 @@ public final class UIPersistence {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
 
-		injector.getInstance(DetachViewStageController.class).apply();
+		injector.getInstance(DetachViewStageController.class).doDetaching();
 		injector.getInstance(StatesView.class).restoreColumnWidths();
 	}
 }

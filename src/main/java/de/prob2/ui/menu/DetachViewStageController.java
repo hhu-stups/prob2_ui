@@ -98,10 +98,8 @@ public final class DetachViewStageController extends Stage {
 	}
 
 	@FXML
-	public void apply() {
-		final MainController mainController = injector.getInstance(MainController.class);
-		mainController.getAccordions().forEach(this::removeTitledPanes);
-		updateWrapperStages();
+	private void apply() {
+		doDetaching();
 		this.setOnCloseRequest(e -> {
 			if (!wrapperStages.isEmpty()) {
 				for (Stage stage : wrapperStages) {
@@ -115,6 +113,13 @@ public final class DetachViewStageController extends Stage {
 		this.hide();
 	}
 
+	public void doDetaching() {
+		uiState.updateSavedStageBoxes();
+		wrapperStages.forEach(Window::hide);
+		injector.getInstance(MainController.class).getAccordions().forEach(this::detachTitledPanes);
+		updateWrapperStages();
+	}
+	
 	private void updateWrapperStages() {
 		for (Stage stage : wrapperStages) {
 			List<Node> child = stage.getScene().getRoot().getChildrenUnmodifiable();
@@ -132,9 +137,7 @@ public final class DetachViewStageController extends Stage {
 		this.apply();
 	}
 	
-	private void removeTitledPanes(Accordion accordion) {
-		uiState.updateSavedStageBoxes();
-		wrapperStages.forEach(Window::hide);
+	private void detachTitledPanes(Accordion accordion) {
 		for (final Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 			final TitledPane tp = it.next();
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
