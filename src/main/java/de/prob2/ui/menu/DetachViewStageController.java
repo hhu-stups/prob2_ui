@@ -100,12 +100,10 @@ public final class DetachViewStageController extends Stage {
 	private void apply() {
 		doDetaching();
 		this.setOnCloseRequest(e -> {
-			if (!wrapperStages.isEmpty()) {
-				for (Stage stage : wrapperStages) {
-					List<Node> child = stage.getScene().getRoot().getChildrenUnmodifiable();
-					if (!child.isEmpty()) {
-						checkBoxMap.get(child.get(0).getClass()).setSelected(true);
-					}
+			for (Stage stage : wrapperStages) {
+				List<Node> child = stage.getScene().getRoot().getChildrenUnmodifiable();
+				if (!child.isEmpty()) {
+					checkBoxMap.get(child.get(0).getClass()).setSelected(true);
 				}
 			}
 		});
