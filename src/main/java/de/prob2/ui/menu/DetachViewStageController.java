@@ -24,7 +24,6 @@ import de.prob2.ui.verifications.VerificationsView;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
@@ -153,7 +152,7 @@ public final class DetachViewStageController extends Stage {
 	}
 	
 	private void transferToNewWindow(TitledPane tp, String title, Accordion accordion) {
-		Parent node = (Parent) tp.getContent();
+		Node node = tp.getContent();
 		tp.setContent(null);
 		Stage stage = stageManager.makeStage(new Scene(new StackPane()), this.getClass().getName() + " DETACHED " + node.getClass().getName());
 		((StackPane) stage.getScene().getRoot()).getChildren().add(node);
