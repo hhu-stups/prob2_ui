@@ -54,7 +54,6 @@ public final class DetachViewStageController extends Stage {
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final UIState uiState;
-	private static final String DETACHED = "detached";
 	
 	private final Map<Class<?>, CheckBox> checkBoxMap;
 	private final Set<Stage> wrapperStages;
@@ -101,12 +100,8 @@ public final class DetachViewStageController extends Stage {
 	@FXML
 	public void apply() {
 		final MainController mainController = injector.getInstance(MainController.class);
-		mainController.loadMainView(uiState.getGuiState().replace(DETACHED, ""));
 		mainController.getAccordions().forEach(this::removeTitledPanes);
 		updateWrapperStages();
-		if (!uiState.getGuiState().contains(DETACHED)) {
-			uiState.setGuiState(uiState.getGuiState() + DETACHED);
-		}
 		this.setOnCloseRequest(e -> {
 			if (!wrapperStages.isEmpty()) {
 				for (Stage stage : wrapperStages) {
@@ -174,9 +169,6 @@ public final class DetachViewStageController extends Stage {
 			tp.setContent(node);
 			accordion.getPanes().add(tp);
 			wrapperStages.remove(stage);
-			if (wrapperStages.isEmpty()) {
-				uiState.setGuiState(uiState.getGuiState().replace(DETACHED,""));
-			}
 		});
 		// Default bounds, replaced by saved ones from the config when show() is called
 		stage.setWidth(200);

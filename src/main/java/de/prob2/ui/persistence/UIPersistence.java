@@ -77,10 +77,7 @@ public final class UIPersistence {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
 
-		if (uiState.getGuiState().contains("detached")) {
-			injector.getInstance(DetachViewStageController.class).apply();
-		}
-		
+		injector.getInstance(DetachViewStageController.class).apply();
 		injector.getInstance(StatesView.class).restoreColumnWidths();
 	}
 }

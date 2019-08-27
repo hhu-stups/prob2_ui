@@ -127,9 +127,7 @@ public class MainController extends BorderPane {
 
 	public void loadMainView(final String guiState) {
 		URL url;
-		if (guiState.contains("detached")) {
-			url = this.getClass().getResource("main.fxml");
-		} else if (guiState.startsWith("custom ")) {
+		if (guiState.startsWith("custom ")) {
 			try {
 				url = new URL(guiState.replace("custom ", ""));
 			} catch (final MalformedURLException e) {
@@ -138,6 +136,10 @@ public class MainController extends BorderPane {
 			}
 		} else {
 			url = this.getClass().getResource(guiState);
+			if (url == null) {
+				LOGGER.error("Unknown built-in perspective {} found in config, using default perspective", guiState);
+				url = this.getClass().getResource("main.fxml");
+			}
 		}
 		stageManager.loadFXML(this, url);
 		injector.getInstance(MenuController.class).setMacMenu();
