@@ -107,19 +107,10 @@ public final class DetachViewStageController extends Stage {
 	public void doDetaching() {
 		uiState.updateSavedStageBoxes();
 		wrapperStages.forEach(Window::hide);
+		wrapperStages.clear();
 		injector.getInstance(MainController.class).getAccordions().forEach(this::detachTitledPanes);
-		updateWrapperStages();
 	}
 	
-	private void updateWrapperStages() {
-		for (DetachedViewStage stage : wrapperStages) {
-			if (!checkBoxMap.get(stage.getDetachedView().getClass()).isSelected()) {
-				stage.hide();
-				Platform.runLater(() -> wrapperStages.remove(stage));
-			}
-		}
-	}
-
 	public void attachAllViews() {
 		for (CheckBox cb : checkBoxMap.values()) {
 			cb.setSelected(false);
