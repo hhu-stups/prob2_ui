@@ -26,6 +26,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -143,7 +144,9 @@ public final class DetachViewStageController extends Stage {
 	
 	private void transferToNewWindow(TitledPane tp, Accordion accordion) {
 		Node node = tp.getContent();
-		tp.setContent(null);
+		// Remove the detached view from the TitledPane.
+		// A dummy node is used instead of null to prevent NullPointerExceptions from internal JavaFX code (mostly related to TitledPane/Accordion animations).
+		tp.setContent(new Label("View is detached\n(this label should be invisible)"));
 		DetachedViewStage stage = new DetachedViewStage(stageManager, node, tp, accordion);
 		node.setVisible(true);
 		wrapperStages.add(stage);
