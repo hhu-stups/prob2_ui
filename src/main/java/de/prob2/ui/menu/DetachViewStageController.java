@@ -3,7 +3,6 @@ package de.prob2.ui.menu;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,14 +23,11 @@ import de.prob2.ui.verifications.VerificationsView;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TitledPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -55,7 +51,7 @@ public final class DetachViewStageController extends Stage {
 	private final UIState uiState;
 	
 	private final Map<Class<?>, CheckBox> checkBoxMap;
-	private final Set<Stage> wrapperStages;
+	private final Set<DetachedViewStage> wrapperStages;
 	
 	@Inject
 	private DetachViewStageController(final Injector injector, final StageManager stageManager, final UIState uiState) {
@@ -100,11 +96,8 @@ public final class DetachViewStageController extends Stage {
 	private void apply() {
 		doDetaching();
 		this.setOnCloseRequest(e -> {
-			for (Stage stage : wrapperStages) {
-				List<Node> child = stage.getScene().getRoot().getChildrenUnmodifiable();
-				if (!child.isEmpty()) {
-					checkBoxMap.get(child.get(0).getClass()).setSelected(true);
-				}
+			for (DetachedViewStage stage : wrapperStages) {
+				checkBoxMap.get(stage.getDetachedView().getClass()).setSelected(true);
 			}
 		});
 		this.hide();
@@ -118,9 +111,8 @@ public final class DetachViewStageController extends Stage {
 	}
 	
 	private void updateWrapperStages() {
-		for (Stage stage : wrapperStages) {
-			List<Node> child = stage.getScene().getRoot().getChildrenUnmodifiable();
-			if (!child.isEmpty() && !checkBoxMap.get(child.get(0).getClass()).isSelected()) {
+		for (DetachedViewStage stage : wrapperStages) {
+			if (!checkBoxMap.get(stage.getDetachedView().getClass()).isSelected()) {
 				stage.hide();
 				Platform.runLater(() -> wrapperStages.remove(stage));
 			}
@@ -139,7 +131,7 @@ public final class DetachViewStageController extends Stage {
 			final TitledPane tp = it.next();
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
 				it.remove();
-				Platform.runLater(() -> transferToNewWindow(tp, tp.getText(), accordion));
+				Platform.runLater(() -> transferToNewWindow(tp, accordion));
 			}
 		}
 		if (accordion.getPanes().isEmpty()) {
@@ -149,32 +141,16 @@ public final class DetachViewStageController extends Stage {
 		}
 	}
 	
-	private void transferToNewWindow(TitledPane tp, String title, Accordion accordion) {
+	private void transferToNewWindow(TitledPane tp, Accordion accordion) {
 		Node node = tp.getContent();
 		tp.setContent(null);
-		Stage stage = stageManager.makeStage(new Scene(new StackPane()), this.getClass().getName() + " DETACHED " + node.getClass().getName());
-		((StackPane) stage.getScene().getRoot()).getChildren().add(node);
+		DetachedViewStage stage = new DetachedViewStage(stageManager, node, tp, accordion);
 		node.setVisible(true);
 		wrapperStages.add(stage);
-		stage.setTitle(title);
 		stage.setOnCloseRequest(e -> {
 			checkBoxMap.get(node.getClass()).setSelected(false);
-			accordion.setVisible(true);
-			accordion.setMaxWidth(Double.POSITIVE_INFINITY);
-			accordion.setMaxHeight(Double.POSITIVE_INFINITY);
-			if (accordion.getExpandedPane()!=null) {
-				accordion.getExpandedPane().setExpanded(false);
-			}
-			accordion.setExpandedPane(tp);
-			tp.setContent(node);
-			accordion.getPanes().add(tp);
 			wrapperStages.remove(stage);
 		});
-		// Default bounds, replaced by saved ones from the config when show() is called
-		stage.setWidth(200);
-		stage.setHeight(100);
-		stage.setX((Screen.getPrimary().getVisualBounds().getWidth()-stage.getWidth())/2);
-		stage.setY((Screen.getPrimary().getVisualBounds().getHeight()-stage.getHeight())/2);
 		stage.show();
 	}
 }
