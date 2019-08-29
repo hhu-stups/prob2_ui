@@ -10,7 +10,6 @@ import de.hhu.stups.prob.translator.exceptions.TranslationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;

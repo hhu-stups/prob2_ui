@@ -203,9 +203,9 @@ public final class StatesView extends StackPane {
 					final IEvalElement formula = ((ASTFormula) to.getContents()).getFormula();
 					String code = core.getCode();
 					List<String> coreConjuncts = Arrays.stream(code.split("&"))
-							.map(str -> str.replaceAll(" ", ""))
+							.map(str -> str.replace(" ", ""))
 							.collect(Collectors.toList());
-					if (coreConjuncts.contains(formula.getCode().replaceAll(" ", ""))) {
+					if (coreConjuncts.contains(formula.getCode().replace(" ", ""))) {
 						row.getStyleClass().add("unsatCore");
 					}
 					return;

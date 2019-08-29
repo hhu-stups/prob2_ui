@@ -43,7 +43,7 @@ import javafx.util.StringConverter;
 public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox {
 
 	private abstract class LineListCell<S> extends ListCell<S> {
-		{
+		private LineListCell() {
 			setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		}
 

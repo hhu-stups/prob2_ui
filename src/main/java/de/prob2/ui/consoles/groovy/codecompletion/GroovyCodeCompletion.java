@@ -64,7 +64,7 @@ public class GroovyCodeCompletion extends Popup {
 	
 	private String handleActivation(String currentLine) {
 		String currentPrefix;
-		String newCurrentLine = currentLine.replaceAll("\\s","");
+		String newCurrentLine = currentLine.replace("\\s","");
 		int indexOfPoint = newCurrentLine.lastIndexOf('.');
 		int index = Math.max(-1, indexOfPoint);
 		currentSuggestion = newCurrentLine.substring(index + 1, newCurrentLine.length());

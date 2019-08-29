@@ -32,6 +32,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Region;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -153,9 +154,9 @@ public final class PreferencesStage extends Stage {
 		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
 
 		// prevent text on buttons from being abbreviated
-		undoButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
-		applyButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
-		resetButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
+		undoButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+		applyButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+		resetButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
 		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 		config.addListener(new ConfigListener() {

@@ -78,7 +78,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	}
 
 	public void handleSequence(SymbolicAnimationFormulaItem item, boolean checkAll) {
-		List<String> events = Arrays.asList(item.getCode().replaceAll(" ", "").split(";"));
+		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new EventB("true", FormulaExpand.EXPAND));
 		symbolicChecker.checkItem(item, cmd, currentTrace.getStateSpace(), checkAll);
 	}

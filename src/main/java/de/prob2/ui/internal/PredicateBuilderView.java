@@ -1,6 +1,7 @@
 package de.prob2.ui.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -111,9 +112,7 @@ public final class PredicateBuilderView extends VBox {
 			items.put(lhs, rhs);
 		}
 		table.refresh();
-		for (int i = size; i < predicates.length; i++) {
-			restPredicates.add(predicates[i]);
-		}
+		restPredicates.addAll(Arrays.asList(predicates).subList(size, predicates.length));
 		this.predicateField.setText(String.join(" & ", restPredicates));
 	}
 	

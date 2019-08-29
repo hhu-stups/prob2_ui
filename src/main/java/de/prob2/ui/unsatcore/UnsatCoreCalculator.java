@@ -1,7 +1,6 @@
 package de.prob2.ui.unsatcore;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.command.UnsatRegularCoreCommand;
 import de.prob.animator.domainobjects.FormulaExpand;
@@ -25,14 +24,11 @@ public class UnsatCoreCalculator {
 
     private final CurrentTrace currentTrace;
 
-    private final Injector injector;
-
     private ObjectProperty<IBEvalElement> unsatCore;
 
     @Inject
-    private UnsatCoreCalculator(final CurrentTrace currentTrace, final Injector injector) {
+    private UnsatCoreCalculator(final CurrentTrace currentTrace) {
         this.currentTrace = currentTrace;
-        this.injector = injector;
         this.unsatCore = new SimpleObjectProperty<>(null);
         this.currentTrace.addListener((observable, from, to) -> {
             if(to != null) {
@@ -62,7 +58,7 @@ public class UnsatCoreCalculator {
                 .filter(astNode -> astNode instanceof ASTCategory)
                 .filter(astNode -> "PROPERTIES".equals(((ASTCategory) astNode).getName()))
                 .collect(Collectors.toList());
-        if(properties.size() == 0) {
+        if(properties.isEmpty()) {
             return null;
         }
         return (IBEvalElement) Join.conjunctWithStrings(bModel, properties.get(0).getSubnodes().stream()

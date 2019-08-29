@@ -17,6 +17,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -56,9 +57,9 @@ public class DynamicPreferencesStage extends Stage {
 	@FXML
 	private void initialize() {
 		// prevent text on buttons from being abbreviated
-		resetButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
-		cancelButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
-		okButton.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
+		resetButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+		cancelButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+		okButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		
 		this.preferences.setPreferences(this.proBPreferences);
 	}
