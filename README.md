@@ -14,4 +14,3 @@ Pre-built binaries for the ProB 2 UI can be downloaded [here](https://www3.hhu.d
 ## Running from source
 
 The ProB 2 UI can be started from source using the Gradle `run` task (`./gradlew run` on Linux/macOS/etc., `gradlew.bat run` on Windows).
-
