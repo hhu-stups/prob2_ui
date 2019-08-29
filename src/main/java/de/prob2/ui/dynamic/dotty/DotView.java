@@ -186,7 +186,7 @@ public class DotView extends DynamicCommandStage {
 			final String dot = getDotCmd.getValue();
 			final String dotEngine = item.getAdditionalInfo().stream()
 				.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
-				.peek(t -> BindingGenerator.getCompoundTerm(t, 1))
+				.map(t -> BindingGenerator.getCompoundTerm(t, 1))
 				.map(t -> PrologTerm.atomicString(t.getArgument(1)))
 				.findAny()
 				.orElseGet(getDotEngineCmd::getValue);
