@@ -6,9 +6,8 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.hildan.fxgson.FxGson;
-import org.hildan.fxgson.adapters.extras.ColorTypeAdapter;
-
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
@@ -23,11 +22,15 @@ import de.prob.MainModule;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
+
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.BoundingBox;
 import javafx.scene.paint.Color;
 import javafx.util.BuilderFactory;
+
+import org.hildan.fxgson.FxGson;
+import org.hildan.fxgson.adapters.extras.ColorTypeAdapter;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -58,6 +61,17 @@ public class ProB2Module extends AbstractModule {
 		bind(Gson.class).toInstance(FxGson.coreBuilder()
 			.disableHtmlEscaping()
 			.setPrettyPrinting()
+			.addSerializationExclusionStrategy(new ExclusionStrategy() {
+				@Override
+				public boolean shouldSkipField(final FieldAttributes f) {
+					return f.getAnnotation(OnlyDeserialize.class) != null;
+				}
+				
+				@Override
+				public boolean shouldSkipClass(final Class<?> clazz) {
+					return false;
+				}
+			})
 			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
 			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(json.getAsString()))
 			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
