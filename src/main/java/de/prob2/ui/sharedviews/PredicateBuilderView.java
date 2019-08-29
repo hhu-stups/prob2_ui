@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.sharedviews;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 
 import de.prob.formula.PredicateBuilder;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

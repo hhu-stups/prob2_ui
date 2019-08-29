@@ -11,9 +11,9 @@ import com.google.inject.Inject;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.PredicateBuilderView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.PredicateBuilderView;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

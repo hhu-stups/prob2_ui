@@ -1,7 +1,9 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.sharedviews;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;

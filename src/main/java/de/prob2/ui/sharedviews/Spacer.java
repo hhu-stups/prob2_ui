@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.sharedviews;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;

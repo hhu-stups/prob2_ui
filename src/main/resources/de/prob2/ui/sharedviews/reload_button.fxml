@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import de.prob2.ui.layout.BindableGlyph?>
-<?import de.prob2.ui.internal.ReloadButton?>
-
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.ReloadButton?>
+<?import javafx.scene.control.Tooltip?>
 <fx:root type="ReloadButton"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>

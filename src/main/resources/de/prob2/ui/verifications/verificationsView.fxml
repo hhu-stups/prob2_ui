@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.internal.BetterTabPane?>
+<?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>

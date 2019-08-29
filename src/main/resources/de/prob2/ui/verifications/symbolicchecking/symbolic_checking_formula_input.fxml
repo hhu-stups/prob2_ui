@@ -2,7 +2,7 @@
 
 <?import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCInputView?>
 <?import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView?>
-<?import de.prob2.ui.internal.PredicateBuilderView?>
+<?import de.prob2.ui.sharedviews.PredicateBuilderView?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaInput?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>

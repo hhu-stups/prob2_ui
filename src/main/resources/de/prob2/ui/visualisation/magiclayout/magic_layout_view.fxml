@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.helpsystem.HelpButton?>
-<?import de.prob2.ui.internal.BetterTabPane?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.menu.ViewMenu?>
+<?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import de.prob2.ui.visualisation.magiclayout.editpane.MagicLayoutEditEdges?>
 <?import de.prob2.ui.visualisation.magiclayout.editpane.MagicLayoutEditNodes?>
 <?import javafx.geometry.Insets?>

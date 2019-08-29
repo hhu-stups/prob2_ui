@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.internal.BetterTabPane?>
 <?import de.prob2.ui.project.machines.MachinesTab?>
 <?import de.prob2.ui.project.preferences.PreferencesTab?>
 <?import de.prob2.ui.project.ProjectTab?>
 <?import de.prob2.ui.project.ProjectView?>
 <?import de.prob2.ui.project.verifications.VerificationsTab?>
+<?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.layout.VBox?>

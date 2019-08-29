@@ -1,27 +1,29 @@
 package de.prob2.ui.symbolic;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import de.prob.statespace.LoadedMachine;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCInputView;
-import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView;
-import de.prob2.ui.internal.PredicateBuilderView;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.AbstractResultHandler;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
+import de.prob.statespace.LoadedMachine;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCInputView;
+import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.PredicateBuilderView;
+import de.prob2.ui.verifications.AbstractResultHandler;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extends VBox {
 	

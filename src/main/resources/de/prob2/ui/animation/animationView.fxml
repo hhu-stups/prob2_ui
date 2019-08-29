@@ -3,7 +3,7 @@
 <?import de.prob2.ui.animation.AnimationView?>
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationView?>
 <?import de.prob2.ui.animation.tracereplay.TraceReplayView?>
-<?import de.prob2.ui.internal.BetterTabPane?>
+<?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.layout.AnchorPane?>
 <fx:root type="AnimationView" xmlns:fx="http://javafx.com/fxml/1">

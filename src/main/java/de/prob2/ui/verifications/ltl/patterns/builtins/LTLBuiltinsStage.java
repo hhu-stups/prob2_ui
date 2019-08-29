@@ -7,7 +7,8 @@ import com.google.inject.Singleton;
 
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.WrappedTextTableCell;
+import de.prob2.ui.sharedviews.WrappedTextTableCell;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;

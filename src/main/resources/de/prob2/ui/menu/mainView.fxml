@@ -2,7 +2,7 @@
 
 <?import de.prob2.ui.beditor.BEditorView?>
 <?import de.prob2.ui.consoles.b.BConsoleView?>
-<?import de.prob2.ui.internal.BetterTabPane?>
+<?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import de.prob2.ui.states.StateErrorsView?>
 <?import de.prob2.ui.states.StatesView?>
 <?import de.prob2.ui.visualisation.VisualisationView?>

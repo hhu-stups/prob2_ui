@@ -1,10 +1,14 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import java.util.Arrays;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.WrappedTextTableCell;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.WrappedTextTableCell;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,8 +18,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
-
-import java.util.Arrays;
 
 @Singleton
 public final class TraceInformationStage extends Stage {
