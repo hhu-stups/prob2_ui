@@ -12,6 +12,7 @@ import java.util.Set;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.MainController;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -36,7 +37,7 @@ public class UIState {
 	public UIState(final Config config) {
 		this.localeOverride = new SimpleObjectProperty<>(this, "localeOverride", null);
 		this.perspectiveKind = PerspectiveKind.PRESET;
-		this.perspective = "main.fxml";
+		this.perspective = MainController.DEFAULT_PERSPECTIVE;
 		this.savedVisibleStages = new LinkedHashSet<>();
 		this.savedStageBoxes = new LinkedHashMap<>();
 		this.stages = new LinkedHashMap<>();
@@ -53,7 +54,7 @@ public class UIState {
 					// Old config field, supported for backward compatibility.
 					if (configData.guiState.contains("detached")) {
 						setPerspectiveKind(PerspectiveKind.PRESET);
-						setPerspective("main.fxml");
+						setPerspective(MainController.DEFAULT_PERSPECTIVE);
 					} else if (configData.guiState.startsWith("custom ")) {
 						setPerspectiveKind(PerspectiveKind.CUSTOM);
 						setPerspective(configData.guiState.replace("custom ", ""));

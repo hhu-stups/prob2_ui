@@ -45,6 +45,8 @@ import org.slf4j.LoggerFactory;
 public class MainController extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 	
+	public static final String DEFAULT_PERSPECTIVE = "main.fxml";
+	
 	@FXML private TitledPane historyTP;
 	@FXML private HistoryView historyView;
 	@FXML private TitledPane statsTP;
@@ -134,8 +136,8 @@ public class MainController extends BorderPane {
 			case PRESET:
 				url = this.getClass().getResource(perspective);
 				if (url == null) {
-					LOGGER.error("Unknown preset perspective {} found in config, using default perspective", perspective);
-					url = this.getClass().getResource("main.fxml");
+					LOGGER.error("Attempted to load nonexistant preset perspective {}", perspective);
+					url = null;
 				}
 				break;
 			
@@ -143,13 +145,20 @@ public class MainController extends BorderPane {
 				try {
 					url = new URL(perspective);
 				} catch (final MalformedURLException e) {
-					LOGGER.error("Custom perspective FXML URL is malformed, using default perspective", e);
-					url = this.getClass().getResource("main.fxml");
+					LOGGER.error("Custom perspective FXML URL is malformed", e);
+					url = null;
 				}
 				break;
 			
 			default:
 				throw new AssertionError("Unhandled perspective kind: " + kind);
+		}
+		if (url == null) {
+			LOGGER.error("Failed to load perspective, falling back to default perspective");
+			url = this.getClass().getResource(DEFAULT_PERSPECTIVE);
+			assert url != null;
+			this.uiState.setPerspectiveKind(PerspectiveKind.PRESET);
+			this.uiState.setPerspective(DEFAULT_PERSPECTIVE);
 		}
 		stageManager.loadFXML(this, url);
 		injector.getInstance(MenuController.class).setMacMenu();
