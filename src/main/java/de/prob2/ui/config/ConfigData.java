@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.operations.OperationsView;
 
 import javafx.geometry.BoundingBox;
@@ -18,7 +19,9 @@ public final class ConfigData extends BasicConfigData {
 	public List<String> recentProjects;
 	public List<String> groovyConsoleInstructions;
 	public List<String> bConsoleInstructions;
-	public String guiState;
+	public String guiState; // Old field, only for backward compatibility
+	public PerspectiveKind perspectiveKind;
+	public String perspective;
 	public List<String> visibleStages;
 	public Map<String, BoundingBox> stageBoxes;
 	public String currentPreference;

@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
+import de.prob2.ui.internal.PerspectiveKind;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,8 +24,10 @@ import javafx.stage.Stage;
 
 @Singleton
 public class UIState {
+	
 	private final ObjectProperty<Locale> localeOverride;
-	private String guiState;
+	private PerspectiveKind perspectiveKind;
+	private String perspective;
 	private final Set<String> savedVisibleStages;
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
@@ -32,7 +35,8 @@ public class UIState {
 	@Inject
 	public UIState(final Config config) {
 		this.localeOverride = new SimpleObjectProperty<>(this, "localeOverride", null);
-		this.guiState = "main.fxml";
+		this.perspectiveKind = PerspectiveKind.PRESET;
+		this.perspective = "main.fxml";
 		this.savedVisibleStages = new LinkedHashSet<>();
 		this.savedStageBoxes = new LinkedHashMap<>();
 		this.stages = new LinkedHashMap<>();
@@ -42,10 +46,21 @@ public class UIState {
 			public void loadConfig(final ConfigData configData) {
 				setLocaleOverride(configData.localeOverride);
 				
-				if (configData.guiState == null || configData.guiState.isEmpty()) {
-					setGuiState("main.fxml");
-				} else {
-					setGuiState(configData.guiState);
+				if (configData.perspectiveKind != null && configData.perspective != null) {
+					setPerspectiveKind(configData.perspectiveKind);
+					setPerspective(configData.perspective);
+				} else if (configData.guiState != null) {
+					// Old config field, supported for backward compatibility.
+					if (configData.guiState.contains("detached")) {
+						setPerspectiveKind(PerspectiveKind.PRESET);
+						setPerspective("main.fxml");
+					} else if (configData.guiState.startsWith("custom ")) {
+						setPerspectiveKind(PerspectiveKind.CUSTOM);
+						setPerspective(configData.guiState.replace("custom ", ""));
+					} else {
+						setPerspectiveKind(PerspectiveKind.PRESET);
+						setPerspective(configData.guiState);
+					}
 				}
 				
 				if (configData.visibleStages != null) {
@@ -62,7 +77,8 @@ public class UIState {
 				updateSavedStageBoxes();
 				
 				configData.localeOverride = getLocaleOverride();
-				configData.guiState = getGuiState();
+				configData.perspectiveKind = getPerspectiveKind();
+				configData.perspective = getPerspective();
 				configData.visibleStages = new ArrayList<>(getSavedVisibleStages());
 				configData.stageBoxes = new HashMap<>(getSavedStageBoxes());
 			}
@@ -81,12 +97,20 @@ public class UIState {
 		this.localeOverrideProperty().set(localeOverride);
 	}
 	
-	public void setGuiState(String guiState) {
-		this.guiState = guiState;
+	public PerspectiveKind getPerspectiveKind() {
+		return perspectiveKind;
 	}
 	
-	public String getGuiState() {
-		return guiState;
+	public void setPerspectiveKind(final PerspectiveKind perspectiveKind) {
+		this.perspectiveKind = perspectiveKind;
+	}
+	
+	public String getPerspective() {
+		return perspective;
+	}
+	
+	public void setPerspective(final String perspective) {
+		this.perspective = perspective;
 	}
 	
 	public Set<String> getSavedVisibleStages() {

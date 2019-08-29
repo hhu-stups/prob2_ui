@@ -17,6 +17,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.persistence.UIState;
@@ -67,7 +68,7 @@ public class MainController extends BorderPane {
 		this.uiState = uiState;
 		this.resourceBundle = resourceBundle;
 		this.config = config;
-		this.loadMainView(this.uiState.getGuiState());
+		this.loadMainView(this.uiState.getPerspectiveKind(), this.uiState.getPerspective());
 	}
 
 	@FXML
@@ -127,29 +128,37 @@ public class MainController extends BorderPane {
 		});
 	}
 
-	public void loadMainView(final String guiState) {
+	public void loadMainView(final PerspectiveKind kind, final String perspective) {
 		URL url;
-		if (guiState.startsWith("custom ")) {
-			try {
-				url = new URL(guiState.replace("custom ", ""));
-			} catch (final MalformedURLException e) {
-				LOGGER.error("Custom perspective FXML URL is malformed, using default perspective", e);
-				url = this.getClass().getResource("main.fxml");
-			}
-		} else {
-			url = this.getClass().getResource(guiState);
-			if (url == null) {
-				LOGGER.error("Unknown built-in perspective {} found in config, using default perspective", guiState);
-				url = this.getClass().getResource("main.fxml");
-			}
+		switch (kind) {
+			case PRESET:
+				url = this.getClass().getResource(perspective);
+				if (url == null) {
+					LOGGER.error("Unknown preset perspective {} found in config, using default perspective", perspective);
+					url = this.getClass().getResource("main.fxml");
+				}
+				break;
+			
+			case CUSTOM:
+				try {
+					url = new URL(perspective);
+				} catch (final MalformedURLException e) {
+					LOGGER.error("Custom perspective FXML URL is malformed, using default perspective", e);
+					url = this.getClass().getResource("main.fxml");
+				}
+				break;
+			
+			default:
+				throw new AssertionError("Unhandled perspective kind: " + kind);
 		}
 		stageManager.loadFXML(this, url);
 		injector.getInstance(MenuController.class).setMacMenu();
 	}
 	
-	public void changeMainView(final String guiState) {
-		this.uiState.setGuiState(guiState);
-		this.loadMainView(guiState);
+	public void changeMainView(final PerspectiveKind kind, final String perspective) {
+		this.uiState.setPerspectiveKind(kind);
+		this.uiState.setPerspective(perspective);
+		this.loadMainView(kind, perspective);
 	}
 
 	public List<Accordion> getAccordions() {

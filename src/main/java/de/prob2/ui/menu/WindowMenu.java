@@ -14,6 +14,7 @@ import de.codecentric.centerdevice.util.StageUtils;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
@@ -77,19 +78,19 @@ public class WindowMenu extends Menu {
 	@FXML
 	private void handleLoadDefault() {
 		reset();
-		injector.getInstance(MainController.class).changeMainView("main.fxml");
+		injector.getInstance(MainController.class).changeMainView(PerspectiveKind.PRESET, "main.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
 		reset();
-		injector.getInstance(MainController.class).changeMainView("separatedHistory.fxml");
+		injector.getInstance(MainController.class).changeMainView(PerspectiveKind.PRESET, "separatedHistory.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
 		reset();
-		injector.getInstance(MainController.class).changeMainView("separatedHistoryAndStatistics.fxml");
+		injector.getInstance(MainController.class).changeMainView(PerspectiveKind.PRESET, "separatedHistoryAndStatistics.fxml");
 	}
 
 	@FXML
@@ -107,7 +108,7 @@ public class WindowMenu extends Menu {
 				stageManager.getMainStage());
 		if (selectedFile != null) {
 			reset();
-			injector.getInstance(MainController.class).changeMainView("custom " + selectedFile.toUri());
+			injector.getInstance(MainController.class).changeMainView(PerspectiveKind.CUSTOM, selectedFile.toUri().toString());
 		}
 	}
 
