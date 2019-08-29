@@ -1,4 +1,4 @@
-# ProB 2 UI
+# ProB 2 Standalone GUI
 
 [![Build Status](https://travis-ci.org/bendisposto/prob2-ui.svg?branch=master)](https://travis-ci.org/bendisposto/prob2-ui)
 [![SonarCloud Tech Debt](https://sonarcloud.io/api/project_badges/measure?project=prob2-ui&metric=sqale_index)](https://sonarcloud.io/dashboard?id=prob2-ui)
@@ -14,3 +14,4 @@ Pre-built binaries for the ProB 2 UI can be downloaded [here](https://www3.hhu.d
 ## Running from source
 
 The ProB 2 UI can be started from source using the Gradle `run` task (`./gradlew run` on Linux/macOS/etc., `gradlew.bat run` on Windows).
+
