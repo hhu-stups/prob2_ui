@@ -4,12 +4,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -19,8 +23,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReplayTrace.class);
 
 	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
@@ -109,29 +119,26 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	}
 
 	public String getDescription() {
-		return getPersistentTrace().getDescription();
+		PersistentTrace trace = getPersistentTrace();
+		if(trace != null) {
+			return trace.getDescription();
+		} else {
+			return null;
+		}
+
 	}
 
 	public void setDescription(String description) {
 		PersistentTrace trace = getPersistentTrace();
-		trace.setDescription(description);
-		injector.getInstance(TraceFileHandler.class)
-			.save(trace, injector.getInstance(CurrentProject.class).getLocation().resolve(location).toFile());
+		if (trace != null) {
+			trace.setDescription(description);
+			injector.getInstance(TraceFileHandler.class)
+				.save(trace, injector.getInstance(CurrentProject.class).getLocation().resolve(location).toFile());
+		}
 	}
 
-	private PersistentTrace getPersistentTrace() {
-		try {
-			return injector.getInstance(TraceFileHandler.class).load(this.getLocation());
-		} catch (FileNotFoundException | NoSuchFileException e) {
-			//LOGGER.warn("Trace file not found", e);
-			return null;
-		} catch (InvalidFileFormatException e) {
-			//LOGGER.warn("Invalid trace file", e);
-			return null;
-		} catch (IOException e) {
-			//LOGGER.warn("Failed to open trace file", e);
-			return null;
-		}
+	PersistentTrace getPersistentTrace() {
+		return injector.getInstance(TraceFileHandler.class).load(this.getLocation());
 	}
 	
 	@Override

@@ -49,73 +49,32 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class TraceChecker {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
-
 	private static final String TRACE_REPLAY_ALERT_HEADER = "animation.tracereplay.alerts.traceReplayError.header";
-	
-	private final TraceFileHandler traceFileHandler;
+
 	private final CurrentTrace currentTrace;
-	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
-	private final Map<ReplayTrace, Exception> failedTraceReplays = new HashMap<>();
 
 	@Inject
-	private TraceChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final TraceFileHandler traceFileHandler, final StageManager stageManager) {
+	private TraceChecker(final CurrentTrace currentTrace, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
-		this.traceFileHandler = traceFileHandler;
 		this.stageManager = stageManager;
 	}
 
 	void checkAll(List<ReplayTrace> replayTraces) {
 		replayTraces.forEach(trace -> replayTrace(trace, false));
-		handleFailedTraceReplays();
 	}
 
 	void check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
 		this.replayTrace(replayTrace, setCurrentAnimation);
-		handleFailedTraceReplays();
-	}
-
-	private void handleFailedTraceReplays() {
-		failedTraceReplays.forEach((trace, exception) -> {
-			Path path = trace.getLocation();
-			Alert alert;
-			List<ButtonType> buttons = new ArrayList<>();
-			buttons.add(ButtonType.YES);
-			buttons.add(ButtonType.NO);
-			if (exception instanceof NoSuchFileException || exception instanceof FileNotFoundException) {
-				alert = stageManager.makeAlert(AlertType.ERROR, buttons,
-						"animation.tracereplay.traceChecker.alerts.fileNotFound.header",
-						"animation.tracereplay.traceChecker.alerts.fileNotFound.content", path);
-			} else if (exception instanceof InvalidFileFormatException) {
-				alert = stageManager.makeAlert(AlertType.ERROR, buttons,
-						"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header",
-						"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content", path);
-			} else {
-				alert = stageManager.makeAlert(AlertType.ERROR, buttons,
-						TRACE_REPLAY_ALERT_HEADER,
-						"animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content", path);
-			}
-			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Machine currentMachine = currentProject.getCurrentMachine();
-				if (currentMachine.getTraceFiles().contains(path)) {
-					currentMachine.removeTraceFile(path);
-				}
-			}
-		});
-		failedTraceReplays.clear();
 	}
 
 	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
 		if(!replayTrace.selected()) {
 			return;
 		}
-		PersistentTrace persistentTrace = getPersistentTrace(replayTrace);
+		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 		if(persistentTrace == null) {
 			return;
 		}
@@ -168,24 +127,6 @@ public class TraceChecker {
 		}, "Trace Replay Thread");
 		currentJobThreads.add(replayThread);
 		replayThread.start();
-	}
-
-	private PersistentTrace getPersistentTrace(ReplayTrace replayTrace) {
-		try {
-			return traceFileHandler.load(replayTrace.getLocation());
-		} catch (FileNotFoundException | NoSuchFileException e) {
-			LOGGER.warn("Trace file not found", e);
-			failedTraceReplays.put(replayTrace, e);
-			return null;
-		} catch (InvalidFileFormatException e) {
-			LOGGER.warn("Invalid trace file", e);
-			failedTraceReplays.put(replayTrace, e);
-			return null;
-		} catch (IOException e) {
-			LOGGER.warn("Failed to open trace file", e);
-			failedTraceReplays.put(replayTrace, e);
-			return null;
-		} 
 	}
 
 	private Transition replayPersistentTransition(ReplayTrace replayTrace, Trace t,

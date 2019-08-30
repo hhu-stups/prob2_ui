@@ -6,6 +6,7 @@ import com.google.inject.Injector;
 
 import de.prob2.ui.internal.StageManager;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -41,7 +42,12 @@ public class DescriptionView extends AnchorPane {
 	@FXML
 	public void initialize() {
 		titelLabel.setText(String.format(bundle.getString("project.machines.machineDescriptionView.title"), describable.getName()));
-		descriptionText.setText(describable.getDescription().isEmpty()? bundle.getString("project.machines.machineDescriptionView.placeholder") : describable.getDescription());
+		String description = describable.getDescription();
+		if(description == null) {
+			Platform.runLater(() -> closeDescriptionView());
+			return;
+		}
+		descriptionText.setText(description.isEmpty()? bundle.getString("project.machines.machineDescriptionView.placeholder") : describable.getDescription());
 		saveButton.visibleProperty().bind(descriptionText.editableProperty());
 	}
 
