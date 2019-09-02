@@ -1,0 +1,35 @@
+default:
+  image: openjdk8:8-jdk-slim
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+    GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
+  before_script:
+    - apt-get update
+    - apt-get install pandoc
+    - export GRADLE_USER_HOME="${PWD}/.gradle"
+
+classes:
+  stage: build
+  script: ./gradlew ${GRADLE_OPTIONS} classes
+  artifacts: 
+    paths:
+      - build
+    # Class files, etc. are only needed by the other stages and don't need to be kept around afterwards.
+    expire_in: 1 day
+
+test:
+  stage: test
+  script: ./gradlew ${GRADLE_OPTIONS} check sonarqube
+
+distributions:
+  stage: deploy
+  script: ./gradlew ${GRADLE_OPTIONS} distZip shadowJar createAppZip
+  artifacts:
+    paths:
+      - build/distributions
+      - build/libs
