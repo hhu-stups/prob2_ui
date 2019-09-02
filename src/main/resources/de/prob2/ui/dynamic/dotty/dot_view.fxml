@@ -5,14 +5,15 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.menu.ViewMenu?>
 <?import de.prob2.ui.menu.WindowMenu?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
@@ -30,7 +31,11 @@
 			<BorderPane>
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-						<ViewMenu fx:id="viewMenu" />
+						<Menu text="%menu.view">
+							<MenuItem text="%menu.view.items.zoomDefault" accelerator="Shortcut+'0'" onAction="#defaultSize" />
+							<MenuItem text="%menu.view.items.zoomIn" accelerator="Shortcut+'+'" onAction="#zoomIn" />
+							<MenuItem text="%menu.view.items.zoomOut" accelerator="Shortcut+'-'" onAction="#zoomOut" />
+						</Menu>
 						<WindowMenu fx:id="windowMenu" />
 					</MenuBar>
 				</top>
