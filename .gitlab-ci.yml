@@ -1,3 +1,7 @@
+variables:
+  DEBIAN_FRONTEND: noninteractive
+  GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
+
 default:
   image: openjdk8:8-jdk-slim
   cache:
@@ -5,9 +9,6 @@ default:
       - .gradle/caches
       - .gradle/native
       - .gradle/wrapper
-  variables:
-    DEBIAN_FRONTEND: noninteractive
-    GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
   before_script:
     - apt-get update
     - apt-get install pandoc
