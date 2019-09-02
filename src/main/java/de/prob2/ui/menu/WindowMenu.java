@@ -62,20 +62,17 @@ public class WindowMenu extends Menu {
 
 	@FXML
 	private void handleLoadDefault() {
-		reset();
-		injector.getInstance(MainController.class).changeMainView(PerspectiveKind.PRESET, "main.fxml");
+		this.switchToPerspective(PerspectiveKind.PRESET, "main.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated() {
-		reset();
-		injector.getInstance(MainController.class).changeMainView(PerspectiveKind.PRESET, "separatedHistory.fxml");
+		this.switchToPerspective(PerspectiveKind.PRESET, "separatedHistory.fxml");
 	}
 
 	@FXML
 	private void handleLoadSeparated2() {
-		reset();
-		injector.getInstance(MainController.class).changeMainView(PerspectiveKind.PRESET, "separatedHistoryAndStatistics.fxml");
+		this.switchToPerspective(PerspectiveKind.PRESET, "separatedHistoryAndStatistics.fxml");
 	}
 
 	@FXML
@@ -92,12 +89,12 @@ public class WindowMenu extends Menu {
 		Path selectedFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
 				stageManager.getMainStage());
 		if (selectedFile != null) {
-			reset();
-			injector.getInstance(MainController.class).changeMainView(PerspectiveKind.CUSTOM, selectedFile.toUri().toString());
+			this.switchToPerspective(PerspectiveKind.CUSTOM, selectedFile.toUri().toString());
 		}
 	}
 
-	private void reset() {
+	private void switchToPerspective(final PerspectiveKind kind, final String perspective) {
 		injector.getInstance(DetachViewStageController.class).attachAllViews();
+		injector.getInstance(MainController.class).changeMainView(kind, perspective);
 	}
 }
