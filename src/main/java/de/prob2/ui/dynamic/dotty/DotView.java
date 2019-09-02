@@ -48,6 +48,7 @@ import javafx.geometry.Orientation;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
@@ -63,6 +64,9 @@ public class DotView extends DynamicCommandStage {
 
 	@FXML
 	private WebView dotView;
+
+	@FXML
+	private MenuBar menuBar;
 	
 	@FXML
 	private Button zoomOutButton;
@@ -98,6 +102,7 @@ public class DotView extends DynamicCommandStage {
 	@Override
 	public void initialize() {
 		super.initialize();
+		stageManager.setMacMenuBar(this, this.menuBar);
 		saveButton.disableProperty().bind(currentSvg.isNull());
 		helpButton.setHelpContent(this.getClass());
 		initializeZooming();
