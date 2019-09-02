@@ -3,7 +3,7 @@ variables:
   GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
 
 default:
-  image: azul/zulu-openjdk:8
+  image: amazoncorretto:8
   cache:
     paths:
       - .gradle/caches
