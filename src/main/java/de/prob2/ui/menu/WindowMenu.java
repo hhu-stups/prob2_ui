@@ -16,6 +16,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.persistence.UIState;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
@@ -29,14 +30,22 @@ public class WindowMenu extends Menu {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
+	private final UIState uiState;
 
 	@Inject
-	private WindowMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle,
-			final FileChooserManager fileChooserManager, @Nullable MenuToolkit menuToolkit) {
+	private WindowMenu(
+		final Injector injector,
+		final StageManager stageManager,
+		final ResourceBundle bundle,
+		final FileChooserManager fileChooserManager,
+		final UIState uiState,
+		@Nullable MenuToolkit menuToolkit
+	) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
+		this.uiState = uiState;
 		stageManager.loadFXML(this, "windowMenu.fxml");
 
 		if (menuToolkit != null) {
@@ -95,6 +104,8 @@ public class WindowMenu extends Menu {
 
 	private void switchToPerspective(final PerspectiveKind kind, final String perspective) {
 		injector.getInstance(DetachViewStageController.class).attachAllViews();
-		injector.getInstance(MainController.class).changeMainView(kind, perspective);
+		this.uiState.setPerspectiveKind(kind);
+		this.uiState.setPerspective(perspective);
+		injector.getInstance(MainController.class).reloadMainView();
 	}
 }

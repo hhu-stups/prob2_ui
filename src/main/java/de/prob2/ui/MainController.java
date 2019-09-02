@@ -70,7 +70,7 @@ public class MainController extends BorderPane {
 		this.uiState = uiState;
 		this.resourceBundle = resourceBundle;
 		this.config = config;
-		this.loadMainView(this.uiState.getPerspectiveKind(), this.uiState.getPerspective());
+		this.reloadMainView();
 	}
 
 	@FXML
@@ -130,7 +130,9 @@ public class MainController extends BorderPane {
 		});
 	}
 
-	public void loadMainView(final PerspectiveKind kind, final String perspective) {
+	public void reloadMainView() {
+		final PerspectiveKind kind = this.uiState.getPerspectiveKind();
+		final String perspective = this.uiState.getPerspective();
 		URL url;
 		switch (kind) {
 			case PRESET:
@@ -164,12 +166,6 @@ public class MainController extends BorderPane {
 		injector.getInstance(MenuController.class).setMacMenu();
 	}
 	
-	public void changeMainView(final PerspectiveKind kind, final String perspective) {
-		this.uiState.setPerspectiveKind(kind);
-		this.uiState.setPerspective(perspective);
-		this.loadMainView(kind, perspective);
-	}
-
 	public List<Accordion> getAccordions() {
 		return Collections.unmodifiableList(accordions);
 	}
