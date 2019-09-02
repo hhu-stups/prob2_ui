@@ -11,7 +11,7 @@ default:
       - .gradle/wrapper
   before_script:
     - apt-get update
-    - apt-get install pandoc
+    - apt-get install --assume-yes pandoc
     - export GRADLE_USER_HOME="${PWD}/.gradle"
 
 classes:
