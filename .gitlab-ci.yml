@@ -3,7 +3,7 @@ variables:
   GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
 
 default:
-  image: openjdk8:8-jdk-slim
+  image: openjdk:8-jdk-slim
   cache:
     paths:
       - .gradle/caches
