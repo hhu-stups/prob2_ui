@@ -3,7 +3,6 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
-
 <fx:root type="Menu" text="%menu.window" xmlns:fx="http://javafx.com/fxml/1">
 	<Menu text="%menu.window.items.perspectives" fx:id="presetPerspectivesMenu"
 		disable="true" visible="false">
@@ -19,8 +18,5 @@
 	</Menu>
 	<MenuItem text="%menu.window.items.detach" fx:id="detatchedMenuItem"
 		onAction="#handleLoadDetached" disable="true" visible="false" />
-	<SeparatorMenuItem />
-	<MenuItem text="%menu.window.items.closeWindow" accelerator="Shortcut+W"
-		onAction="#handleCloseWindow" />
 </fx:root>
 

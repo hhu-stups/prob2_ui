@@ -22,8 +22,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 @FXMLInjected
 public class WindowMenu extends Menu {
@@ -64,14 +62,6 @@ public class WindowMenu extends Menu {
 			this.getItems().addAll(new SeparatorMenuItem(), menuToolkit.createBringAllToFrontItem(),
 					new SeparatorMenuItem());
 			menuToolkit.autoAddWindowMenuItems(this);
-		}
-	}
-
-	@FXML
-	private void handleCloseWindow() {
-		final Stage stage = this.stageManager.getCurrent();
-		if (stage != null) {
-			stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 		}
 	}
 
