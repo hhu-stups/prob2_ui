@@ -30,11 +30,6 @@ public class WindowMenu extends Menu {
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
 
-	@FXML
-	private Menu presetPerspectivesMenu;
-	@FXML
-	private MenuItem detatchedMenuItem;
-
 	@Inject
 	private WindowMenu(final StageManager stageManager, final Injector injector, final ResourceBundle bundle,
 			final FileChooserManager fileChooserManager, @Nullable MenuToolkit menuToolkit) {
@@ -104,12 +99,5 @@ public class WindowMenu extends Menu {
 
 	private void reset() {
 		injector.getInstance(DetachViewStageController.class).attachAllViews();
-	}
-
-	public void enablePerspectivesAndDetatched() {
-		presetPerspectivesMenu.setDisable(false);
-		presetPerspectivesMenu.setVisible(true);
-		detatchedMenuItem.setDisable(false);
-		detatchedMenuItem.setVisible(true);
 	}
 }
