@@ -10,8 +10,7 @@ default:
       - .gradle/native
       - .gradle/wrapper
   before_script:
-    - apt-get update
-    - apt-get install --assume-yes pandoc
+    - yum install -y pandoc
     - export GRADLE_USER_HOME="${PWD}/.gradle"
 
 classes:
