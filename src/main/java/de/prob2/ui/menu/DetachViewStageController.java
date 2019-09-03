@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 public final class DetachViewStageController extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);
 	
+	public static final String PERSISTENCE_ID_PREFIX = DetachViewStageController.class.getName() + " DETACHED ";
+	
 	@FXML private Button apply;
 	@FXML private CheckBox detachOperations;
 	@FXML private CheckBox detachAnimation;

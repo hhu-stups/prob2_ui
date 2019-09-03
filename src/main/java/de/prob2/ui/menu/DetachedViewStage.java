@@ -23,7 +23,8 @@ final class DetachedViewStage extends Stage {
 		this.sourceAccordion = sourceAccordion;
 		
 		this.setScene(new Scene(new StackPane(detachedView)));
-		stageManager.register(this, DetachViewStageController.class.getName() + " DETACHED " + this.getDetachedView().getClass().getName());
+		final String persistenceID = DetachViewStageController.PERSISTENCE_ID_PREFIX + this.getDetachedView().getClass().getName();
+		stageManager.register(this, persistenceID);
 		this.titleProperty().bind(sourceTitledPane.textProperty());
 		
 		// Default bounds, replaced by saved ones from the config when show() is called
