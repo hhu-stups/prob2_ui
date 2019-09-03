@@ -1,7 +1,6 @@
 package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -109,7 +108,7 @@ public class Machine implements DescriptionView.Describable {
 	private transient ObjectProperty<CheckingStatus> modelcheckingStatus;
 	private StringProperty name;
 	private StringProperty description;
-	private String location;
+	private Path location;
 	private Machine.Type type;
 	private ObjectProperty<Preference> lastUsed;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
@@ -124,7 +123,7 @@ public class Machine implements DescriptionView.Describable {
 	public Machine(String name, String description, Path location, Machine.Type type) {
 		this.name = new SimpleStringProperty(this, "name", name);
 		this.description = new SimpleStringProperty(this, "description", description);
-		this.location = location.toString();
+		this.location = location;
 		this.type = type;
 		this.replaceMissingWithDefaults();
 		this.resetStatus();
@@ -409,7 +408,7 @@ public class Machine implements DescriptionView.Describable {
 	}
 	
 	public Path getPath() {
-		return Paths.get(location);
+		return this.location;
 	}
 
 	@Override
@@ -421,7 +420,7 @@ public class Machine implements DescriptionView.Describable {
 			return false;
 		}
 		Machine otherMachine = (Machine) other;
-		return otherMachine.location.equals(this.location);
+		return this.getPath().equals(otherMachine.getPath());
 	}
 	
 	@Override
@@ -431,7 +430,7 @@ public class Machine implements DescriptionView.Describable {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(location);
+		return Objects.hash(this.getPath());
 	}
 	
 	public PatternManager getPatternManager() {
