@@ -1,13 +1,9 @@
 package de.prob2.ui.sharedviews;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
@@ -96,26 +92,27 @@ public final class PredicateBuilderView extends VBox {
 	}
 	
 	public void setFromPredicate(final String predicate) {
+		// Clear the values of all items without removing them from the map.
+		for (final Map.Entry<String, String> entry : this.items.entrySet()) {
+			entry.setValue("");
+		}
+		
 		final String[] predicates = predicate.split(" & ");
-		//Copy elements of items.keySet(), otherwise they will be lost due to items.clear()
-		Set<String> keys = items.keySet().stream().collect(Collectors.toSet());
-		int size = Math.min(items.size(), predicates.length);
-		List<String> restPredicates = new ArrayList<>();
-		items.clear();
-		for (int i = 0; i < size; i++) {
-			final String part = predicates[i];
-			final String[] assignment = part.split("=");
+		int firstNonAssignment = predicates.length;
+		for (int i = 0; i < predicates.length; i++) {
+			final String[] assignment = predicates[i].split("=");
 			final String lhs = assignment[0];
-			if(assignment.length <= 1 || !keys.contains(lhs)) {
-				restPredicates.add(part);
-				continue;
+			// Stop if this is not an assignment, the variable is unknown, or the variable already has a value.
+			if (assignment.length <= 1 || !this.items.containsKey(lhs) || !this.items.get(lhs).isEmpty()) {
+				firstNonAssignment = i;
+				break;
 			}
 			final String rhs = assignment[1];
 			items.put(lhs, rhs);
 		}
 		table.refresh();
-		restPredicates.addAll(Arrays.asList(predicates).subList(size, predicates.length));
-		this.predicateField.setText(String.join(" & ", restPredicates));
+		// Store all remaining parts of the conjunction in the predicate field.
+		this.predicateField.setText(String.join(" & ", Arrays.asList(predicates).subList(firstNonAssignment, predicates.length)));
 	}
 	
 	public String getPredicate() {
