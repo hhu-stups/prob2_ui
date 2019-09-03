@@ -164,12 +164,10 @@ public class MachineLoader {
 	}
 
 	private Path getPathToMachine(Machine machine) {
-		final Path path;
 		if (currentProject.getMachines().contains(machine)) {
-			path = currentProject.get().getLocation().resolve(machine.getLocation());
+			return currentProject.get().getLocation().resolve(machine.getLocation());
 		} else {
-			path = machine.getLocation();
+			return machine.getLocation();
 		}
-		return path;
 	}
 }
