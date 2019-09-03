@@ -175,7 +175,7 @@ public class BEditorView extends BorderPane {
 	}
 	
 	private MachineFileInformation currentMachineFileInformation() {
-		final Path machinePath = currentProject.getCurrentMachine().getPath();
+		final Path machinePath = currentProject.getCurrentMachine().getLocation();
 		final String[] split = machinePath.getFileName().toString().split("\\.", 2);
 		assert split.length == 2;
 		return new MachineFileInformation(split[0], split[1], machinePath.toString());

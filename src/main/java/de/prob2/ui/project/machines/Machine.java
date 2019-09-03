@@ -407,7 +407,7 @@ public class Machine implements DescriptionView.Describable {
 		this.descriptionProperty().addListener(o -> this.setChanged(true));
 	}
 	
-	public Path getPath() {
+	public Path getLocation() {
 		return this.location;
 	}
 
@@ -420,7 +420,7 @@ public class Machine implements DescriptionView.Describable {
 			return false;
 		}
 		Machine otherMachine = (Machine) other;
-		return this.getPath().equals(otherMachine.getPath());
+		return this.getLocation().equals(otherMachine.getLocation());
 	}
 	
 	@Override
@@ -430,7 +430,7 @@ public class Machine implements DescriptionView.Describable {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getPath());
+		return Objects.hash(this.getLocation());
 	}
 	
 	public PatternManager getPatternManager() {

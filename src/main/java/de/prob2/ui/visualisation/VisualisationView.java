@@ -99,7 +99,7 @@ public class VisualisationView extends AnchorPane {
 
 	private Map<Integer, Image> loadMachineImages(final Map<Integer, String> imageNames) {
 		final Path projectDirectory = currentProject.get().getLocation();
-		final Path machineFile = currentProject.getCurrentMachine().getPath();
+		final Path machineFile = currentProject.getCurrentMachine().getLocation();
 		final Path machineDirectory = projectDirectory.resolve(machineFile).getParent();
 		final Path proBDirectory = Paths.get(Main.getProBDirectory());
 		final List<Path> imageDirectories = Arrays.asList(machineDirectory, projectDirectory, proBDirectory);

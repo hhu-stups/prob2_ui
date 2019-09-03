@@ -409,7 +409,7 @@ public class VisualisationController {
 	}
 
 	private boolean checkMachine(String[] machines) {
-		String machineName = currentMachine.get().getPath().getFileName().toString();
+		String machineName = currentMachine.get().getLocation().getFileName().toString();
 		LOGGER.debug("Checking the machine. Current machine is \"{}\" and possible machines are \"{}\"", machineName, machines);
 		boolean start = true;
 		if (machines != null && machines.length != 0) {
