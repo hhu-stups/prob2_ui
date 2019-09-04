@@ -306,11 +306,15 @@ public class ProB2 extends Application {
 					"common.alerts.unsavedProjectChanges.header", "common.alerts.unsavedProjectChanges.content",
 					currentProject.getName());
 			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent() && result.get().equals(ButtonType.CANCEL)) {
+			if (!result.isPresent() || result.get().equals(ButtonType.CANCEL)) {
 				event.consume();
-			} else if (result.isPresent() && result.get().equals(save)) {
+			} else if (result.get().equals(save)) {
 				injector.getInstance(ProjectManager.class).saveCurrentProject();
 				Platform.exit();
+			} else if (result.get().equals(doNotSave)) {
+				Platform.exit();
+			} else {
+				throw new AssertionError("Unhandled button: " + result);
 			}
 		} else {
 
