@@ -14,13 +14,13 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
@@ -84,13 +84,13 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> formulaSelectedColumn;
 	@FXML
-	private TableColumn<LTLFormulaItem, BindableGlyph> formulaStatusColumn;
+	private TableColumn<LTLFormulaItem, Checked> formulaStatusColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
-	private TableColumn<LTLPatternItem, BindableGlyph> patternStatusColumn;
+	private TableColumn<LTLPatternItem, Checked> patternStatusColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternColumn;
 	@FXML
@@ -229,10 +229,12 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 
 	private void setBindings() {
 		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector, this));
-		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		formulaStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		patternStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 

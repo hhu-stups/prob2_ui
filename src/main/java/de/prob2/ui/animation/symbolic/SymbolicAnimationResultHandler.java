@@ -1,5 +1,12 @@
 package de.prob2.ui.animation.symbolic;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -32,16 +39,10 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @Singleton
 public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
@@ -128,15 +129,6 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	
 	protected void handleItem(AbstractCheckableItem item, Checked checked) {
 		item.setChecked(checked);
-		if(checked == Checked.SUCCESS) {
-			item.setCheckedSuccessful();
-		} else if(checked == Checked.PARSE_ERROR) {
-			item.setParseError();
-		} else if(checked == Checked.FAIL) {
-			item.setCheckedFailed();
-		} else if(checked == Checked.INTERRUPTED || checked == Checked.TIMEOUT) {
-			item.setCheckInterrupted();
-		}
 	}
 	
 	public void handleFormulaResult(SymbolicFormulaItem item, Object result) {

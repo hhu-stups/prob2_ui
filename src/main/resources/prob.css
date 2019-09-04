@@ -951,6 +951,26 @@
 	-fx-border-width: 0.5;
 }
 
+.checked-icon.not-checked {
+	-fx-text-fill: blue;
+}
+
+.checked-icon.success {
+	-fx-text-fill: green;
+}
+
+.checked-icon.fail {
+	-fx-text-fill: red;
+}
+
+.checked-icon.interrupted {
+	-fx-text-fill: yellow;
+}
+
+.checked-icon.parse-error {
+	-fx-text-fill: orange;
+}
+
 /* ================= OPERATIONS VIEW ================= */
 
 .operations-cell {

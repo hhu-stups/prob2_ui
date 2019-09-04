@@ -1,17 +1,11 @@
 package de.prob2.ui.verifications;
 
-import de.prob2.ui.layout.BindableGlyph;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.paint.Color;
-
-import org.controlsfx.glyphfont.FontAwesome;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
-	protected transient BindableGlyph status;
 	protected Checked checked;
 	protected String name;
 	protected String description;
@@ -36,8 +30,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		
 	public void initialize() {
 		replaceMissingWithDefaults();
-		this.status = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-		this.status.setTextFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
 		this.resultItem = new SimpleObjectProperty<>(null);
 	}
@@ -46,10 +38,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		if(selected == null) {
 			this.selected = new SimpleBooleanProperty(true);
 		}
-	}
-
-	public BindableGlyph getStatus() {
-		return status;
 	}
 	
 	public String getName() {
@@ -103,26 +91,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	
 	public ObjectProperty<CheckingResultItem> resultItemProperty() {
 		return resultItem;
-	}
-	
-	public void setCheckedSuccessful() {
-		status.setIcon(FontAwesome.Glyph.CHECK);
-		status.setTextFill(Color.GREEN);
-	}
-
-	public void setCheckedFailed() {
-		status.setIcon(FontAwesome.Glyph.REMOVE);
-		status.setTextFill(Color.RED);
-	}
-	
-	public void setCheckInterrupted() {
-		status.setIcon(FontAwesome.Glyph.EXCLAMATION_TRIANGLE);
-		status.setTextFill(Color.YELLOW);
-	}
-
-	public void setParseError() {
-		status.setIcon(FontAwesome.Glyph.EXCLAMATION_TRIANGLE);
-		status.setTextFill(Color.ORANGE);
 	}
 	
 	public void setChecked(Checked checked) {

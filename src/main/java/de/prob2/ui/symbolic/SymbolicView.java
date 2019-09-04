@@ -8,18 +8,19 @@ import de.prob.statespace.FormalismType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
-
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
@@ -74,7 +75,7 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	protected TableView<T> tvFormula;
 	
 	@FXML
-	protected TableColumn<T, BindableGlyph> formulaStatusColumn;
+	protected TableColumn<T, Checked> formulaStatusColumn;
 	
 	@FXML
 	protected TableColumn<T, String> formulaNameColumn;
@@ -163,7 +164,8 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), partOfDisableBinding);
 		cancelButton.disableProperty().bind(executor.currentJobThreadsProperty().emptyProperty());
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvFormula.disableProperty(), partOfDisableBinding);
-		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		formulaStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(getSymbolicType(), injector, this));
