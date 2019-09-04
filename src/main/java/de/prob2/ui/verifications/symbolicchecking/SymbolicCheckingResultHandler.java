@@ -1,14 +1,20 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.animator.domainobjects.EvaluationException;
+
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.command.SymbolicModelcheckCommand;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
@@ -30,11 +36,6 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
 
 @Singleton
 public class SymbolicCheckingResultHandler extends AbstractResultHandler implements ISymbolicResultHandler {
@@ -60,13 +61,13 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 	public void handleFormulaResult(SymbolicFormulaItem item, Object result) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
-			handleItem(item, Checked.SUCCESS);
+			item.setChecked(Checked.SUCCESS);
 		} else if(parseErrors.contains(clazz)) {
-			handleItem(item, Checked.PARSE_ERROR);
+			item.setChecked(Checked.PARSE_ERROR);
 		} else if(error.contains(clazz) || counterExample.contains(clazz) || result instanceof Throwable) {
-			handleItem(item, Checked.FAIL);
+			item.setChecked(Checked.FAIL);
 		} else {
-			handleItem(item, Checked.INTERRUPTED);
+			item.setChecked(Checked.INTERRUPTED);
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, currentTrace.getCurrentState(), traces);
@@ -196,7 +197,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 		
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String header, String msg, Checked checked, Object... messageParams) {
 		item.setResultItem(new CheckingResultItem(checked, header, msg, messageParams));
-		handleItem(item, checked);
+		item.setChecked(checked);
 	}
 	
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, Checked checked) {

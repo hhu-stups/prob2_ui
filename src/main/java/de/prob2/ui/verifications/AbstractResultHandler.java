@@ -98,9 +98,4 @@ public abstract class AbstractResultHandler {
 				"verifications.abstractResultHandler.alerts.alreadyExists.content", bundle.getString(itemType.getKey()))
 				.showAndWait();
 	}
-	
-	protected void handleItem(AbstractCheckableItem item, Checked checked) {
-		item.setChecked(checked);
-	}
-
 }

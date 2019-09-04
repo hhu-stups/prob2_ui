@@ -43,7 +43,7 @@ public class LTLResultHandler extends AbstractResultHandler {
 	public Checked handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, State stateid) {
 		if(result instanceof EvaluationCommand)  {
 			if (((EvaluationCommand) result).isInterrupted()) {
-				handleItem(item, Checked.INTERRUPTED);
+				item.setChecked(Checked.INTERRUPTED);
 				return Checked.INTERRUPTED;
 			} else {
 				result = ((EvaluationCommand) result).getValue();
@@ -51,13 +51,13 @@ public class LTLResultHandler extends AbstractResultHandler {
 		}
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
-			handleItem(item, Checked.SUCCESS);
+			item.setChecked(Checked.SUCCESS);
 		} else if(parseErrors.contains(clazz)) {
-			handleItem(item, Checked.PARSE_ERROR);
+			item.setChecked(Checked.PARSE_ERROR);
 		} else if(error.contains(clazz) || counterExample.contains(clazz)) {
-			handleItem(item, Checked.FAIL);
+			item.setChecked(Checked.FAIL);
 		} else {
-			handleItem(item, Checked.INTERRUPTED);
+			item.setChecked(Checked.INTERRUPTED);
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
