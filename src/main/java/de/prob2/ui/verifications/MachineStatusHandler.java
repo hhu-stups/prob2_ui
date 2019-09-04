@@ -8,7 +8,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.statusbar.StatusBar;
 
 @Singleton
@@ -72,7 +71,6 @@ public final class MachineStatusHandler {
 			default:
 				break;
 		}
-		injector.getInstance(MachineTableView.class).refresh();
 	}
 	
 	private List<? extends IExecutableItem> getItems(Machine machine, CheckingType type) {
