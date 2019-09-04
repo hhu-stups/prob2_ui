@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.AbstractCommand;
@@ -27,7 +26,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaItem;
@@ -35,21 +33,16 @@ import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.MachineStatusHandler;
 
 @Singleton
 public class SymbolicCheckingResultHandler extends AbstractResultHandler implements ISymbolicResultHandler {
 	
 	private final CurrentTrace currentTrace;
 	
-	private final Injector injector;
-	
 	@Inject
-	public SymbolicCheckingResultHandler(final StageManager stageManager, final ResourceBundle bundle, 
-										final CurrentTrace currentTrace, final Injector injector) {
+	public SymbolicCheckingResultHandler(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
 		super(stageManager, bundle);
 		this.currentTrace = currentTrace;
-		this.injector = injector;
 		this.type = CheckingType.SYMBOLIC_CHECKING;
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
@@ -203,11 +196,4 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, Checked checked) {
 		showCheckingResult(item, msg, msg, checked);
 	}
-	
-	public void updateMachine(Machine machine) {
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_CHECKING);
-		injector.getInstance(SymbolicCheckingView.class).refresh();
-	}
-	
-
 }
