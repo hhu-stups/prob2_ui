@@ -5,24 +5,24 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 public class OperationTableItem {
 
-    private String operation;
+	private String operation;
 
-    private BooleanProperty selected;
+	private BooleanProperty selected;
 
-    public OperationTableItem(String operation, boolean selected) {
-        this.operation = operation;
-        this.selected = new SimpleBooleanProperty(selected);
-    }
+	public OperationTableItem(String operation, boolean selected) {
+		this.operation = operation;
+		this.selected = new SimpleBooleanProperty(selected);
+	}
 
-    public String getOperation() {
-        return operation;
-    }
+	public String getOperation() {
+		return operation;
+	}
 
-    public BooleanProperty selectedProperty() {
-        return selected;
-    }
+	public BooleanProperty selectedProperty() {
+		return selected;
+	}
 
-    public boolean selected() {
-        return selected.get();
-    }
+	public boolean selected() {
+		return selected.get();
+	}
 }
