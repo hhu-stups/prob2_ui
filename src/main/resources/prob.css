@@ -971,6 +971,14 @@
 	-fx-text-fill: orange;
 }
 
+.boolean-icon.true {
+	-fx-text-fill: green;
+}
+
+.boolean-icon.false {
+	-fx-text-fill: red;
+}
+
 /* ================= OPERATIONS VIEW ================= */
 
 .operations-cell {
