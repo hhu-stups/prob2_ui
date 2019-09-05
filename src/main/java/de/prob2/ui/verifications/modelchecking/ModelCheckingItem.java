@@ -15,7 +15,8 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-public class ModelCheckingItem extends AbstractModelCheckingItem implements IExecutableItem {
+public class ModelCheckingItem implements IExecutableItem {
+	private Checked checked;
 
 	private final ObjectProperty<ModelCheckingOptions> options;
 	
@@ -24,12 +25,21 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 	private transient ListProperty<ModelCheckingJobItem> items;
 
 	public ModelCheckingItem(ModelCheckingOptions options) {
-		super();
 		Objects.requireNonNull(options);
+		this.checked = Checked.NOT_CHECKED;
 		this.options = new SimpleObjectProperty<>(this, "options", options);
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 		initialize();
+	}
+	
+	@Override
+	public Checked getChecked() {
+		return checked;
+	}
+	
+	public void setChecked(final Checked checked) {
+		this.checked = checked;
 	}
 	
 	public ObjectProperty<ModelCheckingOptions> optionsProperty() {
@@ -97,5 +107,4 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 	public String toString() {
 		return String.format("%s(%s)", this.getClass().getSimpleName(), this.getOptions());
 	}
-	
 }

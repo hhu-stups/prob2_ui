@@ -1,8 +1,10 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.verifications.Checked;
 
-public class ModelCheckingJobItem extends AbstractModelCheckingItem {
+public class ModelCheckingJobItem {
+	private Checked checked;
 
 	private transient ModelCheckStats stats;
 	
@@ -13,10 +15,18 @@ public class ModelCheckingJobItem extends AbstractModelCheckingItem {
 	private String message;
 	
 	public ModelCheckingJobItem(int index, String message) {
-		super();
+		this.checked = Checked.NOT_CHECKED;
 		this.index = index;
 		this.message = message;
 		this.trace = null;
+	}
+	
+	public Checked getChecked() {
+		return checked;
+	}
+	
+	public void setChecked(final Checked checked) {
+		this.checked = checked;
 	}
 	
 	public void setStats(ModelCheckStats stats) {
