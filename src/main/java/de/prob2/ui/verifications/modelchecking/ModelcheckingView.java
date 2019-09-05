@@ -136,7 +136,9 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
+		strategyColumn.setCellValueFactory(features -> Bindings.createStringBinding(() ->
+			bundle.getString(SearchStrategy.fromOptions(features.getValue().getOptions()).getName())
+		));
 		deadlockColumn.setCellValueFactory(new PropertyValueFactory<>("deadlocks"));
 		invariantsViolationsColumn.setCellValueFactory(new PropertyValueFactory<>("invariantViolations"));
 		assertionViolationsColumn.setCellValueFactory(new PropertyValueFactory<>("assertionViolations"));

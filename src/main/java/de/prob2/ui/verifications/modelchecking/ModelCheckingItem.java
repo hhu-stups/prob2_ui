@@ -32,17 +32,14 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 	
 	private transient BindableGlyph stopWhenAllOperationsCovered;
 	
-	private String strategy;
-	
 	private BooleanProperty shouldExecute;
 	
 	private transient ListProperty<ModelCheckingJobItem> items;
 
-	public ModelCheckingItem(ModelCheckingOptions options, String strategy) {
+	public ModelCheckingItem(ModelCheckingOptions options) {
 		super();
 		Objects.requireNonNull(options);
 		this.options = options;
-		this.strategy = strategy;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 		initialize();
@@ -55,14 +52,6 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 
 	public ModelCheckingOptions getOptions() {
 		return this.options;
-	}
-	
-	public void setStrategy(String strategy) {
-		this.strategy = strategy;
-	}
-	
-	public String getStrategy() {
-		return strategy;
 	}
 	
 	public void setSelected(boolean selected) {
