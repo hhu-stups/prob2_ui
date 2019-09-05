@@ -31,8 +31,6 @@ public abstract class AbstractResultHandler {
 		}
 	}
 	
-	private static final String GENERAL_RESULT_MESSAGE = "common.result.message";
-	
 	protected final StageManager stageManager;
 	protected final ResourceBundle bundle;
 	
@@ -78,13 +76,13 @@ public abstract class AbstractResultHandler {
 					"verifications.result.counterExampleFound.message", bundle.getString(type.getKey()));
 		} else if(error.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.error.header",
-					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
+				"common.result.message", ((IModelCheckingResult) result).getMessage());
 		} else if(result instanceof Throwable || parseErrors.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
-					GENERAL_RESULT_MESSAGE, result);
+				"common.result.message", result);
 		} else if(interrupted.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
-					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
+				"common.result.message", ((IModelCheckingResult) result).getMessage());
 		}
 		return resultItem;
 	}
