@@ -66,25 +66,25 @@ public abstract class AbstractResultHandler {
 	}
 	
 	public CheckingResultItem handleFormulaResult(Object result, State stateid, List<Trace> traces) {
-		CheckingResultItem resultItem = null;
 		if(success.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header",
-					"verifications.result.succeeded.message", bundle.getString(type.getKey()));
+			return new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header",
+				"verifications.result.succeeded.message", bundle.getString(type.getKey()));
 		} else if(counterExample.contains(result.getClass())) {
 			traces.addAll(handleCounterExample(result, stateid));
-			resultItem = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header",
-					"verifications.result.counterExampleFound.message", bundle.getString(type.getKey()));
+			return new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header",
+				"verifications.result.counterExampleFound.message", bundle.getString(type.getKey()));
 		} else if(error.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.FAIL, "common.result.error.header",
+			return new CheckingResultItem(Checked.FAIL, "common.result.error.header",
 				"common.result.message", ((IModelCheckingResult) result).getMessage());
 		} else if(result instanceof Throwable || parseErrors.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
+			return new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
 				"common.result.message", result);
 		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
+			return new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
 				"common.result.message", ((IModelCheckingResult) result).getMessage());
+		} else {
+			return null;
 		}
-		return resultItem;
 	}
 	
 	protected abstract List<Trace> handleCounterExample(Object result, State stateid);
