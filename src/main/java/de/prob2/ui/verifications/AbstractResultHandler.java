@@ -31,8 +31,8 @@ public abstract class AbstractResultHandler {
 		}
 	}
 	
-	protected final StageManager stageManager;
-	protected final ResourceBundle bundle;
+	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	
 	protected CheckingType type;
 	protected ArrayList<Class<?>> success;
