@@ -6,7 +6,7 @@ import javafx.scene.control.TableCell;
 
 import org.controlsfx.glyphfont.FontAwesome;
 
-public final class CheckedCell<T extends AbstractCheckableItem> extends TableCell<T, Checked> {
+public final class CheckedCell<T> extends TableCell<T, Checked> {
 	public CheckedCell() {
 		super();
 		

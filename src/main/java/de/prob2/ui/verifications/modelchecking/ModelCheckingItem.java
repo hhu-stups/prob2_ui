@@ -80,8 +80,7 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 
 
 	/*
-	* This function is needed for initializing status and checked for items that are loaded via JSON and might not contain
-	* these fields.
+	* This function is needed for initializing checked for items that are loaded via JSON and might not contain these fields.
 	*/
 	public void initialize() {
 		if(this.items == null) {
@@ -95,8 +94,6 @@ public class ModelCheckingItem extends AbstractModelCheckingItem implements IExe
 	* Required in initialize
 	*/
 	private void initializeStatus() {
-		this.status = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-		this.status.setTextFill(Color.BLUE);
 		this.checked = Checked.NOT_CHECKED;
 	}
 

@@ -18,6 +18,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
@@ -62,7 +63,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	private TableView<ModelCheckingItem> tvItems;
 	
 	@FXML
-	private TableColumn<ModelCheckingItem, BindableGlyph> statusColumn;
+	private TableColumn<ModelCheckingItem, Checked> statusColumn;
 	
 	@FXML
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
@@ -89,7 +90,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	private TableView<ModelCheckingJobItem> tvChecks;
 
 	@FXML
-	private TableColumn<ModelCheckingJobItem, BindableGlyph> jobStatusColumn;
+	private TableColumn<ModelCheckingJobItem, Checked> jobStatusColumn;
 
 	@FXML
 	private TableColumn<ModelCheckingJobItem, Integer> indexColumn;
@@ -133,7 +134,8 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(addModelCheckButton.disableProperty(), currentTrace.existsProperty().not());
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentTrace.existsProperty().not());
 		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		statusColumn.setCellFactory(col -> new CheckedCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		strategyColumn.setCellValueFactory(new PropertyValueFactory<>("strategy"));
 		deadlockColumn.setCellValueFactory(new PropertyValueFactory<>("deadlocks"));
 		invariantsViolationsColumn.setCellValueFactory(new PropertyValueFactory<>("invariantViolations"));
@@ -142,7 +144,8 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		stopAtFullCoverageColumn.setCellValueFactory(new PropertyValueFactory<>("stopWhenAllOperationsCovered"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.MODELCHECKING, injector, this));
 		
-		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
 		messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
 
