@@ -29,11 +29,6 @@ public class ModelcheckingStage extends Stage {
 		MIXED_BF_DF("verifications.modelchecking.modelcheckingStage.strategy.mixedBfDf"),
 		BREADTH_FIRST("verifications.modelchecking.modelcheckingStage.strategy.breadthFirst"),
 		DEPTH_FIRST("verifications.modelchecking.modelcheckingStage.strategy.depthFirst"),
-		//HEURISTIC_FUNCTION("verifications.modelchecking.modelcheckingStage.strategy.heuristicFunction"),
-		//HASH_RANDOM("verifications.modelchecking.modelcheckingStage.strategy.hashRandom"),
-		//RANDOM("verifications.modelchecking.modelcheckingStage.strategy.random"),
-		//OUT_DEGREE("verifications.modelchecking.modelcheckingStage.strategy.outDegree"),
-		//DISABLED_TRANSITIONS("verifications.modelchecking.modelcheckingStage.strategy.disabledTransitions"),
 		;
 		
 		private final String name;
