@@ -3,15 +3,22 @@ package de.prob2.ui.verifications.modelchecking;
 import de.prob.check.ModelCheckingOptions;
 
 public enum SearchStrategy {
-	MIXED_BF_DF("verifications.modelchecking.modelcheckingStage.strategy.mixedBfDf"),
-	BREADTH_FIRST("verifications.modelchecking.modelcheckingStage.strategy.breadthFirst"),
-	DEPTH_FIRST("verifications.modelchecking.modelcheckingStage.strategy.depthFirst"),
+	MIXED_BF_DF("verifications.modelchecking.modelcheckingStage.strategy.mixedBfDf", o -> o.breadthFirst(false).depthFirst(false)),
+	BREADTH_FIRST("verifications.modelchecking.modelcheckingStage.strategy.breadthFirst", o -> o.breadthFirst(true).depthFirst(false)),
+	DEPTH_FIRST("verifications.modelchecking.modelcheckingStage.strategy.depthFirst", o -> o.breadthFirst(false).depthFirst(true)),
 	;
 	
-	private final String name;
+	@FunctionalInterface
+	private interface OptionsApplier {
+		ModelCheckingOptions apply(final ModelCheckingOptions options);
+	}
 	
-	SearchStrategy(final String name) {
+	private final String name;
+	private final OptionsApplier optionsApplier;
+	
+	SearchStrategy(final String name, final OptionsApplier optionsApplier) {
 		this.name = name;
+		this.optionsApplier = optionsApplier;
 	}
 	
 	public static SearchStrategy fromOptions(final ModelCheckingOptions options) {
@@ -26,5 +33,9 @@ public enum SearchStrategy {
 	
 	public String getName() {
 		return this.name;
+	}
+	
+	public ModelCheckingOptions toOptions(final ModelCheckingOptions options) {
+		return this.optionsApplier.apply(options);
 	}
 }

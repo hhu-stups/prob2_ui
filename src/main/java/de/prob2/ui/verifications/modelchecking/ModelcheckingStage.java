@@ -102,20 +102,7 @@ public class ModelcheckingStage extends Stage {
 	
 	private ModelCheckingOptions getOptions() {
 		ModelCheckingOptions options = new ModelCheckingOptions();
-		
-		switch (selectSearchStrategy.getValue()) {
-			case MIXED_BF_DF:
-				break;
-			case BREADTH_FIRST:
-				options = options.breadthFirst(true);
-				break;
-			case DEPTH_FIRST:
-				options = options.depthFirst(true);
-				break;
-			default:
-				throw new IllegalArgumentException("Unhandled search strategy: " + selectSearchStrategy.getValue());
-		}
-		
+		options = selectSearchStrategy.getValue().toOptions(options);
 		options = options.checkDeadlocks(findDeadlocks.isSelected());
 		options = options.checkInvariantViolations(findInvViolations.isSelected());
 		options = options.checkAssertions(findBAViolations.isSelected());
