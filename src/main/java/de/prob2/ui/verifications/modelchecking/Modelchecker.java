@@ -204,11 +204,11 @@ public class Modelchecker implements IModelCheckListener {
 		List<ModelCheckingJobItem> jobItems = currentItem.getItems();
 		ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, result.getMessage());
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
-			jobItem.setCheckedSuccessful();
+			jobItem.setChecked(Checked.SUCCESS);
 		} else if (result instanceof ITraceDescription) {
-			jobItem.setCheckedFailed();
+			jobItem.setChecked(Checked.FAIL);
 		} else {
-			jobItem.setTimeout();
+			jobItem.setChecked(Checked.TIMEOUT);
 		}
 		jobItem.setStats(idToStats.get(jobID));
 		jobItems.add(jobItem);
@@ -227,11 +227,11 @@ public class Modelchecker implements IModelCheckListener {
 				.anyMatch(checked -> checked == Checked.SUCCESS);
 		
 		if (success) {
-			currentItem.setCheckedSuccessful();
+			currentItem.setChecked(Checked.SUCCESS);
 		} else if (failed) {
-			currentItem.setCheckedFailed();
+			currentItem.setChecked(Checked.FAIL);
 		} else {
-			currentItem.setTimeout();
+			currentItem.setChecked(Checked.TIMEOUT);
 		}
 	}
 }
