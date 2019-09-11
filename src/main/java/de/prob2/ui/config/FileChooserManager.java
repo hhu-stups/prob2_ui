@@ -4,17 +4,27 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.model.brules.RulesModelFactory;
+import de.prob.scripting.AlloyFactory;
+import de.prob.scripting.CSPFactory;
+import de.prob.scripting.ClassicalBFactory;
+import de.prob.scripting.EventBFactory;
+import de.prob.scripting.EventBPackageFactory;
+import de.prob.scripting.ModelFactory;
+import de.prob.scripting.TLAFactory;
+import de.prob.scripting.XTLFactory;
+import de.prob.scripting.ZFactory;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 
@@ -25,6 +35,21 @@ import javafx.stage.Window;
 public class FileChooserManager {
 	public enum Kind {
 		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL
+	}
+
+	private static final Map<Class<? extends ModelFactory<?>>, String> FACTORY_TO_TYPE_KEY_MAP;
+	static {
+		final Map<Class<? extends ModelFactory<?>>, String> map = new HashMap<>();
+		map.put(ClassicalBFactory.class, "common.fileChooser.fileTypes.classicalB");
+		map.put(EventBFactory.class, "common.fileChooser.fileTypes.eventB");
+		map.put(EventBPackageFactory.class, "common.fileChooser.fileTypes.eventBPackage");
+		map.put(CSPFactory.class, "common.fileChooser.fileTypes.csp");
+		map.put(TLAFactory.class, "common.fileChooser.fileTypes.tla");
+		map.put(RulesModelFactory.class, "common.fileChooser.fileTypes.bRules");
+		map.put(XTLFactory.class, "common.fileChooser.fileTypes.xtl");
+		map.put(ZFactory.class, "common.fileChooser.fileTypes.z");
+		map.put(AlloyFactory.class, "common.fileChooser.fileTypes.alloy");
+		FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(map);
 	}
 
 	private final ResourceBundle bundle;
@@ -38,13 +63,20 @@ public class FileChooserManager {
 	private FileChooserManager(final Config config, final ResourceBundle bundle) {
 		this.bundle = bundle;
 
-		this.machineExtensions = Machine.Type.getExtensionToTypeMap().keySet();
-		this.machineExtensionFilters = Arrays.stream(Machine.Type.values())
-			.map(type -> new FileChooser.ExtensionFilter(
-				String.format(bundle.getString(type.getFileTypeKey()), String.join(", ", type.getExtensions())),
-				type.getExtensions()
-			))
-			.collect(Collectors.toList());
+		this.machineExtensions = Machine.EXTENSION_TO_FACTORY_MAP.keySet();
+		this.machineExtensionFilters = new ArrayList<>();
+		Machine.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
+			final String name;
+			if (FACTORY_TO_TYPE_KEY_MAP.containsKey(factory)) {
+				name = bundle.getString(FACTORY_TO_TYPE_KEY_MAP.get(factory));
+			} else {
+				name = factory.getSimpleName();
+			}
+			this.machineExtensionFilters.add(new FileChooser.ExtensionFilter(
+				String.format(name, String.join(", ", extensions)),
+				extensions
+			));
+		});
 
 		config.addListener(new ConfigListener() {
 			@Override

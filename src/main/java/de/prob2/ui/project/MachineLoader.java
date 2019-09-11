@@ -144,7 +144,7 @@ public class MachineLoader {
 
 				final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 				allPrefs.putAll(prefs);
-				final ModelFactory<?> modelFactory = injector.getInstance(machine.getType().getModelFactoryClass());
+				final ModelFactory<?> modelFactory = injector.getInstance(machine.getModelFactoryClass());
 				final ExtractedModel<?> extract = modelFactory.extract(path.toString());
 				if (Thread.currentThread().isInterrupted()) {
 					return;
