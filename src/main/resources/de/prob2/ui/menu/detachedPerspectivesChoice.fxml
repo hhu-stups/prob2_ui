@@ -31,6 +31,8 @@
 							text="%common.views.stats" />
 						<CheckBox fx:id="detachProject"
 							text="%common.views.project" />
+						<CheckBox fx:id="detachProlog"
+							text="%common.views.prologoutput" />
 					</VBox>
 					<Button fx:id="apply" onAction="#apply"
 						text="%common.buttons.apply">

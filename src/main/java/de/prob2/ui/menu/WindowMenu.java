@@ -18,6 +18,7 @@ import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
 
+import de.prob2.ui.output.PrologOutput;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;

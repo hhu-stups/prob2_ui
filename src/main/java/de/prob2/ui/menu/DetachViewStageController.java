@@ -15,6 +15,7 @@ import de.prob2.ui.animation.AnimationView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
@@ -48,6 +49,7 @@ public final class DetachViewStageController extends Stage {
 	@FXML private CheckBox detachVerifications;
 	@FXML private CheckBox detachStats;
 	@FXML private CheckBox detachProject;
+	@FXML private CheckBox detachProlog;
 	
 	private final Injector injector;
 	private final StageManager stageManager;
@@ -76,6 +78,7 @@ public final class DetachViewStageController extends Stage {
 		checkBoxMap.put(VerificationsView.class, detachVerifications);
 		checkBoxMap.put(StatsView.class, detachStats);
 		checkBoxMap.put(ProjectView.class, detachProject);
+		checkBoxMap.put(PrologOutput.class, detachProlog);
 	}
 	
 	public void selectForDetach(final String name) {
