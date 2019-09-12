@@ -38,7 +38,7 @@ classes:
 
 test:
   stage: test
-  script: ./gradlew ${GRADLE_OPTIONS} check sonarqube
+  script: ./gradlew ${GRADLE_OPTIONS} check
 
 distributions:
   stage: deploy
