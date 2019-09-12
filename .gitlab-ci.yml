@@ -11,7 +11,9 @@ default:
       - .gradle/wrapper
   before_script:
     - apt-get update
-    - apt-get install --assume-yes pandoc
+    # pandoc is needed to build the ProB 2 UI docs.
+    # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
+    - apt-get install --assume-yes curl pandoc perl rsync
     
     # Install OpenJFX 8.
     # This downloads the Debian stretch version of the libopenjfx-java package (which is the last version compatible with Java 8) and installs it into the OpenJDK directory.
