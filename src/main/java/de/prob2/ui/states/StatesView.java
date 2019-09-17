@@ -18,6 +18,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -36,6 +37,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
@@ -78,6 +80,8 @@ public final class StatesView extends StackPane {
 	private TextField filterState;
 	@FXML
 	private HelpButton helpButton;
+	@FXML
+	private Button btComputeUnsatCore;
 
 	@FXML
 	private TreeTableView<StateItem<?>> tv;
@@ -154,6 +158,7 @@ public final class StatesView extends StackPane {
 		), false));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updater.execute(() -> {
+			boolean showUnsatCoreButton = false;
 			if (to == null) {
 				this.rootNodes = null;
 				this.filteredRootNodes = null;
@@ -162,7 +167,12 @@ public final class StatesView extends StackPane {
 				this.tv.getRoot().getChildren().clear();
 			} else {
 				this.updateRoot(from, to, false);
+				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
+				if (!to.getCurrentState().isInitialised() && operations.isEmpty()) {
+					showUnsatCoreButton = true;
+				}
 			}
+			btComputeUnsatCore.setVisible(showUnsatCoreButton);
 		});
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
@@ -197,6 +207,7 @@ public final class StatesView extends StackPane {
 
 		row.itemProperty().addListener((observable, from, to) -> {
 			row.getStyleClass().remove("changed");
+			row.getStyleClass().remove("unsatCore");
 			if (to != null && to.getContents() instanceof ASTFormula) {
 				IBEvalElement core = unsatCoreCalculator.unsatCoreProperty().get();
 				if(core != null) {
@@ -207,8 +218,8 @@ public final class StatesView extends StackPane {
 							.collect(Collectors.toList());
 					if (coreConjuncts.contains(formula.getCode().replace(" ", ""))) {
 						row.getStyleClass().add("unsatCore");
+						return;
 					}
-					return;
 				}
 
 				final IEvalElement formula = ((ASTFormula) to.getContents()).getFormula();
@@ -527,6 +538,13 @@ public final class StatesView extends StackPane {
 			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
 		}
 		stage.show();
+	}
+	
+	@FXML
+	private void computeUnsatCore() {
+		unsatCoreCalculator.calculate();
+		btComputeUnsatCore.setVisible(false);
+		tv.refresh();
 	}
 
 }
