@@ -15,7 +15,6 @@ import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.model.classicalb.ClassicalBModel;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.property.ObjectProperty;
