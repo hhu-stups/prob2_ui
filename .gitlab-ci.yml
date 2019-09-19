@@ -11,7 +11,20 @@ default:
       - .gradle/wrapper
   before_script:
     - apt-get update
-    - apt-get install --assume-yes pandoc
+    # git is needed to read the current commit hash.
+    # pandoc is needed to build the ProB 2 UI docs.
+    # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
+    - apt-get install --assume-yes curl git pandoc perl rsync
+    
+    # Install OpenJFX 8.
+    # This downloads the Debian stretch version of the libopenjfx-java package (which is the last version compatible with Java 8) and installs it into the OpenJDK directory.
+    # This is a terrible solution, but there's no better alternative - there are apparently no Docker images that have a (non-Oracle) JDK 8 with JavaFX installed.
+    - curl --location -o "libopenjfx-java.deb" "http://security.debian.org/debian-security/pool/updates/main/o/openjfx/libopenjfx-java_8u141-b14-3~deb9u1_all.deb"
+    - shasum --algorithm 256 --quiet --check - <<< "716c6ba4c63597d2621025320c894aba6a9cf7059893a1d8a4f6ae45c0c38c46  libopenjfx-java.deb"
+    - dpkg-deb --extract "libopenjfx-java.deb" "libopenjfx-java"
+    - rsync -a "libopenjfx-java/usr/share/java/openjfx/" "${JAVA_HOME}"
+    - rm -r "libopenjfx-java.deb" "libopenjfx-java"
+    
     - export GRADLE_USER_HOME="${PWD}/.gradle"
 
 classes:
@@ -25,7 +38,7 @@ classes:
 
 test:
   stage: test
-  script: ./gradlew ${GRADLE_OPTIONS} check sonarqube
+  script: ./gradlew ${GRADLE_OPTIONS} check
 
 distributions:
   stage: deploy

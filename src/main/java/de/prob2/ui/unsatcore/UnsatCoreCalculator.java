@@ -2,26 +2,25 @@ package de.prob2.ui.unsatcore;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.command.UnsatRegularCoreCommand;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.animator.domainobjects.Join;
 import de.prob.animator.prologast.ASTCategory;
 import de.prob.animator.prologast.ASTFormula;
 import de.prob.animator.prologast.PrologASTNode;
 import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+@Singleton
 public class UnsatCoreCalculator {
 
 	private final CurrentTrace currentTrace;
@@ -33,16 +32,13 @@ public class UnsatCoreCalculator {
 		this.currentTrace = currentTrace;
 		this.unsatCore = new SimpleObjectProperty<>(null);
 		this.currentTrace.addListener((observable, from, to) -> {
-			if(to != null) {
-				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
-				if (!to.getCurrentState().isInitialised() && operations.isEmpty()) {
-					calculate();
-				}
+			if(to == null) {
+				unsatCore.set(null);
 			}
 		});
 	}
 
-	private void calculate() {
+	public void calculate() {
 		ClassicalBModel bModel = (ClassicalBModel) currentTrace.getModel();
 		IBEvalElement properties = extractProperties(bModel);
 		if(properties == null) {
