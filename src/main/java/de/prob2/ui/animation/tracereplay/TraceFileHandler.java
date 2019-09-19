@@ -1,6 +1,8 @@
 package de.prob2.ui.animation.tracereplay;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Inject;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
@@ -52,6 +54,10 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 			LOGGER.warn("Invalid trace file", e);
 			handleFailedTraceLoad(path, e);
 			return null;
+		} catch ( JsonSyntaxException e) {
+			LOGGER.warn("Invalid syntax in trace file", e);
+			handleFailedTraceLoad(path, e);
+			return null;
 		} catch (IOException e) {
 			LOGGER.warn("Failed to open trace file", e);
 			handleFailedTraceLoad(path, e);
@@ -72,6 +78,10 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 			alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
 				"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header",
 				"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content", path);
+		} else if (exception instanceof JsonSyntaxException) {
+			alert = stageManager.makeExceptionAlert(exception,
+				"animation.tracereplay.traceChecker.alerts.syntaxError.header",
+				"animation.tracereplay.traceChecker.alerts.syntaxError.content", path);
 		} else {
 			alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
 				"animation.tracereplay.alerts.traceReplayError.header",
