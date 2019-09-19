@@ -78,15 +78,15 @@ public class Machine implements DescriptionView.Describable {
 	public static final Map<Class<? extends ModelFactory<?>>, List<String>> FACTORY_TO_EXTENSIONS_MAP;
 	static {
 		final Map<Class<? extends ModelFactory<?>>, List<String>> map = new HashMap<>();
-		map.put(ClassicalBFactory.class, Arrays.asList("*.mch", "*.ref", "*.imp", "*.sys"));
-		map.put(EventBFactory.class, Arrays.asList("*.bum", "*.buc"));
-		map.put(EventBPackageFactory.class, Collections.singletonList("*.eventb"));
-		map.put(CSPFactory.class, Arrays.asList("*.csp", "*.cspm"));
-		map.put(TLAFactory.class, Collections.singletonList("*.tla"));
-		map.put(RulesModelFactory.class, Collections.singletonList("*.rmch"));
-		map.put(XTLFactory.class, Arrays.asList("*.P", "*.pl"));
-		map.put(ZFactory.class, Arrays.asList("*.zed", "*.tex"));
-		map.put(AlloyFactory.class, Collections.singletonList("*.als"));
+		map.put(ClassicalBFactory.class, Arrays.asList("mch", "ref", "imp", "sys"));
+		map.put(EventBFactory.class, Arrays.asList("bum", "buc"));
+		map.put(EventBPackageFactory.class, Collections.singletonList("eventb"));
+		map.put(CSPFactory.class, Arrays.asList("csp", "cspm"));
+		map.put(TLAFactory.class, Collections.singletonList("tla"));
+		map.put(RulesModelFactory.class, Collections.singletonList("rmch"));
+		map.put(XTLFactory.class, Arrays.asList("P", "pl"));
+		map.put(ZFactory.class, Arrays.asList("zed", "tex"));
+		map.put(AlloyFactory.class, Collections.singletonList("als"));
 		FACTORY_TO_EXTENSIONS_MAP = Collections.unmodifiableMap(map);
 	}
 	
@@ -137,7 +137,7 @@ public class Machine implements DescriptionView.Describable {
 	}
 	
 	public static Class<? extends ModelFactory<?>> modelFactoryClassFromExtension(final String ext) {
-		final Class<? extends ModelFactory<?>> factory = EXTENSION_TO_FACTORY_MAP.get("*." + ext);
+		final Class<? extends ModelFactory<?>> factory = EXTENSION_TO_FACTORY_MAP.get(ext);
 		if (factory == null) {
 			throw new IllegalArgumentException(String.format("Could not determine machine type for extension %s", ext));
 		}

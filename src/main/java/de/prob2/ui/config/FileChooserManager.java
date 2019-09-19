@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -54,7 +55,7 @@ public class FileChooserManager {
 
 	private final ResourceBundle bundle;
 
-	private final Collection<String> machineExtensions;
+	private final Collection<String> machineExtensionPatterns;
 	private final List<FileChooser.ExtensionFilter> machineExtensionFilters;
 
 	private final Map<Kind, Path> initialDirectories = new EnumMap<>(Kind.class);
@@ -63,7 +64,7 @@ public class FileChooserManager {
 	private FileChooserManager(final Config config, final ResourceBundle bundle) {
 		this.bundle = bundle;
 
-		this.machineExtensions = Machine.EXTENSION_TO_FACTORY_MAP.keySet();
+		this.machineExtensionPatterns = Machine.EXTENSION_TO_FACTORY_MAP.keySet().stream().map(ext -> "*." + ext).collect(Collectors.toSet());
 		this.machineExtensionFilters = new ArrayList<>();
 		Machine.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
 			final String name;
@@ -72,9 +73,10 @@ public class FileChooserManager {
 			} else {
 				name = factory.getSimpleName();
 			}
+			final List<String> extensionPatterns = extensions.stream().map(ext -> "*." + ext).collect(Collectors.toList());
 			this.machineExtensionFilters.add(new FileChooser.ExtensionFilter(
-				String.format(name, String.join(", ", extensions)),
-				extensions
+				String.format(name, String.join(", ", extensionPatterns)),
+				extensionPatterns
 			));
 		});
 
@@ -141,7 +143,7 @@ public class FileChooserManager {
 		}
 		
 		if (machines) {
-			allExts.addAll(this.machineExtensions);
+			allExts.addAll(this.machineExtensionPatterns);
 			fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		}
 		
@@ -190,7 +192,7 @@ public class FileChooserManager {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
 		
-		final List<String> allExts = new ArrayList<>(this.machineExtensions);
+		final List<String> allExts = new ArrayList<>(this.machineExtensionPatterns);
 		fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		
 		allExts.sort(String::compareTo);
