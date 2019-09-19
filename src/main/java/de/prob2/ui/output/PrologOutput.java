@@ -3,6 +3,7 @@ package de.prob2.ui.output;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -15,7 +16,7 @@ import java.io.OutputStream;
 
 @Singleton
 public class PrologOutput extends TextArea {
-	private class PrologOutputAppender extends OutputStream {
+	private static class PrologOutputAppender extends OutputStream {
 		TextArea textArea;
 		private PrologOutputAppender(TextArea textArea) {
 			this.textArea = textArea;
@@ -40,7 +41,7 @@ public class PrologOutput extends TextArea {
 		encoder.setPattern("%replace(%msg){'\\[0m', ''}%n");
 		encoder.start();
 
-		OutputStreamAppender outputStreamAppender = new OutputStreamAppender();
+		OutputStreamAppender<ILoggingEvent> outputStreamAppender = new OutputStreamAppender<>();
 		outputStreamAppender.setContext(context);
 		outputStreamAppender.setEncoder(encoder);
 		outputStreamAppender.setOutputStream(prologOutputAppender);
