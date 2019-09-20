@@ -27,15 +27,6 @@ default:
     
     - export GRADLE_USER_HOME="${PWD}/.gradle"
 
-classes:
-  stage: build
-  script: ./gradlew ${GRADLE_OPTIONS} classes
-  artifacts: 
-    paths:
-      - build
-    # Class files, etc. are only needed by the other stages and don't need to be kept around afterwards.
-    expire_in: 1 day
-
 test:
   stage: test
   script: ./gradlew ${GRADLE_OPTIONS} check
