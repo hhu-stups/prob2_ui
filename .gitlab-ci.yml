@@ -42,7 +42,7 @@ test:
 
 distributions:
   stage: deploy
-  script: ./gradlew ${GRADLE_OPTIONS} distZip shadowJar createAppZip
+  script: ./gradlew ${GRADLE_OPTIONS} shadowJar createAppZip
   artifacts:
     paths:
       - build/distributions
