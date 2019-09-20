@@ -1,7 +1,5 @@
 # ProB 2 Standalone GUI
 
-[![Build Status](https://travis-ci.org/bendisposto/prob2-ui.svg?branch=master)](https://travis-ci.org/bendisposto/prob2-ui)
-
 ## Requirements
 
 The ProB 2 UI requires Java 8 or newer, and has been tested with Oracle JDK 8, 9, and 10.
