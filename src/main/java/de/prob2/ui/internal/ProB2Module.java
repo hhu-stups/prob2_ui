@@ -12,17 +12,23 @@ import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
+import de.prob.scripting.StateSpaceProvider;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.RuntimeOptions;
+import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.BoundingBox;
@@ -33,6 +39,25 @@ import org.hildan.fxgson.FxGson;
 import org.hildan.fxgson.adapters.extras.ColorTypeAdapter;
 
 public class ProB2Module extends AbstractModule {
+	/**
+	 * Custom {@link StateSpaceProvider} subclass that adds a warning listener to every created {@link StateSpace}, so that ProB warnings are displayed in the UI.
+	 */
+	private static final class CustomStateSpaceProvider extends StateSpaceProvider {
+		@Inject
+		private CustomStateSpaceProvider(
+			final Provider<StateSpace> ssProvider,
+			final Provider<StageManager> stageManagerProvider
+		) {
+			super(() -> {
+				final StateSpace stateSpace = ssProvider.get();
+				stateSpace.addWarningListener(warnings -> Platform.runLater(() ->
+					new WarningAlert(stageManagerProvider.get(), warnings).show()
+				));
+				return stateSpace;
+			});
+		}
+	}
+
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 
 	private final RuntimeOptions runtimeOptions;
@@ -88,6 +113,9 @@ public class ProB2Module extends AbstractModule {
 			})
 			.registerTypeAdapter(Color.class, new ColorTypeAdapter())
 			.create());
+		
+		bind(StateSpaceProvider.class).to(CustomStateSpaceProvider.class);
+		
 		bind(MagicGraphI.class).to(MagicGraphFX.class);
 	}
 
