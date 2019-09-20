@@ -81,7 +81,7 @@
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
 			</placeholder>
 		</TableView>
-		<AnchorPane fx:id="statsPane" minHeight="80.0">
+		<AnchorPane fx:id="statsPane" minHeight="${fontSize.fontSize * 8}">
 			<VBox.margin>
 				<Insets top="5.0" />
 			</VBox.margin>
