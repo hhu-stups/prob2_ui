@@ -26,15 +26,15 @@ final class TypeCell extends TreeTableCell<Object, Object> {
 			final String typeName;
 			switch (((ErrorItem)item).getType()) {
 				case WARNING:
-					typeName = bundle.getString("error.exceptionAlert.proBErrorTable.type.warning");
+					typeName = bundle.getString("error.errorTable.type.warning");
 					break;
 				
 				case ERROR:
-					typeName = bundle.getString("error.exceptionAlert.proBErrorTable.type.error");
+					typeName = bundle.getString("error.errorTable.type.error");
 					break;
 				
 				case INTERNAL_ERROR:
-					typeName = bundle.getString("error.exceptionAlert.proBErrorTable.type.internalError");
+					typeName = bundle.getString("error.errorTable.type.internalError");
 					break;
 				
 				default:
