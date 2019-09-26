@@ -37,7 +37,7 @@ distributions:
   script:
     - ./gradlew ${GRADLE_OPTIONS} shadowJar createAppZip
     # The password is read directly from the environment variable LFTP_PASSWORD.
-    - lftp "${DEPLOY_URL}" --user "${DEPLOY_USERNAME}" --env-password -e "mput -e build/distributions/*-mac.dmg build/libs/*-all.jar; exit"
+    - lftp "${DEPLOY_URL}" --user "${DEPLOY_USERNAME}" --env-password -e "mput -e build/distributions/*-mac.zip build/libs/*-all.jar; exit"
   artifacts:
     expire_in: 1 week
     paths:
