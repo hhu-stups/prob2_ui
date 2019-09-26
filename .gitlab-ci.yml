@@ -35,6 +35,7 @@ distributions:
   stage: deploy
   script: ./gradlew ${GRADLE_OPTIONS} shadowJar createAppZip
   artifacts:
+    expire_in: 1 week
     paths:
       - build/distributions
       - build/libs
