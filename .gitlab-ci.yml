@@ -12,10 +12,9 @@ default:
   before_script:
     - apt-get update
     # git is needed to read the current commit hash.
-    # lftp is needed to upload the builds to our download server.
     # pandoc is needed to build the ProB 2 UI docs.
     # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
-    - apt-get install --assume-yes curl git lftp pandoc perl rsync
+    - apt-get install --assume-yes curl git pandoc perl rsync
     
     # Install OpenJFX 8.
     # This downloads the Debian stretch version of the libopenjfx-java package (which is the last version compatible with Java 8) and installs it into the OpenJDK directory.
@@ -39,6 +38,12 @@ test:
 
 distributions:
   stage: deploy
+  image: debian:stable-slim
+  cache:
+    paths: []
+  before_script:
+    - apt-get update
+    - apt-get install --assume-yes lftp
   variables: 
     DEPLOY_REMOTE_BASEDIR: stupshome/stups
   script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set sftp:auto-confirm yes; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/; mput -e build/distributions/*-mac.zip build/libs/*-all.jar; exit"
