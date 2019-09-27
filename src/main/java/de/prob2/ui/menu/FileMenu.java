@@ -20,7 +20,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
 
-import javafx.collections.ListChangeListener;
+import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -77,20 +77,8 @@ public class FileMenu extends Menu {
 
 	@FXML
 	public void initialize() {
-		final ListChangeListener<Path> recentProjectsListener = change -> {
-			final List<MenuItem> newItems = getRecentProjectItems(projectManager.getRecentProjects());
-			this.clearRecentProjects.setDisable(newItems.isEmpty());
-			if (newItems.isEmpty()) {
-				newItems.add(this.recentProjectsPlaceholder);
-			}else {
-				newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
-			}
-			newItems.add(new SeparatorMenuItem());
-			newItems.add(clearRecentProjects);
-			this.recentProjectsMenu.getItems().setAll(newItems);
-		};
-		this.projectManager.getRecentProjects().addListener(recentProjectsListener);
-		recentProjectsListener.onChanged(null);
+		this.projectManager.getRecentProjects().addListener((InvalidationListener)o -> this.recentProjectsMenu.getItems().setAll(getRecentProjectItems()));
+		this.recentProjectsMenu.getItems().setAll(getRecentProjectItems());
 
 		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull().or(bEditorView.savedProperty()));
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
@@ -159,13 +147,21 @@ public class FileMenu extends Menu {
 		currentProject.reloadCurrentMachine();
 	}
 
-	private List<MenuItem> getRecentProjectItems(final List<Path> recentList) {
+	private List<MenuItem> getRecentProjectItems() {
 		final List<MenuItem> newItems = new ArrayList<>();
-		for (final Path path : recentList) {
+		for (final Path path : projectManager.getRecentProjects()) {
 			final MenuItem item = new MenuItem(path.getFileName().toString());
 			item.setOnAction(event -> projectManager.openProject(path));
 			newItems.add(item);
 		}
+		this.clearRecentProjects.setDisable(newItems.isEmpty());
+		if (newItems.isEmpty()) {
+			newItems.add(this.recentProjectsPlaceholder);
+		}else {
+			newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
+		}
+		newItems.add(new SeparatorMenuItem());
+		newItems.add(clearRecentProjects);
 		return newItems;
 	}
 
