@@ -34,7 +34,6 @@ import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -69,12 +68,6 @@ public class ProjectManager {
 		this.recentProjects = FXCollections.observableArrayList();
 		this.maximumRecentProjects = new SimpleIntegerProperty(this, "maximumRecentProjects");
 		
-		this.getRecentProjects().addListener((ListChangeListener<Path>)change -> {
-			if (change.getList().size() > this.getMaximumRecentProjects()) {
-				// Truncate the list of recent files if it is longer than the maximum
-				change.getList().remove(this.getMaximumRecentProjects(), change.getList().size());
-			}
-		});
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
@@ -86,6 +79,7 @@ public class ProjectManager {
 				
 				if (configData.recentProjects != null) {
 					getRecentProjects().setAll(configData.recentProjects);
+					truncateRecentProjects();
 				}
 			}
 			
@@ -111,6 +105,12 @@ public class ProjectManager {
 
 	public void setMaximumRecentProjects(final int maximumRecentProjects) {
 		this.maximumRecentProjectsProperty().set(maximumRecentProjects);
+	}
+
+	public void truncateRecentProjects() {
+		if (getRecentProjects().size() > getMaximumRecentProjects()) {
+			getRecentProjects().remove(getMaximumRecentProjects(), getRecentProjects().size());
+		}
 	}
 
 	private File saveProject(Project project, File location) {
@@ -230,6 +230,7 @@ public class ProjectManager {
 			if (this.getRecentProjects().isEmpty() || !this.getRecentProjects().get(0).equals(path)) {
 				this.getRecentProjects().remove(path);
 				this.getRecentProjects().add(0, path);
+				this.truncateRecentProjects();
 			}
 		});
 	}
