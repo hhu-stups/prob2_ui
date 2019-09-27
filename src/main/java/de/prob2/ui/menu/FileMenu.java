@@ -58,7 +58,6 @@ public class FileMenu extends Menu {
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
-	private final ResourceBundle bundle;
 
 	@Inject
 	private FileMenu(
@@ -68,8 +67,7 @@ public class FileMenu extends Menu {
 		final BEditorView bEditorView,
 		final Injector injector,
 		final StageManager stageManager,
-		final FileChooserManager fileChooserManager,
-		final ResourceBundle bundle
+		final FileChooserManager fileChooserManager
 	) {
 		this.recentProjects = recentProjects;
 		this.currentProject = currentProject;
@@ -78,7 +76,6 @@ public class FileMenu extends Menu {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.bundle = bundle;
 		stageManager.loadFXML(this, "fileMenu.fxml");
 	}
 
