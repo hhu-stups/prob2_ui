@@ -51,7 +51,8 @@ import org.slf4j.LoggerFactory;
 public class ProjectManager {
 	private static final Charset PROJECT_CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
-	private static final String PROJECT_FILE_EXTENSION = "prob2project";
+	public static final String PROJECT_FILE_EXTENSION = "prob2project";
+	public static final String PROJECT_FILE_PATTERN = "*." + PROJECT_FILE_EXTENSION;
 
 	private final Gson gson;
 	private final CurrentProject currentProject;
@@ -177,7 +178,7 @@ public class ProjectManager {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 				fileChooser.setInitialFileName(project.getName() + "." + PROJECT_FILE_EXTENSION);
-				fileChooser.getExtensionFilters().add(new ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*." + PROJECT_FILE_EXTENSION), "*." + PROJECT_FILE_EXTENSION));
+				fileChooser.getExtensionFilters().add(new ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), PROJECT_FILE_PATTERN), PROJECT_FILE_PATTERN));
 				location = fileChooser.showSaveDialog(stageManager.getCurrent());
 				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
 			}

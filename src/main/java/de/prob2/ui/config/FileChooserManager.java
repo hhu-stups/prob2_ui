@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 
 import javafx.stage.FileChooser;
@@ -25,8 +26,6 @@ public class FileChooserManager {
 	public enum Kind {
 		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL
 	}
-
-	private static final String PROJECT_FILE_ENDING = "*.prob2project";
 
 	private final ResourceBundle bundle;
 
@@ -105,8 +104,8 @@ public class FileChooserManager {
 		
 		final List<String> allExts = new ArrayList<>();
 		if (projects) {
-			allExts.add(PROJECT_FILE_ENDING);
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), PROJECT_FILE_ENDING), PROJECT_FILE_ENDING));
+			allExts.add(ProjectManager.PROJECT_FILE_PATTERN);
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), ProjectManager.PROJECT_FILE_PATTERN), ProjectManager.PROJECT_FILE_PATTERN));
 		}
 		
 		if (machines) {
