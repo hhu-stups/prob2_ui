@@ -76,15 +76,15 @@ public final class PreferencesStage extends Stage {
 
 	@Inject
 	private PreferencesStage(
-		final GlobalPreferences globalPreferences,
-		final ProBPreferences globalProBPrefs,
-		final MachineLoader machineLoader,
-		final RecentProjects recentProjects,
 		final StageManager stageManager,
+		final RecentProjects recentProjects,
 		final ResourceBundle bundle,
 		final CurrentProject currentProject,
 		final UIState uiState,
-		final Config config
+		final GlobalPreferences globalPreferences,
+		final ProBPreferences globalProBPrefs,
+		final Config config,
+		final MachineLoader machineLoader
 	) {
 		this.stageManager = stageManager;
 		this.recentProjects = recentProjects;
