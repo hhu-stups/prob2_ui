@@ -28,10 +28,6 @@ public final class RuntimeOptions {
 		this.saveConfig = saveConfig;
 	}
 	
-	public RuntimeOptions() {
-		this(null, null, null, null, true, true);
-	}
-	
 	public String getMachineFile() {
 		return this.machineFile;
 	}
