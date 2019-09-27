@@ -1,11 +1,14 @@
 package de.prob2.ui.project;
 
+import java.nio.file.Path;
+
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.MachinesTab;
 
@@ -15,6 +18,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 
 @FXMLInjected
 @Singleton
@@ -32,15 +36,25 @@ public final class ProjectView extends StackPane {
 	@FXML
 	private MachinesTab machinesTab;
 
+	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final ProjectManager projectManager;
+	private final Provider<NewProjectStage> newProjectStageProvider;
 	private final CurrentProject currentProject;
-	private final FileMenu fileMenu;
 
 	@Inject
-	private ProjectView(final StageManager stageManager, final ProjectManager projectManager, final CurrentProject currentProject, final FileMenu fileMenu) {
+	private ProjectView(
+		final StageManager stageManager,
+		final FileChooserManager fileChooserManager,
+		final ProjectManager projectManager,
+		final Provider<NewProjectStage> newProjectStageProvider,
+		final CurrentProject currentProject
+	) {
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.projectManager = projectManager;
+		this.newProjectStageProvider = newProjectStageProvider;
 		this.currentProject = currentProject;
-		this.fileMenu = fileMenu;
 		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
@@ -67,12 +81,18 @@ public final class ProjectView extends StackPane {
 
 	@FXML
 	private void createNewProject() {
-		fileMenu.createNewProject();
+		final Stage newProjectStage = newProjectStageProvider.get();
+		newProjectStage.showAndWait();
+		newProjectStage.toFront();
 	}
 	
 	@FXML
 	private void openProject() {
-		fileMenu.handleOpen();
+		final Path selected = fileChooserManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
+		if (selected == null) {
+			return;
+		}
+		projectManager.openFile(selected);
 	}
 
 	public void showMachines() {

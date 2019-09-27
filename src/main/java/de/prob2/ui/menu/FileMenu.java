@@ -67,7 +67,7 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	public void initialize() {
+	private void initialize() {
 		this.projectManager.getRecentProjects().addListener((InvalidationListener)o -> this.recentProjectsMenu.getItems().setAll(this.projectManager.getRecentProjectItems()));
 		this.recentProjectsMenu.getItems().setAll(this.projectManager.getRecentProjectItems());
 
@@ -80,14 +80,14 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	public void createNewProject() {
+	private void createNewProject() {
 		final Stage newProjectStage = injector.getInstance(NewProjectStage.class);
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
 	}
 
 	@FXML
-	public void handleOpen() {
+	private void handleOpen() {
 		final Path selected = fileChooserManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
 		if (selected == null) {
 			return;
@@ -106,7 +106,7 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	public void handleViewFormattedCode() {
+	private void handleViewFormattedCode() {
 		final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
 		this.currentTrace.getStateSpace().execute(cmd);
 		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
