@@ -21,9 +21,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
-import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 
-import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -140,8 +138,6 @@ public class FileMenu extends Menu {
 
 	private void openProject(Path path) {
 		injector.getInstance(ProjectManager.class).openProject(path);
-
-		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).resetView());
 	}
 
 	@FXML
