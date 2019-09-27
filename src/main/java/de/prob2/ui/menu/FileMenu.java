@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.google.common.io.Files;
 import com.google.inject.Inject;
@@ -52,6 +51,7 @@ public class FileMenu extends Menu {
 
 
 	private final RecentProjects recentProjects;
+	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final BEditorView bEditorView;
@@ -62,6 +62,7 @@ public class FileMenu extends Menu {
 	@Inject
 	private FileMenu(
 		final RecentProjects recentProjects,
+		final ProjectManager projectManager,
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace,
 		final BEditorView bEditorView,
@@ -70,6 +71,7 @@ public class FileMenu extends Menu {
 		final FileChooserManager fileChooserManager
 	) {
 		this.recentProjects = recentProjects;
+		this.projectManager = projectManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.bEditorView = bEditorView;
@@ -119,9 +121,9 @@ public class FileMenu extends Menu {
 		}
 		final String ext = Files.getFileExtension(selected.getFileName().toString());
 		if ("prob2project".equals(ext)) {
-			this.openProject(selected);
+			projectManager.openProject(selected);
 		} else {
-			injector.getInstance(ProjectManager.class).openAutomaticProjectFromMachine(selected);
+			projectManager.openAutomaticProjectFromMachine(selected);
 		}
 	}
 	
@@ -130,11 +132,7 @@ public class FileMenu extends Menu {
 		if(this.recentProjects.isEmpty()) {
 			return;
 		}
-		this.openProject(Paths.get(this.recentProjects.get(0)));
-	}
-
-	private void openProject(Path path) {
-		injector.getInstance(ProjectManager.class).openProject(path);
+		projectManager.openProject(Paths.get(this.recentProjects.get(0)));
 	}
 
 	@FXML
@@ -149,7 +147,7 @@ public class FileMenu extends Menu {
 
 	@FXML
 	private void saveProject() {
-		injector.getInstance(ProjectManager.class).saveCurrentProject();
+		projectManager.saveCurrentProject();
 	}
 
 	@FXML
@@ -172,7 +170,7 @@ public class FileMenu extends Menu {
 		for (String s : recentListProperty) {
 			Path path = Paths.get(s);
 			final MenuItem item = new MenuItem(path.getFileName().toString());
-			item.setOnAction(event -> this.openProject(path));
+			item.setOnAction(event -> projectManager.openProject(path));
 			newItems.add(item);
 		}
 		return newItems;
