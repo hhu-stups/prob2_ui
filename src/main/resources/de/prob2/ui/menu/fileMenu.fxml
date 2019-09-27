@@ -5,10 +5,6 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <fx:root type="Menu" text="%menu.file" xmlns:fx="http://javafx.com/fxml/1">
-	<fx:define>
-		<MenuItem fx:id="recentProjectsPlaceholder" text="%menu.file.items.placeholder" disable="true" />
-		<MenuItem fx:id="clearRecentProjects" text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects" />
-	</fx:define>
 	<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
 		onAction="#createNewProject" />
 	<MenuItem text="%menu.file.items.open"

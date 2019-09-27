@@ -38,6 +38,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -111,6 +114,32 @@ public class ProjectManager {
 		if (getRecentProjects().size() > getMaximumRecentProjects()) {
 			getRecentProjects().remove(getMaximumRecentProjects(), getRecentProjects().size());
 		}
+	}
+
+	public List<MenuItem> getRecentProjectItems() {
+		final List<MenuItem> newItems = new ArrayList<>();
+		
+		if (this.getRecentProjects().isEmpty()) {
+			final MenuItem placeholderItem = new MenuItem(bundle.getString("menu.file.items.placeholder"));
+			placeholderItem.setDisable(true);
+			newItems.add(placeholderItem);
+		} else {
+			for (final Path path : this.getRecentProjects()) {
+				final MenuItem item = new MenuItem(path.getFileName().toString());
+				item.setOnAction(event -> this.openProject(path));
+				newItems.add(item);
+			}
+			newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
+		}
+		
+		newItems.add(new SeparatorMenuItem());
+		
+		final MenuItem clearRecentItem = new MenuItem(bundle.getString("menu.file.items.openRecentProject.items.clear"));
+		clearRecentItem.setDisable(newItems.isEmpty());
+		clearRecentItem.setOnAction(event -> this.getRecentProjects().clear());
+		newItems.add(clearRecentItem);
+		
+		return newItems;
 	}
 
 	private File saveProject(Project project, File location) {

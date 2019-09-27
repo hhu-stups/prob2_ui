@@ -1,8 +1,6 @@
 package de.prob2.ui.menu;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.common.io.Files;
 import com.google.inject.Inject;
@@ -24,8 +22,6 @@ import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
 @FXMLInjected
@@ -34,10 +30,6 @@ public class FileMenu extends Menu {
 	private MenuItem preferencesItem;
 	@FXML
 	private Menu recentProjectsMenu;
-	@FXML
-	private MenuItem recentProjectsPlaceholder;
-	@FXML
-	private MenuItem clearRecentProjects;
 	@FXML
 	private MenuItem saveMachineItem;
 	@FXML
@@ -77,8 +69,8 @@ public class FileMenu extends Menu {
 
 	@FXML
 	public void initialize() {
-		this.projectManager.getRecentProjects().addListener((InvalidationListener)o -> this.recentProjectsMenu.getItems().setAll(getRecentProjectItems()));
-		this.recentProjectsMenu.getItems().setAll(getRecentProjectItems());
+		this.projectManager.getRecentProjects().addListener((InvalidationListener)o -> this.recentProjectsMenu.getItems().setAll(this.projectManager.getRecentProjectItems()));
+		this.recentProjectsMenu.getItems().setAll(this.projectManager.getRecentProjectItems());
 
 		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull().or(bEditorView.savedProperty()));
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
@@ -110,19 +102,6 @@ public class FileMenu extends Menu {
 	}
 	
 	@FXML
-	private void handleOpenLastProject() {
-		if(this.projectManager.getRecentProjects().isEmpty()) {
-			return;
-		}
-		projectManager.openProject(this.projectManager.getRecentProjects().get(0));
-	}
-
-	@FXML
-	private void handleClearRecentProjects() {
-		this.projectManager.getRecentProjects().clear();
-	}
-
-	@FXML
 	private void saveMachine() {
 		this.bEditorView.handleSave();
 	}
@@ -147,24 +126,6 @@ public class FileMenu extends Menu {
 		currentProject.reloadCurrentMachine();
 	}
 
-	private List<MenuItem> getRecentProjectItems() {
-		final List<MenuItem> newItems = new ArrayList<>();
-		for (final Path path : projectManager.getRecentProjects()) {
-			final MenuItem item = new MenuItem(path.getFileName().toString());
-			item.setOnAction(event -> projectManager.openProject(path));
-			newItems.add(item);
-		}
-		this.clearRecentProjects.setDisable(newItems.isEmpty());
-		if (newItems.isEmpty()) {
-			newItems.add(this.recentProjectsPlaceholder);
-		}else {
-			newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
-		}
-		newItems.add(new SeparatorMenuItem());
-		newItems.add(clearRecentProjects);
-		return newItems;
-	}
-
 	MenuItem getPreferencesItem() {
 		return preferencesItem;
 	}
@@ -174,9 +135,5 @@ public class FileMenu extends Menu {
 		final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
 		preferencesStage.show();
 		preferencesStage.toFront();
-	}
-
-	public Menu getRecentProjectsMenu() {
-		return recentProjectsMenu;
 	}
 }

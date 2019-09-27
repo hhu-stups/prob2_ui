@@ -9,11 +9,10 @@ import de.prob2.ui.menu.FileMenu;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.MachinesTab;
 
-import javafx.collections.ListChangeListener;
+import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.StackPane;
 
@@ -33,11 +32,13 @@ public final class ProjectView extends StackPane {
 	@FXML
 	private MachinesTab machinesTab;
 
+	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;
 	private final FileMenu fileMenu;
 
 	@Inject
-	private ProjectView(final StageManager stageManager, final CurrentProject currentProject, final FileMenu fileMenu) {
+	private ProjectView(final StageManager stageManager, final ProjectManager projectManager, final CurrentProject currentProject, final FileMenu fileMenu) {
+		this.projectManager = projectManager;
 		this.currentProject = currentProject;
 		this.fileMenu = fileMenu;
 		stageManager.loadFXML(this, "project_view.fxml");
@@ -58,12 +59,10 @@ public final class ProjectView extends StackPane {
 			projectTab.projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
 		});
 
-		recentProjectButton.getItems().setAll(fileMenu.getRecentProjectsMenu().getItems());
-		fileMenu.getRecentProjectsMenu().getItems().addListener((ListChangeListener<MenuItem>)(c -> {
-			recentProjectButton.getItems().clear();
-			recentProjectButton.getItems().setAll(fileMenu.getRecentProjectsMenu().getItems());
-		})); 
-		
+		projectManager.getRecentProjects().addListener((InvalidationListener)o ->
+			recentProjectButton.getItems().setAll(projectManager.getRecentProjectItems())
+		);
+		recentProjectButton.getItems().setAll(projectManager.getRecentProjectItems());
 	}
 
 	@FXML
