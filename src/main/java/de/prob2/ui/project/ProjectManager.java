@@ -18,18 +18,24 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import com.google.gson.Gson;
-
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -49,16 +55,62 @@ public class ProjectManager {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
-	private final RecentProjects recentProjects;
+	
+	private final ObservableList<Path> recentProjects;
+	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle,
-			RecentProjects recentProjects) {
+	public ProjectManager(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config) {
 		this.gson = gson;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.recentProjects = recentProjects;
+		
+		this.recentProjects = FXCollections.observableArrayList();
+		this.maximumRecentProjects = new SimpleIntegerProperty(this, "maximumRecentProjects");
+		
+		this.getRecentProjects().addListener((ListChangeListener<Path>)change -> {
+			if (change.getList().size() > this.getMaximumRecentProjects()) {
+				// Truncate the list of recent files if it is longer than the maximum
+				change.getList().remove(this.getMaximumRecentProjects(), change.getList().size());
+			}
+		});
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.maxRecentProjects > 0) {
+					setMaximumRecentProjects(configData.maxRecentProjects);
+				} else {
+					setMaximumRecentProjects(10);
+				}
+				
+				if (configData.recentProjects != null) {
+					getRecentProjects().setAll(configData.recentProjects);
+				}
+			}
+			
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.maxRecentProjects = getMaximumRecentProjects();
+				configData.recentProjects = new ArrayList<>(getRecentProjects());
+			}
+		});
+	}
+
+	public ObservableList<Path> getRecentProjects() {
+		return this.recentProjects;
+	}
+
+	public IntegerProperty maximumRecentProjectsProperty() {
+		return this.maximumRecentProjects;
+	}
+
+	public int getMaximumRecentProjects() {
+		return this.maximumRecentProjectsProperty().get();
+	}
+
+	public void setMaximumRecentProjects(final int maximumRecentProjects) {
+		this.maximumRecentProjectsProperty().set(maximumRecentProjects);
 	}
 
 	private File saveProject(Project project, File location) {
@@ -136,7 +188,7 @@ public class ProjectManager {
 					"project.projectManager.alerts.fileNotFound.content", path);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Platform.runLater(() -> recentProjects.remove(path));
+				Platform.runLater(() -> this.getRecentProjects().remove(path));
 			}
 			return null;
 		} catch (IOException | JsonSyntaxException exc) {
@@ -149,7 +201,7 @@ public class ProjectManager {
 					"project.projectManager.alerts.couldNotOpenFile.content", path);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Platform.runLater(() -> recentProjects.remove(path));
+				Platform.runLater(() -> this.getRecentProjects().remove(path));
 			}
 			return null;
 		}
@@ -175,9 +227,9 @@ public class ProjectManager {
 
 	private void addToRecentProjects(Path path) {
 		Platform.runLater(() -> {
-			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(path)) {
-				this.recentProjects.remove(path);
-				this.recentProjects.add(0, path);
+			if (this.getRecentProjects().isEmpty() || !this.getRecentProjects().get(0).equals(path)) {
+				this.getRecentProjects().remove(path);
+				this.getRecentProjects().add(0, path);
 			}
 		});
 	}

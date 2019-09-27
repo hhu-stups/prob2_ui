@@ -16,11 +16,11 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.RecentProjects;
 import de.prob2.ui.persistence.TabPersistenceHandler;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
+import de.prob2.ui.project.ProjectManager;
 
 import javafx.beans.InvalidationListener;
 import javafx.collections.MapChangeListener;
@@ -65,8 +65,8 @@ public final class PreferencesStage extends Stage {
 	@FXML private TabPane tabPane;
 
 	private final StageManager stageManager;
-	private final RecentProjects recentProjects;
 	private final ResourceBundle bundle;
+	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;
 	private final UIState uiState;
 	private final GlobalPreferences globalPreferences;
@@ -77,8 +77,8 @@ public final class PreferencesStage extends Stage {
 	@Inject
 	private PreferencesStage(
 		final StageManager stageManager,
-		final RecentProjects recentProjects,
 		final ResourceBundle bundle,
+		final ProjectManager projectManager,
 		final CurrentProject currentProject,
 		final UIState uiState,
 		final GlobalPreferences globalPreferences,
@@ -87,8 +87,8 @@ public final class PreferencesStage extends Stage {
 		final MachineLoader machineLoader
 	) {
 		this.stageManager = stageManager;
-		this.recentProjects = recentProjects;
 		this.bundle = bundle;
+		this.projectManager = projectManager;
 		this.currentProject = currentProject;
 		this.uiState = uiState;
 		this.globalPreferences = globalPreferences;
@@ -105,9 +105,9 @@ public final class PreferencesStage extends Stage {
 		final SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 50);
 		
 		// bindBidirectional doesn't work properly here, don't ask why
-		this.recentProjects.maximumProperty().addListener((observable, from, to) -> valueFactory.setValue((Integer)to));
-		valueFactory.valueProperty().addListener((observable, from, to) -> this.recentProjects.setMaximum(to));
-		valueFactory.setValue(this.recentProjects.getMaximum());
+		this.projectManager.maximumRecentProjectsProperty().addListener((observable, from, to) -> valueFactory.setValue((Integer)to));
+		valueFactory.valueProperty().addListener((observable, from, to) -> this.projectManager.setMaximumRecentProjects(to));
+		valueFactory.setValue(this.projectManager.getMaximumRecentProjects());
 
 		this.recentProjectsCountSpinner.setValueFactory(valueFactory);
 

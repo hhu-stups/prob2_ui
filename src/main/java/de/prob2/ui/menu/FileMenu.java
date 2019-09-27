@@ -47,8 +47,6 @@ public class FileMenu extends Menu {
 	@FXML
 	private MenuItem reloadMachineItem;
 
-
-	private final RecentProjects recentProjects;
 	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
@@ -59,7 +57,6 @@ public class FileMenu extends Menu {
 
 	@Inject
 	private FileMenu(
-		final RecentProjects recentProjects,
 		final ProjectManager projectManager,
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace,
@@ -68,7 +65,6 @@ public class FileMenu extends Menu {
 		final StageManager stageManager,
 		final FileChooserManager fileChooserManager
 	) {
-		this.recentProjects = recentProjects;
 		this.projectManager = projectManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -83,7 +79,7 @@ public class FileMenu extends Menu {
 	public void initialize() {
 		final ListChangeListener<Path> recentProjectsListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentProjectsMenu.getItems();
-			final List<MenuItem> newItems = getRecentProjectItems(recentProjects);
+			final List<MenuItem> newItems = getRecentProjectItems(projectManager.getRecentProjects());
 			this.clearRecentProjects.setDisable(newItems.isEmpty());
 			if (newItems.isEmpty()) {
 				newItems.add(this.recentProjectsPlaceholder);
@@ -93,7 +89,7 @@ public class FileMenu extends Menu {
 			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
 			this.recentProjectsMenu.getItems().setAll(newItems);
 		};
-		this.recentProjects.addListener(recentProjectsListener);
+		this.projectManager.getRecentProjects().addListener(recentProjectsListener);
 		recentProjectsListener.onChanged(null);
 
 		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull().or(bEditorView.savedProperty()));
@@ -127,15 +123,15 @@ public class FileMenu extends Menu {
 	
 	@FXML
 	private void handleOpenLastProject() {
-		if(this.recentProjects.isEmpty()) {
+		if(this.projectManager.getRecentProjects().isEmpty()) {
 			return;
 		}
-		projectManager.openProject(this.recentProjects.get(0));
+		projectManager.openProject(this.projectManager.getRecentProjects().get(0));
 	}
 
 	@FXML
 	private void handleClearRecentProjects() {
-		this.recentProjects.clear();
+		this.projectManager.getRecentProjects().clear();
 	}
 
 	@FXML
