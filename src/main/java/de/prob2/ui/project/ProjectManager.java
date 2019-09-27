@@ -136,7 +136,7 @@ public class ProjectManager {
 					"project.projectManager.alerts.fileNotFound.content", path);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Platform.runLater(() -> recentProjects.remove(path.toString()));
+				Platform.runLater(() -> recentProjects.remove(path));
 			}
 			return null;
 		} catch (IOException | JsonSyntaxException exc) {
@@ -149,7 +149,7 @@ public class ProjectManager {
 					"project.projectManager.alerts.couldNotOpenFile.content", path);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Platform.runLater(() -> recentProjects.remove(path.toString()));
+				Platform.runLater(() -> recentProjects.remove(path));
 			}
 			return null;
 		}
@@ -175,10 +175,9 @@ public class ProjectManager {
 
 	private void addToRecentProjects(Path path) {
 		Platform.runLater(() -> {
-			final String absolutePath = path.toString();
-			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(absolutePath)) {
-				this.recentProjects.remove(absolutePath);
-				this.recentProjects.add(0, absolutePath);
+			if (recentProjects.isEmpty() || !recentProjects.get(0).equals(path)) {
+				this.recentProjects.remove(path);
+				this.recentProjects.add(0, path);
 			}
 		});
 	}

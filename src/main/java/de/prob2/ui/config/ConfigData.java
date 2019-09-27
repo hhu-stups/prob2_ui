@@ -17,7 +17,7 @@ import javafx.geometry.BoundingBox;
 public final class ConfigData extends BasicConfigData {
 	public int maxRecentProjects;
 	public int fontSize;
-	public List<String> recentProjects;
+	public List<Path> recentProjects;
 	public List<String> groovyConsoleInstructions;
 	public List<String> bConsoleInstructions;
 	@OnlyDeserialize

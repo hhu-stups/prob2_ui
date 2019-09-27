@@ -1,7 +1,6 @@
 package de.prob2.ui.menu;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,6 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
 
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -83,7 +81,7 @@ public class FileMenu extends Menu {
 
 	@FXML
 	public void initialize() {
-		final ListChangeListener<String> recentProjectsListener = change -> {
+		final ListChangeListener<Path> recentProjectsListener = change -> {
 			final ObservableList<MenuItem> recentItems = this.recentProjectsMenu.getItems();
 			final List<MenuItem> newItems = getRecentProjectItems(recentProjects);
 			this.clearRecentProjects.setDisable(newItems.isEmpty());
@@ -132,7 +130,7 @@ public class FileMenu extends Menu {
 		if(this.recentProjects.isEmpty()) {
 			return;
 		}
-		projectManager.openProject(Paths.get(this.recentProjects.get(0)));
+		projectManager.openProject(this.recentProjects.get(0));
 	}
 
 	@FXML
@@ -165,10 +163,9 @@ public class FileMenu extends Menu {
 		currentProject.reloadCurrentMachine();
 	}
 
-	private List<MenuItem> getRecentProjectItems(SimpleListProperty<String> recentListProperty) {
+	private List<MenuItem> getRecentProjectItems(final List<Path> recentList) {
 		final List<MenuItem> newItems = new ArrayList<>();
-		for (String s : recentListProperty) {
-			Path path = Paths.get(s);
+		for (final Path path : recentList) {
 			final MenuItem item = new MenuItem(path.getFileName().toString());
 			item.setOnAction(event -> projectManager.openProject(path));
 			newItems.add(item);

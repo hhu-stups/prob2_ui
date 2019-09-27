@@ -1,5 +1,6 @@
 package de.prob2.ui.menu;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import com.google.inject.Inject;
@@ -16,13 +17,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 
 @Singleton
-public final class RecentProjects extends SimpleListProperty<String> {
+public final class RecentProjects extends SimpleListProperty<Path> {
 	private final IntegerProperty maximum = new SimpleIntegerProperty(this, "maximum");
 	
 	@Inject
 	private RecentProjects(final Config config) {
 		this.set(FXCollections.observableArrayList());
-		this.addListener((ListChangeListener<? super String>)change -> {
+		this.addListener((ListChangeListener<Path>)change -> {
 			if (change.getList().size() > this.getMaximum()) {
 				// Truncate the list of recent files if it is longer than the maximum
 				change.getList().remove(this.getMaximum(), change.getList().size());
