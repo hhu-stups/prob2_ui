@@ -20,10 +20,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
-import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 
 import javafx.application.Platform;
@@ -129,7 +126,7 @@ public class FileMenu extends Menu {
 		if ("prob2project".equals(ext)) {
 			this.openProject(selected);
 		} else {
-			this.createProjectFromFile(selected);
+			injector.getInstance(ProjectManager.class).openAutomaticProjectFromMachine(selected);
 		}
 	}
 	
@@ -139,18 +136,6 @@ public class FileMenu extends Menu {
 			return;
 		}
 		this.openProject(Paths.get(this.recentProjects.get(0)));
-	}
-
-	private void createProjectFromFile(Path path) {
-		final Path projectLocation = path.getParent();
-		final Path relative = projectLocation.relativize(path);
-		final String fileName = path.getFileName().toString();
-		final String shortName = fileName.substring(0, fileName.lastIndexOf('.'));
-		final String description = String.format(bundle.getString("menu.file.automaticProjectDescription"), path);
-		final Machine machine = new Machine(shortName, "", relative);
-		currentProject.set(new Project(shortName, description, machine, projectLocation), true);
-
-		currentProject.startAnimation(machine, Preference.DEFAULT);
 	}
 
 	private void openProject(Path path) {

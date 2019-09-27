@@ -183,6 +183,18 @@ public class ProjectManager {
 		});
 	}
 
+	public void openAutomaticProjectFromMachine(Path path) {
+		final Path projectLocation = path.getParent();
+		final Path relative = projectLocation.relativize(path);
+		final String fileName = path.getFileName().toString();
+		final String shortName = fileName.substring(0, fileName.lastIndexOf('.'));
+		final String description = String.format(bundle.getString("menu.file.automaticProjectDescription"), path);
+		final Machine machine = new Machine(shortName, "", relative);
+		currentProject.set(new Project(shortName, description, machine, projectLocation), true);
+
+		currentProject.startAnimation(machine, Preference.DEFAULT);
+	}
+
 	private void replaceMissingWithDefaults(Project project) {
 		project.setName((project.getName() == null) ? "" : project.getName());
 		project.setDescription((project.getDescription() == null) ? "" : project.getDescription());

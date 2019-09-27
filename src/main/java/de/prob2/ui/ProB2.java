@@ -154,6 +154,10 @@ public class ProB2 extends Application {
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
 		uiPersistence.open();
 
+		if (runtimeOptions.getMachineFile() != null) {
+			injector.getInstance(ProjectManager.class).openAutomaticProjectFromMachine(Paths.get(runtimeOptions.getMachineFile()));
+		}
+
 		if (runtimeOptions.getProject() != null) {
 			injector.getInstance(ProjectManager.class).openProject(Paths.get(runtimeOptions.getProject()));
 		}
@@ -238,8 +242,9 @@ public class ProB2 extends Application {
 		final Options options = new Options();
 
 		options.addOption(null, "help", false, "Show this help text.");
-		options.addOption(null, "project", true, "Open the specified project on startup.");
-		options.addOption(null, "machine", true, "Load the specified machine from the project on startup. Requires --project.");
+		options.addOption(null, "machine-file", true, "Open and start the specified machine file on startup. Cannot be used together with --project.");
+		options.addOption(null, "project", true, "Open the specified project on startup. Cannot be used together with --machine-file.");
+		options.addOption(null, "machine", true, "Start the specified machine from the project on startup. Requires --project.");
 		options.addOption(null, "preference", true, "Use the specified preference set from the project when loading the machine. Requires --project and --machine.");
 		options.addOption(null, "no-load-config", false, "Do not load the user config file, use the default config instead.");
 		options.addOption(null, "no-save-config", false, "Do not save the user config file.");
@@ -264,6 +269,10 @@ public class ProB2 extends Application {
 			throw die("Positional arguments are not allowed: " + cl.getArgList(), 2);
 		}
 
+		if (cl.hasOption("machine-file") && cl.hasOption("project")) {
+			throw die("Invalid combination of options: --machine-file and --project cannot be used together", 2);
+		}
+
 		if (cl.hasOption("machine") && !cl.hasOption("project")) {
 			throw die("Invalid combination of options: --machine requires --project", 2);
 		}
@@ -273,6 +282,7 @@ public class ProB2 extends Application {
 		}
 
 		final RuntimeOptions runtimeOpts = new RuntimeOptions(
+			cl.getOptionValue("machine-file"),
 			cl.getOptionValue("project"),
 			cl.getOptionValue("machine"),
 			cl.getOptionValue("preference"),

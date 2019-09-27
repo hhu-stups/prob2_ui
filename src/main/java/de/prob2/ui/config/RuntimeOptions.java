@@ -3,15 +3,24 @@ package de.prob2.ui.config;
 import com.google.common.base.MoreObjects;
 
 public final class RuntimeOptions {
+	private final String machineFile;
 	private final String project;
 	private final String machine;
 	private final String preference;
 	private final boolean loadConfig;
 	private final boolean saveConfig;
 	
-	public RuntimeOptions(final String project, final String machine, final String preference, final boolean loadConfig, final boolean saveConfig) {
+	public RuntimeOptions(
+		final String machineFile,
+		final String project,
+		final String machine,
+		final String preference,
+		final boolean loadConfig,
+		final boolean saveConfig
+	) {
 		super();
 		
+		this.machineFile = machineFile;
 		this.project = project;
 		this.machine = machine;
 		this.preference = preference;
@@ -20,7 +29,11 @@ public final class RuntimeOptions {
 	}
 	
 	public RuntimeOptions() {
-		this(null, null, null, true, true);
+		this(null, null, null, null, true, true);
+	}
+	
+	public String getMachineFile() {
+		return this.machineFile;
 	}
 	
 	public String getProject() {
@@ -46,6 +59,7 @@ public final class RuntimeOptions {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
+			.add("machineFile", this.machineFile)
 			.add("project", this.project)
 			.add("machine", this.machine)
 			.add("preference", this.preference)
