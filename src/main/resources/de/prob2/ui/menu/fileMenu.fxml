@@ -5,17 +5,15 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <fx:root type="Menu" text="%menu.file" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<MenuItem fx:id="recentProjectsPlaceholder" text="%menu.file.items.placeholder" disable="true" />
+		<MenuItem fx:id="clearRecentProjects" text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects" />
+	</fx:define>
 	<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
 		onAction="#createNewProject" />
 	<MenuItem text="%menu.file.items.open"
 			accelerator="Shortcut+O" onAction="#handleOpen" />
-	<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject">
-		<MenuItem fx:id="recentProjectsPlaceholder" text="%menu.file.items.placeholder"
-			disable="true" />
-		<SeparatorMenuItem />
-		<MenuItem fx:id="clearRecentProjects"
-			text="%menu.file.items.openRecentProject.items.clear" onAction="#handleClearRecentProjects" />
-	</Menu>
+	<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject"/>
 	<SeparatorMenuItem />
 	<MenuItem fx:id="saveMachineItem" text="%menu.file.items.saveMachine" accelerator="Shortcut+S" onAction="#saveMachine"/>
 	<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"

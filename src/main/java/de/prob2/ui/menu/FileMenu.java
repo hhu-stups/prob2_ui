@@ -21,10 +21,10 @@ import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
 
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
@@ -78,7 +78,6 @@ public class FileMenu extends Menu {
 	@FXML
 	public void initialize() {
 		final ListChangeListener<Path> recentProjectsListener = change -> {
-			final ObservableList<MenuItem> recentItems = this.recentProjectsMenu.getItems();
 			final List<MenuItem> newItems = getRecentProjectItems(projectManager.getRecentProjects());
 			this.clearRecentProjects.setDisable(newItems.isEmpty());
 			if (newItems.isEmpty()) {
@@ -86,7 +85,8 @@ public class FileMenu extends Menu {
 			}else {
 				newItems.get(0).setAccelerator(KeyCombination.valueOf("Shift+Shortcut+'O'"));
 			}
-			newItems.addAll(recentItems.subList(recentItems.size() - 2, recentItems.size()));
+			newItems.add(new SeparatorMenuItem());
+			newItems.add(clearRecentProjects);
 			this.recentProjectsMenu.getItems().setAll(newItems);
 		};
 		this.projectManager.getRecentProjects().addListener(recentProjectsListener);
