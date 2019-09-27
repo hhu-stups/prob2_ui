@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public class ProjectManager {
 	private static final Charset PROJECT_CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
-	private static final String PROJECT_FILE_ENDING = ".prob2project";
+	private static final String PROJECT_FILE_EXTENSION = "prob2project";
 
 	private final Gson gson;
 	private final CurrentProject currentProject;
@@ -158,7 +158,7 @@ public class ProjectManager {
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		String name = project.getName();
-		File location = new File(project.getLocation() + File.separator + project.getName() + PROJECT_FILE_ENDING);
+		File location = new File(project.getLocation() + File.separator + project.getName() + "." + PROJECT_FILE_EXTENSION);
 
 		if (currentProject.isNewProject() && location.exists()) {
 			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
@@ -176,8 +176,8 @@ public class ProjectManager {
 			} else if (result.get().equals(renameBT)) {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-				fileChooser.setInitialFileName(project.getName() + PROJECT_FILE_ENDING);
-				fileChooser.getExtensionFilters().add(new ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*" + PROJECT_FILE_ENDING), "*" + PROJECT_FILE_ENDING));
+				fileChooser.setInitialFileName(project.getName() + "." + PROJECT_FILE_EXTENSION);
+				fileChooser.getExtensionFilters().add(new ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), "*." + PROJECT_FILE_EXTENSION), "*." + PROJECT_FILE_EXTENSION));
 				location = fileChooser.showSaveDialog(stageManager.getCurrent());
 				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
 			}
@@ -240,10 +240,10 @@ public class ProjectManager {
 	public void openProject(Path path) {
 		final Path absPath = path.toAbsolutePath();
 		Project project = loadProject(absPath);
-		if(!absPath.toString().endsWith(PROJECT_FILE_ENDING)) {
+		if(!com.google.common.io.Files.getFileExtension(absPath.getFileName().toString()).equals(PROJECT_FILE_EXTENSION)) {
 			stageManager.makeAlert(AlertType.WARNING,
 					"project.projectManager.alerts.wrongProjectFileExtensionWarning.header",
-					"project.projectManager.alerts.wrongProjectFileExtensionWarning.content", PROJECT_FILE_ENDING, absPath)
+					"project.projectManager.alerts.wrongProjectFileExtensionWarning.content", PROJECT_FILE_EXTENSION, absPath)
 					.showAndWait();
 		}
 		if (project != null) {
