@@ -2,7 +2,6 @@ package de.prob2.ui.menu;
 
 import java.nio.file.Path;
 
-import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -93,12 +92,7 @@ public class FileMenu extends Menu {
 		if (selected == null) {
 			return;
 		}
-		final String ext = Files.getFileExtension(selected.getFileName().toString());
-		if ("prob2project".equals(ext)) {
-			projectManager.openProject(selected);
-		} else {
-			projectManager.openAutomaticProjectFromMachine(selected);
-		}
+		projectManager.openFile(selected);
 	}
 	
 	@FXML

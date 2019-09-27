@@ -276,6 +276,14 @@ public class ProjectManager {
 		currentProject.startAnimation(machine, Preference.DEFAULT);
 	}
 
+	public void openFile(final Path path) {
+		if (com.google.common.io.Files.getFileExtension(path.getFileName().toString()).equals(PROJECT_FILE_EXTENSION)) {
+			this.openProject(path);
+		} else {
+			this.openAutomaticProjectFromMachine(path);
+		}
+	}
+
 	private void replaceMissingWithDefaults(Project project) {
 		project.setName((project.getName() == null) ? "" : project.getName());
 		project.setDescription((project.getDescription() == null) ? "" : project.getDescription());
