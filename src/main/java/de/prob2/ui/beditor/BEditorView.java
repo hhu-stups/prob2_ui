@@ -159,7 +159,7 @@ public class BEditorView extends BorderPane {
 	}
 	
 	private void loadText(Path machinePath) {
-		if(currentProject.getCurrentMachine().getType() == Machine.Type.EVENTB) {
+		if (currentProject.getCurrentMachine().getType() == Machine.Type.EVENTB || currentProject.getCurrentMachine().getType() == Machine.Type.EVENTB_PACKAGE) {
 			final StateSpace stateSpace = currentTrace.getStateSpace();
 			if (stateSpace == null) {
 				setHint();

@@ -15,6 +15,7 @@ import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
+import de.prob.scripting.EventBPackageFactory;
 import de.prob.scripting.ModelFactory;
 import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
@@ -44,7 +45,8 @@ import javafx.collections.ObservableSet;
 public class Machine implements DescriptionView.Describable {
 	public enum Type {
 		B(ClassicalBFactory.class, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}, "common.fileChooser.fileTypes.classicalB"),
-		EVENTB(EventBFactory.class, new String[] {"*.eventb", "*.bum", "*.buc"}, "common.fileChooser.fileTypes.eventB"),
+		EVENTB(EventBFactory.class, new String[] {"*.bum", "*.buc"}, "common.fileChooser.fileTypes.eventB"),
+		EVENTB_PACKAGE(EventBPackageFactory.class, new String[] {"*.eventb"}, "common.fileChooser.fileTypes.eventBPackage"),
 		CSP(CSPFactory.class, new String[] {"*.csp", "*.cspm"}, "common.fileChooser.fileTypes.csp"),
 		TLA(TLAFactory.class, new String[] {"*.tla"}, "common.fileChooser.fileTypes.tla"),
 		BRULES(RulesModelFactory.class, new String[] {"*.rmch"}, "common.fileChooser.fileTypes.bRules"),
@@ -380,6 +382,9 @@ public class Machine implements DescriptionView.Describable {
 		}
 		if (type == null) {
 			this.type = Machine.Type.B;
+		} else if (this.type == Type.EVENTB && this.getLocation().getFileName().toString().endsWith(".eventb")) {
+			// EventB package files previously had the type EVENTB, which is now only used for Rodin projects.
+			this.type = Type.EVENTB_PACKAGE;
 		}
 		if(ltlFormulas == null) {
 			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
