@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
@@ -50,6 +52,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.prompt = new SimpleStringProperty(this, "prompt", prompt);
 		
 		this.requestFollowCaret();
+		initializeContextMenu();
 		setEvents();
 		setDragDrop();
 		this.reset();
@@ -69,6 +72,24 @@ public abstract class Console extends StyleClassedTextArea {
 				this.moveTo(this.getLineNumber(), caretPositionInInput + to.length());
 			}
 		});
+	}
+	
+	private void initializeContextMenu() {
+		final ContextMenu contextMenu = new ContextMenu();
+		
+		final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
+		copyItem.setOnAction(e -> this.copy());
+		contextMenu.getItems().add(copyItem);
+		
+		final MenuItem pasteItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
+		pasteItem.setOnAction(e -> this.paste());
+		contextMenu.getItems().add(pasteItem);
+		
+		final MenuItem clearItem = new MenuItem(bundle.getString("common.contextMenu.clear"));
+		clearItem.setOnAction(e -> this.reset());
+		contextMenu.getItems().add(clearItem);
+		
+		this.setContextMenu(contextMenu);
 	}
 	
 	public void setEvents() {
@@ -148,12 +169,6 @@ public abstract class Console extends StyleClassedTextArea {
 
 		charCounterInLine += diff;
 		currentPosInLine += diff;
-	}
-		
-	@Override
-	public void copy() {
-		super.copy();
-		goToLastPos();
 	}
 					
 	private void mouseClicked() {
