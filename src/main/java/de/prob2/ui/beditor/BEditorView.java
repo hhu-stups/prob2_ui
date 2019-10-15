@@ -23,7 +23,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetAllUsedFilenamesCommand;
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.MachineFileInformation;
 import de.prob.statespace.StateSpace;
@@ -164,7 +164,7 @@ public class BEditorView extends BorderPane {
 			if (stateSpace == null) {
 				setHint();
 			} else {
-				GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+				GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
 				stateSpace.execute(cmd);
 				this.setEditorText(cmd.getPrettyPrint(), machinePath);
 				beditor.setEditable(false);
