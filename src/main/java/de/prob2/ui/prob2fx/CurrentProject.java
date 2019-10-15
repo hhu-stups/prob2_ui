@@ -231,7 +231,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		currentTrace.set(null);
 		update(project);
 		initializeMachines();
-		this.setSaved(!newProject);
+		this.setSaved(true);
 		this.setNewProject(newProject);
 		this.currentMachine.set(null);
 	}
