@@ -23,12 +23,12 @@ import de.prob.scripting.CSPFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
+import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob2.ui.project.ProjectManager;
-import de.prob2.ui.project.machines.Machine;
 
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -65,9 +65,9 @@ public class FileChooserManager {
 	private FileChooserManager(final Config config, final ResourceBundle bundle) {
 		this.bundle = bundle;
 
-		this.machineExtensionPatterns = Machine.EXTENSION_TO_FACTORY_MAP.keySet().stream().map(ext -> "*." + ext).collect(Collectors.toSet());
+		this.machineExtensionPatterns = FactoryProvider.EXTENSION_TO_FACTORY_MAP.keySet().stream().map(ext -> "*." + ext).collect(Collectors.toSet());
 		this.machineExtensionFilters = new ArrayList<>();
-		Machine.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
+		FactoryProvider.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
 			final String name;
 			if (FACTORY_TO_TYPE_KEY_MAP.containsKey(factory)) {
 				name = bundle.getString(FACTORY_TO_TYPE_KEY_MAP.get(factory));

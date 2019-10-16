@@ -1,11 +1,7 @@
 package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import com.google.common.io.Files;
@@ -17,6 +13,7 @@ import de.prob.scripting.CSPFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
+import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
@@ -75,30 +72,6 @@ public class Machine implements DescriptionView.Describable {
 		UNKNOWN, SUCCESSFUL, FAILED
 	}
 	
-	public static final Map<Class<? extends ModelFactory<?>>, List<String>> FACTORY_TO_EXTENSIONS_MAP;
-	static {
-		final Map<Class<? extends ModelFactory<?>>, List<String>> map = new HashMap<>();
-		map.put(ClassicalBFactory.class, Arrays.asList("mch", "ref", "imp", "sys"));
-		map.put(EventBFactory.class, Arrays.asList("bum", "buc"));
-		map.put(EventBPackageFactory.class, Collections.singletonList("eventb"));
-		map.put(CSPFactory.class, Arrays.asList("csp", "cspm"));
-		map.put(TLAFactory.class, Collections.singletonList("tla"));
-		map.put(RulesModelFactory.class, Collections.singletonList("rmch"));
-		map.put(XTLFactory.class, Arrays.asList("P", "pl"));
-		map.put(ZFactory.class, Arrays.asList("zed", "tex"));
-		map.put(AlloyFactory.class, Collections.singletonList("als"));
-		FACTORY_TO_EXTENSIONS_MAP = Collections.unmodifiableMap(map);
-	}
-	
-	public static final Map<String, Class<? extends ModelFactory<?>>> EXTENSION_TO_FACTORY_MAP;
-	static {
-		final Map<String, Class<? extends ModelFactory<?>>> map = new HashMap<>();
-		FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) ->
-			extensions.forEach(extension -> map.put(extension, factory))
-		);
-		EXTENSION_TO_FACTORY_MAP = Collections.unmodifiableMap(map);
-	}
-	
 	private transient ObjectProperty<CheckingStatus> ltlStatus;
 	private transient ObjectProperty<CheckingStatus> symbolicCheckingStatus;
 	private transient ObjectProperty<CheckingStatus> symbolicAnimationStatus;
@@ -133,15 +106,7 @@ public class Machine implements DescriptionView.Describable {
 	
 	public Machine(String name, String description, Path location) {
 		this(name, description, location,
-			modelFactoryClassFromExtension(Files.getFileExtension(location.getFileName().toString())));
-	}
-	
-	public static Class<? extends ModelFactory<?>> modelFactoryClassFromExtension(final String ext) {
-		final Class<? extends ModelFactory<?>> factory = EXTENSION_TO_FACTORY_MAP.get(ext);
-		if (factory == null) {
-			throw new IllegalArgumentException(String.format("Could not determine machine type for extension %s", ext));
-		}
-		return factory;
+			FactoryProvider.factoryClassFromExtension(Files.getFileExtension(location.getFileName().toString())));
 	}
 	
 	public BooleanProperty changedProperty() {
