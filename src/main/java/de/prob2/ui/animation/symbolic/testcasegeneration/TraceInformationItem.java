@@ -18,7 +18,7 @@ public class TraceInformationItem {
 
 	private transient Trace trace;
 
-	public TraceInformationItem(int depth, List<String> transitions, boolean complete, String operation, String guard, Trace trace) {
+	public TraceInformationItem(final int depth, final List<String> transitions, final boolean complete, final String operation, final String guard, final Trace trace) {
 		this.depth = depth;
 		this.transitions = String.join(",\n", transitions);
 		this.complete = complete;

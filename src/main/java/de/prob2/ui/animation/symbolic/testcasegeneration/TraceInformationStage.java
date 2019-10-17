@@ -89,10 +89,12 @@ public final class TraceInformationStage extends Stage {
 
 	public void setTraces(ObservableList<TraceInformationItem> traces) {
 		this.traces.setAll(traces);
+		tvTraces.refresh();
 	}
 	
 	public void setUncoveredOperations(ObservableList<TraceInformationItem> uncoveredOperations) {
 		this.uncoveredOperations.setAll(uncoveredOperations);
+		tvUncovered.refresh();
 	}
 
 	@FXML
