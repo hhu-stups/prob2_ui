@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
@@ -107,7 +107,7 @@ public class FileMenu extends Menu {
 
 	@FXML
 	private void handleViewFormattedCode() {
-		final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+		final GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
 		this.currentTrace.getStateSpace().execute(cmd);
 		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
 		stage.setTitle(currentProject.getCurrentMachine().getName());
