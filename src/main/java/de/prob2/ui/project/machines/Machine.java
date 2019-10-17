@@ -84,7 +84,6 @@ public class Machine implements DescriptionView.Describable {
 	 */
 	@OnlyDeserialize
 	private Machine.Type type;
-	private Class<? extends ModelFactory<?>> modelFactoryClass;
 	private ObjectProperty<Preference> lastUsed;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
@@ -95,18 +94,12 @@ public class Machine implements DescriptionView.Describable {
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed;
 
-	public Machine(String name, String description, Path location, Class<? extends ModelFactory<?>> modelFactoryClass) {
+	public Machine(String name, String description, Path location) {
 		this.name = new SimpleStringProperty(this, "name", name);
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = location;
-		this.modelFactoryClass = modelFactoryClass;
 		this.replaceMissingWithDefaults();
 		this.resetStatus();
-	}
-	
-	public Machine(String name, String description, Path location) {
-		this(name, description, location,
-			FactoryProvider.factoryClassFromExtension(Files.getFileExtension(location.getFileName().toString())));
 	}
 	
 	public BooleanProperty changedProperty() {
@@ -122,7 +115,9 @@ public class Machine implements DescriptionView.Describable {
 	}
 	
 	public Class<? extends ModelFactory<?>> getModelFactoryClass() {
-		return this.modelFactoryClass;
+		return FactoryProvider.factoryClassFromExtension(
+			Files.getFileExtension(this.getLocation().getFileName().toString())
+		);
 	}
 	
 	public ObjectProperty<Preference> lastUsedProperty() {
@@ -356,10 +351,6 @@ public class Machine implements DescriptionView.Describable {
 		if (this.type == Type.EVENTB && this.getLocation().getFileName().toString().endsWith(".eventb")) {
 			// EventB package files previously had the type EVENTB, which is now only used for Rodin projects.
 			this.type = Type.EVENTB_PACKAGE;
-		}
-		if (modelFactoryClass == null) {
-			// Translate type field from old projects to the new modelFactoryClass field.
-			this.modelFactoryClass = type != null ? type.getModelFactoryClass() : ClassicalBFactory.class;
 		}
 		if(ltlFormulas == null) {
 			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
