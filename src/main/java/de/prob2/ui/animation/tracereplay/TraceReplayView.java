@@ -24,7 +24,6 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -209,10 +208,11 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("animation.tracereplay.view.contextMenu.showError"));
-			showErrorItem.setOnAction(event -> stageManager
-					.makeAlert(AlertType.ERROR, "animation.tracereplay.alerts.traceReplayError.header",
-							row.getItem().getErrorMessageBundleKey(), row.getItem().getErrorMessageParams())
-					.showAndWait());
+			showErrorItem.setOnAction(event -> {
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, row.getItem().getErrorMessageBundleKey(), row.getItem().getErrorMessageParams());
+				alert.initOwner(stageManager.getCurrent());
+				alert.show();
+			});
 			showErrorItem.setDisable(true);
 
 			final MenuItem deleteTraceItem = new MenuItem(

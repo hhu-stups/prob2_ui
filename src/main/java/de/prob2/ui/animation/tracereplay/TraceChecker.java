@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.hhu.stups.prob.translator.BValue;
@@ -29,7 +30,6 @@ import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.control.Alert.AlertType;
 
 @FXMLInjected
 @Singleton
@@ -38,13 +38,15 @@ public class TraceChecker {
 	private static final String TRACE_REPLAY_ALERT_HEADER = "animation.tracereplay.alerts.traceReplayError.header";
 
 	private final CurrentTrace currentTrace;
+	private final Injector injector;
 	private final StageManager stageManager;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
 
 	@Inject
-	private TraceChecker(final CurrentTrace currentTrace, final StageManager stageManager) {
+	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
+		this.injector = injector;
 		this.stageManager = stageManager;
 	}
 
@@ -102,10 +104,11 @@ public class TraceChecker {
 				currentTrace.set(trace);
 
 				if (replayTrace.getErrorMessageBundleKey() != null) {
-					Platform.runLater(() -> stageManager.makeAlert(AlertType.ERROR, 
-							TRACE_REPLAY_ALERT_HEADER,
-							replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams())
-							.showAndWait());
+					Platform.runLater(() -> {
+						TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams());
+						alert.initOwner(stageManager.getCurrent());
+						alert.show();
+					});
 				}
 
 			}
