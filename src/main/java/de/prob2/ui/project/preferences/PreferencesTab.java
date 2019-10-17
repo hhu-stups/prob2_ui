@@ -10,6 +10,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -83,8 +84,17 @@ public class PreferencesTab extends Tab {
 		editMenuItem.setOnAction(event -> {
 			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
 			Preference pref = cell.getItem();
+			final String oldName = pref.getName();
 			prefDialog.setPreference(pref);
 			prefDialog.showAndWait().ifPresent(result -> {
+				if (!oldName.equals(pref.getName())) {
+					// If preference was renamed, update lastUsedPreferenceName of machines that use the old name.
+					for (final Machine machine : currentProject.getMachines()) {
+						if (oldName.equals(machine.getLastUsedPreferenceName())) {
+							machine.setLastUsedPreferenceName(pref.getName());
+						}
+					}
+				}
 				preferencesListView.refresh();
 				showPreferenceView(pref);
 			});
