@@ -1,10 +1,7 @@
 package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import com.google.common.io.Files;
@@ -15,11 +12,14 @@ import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
+import de.prob.scripting.EventBPackageFactory;
+import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.internal.OnlyDeserialize;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -42,59 +42,29 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
 public class Machine implements DescriptionView.Describable {
-	public enum Type {
-		B(ClassicalBFactory.class, new String[] {"*.mch", "*.ref", "*.imp", "*.sys"}, "common.fileChooser.fileTypes.classicalB"),
-		EVENTB(EventBFactory.class, new String[] {"*.eventb", "*.bum", "*.buc"}, "common.fileChooser.fileTypes.eventB"),
-		CSP(CSPFactory.class, new String[] {"*.csp", "*.cspm"}, "common.fileChooser.fileTypes.csp"),
-		TLA(TLAFactory.class, new String[] {"*.tla"}, "common.fileChooser.fileTypes.tla"),
-		BRULES(RulesModelFactory.class, new String[] {"*.rmch"}, "common.fileChooser.fileTypes.bRules"),
-		XTL(XTLFactory.class, new String[] {"*.P", "*.pl"}, "common.fileChooser.fileTypes.xtl"),
-		Z(ZFactory.class, new String[] {"*.zed", "*.tex"}, "common.fileChooser.fileTypes.z"),
-		ALLOY(AlloyFactory.class, new String[] {"*.als"}, "common.fileChooser.fileTypes.alloy"),
+	/**
+	 * No longer used, except for backwards compatibility with old project files.
+	 */
+	private enum Type {
+		B(ClassicalBFactory.class),
+		EVENTB(EventBFactory.class),
+		EVENTB_PACKAGE(EventBPackageFactory.class),
+		CSP(CSPFactory.class),
+		TLA(TLAFactory.class),
+		BRULES(RulesModelFactory.class),
+		XTL(XTLFactory.class),
+		Z(ZFactory.class),
+		ALLOY(AlloyFactory.class),
 		;
 		
-		private static final Map<String, Machine.Type> extensionToTypeMap;
-		static {
-			extensionToTypeMap = new HashMap<>();
-			for (final Machine.Type type : Machine.Type.values()) {
-				for (final String ext : type.getExtensions()) {
-					extensionToTypeMap.put(ext, type);
-				}
-			}
-		}
-		
 		private final Class<? extends ModelFactory<?>> modelFactoryClass;
-		private final String[] extensions;
-		private final String fileTypeKey;
 		
-		Type(final Class<? extends ModelFactory<?>> modelFactoryClass, final String[] extensions, final String fileTypeKey) {
+		Type(final Class<? extends ModelFactory<?>> modelFactoryClass) {
 			this.modelFactoryClass = modelFactoryClass;
-			this.extensions = extensions;
-			this.fileTypeKey = fileTypeKey;
-		}
-		
-		public static Map<String, Machine.Type> getExtensionToTypeMap() {
-			return Collections.unmodifiableMap(extensionToTypeMap);
-		}
-		
-		public static Machine.Type fromExtension(final String ext) {
-			final Machine.Type type = getExtensionToTypeMap().get("*." + ext);
-			if (type == null) {
-				throw new IllegalArgumentException(String.format("Could not determine machine type for extension %s", ext));
-			}
-			return type;
 		}
 		
 		public Class<? extends ModelFactory<?>> getModelFactoryClass() {
 			return this.modelFactoryClass;
-		}
-		
-		public String[] getExtensions() {
-			return this.extensions.clone();
-		}
-		
-		public String getFileTypeKey() {
-			return this.fileTypeKey;
 		}
 	}
 	
@@ -109,7 +79,12 @@ public class Machine implements DescriptionView.Describable {
 	private StringProperty name;
 	private StringProperty description;
 	private Path location;
+	/**
+	 * No longer used, except for backwards compatibility with old projects.
+	 */
+	@OnlyDeserialize
 	private Machine.Type type;
+	private Class<? extends ModelFactory<?>> modelFactoryClass;
 	private ObjectProperty<Preference> lastUsed;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
@@ -120,18 +95,18 @@ public class Machine implements DescriptionView.Describable {
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed;
 
-	public Machine(String name, String description, Path location, Machine.Type type) {
+	public Machine(String name, String description, Path location, Class<? extends ModelFactory<?>> modelFactoryClass) {
 		this.name = new SimpleStringProperty(this, "name", name);
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = location;
-		this.type = type;
+		this.modelFactoryClass = modelFactoryClass;
 		this.replaceMissingWithDefaults();
 		this.resetStatus();
 	}
 	
 	public Machine(String name, String description, Path location) {
 		this(name, description, location,
-			Machine.Type.fromExtension(Files.getFileExtension(location.getFileName().toString())));
+			FactoryProvider.factoryClassFromExtension(Files.getFileExtension(location.getFileName().toString())));
 	}
 	
 	public BooleanProperty changedProperty() {
@@ -146,8 +121,8 @@ public class Machine implements DescriptionView.Describable {
 		this.changedProperty().set(changed);
 	}
 	
-	public Machine.Type getType() {
-		return this.type;
+	public Class<? extends ModelFactory<?>> getModelFactoryClass() {
+		return this.modelFactoryClass;
 	}
 	
 	public ObjectProperty<Preference> lastUsedProperty() {
@@ -378,8 +353,13 @@ public class Machine implements DescriptionView.Describable {
 		if (modelcheckingStatus == null) {
 			this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);
 		}
-		if (type == null) {
-			this.type = Machine.Type.B;
+		if (this.type == Type.EVENTB && this.getLocation().getFileName().toString().endsWith(".eventb")) {
+			// EventB package files previously had the type EVENTB, which is now only used for Rodin projects.
+			this.type = Type.EVENTB_PACKAGE;
+		}
+		if (modelFactoryClass == null) {
+			// Translate type field from old projects to the new modelFactoryClass field.
+			this.modelFactoryClass = type != null ? type.getModelFactoryClass() : ClassicalBFactory.class;
 		}
 		if(ltlFormulas == null) {
 			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());

@@ -23,9 +23,11 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetAllUsedFilenamesCommand;
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.MachineFileInformation;
+import de.prob.scripting.EventBFactory;
+import de.prob.scripting.EventBPackageFactory;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
@@ -34,7 +36,6 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -159,12 +160,12 @@ public class BEditorView extends BorderPane {
 	}
 	
 	private void loadText(Path machinePath) {
-		if(currentProject.getCurrentMachine().getType() == Machine.Type.EVENTB) {
+		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
 			final StateSpace stateSpace = currentTrace.getStateSpace();
 			if (stateSpace == null) {
 				setHint();
 			} else {
-				GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+				GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
 				stateSpace.execute(cmd);
 				this.setEditorText(cmd.getPrettyPrint(), machinePath);
 				beditor.setEditable(false);

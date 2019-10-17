@@ -13,7 +13,6 @@ import com.google.inject.Singleton;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ClassicalBFactory;
-import de.prob.scripting.EventBFactory;
 import de.prob.scripting.ExtractedModel;
 import de.prob.scripting.ModelFactory;
 import de.prob.scripting.ModelTranslationError;
@@ -145,21 +144,13 @@ public class MachineLoader {
 
 				final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 				allPrefs.putAll(prefs);
-				final ModelFactory<?> modelFactory = injector.getInstance(machine.getType().getModelFactoryClass());
-				final StateSpace stateSpace;
-				// FIXME Workaround for loading .eventb files.
-				// .eventb files currently have to be loaded using EventBFactory.loadModelFromEventBFile, because the usual factory.extract(...).load(...) sequence only works with Rodin projects (.bum/.buc).
-				// In the future, EventBFactory should probably be updated to support .eventb files with .extract(...).load(...), to make this special case unnecessary.
-				if (modelFactory instanceof EventBFactory && path.toString().endsWith(".eventb")) {
-					stateSpace = ((EventBFactory)modelFactory).loadModelFromEventBFile(path.toString(), allPrefs);
-				} else {
-					final ExtractedModel<?> extract = modelFactory.extract(path.toString());
-					if (Thread.currentThread().isInterrupted()) {
-						return;
-					}
-					setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
-					stateSpace = extract.load(allPrefs);
+				final ModelFactory<?> modelFactory = injector.getInstance(machine.getModelFactoryClass());
+				final ExtractedModel<?> extract = modelFactory.extract(path.toString());
+				if (Thread.currentThread().isInterrupted()) {
+					return;
 				}
+				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
+				final StateSpace stateSpace = extract.load(allPrefs);
 				if (Thread.currentThread().isInterrupted()) {
 					stateSpace.kill();
 					return;
