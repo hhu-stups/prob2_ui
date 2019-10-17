@@ -5,9 +5,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
+
 <fx:root type="ViewCodeStage" minWidth="240" minHeight="160" width="640" height="480" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
@@ -24,6 +26,7 @@
 							<Insets top="10.0" left="15.0" right="15.0"/>
 						</padding>
 						<Spacer/>
+						<CheckBox fx:id="cbUnicode" text="%common.checkbox.unicode" alignment="CENTER_RIGHT" HBox.hgrow="NEVER"/>
 						<Button fx:id="saveAsButton" text="%common.buttons.saveAs" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs"/>
 					</HBox>
 				</bottom>

@@ -12,13 +12,16 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -30,19 +33,29 @@ import org.slf4j.LoggerFactory;
 public final class ViewCodeStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ViewCodeStage.class);
 	
-	@FXML private TextArea codeTextArea;
-	@FXML private Button saveAsButton;
+	@FXML 
+	private TextArea codeTextArea;
+	
+	@FXML
+	private CheckBox cbUnicode;
+	
+	@FXML 
+	private Button saveAsButton;
 	
 	private final StageManager stageManager;
+	
+	private final CurrentTrace currentTrace;
+	
 	private final ResourceBundle bundle;
 	
 	private final StringProperty code;
 	
 	@Inject
-	private ViewCodeStage(final StageManager stageManager, final ResourceBundle bundle) {
+	private ViewCodeStage(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		super();
 		
 		this.stageManager = stageManager;
+		this.currentTrace = currentTrace;
 		this.bundle = bundle;
 		
 		this.code = new SimpleStringProperty(this, "code", null);
@@ -53,6 +66,7 @@ public final class ViewCodeStage extends Stage {
 	@FXML
 	private void initialize() {
 		this.codeTextArea.textProperty().bind(this.codeProperty());
+		this.cbUnicode.selectedProperty().addListener((observable, from, to) -> setCode());
 	}
 	
 	public StringProperty codeProperty() {
@@ -63,8 +77,16 @@ public final class ViewCodeStage extends Stage {
 		return this.codeProperty().get();
 	}
 	
-	public void setCode(final String code) {
-		this.codeProperty().set(code);
+	public void setCode() {
+		if(cbUnicode.isSelected()) {
+			final GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
+			this.currentTrace.getStateSpace().execute(cmd);
+			this.codeProperty().set(cmd.getPrettyPrint());
+		} else {
+			final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+			this.currentTrace.getStateSpace().execute(cmd);
+			this.codeProperty().set(cmd.getPrettyPrint());
+		}
 	}
 	
 	@FXML

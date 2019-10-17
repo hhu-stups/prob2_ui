@@ -122,11 +122,9 @@ public class MachinesTab extends Tab {
 		
 		@FXML
 		private void handleShowInternal() {
-			final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
-			currentTrace.getStateSpace().execute(cmd);
 			final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
 			stage.setTitle(currentProject.getCurrentMachine().getName());
-			stage.setCode(cmd.getPrettyPrint());
+			stage.setCode();
 			stage.show();
 		}
 		

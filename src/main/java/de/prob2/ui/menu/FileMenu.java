@@ -107,11 +107,9 @@ public class FileMenu extends Menu {
 
 	@FXML
 	private void handleViewFormattedCode() {
-		final GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
-		this.currentTrace.getStateSpace().execute(cmd);
 		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
 		stage.setTitle(currentProject.getCurrentMachine().getName());
-		stage.setCode(cmd.getPrettyPrint());
+		stage.setCode();
 		stage.show();
 	}
 

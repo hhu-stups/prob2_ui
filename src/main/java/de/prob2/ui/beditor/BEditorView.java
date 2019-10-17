@@ -23,6 +23,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetAllUsedFilenamesCommand;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.MachineFileInformation;
@@ -49,6 +50,7 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -62,12 +64,26 @@ public class BEditorView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorView.class);
 	private static final Charset EDITOR_CHARSET = StandardCharsets.UTF_8;
 
-	@FXML private Button saveButton;
-	@FXML private Button openExternalButton;
-	@FXML private Label warningLabel;
-	@FXML private BEditor beditor;
-	@FXML private HelpButton helpButton;
-	@FXML private ChoiceBox<MachineFileInformation> machineChoice;
+	@FXML 
+	private Button saveButton;
+	
+	@FXML 
+	private Button openExternalButton;
+	
+	@FXML 
+	private Label warningLabel;
+	
+	@FXML 
+	private BEditor beditor;
+	
+	@FXML 
+	private HelpButton helpButton;
+	
+	@FXML 
+	private ChoiceBox<MachineFileInformation> machineChoice;
+	
+	@FXML 
+	private CheckBox cbUnicode;
 
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -147,6 +163,8 @@ public class BEditorView extends BorderPane {
 			switchMachine(to.getPath());
 		});
 		
+		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
+		
 		this.stopActions.add(beditor::stopHighlighting);
 		helpButton.setHelpContent(this.getClass());
 	}
@@ -162,17 +180,32 @@ public class BEditorView extends BorderPane {
 	private void loadText(Path machinePath) {
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
 			final StateSpace stateSpace = currentTrace.getStateSpace();
+			cbUnicode.setVisible(true);
 			if (stateSpace == null) {
 				setHint();
 			} else {
-				GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
-				stateSpace.execute(cmd);
-				this.setEditorText(cmd.getPrettyPrint(), machinePath);
-				beditor.setEditable(false);
+				showInternalRepresentation(stateSpace, machinePath);
 			}
 		} else {
+			cbUnicode.setVisible(false);
 			setText(machinePath);
 		}
+	}
+	
+	private void showInternalRepresentation(StateSpace stateSpace, Path machinePath) {
+		if(stateSpace == null) {
+			return;
+		}
+		if(cbUnicode.isSelected()) {
+			GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
+			stateSpace.execute(cmd);
+			this.setEditorText(cmd.getPrettyPrint(), machinePath);
+		} else {
+			GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+			stateSpace.execute(cmd);
+			this.setEditorText(cmd.getPrettyPrint(), machinePath);
+		}
+		beditor.setEditable(false);
 	}
 	
 	private MachineFileInformation currentMachineFileInformation() {
