@@ -10,6 +10,7 @@ import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.internal.OnlyDeserialize;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -43,7 +44,12 @@ public class Machine implements DescriptionView.Describable {
 	private StringProperty name;
 	private StringProperty description;
 	private Path location;
+	/**
+	 * No longer used, except for backwards compatibility with old projects. Replaced by {@link #lastUsedPreferenceName}.
+	 */
+	@OnlyDeserialize
 	private ObjectProperty<Preference> lastUsed;
+	private StringProperty lastUsedPreferenceName;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
@@ -79,16 +85,16 @@ public class Machine implements DescriptionView.Describable {
 		);
 	}
 	
-	public ObjectProperty<Preference> lastUsedProperty() {
-		return this.lastUsed;
+	public StringProperty lastUsedPreferenceNameProperty() {
+		return this.lastUsedPreferenceName;
 	}
 	
-	public Preference getLastUsed() {
-		return this.lastUsedProperty().get();
+	public String getLastUsedPreferenceName() {
+		return this.lastUsedPreferenceNameProperty().get();
 	}
 	
-	public void setLastUsed(final Preference lastUsed) {
-		this.lastUsedProperty().set(lastUsed);
+	public void setLastUsedPreferenceName(final String lastUsedPreferenceName) {
+		this.lastUsedPreferenceNameProperty().set(lastUsedPreferenceName);
 	}
 	
 	public void resetStatus() {
@@ -325,8 +331,9 @@ public class Machine implements DescriptionView.Describable {
 		if(modelcheckingItems == null) {
 			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 		}
-		if(lastUsed == null){
-			lastUsed = new SimpleObjectProperty<>(this, "lastUsed", Preference.DEFAULT);
+		if (lastUsedPreferenceName == null) {
+			final Preference pref = this.lastUsed == null || this.lastUsed.get() == null ? Preference.DEFAULT : this.lastUsed.get();
+			lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", pref.getName());
 		}
 		this.changed = new SimpleBooleanProperty(false);
 		this.nameProperty().addListener(o -> this.setChanged(true));
