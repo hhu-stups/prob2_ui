@@ -37,7 +37,7 @@
 			</Button>
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 			<Label fx:id="warningLabel" styleClass="warning" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
-			<CheckBox fx:id="cbUnicode" text="%common.checkbox.unicode" alignment="CENTER_RIGHT" HBox.hgrow="NEVER"/>
+			<CheckBox fx:id="cbUnicode" text="%common.checkbox.unicode" visible="false" alignment="CENTER_RIGHT" HBox.hgrow="NEVER"/>
 			<ChoiceBox fx:id="machineChoice" prefWidth="100.0">
 				<HBox.margin>
 					<Insets topRightBottomLeft="5.0"/>
