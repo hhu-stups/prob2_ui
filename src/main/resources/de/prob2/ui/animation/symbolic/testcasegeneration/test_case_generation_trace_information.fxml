@@ -21,7 +21,6 @@
 						<columns>
 							<TableColumn fx:id="depth" editable="false" prefWidth="20.0" text="%animation.symbolic.traceInformation.column.depth" />
 							<TableColumn fx:id="transitions" editable="false" prefWidth="200.0" text="%animation.symbolic.traceInformation.column.transitions" />
-							<TableColumn fx:id="isComplete" editable="false" prefWidth="20.0" text="%animation.symbolic.traceInformation.column.isComplete" />
 							<TableColumn fx:id="operation" editable="false" prefWidth="20.0" text="%animation.symbolic.traceInformation.column.operation" />
 							<TableColumn fx:id="guard" editable="false" prefWidth="20.0" text="%animation.symbolic.traceInformation.column.guard" />
 						</columns>

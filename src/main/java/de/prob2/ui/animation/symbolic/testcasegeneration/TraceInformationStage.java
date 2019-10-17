@@ -58,9 +58,6 @@ public final class TraceInformationStage extends Stage {
 	private TableColumn<TraceInformationItem, String> transitions;
 
 	@FXML
-	private TableColumn<TraceInformationItem, Boolean> isComplete;
-
-	@FXML
 	private TableColumn<TraceInformationItem, String> operation;
 	
 	@FXML
@@ -102,7 +99,6 @@ public final class TraceInformationStage extends Stage {
 		tvTraces.setRowFactory(item -> new TraceInformationRow());
 		depth.setCellValueFactory(new PropertyValueFactory<>("depth"));
 		transitions.setCellValueFactory(new PropertyValueFactory<>("transitions"));
-		isComplete.setCellValueFactory(new PropertyValueFactory<>("complete"));
 		operation.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		guard.setCellFactory(WrappedTextTableCell<TraceInformationItem>::new);
 		guard.setCellValueFactory(new PropertyValueFactory<>("guard"));

@@ -10,18 +10,15 @@ public class TraceInformationItem {
 
 	private String transitions;
 
-	private boolean complete;
-
 	private String operation;
 	
 	private String guard;
 
 	private transient Trace trace;
 
-	public TraceInformationItem(final int depth, final List<String> transitions, final boolean complete, final String operation, final String guard, final Trace trace) {
+	public TraceInformationItem(final int depth, final List<String> transitions, final String operation, final String guard, final Trace trace) {
 		this.depth = depth;
 		this.transitions = String.join(",\n", transitions);
-		this.complete = complete;
 		this.operation = operation;
 		this.guard = guard;
 		this.trace = trace;
@@ -34,11 +31,7 @@ public class TraceInformationItem {
 	public String getTransitions() {
 		return transitions;
 	}
-
-	public boolean isComplete() {
-		return complete;
-	}
-
+	
 	public String getOperation() {
 		return operation;
 	}
