@@ -7,19 +7,9 @@ import java.util.Objects;
 import com.google.common.io.Files;
 
 import de.prob.ltl.parser.pattern.PatternManager;
-import de.prob.model.brules.RulesModelFactory;
-import de.prob.scripting.AlloyFactory;
-import de.prob.scripting.CSPFactory;
-import de.prob.scripting.ClassicalBFactory;
-import de.prob.scripting.EventBFactory;
-import de.prob.scripting.EventBPackageFactory;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
-import de.prob.scripting.TLAFactory;
-import de.prob.scripting.XTLFactory;
-import de.prob.scripting.ZFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
-import de.prob2.ui.internal.OnlyDeserialize;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -42,32 +32,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
 public class Machine implements DescriptionView.Describable {
-	/**
-	 * No longer used, except for backwards compatibility with old project files.
-	 */
-	private enum Type {
-		B(ClassicalBFactory.class),
-		EVENTB(EventBFactory.class),
-		EVENTB_PACKAGE(EventBPackageFactory.class),
-		CSP(CSPFactory.class),
-		TLA(TLAFactory.class),
-		BRULES(RulesModelFactory.class),
-		XTL(XTLFactory.class),
-		Z(ZFactory.class),
-		ALLOY(AlloyFactory.class),
-		;
-		
-		private final Class<? extends ModelFactory<?>> modelFactoryClass;
-		
-		Type(final Class<? extends ModelFactory<?>> modelFactoryClass) {
-			this.modelFactoryClass = modelFactoryClass;
-		}
-		
-		public Class<? extends ModelFactory<?>> getModelFactoryClass() {
-			return this.modelFactoryClass;
-		}
-	}
-	
 	public enum CheckingStatus {
 		UNKNOWN, SUCCESSFUL, FAILED
 	}
@@ -79,11 +43,6 @@ public class Machine implements DescriptionView.Describable {
 	private StringProperty name;
 	private StringProperty description;
 	private Path location;
-	/**
-	 * No longer used, except for backwards compatibility with old projects.
-	 */
-	@OnlyDeserialize
-	private Machine.Type type;
 	private ObjectProperty<Preference> lastUsed;
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
@@ -347,10 +306,6 @@ public class Machine implements DescriptionView.Describable {
 		}
 		if (modelcheckingStatus == null) {
 			this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);
-		}
-		if (this.type == Type.EVENTB && this.getLocation().getFileName().toString().endsWith(".eventb")) {
-			// EventB package files previously had the type EVENTB, which is now only used for Rodin projects.
-			this.type = Type.EVENTB_PACKAGE;
 		}
 		if(ltlFormulas == null) {
 			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
