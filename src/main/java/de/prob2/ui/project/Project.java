@@ -3,6 +3,7 @@ package de.prob2.ui.project;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import de.prob2.ui.project.machines.Machine;
@@ -78,12 +79,15 @@ public class Project {
 	}
 	
 	public Preference getPreference(final String name) {
+		if (Preference.DEFAULT.getName().equals(name)) {
+			return Preference.DEFAULT;
+		}
 		for (final Preference pref : this.getPreferences()) {
 			if (pref.getName().equals(name)) {
 				return pref;
 			}
 		}
-		return null;
+		throw new NoSuchElementException("Could not find preference with name " + name);
 	}
 	
 	public Path getLocation() {
