@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -147,7 +146,7 @@ public class MachinesTab extends Tab {
 			defItem.textProperty().bind(Preference.DEFAULT.nameProperty());
 			defItem.setOnAction(e -> {
 				currentProject.startAnimation(this.machineProperty.get(), Preference.DEFAULT);
-				this.machineProperty.get().setLastUsed(Preference.DEFAULT);
+				this.machineProperty.get().setLastUsedPreferenceName(Preference.DEFAULT.getName());
 			});
 			startAnimationMenu.getItems().add(defItem);
 			
@@ -158,7 +157,7 @@ public class MachinesTab extends Tab {
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(e -> {
 					currentProject.startAnimation(this.machineProperty.get(), preference);
-					this.machineProperty.get().setLastUsed(preference);
+					this.machineProperty.get().setLastUsedPreferenceName(preference.getName());
 				});
 				startAnimationMenu.getItems().add(menuItem);
 			}
@@ -180,7 +179,7 @@ public class MachinesTab extends Tab {
 				this.refresh();
 				this.nameLabel.textProperty().bind(Bindings.format(
 					"%s : %s",
-					Bindings.selectString(machineProperty.get().lastUsedProperty(), "name"),
+					machineProperty.get().lastUsedPreferenceNameProperty(),
 					machineProperty.get().nameProperty()
 				));
 				this.statusIcon.setVisible(true);
@@ -333,7 +332,7 @@ public class MachinesTab extends Tab {
 	
 	private void startMachine(final Machine machine) {
 		if (machine != null) {
-			currentProject.startAnimation(machine, machine.getLastUsed());
+			currentProject.startAnimation(machine, currentProject.get().getPreference(machine.getLastUsedPreferenceName()));
 		}
 	}
 }

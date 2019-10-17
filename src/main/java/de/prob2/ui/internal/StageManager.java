@@ -201,14 +201,14 @@ public final class StageManager {
 				final Region region = (Region)to;
 				stage.minWidthProperty().bind(
 					Bindings.createDoubleBinding(
-						() -> region.minWidth(-1),
+						() -> region.minWidth(Region.USE_COMPUTED_SIZE),
 						region.minWidthProperty(),
 						region.widthProperty()
 					).add(this.stageSceneWidthDifference)
 				);
 				stage.minHeightProperty().bind(
 					Bindings.createDoubleBinding(
-						() -> region.minHeight(-1),
+						() -> region.minHeight(Region.USE_COMPUTED_SIZE),
 						region.minHeightProperty(),
 						region.heightProperty()
 					).add(this.stageSceneHeightDifference)

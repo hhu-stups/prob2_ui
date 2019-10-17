@@ -180,6 +180,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void removePreference(Preference preference) {
+		// If this is the last used preference for any machines, reset their last used preference to the default.
+		this.getMachines().stream()
+			.filter(machine -> preference.getName().equals(machine.getLastUsedPreferenceName()))
+			.forEach(machine -> machine.setLastUsedPreferenceName(Preference.DEFAULT.getName()));
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
 		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
