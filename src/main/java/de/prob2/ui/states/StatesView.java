@@ -377,7 +377,7 @@ public final class StatesView extends StackPane {
 	}
 
 	@FXML
-	private void handleSearchButton() {
+	private void handleSearch() {
 		filter = filterState.getText();
 		this.updateRoot(currentTrace.get(), currentTrace.get(), true);
 	}
