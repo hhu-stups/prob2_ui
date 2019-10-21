@@ -454,6 +454,9 @@ public final class StatesView extends StackPane {
 	}
 
 	private void updateRoot(final Trace from, final Trace to, final boolean filterChanged) {
+		if(to == null) {
+			return;
+		}
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
 		Platform.runLater(() -> {
