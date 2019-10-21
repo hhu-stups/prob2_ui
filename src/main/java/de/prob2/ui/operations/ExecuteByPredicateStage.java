@@ -31,11 +31,23 @@ import org.slf4j.LoggerFactory;
 public final class ExecuteByPredicateStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExecuteByPredicateStage.class);
 	
-	@FXML private Label operationLabel;
-	@FXML private Label paramsLabel;
-	@FXML private PredicateBuilderView predicateBuilderView;
-	@FXML private TextField predicateTextField;
-	@FXML private Button executeButton;
+	@FXML 
+	private Label operationLabel;
+	
+	@FXML 
+	private Label paramsLabel;
+	
+	@FXML 
+	private PredicateBuilderView predicateBuilderView;
+	
+	@FXML 
+	private TextField predicateTextField;
+	
+	@FXML 
+	private Button executeButton;
+	
+	@FXML
+	private Label warningLabel;
 	
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -101,7 +113,7 @@ public final class ExecuteByPredicateStage extends Stage {
 			);
 		} catch (IllegalArgumentException | ProBError e) {
 			LOGGER.info("Execute by predicate failed", e);
-			stageManager.makeExceptionAlert(e, "operations.executeByPredicate.alerts.failedToExecuteOperation.content").show();
+			warningLabel.setText(String.format(bundle.getString("operations.executeByPredicate.alerts.failedToExecuteOperation.content")));
 			return;
 		}
 		assert transitions.size() == 1;

@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
+<fx:root type="Stage" width="600" height="800" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
 	<scene>
 		<Scene>
 			<StackPane>
@@ -18,8 +18,9 @@
 					</padding>
 					<Label fx:id="operationLabel"/>
 					<Label fx:id="paramsLabel" text="%operations.executeByPredicate.parameters"/>
-					<PredicateBuilderView fx:id="predicateBuilderView"/>
+					<PredicateBuilderView fx:id="predicateBuilderView" VBox.vgrow="always"/>
 					<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute"/>
+					<Label fx:id="warningLabel" styleClass="warning"/>
 				</VBox>
 			</StackPane>
 		</Scene>
