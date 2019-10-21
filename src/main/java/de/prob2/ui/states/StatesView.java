@@ -174,6 +174,7 @@ public final class StatesView extends StackPane {
 				}
 			}
 			btComputeUnsatCore.setVisible(showUnsatCoreButton);
+			btComputeUnsatCore.setManaged(showUnsatCoreButton);
 		});
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
@@ -545,6 +546,7 @@ public final class StatesView extends StackPane {
 	private void computeUnsatCore() {
 		unsatCoreCalculator.calculate();
 		btComputeUnsatCore.setVisible(false);
+		btComputeUnsatCore.setManaged(false);
 		tv.refresh();
 	}
 

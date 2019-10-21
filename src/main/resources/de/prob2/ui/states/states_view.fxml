@@ -25,7 +25,7 @@
 			<TextField fx:id="filterState" onAction="#handleSearchButton" promptText="%states.statesView.search.prompt" HBox.hgrow="ALWAYS" />
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 		</HBox>
-		<Button fx:id="btComputeUnsatCore" styleClass="button-blue" onAction="#computeUnsatCore" visible="false" text="%states.statesView.computeUnsatCore"/>
+		<Button fx:id="btComputeUnsatCore" styleClass="button-blue" onAction="#computeUnsatCore" visible="false" managed="false" text="%states.statesView.computeUnsatCore"/>
 		<TreeTableView fx:id="tv" VBox.vgrow="ALWAYS" showRoot="false">
 			<columns>
 				<TreeTableColumn fx:id="tvName" id="name" editable="false" minWidth="80.0" prefWidth="160" sortable="false" text="%states.statesView.columns.name" />
