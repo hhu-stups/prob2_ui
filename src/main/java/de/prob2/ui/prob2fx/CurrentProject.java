@@ -232,16 +232,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
-	@Override
-	public void set(Project project) {
-		if (!saved.get() && !confirmReplacingProject()) {
-			return;
-		}
-		currentTrace.set(null);
-		update(project);
-		initializeMachines();
-	}
-	
 	public void set(Project project, boolean newProject) {
 		if (!saved.get() && !confirmReplacingProject()) {
 			return;
@@ -255,11 +245,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void update(Project project) {
-		super.set(project);
+		this.set(project);
 	}
 
 	public void remove() {
-		super.set(null);
+		this.set(null);
 	}
 
 	public ReadOnlyBooleanProperty existsProperty() {
