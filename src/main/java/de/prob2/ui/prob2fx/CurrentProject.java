@@ -172,7 +172,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
-		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
 	}
 
 	public void removeMachine(Machine machine) {
@@ -184,13 +184,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			this.currentPreference.set(null);
 			this.currentTrace.set(null);
 		}
-		this.update(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
 	}
 
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
 	}
 
 	public void removePreference(Preference preference) {
@@ -200,7 +200,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			.forEach(machine -> machine.setLastUsedPreferenceName(Preference.DEFAULT.getName()));
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
-		this.update(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
 	}
 
 	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
@@ -225,11 +225,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void changeName(String newName) {
 		this.setNewProject(true);
-		this.update(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(), this.getLocation()));
+		this.set(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
 	public void changeDescription(String newDescription) {
-		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getLocation()));
+		this.set(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
 	public void switchTo(Project project, boolean newProject) {
@@ -237,19 +237,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			return;
 		}
 		currentTrace.set(null);
-		update(project);
+		this.set(project);
 		initializeMachines();
 		this.setSaved(true);
 		this.setNewProject(newProject);
 		this.currentMachine.set(null);
-	}
-
-	public void update(Project project) {
-		this.set(project);
-	}
-
-	public void remove() {
-		this.set(null);
 	}
 
 	public ReadOnlyBooleanProperty existsProperty() {

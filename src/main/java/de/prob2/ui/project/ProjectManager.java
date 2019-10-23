@@ -185,7 +185,7 @@ public class ProjectManager {
 			}
 		}
 
-		currentProject.update(new Project(name, project.getDescription(), project.getMachines(),
+		currentProject.set(new Project(name, project.getDescription(), project.getMachines(),
 				project.getPreferences(), project.getLocation()));
 
 		File savedFile = saveProject(project, location);
