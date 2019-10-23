@@ -3,6 +3,7 @@ package de.prob2.ui.project;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -70,7 +71,7 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText(bundle.getString("project.newProjectStage.invalidLocationError"));
 			return;
 		}
-		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), dir);
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), Collections.emptyList(), Collections.emptyList(), dir);
 		currentProject.set(newProject, true);
 		this.close();
 	}

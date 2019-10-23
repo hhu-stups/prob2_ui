@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -272,7 +273,7 @@ public class ProjectManager {
 		final String shortName = fileName.substring(0, fileName.lastIndexOf('.'));
 		final String description = String.format(bundle.getString("menu.file.automaticProjectDescription"), path);
 		final Machine machine = new Machine(shortName, "", relative);
-		currentProject.set(new Project(shortName, description, machine, projectLocation), true);
+		currentProject.set(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), projectLocation), true);
 
 		currentProject.startAnimation(machine, Preference.DEFAULT);
 	}
