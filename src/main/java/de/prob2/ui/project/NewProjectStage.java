@@ -72,7 +72,7 @@ public class NewProjectStage extends Stage {
 			return;
 		}
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), Collections.emptyList(), Collections.emptyList(), dir);
-		currentProject.set(newProject, true);
+		currentProject.switchTo(newProject, true);
 		this.close();
 	}
 }

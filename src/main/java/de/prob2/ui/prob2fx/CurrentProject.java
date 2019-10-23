@@ -232,7 +232,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.update(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
-	public void set(Project project, boolean newProject) {
+	public void switchTo(Project project, boolean newProject) {
 		if (!saved.get() && !confirmReplacingProject()) {
 			return;
 		}
