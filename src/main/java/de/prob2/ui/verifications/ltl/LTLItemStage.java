@@ -1,9 +1,9 @@
 package de.prob2.ui.verifications.ltl;
 
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebEngine;
@@ -73,11 +73,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 
 	public WebEngine getEngine() {
 		return engine;
-	}
-	
-	protected void updateProject() {
-		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getLocation()));
 	}
 	
 	public void setHandleItem(LTLHandleItem<T> handleItem) {

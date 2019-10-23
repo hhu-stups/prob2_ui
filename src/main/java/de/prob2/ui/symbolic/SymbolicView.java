@@ -10,7 +10,6 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
@@ -199,11 +198,6 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 
 	}
 	
-	public void updateProject() {
-		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getLocation()));
-	}
-	
 	protected abstract void setContextMenu();
 	
 	public void refresh() {
@@ -222,7 +216,6 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		Machine machine = currentProject.getCurrentMachine();
 		T item = tvFormula.getSelectionModel().getSelectedItem();
 		removeFormula(machine, item);
-		updateProject();
 	}
 	
 	

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
@@ -33,18 +32,15 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	
 	private final SymbolicCheckingResultHandler resultHandler;
 	
-	private final Injector injector;
-	
 	private final CurrentProject currentProject;
 	
 	
 	@Inject
 	public SymbolicCheckingFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
-											final Injector injector, final SymbolicFormulaChecker symbolicChecker,
+											final SymbolicFormulaChecker symbolicChecker,
 											final SymbolicCheckingResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.injector = injector;
 		this.symbolicChecker = symbolicChecker;
 		this.resultHandler = resultHandler;
 	}
@@ -59,7 +55,6 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		if (currentMachine != null) {
 			if(!currentMachine.getSymbolicCheckingFormulas().contains(formula)) {
 				currentMachine.addSymbolicCheckingFormula(formula);
-				injector.getInstance(SymbolicCheckingView.class).updateProject();
 			} else if(!checking) {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
