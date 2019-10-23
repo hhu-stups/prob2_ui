@@ -93,6 +93,20 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				if (from != null && !to.getLocation().equals(from.getLocation())) {
 					this.currentMachine.set(null);
 				}
+				for(Machine machine : to.getMachines()) {
+					machine.changedProperty().addListener((o1, from1, to1) -> {
+						if (to1) {
+							this.setSaved(false);
+						}
+					});
+				}
+				for(Preference pref : to.getPreferences()) {
+					pref.changedProperty().addListener((o1, from1, to1) -> {
+						if (to1) {
+							this.setSaved(false);
+						}
+					});
+				}
 			}
 		});
 		this.currentMachineProperty().addListener((observable, from, to) -> {
@@ -242,20 +256,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void update(Project project) {
 		super.set(project);
-		for(Machine machine : project.getMachines()) {
-			machine.changedProperty().addListener((observable, from, to) -> {
-				if (to) {
-					this.setSaved(false);
-				}
-			});
-		}
-		for(Preference pref : project.getPreferences()) {
-			pref.changedProperty().addListener((observable, from, to) -> {
-				if (to) {
-					this.setSaved(false);
-				}
-			});
-		}
 	}
 
 	public void remove() {
