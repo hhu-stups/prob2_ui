@@ -234,17 +234,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
-	public boolean switchTo(Project project, boolean newProject) {
-		if (!saved.get()) {
-			return false;
-		}
+	public void switchTo(Project project, boolean newProject) {
 		currentTrace.set(null);
 		this.updateCurrentMachine(null, null);
 		this.set(project);
 		initializeMachines();
 		this.setSaved(true);
 		this.setNewProject(newProject);
-		return true;
 	}
 
 	public ReadOnlyBooleanProperty existsProperty() {
@@ -333,7 +329,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public boolean confirmReplacingProject() {
-		if (exists()) {
+		if (this.exists() && !this.isSaved()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
 					"prob2fx.currentProject.alerts.confirmReplacingProject.header",
 					"prob2fx.currentProject.alerts.confirmReplacingProject.content");
