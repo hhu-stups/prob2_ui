@@ -287,18 +287,35 @@ public final class StageManager {
 	public void registerMainStage(Stage stage, String persistenceID) {
 		this.mainStage = stage;
 		stage.setOnShown(event -> {
+			// Calculate difference between stage and scene sizes.
+			// This information is needed to automatically set the minimum sizes of stages.
+			// See the listener in StageManager.register for details.
+			// The size difference can only be calculated properly once the stage is on screen and properly sized, but there is no good way to determine when that has happened.
+			// (Putting the code in onShown is not enough - on Linux for example, the stage/scene do not have their final size when onShown is called.)
+			// So instead we have to rely on some guessing. We assume that the stage/scene have been properly sized when all of the following are true:
+			// * the stage is shown
+			// * the stage and scene width and height are greater than 100 (during the initial sizing the stage/scene can be very small)
+			// * the width/height difference is at least 0 and less than 100 (this catches cases where one size has changed, but the other size hasn't yet been updated to match)
 			final InvalidationListener widthDiffListener = o -> {
 				final double stageWidth = stage.getWidth();
 				final double sceneWidth = stage.getScene().getWidth();
-				if (stageWidth > sceneWidth) {
-					this.stageSceneWidthDifference.set(stageWidth - sceneWidth);
+				System.out.println("stageWidth: " + stageWidth);
+				System.out.println("sceneWidth: " + sceneWidth);
+				final double widthDiff = stageWidth - sceneWidth;
+				if (stageWidth > 100.0 && sceneWidth > 100.0 && widthDiff >= 0.0 && widthDiff < 100.0) {
+					System.out.println("stageSceneWidthDifference: " + widthDiff);
+					this.stageSceneWidthDifference.set(widthDiff);
 				}
 			};
 			final InvalidationListener heightDiffListener = o -> {
 				final double stageHeight = stage.getHeight();
 				final double sceneHeight = stage.getScene().getHeight();
-				if (stageHeight > sceneHeight) {
-					this.stageSceneWidthDifference.set(stageHeight - sceneHeight);
+				System.out.println("stageHeight: " + stageHeight);
+				System.out.println("sceneHeight: " + sceneHeight);
+				final double heightDiff = stageHeight - sceneHeight;
+				if (stageHeight > 100.0 && sceneHeight > 100.0 && heightDiff >= 0.0 && heightDiff < 100.0) {
+					System.out.println("stageSceneHeightDifference: " + heightDiff);
+					this.stageSceneHeightDifference.set(heightDiff);
 				}
 			};
 			stage.widthProperty().addListener(widthDiffListener);
