@@ -51,6 +51,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This singleton provides common methods for creating and initializing views,
  * dialogs and stages. These methods ensure that all parts of the ProB 2 UI
@@ -65,6 +68,8 @@ public final class StageManager {
 	private enum PropertiesKey {
 		PERSISTENCE_ID, USE_GLOBAL_MAC_MENU_BAR
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image(StageManager.class.getResource("/de/prob2/ui/ProB_Icon.png").toExternalForm());
@@ -299,22 +304,22 @@ public final class StageManager {
 			final InvalidationListener widthDiffListener = o -> {
 				final double stageWidth = stage.getWidth();
 				final double sceneWidth = stage.getScene().getWidth();
-				System.out.println("stageWidth: " + stageWidth);
-				System.out.println("sceneWidth: " + sceneWidth);
+				LOGGER.trace("Main stage width is now {}", stageWidth);
+				LOGGER.trace("Main scene width is now {}", sceneWidth);
 				final double widthDiff = stageWidth - sceneWidth;
 				if (stageWidth > 100.0 && sceneWidth > 100.0 && widthDiff >= 0.0 && widthDiff < 100.0) {
-					System.out.println("stageSceneWidthDifference: " + widthDiff);
+					LOGGER.trace("Stage/scene width difference is now {}", widthDiff);
 					this.stageSceneWidthDifference.set(widthDiff);
 				}
 			};
 			final InvalidationListener heightDiffListener = o -> {
 				final double stageHeight = stage.getHeight();
 				final double sceneHeight = stage.getScene().getHeight();
-				System.out.println("stageHeight: " + stageHeight);
-				System.out.println("sceneHeight: " + sceneHeight);
+				LOGGER.trace("Main stage height is now {}", stageHeight);
+				LOGGER.trace("Main scene height is now {}", sceneHeight);
 				final double heightDiff = stageHeight - sceneHeight;
 				if (stageHeight > 100.0 && sceneHeight > 100.0 && heightDiff >= 0.0 && heightDiff < 100.0) {
-					System.out.println("stageSceneHeightDifference: " + heightDiff);
+					LOGGER.trace("Stage/scene height difference is now {}", heightDiff);
 					this.stageSceneHeightDifference.set(heightDiff);
 				}
 			};
