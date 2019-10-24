@@ -26,6 +26,7 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.DoubleProperty;
@@ -286,8 +287,24 @@ public final class StageManager {
 	public void registerMainStage(Stage stage, String persistenceID) {
 		this.mainStage = stage;
 		stage.setOnShown(event -> {
-			this.stageSceneWidthDifference.set(stage.getWidth() - stage.getScene().getWidth());
-			this.stageSceneHeightDifference.set(stage.getHeight() - stage.getScene().getHeight());
+			final InvalidationListener widthDiffListener = o -> {
+				final double stageWidth = stage.getWidth();
+				final double sceneWidth = stage.getScene().getWidth();
+				if (stageWidth > sceneWidth) {
+					this.stageSceneWidthDifference.set(stageWidth - sceneWidth);
+				}
+			};
+			final InvalidationListener heightDiffListener = o -> {
+				final double stageHeight = stage.getHeight();
+				final double sceneHeight = stage.getScene().getHeight();
+				if (stageHeight > sceneHeight) {
+					this.stageSceneWidthDifference.set(stageHeight - sceneHeight);
+				}
+			};
+			stage.widthProperty().addListener(widthDiffListener);
+			stage.heightProperty().addListener(heightDiffListener);
+			stage.getScene().widthProperty().addListener(widthDiffListener);
+			stage.getScene().heightProperty().addListener(heightDiffListener);
 			stage.setOnShown(null);
 		});
 		this.register(stage, persistenceID);
