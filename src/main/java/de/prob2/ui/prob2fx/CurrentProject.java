@@ -235,7 +235,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public boolean switchTo(Project project, boolean newProject) {
-		if (!saved.get() && !confirmReplacingProject()) {
+		if (!saved.get()) {
 			return false;
 		}
 		currentTrace.set(null);
@@ -332,7 +332,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.newProjectProperty().get();
 	}
 
-	private boolean confirmReplacingProject() {
+	public boolean confirmReplacingProject() {
 		if (exists()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
 					"prob2fx.currentProject.alerts.confirmReplacingProject.header",

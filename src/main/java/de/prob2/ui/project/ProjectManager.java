@@ -238,7 +238,9 @@ public class ProjectManager {
 		if (project != null) {
 			replaceMissingWithDefaults(project);
 			project.getMachines().forEach(Machine::resetStatus);
-			if(currentProject.switchTo(project, false)) {
+			boolean replacingProject = currentProject.confirmReplacingProject();
+			if(replacingProject) {
+				currentProject.switchTo(project, false);
 				addToRecentProjects(absPath);
 			}
 		}
@@ -261,7 +263,9 @@ public class ProjectManager {
 		final String shortName = fileName.substring(0, fileName.lastIndexOf('.'));
 		final String description = String.format(bundle.getString("menu.file.automaticProjectDescription"), path);
 		final Machine machine = new Machine(shortName, "", relative);
-		if (currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), projectLocation), true)) {
+		boolean replacingProject = currentProject.confirmReplacingProject();
+		if(replacingProject) {
+			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), projectLocation), true);
 			currentProject.startAnimation(machine, Preference.DEFAULT);
 		}
 	}
