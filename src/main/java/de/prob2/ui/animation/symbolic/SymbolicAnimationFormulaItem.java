@@ -4,7 +4,9 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationFormulaExtractor;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaItem;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,6 +25,8 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 	private static final String OPERATIONS = "operations";
 
 	private transient ListProperty<Trace> examples;
+	
+	private BooleanProperty testCase;
 
 	private Map<String, Object> additionalInformation;
 
@@ -30,12 +34,14 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		super(name, type);
 		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.additionalInformation = new HashMap<>();
+		this.testCase = new SimpleBooleanProperty(type == SymbolicExecutionType.MCDC || type == SymbolicExecutionType.COVERED_OPERATIONS);
 	}
 
 	public SymbolicAnimationFormulaItem(String name, SymbolicExecutionType type, Map<String, Object> additionalInformation) {
 		super(name, type);
 		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.additionalInformation = additionalInformation;
+		this.testCase = new SimpleBooleanProperty(type == SymbolicExecutionType.MCDC || type == SymbolicExecutionType.COVERED_OPERATIONS);
 	}
 
 	public SymbolicAnimationFormulaItem(int maxDepth, int level) {
@@ -44,6 +50,7 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		this.additionalInformation = new HashMap<>();
 		additionalInformation.put(MAX_DEPTH, maxDepth);
 		additionalInformation.put(LEVEL, level);
+		this.testCase = new SimpleBooleanProperty(true);
 	}
 
 	public SymbolicAnimationFormulaItem(int maxDepth, List<String> operations) {
@@ -52,6 +59,7 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		this.additionalInformation = new HashMap<>();
 		additionalInformation.put(MAX_DEPTH, maxDepth);
 		additionalInformation.put(OPERATIONS, operations);
+		this.testCase = new SimpleBooleanProperty(true);
 	}
 
 	@Override
@@ -64,6 +72,9 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		}
 		if(this.additionalInformation == null) {
 			this.additionalInformation = new HashMap<>();
+		}
+		if(this.testCase == null) {
+			this.testCase = new SimpleBooleanProperty(type == SymbolicExecutionType.MCDC || type == SymbolicExecutionType.COVERED_OPERATIONS);
 		}
 		if(type == SymbolicExecutionType.MCDC) {
 			replaceMissingMCDCOptionsByDefaults();
@@ -96,6 +107,10 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 
 	public ListProperty<Trace> examplesProperty() {
 		return examples;
+	}
+	
+	public BooleanProperty isTestCase() {
+		return testCase;
 	}
 	
 	@Override
