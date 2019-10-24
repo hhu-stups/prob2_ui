@@ -235,12 +235,6 @@ public class ProjectManager {
 	public void openProject(Path path) {
 		final Path absPath = path.toAbsolutePath();
 		Project project = loadProject(absPath);
-		if(!com.google.common.io.Files.getFileExtension(absPath.getFileName().toString()).equals(PROJECT_FILE_EXTENSION)) {
-			stageManager.makeAlert(AlertType.WARNING,
-					"project.projectManager.alerts.wrongProjectFileExtensionWarning.header",
-					"project.projectManager.alerts.wrongProjectFileExtensionWarning.content", PROJECT_FILE_EXTENSION, absPath)
-					.showAndWait();
-		}
 		if (project != null) {
 			replaceMissingWithDefaults(project);
 			project.getMachines().forEach(Machine::resetStatus);
