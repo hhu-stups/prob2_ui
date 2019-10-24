@@ -3,19 +3,17 @@
 <?import de.prob2.ui.consoles.groovy.GroovyConsole?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.layout.StackPane?>
-<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-
-<fx:root type="Stage" maxWidth="Infinity" title="%consoles.groovy.stage.title"
-	maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1" height="600.0" width="800.0">
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<fx:root type="Stage" title="%consoles.groovy.stage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<StackPane>
-				<VirtualizedScrollPane>
+				<VirtualizedScrollPane minWidth="200.0" minHeight="200.0" prefWidth="800.0" prefHeight="600.0">
 					<content>
 						<GroovyConsole fx:id="groovyConsole" />
 					</content>
