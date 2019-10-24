@@ -91,7 +91,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.location.set(to.getLocation());
 				this.saved.set(false);
 				if (from != null && !to.getLocation().equals(from.getLocation())) {
-					this.currentMachine.set(null);
+					this.updateCurrentMachine(null, null);
 				}
 				for(Machine machine : to.getMachines()) {
 					machine.changedProperty().addListener((o1, from1, to1) -> {
@@ -133,6 +133,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		});
 	}
 
+	private void updateCurrentMachine(final Machine m, final Preference p) {
+		this.currentMachine.set(m);
+		this.currentPreference.set(p);
+	}
+
 	private void clearProperties() {
 		this.name.set("");
 		this.description.set("");
@@ -140,15 +145,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.preferences.clear();
 		this.location.set(null);
 		this.saved.set(true);
-		this.currentMachine.set(null);
-		this.currentPreference.set(null);
+		this.updateCurrentMachine(null, null);
 	}
 
 	public void startAnimation(Machine m, Preference p) {
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		machineLoader.loadAsync(m, p.getPreferences());
-		this.currentMachine.set(m);
-		this.currentPreference.set(p);
+		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		injector.getInstance(LTLView.class).bindMachine(m);
 		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
@@ -180,9 +183,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		machinesList.remove(machine);
 		if(machine.equals(currentMachine.get())) {
 			this.saved.set(false);
-			this.currentMachine.set(null);
-			this.currentPreference.set(null);
 			this.currentTrace.set(null);
+			this.updateCurrentMachine(null, null);
 		}
 		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
 	}
@@ -237,11 +239,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			return;
 		}
 		currentTrace.set(null);
+		this.updateCurrentMachine(null, null);
 		this.set(project);
 		initializeMachines();
 		this.setSaved(true);
 		this.setNewProject(newProject);
-		this.currentMachine.set(null);
 	}
 
 	public ReadOnlyBooleanProperty existsProperty() {
