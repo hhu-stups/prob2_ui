@@ -234,9 +234,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getLocation()));
 	}
 
-	public void switchTo(Project project, boolean newProject) {
+	public boolean switchTo(Project project, boolean newProject) {
 		if (!saved.get() && !confirmReplacingProject()) {
-			return;
+			return false;
 		}
 		currentTrace.set(null);
 		this.updateCurrentMachine(null, null);
@@ -244,6 +244,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		initializeMachines();
 		this.setSaved(true);
 		this.setNewProject(newProject);
+		return true;
 	}
 
 	public ReadOnlyBooleanProperty existsProperty() {
