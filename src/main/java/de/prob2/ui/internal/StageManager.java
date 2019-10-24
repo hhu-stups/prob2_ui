@@ -26,6 +26,7 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.DoubleProperty;
@@ -50,6 +51,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This singleton provides common methods for creating and initializing views,
  * dialogs and stages. These methods ensure that all parts of the ProB 2 UI
@@ -64,6 +68,8 @@ public final class StageManager {
 	private enum PropertiesKey {
 		PERSISTENCE_ID, USE_GLOBAL_MAC_MENU_BAR
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 
 	private static final String STYLESHEET = "prob.css";
 	private static final Image ICON = new Image(StageManager.class.getResource("/de/prob2/ui/ProB_Icon.png").toExternalForm());
@@ -286,8 +292,41 @@ public final class StageManager {
 	public void registerMainStage(Stage stage, String persistenceID) {
 		this.mainStage = stage;
 		stage.setOnShown(event -> {
-			this.stageSceneWidthDifference.set(stage.getWidth() - stage.getScene().getWidth());
-			this.stageSceneHeightDifference.set(stage.getHeight() - stage.getScene().getHeight());
+			// Calculate difference between stage and scene sizes.
+			// This information is needed to automatically set the minimum sizes of stages.
+			// See the listener in StageManager.register for details.
+			// The size difference can only be calculated properly once the stage is on screen and properly sized, but there is no good way to determine when that has happened.
+			// (Putting the code in onShown is not enough - on Linux for example, the stage/scene do not have their final size when onShown is called.)
+			// So instead we have to rely on some guessing. We assume that the stage/scene have been properly sized when all of the following are true:
+			// * the stage is shown
+			// * the stage and scene width and height are greater than 100 (during the initial sizing the stage/scene can be very small)
+			// * the width/height difference is at least 0 and less than 100 (this catches cases where one size has changed, but the other size hasn't yet been updated to match)
+			final InvalidationListener widthDiffListener = o -> {
+				final double stageWidth = stage.getWidth();
+				final double sceneWidth = stage.getScene().getWidth();
+				LOGGER.trace("Main stage width is now {}", stageWidth);
+				LOGGER.trace("Main scene width is now {}", sceneWidth);
+				final double widthDiff = stageWidth - sceneWidth;
+				if (stageWidth > 100.0 && sceneWidth > 100.0 && widthDiff >= 0.0 && widthDiff < 100.0) {
+					LOGGER.trace("Stage/scene width difference is now {}", widthDiff);
+					this.stageSceneWidthDifference.set(widthDiff);
+				}
+			};
+			final InvalidationListener heightDiffListener = o -> {
+				final double stageHeight = stage.getHeight();
+				final double sceneHeight = stage.getScene().getHeight();
+				LOGGER.trace("Main stage height is now {}", stageHeight);
+				LOGGER.trace("Main scene height is now {}", sceneHeight);
+				final double heightDiff = stageHeight - sceneHeight;
+				if (stageHeight > 100.0 && sceneHeight > 100.0 && heightDiff >= 0.0 && heightDiff < 100.0) {
+					LOGGER.trace("Stage/scene height difference is now {}", heightDiff);
+					this.stageSceneHeightDifference.set(heightDiff);
+				}
+			};
+			stage.widthProperty().addListener(widthDiffListener);
+			stage.heightProperty().addListener(heightDiffListener);
+			stage.getScene().widthProperty().addListener(widthDiffListener);
+			stage.getScene().heightProperty().addListener(heightDiffListener);
 			stage.setOnShown(null);
 		});
 		this.register(stage, persistenceID);

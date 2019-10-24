@@ -12,28 +12,15 @@ import de.prob2.ui.project.preferences.Preference;
 public class Project {
 	private String name;
 	private String description;
-	private List<Machine> machines = new ArrayList<>();
-	private List<Preference> preferences = new ArrayList<>();
+	private List<Machine> machines;
+	private List<Preference> preferences;
 	private transient Path location;
 
 	public Project(String name, String description, List<Machine> machines, List<Preference> preferences, Path location) {
 		this.name = name;
 		this.description = description;
-		this.machines.addAll(machines);
-		this.preferences.addAll(preferences);
-		this.location = location;
-	}
-
-	public Project(String name, String description, Path location) {
-		this.name = name;
-		this.description = description;
-		this.location = location;
-	}
-
-	public Project(String name, String description, Machine machine, Path location) {
-		this.name = name;
-		this.description = description;
-		this.machines.add(machine);
+		this.machines = new ArrayList<>(machines);
+		this.preferences = new ArrayList<>(preferences);
 		this.location = location;
 	}
 

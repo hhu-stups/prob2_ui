@@ -1,7 +1,12 @@
 package de.prob2.ui.animation.symbolic;
 
-import com.google.inject.Injector;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import com.google.inject.Singleton;
+
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
@@ -18,10 +23,6 @@ import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.AbstractResultHandler;
 
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.List;
-
 @Singleton
 public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<SymbolicAnimationFormulaItem> {
 
@@ -33,18 +34,15 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 
 	private final SymbolicAnimationResultHandler resultHandler;
 
-	private final Injector injector;
-
 	private final CurrentProject currentProject;
 
 	@Inject
 	private SymbolicAnimationFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
-										   final Injector injector, final SymbolicAnimationChecker symbolicChecker,
+										   final SymbolicAnimationChecker symbolicChecker,
 										   final TestCaseGeneratorCreator testCaseGeneratorCreator,
 										   final SymbolicAnimationResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.injector = injector;
 		this.symbolicChecker = symbolicChecker;
 		this.testCaseGeneratorCreator = testCaseGeneratorCreator;
 		this.resultHandler = resultHandler;
@@ -70,7 +68,6 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		if (currentMachine != null) {
 			if(!currentMachine.getSymbolicAnimationFormulas().contains(formula)) {
 				currentMachine.addSymbolicAnimationFormula(formula);
-				injector.getInstance(SymbolicAnimationView.class).updateProject();
 			} else if(!checking) {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}

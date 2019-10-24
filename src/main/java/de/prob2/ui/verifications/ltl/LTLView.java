@@ -16,7 +16,6 @@ import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
@@ -308,7 +307,6 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 		machine.removeLTLFormula(item);
 		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-		updateProject();
 	}
 	
 	@FXML
@@ -325,7 +323,6 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
 		machine.removeLTLPattern(item);
 		patternParser.removePattern(item, machine);
-		updateProject();
 	}
 	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
@@ -356,11 +353,6 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 				stage.setData(item.getDescription(), item.getCode());
 			}
 		});
-	}
-	
-	private void updateProject() {
-		currentProject.update(new Project(currentProject.getName(), currentProject.getDescription(), 
-				currentProject.getMachines(), currentProject.getPreferences(), currentProject.getLocation()));
 	}
 	
 	@FXML

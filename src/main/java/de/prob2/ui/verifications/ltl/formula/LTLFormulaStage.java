@@ -41,7 +41,6 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
-			updateProject();
 			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
 			showErrors((LTLCheckingResultItem) item.getResultItem());

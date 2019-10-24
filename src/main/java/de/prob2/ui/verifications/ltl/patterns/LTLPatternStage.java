@@ -44,7 +44,6 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		if(!machine.getLTLPatterns().contains(item)) {
 			patternParser.addPattern(item, machine);
 			machine.addLTLPattern(item);
-			updateProject();
 			setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, item));
 			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
