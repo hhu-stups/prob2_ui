@@ -205,38 +205,31 @@ public class ProjectManager {
 	}
 
 	private Project loadProject(Path path) {
-		Project project;
 		try (final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET)) {
-			project = gson.fromJson(reader, Project.class);
+			final Project project = gson.fromJson(reader, Project.class);
 			project.setLocation(path.getParent());
-		} catch (FileNotFoundException | NoSuchFileException exc) {
-			LOGGER.warn("Project file not found", exc);
-			List<ButtonType> buttons = new ArrayList<>();
-			buttons.add(ButtonType.YES);
-			buttons.add(ButtonType.NO);
-			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
-					"project.projectManager.alerts.fileNotFound.header",
-					"project.projectManager.alerts.fileNotFound.content", path);
-			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Platform.runLater(() -> this.getRecentProjects().remove(path));
-			}
-			return null;
+			return project;
 		} catch (IOException | JsonSyntaxException exc) {
 			LOGGER.warn("Failed to open project file", exc);
 			List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(ButtonType.YES);
 			buttons.add(ButtonType.NO);
-			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
-					"project.projectManager.alerts.couldNotOpenFile.header",
-					"project.projectManager.alerts.couldNotOpenFile.content", path);
+			final String headerBundleKey;
+			final String contentBundleKey;
+			if (exc instanceof FileNotFoundException || exc instanceof NoSuchFileException) {
+				headerBundleKey = "project.projectManager.alerts.fileNotFound.header";
+				contentBundleKey = "project.projectManager.alerts.fileNotFound.content";
+			} else {
+				headerBundleKey = "project.projectManager.alerts.couldNotOpenFile.header";
+				contentBundleKey = "project.projectManager.alerts.couldNotOpenFile.content";
+			}
+			Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons, headerBundleKey, contentBundleKey, path);
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> this.getRecentProjects().remove(path));
 			}
 			return null;
 		}
-		return project;
 	}
 
 	public void openProject(Path path) {
