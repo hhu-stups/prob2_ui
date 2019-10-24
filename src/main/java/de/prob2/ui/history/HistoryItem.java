@@ -42,6 +42,6 @@ public class HistoryItem {
 	}
 	
 	public String toPrettyString() {
-		return this.getOperationItem() == null ? "---root---" : this.getOperationItem().toPrettyString();
+		return this.getOperationItem() == null ? "---root---" : this.getOperationItem().toPrettyString(true);
 	}
 }
