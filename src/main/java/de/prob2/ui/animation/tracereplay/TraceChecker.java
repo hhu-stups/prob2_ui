@@ -148,7 +148,7 @@ public class TraceChecker {
 	private boolean checkOutputParams(ReplayTrace replayTrace, Transition trans,
 			PersistentTransition persistentTransition, boolean setCurrentAnimation) {
 		String operationName = trans.getName();
-		OperationInfo machineOperationInfo = trans.stateSpace.getLoadedMachine().getMachineOperationInfo(operationName);
+		OperationInfo machineOperationInfo = trans.getStateSpace().getLoadedMachine().getMachineOperationInfo(operationName);
 		final Map<String, String> ouputParameters = persistentTransition.getOuputParameters();
 		if (machineOperationInfo != null && ouputParameters != null) {
 			List<String> outputParameterNames = machineOperationInfo.getOutputParameterNames();
