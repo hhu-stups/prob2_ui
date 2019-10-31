@@ -75,7 +75,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
 							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
-					saveTraces.disableProperty().bind(showStateItem.disableProperty());
+					saveTraces.disableProperty().bind(showStateItem.disableProperty().or(to.isTestCase().not()));
 					showExamples(to, showStateItem);
 					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty().or(to.isTestCase().not()));
 				}
