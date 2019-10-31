@@ -3,7 +3,6 @@ package de.prob2.ui.operations;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,7 +30,7 @@ public class OperationItem {
 	}
 	
 	/**
-	 * Internal helper class that holds an operation's name and parameter values. Used for grouping in {@link #removeUnambiguousConstantsAndVariables(Collection)}.
+	 * Internal helper class that holds an operation's name and parameter values. Used for grouping in {@link #computeUnambiguousConstantsAndVariables(Collection)}.
 	 */
 	private static final class OperationNameAndParameterValues {
 		final String name;
@@ -92,11 +91,15 @@ public class OperationItem {
 	private final List<String> returnParameterValues;
 	private final Map<String, String> constants;
 	private final Map<String, String> variables;
+	private final Collection<String> unambiguousConstantNames;
+	private final Collection<String> unambiguousVariableNames;
 
 	public OperationItem(final Transition transition, final String name, final Status status,
 			final List<String> parameterNames, final List<String> parameterValues,
 			final List<String> returnParameterNames, final List<String> returnParameterValues,
-			final Map<String, String> constants, final Map<String, String> variables) {
+			final Map<String, String> constants, final Map<String, String> variables,
+			final Collection<String> unambiguousConstantNames,
+			final Collection<String> unambiguousVariableNames) {
 		this.transition = transition;
 		this.name = Objects.requireNonNull(name);
 		this.status = Objects.requireNonNull(status);
@@ -106,6 +109,8 @@ public class OperationItem {
 		this.returnParameterValues = Objects.requireNonNull(returnParameterValues);
 		this.constants = Objects.requireNonNull(constants);
 		this.variables = Objects.requireNonNull(variables);
+		this.unambiguousConstantNames = Objects.requireNonNull(unambiguousConstantNames);
+		this.unambiguousVariableNames = Objects.requireNonNull(unambiguousVariableNames);
 	}
 
 	private static Map<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas) {
@@ -172,7 +177,8 @@ public class OperationItem {
 			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
 			
 			items.add(new OperationItem(transition, transition.getName(), Status.ENABLED, paramNames,
-				transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables));
+				transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables,
+				Collections.emptySet(), Collections.emptySet()));
 		}
 		return items;
 	}
@@ -185,16 +191,11 @@ public class OperationItem {
 
 	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters) {
 		return new OperationItem(null, name, status, Collections.emptyList(), parameters,
-				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
+				Collections.emptySet(), Collections.emptySet());
 	}
 
-	private static <K, V> Map<K, V> withoutKeys(final Map<K, V> map, final Set<K> toRemove) {
-		final Map<K, V> newMap = new HashMap<>(map);
-		toRemove.forEach(newMap::remove);
-		return newMap;
-	}
-
-	private static Stream<OperationItem> removeUnambiguousConstantsAndVariablesInternal(final Collection<OperationItem> items) {
+	private static Stream<OperationItem> computeUnambiguousConstantsAndVariablesInternal(final Collection<OperationItem> items) {
 		assert !items.isEmpty();
 		final OperationItem first = items.iterator().next();
 		final Set<String> unambiguousConstants = new HashSet<>(first.getConstants().keySet());
@@ -211,19 +212,20 @@ public class OperationItem {
 				item.getTransition(), item.getName(), item.getStatus(),
 				item.getParameterNames(), item.getParameterValues(),
 				item.getReturnParameterNames(), item.getReturnParameterValues(),
-				withoutKeys(item.getConstants(), unambiguousConstants), withoutKeys(item.getVariables(), unambiguousVariables)
+				item.getConstants(), item.getVariables(),
+				unambiguousConstants, unambiguousVariables
 			));
 	}
 	
-	public static Collection<OperationItem> removeUnambiguousConstantsAndVariables(final Collection<OperationItem> items) {
-		// Group by operation name and parameter values, remove unambiguous constants/variables inside each group, then combine them again.
+	public static Collection<OperationItem> computeUnambiguousConstantsAndVariables(final Collection<OperationItem> items) {
+		// Group by operation name and parameter values, compute unambiguous constants/variables inside each group, then combine them again.
 		// The grouping step ensures that only operations with the same name and parameter values are considered when checking for ambiguity.
 		// Otherwise operations that change the same variables, but have different names or parameters, would be incorrectly detected as ambiguous.
 		return items.stream()
 			.collect(Collectors.groupingBy(OperationNameAndParameterValues::new))
 			.values()
 			.stream()
-			.flatMap(OperationItem::removeUnambiguousConstantsAndVariablesInternal)
+			.flatMap(OperationItem::computeUnambiguousConstantsAndVariablesInternal)
 			.collect(Collectors.toList());
 	}
 
@@ -263,6 +265,14 @@ public class OperationItem {
 		return this.variables;
 	}
 
+	public Collection<String> getUnambiguousConstantNames() {
+		return this.unambiguousConstantNames;
+	}
+
+	public Collection<String> getUnambiguousVariableNames() {
+		return this.unambiguousVariableNames;
+	}
+
 	public boolean isExplored() {
 		return this.getTransition() != null && this.getTransition().getDestination().isExplored();
 	}
@@ -282,8 +292,11 @@ public class OperationItem {
 				.add("name", this.getName()).add("status", this.getStatus())
 				.add("parameterNames", this.getParameterNames()).add("parameterValues", this.getParameterValues())
 				.add("returnParameterNames", this.getReturnParameterNames())
-				.add("returnParameterValues", this.getReturnParameterValues()).add("constants", this.getConstants())
-				.add("variables", this.getVariables()).toString();
+				.add("returnParameterValues", this.getReturnParameterValues())
+				.add("constants", this.getConstants()).add("variables", this.getVariables())
+				.add("unambiguousConstantNames", this.getUnambiguousConstantNames())
+				.add("unambiguousVariableNames", this.getUnambiguousVariableNames())
+				.toString();
 	}
 
 	private static String getPrettyName(final String name) {
@@ -299,7 +312,7 @@ public class OperationItem {
 		}
 	}
 
-	public String toPrettyString() {
+	public String toPrettyString(final boolean includeUnambiguous) {
 		StringBuilder sb = new StringBuilder(getPrettyName(this.getName()));
 
 		final List<String> args = new ArrayList<>();
@@ -316,8 +329,16 @@ public class OperationItem {
 			}
 		}
 
-		this.getConstants().forEach((key, value) -> args.add(key + ":=" + value));
-		this.getVariables().forEach((key, value) -> args.add(key + ":=" + value));
+		this.getConstants().forEach((key, value) -> {
+			if (includeUnambiguous || !this.getUnambiguousConstantNames().contains(key)) {
+				args.add(key + ":=" + value);
+			}
+		});
+		this.getVariables().forEach((key, value) -> {
+			if (includeUnambiguous || !this.getUnambiguousVariableNames().contains(key)) {
+				args.add(key + ":=" + value);
+			}
+		});
 
 		if (!args.isEmpty()) {
 			sb.append('(');
