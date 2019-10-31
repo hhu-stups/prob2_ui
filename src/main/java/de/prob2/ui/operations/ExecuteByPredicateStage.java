@@ -78,9 +78,15 @@ public final class ExecuteByPredicateStage extends Stage {
 				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getName()));
 				
 				final Map<String, String> items = new LinkedHashMap<>();
-				assert to.getParameterNames().size() == to.getParameterValues().size();
-				for (int i = 0; i < to.getParameterNames().size(); i++) {
-					items.put(to.getParameterNames().get(i), to.getParameterValues().get(i));
+				if (to.getParameterValues().isEmpty()) {
+					for (final String name : to.getParameterNames()) {
+						items.put(name, "");
+					}
+				} else {
+					assert to.getParameterNames().size() == to.getParameterValues().size();
+					for (int i = 0; i < to.getParameterNames().size(); i++) {
+						items.put(to.getParameterNames().get(i), to.getParameterValues().get(i));
+					}
 				}
 				items.putAll(to.getConstants());
 				items.putAll(to.getVariables());

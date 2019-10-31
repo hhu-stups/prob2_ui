@@ -113,7 +113,7 @@ public final class OperationsView extends VBox {
 			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled");
 			if (item != null && !empty) {
 				setText(item.toPrettyString(unambiguousToggle.isSelected()));
-				setDisable(true);
+				setDisable(false);
 				final FontAwesome.Glyph icon;
 				switch (item.getStatus()) {
 				case TIMEOUT:
@@ -124,7 +124,6 @@ public final class OperationsView extends VBox {
 
 				case ENABLED:
 					icon = item.isSkip() ? FontAwesome.Glyph.REPEAT : FontAwesome.Glyph.PLAY;
-					setDisable(false);
 					getStyleClass().add("enabled");
 					if (!item.isExplored()) {
 						getStyleClass().add("unexplored");

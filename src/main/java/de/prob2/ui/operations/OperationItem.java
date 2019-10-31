@@ -190,7 +190,7 @@ public class OperationItem {
 	}
 
 	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters) {
-		return new OperationItem(null, name, status, Collections.emptyList(), parameters,
+		return new OperationItem(null, name, status, parameters, Collections.emptyList(),
 				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
 				Collections.emptySet(), Collections.emptySet());
 	}
@@ -322,6 +322,9 @@ public class OperationItem {
 		if (paramNames.isEmpty()) {
 			// Parameter names not available
 			args.addAll(paramValues);
+		} else if (paramValues.isEmpty()) {
+			// Parameter names without values (disabled/timed out operation)
+			args.addAll(paramNames);
 		} else {
 			assert paramNames.size() == paramValues.size();
 			for (int i = 0; i < paramValues.size(); i++) {

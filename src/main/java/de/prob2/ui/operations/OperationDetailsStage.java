@@ -94,10 +94,16 @@ class OperationDetailsStage extends Stage {
 				
 				final List<String> paramNames = to.getParameterNames();
 				final List<String> paramValues = to.getParameterValues();
-				for (int i = 0; i < paramValues.size(); i++) {
-					String name = i < paramNames.size() ? paramNames.get(i) : "#" + (i + 1);
-					final String param = paramValues.get(i);
-					this.parametersItem.getChildren().add(new TreeItem<>(new ValueItem(name, param)));
+				if (paramValues.isEmpty()) {
+					for (final String name : paramNames) {
+						this.parametersItem.getChildren().add(new TreeItem<>(new ValueItem(name, "")));
+					}
+				} else {
+					for (int i = 0; i < paramValues.size(); i++) {
+						String name = i < paramNames.size() ? paramNames.get(i) : "#" + (i + 1);
+						final String param = paramValues.get(i);
+						this.parametersItem.getChildren().add(new TreeItem<>(new ValueItem(name, param)));
+					}
 				}
 				
 				final List<String> returnNames = to.getReturnParameterNames();
