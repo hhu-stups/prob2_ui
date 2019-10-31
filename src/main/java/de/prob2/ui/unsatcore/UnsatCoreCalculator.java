@@ -26,9 +26,11 @@ public class UnsatCoreCalculator {
 	private final CurrentTrace currentTrace;
 
 	private ObjectProperty<IBEvalElement> unsatCore;
+	
+	private final UnsatCoreStage unsatCoreStage;
 
 	@Inject
-	private UnsatCoreCalculator(final CurrentTrace currentTrace) {
+	private UnsatCoreCalculator(final CurrentTrace currentTrace, final UnsatCoreStage unsatCoreStage) {
 		this.currentTrace = currentTrace;
 		this.unsatCore = new SimpleObjectProperty<>(null);
 		this.currentTrace.addListener((observable, from, to) -> {
@@ -36,6 +38,7 @@ public class UnsatCoreCalculator {
 				unsatCore.set(null);
 			}
 		});
+		this.unsatCoreStage = unsatCoreStage;
 	}
 
 	public void calculate() {
@@ -46,7 +49,11 @@ public class UnsatCoreCalculator {
 		}
 		UnsatRegularCoreCommand unsatCoreCmd = new UnsatRegularCoreCommand(properties, new ArrayList<>());
 		currentTrace.getStateSpace().execute(unsatCoreCmd);
-		this.unsatCore.set(unsatCoreCmd.getCore());
+		IBEvalElement core = unsatCoreCmd.getCore();
+		this.unsatCore.set(core);
+		this.unsatCoreStage.setUnsatCore(core.getCode());
+		this.unsatCoreStage.show();
+		
 	}
 
 	private IBEvalElement extractProperties(ClassicalBModel bModel) {
