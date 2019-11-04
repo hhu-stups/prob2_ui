@@ -23,6 +23,7 @@
 							<TableColumn fx:id="transitions" editable="false" prefWidth="200.0" text="%animation.symbolic.traceInformation.column.transitions" />
 							<TableColumn fx:id="operation" editable="false" prefWidth="20.0" text="%animation.symbolic.traceInformation.column.operation" />
 							<TableColumn fx:id="guard" editable="false" prefWidth="20.0" text="%animation.symbolic.traceInformation.column.guard" />
+							<TableColumn fx:id="enabled" editable="false" prefWidth="20.0" text="%animation.symbolic.traceInformation.column.enabled" />
 						</columns>
 					</TableView>
 					<Label text="%animation.symbolic.traceInformation.uncoveredOperations" VBox.vgrow="NEVER"/>

@@ -201,7 +201,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	
 	private List<TraceInformationItem> extractUncoveredOperations(TestCaseGeneratorResult testCaseGeneratorResult) {
 		return testCaseGeneratorResult.getUncoveredTargets().stream()
-				.map(target -> new TraceInformationItem(-1, new ArrayList<>(), target.getOperation(), target.getGuardString(), null))
+				.map(target -> new TraceInformationItem(-1, new ArrayList<>(), target.getOperation(), target.getGuardString(), target.getFeasible(), null))
 				.collect(Collectors.toList());
 	}
 	
@@ -214,7 +214,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 
 	private List<TraceInformationItem> extractTraceInformation(TestCaseGeneratorResult testCaseGeneratorResult) {
 		return testCaseGeneratorResult.getTestTraces().stream()
-				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.getTarget().getOperation(), trace.getTarget().getGuardString(), trace.getTrace()))
+				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.getTarget().getOperation(), trace.getTarget().getGuardString(), trace.getTarget().getFeasible(), trace.getTrace()))
 				.collect(Collectors.toList());
 	}
 

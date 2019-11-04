@@ -28,7 +28,7 @@ public final class TraceInformationStage extends Stage {
 			this.getStyleClass().add("trace-information-row");
 			this.setOnMouseClicked(e -> {
 				TraceInformationItem item = this.getItem();
-				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && item.getTrace() != null) {
+				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && item.isEnabled()) {
 					currentTrace.set(item.getTrace());
 				}
 			});
@@ -39,10 +39,10 @@ public final class TraceInformationStage extends Stage {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll(Arrays.asList("replayable", "not-replayable"));
 			if(item != null) {
-				if (item.getTrace() == null) {
-					this.getStyleClass().add("not-replayable");
-				} else {
+				if (item.isEnabled()) {
 					this.getStyleClass().add("replayable");
+				} else {
+					this.getStyleClass().add("not-replayable");
 				}
 			}
 		}
@@ -62,6 +62,9 @@ public final class TraceInformationStage extends Stage {
 	
 	@FXML
 	private TableColumn<TraceInformationItem, String> guard;
+	
+	@FXML
+	private TableColumn<TraceInformationItem, String> enabled;
 	
 	@FXML
 	private TableView<TraceInformationItem> tvUncovered;
@@ -102,6 +105,8 @@ public final class TraceInformationStage extends Stage {
 		operation.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		guard.setCellFactory(WrappedTextTableCell<TraceInformationItem>::new);
 		guard.setCellValueFactory(new PropertyValueFactory<>("guard"));
+		
+		enabled.setCellValueFactory(new PropertyValueFactory<>("enabled"));
 		
 		tvTraces.setItems(traces);
 		

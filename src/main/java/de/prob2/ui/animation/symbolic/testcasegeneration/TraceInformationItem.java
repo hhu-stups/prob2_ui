@@ -13,14 +13,17 @@ public class TraceInformationItem {
 	private String operation;
 	
 	private String guard;
+	
+	private boolean enabled;
 
 	private transient Trace trace;
 
-	public TraceInformationItem(final int depth, final List<String> transitions, final String operation, final String guard, final Trace trace) {
+	public TraceInformationItem(final int depth, final List<String> transitions, final String operation, final String guard, final boolean enabled, final Trace trace) {
 		this.depth = depth;
 		this.transitions = String.join(",\n", transitions);
 		this.operation = operation;
 		this.guard = guard;
+		this.enabled = enabled;
 		this.trace = trace;
 	}
 
@@ -38,6 +41,10 @@ public class TraceInformationItem {
 	
 	public String getGuard() {
 		return guard;
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
 	}
 
 	public Trace getTrace() {
