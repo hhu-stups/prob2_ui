@@ -55,13 +55,8 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 							.or(to.selectedProperty().not()));
 				}
 			});
-			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.remove"));
-			removeItem.setOnAction(e -> removeFormula());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.change"));
-			changeItem.setOnAction(e->openItem(row.getItem()));
-			
-			row.setContextMenu(new ContextMenu(checkItem, changeItem, removeItem));
+			row.setContextMenu(new ContextMenu(checkItem));
 			return row;
 		}
 		

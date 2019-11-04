@@ -42,6 +42,12 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 		public TableRow<SymbolicAnimationFormulaItem> call(TableView<SymbolicAnimationFormulaItem> param) {
 			TableRow<SymbolicAnimationFormulaItem> row = createRow();
 
+			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.removeConfiguration"));
+			removeItem.setOnAction(e -> removeFormula());
+			
+			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.changeConfiguration"));
+			changeItem.setOnAction(e->openItem(row.getItem()));
+			
 			MenuItem showDetails = new MenuItem(bundle.getString("symbolic.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
 			showDetails.setOnAction(e -> {
@@ -82,7 +88,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 			});
 			
 			ContextMenu contextMenu = row.getContextMenu();
-			contextMenu.getItems().addAll(showDetails, showMessage, showStateItem, saveTraces);
+			contextMenu.getItems().addAll(changeItem, removeItem, showDetails, showMessage, showStateItem, saveTraces);
 			
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())

@@ -43,6 +43,12 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		public TableRow<SymbolicCheckingFormulaItem> call(TableView<SymbolicCheckingFormulaItem> param) {
 			TableRow<SymbolicCheckingFormulaItem> row = createRow();
 			
+			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.removeFormula"));
+			removeItem.setOnAction(e -> removeFormula());
+			
+			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.changeFormula"));
+			changeItem.setOnAction(e->openItem(row.getItem()));
+			
 			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
 			
@@ -59,7 +65,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			});
 			
 			ContextMenu contextMenu = row.getContextMenu();
-			contextMenu.getItems().addAll(showMessage, showCounterExampleItem);
+			contextMenu.getItems().addAll(changeItem, removeItem, showMessage, showCounterExampleItem);
 	
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
