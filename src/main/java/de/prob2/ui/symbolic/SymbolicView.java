@@ -74,13 +74,13 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 	protected TableView<T> tvFormula;
 	
 	@FXML
-	protected TableColumn<T, Checked> formulaStatusColumn;
+	protected TableColumn<T, Checked> statusColumn;
 	
 	@FXML
-	protected TableColumn<T, String> formulaNameColumn;
+	protected TableColumn<T, String> nameColumn;
 	
 	@FXML
-	protected TableColumn<T, String> formulaDescriptionColumn;
+	protected TableColumn<T, String> descriptionColumn;
 	
 	@FXML
 	protected TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -163,10 +163,10 @@ public abstract class SymbolicView<T extends SymbolicFormulaItem> extends Scroll
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), partOfDisableBinding);
 		cancelButton.disableProperty().bind(executor.currentJobThreadsProperty().emptyProperty());
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvFormula.disableProperty(), partOfDisableBinding);
-		formulaStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		formulaNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		statusColumn.setCellFactory(col -> new CheckedCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(getSymbolicType(), injector, this));
 
 		selectAll.setSelected(true);
