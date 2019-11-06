@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 
@@ -15,6 +16,8 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
+
+import javafx.scene.control.Alert;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +34,12 @@ public final class ExternalEditor {
 		this.stageManager = stageManager;
 	}
 
-	private Path getExternalEditorPath() {
+	private Optional<Path> getExternalEditorPath() {
 		final StateSpace stateSpace = machineLoader.getEmptyStateSpace();
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 		stateSpace.execute(cmd);
-		return Paths.get(cmd.getValue());
+		final String editorPath = cmd.getValue();
+		return editorPath.isEmpty() ? Optional.empty() : Optional.of(Paths.get(editorPath));
 	}
 
 	private static List<String> getCommandLine(final Path executable, final List<String> args) {
@@ -55,7 +59,12 @@ public final class ExternalEditor {
 	}
 
 	public void open(Path path) {
-		final ProcessBuilder processBuilder = new ProcessBuilder(getCommandLine(this.getExternalEditorPath().toAbsolutePath(), path.toString()));
+		final Optional<Path> editorPath = this.getExternalEditorPath();
+		if (!editorPath.isPresent()) {
+			this.stageManager.makeAlert(Alert.AlertType.ERROR, "externalEditor.alerts.noEditorSet.header", "externalEditor.alerts.noEditorSet.content").show();
+			return;
+		}
+		final ProcessBuilder processBuilder = new ProcessBuilder(getCommandLine(editorPath.get().toAbsolutePath(), path.toString()));
 		try {
 			processBuilder.start();
 		} catch (IOException e) {
