@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 
 import de.prob.animator.command.GetPreferenceCommand;
@@ -18,6 +15,9 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ExternalEditor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExternalEditor.class);
@@ -60,7 +60,7 @@ public final class ExternalEditor {
 			processBuilder.start();
 		} catch (IOException e) {
 			LOGGER.error("Failed to start external editor", e);
-			stageManager.makeExceptionAlert(e, "menu.externalEditor.alerts.couldNotStartEditor.content").showAndWait();
+			stageManager.makeExceptionAlert(e, "externalEditor.alerts.couldNotStartEditor.content").showAndWait();
 		}
 	}
 }
