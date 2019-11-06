@@ -10,12 +10,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
 
-<fx:root type="ViewCodeStage" minWidth="240" minHeight="160" width="640" height="480" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="ViewCodeStage" width="640" height="480" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
-			<BorderPane stylesheets="@/prob.css" styleClass="dialog" maxWidth="Infinity" maxHeight="Infinity">
+			<BorderPane stylesheets="@/prob.css" styleClass="dialog">
 				<center>
-					<TextArea fx:id="codeTextArea" styleClass="code" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity"/>
+					<TextArea fx:id="codeTextArea" styleClass="code" editable="false" wrapText="true" minWidth="320" minHeight="240"/>
 				</center>
 				<bottom>
 					<HBox spacing="10.0">
