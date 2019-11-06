@@ -14,16 +14,13 @@
 	<scene>
 		<Scene>
 			<BorderPane stylesheets="@/prob.css" styleClass="dialog" maxWidth="Infinity" maxHeight="Infinity">
-				<padding>
-					<Insets top="1.0" right="0.0" bottom="10.0" left="0.0"/>
-				</padding>
 				<center>
 					<TextArea fx:id="codeTextArea" styleClass="code" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity"/>
 				</center>
 				<bottom>
 					<HBox spacing="10.0">
 						<padding>
-							<Insets top="10.0" left="15.0" right="15.0"/>
+							<Insets topRightBottomLeft="10.0"/>
 						</padding>
 						<Spacer/>
 						<CheckBox fx:id="cbUnicode" text="%common.checkbox.unicode" alignment="CENTER_RIGHT" HBox.hgrow="NEVER"/>
