@@ -171,7 +171,7 @@ public class TestCaseGenerationInput extends VBox {
 							.showAndWait();
 					return;
 				}
-				testCaseGenerationFormulaHandler.addFormula(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()), checking);
+				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()), checking);
 				break;
 			}
 			case COVERED_OPERATIONS: {
@@ -189,7 +189,7 @@ public class TestCaseGenerationInput extends VBox {
 							.showAndWait();
 					return;
 				}
-				testCaseGenerationFormulaHandler.addFormula(Integer.parseInt(operationCoverageInputView.getDepth()), operations, checking);
+				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(operationCoverageInputView.getDepth()), operations, checking);
 				break;
 			}
 			default:

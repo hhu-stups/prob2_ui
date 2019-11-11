@@ -40,22 +40,22 @@ public class TestCaseGenerationItemHandler {
 		this.resultHandler = resultHandler;
 	}
 
-	public void addFormula(String name, TestCaseGenerationType type, boolean checking) {
+	public void addItem(String name, TestCaseGenerationType type, boolean checking) {
 		TestCaseGenerationItem item = new TestCaseGenerationItem(name, type);
-		addFormula(item,checking);
+		addItem(item,checking);
 	}
 
-	public void addFormula(int depth, int level, boolean checking) {
+	public void addItem(int depth, int level, boolean checking) {
 		TestCaseGenerationItem item = new TestCaseGenerationItem(depth, level);
-		addFormula(item,checking);
+		addItem(item,checking);
 	}
 
-	public void addFormula(int depth, List<String> operations, boolean checking) {
+	public void addItem(int depth, List<String> operations, boolean checking) {
 		TestCaseGenerationItem item = new TestCaseGenerationItem(depth, operations);
-		addFormula(item,checking);
+		addItem(item,checking);
 	}
 
-	public void addFormula(TestCaseGenerationItem item, boolean checking) {
+	public void addItem(TestCaseGenerationItem item, boolean checking) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(!currentMachine.getTestCases().contains(item)) {

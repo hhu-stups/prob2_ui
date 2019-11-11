@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -13,15 +12,6 @@ import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
-import de.prob.animator.command.NoTraceFoundException;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.check.CheckError;
-import de.prob.check.CheckInterrupted;
-import de.prob.check.IModelCheckingResult;
-import de.prob.check.ModelCheckOk;
-import de.prob.check.NotYetFinished;
-import de.prob.exception.CliError;
-import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -38,16 +28,10 @@ import javafx.scene.layout.Region;
 
 @Singleton
 public class TestCaseGenerationResultHandler {
-
-	private static final String GENERAL_RESULT_MESSAGE = "common.result.message";
 	
 	private final ResourceBundle bundle;
 	
 	private final CurrentTrace currentTrace;
-	
-	private ArrayList<Class<?>> success;
-	private ArrayList<Class<?>> parseErrors;
-	private ArrayList<Class<?>> interrupted;
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
@@ -61,12 +45,6 @@ public class TestCaseGenerationResultHandler {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.injector = injector;
-		this.success = new ArrayList<>();
-		this.parseErrors = new ArrayList<>();
-		this.interrupted = new ArrayList<>();
-		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.parseErrors.addAll(Arrays.asList(ProBError.class, CliError.class, CheckError.class, EvaluationException.class));
-		this.interrupted.addAll(Arrays.asList(NoTraceFoundException.class, NotYetFinished.class, CheckInterrupted.class));
 	}
 	
 	private void showCheckingResult(TestCaseGenerationItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
@@ -82,43 +60,9 @@ public class TestCaseGenerationResultHandler {
 		item.setChecked(checked);
 	}
 	
-	public void handleFormulaResult(TestCaseGenerationItem item, Object result) {
-		Class<?> clazz = result.getClass();
-		if(success.contains(clazz)) {
-			handleItem(item, Checked.SUCCESS);
-		} else if(parseErrors.contains(clazz)) {
-			handleItem(item, Checked.PARSE_ERROR);
-		} else {
-			handleItem(item, Checked.INTERRUPTED);
-		}
-		CheckingResultItem resultItem = handleFormulaResult(result);
-		item.setResultItem(resultItem);
-	}
-	
-	public CheckingResultItem handleFormulaResult(Object result) {
-		CheckingResultItem resultItem = null;
-		if(success.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.result.succeeded.header",
-					"animation.symbolic.result.succeeded.message");
-		} else if(parseErrors.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
-					GENERAL_RESULT_MESSAGE, result);
-		} else if(interrupted.contains(result.getClass())) {
-			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
-					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
-		}
-		return resultItem;
-	}
 
 	public void handleTestCaseGenerationResult(TestCaseGenerationItem item, Object result, boolean checkAll) {
 		item.getExamples().clear();
-		if(parseErrors.contains(result.getClass())) {
-			showCheckingResult(item, Checked.PARSE_ERROR, "animation.symbolic.resultHandler.testcasegeneration.result.error");
-			return;
-		} else if(interrupted.contains(result.getClass())) {
-			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.testcasegeneration.result.interrupted");
-			return;
-		}
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
 		List<TraceInformationItem> traceInformation = extractTraceInformation(testCaseGeneratorResult);
 		List<Trace> traces = extractTraces(testCaseGeneratorResult);
