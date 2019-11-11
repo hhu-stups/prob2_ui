@@ -30,13 +30,13 @@ import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
-public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormulaItem> {
+public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
-	private class SymbolicAnimationCellFactory extends SymbolicCellFactory implements Callback<TableView<SymbolicAnimationFormulaItem>, TableRow<SymbolicAnimationFormulaItem>>{
+	private class SymbolicAnimationCellFactory extends SymbolicCellFactory implements Callback<TableView<SymbolicAnimationItem>, TableRow<SymbolicAnimationItem>>{
 	
 		@Override
-		public TableRow<SymbolicAnimationFormulaItem> call(TableView<SymbolicAnimationFormulaItem> param) {
-			TableRow<SymbolicAnimationFormulaItem> row = createRow();
+		public TableRow<SymbolicAnimationItem> call(TableView<SymbolicAnimationItem> param) {
+			TableRow<SymbolicAnimationItem> row = createRow();
 
 			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> removeFormula());
@@ -72,7 +72,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 			return row;
 		}
 
-		private void showExamples(SymbolicAnimationFormulaItem item, Menu exampleItem) {
+		private void showExamples(SymbolicAnimationItem item, Menu exampleItem) {
 			exampleItem.getItems().clear();
 			List<Trace> examples = item.getExamples();
 			for(int i = 0; i < examples.size(); i++) {
@@ -86,18 +86,18 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 	
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final SymbolicAnimationFormulaHandler symbolicCheckHandler, 
+					final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler, 
 					final SymbolicAnimationChecker symbolicChecker, final Injector injector) {
-		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicAnimationFormulaItem.class);
+		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicAnimationItem.class);
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 
-	protected ListProperty<SymbolicAnimationFormulaItem> formulasProperty(Machine machine) {
+	protected ListProperty<SymbolicAnimationItem> formulasProperty(Machine machine) {
 		return machine.symbolicAnimationFormulasProperty();
 	}
 	
 	@Override
-	protected void removeFormula(Machine machine, SymbolicAnimationFormulaItem item) {
+	protected void removeFormula(Machine machine, SymbolicAnimationItem item) {
 		machine.removeSymbolicAnimationFormula(item);
 		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_ANIMATION);
 	}
@@ -114,8 +114,8 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationFormula
 	}
 
 	@Override
-	protected void openItem(SymbolicAnimationFormulaItem item) {
-		SymbolicAnimationFormulaInput formulaInput = injector.getInstance(SymbolicAnimationFormulaInput.class);
+	protected void openItem(SymbolicAnimationItem item) {
+		SymbolicAnimationInput formulaInput = injector.getInstance(SymbolicAnimationInput.class);
 		formulaInput.changeFormula(item, injector.getInstance(SymbolicAnimationView.class),
 				injector.getInstance(SymbolicAnimationResultHandler.class), injector.getInstance(SymbolicAnimationChoosingStage.class));
 	}

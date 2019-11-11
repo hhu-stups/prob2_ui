@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationChoosingStage?>
-<?import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaInput?>
+<?import de.prob2.ui.animation.symbolic.SymbolicAnimationInput?>
 <?import de.prob2.ui.symbolic.SymbolicExecutionItem?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>

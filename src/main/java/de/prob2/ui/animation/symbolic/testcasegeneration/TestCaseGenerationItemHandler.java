@@ -61,7 +61,7 @@ public class TestCaseGenerationItemHandler {
 			if(!currentMachine.getTestCases().contains(item)) {
 				currentMachine.addTestCase(item);
 			} else if(!checking) {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
 		}
 	}

@@ -35,7 +35,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
-public abstract class SymbolicView<T extends SymbolicFormulaItem> extends ScrollPane implements ISelectableCheckingView {
+public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane implements ISelectableCheckingView {
 	
 	public abstract class SymbolicCellFactory {
 

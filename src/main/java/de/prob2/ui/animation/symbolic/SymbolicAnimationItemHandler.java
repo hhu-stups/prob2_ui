@@ -20,7 +20,7 @@ import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.AbstractResultHandler;
 
 @Singleton
-public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<SymbolicAnimationFormulaItem> {
+public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<SymbolicAnimationItem> {
 
 	private final CurrentTrace currentTrace;
 
@@ -31,7 +31,7 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	private final CurrentProject currentProject;
 
 	@Inject
-	private SymbolicAnimationFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
+	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
 										   final SymbolicAnimationChecker symbolicChecker,
 										   final SymbolicAnimationResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
@@ -41,34 +41,34 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	}
 
 	public void addFormula(String name, SymbolicExecutionType type, boolean checking) {
-		SymbolicAnimationFormulaItem formula = new SymbolicAnimationFormulaItem(name, type);
+		SymbolicAnimationItem formula = new SymbolicAnimationItem(name, type);
 		addFormula(formula,checking);
 	}
 
-	public void addFormula(SymbolicAnimationFormulaItem formula, boolean checking) {
+	public void addFormula(SymbolicAnimationItem formula, boolean checking) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(!currentMachine.getSymbolicAnimationFormulas().contains(formula)) {
 				currentMachine.addSymbolicAnimationFormula(formula);
 			} else if(!checking) {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
 		}
 	}
 
-	public void handleSequence(SymbolicAnimationFormulaItem item, boolean checkAll) {
+	public void handleSequence(SymbolicAnimationItem item, boolean checkAll) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new EventB("true", FormulaExpand.EXPAND));
 		symbolicChecker.checkItem(item, cmd, currentTrace.getStateSpace(), checkAll);
 	}
 
-	public void findValidState(SymbolicAnimationFormulaItem item, boolean checkAll) {
+	public void findValidState(SymbolicAnimationItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode(), FormulaExpand.EXPAND), true);
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 
-	public void handleItem(SymbolicAnimationFormulaItem item, boolean checkAll) {
+	public void handleItem(SymbolicAnimationItem item, boolean checkAll) {
 		if(!item.selected()) {
 			return;
 		}

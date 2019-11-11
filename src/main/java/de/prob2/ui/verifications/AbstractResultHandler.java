@@ -16,6 +16,7 @@ import javafx.scene.layout.Region;
 public abstract class AbstractResultHandler {
 	
 	public enum ItemType {
+		CONFIGURATION("verifications.abstractResultHandler.itemType.configuration"),
 		FORMULA("verifications.abstractResultHandler.itemType.formula"),
 		PATTERN("verifications.abstractResultHandler.itemType.pattern"),
 		;

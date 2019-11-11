@@ -28,7 +28,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
-import de.prob2.ui.symbolic.SymbolicFormulaItem;
+import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -51,7 +51,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 		this.parseErrors.addAll(Arrays.asList(CheckError.class, EvaluationException.class));
 	}
 	
-	public void handleFormulaResult(SymbolicFormulaItem item, Object result) {
+	public void handleFormulaResult(SymbolicItem item, Object result) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			item.setChecked(Checked.SUCCESS);
@@ -71,7 +71,7 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 		}
 	}
 	
-	public void handleFormulaResult(SymbolicFormulaItem item, AbstractCommand cmd) {
+	public void handleFormulaResult(SymbolicItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if(item.getType() == SymbolicExecutionType.TINDUCTION || item.getType() == SymbolicExecutionType.KINDUCTION ||
 					item.getType() == SymbolicExecutionType.BMC || item.getType() == SymbolicExecutionType.IC3) {

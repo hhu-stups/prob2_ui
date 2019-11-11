@@ -8,7 +8,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutor;
-import de.prob2.ui.symbolic.SymbolicFormulaItem;
+import de.prob2.ui.symbolic.SymbolicItem;
 
 
 import javax.inject.Inject;
@@ -28,8 +28,8 @@ public class SymbolicAnimationChecker extends SymbolicExecutor {
 	}
 
 	@Override
-	protected void updateTrace(SymbolicFormulaItem item) {
-		List<Trace> examples = ((SymbolicAnimationFormulaItem) item).getExamples();
+	protected void updateTrace(SymbolicItem item) {
+		List<Trace> examples = ((SymbolicAnimationItem) item).getExamples();
 		if(!examples.isEmpty()) {
 			currentTrace.set(examples.get(0));
 		}

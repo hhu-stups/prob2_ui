@@ -4,13 +4,13 @@ import java.util.Objects;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
-import de.prob2.ui.symbolic.SymbolicFormulaItem;
+import de.prob2.ui.symbolic.SymbolicItem;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class SymbolicCheckingFormulaItem extends SymbolicFormulaItem {
+public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	
 	private transient ListProperty<Trace> counterExamples;
 

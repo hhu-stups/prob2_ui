@@ -9,7 +9,7 @@ import com.google.common.io.Files;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.internal.OnlyDeserialize;
 import de.prob2.ui.project.preferences.Preference;
@@ -54,7 +54,7 @@ public class Machine implements DescriptionView.Describable {
 	private ListProperty<LTLFormulaItem> ltlFormulas;
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
-	private ListProperty<SymbolicAnimationFormulaItem> symbolicAnimationFormulas;
+	private ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private ListProperty<TestCaseGenerationItem> testCases;
 	private SetProperty<Path> traces;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
@@ -112,7 +112,7 @@ public class Machine implements DescriptionView.Describable {
 			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
 		}
 		if (symbolicAnimationFormulas != null) {
-			symbolicAnimationFormulas.forEach(SymbolicAnimationFormulaItem::initialize);
+			symbolicAnimationFormulas.forEach(SymbolicAnimationItem::initialize);
 		}
 		if (testCases != null) {
 			testCases.forEach(TestCaseGenerationItem::initialize);
@@ -248,20 +248,20 @@ public class Machine implements DescriptionView.Describable {
 		this.setChanged(true);
 	}
 	
-	public ListProperty<SymbolicAnimationFormulaItem> symbolicAnimationFormulasProperty() {
+	public ListProperty<SymbolicAnimationItem> symbolicAnimationFormulasProperty() {
 		return symbolicAnimationFormulas;
 	}
 	
-	public List<SymbolicAnimationFormulaItem> getSymbolicAnimationFormulas() {
+	public List<SymbolicAnimationItem> getSymbolicAnimationFormulas() {
 		return symbolicAnimationFormulas.get();
 	}
 	
-	public void addSymbolicAnimationFormula(SymbolicAnimationFormulaItem formula) {
+	public void addSymbolicAnimationFormula(SymbolicAnimationItem formula) {
 		symbolicAnimationFormulas.add(formula);
 		this.setChanged(true);
 	}
 	
-	public void removeSymbolicAnimationFormula(SymbolicAnimationFormulaItem formula) {
+	public void removeSymbolicAnimationFormula(SymbolicAnimationItem formula) {
 		symbolicAnimationFormulas.remove(formula);
 		this.setChanged(true);
 	}

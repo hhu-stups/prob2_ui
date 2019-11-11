@@ -13,7 +13,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
-import de.prob2.ui.symbolic.SymbolicFormulaItem;
+import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.symbolic.SymbolicGUIType;
 import de.prob2.ui.symbolic.SymbolicView;
 import javafx.fxml.FXML;
@@ -40,7 +40,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 	protected boolean updateFormula(SymbolicCheckingFormulaItem item, SymbolicView<SymbolicCheckingFormulaItem> view, SymbolicChoosingStage<SymbolicCheckingFormulaItem> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractFormula(choosingStage);
-		SymbolicFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
+		SymbolicItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
 		if(choosingStage.getExecutionType() == SymbolicExecutionType.CHECK_ALL_OPERATIONS || (choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null)) {
 			return true;
 		}

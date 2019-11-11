@@ -2,7 +2,7 @@ package de.prob2.ui.animation.symbolic;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
-import de.prob2.ui.symbolic.SymbolicFormulaItem;
+import de.prob2.ui.symbolic.SymbolicItem;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -11,16 +11,16 @@ import javafx.collections.ObservableList;
 import java.util.Map;
 import java.util.Objects;
 
-public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
+public class SymbolicAnimationItem extends SymbolicItem {
 
 	private transient ListProperty<Trace> examples;
 
-	public SymbolicAnimationFormulaItem(String name, SymbolicExecutionType type) {
+	public SymbolicAnimationItem(String name, SymbolicExecutionType type) {
 		super(name, type);
 		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 	}
 
-	public SymbolicAnimationFormulaItem(String name, SymbolicExecutionType type, Map<String, Object> additionalInformation) {
+	public SymbolicAnimationItem(String name, SymbolicExecutionType type, Map<String, Object> additionalInformation) {
 		super(name, type);
 		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 	}
@@ -54,10 +54,10 @@ public class SymbolicAnimationFormulaItem extends SymbolicFormulaItem {
 		if (obj == this) {
 			return true;
 		}
-		if (!(obj instanceof SymbolicAnimationFormulaItem)) {
+		if (!(obj instanceof SymbolicAnimationItem)) {
 			return false;
 		}
-		SymbolicAnimationFormulaItem otherItem = (SymbolicAnimationFormulaItem) obj;
+		SymbolicAnimationItem otherItem = (SymbolicAnimationItem) obj;
 		return otherItem.getName().equals(this.getName()) &&
 				otherItem.getCode().equals(this.getCode()) &&
 				otherItem.getType().equals(this.getType());

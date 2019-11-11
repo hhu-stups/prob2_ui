@@ -18,7 +18,6 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -33,28 +32,28 @@ public class TestCaseGenerationInput extends VBox {
 	private final TestCaseGenerationSettingsHandler testCaseGenerationSettingsHandler;
 	
 	@FXML
-	protected Button btAdd;
+	private Button btAdd;
 	
 	@FXML
-	protected Button btCheck;
+	private Button btCheck;
 	
 	@FXML
-	protected MCDCInputView mcdcInputView;
+	private MCDCInputView mcdcInputView;
 
 	@FXML
-	protected OperationCoverageInputView operationCoverageInputView;
+	private OperationCoverageInputView operationCoverageInputView;
 
-	protected final StageManager stageManager;
+	private final StageManager stageManager;
 
-	protected final Injector injector;
+	private final Injector injector;
 	
-	protected final ResourceBundle bundle;
+	private final ResourceBundle bundle;
 	
-	protected final CurrentTrace currentTrace;
+	private final CurrentTrace currentTrace;
 	
-	protected ArrayList<String> events;
+	private ArrayList<String> events;
 	
-	protected final CurrentProject currentProject;
+	private final CurrentProject currentProject;
 	
 	@Inject
 	private TestCaseGenerationInput(final StageManager stageManager, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
@@ -77,27 +76,24 @@ public class TestCaseGenerationInput extends VBox {
 		setCheckListeners();
 	}
 	
-	protected void update() {
+	private void update() {
 		events.clear();
-		final Map<String, String> items = new LinkedHashMap<>();
 		if (currentTrace.get() != null) {
 			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
 			if (loadedMachine != null) {
 				events.addAll(loadedMachine.getOperationNames());
-				loadedMachine.getConstantNames().forEach(s -> items.put(s, ""));
-				loadedMachine.getVariableNames().forEach(s -> items.put(s, ""));
 			}
 		}
 		operationCoverageInputView.setTable(events);
 	}
 
-	private boolean updateFormula(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationChoosingStage choosingStage) {
+	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationChoosingStage choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		String formula = extractFormula(choosingStage);
+		String formula = extractItem(choosingStage);
 		Map<String, Object> additionalInformation = testCaseGenerationSettingsHandler.extractAdditionalInformation(choosingStage, mcdcInputView, operationCoverageInputView);
 		boolean valid = testCaseGenerationSettingsHandler.isValid(choosingStage, mcdcInputView, operationCoverageInputView);
 		TestCaseGenerationItem newItem = new TestCaseGenerationItem(formula, choosingStage.getTestCaseGenerationType(), additionalInformation);
-		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
+		if(!currentMachine.getTestCases().contains(newItem)) {
 			if(valid) {
 				TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
 				item.setData(formula, type.getName(), formula, type, additionalInformation);
@@ -109,9 +105,9 @@ public class TestCaseGenerationInput extends VBox {
 		return false;
 	}
 	
-	protected void setCheckListeners() {
-		btAdd.setOnAction(e -> addFormula(false));
-		btCheck.setOnAction(e -> checkFormula());
+	private void setCheckListeners() {
+		btAdd.setOnAction(e -> addItem(false));
+		btCheck.setOnAction(e -> checkItem());
 	}
 	
 	public void changeType(final TestCaseExecutionItem item) {
@@ -137,10 +133,10 @@ public class TestCaseGenerationInput extends VBox {
 		operationCoverageInputView.reset();
 	}
 
-	public void checkFormula() {
+	public void checkItem() {
 		TestCaseGenerationType testCaseGenerationType = injector.getInstance(TestCaseGenerationChoosingStage.class).getTestCaseGenerationType();
 		TestCaseGenerationItem item = null;
-		addFormula(true);
+		addItem(true);
 		switch (testCaseGenerationType) {
 			case MCDC: {
 				if(!testCaseGenerationSettingsHandler.checkMCDCSettings(mcdcInputView.getLevel(), mcdcInputView.getDepth())) {
@@ -164,7 +160,7 @@ public class TestCaseGenerationInput extends VBox {
 		injector.getInstance(TestCaseGenerationChoosingStage.class).close();
 	}
 
-	public void addFormula(boolean checking) {
+	public void addItem(boolean checking) {
 		TestCaseGenerationType type = injector.getInstance(TestCaseGenerationChoosingStage.class).getTestCaseGenerationType();
 		switch(type) {
 			case MCDC: {
@@ -202,7 +198,7 @@ public class TestCaseGenerationInput extends VBox {
 		injector.getInstance(TestCaseGenerationChoosingStage.class).close();
 	}
 	
-	protected String extractFormula(TestCaseGenerationChoosingStage choosingStage) {
+	private String extractItem(TestCaseGenerationChoosingStage choosingStage) {
 		String formula;
 		if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
 			String level = mcdcInputView.getLevel();
@@ -218,7 +214,7 @@ public class TestCaseGenerationInput extends VBox {
 		return formula;
 	}
 	
-	public void changeFormula(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
+	public void changeItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
 		setChangeListeners(item, view, resultHandler, stage);
@@ -231,21 +227,21 @@ public class TestCaseGenerationInput extends VBox {
 		stage.show();
 	}
 	
-	protected void setChangeListeners(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
+	private void setChangeListeners(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
 		btAdd.setOnAction(e -> {
-			if(updateFormula(item, view, stage)) {
-				addFormula(false);
+			if(updateItem(item, view, stage)) {
+				addItem(false);
 			} else {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
 			stage.close();
 		});
 		
 		btCheck.setOnAction(e-> {
-			if(updateFormula(item, view, stage)) {
-				checkFormula();
+			if(updateItem(item, view, stage)) {
+				checkItem();
 			} else {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
 			stage.close();
 		});

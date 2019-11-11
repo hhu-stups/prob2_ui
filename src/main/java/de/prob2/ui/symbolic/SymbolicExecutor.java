@@ -73,8 +73,8 @@ public abstract class SymbolicExecutor {
 		return currentJobThreads;
 	}
 	
-	public void checkItem(SymbolicFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
-		final SymbolicFormulaItem currentItem = getItemIfAlreadyExists(item);
+	public void checkItem(SymbolicItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
+		final SymbolicItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			RuntimeException exception = null;
 			try {
@@ -103,7 +103,7 @@ public abstract class SymbolicExecutor {
 		checkingThread.start();
 	}
 	
-	public void checkItem(IModelCheckJob checker, SymbolicFormulaItem item, boolean checkAll) {
+	public void checkItem(IModelCheckJob checker, SymbolicItem item, boolean checkAll) {
 		Thread checkingThread = new Thread(() -> {
 			currentJobs.add(checker);
 			Object result;
@@ -129,12 +129,12 @@ public abstract class SymbolicExecutor {
 		checkingThread.start();
 	}
 	
-	protected abstract void updateTrace(SymbolicFormulaItem item);
+	protected abstract void updateTrace(SymbolicItem item);
 	
 	protected abstract void updateMachine(Machine machine);
 	
-	protected SymbolicFormulaItem getItemIfAlreadyExists(SymbolicFormulaItem item) {
-		List<? extends SymbolicFormulaItem> formulas = getItems();
+	protected SymbolicItem getItemIfAlreadyExists(SymbolicItem item) {
+		List<? extends SymbolicItem> formulas = getItems();
 		int index = formulas.indexOf(item);
 		if(index > -1) {
 			item = formulas.get(index);
@@ -142,9 +142,9 @@ public abstract class SymbolicExecutor {
 		return item;
 	}
 	
-	private List<? extends SymbolicFormulaItem> getItems() {
+	private List<? extends SymbolicItem> getItems() {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		List<? extends SymbolicFormulaItem> formulas;
+		List<? extends SymbolicItem> formulas;
 		if(resultHandler instanceof SymbolicCheckingResultHandler) {
 			formulas = currentMachine.getSymbolicCheckingFormulas();
 		} else {

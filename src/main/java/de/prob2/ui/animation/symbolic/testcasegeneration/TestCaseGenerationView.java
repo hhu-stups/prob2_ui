@@ -206,7 +206,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 		tvFormula.refresh();
 	}
 	
-	protected void setBindings() {
+	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = currentTrace.existsProperty().not()
 				.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()));
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(addFormulaButton.disableProperty(), partOfDisableBinding);
@@ -272,7 +272,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 
 	private void openItem(TestCaseGenerationItem item) {
 		TestCaseGenerationInput input = injector.getInstance(TestCaseGenerationInput.class);
-		input.changeFormula(item, injector.getInstance(TestCaseGenerationView.class),
+		input.changeItem(item, injector.getInstance(TestCaseGenerationView.class),
 				injector.getInstance(TestCaseGenerationResultHandler.class), injector.getInstance(TestCaseGenerationChoosingStage.class));
 	}
 	

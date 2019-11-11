@@ -5,7 +5,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public abstract class SymbolicChoosingStage<T extends SymbolicFormulaItem> extends Stage {
+public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stage {
 		
 	@FXML
 	private SymbolicFormulaInput<T> formulaInput;
@@ -38,7 +38,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicFormulaItem> exten
 		return cbChoice.getSelectionModel().getSelectedItem().getExecutionType();
 	}
 	
-	public void select(SymbolicFormulaItem item) {
+	public void select(SymbolicItem item) {
 		cbChoice.getItems().forEach(choice -> {
 			if(item.getType().equals(choice.getExecutionType())) {
 				cbChoice.getSelectionModel().select(choice);

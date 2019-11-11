@@ -11,7 +11,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutor;
-import de.prob2.ui.symbolic.SymbolicFormulaItem;
+import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 
@@ -30,7 +30,7 @@ public class SymbolicFormulaChecker extends SymbolicExecutor {
 	}
 	
 	@Override
-	protected void updateTrace(SymbolicFormulaItem item) {
+	protected void updateTrace(SymbolicItem item) {
 		List<Trace> counterExamples = ((SymbolicCheckingFormulaItem) item).getCounterExamples();
 		if(!counterExamples.isEmpty()) {
 			currentTrace.set(counterExamples.get(0));

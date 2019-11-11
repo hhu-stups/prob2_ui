@@ -25,7 +25,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
-import de.prob2.ui.symbolic.SymbolicFormulaItem;
+import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
@@ -64,7 +64,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		this.interrupted.addAll(Arrays.asList(NoTraceFoundException.class, NotYetFinished.class, CheckInterrupted.class));
 	}
 	
-	public void handleFindValidState(SymbolicAnimationFormulaItem item, FindStateCommand cmd, StateSpace stateSpace) {
+	public void handleFindValidState(SymbolicAnimationItem item, FindStateCommand cmd, StateSpace stateSpace) {
 		FindStateCommand.ResultType result = cmd.getResult();
 		item.getExamples().clear();
 		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
@@ -80,7 +80,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		}
 	}
 	
-	public void handleSequence(SymbolicAnimationFormulaItem item, ConstraintBasedSequenceCheckCommand cmd) {
+	public void handleSequence(SymbolicAnimationItem item, ConstraintBasedSequenceCheckCommand cmd) {
 		ConstraintBasedSequenceCheckCommand.ResultType result = cmd.getResult();
 		item.getExamples().clear();
 		switch(result) {
@@ -105,12 +105,12 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		}
 	}
 	
-	private void showCheckingResult(SymbolicAnimationFormulaItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
+	private void showCheckingResult(SymbolicAnimationItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
 		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams));
 		handleItem(item, checked);
 	}
 	
-	private void showCheckingResult(SymbolicAnimationFormulaItem item, Checked checked, String msgKey) {
+	private void showCheckingResult(SymbolicAnimationItem item, Checked checked, String msgKey) {
 		showCheckingResult(item, checked, msgKey, msgKey);
 	}
 	
@@ -118,7 +118,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		item.setChecked(checked);
 	}
 	
-	public void handleFormulaResult(SymbolicFormulaItem item, Object result) {
+	public void handleFormulaResult(SymbolicItem item, Object result) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			handleItem(item, Checked.SUCCESS);
@@ -146,12 +146,12 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 		return resultItem;
 	}
 
-	public void handleFormulaResult(SymbolicFormulaItem item, AbstractCommand cmd) {
+	public void handleFormulaResult(SymbolicItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if(item.getType() == SymbolicExecutionType.FIND_VALID_STATE) {
-			handleFindValidState((SymbolicAnimationFormulaItem) item, (FindStateCommand) cmd, stateSpace);
+			handleFindValidState((SymbolicAnimationItem) item, (FindStateCommand) cmd, stateSpace);
 		} else if(item.getType() == SymbolicExecutionType.SEQUENCE) {
-			handleSequence((SymbolicAnimationFormulaItem) item, (ConstraintBasedSequenceCheckCommand) cmd);
+			handleSequence((SymbolicAnimationItem) item, (ConstraintBasedSequenceCheckCommand) cmd);
 		}
 	}
 
@@ -162,7 +162,7 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 				.showAndWait();
 	}
 	
-	public void showResult(SymbolicAnimationFormulaItem item) {
+	public void showResult(SymbolicAnimationItem item) {
 		CheckingResultItem resultItem = item.getResultItem();
 		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
 			return;

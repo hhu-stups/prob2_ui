@@ -45,9 +45,9 @@ public class TestCaseGenerationResultHandler {
 	
 	private final CurrentTrace currentTrace;
 	
-	protected ArrayList<Class<?>> success;
-	protected ArrayList<Class<?>> parseErrors;
-	protected ArrayList<Class<?>> interrupted;
+	private ArrayList<Class<?>> success;
+	private ArrayList<Class<?>> parseErrors;
+	private ArrayList<Class<?>> interrupted;
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
