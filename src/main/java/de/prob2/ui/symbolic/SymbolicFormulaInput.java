@@ -44,12 +44,6 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 	@FXML
 	protected PredicateBuilderView predicateBuilderView;
 
-	@FXML
-	protected MCDCInputView mcdcInputView;
-
-	@FXML
-	protected OperationCoverageInputView operationCoverageInputView;
-
 	protected final StageManager stageManager;
 
 	protected final Injector injector;
@@ -92,13 +86,12 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		}
 		cbOperations.getItems().setAll(events);
 		predicateBuilderView.setItems(items);
-		operationCoverageInputView.setTable(events);
 	}
 	
 	protected abstract void setCheckListeners();
 	
 	public void changeGUIType(final SymbolicGUIType guiType) {
-		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView, mcdcInputView, operationCoverageInputView);
+		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView);
 		switch (guiType) {
 			case NONE:
 				break;
@@ -111,12 +104,6 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			case PREDICATE:
 				this.getChildren().add(0, predicateBuilderView);
 				break;
-			case MCDC:
-				this.getChildren().add(0, mcdcInputView);
-				break;
-			case OPERATIONS:
-				this.getChildren().add(0, operationCoverageInputView);
-				break;
 			default:
 				throw new AssertionError("Unhandled GUI type: " + guiType);
 		}
@@ -128,8 +115,6 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 		setCheckListeners();
 		tfFormula.clear();
 		predicateBuilderView.reset();
-		mcdcInputView.reset();
-		operationCoverageInputView.reset();
 		cbOperations.getSelectionModel().clearSelection();
 	}
 
@@ -143,14 +128,6 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 			formula = cbOperations.getSelectionModel().getSelectedItem();
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.MCDC) {
-			String level = mcdcInputView.getLevel();
-			String depth = mcdcInputView.getDepth();
-			formula = "MCDC:" + level + "/" + "DEPTH:" + depth;
-		} else if(choosingStage.getGUIType() == SymbolicGUIType.OPERATIONS) {
-			List<String> operations = operationCoverageInputView.getOperations();
-			String depth = operationCoverageInputView.getDepth();
-			formula = "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
 		} else {
 			formula = choosingStage.getExecutionType().getName();
 		}
@@ -173,10 +150,6 @@ public abstract class SymbolicFormulaInput<T extends SymbolicFormulaItem> extend
 					return;
 				}
 			});
-		} else if(stage.getGUIType() == SymbolicGUIType.MCDC) {
-			mcdcInputView.setItem((SymbolicAnimationFormulaItem) item);
-		} else if(stage.getGUIType() == SymbolicGUIType.OPERATIONS) {
-			operationCoverageInputView.setItem((SymbolicAnimationFormulaItem) item);
 		}
 		stage.show();
 	}

@@ -2,7 +2,6 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import com.google.inject.Inject;
 
-import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
@@ -38,10 +37,10 @@ public class MCDCInputView extends VBox {
 		depthField.clear();
 	}
 
-	public void setItem(SymbolicAnimationFormulaItem item) {
+	public void setItem(TestCaseGenerationItem item) {
 		//An element in the values set of additionalInformation can be from any type. GSON casts an integer to double when saving the project file.
 		levelField.setText(String.valueOf((int) Double.parseDouble(item.getAdditionalInformation("level").toString())));
-		depthField.setText(String.valueOf((int) Double.parseDouble(item.getAdditionalInformation("maxDepth").toString())));
+		depthField.setText(String.valueOf(item.getMaxDepth()));
 	}
 
 }

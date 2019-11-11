@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -23,11 +22,9 @@ public class SymbolicFormulaChecker extends SymbolicExecutor {
 	public SymbolicFormulaChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
 							final SymbolicCheckingResultHandler resultHandler, final Injector injector) {
 		super(currentTrace, currentProject, resultHandler, injector);
-		this.items = new ArrayList<>();
 	}
 	
 	public void updateMachine(Machine machine) {
-		this.items = machine.getSymbolicCheckingFormulas();
 		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_CHECKING);
 		injector.getInstance(SymbolicCheckingView.class).refresh();
 	}

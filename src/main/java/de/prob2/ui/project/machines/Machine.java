@@ -10,6 +10,7 @@ import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.internal.OnlyDeserialize;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
@@ -54,6 +55,7 @@ public class Machine implements DescriptionView.Describable {
 	private ListProperty<LTLPatternItem> ltlPatterns;
 	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
 	private ListProperty<SymbolicAnimationFormulaItem> symbolicAnimationFormulas;
+	private ListProperty<TestCaseGenerationItem> testCases;
 	private SetProperty<Path> traces;
 	private ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
@@ -111,6 +113,9 @@ public class Machine implements DescriptionView.Describable {
 		}
 		if (symbolicAnimationFormulas != null) {
 			symbolicAnimationFormulas.forEach(SymbolicAnimationFormulaItem::initialize);
+		}
+		if (testCases != null) {
+			testCases.forEach(TestCaseGenerationItem::initialize);
 		}
 		if (modelcheckingItems != null) {
 			modelcheckingItems.forEach(ModelCheckingItem::initialize);
@@ -261,6 +266,24 @@ public class Machine implements DescriptionView.Describable {
 		this.setChanged(true);
 	}
 	
+	public ListProperty<TestCaseGenerationItem> testCasesProperty() {
+		return testCases;
+	}
+	
+	public List<TestCaseGenerationItem> getTestCases() {
+		return testCases.get();
+	}
+	
+	public void addTestCase(TestCaseGenerationItem item) {
+		testCases.add(item);
+		this.setChanged(true);
+	}
+	
+	public void removeTestCase(TestCaseGenerationItem item) {
+		testCases.remove(item);
+		this.setChanged(true);
+	}
+	
 	public ObservableSet<Path> getTraceFiles() {
 		return this.traces;
 	}
@@ -324,6 +347,9 @@ public class Machine implements DescriptionView.Describable {
 		}
 		if(symbolicAnimationFormulas == null) {
 			this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
+		}
+		if(testCases == null) {
+			this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		}
 		if(traces == null) {
 			this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());

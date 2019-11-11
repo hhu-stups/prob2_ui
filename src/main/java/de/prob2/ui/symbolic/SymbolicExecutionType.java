@@ -16,8 +16,6 @@ public enum SymbolicExecutionType {
 	TINDUCTION("TINDUCTION", SymbolicModelcheckCommand.Algorithm.TINDUCTION), 
 	KINDUCTION("KINDUCTION", SymbolicModelcheckCommand.Algorithm.KINDUCTION), 
 	BMC("BMC", SymbolicModelcheckCommand.Algorithm.BMC),
-	MCDC("MCDC Testing", null),
-	COVERED_OPERATIONS("Covered Operations Testing", null)
 	;
 	
 	private final String name;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.animation.symbolic.SymbolicAnimationChoosingStage?>
-<?import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaInput?>
-<?import de.prob2.ui.symbolic.SymbolicExecutionItem?>
+<?import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationChoosingStage?>
+<?import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationInput?>
+<?import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseExecutionItem?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ChoiceBox?>
@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
-<fx:root type="SymbolicAnimationChoosingStage" fx:id="cbcChoice" title="%animation.symbolic.choice.title"
+<fx:root type="TestCaseGenerationChoosingStage" fx:id="cbcChoice" title="%animation.symbolic.choice.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -25,13 +25,13 @@
 						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicExecutionItem executionType="SEQUENCE" guiType="TEXT_FIELD"/>
-									<SymbolicExecutionItem executionType="FIND_VALID_STATE" guiType="PREDICATE"/>
+									<TestCaseExecutionItem executionType="MCDC"/>
+									<TestCaseExecutionItem executionType="COVERED_OPERATIONS"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>
 					</HBox>
-					<SymbolicAnimationFormulaInput fx:id="formulaInput"/>
+					<TestCaseGenerationInput fx:id="input"/>
 				</VBox>
 			</AnchorPane>
 		</Scene>

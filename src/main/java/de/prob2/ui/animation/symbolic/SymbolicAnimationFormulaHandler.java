@@ -7,15 +7,11 @@ import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
-import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGeneratorCreator;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -29,8 +25,6 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	private final CurrentTrace currentTrace;
 
 	private final SymbolicAnimationChecker symbolicChecker;
-	
-	private final TestCaseGeneratorCreator testCaseGeneratorCreator;
 
 	private final SymbolicAnimationResultHandler resultHandler;
 
@@ -39,27 +33,15 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 	@Inject
 	private SymbolicAnimationFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
 										   final SymbolicAnimationChecker symbolicChecker,
-										   final TestCaseGeneratorCreator testCaseGeneratorCreator,
 										   final SymbolicAnimationResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.symbolicChecker = symbolicChecker;
-		this.testCaseGeneratorCreator = testCaseGeneratorCreator;
 		this.resultHandler = resultHandler;
 	}
 
 	public void addFormula(String name, SymbolicExecutionType type, boolean checking) {
 		SymbolicAnimationFormulaItem formula = new SymbolicAnimationFormulaItem(name, type);
-		addFormula(formula,checking);
-	}
-
-	public void addFormula(int depth, int level, boolean checking) {
-		SymbolicAnimationFormulaItem formula = new SymbolicAnimationFormulaItem(depth, level);
-		addFormula(formula,checking);
-	}
-
-	public void addFormula(int depth, List<String> operations, boolean checking) {
-		SymbolicAnimationFormulaItem formula = new SymbolicAnimationFormulaItem(depth, operations);
 		addFormula(formula,checking);
 	}
 
@@ -86,17 +68,6 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 
-	public void generateTestCases(SymbolicAnimationFormulaItem item, boolean checkAll) {
-		AbstractModel model = currentTrace.getModel();
-		if(!(model instanceof ClassicalBModel)) {
-			return;
-		}
-		ClassicalBModel bModel = (ClassicalBModel) model;
-		ConstraintBasedTestCaseGenerator testCaseGenerator = testCaseGeneratorCreator.getTestCaseGenerator(bModel, item);
-		symbolicChecker.checkItem(item, testCaseGenerator, checkAll);
-	}
-
-
 	public void handleItem(SymbolicAnimationFormulaItem item, boolean checkAll) {
 		if(!item.selected()) {
 			return;
@@ -108,12 +79,6 @@ public class SymbolicAnimationFormulaHandler implements SymbolicFormulaHandler<S
 				break;
 			case FIND_VALID_STATE:
 				findValidState(item, checkAll);
-				break;
-			case MCDC:
-				generateTestCases(item, checkAll);
-				break;
-			case COVERED_OPERATIONS:
-				generateTestCases(item, checkAll);
 				break;
 			default:
 				break;

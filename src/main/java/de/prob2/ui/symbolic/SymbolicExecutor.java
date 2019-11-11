@@ -38,7 +38,6 @@ public abstract class SymbolicExecutor {
 	
 	protected final ListProperty<Thread> currentJobThreads;
 	
-	protected List<? extends SymbolicFormulaItem> items;
 	
 	public SymbolicExecutor(final CurrentTrace currentTrace, final CurrentProject currentProject,
 							final ISymbolicResultHandler resultHandler, final Injector injector) {

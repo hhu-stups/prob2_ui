@@ -5,6 +5,7 @@ public enum CheckingType {
 	LTL("verifications.checkingType.ltl"),
 	SYMBOLIC_CHECKING("verifications.checkingType.symbolic.checking"),
 	SYMBOLIC_ANIMATION("verifications.checkingType.symbolic.animation"),
+	TEST_CASE_GENERATION("verifications.checkingType.testcasegeneration"),
 	MODELCHECKING("verifications.checkingType.modelchecking")
 	;
 	

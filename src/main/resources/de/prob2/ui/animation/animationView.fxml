@@ -2,6 +2,7 @@
 
 <?import de.prob2.ui.animation.AnimationView?>
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationView?>
+<?import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationView?>
 <?import de.prob2.ui.animation.tracereplay.TraceReplayView?>
 <?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import javafx.scene.control.Tab?>
@@ -14,6 +15,9 @@
 		</Tab>
 		<Tab fx:id="tabSymbolic" id="symbolic" text="%animation.view.tabs.symbolic">
 			<SymbolicAnimationView />
+		</Tab>
+		<Tab fx:id="tabTestCases" id="testCases" text="%animation.view.tabs.testcase">
+			<TestCaseGenerationView />
 		</Tab>
 	</BetterTabPane>
 </fx:root>

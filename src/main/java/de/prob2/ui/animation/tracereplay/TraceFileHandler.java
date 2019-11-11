@@ -6,6 +6,7 @@ import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Inject;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationFormulaItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.InvalidFileFormatException;
@@ -108,7 +109,7 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		Files.deleteIfExists(Paths.get(file.getAbsolutePath()));
 	}
 
-	public void save(SymbolicAnimationFormulaItem item, Machine machine) {
+	public void save(TestCaseGenerationItem item, Machine machine) {
 		List<PersistentTrace> traces = item.getExamples().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
 				.collect(Collectors.toList());
