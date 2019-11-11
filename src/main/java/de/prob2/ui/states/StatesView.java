@@ -1,22 +1,29 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.animator.command.GetMachineStructureCommand;
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.EvaluationErrorResult;
+
+import de.prob.animator.command.ComposedCommand;
+import de.prob.animator.command.ExpandFormulaCommand;
+import de.prob.animator.command.GetTopLevelFormulasCommand;
+import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IBEvalElement;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.prologast.ASTCategory;
-import de.prob.animator.prologast.ASTFormula;
-import de.prob.animator.prologast.PrologASTNode;
 import de.prob.exception.ProBError;
-import de.prob.statespace.State;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.config.Config;
@@ -32,6 +39,7 @@ import de.prob2.ui.persistence.TableUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.unsatcore.UnsatCoreCalculator;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -53,23 +61,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -84,15 +78,15 @@ public final class StatesView extends StackPane {
 	private Button btComputeUnsatCore;
 
 	@FXML
-	private TreeTableView<StateItem<?>> tv;
+	private TreeTableView<ExpandedFormula> tv;
 	@FXML
-	private TreeTableColumn<StateItem<?>, StateItem<?>> tvName;
+	private TreeTableColumn<ExpandedFormula, ExpandedFormula> tvName;
 	@FXML
-	private TreeTableColumn<StateItem<?>, StateItem<?>> tvValue;
+	private TreeTableColumn<ExpandedFormula, ExpandedFormula> tvValue;
 	@FXML
-	private TreeTableColumn<StateItem<?>, StateItem<?>> tvPreviousValue;
+	private TreeTableColumn<ExpandedFormula, ExpandedFormula> tvPreviousValue;
 	@FXML
-	private TreeItem<StateItem<?>> tvRootItem;
+	private TreeItem<ExpandedFormula> tvRootItem;
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -102,11 +96,8 @@ public final class StatesView extends StackPane {
 	private final Config config;
 	private final UnsatCoreCalculator unsatCoreCalculator;
 
-	private List<PrologASTNode> rootNodes;
-	private List<PrologASTNode> filteredRootNodes;
-	private final Set<IEvalElement> subscribedFormulas;
-	private final Map<IEvalElement, AbstractEvalResult> currentValues;
-	private final Map<IEvalElement, AbstractEvalResult> previousValues;
+	private List<ExpandedFormula> rootNodes;
+	private List<ExpandedFormula> filteredRootNodes;
 	private final ExecutorService updater;
 	private List<Double> columnWidthsToRestore;
 
@@ -124,9 +115,6 @@ public final class StatesView extends StackPane {
 
 		this.rootNodes = null;
 		this.filteredRootNodes = null;
-		this.subscribedFormulas = new HashSet<>();
-		this.currentValues = new HashMap<>();
-		this.previousValues = new HashMap<>();
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
 		this.unsatCoreCalculator = unsatCoreCalculator;
 		stopActions.add(this.updater::shutdownNow);
@@ -141,32 +129,30 @@ public final class StatesView extends StackPane {
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell());
-		this.tvValue.setCellFactory(col -> new ValueCell(bundle, this.currentValues));
-		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle, this.previousValues));
+		this.tvValue.setCellFactory(col -> new ValueCell(bundle));
+		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle)); // FIXME actually use previous state
 
-		final Callback<TreeTableColumn.CellDataFeatures<StateItem<?>, StateItem<?>>, ObservableValue<StateItem<?>>> cellValueFactory = data -> Bindings
+		final Callback<TreeTableColumn.CellDataFeatures<ExpandedFormula, ExpandedFormula>, ObservableValue<ExpandedFormula>> cellValueFactory = data -> Bindings
 				.createObjectBinding(data.getValue()::getValue, this.currentTrace);
 		this.tvName.setCellValueFactory(cellValueFactory);
 		this.tvValue.setCellValueFactory(cellValueFactory);
 		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
 
-		this.tv.getRoot().setValue(new StateItem<>(new ASTCategory(
-			Collections.emptyList(),
+		this.tv.getRoot().setValue(new ExpandedFormula(
 			"Machine (this root item should be invisible)",
-			true,
-			false
-		), false));
+			BVisual2Value.Inactive.INSTANCE,
+			null,
+			Collections.emptyList()
+		));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updater.execute(() -> {
 			boolean showUnsatCoreButton = false;
 			if (to == null) {
 				this.rootNodes = null;
 				this.filteredRootNodes = null;
-				this.currentValues.clear();
-				this.previousValues.clear();
 				this.tv.getRoot().getChildren().clear();
 			} else {
-				this.updateRoot(from, to, false);
+				this.updateRoot(to);
 				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
 				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) || 
 						operations.stream().map(trans -> trans.getName()).collect(Collectors.toList()).contains("$partial_setup_constants")) {
@@ -204,33 +190,29 @@ public final class StatesView extends StackPane {
 		}
 	}
 
-	private TreeTableRow<StateItem<?>> initTableRow() {
-		final TreeTableRow<StateItem<?>> row = new TreeTableRow<>();
+	private TreeTableRow<ExpandedFormula> initTableRow() {
+		final TreeTableRow<ExpandedFormula> row = new TreeTableRow<>();
 
 		row.itemProperty().addListener((observable, from, to) -> {
 			row.getStyleClass().remove("changed");
 			row.getStyleClass().remove("unsatCore");
-			if (to != null && to.getContents() instanceof ASTFormula) {
+			if (to != null) {
 				IBEvalElement core = unsatCoreCalculator.unsatCoreProperty().get();
 				if(core != null) {
-					final IEvalElement formula = ((ASTFormula) to.getContents()).getFormula();
 					String code = core.getCode();
 					List<String> coreConjuncts = Arrays.stream(code.split("&"))
 							.map(str -> str.replace(" ", ""))
 							.collect(Collectors.toList());
-					if (coreConjuncts.contains(formula.getCode().replace(" ", ""))) {
+					if (coreConjuncts.contains(to.getLabel().replace(" ", ""))) {
 						row.getStyleClass().add("unsatCore");
 						return;
 					}
 				}
 
-				final IEvalElement formula = ((ASTFormula) to.getContents()).getFormula();
-				final AbstractEvalResult current = this.currentValues.get(formula);
-				final AbstractEvalResult previous = this.previousValues.get(formula);
+				final BVisual2Value current = to.getValue();
+				final BVisual2Value previous = to.getValue(); // FIXME actually use previous state
 
-				if (current != null && previous != null
-						&& (!current.getClass().equals(previous.getClass()) || current instanceof EvalResult
-								&& !((EvalResult) current).getValue().equals(((EvalResult) previous).getValue()))) {
+				if (!current.equals(previous)) {
 					row.getStyleClass().add("changed");
 				}
 			}
@@ -242,7 +224,7 @@ public final class StatesView extends StackPane {
 		copyItem.disableProperty().bind(row.itemProperty().isNull());
 
 		this.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), () -> {
-			final TreeItem<StateItem<?>> item = tv.getSelectionModel().getSelectedItem();
+			final TreeItem<ExpandedFormula> item = tv.getSelectionModel().getSelectedItem();
 			if (item != null) {
 				handleCopyName(item);
 			}
@@ -250,15 +232,11 @@ public final class StatesView extends StackPane {
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
 				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionGraph"));
-		// Expression can only be shown if the row item contains an ASTFormula
-		// and the current state is initialized.
-		visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
-				.or(currentTrace.currentStateProperty().initializedProperty().not()));
+		visualizeExpressionAsGraphItem.disableProperty().bind(row.itemProperty().isNull());
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				DotView formulaStage = injector.getInstance(DotView.class);
-				formulaStage.visualizeFormula(((ASTFormula) row.getItem().getContents()).getFormula());
+				formulaStage.visualizeFormula(row.getItem().getLabel());
 				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -268,16 +246,11 @@ public final class StatesView extends StackPane {
 
 		final MenuItem visualizeExpressionAsTableItem = new MenuItem(
 				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionTable"));
-		// Expression can only be shown if the row item contains an ASTFormula
-		// and the current state is initialized.
-		visualizeExpressionAsTableItem.disableProperty().bind(Bindings.createBooleanBinding(
-				() -> row.getItem() == null || !(row.getItem().getContents() instanceof ASTFormula), row.itemProperty())
-				.or(currentTrace.currentStateProperty().initializedProperty().not()));
+		visualizeExpressionAsTableItem.disableProperty().bind(row.itemProperty().isNull());
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-				expressionTableView.visualizeExpression(
-						getResultValue((ASTFormula) row.getItem().getContents(), this.currentTrace.getCurrentState()));
+				expressionTableView.visualizeExpression(getResultValue(row.getItem().getValue()));
 				expressionTableView.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -287,19 +260,7 @@ public final class StatesView extends StackPane {
 		});
 
 		final MenuItem showDetailsItem = new MenuItem(bundle.getString("states.statesView.contextMenu.items.showDetails"));
-		// Details can only be shown if the row item contains an ASTFormula,
-		// and the corresponding value is an EvalResult or EvaluationErrorResult.
-		showDetailsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> {
-			if (row.getItem() == null) {
-				return true;
-			}
-			if (row.getItem().getContents() instanceof ASTFormula) {
-				final AbstractEvalResult currentValue = this.currentValues.get(((ASTFormula)row.getItem().getContents()).getFormula());
-				return !(currentValue instanceof EvalResult || currentValue instanceof EvaluationErrorResult);
-			} else {
-				return true;
-			}
-		}, row.itemProperty()));
+		showDetailsItem.disableProperty().bind(row.itemProperty().isNull());
 		showDetailsItem.setOnAction(event -> this.showDetails(row.getItem()));
 
 		row.contextMenuProperty().bind(Bindings.when(row.emptyProperty())
@@ -322,141 +283,51 @@ public final class StatesView extends StackPane {
 		return row;
 	}
 
-	private static void getInitialExpandedFormulas(final List<PrologASTNode> nodes, final List<IEvalElement> formulas) {
-		for (final PrologASTNode node : nodes) {
-			if (node instanceof ASTFormula) {
-				formulas.add(((ASTFormula) node).getFormula());
-			}
-			if (node instanceof ASTCategory && ((ASTCategory) node).isExpanded()) {
-				getInitialExpandedFormulas(node.getSubnodes(), formulas);
-			}
-		}
-	}
-
-	private static List<IEvalElement> getInitialExpandedFormulas(final List<PrologASTNode> nodes) {
-		final List<IEvalElement> formulas = new ArrayList<>();
-		getInitialExpandedFormulas(nodes, formulas);
-		return formulas;
-	}
-
-	private static void getExpandedFormulas(final List<TreeItem<StateItem<?>>> treeItems,
-			final List<IEvalElement> formulas) {
-		for (final TreeItem<StateItem<?>> ti : treeItems) {
-			if (ti.getValue().getContents() instanceof ASTFormula) {
-				formulas.add(((ASTFormula) ti.getValue().getContents()).getFormula());
-			}
-			if (ti.isExpanded()) {
-				getExpandedFormulas(ti.getChildren(), formulas);
-			}
-		}
-	}
-
-	private static List<IEvalElement> getExpandedFormulas(final List<TreeItem<StateItem<?>>> treeItems) {
-		final List<IEvalElement> formulas = new ArrayList<>();
-		getExpandedFormulas(treeItems, formulas);
-		return formulas;
-	}
-
-	private void subscribeFormulas(final StateSpace stateSpace, final Collection<? extends IEvalElement> formulas) {
-		stateSpace.subscribe(this, formulas);
-		this.subscribedFormulas.addAll(formulas);
-	}
-
-	private void unsubscribeFormulas(final StateSpace stateSpace, final Collection<? extends IEvalElement> formulas) {
-		stateSpace.unsubscribe(this, formulas);
-		this.subscribedFormulas.removeAll(formulas);
-	}
-
-	private void updateValueMaps(final Trace trace) {
-		this.currentValues.clear();
-		this.currentValues.putAll(trace.getCurrentState().getValues());
-		this.previousValues.clear();
-		if (trace.canGoBack()) {
-			this.previousValues.putAll(trace.getPreviousState().getValues());
-		}
-	}
-
 	@FXML
 	private void handleSearch() {
 		filter = filterState.getText();
-		this.updateRoot(currentTrace.get(), currentTrace.get(), true);
+		this.updateRoot(currentTrace.get());
 	}
 
 	private static boolean matchesFilter(final String filter, final String string) {
 		return string.toLowerCase().contains(filter.toLowerCase());
 	}
 
-	private static List<PrologASTNode> filterNodes(final List<PrologASTNode> nodes, final String filter) {
+	private static List<ExpandedFormula> filterNodes(final List<ExpandedFormula> nodes, final String filter) {
 		if (filter.isEmpty()) {
 			return nodes;
 		}
 
-		final List<PrologASTNode> filteredNodes = new ArrayList<>();
-		for (final PrologASTNode node : nodes) {
-			if (node instanceof ASTFormula) {
-				if (matchesFilter(filter, ((ASTFormula) node).getPrettyPrint())) {
-					filteredNodes.add(node);
-				}
-			} else if (node instanceof ASTCategory) {
-				final List<PrologASTNode> filteredSubnodes = filterNodes(node.getSubnodes(), filter);
-				if (!filteredSubnodes.isEmpty()) {
-					final ASTCategory category = (ASTCategory) node;
-					filteredNodes.add(new ASTCategory(filteredSubnodes, category.getName(), category.isExpanded(),
-							category.isPropagated()));
-				}
+		final List<ExpandedFormula> filteredNodes = new ArrayList<>();
+		for (final ExpandedFormula node : nodes) {
+			if (matchesFilter(filter, node.getLabel())) {
+				filteredNodes.add(node);
 			} else {
-				throw new IllegalArgumentException("Unknown node type: " + node.getClass());
+				final List<ExpandedFormula> filteredSubnodes = filterNodes(node.getChildren(), filter);
+				if (!filteredSubnodes.isEmpty()) {
+					filteredNodes.add(new ExpandedFormula(node.getLabel(), node.getValue(), node.getId(), filteredSubnodes));
+				}
 			}
 		}
 		return filteredNodes;
 	}
 
-	private void buildNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
+	private static void buildNodes(final TreeItem<ExpandedFormula> treeItem, final List<ExpandedFormula> nodes) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(nodes);
 
 		assert treeItem.getChildren().isEmpty();
 
-		for (final PrologASTNode node : nodes) {
-			final TreeItem<StateItem<?>> subTreeItem = new TreeItem<>();
-			if (node instanceof ASTCategory && ((ASTCategory) node).isExpanded()) {
-				subTreeItem.setExpanded(true);
-			}
+		for (final ExpandedFormula node : nodes) {
+			final TreeItem<ExpandedFormula> subTreeItem = new TreeItem<>();
 
 			treeItem.getChildren().add(subTreeItem);
-			subTreeItem.setValue(new StateItem<>(node, false));
-			subTreeItem.expandedProperty().addListener((o, from, to) -> {
-				final Trace trace = this.currentTrace.get();
-				final List<IEvalElement> formulas = getExpandedFormulas(subTreeItem.getChildren());
-				if (to) {
-					this.subscribeFormulas(trace.getStateSpace(), formulas);
-				} else {
-					this.unsubscribeFormulas(trace.getStateSpace(), formulas);
-				}
-				this.updateValueMaps(trace);
-			});
-			buildNodes(subTreeItem, node.getSubnodes());
+			subTreeItem.setValue(node);
+			buildNodes(subTreeItem, node.getChildren());
 		}
 	}
 
-	private static void updateNodes(final TreeItem<StateItem<?>> treeItem, final List<PrologASTNode> nodes) {
-		Objects.requireNonNull(treeItem);
-		Objects.requireNonNull(nodes);
-
-		assert treeItem.getChildren().size() == nodes.size();
-
-		for (int i = 0; i < nodes.size(); i++) {
-			final TreeItem<StateItem<?>> subTreeItem = treeItem.getChildren().get(i);
-			final PrologASTNode node = nodes.get(i);
-			subTreeItem.setValue(new StateItem<>(node, false));
-			updateNodes(subTreeItem, node.getSubnodes());
-		}
-	}
-
-	private void updateRoot(final Trace from, final Trace to, final boolean filterChanged) {
-		if(to == null) {
-			return;
-		}
+	private void updateRoot(final Trace to) {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
 		Platform.runLater(() -> {
@@ -464,36 +335,22 @@ public final class StatesView extends StackPane {
 			this.tv.setDisable(true);
 		});
 
-		// If the model has changed or the machine structure hasn't been loaded
-		// yet, update it and rebuild the tree view.
-		final boolean reloadRootNodes = this.rootNodes == null || from == null
-				|| !from.getModel().equals(to.getModel());
-		if (reloadRootNodes) {
-			final GetMachineStructureCommand cmd = new GetMachineStructureCommand();
-			to.getStateSpace().execute(cmd);
-			this.rootNodes = cmd.getPrologASTList();
-		}
-		// If the root nodes were reloaded or the filter has changed, update the
-		// filtered node list.
-		if (reloadRootNodes || filterChanged) {
-			this.filteredRootNodes = filterNodes(this.rootNodes, this.filter);
-			this.unsubscribeFormulas(to.getStateSpace(), this.subscribedFormulas);
-			this.subscribeFormulas(to.getStateSpace(), getInitialExpandedFormulas(this.filteredRootNodes));
-		}
-
-		this.updateValueMaps(to);
+		final GetTopLevelFormulasCommand getTopLevelCommand = new GetTopLevelFormulasCommand();
+		to.getStateSpace().execute(getTopLevelCommand);
+		final List<ExpandFormulaCommand> expandCommands = getTopLevelCommand.getFormulaIds().stream()
+			.map(id -> new ExpandFormulaCommand(id, to.getCurrentState()))
+			.collect(Collectors.toList());
+		to.getStateSpace().execute(new ComposedCommand(expandCommands));
+		this.rootNodes = expandCommands.stream().map(ExpandFormulaCommand::getResult).collect(Collectors.toList());
+		this.filteredRootNodes = filterNodes(this.rootNodes, this.filter);
 
 		// The nodes are stored in a local variable to avoid a race condition
 		// where another updateRoot call reassigns the filteredRootNodes field
 		// before the Platform.runLater block runs.
-		final List<PrologASTNode> nodes = this.filteredRootNodes;
+		final List<ExpandedFormula> nodes = this.filteredRootNodes;
 		Platform.runLater(() -> {
-			if (reloadRootNodes || filterChanged) {
-				this.tvRootItem.getChildren().clear();
-				buildNodes(this.tvRootItem, nodes);
-			} else {
-				updateNodes(this.tvRootItem, nodes);
-			}
+			this.tvRootItem.getChildren().clear();
+			buildNodes(this.tvRootItem, nodes);
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
@@ -501,46 +358,33 @@ public final class StatesView extends StackPane {
 		});
 	}
 
-	private static void handleCopyName(final TreeItem<StateItem<?>> item) {
-		final PrologASTNode contents = item.getValue().getContents();
-		final String text;
-		if (contents instanceof ASTCategory) {
-			text = ((ASTCategory)contents).getName();
-		} else if (contents instanceof ASTFormula) {
-			text = ((ASTFormula)contents).getFormula(FormulaExpand.EXPAND).getCode();
-		} else {
-			throw new AssertionError("Unhandled node type: " + contents.getClass());
-		}
-		
+	private static void handleCopyName(final TreeItem<ExpandedFormula> item) {
 		final Clipboard clipboard = Clipboard.getSystemClipboard();
 		final ClipboardContent content = new ClipboardContent();
-		content.putString(text);
+		content.putString(item.getValue().getLabel());
 		clipboard.setContent(content);
 	}
 
-	private static String getResultValue(final ASTFormula element, final State state) {
-		final AbstractEvalResult result = state.eval(element.getFormula(FormulaExpand.EXPAND));
-		if (result instanceof EvalResult) {
-			return ((EvalResult)result).getValue();
-		} else if (result instanceof EvaluationErrorResult) {
-			return String.join("\n", ((EvaluationErrorResult)result).getErrors());
+	private static String getResultValue(final BVisual2Value result) {
+		if (result instanceof BVisual2Value.PredicateValue) {
+			return String.valueOf(((BVisual2Value.PredicateValue)result).getValue());
+		} else if (result instanceof BVisual2Value.ExpressionValue) {
+			return ((BVisual2Value.ExpressionValue)result).getValue();
+		} else if (result instanceof BVisual2Value.Error) {
+			return ((BVisual2Value.Error)result).getMessage();
+		} else if (result instanceof BVisual2Value.Inactive) {
+			return "";
 		} else {
 			throw new IllegalArgumentException("Unknown eval result type: " + result.getClass());
 		}
 	}
 
-	private void showDetails(StateItem<?> stateItem) {
+	private void showDetails(final ExpandedFormula formula) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
-		if (stateItem.getContents() instanceof ASTFormula) {
-			final ASTFormula element = (ASTFormula) stateItem.getContents();
-			stage.setTitle(element.getFormula().toString());
-			stage.setCurrentValue(getResultValue(element, this.currentTrace.getCurrentState()));
-			if (this.currentTrace.canGoBack()) {
-				stage.setPreviousValue(getResultValue(element, this.currentTrace.get().getPreviousState()));
-			}
-			stage.show();
-		} else {
-			throw new IllegalArgumentException("Invalid row item type: " + stateItem.getClass());
+		stage.setTitle(formula.getLabel());
+		stage.setCurrentValue(getResultValue(formula.getValue()));
+		if (this.currentTrace.canGoBack()) {
+			stage.setPreviousValue(getResultValue(formula.getValue())); // FIXME actually use previous state
 		}
 		stage.show();
 	}

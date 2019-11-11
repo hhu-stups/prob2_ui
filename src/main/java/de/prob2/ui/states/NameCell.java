@@ -1,39 +1,24 @@
 package de.prob2.ui.states;
 
-import java.util.Objects;
-
-import de.prob.animator.prologast.ASTCategory;
-import de.prob.animator.prologast.ASTFormula;
-import de.prob.animator.prologast.PrologASTNode;
+import de.prob.animator.domainobjects.BVisual2Value;
+import de.prob.animator.domainobjects.ExpandedFormula;
 
 import javafx.scene.control.TreeTableCell;
 
-class NameCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
-	public static String getName(final StateItem<?> item) {
-		Objects.requireNonNull(item);
-		
-		final PrologASTNode contents = item.getContents();
-		
-		if (contents instanceof ASTCategory) {
-			return ((ASTCategory)contents).getName();
-		} else if (contents instanceof ASTFormula) {
-			return ((ASTFormula)contents).getFormula().toString();
-		} else {
-			throw new IllegalArgumentException("Don't know how to get the name of a " + contents.getClass() + " instance");
-		}
-	}
-	
+class NameCell extends TreeTableCell<ExpandedFormula, ExpandedFormula> {
 	@Override
-	protected void updateItem(final StateItem<?> item, final boolean empty) {
+	protected void updateItem(final ExpandedFormula item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		this.getStyleClass().removeAll("error");
+		this.getStyleClass().removeAll("not-initialized", "error");
 		
 		if (item == null || empty) {
 			this.setText(null);
 		} else {
-			this.setText(getName(item));
-			if (item.isErrored()) {
+			this.setText(item.getLabel());
+			if (item.getValue() instanceof BVisual2Value.Inactive) {
+				this.getStyleClass().add("not-initialized");
+			} else if (item.getValue() instanceof BVisual2Value.Error) {
 				this.getStyleClass().add("error");
 			}
 		}
