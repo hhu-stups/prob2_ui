@@ -16,6 +16,9 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	@FXML
 	private TestCaseGenerationInput input;
 	
+	@FXML
+	private ChoiceBox<TestCaseExecutionItem> testChoice;
+	
 	@Inject
 	private TestCaseGenerationChoosingStage(final StageManager stageManager) {
 		super();
@@ -23,14 +26,11 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		stageManager.loadFXML(this, "test_case_generation_choice.fxml");
 	}
 	
-	@FXML
-	private ChoiceBox<TestCaseExecutionItem> cbChoice;
-	
 	
 	@FXML
 	public void initialize() {
-		input.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
-		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
+		input.visibleProperty().bind(testChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		testChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if(to == null) {
 				return;
 			}
@@ -40,19 +40,19 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	}
 	
 	public TestCaseGenerationType getTestCaseGenerationType() {
-		return cbChoice.getSelectionModel().getSelectedItem().getExecutionType();
+		return testChoice.getSelectionModel().getSelectedItem().getExecutionType();
 	}
 	
 	public void select(TestCaseGenerationItem item) {
-		cbChoice.getItems().forEach(choice -> {
+		testChoice.getItems().forEach(choice -> {
 			if(item.getType().equals(choice.getExecutionType())) {
-				cbChoice.getSelectionModel().select(choice);
+				testChoice.getSelectionModel().select(choice);
 			}
 		});
 	}
 	
 	public void reset() {
 		input.reset();
-		cbChoice.getSelectionModel().clearSelection();
+		testChoice.getSelectionModel().clearSelection();
 	}
 }

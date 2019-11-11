@@ -22,7 +22,7 @@
 					</padding>
 					<Label text="%animation.symbolic.choice.text"/>
 					<HBox alignment="CENTER">
-						<ChoiceBox fx:id="cbChoice">
+						<ChoiceBox fx:id="testChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
 									<TestCaseExecutionItem executionType="MCDC"/>
