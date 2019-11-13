@@ -96,12 +96,8 @@ public final class StatesView extends StackPane {
 	private final Config config;
 	private final UnsatCoreCalculator unsatCoreCalculator;
 
-	private List<ExpandedFormula> rootNodes;
-	private List<ExpandedFormula> filteredRootNodes;
 	private final ExecutorService updater;
 	private List<Double> columnWidthsToRestore;
-
-	private String filter = "";
 
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
@@ -113,8 +109,6 @@ public final class StatesView extends StackPane {
 		this.bundle = bundle;
 		this.config = config;
 
-		this.rootNodes = null;
-		this.filteredRootNodes = null;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
 		this.unsatCoreCalculator = unsatCoreCalculator;
 		stopActions.add(this.updater::shutdownNow);
@@ -148,8 +142,6 @@ public final class StatesView extends StackPane {
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updater.execute(() -> {
 			boolean showUnsatCoreButton = false;
 			if (to == null) {
-				this.rootNodes = null;
-				this.filteredRootNodes = null;
 				this.tv.getRoot().getChildren().clear();
 			} else {
 				this.updateRoot(to);
@@ -285,7 +277,6 @@ public final class StatesView extends StackPane {
 
 	@FXML
 	private void handleSearch() {
-		filter = filterState.getText();
 		this.updateRoot(currentTrace.get());
 	}
 
@@ -341,13 +332,8 @@ public final class StatesView extends StackPane {
 			.map(id -> new ExpandFormulaCommand(id, to.getCurrentState()))
 			.collect(Collectors.toList());
 		to.getStateSpace().execute(new ComposedCommand(expandCommands));
-		this.rootNodes = expandCommands.stream().map(ExpandFormulaCommand::getResult).collect(Collectors.toList());
-		this.filteredRootNodes = filterNodes(this.rootNodes, this.filter);
-
-		// The nodes are stored in a local variable to avoid a race condition
-		// where another updateRoot call reassigns the filteredRootNodes field
-		// before the Platform.runLater block runs.
-		final List<ExpandedFormula> nodes = this.filteredRootNodes;
+		final List<ExpandedFormula> rootNodes = expandCommands.stream().map(ExpandFormulaCommand::getResult).collect(Collectors.toList());
+		final List<ExpandedFormula> nodes = filterNodes(rootNodes, this.filterState.getText());
 		Platform.runLater(() -> {
 			this.tvRootItem.getChildren().clear();
 			buildNodes(this.tvRootItem, nodes);
