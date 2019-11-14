@@ -28,6 +28,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.FormulaId;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.exception.ProBError;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.config.Config;
@@ -101,6 +102,8 @@ public final class StatesView extends StackPane {
 	private final ExecutorService updater;
 	private final Object updateRootAsyncLock;
 	private Future<Void> lastUpdateFuture;
+	private List<ExpandedFormula> currentFormulas;
+	private List<ExpandedFormula> previousFormulas;
 	private List<Double> columnWidthsToRestore;
 
 	@Inject
@@ -116,6 +119,8 @@ public final class StatesView extends StackPane {
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
 		this.updateRootAsyncLock = new Object();
 		this.lastUpdateFuture = Futures.immediateFuture(null);
+		this.currentFormulas = null;
+		this.previousFormulas = null;
 		this.unsatCoreCalculator = unsatCoreCalculator;
 		stopActions.add(this.updater::shutdownNow);
 
@@ -145,7 +150,7 @@ public final class StatesView extends StackPane {
 		this.tv.getRoot().setValue(new StateItem(rootPlaceholderFormula, rootPlaceholderFormula));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-			this.updateRootAsync(to);
+			this.updateRootAsync(from, to);
 			boolean showUnsatCoreButton = false;
 			if (to != null) {
 				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
@@ -176,7 +181,10 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-		filterState.textProperty().addListener(o -> this.updateRootAsync(this.currentTrace.get()));
+		filterState.textProperty().addListener(o -> {
+			final Trace trace = this.currentTrace.get();
+			this.updateRootAsync(trace, trace);
+		});
 	}
 
 	public void restoreColumnWidths() {
@@ -321,19 +329,33 @@ public final class StatesView extends StackPane {
 		treeItem.getChildren().setAll(newChildren);
 	}
 
-	private void updateRootAsync(final Trace to) {
+	private void updateRootAsync(final Trace from, final Trace to) {
 		synchronized (this.updateRootAsyncLock) {
 			this.lastUpdateFuture.cancel(false);
 			if (to == null) {
 				this.tv.getRoot().getChildren().clear();
+				this.currentFormulas = null;
+				this.previousFormulas = null;
 				this.lastUpdateFuture = Futures.immediateFuture(null);
 			} else {
-				this.lastUpdateFuture = this.updater.submit(() -> this.updateRoot(to), null);
+				this.lastUpdateFuture = this.updater.submit(() -> this.updateRoot(from, to), null);
 			}
 		}
 	}
 
-	private void updateRoot(final Trace to) {
+	private static List<ExpandedFormula> expandFormulasInState(final List<FormulaId> formulas, final State state) {
+		final List<ExpandFormulaCommand> expandCommands = formulas.stream()
+			.map(id -> new ExpandFormulaCommand(id, state))
+			.collect(Collectors.toList());
+		state.getStateSpace().execute(new ComposedCommand(expandCommands));
+		return expandCommands.stream()
+			.map(ExpandFormulaCommand::getResult)
+			.collect(Collectors.toList());
+	}
+
+	private void updateRoot(final Trace from, final Trace to) {
+		Objects.requireNonNull(to, "to");
+
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
 		Platform.runLater(() -> {
@@ -345,31 +367,39 @@ public final class StatesView extends StackPane {
 		to.getStateSpace().execute(getTopLevelCommand);
 		final List<FormulaId> topLevel = getTopLevelCommand.getFormulaIds();
 		
-		final List<ExpandFormulaCommand> expandCurrentCommands = topLevel.stream()
-			.map(id -> new ExpandFormulaCommand(id, to.getCurrentState()))
-			.collect(Collectors.toList());
-		final List<ExpandFormulaCommand> expandPreviousCommands;
-		if (to.canGoBack()) {
-			expandPreviousCommands = topLevel.stream()
-				.map(id -> new ExpandFormulaCommand(id, to.getPreviousState()))
-				.collect(Collectors.toList());
+		if (to.equals(from)) {
+			// Trace hasn't changed, keep all existing values.
+		} else if (from != null && to.canGoBack() && to.getPreviousState().equals(from.getCurrentState())) {
+			// Trace went one step forward, reuse old current values as new previous values.
+			this.previousFormulas = this.currentFormulas;
+			this.currentFormulas = null;
+		} else if (from != null && from.canGoBack() && to.getCurrentState().equals(from.getPreviousState())) {
+			// Trace went one step back, reuse old previous values as new current values.
+			this.currentFormulas = this.previousFormulas;
+			this.previousFormulas = null;
 		} else {
-			expandPreviousCommands = Collections.emptyList();
+			// Trace changed in some other way (or previous trace is null), need to recalculate everything.
+			this.currentFormulas = null;
+			this.previousFormulas = null;
 		}
-		
-		final List<ExpandFormulaCommand> allCommands = new ArrayList<>(expandCurrentCommands);
-		allCommands.addAll(expandPreviousCommands);
-		to.getStateSpace().execute(new ComposedCommand(allCommands));
-		
-		final List<ExpandedFormula> currentFormulas = expandCurrentCommands.stream()
-			.map(ExpandFormulaCommand::getResult)
-			.collect(Collectors.toList());
-		final List<ExpandedFormula> previousFormulas = expandPreviousCommands.stream()
-			.map(ExpandFormulaCommand::getResult)
-			.collect(Collectors.toList());
+
+		if (this.currentFormulas == null) {
+			// Recalculate values in the current state.
+			this.currentFormulas = expandFormulasInState(topLevel, to.getCurrentState());
+		}
+
+		if (this.previousFormulas == null) {
+			if (to.canGoBack()) {
+				// Recalculate values in the previous state.
+				this.previousFormulas = expandFormulasInState(topLevel, to.getPreviousState());
+			} else {
+				// At the start of a trace there is no previous state, so there is nothing that can be evaluated.
+				this.previousFormulas = Collections.emptyList();
+			}
+		}
 
 		Platform.runLater(() -> {
-			updateTree(this.tvRootItem, currentFormulas, previousFormulas, filterState.getText());
+			updateTree(this.tvRootItem, this.currentFormulas, this.previousFormulas, filterState.getText());
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
