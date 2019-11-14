@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class TestCaseGenerationItem extends AbstractCheckableItem {
+	
+	private static class TestCaseGenerationFormulaExtractor {
+
+		private TestCaseGenerationFormulaExtractor(){}
+
+		private static int extractLevel(String formula) {
+			String[] splittedStringBySlash = formula.replace(" ", "").split("/");
+			String[] splittedStringByColon = splittedStringBySlash[0].split(":");
+			return Integer.parseInt(splittedStringByColon[1]);
+		}
+
+		private static List<String> extractOperations(String formula) {
+			String[] splittedString = formula.replace(" ", "").split("/");
+			return Arrays.asList(splittedString[0].split(":")[1].split(","));
+		}
+
+	}
+	
 
 	private static final String LEVEL = "level";
 

@@ -79,18 +79,14 @@ public class TestCaseGenerator {
 	}
 	
 	private TestCaseGenerationItem getItemIfAlreadyExists(TestCaseGenerationItem item) {
-		List<TestCaseGenerationItem> formulas = getItems();
+		List<TestCaseGenerationItem> formulas = currentProject.getCurrentMachine().getTestCases();
 		int index = formulas.indexOf(item);
 		if(index > -1) {
 			item = formulas.get(index);
 		}
 		return item;
 	}
-	
-	private List<TestCaseGenerationItem> getItems() {
-		return currentProject.getCurrentMachine().getTestCases();
-	}
-	
+
 	public ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
 	}

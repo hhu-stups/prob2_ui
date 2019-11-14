@@ -7,7 +7,10 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
@@ -15,9 +18,47 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 @FXMLInjected
 public class OperationCoverageInputView extends VBox {
+	
+	private static class OperationTableItem {
+
+		private String operation;
+
+		private BooleanProperty selected;
+
+		public OperationTableItem(String operation, boolean selected) {
+			this.operation = operation;
+			this.selected = new SimpleBooleanProperty(selected);
+		}
+
+		public String getOperation() {
+			return operation;
+		}
+
+		public BooleanProperty selectedProperty() {
+			return selected;
+		}
+
+		public boolean selected() {
+			return selected.get();
+		}
+	}
+	
+	private static class OperationSelectedProperty implements Callback<TableColumn.CellDataFeatures<OperationTableItem, CheckBox>, ObservableValue<CheckBox>> {
+
+		@Override
+		public ObservableValue<CheckBox> call(TableColumn.CellDataFeatures<OperationTableItem, CheckBox> param) {
+			OperationTableItem item = param.getValue();
+			CheckBox checkBox = new CheckBox();
+			checkBox.selectedProperty().setValue(item.selected());
+			checkBox.selectedProperty().addListener((observable, from, to) -> item.selectedProperty().set(to));
+			return new SimpleObjectProperty<>(checkBox);
+		}
+
+	}
 
 	@FXML
 	private TableView<OperationTableItem> tvOperations;
