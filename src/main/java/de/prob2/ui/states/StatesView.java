@@ -169,7 +169,7 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-
+		filterState.textProperty().addListener(o -> this.updateRootAsync(this.currentTrace.get()));
 	}
 
 	public void restoreColumnWidths() {
@@ -266,11 +266,6 @@ public final class StatesView extends StackPane {
 			}
 		});
 		return row;
-	}
-
-	@FXML
-	private void handleSearch() {
-		this.updateRootAsync(currentTrace.get());
 	}
 
 	private static boolean matchesFilter(final String filter, final String string) {
