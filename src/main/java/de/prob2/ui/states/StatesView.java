@@ -242,7 +242,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-				expressionTableView.visualizeExpression(getResultValue(row.getItem().getCurrent().getValue()));
+				expressionTableView.visualizeExpression(row.getItem().getCurrent().getLabel());
 				expressionTableView.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
