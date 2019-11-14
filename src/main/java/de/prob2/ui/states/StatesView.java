@@ -279,26 +279,7 @@ public final class StatesView extends StackPane {
 		return string.toLowerCase().contains(filter.toLowerCase());
 	}
 
-	private static List<ExpandedFormula> filterNodes(final List<ExpandedFormula> nodes, final String filter) {
-		if (filter.isEmpty()) {
-			return nodes;
-		}
-
-		final List<ExpandedFormula> filteredNodes = new ArrayList<>();
-		for (final ExpandedFormula node : nodes) {
-			if (matchesFilter(filter, node.getLabel())) {
-				filteredNodes.add(node);
-			} else {
-				final List<ExpandedFormula> filteredSubnodes = filterNodes(node.getChildren(), filter);
-				if (!filteredSubnodes.isEmpty()) {
-					filteredNodes.add(new ExpandedFormula(node.getLabel(), node.getValue(), node.getId(), filteredSubnodes));
-				}
-			}
-		}
-		return filteredNodes;
-	}
-
-	private static void buildNodes(final TreeItem<StateItem> treeItem, final List<ExpandedFormula> currentFormulas, final List<ExpandedFormula> previousFormulas) {
+	private static void buildNodes(final TreeItem<StateItem> treeItem, final List<ExpandedFormula> currentFormulas, final List<ExpandedFormula> previousFormulas, final String filter) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(currentFormulas);
 		Objects.requireNonNull(previousFormulas);
@@ -317,8 +298,14 @@ public final class StatesView extends StackPane {
 			}
 			final TreeItem<StateItem> subTreeItem = new TreeItem<>(new StateItem(current, previous));
 
-			treeItem.getChildren().add(subTreeItem);
-			buildNodes(subTreeItem, current.getChildren(), previous.getChildren());
+			final boolean itemMatches = matchesFilter(filter, current.getLabel());
+			// If this item matches the filter, don't filter its children.
+			buildNodes(subTreeItem, current.getChildren(), previous.getChildren(), itemMatches ? "" : filter);
+
+			// Only display this item if it or any of its children match the filter.
+			if (itemMatches || !subTreeItem.getChildren().isEmpty()) {
+				treeItem.getChildren().add(subTreeItem);
+			}
 		}
 	}
 
@@ -359,8 +346,7 @@ public final class StatesView extends StackPane {
 
 		Platform.runLater(() -> {
 			this.tvRootItem.getChildren().clear();
-			buildNodes(this.tvRootItem, currentFormulas, previousFormulas);
-			// TODO filter
+			buildNodes(this.tvRootItem, currentFormulas, previousFormulas, filterState.getText());
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
