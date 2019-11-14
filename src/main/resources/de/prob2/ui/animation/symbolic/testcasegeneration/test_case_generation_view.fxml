@@ -19,12 +19,12 @@
 	</fx:define>
 	<VBox>
 		<HBox styleClass="border" alignment="CENTER">
-			<Button fx:id="checkMachineButton" onAction="#checkMachine">
+			<Button fx:id="generateButton" onAction="#generate">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%common.checkMachine" />
+					<Tooltip text="%common.generate" />
 				</tooltip>
 			</Button>
 			<Button fx:id="cancelButton" onAction="#cancel">
@@ -36,7 +36,7 @@
 				</tooltip>
 			</Button>
 			<Spacer/>
-			<Button fx:id="addFormulaButton" disable="true" onAction="#addFormula"
+			<Button fx:id="addTestCaseButton" disable="true" onAction="#addTestCase"
 				contentDisplay="GRAPHIC_ONLY">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />

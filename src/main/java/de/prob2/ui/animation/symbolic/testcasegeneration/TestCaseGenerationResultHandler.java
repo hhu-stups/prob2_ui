@@ -60,13 +60,13 @@ public class TestCaseGenerationResultHandler extends AbstractResultHandler {
 		List<TraceInformationItem> uncoveredOperations = extractUncoveredOperations(testCaseGeneratorResult);
 
 		if(testCaseGeneratorResult.isInterrupted()) {
-			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.testcasegeneration.result.interrupted");
+			showCheckingResult(item, Checked.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted");
 		} else if(traces.isEmpty()) {
-			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.notFound");
+			showCheckingResult(item, Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound");
 		} else if(!uncoveredOperations.isEmpty()) {
-			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.testcasegeneration.result.notAllGenerated");
+			showCheckingResult(item, Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated");
 		} else {
-			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.testcasegeneration.result.found");
+			showCheckingResult(item, Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found");
 		}
 		item.getExamples().addAll(traces);
 		if(!item.getExamples().isEmpty()) {

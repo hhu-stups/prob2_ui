@@ -7,11 +7,11 @@
 <?import javafx.scene.layout.HBox?>
 <fx:root type="MCDCInputView" stylesheets="@/prob.css" spacing="5.0" xmlns:fx="http://javafx.com/fxml/1">
 	<HBox spacing="10.0">
-		<Label text="%animation.symbolic.testcasegeneration.mcdc.level" labelFor="$levelField" VBox.vgrow="NEVER"/>
+		<Label text="%animation.testcase.mcdc.level" labelFor="$levelField" VBox.vgrow="NEVER"/>
 		<TextField fx:id="levelField" VBox.vgrow="NEVER"/>
 	</HBox>
 	<HBox spacing="10.0">
-		<Label text="%animation.symbolic.testcasegeneration.depth" labelFor="$depthField" VBox.vgrow="NEVER"/>
+		<Label text="%animation.testcase.depth" labelFor="$depthField" VBox.vgrow="NEVER"/>
 		<TextField fx:id="depthField" VBox.vgrow="NEVER"/>
 	</HBox>
 </fx:root>

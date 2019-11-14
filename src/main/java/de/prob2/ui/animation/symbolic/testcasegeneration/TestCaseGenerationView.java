@@ -67,10 +67,10 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 	
 	@FXML
-	private Button addFormulaButton;
+	private Button addTestCaseButton;
 	
 	@FXML
-	private Button checkMachineButton;
+	private Button generateButton;
 	
 	@FXML
 	private Button cancelButton;
@@ -94,17 +94,17 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 		public TableRow<TestCaseGenerationItem> call(TableView<TestCaseGenerationItem> param) {
 			TableRow<TestCaseGenerationItem> row = new TableRow<>();
 			
-			MenuItem checkItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.check"));
+			MenuItem checkItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.generate"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> itemHandler.handleItem(row.getItem(), false));
 
-			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.removeConfiguration"));
+			MenuItem removeItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> removeFormula());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.changeConfiguration"));
+			MenuItem changeItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
-			MenuItem showDetails = new MenuItem(bundle.getString("symbolic.view.contextMenu.showDetails"));
+			MenuItem showDetails = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
 			showDetails.setOnAction(e -> {
 				TestCaseGenerationItem item = row.getItem();
@@ -120,13 +120,13 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 				stage.show();
 			});
 
-			Menu showStateItem = new Menu(bundle.getString("animation.symbolic.view.contextMenu.showFoundPaths"));
+			Menu showStateItem = new Menu(bundle.getString("animation.testcase.view.contextMenu.showFoundPaths"));
 			showStateItem.setDisable(true);
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("symbolic.view.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.showGenerationMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(TestCaseGenerationResultHandler.class).showResult(row.getItem()));
 
-			MenuItem saveTraces = new MenuItem(bundle.getString("animation.symbolic.view.contextMenu.savePaths"));
+			MenuItem saveTraces = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.savePaths"));
 			saveTraces.setOnAction(e -> {
 				TestCaseGenerationItem item = row.getItem();
 				injector.getInstance(TestCaseGenerationResultHandler.class).saveTraces(item);
@@ -155,7 +155,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 			exampleItem.getItems().clear();
 			List<Trace> examples = item.getExamples();
 			for(int i = 0; i < examples.size(); i++) {
-				MenuItem traceItem = new MenuItem(String.format(bundle.getString("animation.symbolic.view.contextMenu.showExample"), i + 1));
+				MenuItem traceItem = new MenuItem(String.format(bundle.getString("animation.testcase.view.contextMenu.showExample"), i + 1));
 				final int index = i;
 				traceItem.setOnAction(e-> currentTrace.set((examples.get(index))));
 				exampleItem.getItems().add(traceItem);
@@ -192,10 +192,10 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 		});
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), testCasesProperty(currentProject.getCurrentMachine()).emptyProperty().or(testCaseGenerator.currentJobThreadsProperty().emptyProperty().not()));
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(generateButton.disableProperty(), testCasesProperty(currentProject.getCurrentMachine()).emptyProperty().or(testCaseGenerator.currentJobThreadsProperty().emptyProperty().not()));
 			} else {
-				checkMachineButton.disableProperty().unbind();
-				checkMachineButton.setDisable(true);
+				generateButton.disableProperty().unbind();
+				generateButton.setDisable(true);
 			}
 		});
 	}
@@ -209,8 +209,8 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = currentTrace.existsProperty().not()
 				.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()));
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(addFormulaButton.disableProperty(), partOfDisableBinding);
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), partOfDisableBinding);
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(addTestCaseButton.disableProperty(), partOfDisableBinding);
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(generateButton.disableProperty(), partOfDisableBinding);
 		cancelButton.disableProperty().bind(testCaseGenerator.currentJobThreadsProperty().emptyProperty());
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvTestCases.disableProperty(), partOfDisableBinding);
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -222,10 +222,10 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
 			if(!to) {
-				checkMachineButton.disableProperty().unbind();
-				checkMachineButton.setDisable(true);
+				generateButton.disableProperty().unbind();
+				generateButton.setDisable(true);
 			} else {
-				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), testCasesProperty(currentProject.getCurrentMachine()).emptyProperty());
+				injector.getInstance(DisablePropertyController.class).addDisableProperty(generateButton.disableProperty(), testCasesProperty(currentProject.getCurrentMachine()).emptyProperty());
 			}
 		});
 		selectAll.setOnAction(e-> {
@@ -251,7 +251,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 
 	
 	@FXML
-	public void addFormula() {
+	public void addTestCase() {
 		injector.getInstance(TestCaseGenerationChoosingStage.class).reset();
 		injector.getInstance(TestCaseGenerationChoosingStage.class).showAndWait();
 	}
@@ -273,7 +273,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	}
 	
 	@FXML
-	public void checkMachine() {
+	public void generate() {
 		Machine machine = currentProject.getCurrentMachine();
 		itemHandler.handleMachine(machine);
 		refresh();

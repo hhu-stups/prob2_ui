@@ -23,7 +23,7 @@ import javafx.util.Callback;
 @FXMLInjected
 public class OperationCoverageInputView extends VBox {
 	
-	private static class OperationTableItem {
+	public static class OperationTableItem {
 
 		private String operation;
 

@@ -59,7 +59,7 @@ public class TestCaseGenerator {
 				updateMachine(currentProject.getCurrentMachine());
 			});
 			currentJobThreads.remove(Thread.currentThread());
-		}, "Symbolic Formula Checking Thread");
+		}, "Test Case Generation Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}

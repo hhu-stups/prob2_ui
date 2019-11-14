@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
-<fx:root type="TestCaseGenerationChoosingStage" fx:id="cbcChoice" title="%animation.symbolic.choice.title"
+<fx:root type="TestCaseGenerationChoosingStage" fx:id="cbcChoice" title="%animation.testcase.choice.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -20,7 +20,7 @@
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
-					<Label text="%animation.symbolic.choice.text"/>
+					<Label text="%animation.testcase.choice.text"/>
 					<HBox alignment="CENTER">
 						<ChoiceBox fx:id="testChoice">
 							<items>

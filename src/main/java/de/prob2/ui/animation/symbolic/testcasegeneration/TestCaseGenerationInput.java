@@ -127,7 +127,7 @@ public class TestCaseGenerationInput extends VBox {
 	
 	public void reset() {
 		btAdd.setText(bundle.getString("common.buttons.add"));
-		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.addAndCheck"));
+		btCheck.setText(bundle.getString("testcase.input.buttons.addAndGenerate"));
 		setCheckListeners();
 		mcdcInputView.reset();
 		operationCoverageInputView.reset();
@@ -166,8 +166,8 @@ public class TestCaseGenerationInput extends VBox {
 			case MCDC: {
 				if(!testCaseGenerationSettingsHandler.checkMCDCSettings(mcdcInputView.getLevel(), mcdcInputView.getDepth())) {
 					stageManager.makeAlert(Alert.AlertType.ERROR,
-							"animation.symbolic.alerts.testcasegeneration.invalid",
-							"animation.symbolic.alerts.testcasegeneration.mcdc.invalid")
+							"animation.alerts.testcasegeneration.invalid",
+							"animation.alerts.testcasegeneration.mcdc.invalid")
 							.showAndWait();
 					return;
 				}
@@ -178,14 +178,14 @@ public class TestCaseGenerationInput extends VBox {
 				List<String> operations = operationCoverageInputView.getOperations();
 				if(operations.isEmpty()) {
 					stageManager.makeAlert(Alert.AlertType.ERROR,
-							"animation.symbolic.alerts.testcasegeneration.operations.header",
-							"animation.symbolic.alerts.testcasegeneration.operations.content").showAndWait();
+							"animation.alerts.testcasegeneration.operations.header",
+							"animation.alerts.testcasegeneration.operations.content").showAndWait();
 					return;
 				}
 				if(!testCaseGenerationSettingsHandler.checkInteger(operationCoverageInputView.getDepth())) {
 					stageManager.makeAlert(Alert.AlertType.ERROR,
-							"animation.symbolic.alerts.testcasegeneration.invalid",
-							"animation.symbolic.alerts.testcasegeneration.coveredoperations.invalid")
+							"animation.alerts.testcasegeneration.invalid",
+							"animation.alerts.testcasegeneration.coveredoperations.invalid")
 							.showAndWait();
 					return;
 				}
@@ -215,8 +215,8 @@ public class TestCaseGenerationInput extends VBox {
 	}
 	
 	public void changeItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
-		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
-		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
+		btAdd.setText(bundle.getString("testcase.input.buttons.change"));
+		btCheck.setText(bundle.getString("testcase.input.buttons.changeAndGenerate"));
 		setChangeListeners(item, view, resultHandler, stage);
 		stage.select(item);
 		if(stage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {

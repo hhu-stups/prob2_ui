@@ -19,7 +19,7 @@
 		</columnResizePolicy>
 	</TableView>
 	<HBox spacing="10.0">
-		<Label text="%animation.symbolic.testcasegeneration.depth" labelFor="$depthField" VBox.vgrow="NEVER"/>
+		<Label text="%animation.testcase.depth" labelFor="$depthField" VBox.vgrow="NEVER"/>
 		<TextField fx:id="depthField" VBox.vgrow="NEVER"/>
 	</HBox>
 </fx:root>
