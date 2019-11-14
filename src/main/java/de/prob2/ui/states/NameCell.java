@@ -5,7 +5,7 @@ import de.prob.animator.domainobjects.ExpandedFormula;
 
 import javafx.scene.control.TreeTableCell;
 
-class NameCell extends TreeTableCell<ExpandedFormula, ExpandedFormula> {
+class NameCell extends TreeTableCell<StateItem, ExpandedFormula> {
 	@Override
 	protected void updateItem(final ExpandedFormula item, final boolean empty) {
 		super.updateItem(item, empty);

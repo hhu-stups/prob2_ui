@@ -8,7 +8,7 @@ import de.prob.animator.domainobjects.ExpandedFormula;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
 
-final class ValueCell extends TreeTableCell<ExpandedFormula, ExpandedFormula> {
+final class ValueCell extends TreeTableCell<StateItem, ExpandedFormula> {
 	private final ResourceBundle bundle;
 	
 	ValueCell(final ResourceBundle bundle) {

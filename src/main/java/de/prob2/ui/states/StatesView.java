@@ -22,6 +22,7 @@ import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.FormulaId;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
@@ -43,7 +44,6 @@ import de.prob2.ui.unsatcore.UnsatCoreCalculator;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -60,7 +60,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-import javafx.util.Callback;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,15 +77,15 @@ public final class StatesView extends StackPane {
 	private Button btComputeUnsatCore;
 
 	@FXML
-	private TreeTableView<ExpandedFormula> tv;
+	private TreeTableView<StateItem> tv;
 	@FXML
-	private TreeTableColumn<ExpandedFormula, ExpandedFormula> tvName;
+	private TreeTableColumn<StateItem, ExpandedFormula> tvName;
 	@FXML
-	private TreeTableColumn<ExpandedFormula, ExpandedFormula> tvValue;
+	private TreeTableColumn<StateItem, ExpandedFormula> tvValue;
 	@FXML
-	private TreeTableColumn<ExpandedFormula, ExpandedFormula> tvPreviousValue;
+	private TreeTableColumn<StateItem, ExpandedFormula> tvPreviousValue;
 	@FXML
-	private TreeItem<ExpandedFormula> tvRootItem;
+	private TreeItem<StateItem> tvRootItem;
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -124,20 +123,19 @@ public final class StatesView extends StackPane {
 
 		this.tvName.setCellFactory(col -> new NameCell());
 		this.tvValue.setCellFactory(col -> new ValueCell(bundle));
-		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle)); // FIXME actually use previous state
+		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle));
 
-		final Callback<TreeTableColumn.CellDataFeatures<ExpandedFormula, ExpandedFormula>, ObservableValue<ExpandedFormula>> cellValueFactory = data -> Bindings
-				.createObjectBinding(data.getValue()::getValue, this.currentTrace);
-		this.tvName.setCellValueFactory(cellValueFactory);
-		this.tvValue.setCellValueFactory(cellValueFactory);
-		this.tvPreviousValue.setCellValueFactory(cellValueFactory);
+		this.tvName.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "current"));
+		this.tvValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "current"));
+		this.tvPreviousValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "previous"));
 
-		this.tv.getRoot().setValue(new ExpandedFormula(
+		final ExpandedFormula rootPlaceholderFormula = new ExpandedFormula(
 			"Machine (this root item should be invisible)",
 			BVisual2Value.Inactive.INSTANCE,
 			null,
 			Collections.emptyList()
-		));
+		);
+		this.tv.getRoot().setValue(new StateItem(rootPlaceholderFormula, rootPlaceholderFormula));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updater.execute(() -> {
 			boolean showUnsatCoreButton = false;
@@ -182,8 +180,8 @@ public final class StatesView extends StackPane {
 		}
 	}
 
-	private TreeTableRow<ExpandedFormula> initTableRow() {
-		final TreeTableRow<ExpandedFormula> row = new TreeTableRow<>();
+	private TreeTableRow<StateItem> initTableRow() {
+		final TreeTableRow<StateItem> row = new TreeTableRow<>();
 
 		row.itemProperty().addListener((observable, from, to) -> {
 			row.getStyleClass().remove("changed");
@@ -195,16 +193,13 @@ public final class StatesView extends StackPane {
 					List<String> coreConjuncts = Arrays.stream(code.split("&"))
 							.map(str -> str.replace(" ", ""))
 							.collect(Collectors.toList());
-					if (coreConjuncts.contains(to.getLabel().replace(" ", ""))) {
+					if (coreConjuncts.contains(to.getCurrent().getLabel().replace(" ", ""))) {
 						row.getStyleClass().add("unsatCore");
 						return;
 					}
 				}
 
-				final BVisual2Value current = to.getValue();
-				final BVisual2Value previous = to.getValue(); // FIXME actually use previous state
-
-				if (!current.equals(previous)) {
+				if (!to.getCurrent().getValue().equals(to.getPrevious().getValue())) {
 					row.getStyleClass().add("changed");
 				}
 			}
@@ -216,7 +211,7 @@ public final class StatesView extends StackPane {
 		copyItem.disableProperty().bind(row.itemProperty().isNull());
 
 		this.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN), () -> {
-			final TreeItem<ExpandedFormula> item = tv.getSelectionModel().getSelectedItem();
+			final TreeItem<StateItem> item = tv.getSelectionModel().getSelectedItem();
 			if (item != null) {
 				handleCopyName(item);
 			}
@@ -228,7 +223,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				DotView formulaStage = injector.getInstance(DotView.class);
-				formulaStage.visualizeFormula(row.getItem().getLabel());
+				formulaStage.visualizeFormula(row.getItem().getCurrent().getLabel());
 				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -242,7 +237,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-				expressionTableView.visualizeExpression(getResultValue(row.getItem().getValue()));
+				expressionTableView.visualizeExpression(getResultValue(row.getItem().getCurrent().getValue()));
 				expressionTableView.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -303,18 +298,27 @@ public final class StatesView extends StackPane {
 		return filteredNodes;
 	}
 
-	private static void buildNodes(final TreeItem<ExpandedFormula> treeItem, final List<ExpandedFormula> nodes) {
+	private static void buildNodes(final TreeItem<StateItem> treeItem, final List<ExpandedFormula> currentFormulas, final List<ExpandedFormula> previousFormulas) {
 		Objects.requireNonNull(treeItem);
-		Objects.requireNonNull(nodes);
+		Objects.requireNonNull(currentFormulas);
+		Objects.requireNonNull(previousFormulas);
 
 		assert treeItem.getChildren().isEmpty();
+		assert previousFormulas.isEmpty() || currentFormulas.size() == previousFormulas.size();
 
-		for (final ExpandedFormula node : nodes) {
-			final TreeItem<ExpandedFormula> subTreeItem = new TreeItem<>();
+		for (int i = 0; i < currentFormulas.size(); i++) {
+			final ExpandedFormula current = currentFormulas.get(i);
+			final ExpandedFormula previous;
+			if (previousFormulas.isEmpty()) {
+				// Previous state not available, use a placeholder formula with an inactive value.
+				previous = new ExpandedFormula(current.getLabel(), BVisual2Value.Inactive.INSTANCE, current.getId(), Collections.emptyList());
+			} else {
+				previous = previousFormulas.get(i);
+			}
+			final TreeItem<StateItem> subTreeItem = new TreeItem<>(new StateItem(current, previous));
 
 			treeItem.getChildren().add(subTreeItem);
-			subTreeItem.setValue(node);
-			buildNodes(subTreeItem, node.getChildren());
+			buildNodes(subTreeItem, current.getChildren(), previous.getChildren());
 		}
 	}
 
@@ -328,15 +332,35 @@ public final class StatesView extends StackPane {
 
 		final GetTopLevelFormulasCommand getTopLevelCommand = new GetTopLevelFormulasCommand();
 		to.getStateSpace().execute(getTopLevelCommand);
-		final List<ExpandFormulaCommand> expandCommands = getTopLevelCommand.getFormulaIds().stream()
+		final List<FormulaId> topLevel = getTopLevelCommand.getFormulaIds();
+		
+		final List<ExpandFormulaCommand> expandCurrentCommands = topLevel.stream()
 			.map(id -> new ExpandFormulaCommand(id, to.getCurrentState()))
 			.collect(Collectors.toList());
-		to.getStateSpace().execute(new ComposedCommand(expandCommands));
-		final List<ExpandedFormula> rootNodes = expandCommands.stream().map(ExpandFormulaCommand::getResult).collect(Collectors.toList());
-		final List<ExpandedFormula> nodes = filterNodes(rootNodes, this.filterState.getText());
+		final List<ExpandFormulaCommand> expandPreviousCommands;
+		if (to.canGoBack()) {
+			expandPreviousCommands = topLevel.stream()
+				.map(id -> new ExpandFormulaCommand(id, to.getPreviousState()))
+				.collect(Collectors.toList());
+		} else {
+			expandPreviousCommands = Collections.emptyList();
+		}
+		
+		final List<ExpandFormulaCommand> allCommands = new ArrayList<>(expandCurrentCommands);
+		allCommands.addAll(expandPreviousCommands);
+		to.getStateSpace().execute(new ComposedCommand(allCommands));
+		
+		final List<ExpandedFormula> currentFormulas = expandCurrentCommands.stream()
+			.map(ExpandFormulaCommand::getResult)
+			.collect(Collectors.toList());
+		final List<ExpandedFormula> previousFormulas = expandPreviousCommands.stream()
+			.map(ExpandFormulaCommand::getResult)
+			.collect(Collectors.toList());
+
 		Platform.runLater(() -> {
 			this.tvRootItem.getChildren().clear();
-			buildNodes(this.tvRootItem, nodes);
+			buildNodes(this.tvRootItem, currentFormulas, previousFormulas);
+			// TODO filter
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
@@ -344,10 +368,10 @@ public final class StatesView extends StackPane {
 		});
 	}
 
-	private static void handleCopyName(final TreeItem<ExpandedFormula> item) {
+	private static void handleCopyName(final TreeItem<StateItem> item) {
 		final Clipboard clipboard = Clipboard.getSystemClipboard();
 		final ClipboardContent content = new ClipboardContent();
-		content.putString(item.getValue().getLabel());
+		content.putString(item.getValue().getCurrent().getLabel());
 		clipboard.setContent(content);
 	}
 
@@ -365,13 +389,11 @@ public final class StatesView extends StackPane {
 		}
 	}
 
-	private void showDetails(final ExpandedFormula formula) {
+	private void showDetails(final StateItem item) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
-		stage.setTitle(formula.getLabel());
-		stage.setCurrentValue(getResultValue(formula.getValue()));
-		if (this.currentTrace.canGoBack()) {
-			stage.setPreviousValue(getResultValue(formula.getValue())); // FIXME actually use previous state
-		}
+		stage.setTitle(item.getCurrent().getLabel());
+		stage.setCurrentValue(getResultValue(item.getCurrent().getValue()));
+		stage.setPreviousValue(getResultValue(item.getPrevious().getValue()));
 		stage.show();
 	}
 	
