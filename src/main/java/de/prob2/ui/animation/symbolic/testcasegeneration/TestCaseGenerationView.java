@@ -52,7 +52,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	private HelpButton helpButton;
 		
 	@FXML
-	private TableView<TestCaseGenerationItem> tvFormula;
+	private TableView<TestCaseGenerationItem> tvTestCases;
 	
 	@FXML
 	private TableColumn<TestCaseGenerationItem, Checked> statusColumn;
@@ -181,13 +181,13 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
 		setBindings();
-		setContextMenu();
+		tvTestCases.setRowFactory(new TestCaseGenerationCellFactory());
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				bindMachine(newValue);
 			} else {
-				tvFormula.getItems().clear();
-				tvFormula.itemsProperty().unbind();
+				tvTestCases.getItems().clear();
+				tvTestCases.itemsProperty().unbind();
 			}
 		});
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
@@ -201,9 +201,9 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	}
 	
 	public void bindMachine(Machine machine) {
-		tvFormula.itemsProperty().unbind();
-		tvFormula.itemsProperty().bind(testCasesProperty(machine));
-		tvFormula.refresh();
+		tvTestCases.itemsProperty().unbind();
+		tvTestCases.itemsProperty().bind(testCasesProperty(machine));
+		tvTestCases.refresh();
 	}
 	
 	private void setBindings() {
@@ -212,7 +212,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(addFormulaButton.disableProperty(), partOfDisableBinding);
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), partOfDisableBinding);
 		cancelButton.disableProperty().bind(testCaseGenerator.currentJobThreadsProperty().emptyProperty());
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvFormula.disableProperty(), partOfDisableBinding);
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvTestCases.disableProperty(), partOfDisableBinding);
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -229,15 +229,15 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 			}
 		});
 		selectAll.setOnAction(e-> {
-			for(IExecutableItem item : tvFormula.getItems()) {
+			for(IExecutableItem item : tvTestCases.getItems()) {
 				item.setSelected(selectAll.isSelected());
-				tvFormula.refresh();
+				tvTestCases.refresh();
 			}
 		});
 
 		shouldExecuteColumn.setGraphic(selectAll);
-		tvFormula.setOnMouseClicked(e-> {
-			TestCaseGenerationItem item = tvFormula.getSelectionModel().getSelectedItem();
+		tvTestCases.setOnMouseClicked(e-> {
+			TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
 				itemHandler.handleItem(item, false);
 			}
@@ -248,15 +248,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	public ListProperty<TestCaseGenerationItem> testCasesProperty(Machine machine) {
 		return machine.testCasesProperty();
 	}
-	
 
-	private void removeFormula(Machine machine, TestCaseGenerationItem item) {
-		machine.removeTestCase(item);
-	}
-	
-	private void setContextMenu() {
-		tvFormula.setRowFactory(new TestCaseGenerationCellFactory());
-	}
 	
 	@FXML
 	public void addFormula() {
@@ -266,8 +258,8 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
-		TestCaseGenerationItem item = tvFormula.getSelectionModel().getSelectedItem();
-		removeFormula(machine, item);
+		TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
+		machine.removeTestCase(item);
 	}
 
 	private void openItem(TestCaseGenerationItem item) {
@@ -277,7 +269,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	}
 	
 	public void refresh() {
-		tvFormula.refresh();
+		tvTestCases.refresh();
 	}
 	
 	@FXML
