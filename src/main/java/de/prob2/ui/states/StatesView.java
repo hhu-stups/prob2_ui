@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -278,14 +279,17 @@ public final class StatesView extends StackPane {
 		return string.toLowerCase().contains(filter.toLowerCase());
 	}
 
-	private static void buildNodes(final TreeItem<StateItem> treeItem, final List<ExpandedFormula> currentFormulas, final List<ExpandedFormula> previousFormulas, final String filter) {
+	private static void updateTree(final TreeItem<StateItem> treeItem, final List<ExpandedFormula> currentFormulas, final List<ExpandedFormula> previousFormulas, final String filter) {
 		Objects.requireNonNull(treeItem);
 		Objects.requireNonNull(currentFormulas);
 		Objects.requireNonNull(previousFormulas);
 
-		assert treeItem.getChildren().isEmpty();
 		assert previousFormulas.isEmpty() || currentFormulas.size() == previousFormulas.size();
 
+		final Map<String, TreeItem<StateItem>> existingItems = treeItem.getChildren().stream()
+			.collect(Collectors.toMap(ti -> ti.getValue().getCurrent().getId(), ti -> ti));
+
+		final List<TreeItem<StateItem>> newChildren = new ArrayList<>();
 		for (int i = 0; i < currentFormulas.size(); i++) {
 			final ExpandedFormula current = currentFormulas.get(i);
 			final ExpandedFormula previous;
@@ -295,17 +299,26 @@ public final class StatesView extends StackPane {
 			} else {
 				previous = previousFormulas.get(i);
 			}
-			final TreeItem<StateItem> subTreeItem = new TreeItem<>(new StateItem(current, previous));
+
+			// Reuse an existing tree item (with the same formula ID) if possible.
+			final TreeItem<StateItem> subTreeItem;
+			if (existingItems.containsKey(current.getId())) {
+				subTreeItem = existingItems.remove(current.getId());
+			} else {
+				subTreeItem = new TreeItem<>();
+			}
+			subTreeItem.setValue(new StateItem(current, previous));
 
 			final boolean itemMatches = matchesFilter(filter, current.getLabel());
 			// If this item matches the filter, don't filter its children.
-			buildNodes(subTreeItem, current.getChildren(), previous.getChildren(), itemMatches ? "" : filter);
+			updateTree(subTreeItem, current.getChildren(), previous.getChildren(), itemMatches ? "" : filter);
 
 			// Only display this item if it or any of its children match the filter.
 			if (itemMatches || !subTreeItem.getChildren().isEmpty()) {
-				treeItem.getChildren().add(subTreeItem);
+				newChildren.add(subTreeItem);
 			}
 		}
+		treeItem.getChildren().setAll(newChildren);
 	}
 
 	private void updateRootAsync(final Trace to) {
@@ -356,8 +369,7 @@ public final class StatesView extends StackPane {
 			.collect(Collectors.toList());
 
 		Platform.runLater(() -> {
-			this.tvRootItem.getChildren().clear();
-			buildNodes(this.tvRootItem, currentFormulas, previousFormulas, filterState.getText());
+			updateTree(this.tvRootItem, currentFormulas, previousFormulas, filterState.getText());
 			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
