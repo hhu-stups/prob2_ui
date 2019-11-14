@@ -137,12 +137,10 @@ public final class StatesView extends StackPane {
 		);
 		this.tv.getRoot().setValue(new StateItem(rootPlaceholderFormula, rootPlaceholderFormula));
 
-		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updater.execute(() -> {
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
+			this.updateRootAsync(to);
 			boolean showUnsatCoreButton = false;
-			if (to == null) {
-				this.tv.getRoot().getChildren().clear();
-			} else {
-				this.updateRoot(to);
+			if (to != null) {
 				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
 				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) || 
 						operations.stream().map(trans -> trans.getName()).collect(Collectors.toList()).contains("$partial_setup_constants")) {
@@ -151,7 +149,7 @@ public final class StatesView extends StackPane {
 			}
 			btComputeUnsatCore.setVisible(showUnsatCoreButton);
 			btComputeUnsatCore.setManaged(showUnsatCoreButton);
-		});
+		};
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
 
@@ -272,7 +270,7 @@ public final class StatesView extends StackPane {
 
 	@FXML
 	private void handleSearch() {
-		this.updateRoot(currentTrace.get());
+		this.updateRootAsync(currentTrace.get());
 	}
 
 	private static boolean matchesFilter(final String filter, final String string) {
@@ -306,6 +304,14 @@ public final class StatesView extends StackPane {
 			if (itemMatches || !subTreeItem.getChildren().isEmpty()) {
 				treeItem.getChildren().add(subTreeItem);
 			}
+		}
+	}
+
+	private void updateRootAsync(final Trace to) {
+		if (to == null) {
+			this.tv.getRoot().getChildren().clear();
+		} else {
+			this.updater.execute(() -> this.updateRoot(to));
 		}
 	}
 
