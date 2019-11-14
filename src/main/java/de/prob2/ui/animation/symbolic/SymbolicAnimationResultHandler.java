@@ -21,26 +21,21 @@ import de.prob.check.NotYetFinished;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.Region;
 
 @Singleton
-public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
+public class SymbolicAnimationResultHandler extends AbstractResultHandler implements ISymbolicResultHandler {
 
 	private static final String GENERAL_RESULT_MESSAGE = "common.result.message";
-	
-	private final ResourceBundle bundle;
 	
 	private final CurrentTrace currentTrace;
 	
@@ -48,14 +43,11 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 	protected ArrayList<Class<?>> parseErrors;
 	protected ArrayList<Class<?>> interrupted;
 
-	private final StageManager stageManager;
-
 	
 	@Inject
-	public SymbolicAnimationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final StageManager stageManager) {
-		this.bundle = bundle;
+	public SymbolicAnimationResultHandler(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
+		super(stageManager, bundle);
 		this.currentTrace = currentTrace;
-		this.stageManager = stageManager;
 		this.success = new ArrayList<>();
 		this.parseErrors = new ArrayList<>();
 		this.interrupted = new ArrayList<>();
@@ -154,26 +146,6 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler {
 			handleSequence((SymbolicAnimationItem) item, (ConstraintBasedSequenceCheckCommand) cmd);
 		}
 	}
-
-	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
-		stageManager.makeAlert(AlertType.INFORMATION,
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content", bundle.getString(itemType.getKey()))
-				.showAndWait();
-	}
 	
-	public void showResult(SymbolicAnimationItem item) {
-		CheckingResultItem resultItem = item.getResultItem();
-		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
-			return;
-		}
-		Alert alert = stageManager.makeAlert(
-				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
-				resultItem.getHeaderBundleKey(),
-				resultItem.getMessageBundleKey(), resultItem.getMessageParams());
-		alert.setTitle(item.getName());
-		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-		alert.showAndWait();
-	}
 
 }

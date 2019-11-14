@@ -18,32 +18,23 @@ import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.AbstractResultHandler;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.Region;
-
 @Singleton
-public class TestCaseGenerationResultHandler {
-	
-	private final ResourceBundle bundle;
+public class TestCaseGenerationResultHandler extends AbstractResultHandler {
 	
 	private final CurrentTrace currentTrace;
-
-	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final Injector injector;
 
 	
 	@Inject
-	public TestCaseGenerationResultHandler(final ResourceBundle bundle, final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final Injector injector) {
-		this.bundle = bundle;
+	public TestCaseGenerationResultHandler(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
+		super(stageManager, bundle);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.stageManager = stageManager;
 		this.injector = injector;
 	}
 	
@@ -108,27 +99,6 @@ public class TestCaseGenerationResultHandler {
 		if (currentTrace.get() != null) {
 			traceSaver.save(item, currentProject.getCurrentMachine());
 		}
-	}
-	
-	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
-		stageManager.makeAlert(AlertType.INFORMATION,
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content", bundle.getString(itemType.getKey()))
-				.showAndWait();
-	}
-	
-	public void showResult(TestCaseGenerationItem item) {
-		CheckingResultItem resultItem = item.getResultItem();
-		if(resultItem == null || item.getChecked() == Checked.SUCCESS) {
-			return;
-		}
-		Alert alert = stageManager.makeAlert(
-				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
-				resultItem.getHeaderBundleKey(),
-				resultItem.getMessageBundleKey(), resultItem.getMessageParams());
-		alert.setTitle(item.getName());
-		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-		alert.showAndWait();
 	}
 
 }

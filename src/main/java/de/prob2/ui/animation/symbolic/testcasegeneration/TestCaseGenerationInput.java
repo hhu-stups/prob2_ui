@@ -6,9 +6,9 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationSettingsHandler;
-import de.prob2.ui.verifications.AbstractResultHandler;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;

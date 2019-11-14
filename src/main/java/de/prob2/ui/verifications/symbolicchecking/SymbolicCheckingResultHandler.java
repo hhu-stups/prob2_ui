@@ -29,13 +29,13 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicItem;
-import de.prob2.ui.verifications.AbstractResultHandler;
+import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 
 @Singleton
-public class SymbolicCheckingResultHandler extends AbstractResultHandler implements ISymbolicResultHandler {
+public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHandler implements ISymbolicResultHandler {
 	
 	private final CurrentTrace currentTrace;
 	

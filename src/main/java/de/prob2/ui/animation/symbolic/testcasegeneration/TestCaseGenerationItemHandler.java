@@ -13,7 +13,7 @@ import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGeneratorCreato
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.AbstractResultHandler;
+import de.prob2.ui.internal.AbstractResultHandler;
 
 @Singleton
 public class TestCaseGenerationItemHandler {

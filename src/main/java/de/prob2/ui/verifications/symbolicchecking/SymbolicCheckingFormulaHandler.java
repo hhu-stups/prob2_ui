@@ -21,7 +21,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
-import de.prob2.ui.verifications.AbstractResultHandler;
+import de.prob2.ui.internal.AbstractResultHandler;
 
 @Singleton
 public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<SymbolicCheckingFormulaItem> {

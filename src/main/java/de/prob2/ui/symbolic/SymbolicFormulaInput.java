@@ -14,7 +14,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
-import de.prob2.ui.verifications.AbstractResultHandler.ItemType;
+import de.prob2.ui.internal.AbstractResultHandler;
+import de.prob2.ui.internal.AbstractResultHandler.ItemType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -130,7 +131,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 		return formula;
 	}
 
-	public void changeFormula(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
+	public void changeFormula(T item, SymbolicView<T> view, AbstractResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
 		setChangeListeners(item, view, resultHandler, stage);
@@ -150,7 +151,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 		stage.show();
 	}
 	
-	protected void setChangeListeners(T item, SymbolicView<T> view, ISymbolicResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
+	protected void setChangeListeners(T item, SymbolicView<T> view, AbstractResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setOnAction(e -> {
 			if(updateFormula(item, view, stage)) {
 				addFormula(false);
