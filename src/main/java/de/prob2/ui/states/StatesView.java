@@ -9,8 +9,10 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -96,6 +98,8 @@ public final class StatesView extends StackPane {
 	private final UnsatCoreCalculator unsatCoreCalculator;
 
 	private final ExecutorService updater;
+	private final Object updateRootAsyncLock;
+	private Future<Void> lastUpdateFuture;
 	private List<Double> columnWidthsToRestore;
 
 	@Inject
@@ -109,6 +113,8 @@ public final class StatesView extends StackPane {
 		this.config = config;
 
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
+		this.updateRootAsyncLock = new Object();
+		this.lastUpdateFuture = Futures.immediateFuture(null);
 		this.unsatCoreCalculator = unsatCoreCalculator;
 		stopActions.add(this.updater::shutdownNow);
 
@@ -303,10 +309,14 @@ public final class StatesView extends StackPane {
 	}
 
 	private void updateRootAsync(final Trace to) {
-		if (to == null) {
-			this.tv.getRoot().getChildren().clear();
-		} else {
-			this.updater.execute(() -> this.updateRoot(to));
+		synchronized (this.updateRootAsyncLock) {
+			this.lastUpdateFuture.cancel(false);
+			if (to == null) {
+				this.tv.getRoot().getChildren().clear();
+				this.lastUpdateFuture = Futures.immediateFuture(null);
+			} else {
+				this.lastUpdateFuture = this.updater.submit(() -> this.updateRoot(to), null);
+			}
 		}
 	}
 
