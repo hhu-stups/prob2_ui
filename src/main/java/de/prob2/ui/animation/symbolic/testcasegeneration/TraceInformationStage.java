@@ -12,6 +12,7 @@ import de.prob2.ui.sharedviews.WrappedTextTableCell;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -30,6 +31,13 @@ public final class TraceInformationStage extends Stage {
 				TraceInformationItem item = this.getItem();
 				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && item.isEnabled()) {
 					currentTrace.set(item.getTrace());
+				}
+			});
+			this.itemProperty().addListener((observable, from, to) -> {
+				if(to != null && to.isEnabled()) {
+					this.setCursor(Cursor.HAND);
+				} else {
+					this.setCursor(Cursor.DEFAULT);
 				}
 			});
 		}
