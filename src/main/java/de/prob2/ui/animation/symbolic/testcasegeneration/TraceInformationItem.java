@@ -8,7 +8,7 @@ public class TraceInformationItem {
 
 	private int depth;
 
-	private String transitions;
+	private String operations;
 
 	private String operation;
 	
@@ -18,9 +18,9 @@ public class TraceInformationItem {
 
 	private transient Trace trace;
 
-	public TraceInformationItem(final int depth, final List<String> transitions, final String operation, final String guard, final boolean enabled, final Trace trace) {
+	public TraceInformationItem(final int depth, final List<String> operations, final String operation, final String guard, final boolean enabled, final Trace trace) {
 		this.depth = depth;
-		this.transitions = String.join(",\n", transitions);
+		this.operations = String.join(",\n", operations);
 		this.operation = operation;
 		this.guard = guard;
 		this.enabled = enabled;
@@ -31,8 +31,8 @@ public class TraceInformationItem {
 		return depth;
 	}
 
-	public String getTransitions() {
-		return transitions;
+	public String getOperations() {
+		return operations;
 	}
 	
 	public String getOperation() {
