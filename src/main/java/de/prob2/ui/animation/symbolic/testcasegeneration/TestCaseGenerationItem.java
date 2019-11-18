@@ -132,9 +132,10 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.initialize();
 	}
 	
-	public void setData(String name, String description, String code, TestCaseGenerationType type, Map<String, Object> additionalInformation) {
+	public void setData(String name, String description, String code, TestCaseGenerationType type, int maxDepth, Map<String, Object> additionalInformation) {
 		super.setData(name, description, code);
 		this.type = type;
+		this.maxDepth = maxDepth;
 		this.additionalInformation = additionalInformation;
 	}
 	

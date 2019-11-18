@@ -31,7 +31,7 @@
 							</items>
 						</ChoiceBox>
 					</HBox>
-					<SymbolicAnimationFormulaInput fx:id="formulaInput"/>
+					<SymbolicAnimationInput fx:id="formulaInput"/>
 				</VBox>
 			</AnchorPane>
 		</Scene>

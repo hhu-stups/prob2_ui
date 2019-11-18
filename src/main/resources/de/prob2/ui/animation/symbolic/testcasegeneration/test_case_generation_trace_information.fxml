@@ -26,7 +26,7 @@
 							<TableColumn fx:id="enabled" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.enabled" />
 						</columns>
 					</TableView>
-					<Label text="%animation.symbolic.traceInformation.uncoveredOperations" VBox.vgrow="NEVER"/>
+					<Label text="%animation.testcase.traceInformation.uncoveredOperations" VBox.vgrow="NEVER"/>
 					<TableView fx:id="tvUncovered">
 						<columnResizePolicy>
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

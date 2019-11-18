@@ -90,13 +90,14 @@ public class TestCaseGenerationInput extends VBox {
 	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationChoosingStage choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractItem(choosingStage);
+		TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
+		int maxDepth = item.getMaxDepth();
 		Map<String, Object> additionalInformation = testCaseGenerationSettingsHandler.extractAdditionalInformation(choosingStage, mcdcInputView, operationCoverageInputView);
 		boolean valid = testCaseGenerationSettingsHandler.isValid(choosingStage, mcdcInputView, operationCoverageInputView);
-		TestCaseGenerationItem newItem = new TestCaseGenerationItem(formula, choosingStage.getTestCaseGenerationType(), additionalInformation);
+		TestCaseGenerationItem newItem = new TestCaseGenerationItem(formula, type, additionalInformation);
 		if(!currentMachine.getTestCases().contains(newItem)) {
 			if(valid) {
-				TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
-				item.setData(formula, type.getName(), formula, type, additionalInformation);
+				item.setData(formula, type.getName(), "", type, maxDepth, additionalInformation);
 				item.reset();
 				view.refresh();
 			}
