@@ -22,7 +22,7 @@
 			<padding>
 				<Insets top="5.0" left="5.0"/>
 			</padding>
-			<TextField fx:id="filterState" onKeyReleased="#handleSearch" promptText="%states.statesView.search.prompt" HBox.hgrow="ALWAYS" />
+			<TextField fx:id="filterState" promptText="%states.statesView.search.prompt" HBox.hgrow="ALWAYS" />
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 		</HBox>
 		<Button fx:id="btComputeUnsatCore" styleClass="button-blue" onAction="#computeUnsatCore" visible="false" managed="false" text="%states.statesView.computeUnsatCore"/>
