@@ -400,7 +400,6 @@ public final class StatesView extends StackPane {
 
 		Platform.runLater(() -> {
 			updateTree(this.tvRootItem, this.currentFormulas, this.previousFormulas, filterState.getText());
-			this.tv.refresh();
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
 			this.statusBar.setStatesViewUpdating(false);
