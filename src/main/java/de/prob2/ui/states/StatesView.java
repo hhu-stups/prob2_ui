@@ -398,8 +398,11 @@ public final class StatesView extends StackPane {
 			}
 		}
 
+		// The formulas are stored in local variables to avoid a race condition where another updateRoot call reassigns the fields before the Platform.runLater block runs.
+		final List<ExpandedFormula> currentFormulasLocal = this.currentFormulas;
+		final List<ExpandedFormula> previousFormulasLocal = this.previousFormulas;
 		Platform.runLater(() -> {
-			updateTree(this.tvRootItem, this.currentFormulas, this.previousFormulas, filterState.getText());
+			updateTree(this.tvRootItem, currentFormulasLocal, previousFormulasLocal, filterState.getText());
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
 			this.statusBar.setStatesViewUpdating(false);
