@@ -2,11 +2,13 @@ package de.prob2.ui.internal;
 
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * <p>An executor that runs tasks in a single background thread, and automatically cancels any previous tasks when a new task is submitted.</p>
@@ -16,14 +18,25 @@ import com.google.common.util.concurrent.Futures;
  * <p>Note: This automatic cancelling behavior is not useful for all kinds of UI updates. If you do not need this special behavior, use a regular single-thread executor ({@link Executors#newSingleThreadExecutor()}) instead of this class.</p>
  */
 public final class BackgroundUpdater implements Executor {
-	private final ExecutorService executor;
+	private static final FutureCallback<Object> THROW_EXCEPTIONS_CALLBACK = new FutureCallback<Object>() {
+		@Override
+		public void onSuccess(final Object result) {}
+		
+		@Override
+		public void onFailure(final Throwable t) {
+			final Thread thread = Thread.currentThread();
+			thread.getUncaughtExceptionHandler().uncaughtException(thread, t);
+		}
+	};
+	
+	private final ListeningExecutorService executor;
 	private final Object lock;
-	private Future<Void> lastFuture;
+	private ListenableFuture<Void> lastFuture;
 	
 	public BackgroundUpdater(final String threadName) {
 		super();
 		
-		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, threadName));
+		this.executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(r -> new Thread(r, threadName)));
 		this.lock = new Object();
 		this.lastFuture = Futures.immediateFuture(null);
 	}
@@ -33,6 +46,7 @@ public final class BackgroundUpdater implements Executor {
 		synchronized (this.lock) {
 			this.lastFuture.cancel(false);
 			this.lastFuture = this.executor.submit(command, null);
+			Futures.addCallback(this.lastFuture, THROW_EXCEPTIONS_CALLBACK, MoreExecutors.directExecutor());
 		}
 	}
 	
