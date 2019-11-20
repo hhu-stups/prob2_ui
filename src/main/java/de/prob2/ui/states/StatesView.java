@@ -8,12 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -37,6 +33,7 @@ import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -99,9 +96,7 @@ public final class StatesView extends StackPane {
 	private final Config config;
 	private final UnsatCoreCalculator unsatCoreCalculator;
 
-	private final ExecutorService updater;
-	private final Object updateRootAsyncLock;
-	private Future<Void> lastUpdateFuture;
+	private final BackgroundUpdater updater;
 	private List<ExpandedFormula> currentFormulas;
 	private List<ExpandedFormula> previousFormulas;
 	private List<Double> columnWidthsToRestore;
@@ -116,13 +111,11 @@ public final class StatesView extends StackPane {
 		this.bundle = bundle;
 		this.config = config;
 
-		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "StatesView Updater"));
-		this.updateRootAsyncLock = new Object();
-		this.lastUpdateFuture = Futures.immediateFuture(null);
+		this.updater = new BackgroundUpdater("StatesView Updater");
+		stopActions.add(this.updater::shutdownNow);
 		this.currentFormulas = null;
 		this.previousFormulas = null;
 		this.unsatCoreCalculator = unsatCoreCalculator;
-		stopActions.add(this.updater::shutdownNow);
 
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
@@ -330,17 +323,7 @@ public final class StatesView extends StackPane {
 	}
 
 	private void updateRootAsync(final Trace from, final Trace to) {
-		synchronized (this.updateRootAsyncLock) {
-			this.lastUpdateFuture.cancel(false);
-			if (to == null) {
-				this.tv.getRoot().getChildren().clear();
-				this.currentFormulas = null;
-				this.previousFormulas = null;
-				this.lastUpdateFuture = Futures.immediateFuture(null);
-			} else {
-				this.lastUpdateFuture = this.updater.submit(() -> this.updateRoot(from, to), null);
-			}
-		}
+		this.updater.execute(() -> this.updateRoot(from, to));
 	}
 
 	private static List<ExpandedFormula> expandFormulasInState(final List<FormulaId> formulas, final State state) {
@@ -354,7 +337,12 @@ public final class StatesView extends StackPane {
 	}
 
 	private void updateRoot(final Trace from, final Trace to) {
-		Objects.requireNonNull(to, "to");
+		if (to == null) {
+			this.tv.getRoot().getChildren().clear();
+			this.currentFormulas = null;
+			this.previousFormulas = null;
+			return;
+		}
 
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
