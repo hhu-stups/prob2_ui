@@ -8,15 +8,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.beans.property.BooleanProperty;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -58,8 +58,7 @@ public class StatusBar extends HBox {
 	private final ObjectProperty<StatusBar.CheckingStatus> symbolicCheckingStatus;
 	private final ObjectProperty<StatusBar.CheckingStatus> symbolicAnimationStatus;
 	private final ObjectProperty<StatusBar.CheckingStatus> modelcheckingStatus;
-	private final BooleanProperty operationsViewUpdating;
-	private final BooleanProperty statesViewUpdating;
+	private BooleanExpression updating;
 	
 	@Inject
 	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -74,8 +73,7 @@ public class StatusBar extends HBox {
 		this.symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", StatusBar.CheckingStatus.SUCCESSFUL);
 		this.symbolicAnimationStatus = new SimpleObjectProperty<>(this, "symbolicAnimationStatus", StatusBar.CheckingStatus.SUCCESSFUL);
 		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", StatusBar.CheckingStatus.SUCCESSFUL);
-		this.operationsViewUpdating = new SimpleBooleanProperty(this, "operationsViewUpdating", false);
-		this.statesViewUpdating = new SimpleBooleanProperty(this, "statesViewUpdating", false);
+		this.updating = Bindings.createBooleanBinding(() -> false);
 		
 		stageManager.loadFXML(this, "status_bar.fxml");
 	}
@@ -93,8 +91,7 @@ public class StatusBar extends HBox {
 		this.symbolicCheckingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.symbolicAnimationStatusProperty().addListener((observable, from, to) -> this.update());
 		this.modelcheckingStatusProperty().addListener((observable, from, to) -> this.update());
-		this.operationsViewUpdatingProperty().addListener((o, from, to) -> this.update());
-		this.statesViewUpdatingProperty().addListener((o, from, to) -> this.update());
+		// this.updating doesn't have a listener; instead each individual expression has a listener added in addUpdatingExpression.
 	}
 	
 	public ObjectProperty<StatusBar.LoadingStatus> loadingStatusProperty() {
@@ -157,33 +154,15 @@ public class StatusBar extends HBox {
 		this.modelcheckingStatus.set(modelcheckingStatus);
 	}
 	
-	public BooleanProperty operationsViewUpdatingProperty() {
-		return this.operationsViewUpdating;
-	}
-	
-	public boolean isOperationsViewUpdating() {
-		return this.operationsViewUpdatingProperty().get();
-	}
-	
-	public void setOperationsViewUpdating(final boolean operationsViewUpdating) {
-		this.operationsViewUpdatingProperty().set(operationsViewUpdating);
-	}
-	
-	public BooleanProperty statesViewUpdatingProperty() {
-		return this.statesViewUpdating;
-	}
-	
-	public boolean isStatesViewUpdating() {
-		return this.statesViewUpdatingProperty().get();
-	}
-	
-	public void setStatesViewUpdating(final boolean statesViewUpdating) {
-		this.statesViewUpdatingProperty().set(statesViewUpdating);
+	public void addUpdatingExpression(final BooleanExpression expr) {
+		this.updating = this.updating.or(expr);
+		expr.addListener(o -> Platform.runLater(this::update));
+		Platform.runLater(this::update);
 	}
 	
 	private void update() {
 		statusLabel.getStyleClass().removeAll("noErrors", "someErrors");
-		if (this.isOperationsViewUpdating() || this.isStatesViewUpdating()) {
+		if (this.updating.get()) {
 			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
 		} else {
 			final Trace trace = this.currentTrace.get();
@@ -234,8 +213,6 @@ public class StatusBar extends HBox {
 		setSymbolicCheckingStatus(CheckingStatus.SUCCESSFUL);
 		setSymbolicAnimationStatus(CheckingStatus.SUCCESSFUL);
 		setLoadingStatus(LoadingStatus.NOT_LOADING);
-		setOperationsViewUpdating(false);
-		setStatesViewUpdating(false);
 	}
 	
 }

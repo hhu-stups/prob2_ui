@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +14,19 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
+import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
+import de.prob.animator.domainobjects.AnimationMatrixEntry;
+import de.prob.statespace.State;
+import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.statusbar.StatusBar;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -49,12 +57,17 @@ public class VisualisationView extends AnchorPane {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
+	private final BackgroundUpdater updater;
+
 	@Inject
-	public VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final ResourceBundle bundle) {
+	public VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final StatusBar statusBar) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
+		this.updater = new BackgroundUpdater("VisualisationView Updater");
+		stopActions.add(this.updater::shutdownNow);
+		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		stageManager.loadFXML(this, "visualisation_view.fxml");
 	}
 
@@ -65,23 +78,24 @@ public class VisualisationView extends AnchorPane {
 		previousStateVBox.managedProperty().bind(previousStateVisualisation.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
-		currentTrace.addListener((observable, from, to) -> {
-			if(to == null) {
+		this.updater.runningProperty().addListener((o, from, to) -> {
+			this.currentStateVisualisation.setDisable(to);
+			this.previousStateVisualisation.setDisable(to);
+		});
+
+		currentTrace.addListener((o, from, to) -> {
+			if (to == null) {
 				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
-				currentStateVisualisation.visualiseState(null);
-				previousStateVisualisation.visualiseState(null);
+			} else if (!currentTrace.getCurrentState().isInitialised()) {
+				placeholderLabel.setText(bundle.getString("common.notInitialised"));
 			} else {
-				if (!currentTrace.getCurrentState().isInitialised()) {
-					placeholderLabel.setText(bundle.getString("common.notInitialised"));
-				} else {
-					placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
-				}
-				
-				currentStateVisualisation.visualiseState(to.getCurrentState());
-				if (to.canGoBack()) {
-					previousStateVisualisation.visualiseState(to.getPreviousState());
-				}
+				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
 			}
+			
+			updater.execute(() -> {
+				visualiseState(currentStateVisualisation, to != null ? to.getCurrentState() : null);
+				visualiseState(previousStateVisualisation, to != null && to.canGoBack() ? to.getPreviousState() : null);
+			});
 		});
 
 		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
@@ -134,5 +148,25 @@ public class VisualisationView extends AnchorPane {
 		}
 
 		return machineImages;
+	}
+
+	private static void visualiseState(final StateVisualisationView view, final State state) {
+		final List<List<AnimationMatrixEntry>> matrix;
+		if (state == null) {
+			matrix = Collections.emptyList();
+		} else {
+			final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
+			state.getStateSpace().execute(cmd);
+			matrix = cmd.getMatrix();
+		}
+		
+		Platform.runLater(() -> {
+			view.getChildren().clear();
+			final boolean it = !matrix.isEmpty();
+			view.visualisationPossibleProperty().set(it);
+			if (it) {
+				view.showMatrix(state, matrix);
+			}
+		});
 	}
 }

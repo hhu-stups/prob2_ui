@@ -90,7 +90,6 @@ public final class StatesView extends StackPane {
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
-	private final StatusBar statusBar;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final Config config;
@@ -106,13 +105,13 @@ public final class StatesView extends StackPane {
 					   final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config, final UnsatCoreCalculator unsatCoreCalculator) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
-		this.statusBar = statusBar;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.config = config;
 
 		this.updater = new BackgroundUpdater("StatesView Updater");
 		stopActions.add(this.updater::shutdownNow);
+		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		this.currentFormulas = null;
 		this.previousFormulas = null;
 		this.unsatCoreCalculator = unsatCoreCalculator;
@@ -141,6 +140,8 @@ public final class StatesView extends StackPane {
 			Collections.emptyList()
 		);
 		this.tv.getRoot().setValue(new StateItem(rootPlaceholderFormula, rootPlaceholderFormula));
+
+		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> this.tv.setDisable(to)));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			this.updateRootAsync(from, to);
@@ -346,11 +347,6 @@ public final class StatesView extends StackPane {
 
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
-		Platform.runLater(() -> {
-			this.statusBar.setStatesViewUpdating(true);
-			this.tv.setDisable(true);
-		});
-
 		final GetTopLevelFormulasCommand getTopLevelCommand = new GetTopLevelFormulasCommand();
 		to.getStateSpace().execute(getTopLevelCommand);
 		final List<FormulaId> topLevel = getTopLevelCommand.getFormulaIds();
@@ -392,8 +388,6 @@ public final class StatesView extends StackPane {
 		Platform.runLater(() -> {
 			updateTree(this.tvRootItem, currentFormulasLocal, previousFormulasLocal, filterState.getText());
 			this.tv.getSelectionModel().select(selectedRow);
-			this.tv.setDisable(false);
-			this.statusBar.setStatesViewUpdating(false);
 		});
 	}
 

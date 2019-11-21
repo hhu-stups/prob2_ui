@@ -8,7 +8,6 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.ExecuteRightClickCommand;
-import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.statespace.State;
@@ -43,21 +42,6 @@ public class StateVisualisationView extends GridPane {
 		stageManager.loadFXML(this, "state_visualisation_view.fxml");
 	}
 
-	public void visualiseState(State state) {
-		this.getChildren().clear();
-		visualisationPossible.set(false);
-		if (state == null) {
-			return;
-		}
-		final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
-		state.getStateSpace().execute(cmd);
-		final List<List<AnimationMatrixEntry>> matrix = cmd.getMatrix();
-		if (!matrix.isEmpty()) {
-			visualisationPossible.set(true);
-			showMatrix(state, matrix);
-		}
-	}
-
 	public BooleanProperty visualisationPossibleProperty() {
 		return visualisationPossible;
 	}
@@ -66,7 +50,7 @@ public class StateVisualisationView extends GridPane {
 		return this.machineImages;
 	}
 
-	private void showMatrix(final State state, final List<List<AnimationMatrixEntry>> matrix) {
+	public void showMatrix(final State state, final List<List<AnimationMatrixEntry>> matrix) {
 		for (int r = 0; r < matrix.size(); r++) {
 			final List<AnimationMatrixEntry> row = matrix.get(r);
 			for (int c = 0; c < row.size(); c++) {
