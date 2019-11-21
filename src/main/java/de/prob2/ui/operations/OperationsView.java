@@ -10,8 +10,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,6 +29,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -46,6 +45,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -208,10 +208,8 @@ public final class OperationsView extends VBox {
 	private final StageManager stageManager;
 	private final Config config;
 	private final Comparator<CharSequence> alphanumericComparator;
-	private final ExecutorService updater;
+	private final BackgroundUpdater updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
-	private final BooleanProperty runningProperty;
-
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
@@ -226,11 +224,10 @@ public final class OperationsView extends VBox {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.config = config;
-		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
+		this.updater = new BackgroundUpdater("OperationsView Updater");
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
-		this.runningProperty = new SimpleBooleanProperty(this, "running", false);
 		stopActions.add(this.updater::shutdownNow);
-		statusBar.addUpdatingExpression(this.runningProperty);
+		statusBar.addUpdatingExpression(this.updater.runningProperty());
 
 		stageManager.loadFXML(this, "operations_view.fxml");
 	}
@@ -244,6 +241,7 @@ public final class OperationsView extends VBox {
 				executeOperationIfPossible(opsListView.getSelectionModel().getSelectedItem());
 			}
 		});
+		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> opsListView.setDisable(to)));
 
 		injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable,from,to) -> opsListView.setDisable(!to));
 		injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
@@ -348,11 +346,6 @@ public final class OperationsView extends VBox {
 	}
 
 	private void updateBG(final Trace trace) {
-		Platform.runLater(() -> {
-			this.opsListView.setDisable(true);
-			this.runningProperty.set(true);
-		});
-
 		if (!trace.getModel().equals(currentModel)) {
 			updateModel(trace);
 		}
@@ -382,11 +375,7 @@ public final class OperationsView extends VBox {
 
 		final List<OperationItem> filtered = applyFilter(searchBar.getText());
 
-		Platform.runLater(() -> {
-			opsListView.getItems().setAll(filtered);
-			this.opsListView.setDisable(false);
-			this.runningProperty.set(false);
-		});
+		Platform.runLater(() -> opsListView.getItems().setAll(filtered));
 	}
 
 	private void showDisabledAndWithTimeout(final Set<String> notEnabled, final Set<String> withTimeout) {
@@ -592,7 +581,7 @@ public final class OperationsView extends VBox {
 		return randomExecutionThread;
 	}
 	
-	public BooleanProperty runningProperty() {
-		return runningProperty;
+	public ReadOnlyBooleanProperty runningProperty() {
+		return this.updater.runningProperty();
 	}
 }
