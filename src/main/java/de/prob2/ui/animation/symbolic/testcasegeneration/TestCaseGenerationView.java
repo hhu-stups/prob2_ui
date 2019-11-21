@@ -141,6 +141,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 					checkItem.disableProperty().bind(testCaseGenerator.currentJobThreadsProperty().emptyProperty().not()
 							.or(to.selectedProperty().not()));
 					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
+					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
 			});
 
