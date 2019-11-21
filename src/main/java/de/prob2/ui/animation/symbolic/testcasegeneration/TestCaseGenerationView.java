@@ -244,7 +244,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 				itemHandler.handleItem(item, false);
 			}
 		});
-
+		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvTestCases.disableProperty(), currentTrace.existsProperty().not());
 	}
 
 	public ListProperty<TestCaseGenerationItem> testCasesProperty(Machine machine) {

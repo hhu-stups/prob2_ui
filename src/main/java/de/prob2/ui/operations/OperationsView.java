@@ -26,6 +26,7 @@ import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerator;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -249,7 +250,7 @@ public final class OperationsView extends VBox {
 		injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
 		injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
 		injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
-
+		injector.getInstance(TestCaseGenerator.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
 
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 
