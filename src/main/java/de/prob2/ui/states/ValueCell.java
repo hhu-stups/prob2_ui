@@ -1,85 +1,64 @@
 package de.prob2.ui.states;
 
-import java.util.Map;
 import java.util.ResourceBundle;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.EnumerationWarning;
-import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.EvaluationErrorResult;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.animator.domainobjects.IdentifierNotInitialised;
-import de.prob.animator.domainobjects.WDError;
-import de.prob.animator.prologast.ASTCategory;
-import de.prob.animator.prologast.ASTFormula;
-import de.prob.animator.prologast.PrologASTNode;
+import de.prob.animator.domainobjects.BVisual2Value;
+import de.prob.animator.domainobjects.ExpandedFormula;
 
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
 
-final class ValueCell extends TreeTableCell<StateItem<?>, StateItem<?>> {
-	
-	private static final String ERROR = "error";
-	
+final class ValueCell extends TreeTableCell<StateItem, ExpandedFormula> {
 	private final ResourceBundle bundle;
-	private final Map<IEvalElement, AbstractEvalResult> values;
 	
-	ValueCell(final ResourceBundle bundle, final Map<IEvalElement, AbstractEvalResult> values) {
+	ValueCell(final ResourceBundle bundle) {
 		super();
 		
 		this.bundle = bundle;
-		this.values = values;
 		
 		this.setTextOverrun(OverrunStyle.CENTER_WORD_ELLIPSIS);
 	}
 	
 	@Override
-	protected void updateItem(final StateItem<?> item, final boolean empty) {
+	protected void updateItem(final ExpandedFormula item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		this.getStyleClass().removeAll("false", "true", "not-initialized", ERROR);
+		this.getStyleClass().removeAll("false", "true", "not-initialized", "error");
 		
 		if (item == null || empty) {
 			this.setText(null);
-			this.setGraphic(null);
 		} else {
-			final PrologASTNode contents = item.getContents();
-			
-			if (contents instanceof ASTCategory) {
-				this.setText(null);
-			} else if (contents instanceof ASTFormula) {
-				final AbstractEvalResult result = this.values.get(((ASTFormula)contents).getFormula());
-				checkResult(result);
-			} else {
-				throw new IllegalArgumentException("Don't know how to show the value of a " + contents.getClass() + " instance");
-			}
-			this.setGraphic(null);
+			checkResult(item.getValue());
 		}
 	}
 
-	private void checkResult(final AbstractEvalResult result) {
+	private void checkResult(final BVisual2Value result) {
 		if (result == null) {
 			this.setText(null);
-		} else if (result instanceof EvalResult) {
-			final EvalResult eresult = (EvalResult)result;
-			this.setText(eresult.getValue());
-			if ("FALSE".equals(eresult.getValue())) {
-				this.getStyleClass().add("false");
-			} else if ("TRUE".equals(eresult.getValue())) {
-				this.getStyleClass().add("true");
+		} else if (result instanceof BVisual2Value.PredicateValue) {
+			final BVisual2Value.PredicateValue predValue = (BVisual2Value.PredicateValue)result;
+			this.setText(String.valueOf(predValue.getValue()));
+			switch (predValue) {
+				case FALSE:
+					this.getStyleClass().add("false");
+					break;
+				
+				case TRUE:
+					this.getStyleClass().add("true");
+					break;
+				
+				default:
+					throw new AssertionError(predValue);
 			}
-		} else if (result instanceof IdentifierNotInitialised) {
-			this.setText(bundle.getString("states.valueCell.notInitialized"));
+		} else if (result instanceof BVisual2Value.ExpressionValue) {
+			this.setText(((BVisual2Value.ExpressionValue)result).getValue());
+		} else if (result instanceof BVisual2Value.Inactive) {
+			this.setText("");
 			this.getStyleClass().add("not-initialized");
-		} else if (result instanceof WDError) {
-			this.setText(bundle.getString("states.valueCell.notWellDefined"));
-			this.getStyleClass().add(ERROR);
-		} else if (result instanceof EvaluationErrorResult) {
-			this.setText(String.format(bundle.getString("states.valueCell.error"), ((EvaluationErrorResult)result).getResult()));
-			this.getStyleClass().add(ERROR);
-		} else if (result instanceof EnumerationWarning) {
-			this.setText(bundle.getString("states.valueCell.enumerationWarning"));
-			this.getStyleClass().add(ERROR);
+		} else if (result instanceof BVisual2Value.Error) {
+			final String firstErrorMessageLine = ((BVisual2Value.Error)result).getMessage().split("\\n", 2)[0];
+			this.setText(String.format(bundle.getString("states.valueCell.error"), firstErrorMessageLine));
+			this.getStyleClass().add("error");
 		} else {
 			throw new IllegalArgumentException("Don't know how to show the value of a " + result.getClass() + " instance");
 		}

@@ -7,14 +7,13 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetMachineStructureCommand;
 import de.prob.animator.command.UnsatRegularCoreCommand;
 import de.prob.animator.domainobjects.IBEvalElement;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.Join;
-import de.prob.animator.prologast.ASTCategory;
-import de.prob.animator.prologast.ASTFormula;
-import de.prob.animator.prologast.PrologASTNode;
 import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.classicalb.Property;
+import de.prob.model.representation.AbstractFormulaElement;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.property.ObjectProperty;
@@ -56,19 +55,16 @@ public class UnsatCoreCalculator {
 		
 	}
 
-	private IBEvalElement extractProperties(ClassicalBModel bModel) {
-		final GetMachineStructureCommand machineStructureCmd = new GetMachineStructureCommand();
-		currentTrace.getStateSpace().execute(machineStructureCmd);
-		List<PrologASTNode> properties = machineStructureCmd.getPrologASTList().stream()
-				.filter(astNode -> astNode instanceof ASTCategory)
-				.filter(astNode -> "PROPERTIES".equals(((ASTCategory) astNode).getName()))
-				.collect(Collectors.toList());
-		if(properties.isEmpty()) {
+	private static IBEvalElement extractProperties(ClassicalBModel bModel) {
+		final List<Property> properties = bModel.getMainMachine().getProperties();
+		if (properties.isEmpty()) {
 			return null;
+		} else {
+			final List<IEvalElement> formulas = properties.stream()
+				.map(AbstractFormulaElement::getFormula)
+				.collect(Collectors.toList());
+			return (IBEvalElement) Join.conjunct(bModel, formulas);
 		}
-		return (IBEvalElement) Join.conjunctWithStrings(bModel, properties.get(0).getSubnodes().stream()
-				.map(prop -> ((ASTFormula) prop).getPrettyPrint())
-				.collect(Collectors.toList()));
 	}
 
 	public ObjectProperty<IBEvalElement> unsatCoreProperty() {

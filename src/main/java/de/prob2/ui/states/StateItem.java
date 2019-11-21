@@ -1,32 +1,22 @@
 package de.prob2.ui.states;
 
-import java.util.Objects;
+import de.prob.animator.domainobjects.ExpandedFormula;
 
-import de.prob.animator.prologast.PrologASTNode;
-
-public class StateItem<T extends PrologASTNode> {
-	private final T contents;
-	private final boolean errored;
+// This class needs to be public (even though it's only used inside this package) so that Bindings.select can access its getters.
+public final class StateItem {
+	private final ExpandedFormula current;
+	private final ExpandedFormula previous;
 	
-	public StateItem(final T contents, final boolean errored) {
-		super();
-		
-		Objects.requireNonNull(contents);
-		
-		this.contents = contents;
-		this.errored = errored;
+	StateItem(final ExpandedFormula current, final ExpandedFormula previous) {
+		this.current = current;
+		this.previous = previous;
 	}
 	
-	public T getContents() {
-		return this.contents;
+	public ExpandedFormula getCurrent() {
+		return this.current;
 	}
 	
-	public boolean isErrored() {
-		return this.errored;
-	}
-	
-	@Override
-	public String toString() {
-		return String.format("%s{contents=%s, errored=%s}", this.getClass().getName(), this.getContents(), this.isErrored());
+	public ExpandedFormula getPrevious() {
+		return this.previous;
 	}
 }
