@@ -1,6 +1,7 @@
 package de.prob2.ui.internal;
 
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -10,6 +11,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * <p>An executor that runs tasks in a single background thread, and automatically cancels any previous tasks when a new task is submitted.</p>
  * 
@@ -18,14 +22,19 @@ import com.google.common.util.concurrent.MoreExecutors;
  * <p>Note: This automatic cancelling behavior is not useful for all kinds of UI updates. If you do not need this special behavior, use a regular single-thread executor ({@link Executors#newSingleThreadExecutor()}) instead of this class.</p>
  */
 public final class BackgroundUpdater implements Executor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BackgroundUpdater.class);
 	private static final FutureCallback<Object> THROW_EXCEPTIONS_CALLBACK = new FutureCallback<Object>() {
 		@Override
 		public void onSuccess(final Object result) {}
 		
 		@Override
 		public void onFailure(final Throwable t) {
-			final Thread thread = Thread.currentThread();
-			thread.getUncaughtExceptionHandler().uncaughtException(thread, t);
+			if (t instanceof CancellationException) {
+				LOGGER.debug("Background update thread cancelled (this is not an error)", t);
+			} else {
+				final Thread thread = Thread.currentThread();
+				thread.getUncaughtExceptionHandler().uncaughtException(thread, t);
+			}
 		}
 	};
 	
