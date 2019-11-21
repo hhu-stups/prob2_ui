@@ -14,6 +14,23 @@ apply plugin: 'idea'
 project.group = "de.hhu.stups"
 project.version = "1.0.1-SNAPSHOT"
 
+if (project != rootProject) {
+	throw new GradleException(
+		"""\
+			The prob2-ui Gradle build cannot be included as a subproject.
+			If you are writing a plugin and need to reference the prob2-ui code as a dependency, replace the include statement in your settings.gradle with an includeBuild statement:
+			
+				includeBuild "${rootProject.relativePath(project.projectDir)}"
+			
+			And replace the project(":prob2-ui") dependency in your build.gradle with a compileOnly dependency:
+			
+				dependencies {
+					compileOnly group: "${project.group}", name: "${project.name}", version: "${project.version}"
+				}
+		""".stripIndent()
+	)
+}
+
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
 
@@ -155,11 +172,9 @@ macAppBundle {
 
 macAppBundle.mainClassName = mainClassName
 
-if( rootProject == project) {
-	wrapper {
-		gradleVersion = "5.6.2"
-		distributionType = Wrapper.DistributionType.ALL
-	}
+wrapper {
+	gradleVersion = "5.6.2"
+	distributionType = Wrapper.DistributionType.ALL
 }
 
 final helpScript = "./help.sh"
