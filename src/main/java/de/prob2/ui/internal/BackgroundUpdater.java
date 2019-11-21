@@ -11,6 +11,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +45,7 @@ public final class BackgroundUpdater implements Executor {
 	private final ListeningExecutorService executor;
 	private final Object lock;
 	private ListenableFuture<Void> lastFuture;
+	private BooleanProperty running;
 	
 	public BackgroundUpdater(final String threadName) {
 		super();
@@ -48,13 +53,29 @@ public final class BackgroundUpdater implements Executor {
 		this.executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(r -> new Thread(r, threadName)));
 		this.lock = new Object();
 		this.lastFuture = Futures.immediateFuture(null);
+		this.running = new SimpleBooleanProperty(this, "running", false);
+	}
+	
+	public ReadOnlyBooleanProperty runningProperty() {
+		return this.running;
+	}
+	
+	public boolean isRunning() {
+		return this.runningProperty().get();
 	}
 	
 	@Override
 	public void execute(final Runnable command) {
 		synchronized (this.lock) {
 			this.lastFuture.cancel(false);
-			this.lastFuture = this.executor.submit(command, null);
+			this.lastFuture = this.executor.submit(() -> {
+				try {
+					this.running.set(true);
+					command.run();
+				} finally {
+					this.running.set(false);
+				}
+			}, null);
 			Futures.addCallback(this.lastFuture, THROW_EXCEPTIONS_CALLBACK, MoreExecutors.directExecutor());
 		}
 	}

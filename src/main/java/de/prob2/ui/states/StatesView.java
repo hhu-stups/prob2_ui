@@ -44,8 +44,6 @@ import de.prob2.ui.unsatcore.UnsatCoreCalculator;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -92,14 +90,12 @@ public final class StatesView extends StackPane {
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
-	private final StatusBar statusBar;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final Config config;
 	private final UnsatCoreCalculator unsatCoreCalculator;
 
 	private final BackgroundUpdater updater;
-	private final BooleanProperty updating;
 	private List<ExpandedFormula> currentFormulas;
 	private List<ExpandedFormula> previousFormulas;
 	private List<Double> columnWidthsToRestore;
@@ -109,15 +105,13 @@ public final class StatesView extends StackPane {
 					   final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config, final UnsatCoreCalculator unsatCoreCalculator) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
-		this.statusBar = statusBar;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.config = config;
 
 		this.updater = new BackgroundUpdater("StatesView Updater");
 		stopActions.add(this.updater::shutdownNow);
-		this.updating = new SimpleBooleanProperty(this, "updating", false);
-		this.statusBar.addUpdatingExpression(this.updating);
+		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		this.currentFormulas = null;
 		this.previousFormulas = null;
 		this.unsatCoreCalculator = unsatCoreCalculator;
@@ -146,6 +140,8 @@ public final class StatesView extends StackPane {
 			Collections.emptyList()
 		);
 		this.tv.getRoot().setValue(new StateItem(rootPlaceholderFormula, rootPlaceholderFormula));
+
+		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> this.tv.setDisable(to)));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			this.updateRootAsync(from, to);
@@ -351,11 +347,6 @@ public final class StatesView extends StackPane {
 
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
-		Platform.runLater(() -> {
-			this.updating.set(true);
-			this.tv.setDisable(true);
-		});
-
 		final GetTopLevelFormulasCommand getTopLevelCommand = new GetTopLevelFormulasCommand();
 		to.getStateSpace().execute(getTopLevelCommand);
 		final List<FormulaId> topLevel = getTopLevelCommand.getFormulaIds();
@@ -397,8 +388,6 @@ public final class StatesView extends StackPane {
 		Platform.runLater(() -> {
 			updateTree(this.tvRootItem, currentFormulasLocal, previousFormulasLocal, filterState.getText());
 			this.tv.getSelectionModel().select(selectedRow);
-			this.tv.setDisable(false);
-			this.updating.set(false);
 		});
 	}
 
