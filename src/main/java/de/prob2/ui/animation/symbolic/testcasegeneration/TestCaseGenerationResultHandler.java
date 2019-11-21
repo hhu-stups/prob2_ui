@@ -54,6 +54,10 @@ public class TestCaseGenerationResultHandler extends AbstractResultHandler {
 
 	public void handleTestCaseGenerationResult(TestCaseGenerationItem item, Object result, boolean checkAll) {
 		item.getExamples().clear();
+		if(!(result instanceof TestCaseGeneratorResult)) {
+			showCheckingResult(item, Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound");
+			return;
+		}
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
 		List<TraceInformationItem> traceInformation = extractTraceInformation(testCaseGeneratorResult);
 		List<Trace> traces = extractTraces(testCaseGeneratorResult);
