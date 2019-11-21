@@ -29,7 +29,7 @@ public final class TraceInformationStage extends Stage {
 			this.getStyleClass().add("trace-information-row");
 			this.setOnMouseClicked(e -> {
 				TraceInformationItem item = this.getItem();
-				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && item.isEnabled()) {
+				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && item.getTrace() != null) {
 					currentTrace.set(item.getTrace());
 				}
 			});
