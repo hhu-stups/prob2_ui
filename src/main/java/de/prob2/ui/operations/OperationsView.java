@@ -205,7 +205,6 @@ public final class OperationsView extends VBox {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final ResourceBundle bundle;
-	private final StatusBar statusBar;
 	private final StageManager stageManager;
 	private final Config config;
 	private final Comparator<CharSequence> alphanumericComparator;
@@ -225,13 +224,13 @@ public final class OperationsView extends VBox {
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
 		this.bundle = bundle;
-		this.statusBar = statusBar;
 		this.stageManager = stageManager;
 		this.config = config;
 		this.updater = Executors.newSingleThreadExecutor(r -> new Thread(r, "OperationsView Updater"));
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		this.runningProperty = new SimpleBooleanProperty(this, "running", false);
 		stopActions.add(this.updater::shutdownNow);
+		statusBar.addUpdatingExpression(this.runningProperty);
 
 		stageManager.loadFXML(this, "operations_view.fxml");
 	}
@@ -350,7 +349,6 @@ public final class OperationsView extends VBox {
 
 	private void updateBG(final Trace trace) {
 		Platform.runLater(() -> {
-			this.statusBar.setOperationsViewUpdating(true);
 			this.opsListView.setDisable(true);
 			this.runningProperty.set(true);
 		});
@@ -388,7 +386,6 @@ public final class OperationsView extends VBox {
 			opsListView.getItems().setAll(filtered);
 			this.opsListView.setDisable(false);
 			this.runningProperty.set(false);
-			this.statusBar.setOperationsViewUpdating(false);
 		});
 	}
 

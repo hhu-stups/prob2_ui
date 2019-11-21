@@ -44,6 +44,8 @@ import de.prob2.ui.unsatcore.UnsatCoreCalculator;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -97,6 +99,7 @@ public final class StatesView extends StackPane {
 	private final UnsatCoreCalculator unsatCoreCalculator;
 
 	private final BackgroundUpdater updater;
+	private final BooleanProperty updating;
 	private List<ExpandedFormula> currentFormulas;
 	private List<ExpandedFormula> previousFormulas;
 	private List<Double> columnWidthsToRestore;
@@ -113,6 +116,8 @@ public final class StatesView extends StackPane {
 
 		this.updater = new BackgroundUpdater("StatesView Updater");
 		stopActions.add(this.updater::shutdownNow);
+		this.updating = new SimpleBooleanProperty(this, "updating", false);
+		this.statusBar.addUpdatingExpression(this.updating);
 		this.currentFormulas = null;
 		this.previousFormulas = null;
 		this.unsatCoreCalculator = unsatCoreCalculator;
@@ -347,7 +352,7 @@ public final class StatesView extends StackPane {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
 		Platform.runLater(() -> {
-			this.statusBar.setStatesViewUpdating(true);
+			this.updating.set(true);
 			this.tv.setDisable(true);
 		});
 
@@ -393,7 +398,7 @@ public final class StatesView extends StackPane {
 			updateTree(this.tvRootItem, currentFormulasLocal, previousFormulasLocal, filterState.getText());
 			this.tv.getSelectionModel().select(selectedRow);
 			this.tv.setDisable(false);
-			this.statusBar.setStatesViewUpdating(false);
+			this.updating.set(false);
 		});
 	}
 
