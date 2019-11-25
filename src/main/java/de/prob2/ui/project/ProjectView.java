@@ -32,8 +32,6 @@ public final class ProjectView extends StackPane {
 	@FXML
 	private MenuButton recentProjectButton;
 	@FXML
-	private ProjectTab projectTab;
-	@FXML
 	private MachinesTab machinesTab;
 
 	private final StageManager stageManager;
@@ -64,14 +62,6 @@ public final class ProjectView extends StackPane {
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		recentProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		openProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
-		
-		this.projectTabPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-			if (newValue == null) {
-				projectTab.projectDescriptionText.setWrappingWidth(0);
-				return;
-			}
-			projectTab.projectDescriptionText.setWrappingWidth(newValue.doubleValue() - 20);
-		});
 
 		projectManager.getRecentProjects().addListener((InvalidationListener)o ->
 			recentProjectButton.getItems().setAll(projectManager.getRecentProjectItems())

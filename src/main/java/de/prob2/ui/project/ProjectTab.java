@@ -7,6 +7,8 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
@@ -27,9 +29,9 @@ public class ProjectTab extends Tab {
 	@FXML
 	private TextField projectNameTextField;
 	@FXML
-	Text projectDescriptionText;
+	private Text projectDescriptionText;
 	@FXML
-	TextArea projectDescriptionTextArea;
+	private TextArea projectDescriptionTextArea;
 	@FXML
 	private StackPane projectDescriptionPane;
 	@FXML
@@ -51,6 +53,25 @@ public class ProjectTab extends Tab {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent(this.getClass());
+		
+		final ChangeListener<Number> widthChangeListener = (o, from, to) -> {
+			if (to == null) {
+				projectDescriptionText.setWrappingWidth(0);
+			} else {
+				projectDescriptionText.setWrappingWidth(to.doubleValue() - 20);
+			}
+		};
+		
+		this.tabPaneProperty().addListener((o, from, to) -> {
+			if (from != null) {
+				from.widthProperty().removeListener(widthChangeListener);
+			}
+			
+			if (to != null) {
+				to.widthProperty().addListener(widthChangeListener);
+			}
+		});
+		
 		projectDescriptionText.visibleProperty().bind(projectDescriptionTextArea.visibleProperty().not());
 		projectDescriptionText.managedProperty().bind(projectDescriptionTextArea.managedProperty().not());
 		projectNameLabel.visibleProperty().bind(projectNameTextField.visibleProperty().not());
