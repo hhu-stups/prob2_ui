@@ -34,7 +34,7 @@ public final class TraceInformationStage extends Stage {
 				}
 			});
 			this.itemProperty().addListener((observable, from, to) -> {
-				if(to != null && to.isEnabled()) {
+				if(to != null && to.getTrace() != null) {
 					this.setCursor(Cursor.HAND);
 				} else {
 					this.setCursor(Cursor.DEFAULT);
