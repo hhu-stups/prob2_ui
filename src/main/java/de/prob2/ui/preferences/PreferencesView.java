@@ -184,7 +184,6 @@ public final class PreferencesView extends BorderPane {
 			final String value = this.getPreferences().getPreferenceValue(pref.name);
 			item.setValue(new PrefTreeItem.Preference(
 				pref.name,
-				value.equals(pref.defaultValue) ? "" : "*",
 				value,
 				ProBPreferenceType.fromProBPreference(pref),
 				pref.defaultValue,

@@ -19,13 +19,12 @@ abstract class PrefTreeItem {
 	public static class Preference extends PrefTreeItem {
 		Preference(
 			final String name,
-			final String changed,
 			final String value,
 			final ProBPreferenceType valueType,
 			final String defaultValue,
 			final String description
 		) {
-			super(name, changed, value, valueType, defaultValue, description);
+			super(name, value.equals(defaultValue) ? "" : "*", value, valueType, defaultValue, description);
 		}
 	}
 	
