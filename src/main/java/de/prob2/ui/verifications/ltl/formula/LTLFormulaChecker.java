@@ -25,6 +25,7 @@ import de.prob2.ui.verifications.ltl.ILTLItemHandler;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
+import de.prob2.ui.verifications.ltl.LTLView;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -93,6 +94,11 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		checkingThread.start();
 	}
 	
+	public void updateMachine(Machine machine) {
+		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+		injector.getInstance(LTLView.class).refresh();
+	}
+	
 	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
 		if(!item.selected()) {
 			return Checked.NOT_CHECKED;
@@ -110,10 +116,14 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		Thread checkingThread = new Thread(() -> {
 			Checked result = checkFormula(item, machine);
 			item.setChecked(result);
-			Platform.runLater(() -> injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL));
+			Platform.runLater(() -> {
+				updateMachine(machine);
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+			});
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}
+			
 			currentJobThreads.remove(Thread.currentThread());
 		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);

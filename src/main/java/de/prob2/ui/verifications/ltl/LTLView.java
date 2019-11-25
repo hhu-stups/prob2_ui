@@ -423,4 +423,8 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		formulaSelectAll.setSelected(anySelected);
 	}
 
+	public void refresh() {
+		tvFormula.refresh();	
+	}
+
 }
