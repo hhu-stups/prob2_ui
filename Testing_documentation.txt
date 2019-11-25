@@ -10,9 +10,9 @@ Testfälle:
 
 Projekt ist gültig
 
-Erwartetes Ergebnis: Projekt wird geladen
+Erwartetes Ergebnis: Projekt wird geladen und Projekt Tab klappt auf
 
-Tatsächliches Ergebnis: Projekt wird geladen
+Tatsächliches Ergebnis: Projekt wird geladen und Projekt Tab klappt auf
 
 
 2.
@@ -26,7 +26,7 @@ Tatsächliches Ergebnis: Fehlermeldung erscheint
 
 3.
 
-Projekt Datei enthält fehlendene Informationen (Machine Name und Description fehlt)
+Projekt Datei enthält fehlendene Informationen
 
 Erwartetes Ergebnis: Projekt kann trotzdem geladen werden
 
@@ -37,9 +37,9 @@ Tatsächliches Ergebnis: Projekt kann trotzdem geladen werden, JSON Dateiname wi
 
 Format der Projekt Datei ist fehlerhaft
 
-Erwartetes Ergebnis: com.google.gson.stream.MalformedJsonException
+Erwartetes Ergebnis: Fehlermeldung tritt auf und Nutzer wird benachrichtigt, dass das Format der Datei falsch ist
 
-Tatsächliches Ergebnis: com.google.gson.stream.MalformedJsonException
+Tatsächliches Ergebnis: Fehlermeldung tritt auf und Nutzer wird benachrichtigt, dass das Format der Datei falsch ist
 
 
 
@@ -54,9 +54,9 @@ Testfälle:
 
 1. Machine ist gültig
 
-Erwartetes Ergebnis: Machine wird korrekt formatiert angezeigt
+Erwartetes Ergebnis: Machine wird korrekt formatiert angezeigt und Unicode Darstellung ist möglich
 
-Tatsächliches Ergebnis: Machine wird korrekt formatiert angezeigt
+Tatsächliches Ergebnis: Machine wird korrekt formatiert angezeigt und Unicode Darstellung ist möglich
 
 
 
@@ -101,9 +101,9 @@ Tatsächliches Ergebnis: Machine wird korrekt neu geladen
 2. Machine ist ungültig
 
 
-Erwartetes Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item wird deaktiviert
+Erwartetes Ergebnis: Parsefehler wird geworfen
 
-Tatsächliches Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item wird deaktiviert
+Tatsächliches Ergebnis: Parsefehler wird geworfen
 
 
 
@@ -133,8 +133,6 @@ Tatsächliches Ergebnis: Es wird rausgezoomt und eine untere Grenze ist vorhande
 Erwartetes Ergebnis: Default Größe wird gesetzt
 
 Tatsächliches Ergebnis: Default Größe wird gesetzt
-
-Bemerkung: Default Größe ist zu klein
 
 4. Enter Full Screen
 
@@ -196,7 +194,6 @@ Auch in der .jar Version testen!
 8. Cancel Button in allen File Dialogs testen:
 -File/Open
 -File/New Project
--State View/Edit/Save Machine As
 -File/View Current Machine Formatted/Save As
 -Preferences/General/Select Location
 -Project View/Open
@@ -234,9 +231,11 @@ Tatsächliches Ergebnis: Die Perspektive wird korrekt geladen und dargestellt
 
 Es wird eine Perspektive als FXML geladen. Hierbei ist die FXML ungültig
 
-Erwartetes Ergebnis: Fehlermeldung, ProB2-UI stürzt nicht ab
+Erwartetes Ergebnis: Fehlermeldung mit Exception, ProB2-UI stürzt nicht ab
 
-Tatsächliches Ergebnis: Fehlermeldung, ProB2-UI stürzt nicht ab
+Tatsächliches Ergebnis: Fehlermeldung mit Exception, ProB2-UI stürzt nicht ab
+
+Allerdings wird die fehlerhafte FXML persistiert, sodass ein Laden vom prob2-ui nicht mehr möglich ist (BEHEBEN!)
 
 Bemerkung: Anleitung für das Erstellen einzelner Sichten
 
@@ -270,7 +269,7 @@ Testfälle:
 
 1.
 
-Suchfunktion wird mit Lowercase und Uppercase getestet (sowohl mit Enter im Suchfeld als auch mit dem Suchbutton)
+Suchfunktion wird mit Lowercase und Uppercase getestet
 
 Erwartetes Ergebnis: Entsprechende Einträge werden angezeigt
 
@@ -298,7 +297,7 @@ Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, entsprechender Eintrag f�
 
 8. Show Details -> funktioniert
 
-9. Execute By Predicate -> funktioniert
+9. Execute By Predicate -> funktioniert; bei nicht parsebarem Prädikat wird allerdings eine Exception angezeigt (BEHEBEN?)
 
 
 
@@ -321,7 +320,7 @@ Erwartetes Ergebnis: Hilfe Fenster wird geöffnet und zum entsprechenden Eintrag
 Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, wird nicht zum entsprechenden Eintrag weitergeleitet
 
 
-5. Trace abspeichern -> funktioniert außer bei CSP
+5. Trace abspeichern -> funktioniert außer bei CSP; falls History nur den root als Eintrag hat dann kommt eine Exception (BEHEBEN!)
 
 
 
@@ -347,45 +346,7 @@ Tatsächliches Ergebnis: Leeres Projekt wird erstellt
 
 
 
-16. Formula Visualisierung
-
-Testfälle: 
-
-1. Gültige Formel wird eingegeben und auf apply gedrückt
-
-Erwartetes Ergebnis: Formel wird als Baum in der FormulaView dargestellt
-
-Tatsächliches Ergebnis: Formel wird als Baum in der FormulaView dargestellt
-
-
-2. Ungültige Formel wird eingegeben und auf apply gedrückt
-
-Erwartetes Ergebnis: View wird zurückgesetzt, Eingabefeld wird rot umrandet
-
-Tatsächliches Ergebnis: View wird zurückgesetzt, Eingabefeld wird rot umrandet 
-
-
-
-3. Reinzoomen per Button und per Shortcut (falls Eingabefeld den Fokus hat, soll dort nichts eingegeben werden) -> funktioniert
-
-4. Rauszoomen per Button und per Shortcut (falls Eingabefeld den Fokus hat, soll dort nichts eingegeben werden) -> funktioniert
-
-5. Abbrechen der Visualisierung von Formeln -> funktioniert 
-
-6. Draging in der View -> funktioniert
-
-7. Testen komplizierterer Formeln im Bezug auf die Darstellung
-
-Erwartetes Ergebnis: Baum wird korrekt dargestellt mit Abständen zwischen den einzelnen Knoten (keine Überlappung)
-
-Tatsächliches Ergebnis: Baum wird korrekt dargestellt mit Abständen zwischen den einzelnen Knoten (keine Überlappung)
-
-8. Hilfe Button -> springt noch nicht an die richtige Stelle
-
-
-
-
-17. Graph Visualisierung
+16. Graph Visualisierung
 
 1. Ausgewählte Darstellung verfügbar
 
@@ -484,7 +445,7 @@ Bemerkung: Renderingfehler in der HTML View
 
 
 
-18. Tabellen Visualisierung
+17. Tabellen Visualisierung
 
 1. Ausgewählte Darstellung verfügbar
 
@@ -574,7 +535,7 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 
 
 
-19. BEditor
+18. BEditor
 
 1. Undo -> funktioniert, Cursor muss sich an der richtigen Stelle befinden
 2. Redo -> funktioniert, Cursor muss sich an der richtigen Stelle befinden
@@ -590,11 +551,11 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 
 
 
-20. Save Project -> funktioniert
+19. Save Project -> funktioniert
 
 
 
-21. Project View
+20. Project View
 
 1. Load machine -> funktioniert
 
@@ -637,7 +598,7 @@ Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Succ
 
 
 
-22. History Chart
+21. History Chart
 
 1. Es wird auf das '+' geklickt und eine valide Formel eingegeben
 
@@ -648,7 +609,7 @@ Tatsächliches Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
 
 
 
-2. Es wird auf das '+' geklickt und eine invalide Formel eingegeben
+22. Es wird auf das '+' geklickt und eine invalide Formel eingegeben
 
 Erwartetes Ergebnis: Fehlermeldung erscheint
 
