@@ -438,7 +438,7 @@ Cursor?
 
 13. Enter/Shift Enter im Eingabefeld für Formeln -> funktioniert
 
-14. Hilfe Button -> springt noch nicht an die richtige Stelle
+14. Hilfe Button -> funktioniert; Dokumentation ist allerdings leer
 
 
 Bemerkung: Renderingfehler in der HTML View
@@ -531,14 +531,14 @@ Erwartetes Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenumbruc
 Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenumbruch in der Formeleingabe hinzugefügt, bei Shift Enter wird nur ein Zeilenumbruch hinzugefügt
 
 
-11. Hilfe Button -> springt noch nicht an die richtige Stelle
+11. Hilfe Button -> funktioniert
 
 
 
 18. BEditor
 
-1. Undo -> funktioniert, Cursor muss sich an der richtigen Stelle befinden
-2. Redo -> funktioniert, Cursor muss sich an der richtigen Stelle befinden
+1. Undo -> funktioniert
+2. Redo -> funktioniert
 3. Cut -> funktioniert
 4. Copy -> funktioniert
 5. Paste -> funktioniert
@@ -546,7 +546,7 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 7. Select all -> funktioniert
 8. Save Machine File -> funktioniert
 9. Highlighting -> funktioniert
-10. Help Button -> springt noch nicht an die richtige Stelle
+10. Help Button -> funktioniert
 
 
 
@@ -573,13 +573,13 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 
 8. Add machine -> funktioniert
 
-9. Help Buttons -> funktionieren, springen allerdings noch nicht an die richtige Stelle
+9. Help Buttons -> funktionieren
 
-10. Status 
+10. Status (BEHEBEN?)
 
-Erwartetes Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
+Erwartetes Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt?. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
 
-Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
+Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, es wird nicht zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
 
 
 
@@ -600,6 +600,8 @@ Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Succ
 
 21. History Chart
 
+
+
 1. Es wird auf das '+' geklickt und eine valide Formel eingegeben
 
 Erwartetes Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
@@ -609,7 +611,7 @@ Tatsächliches Ergebnis: Eingegebene Formel wird in der Grafik dargestellt
 
 
 
-22. Es wird auf das '+' geklickt und eine invalide Formel eingegeben
+2. Es wird auf das '+' geklickt und eine invalide Formel eingegeben
 
 Erwartetes Ergebnis: Fehlermeldung erscheint
 
@@ -650,22 +652,16 @@ Tatsächliches Ergebnis: Pro Formel gibt es einen Graphen
 
 
 
-7. Hilfebutton -> springt noch nicht an die richtige Stelle
+7. Hilfebutton -> springt an die richige Stelle; Hilfe ist allerdings leer
 
 
-
-Bemerkungen:
-
-1. Eingaben persistieren?
-
-2. Farben sind nicht ganz korrekt, wenn man Separate Charts auswählt, eine Formel eingibt und dann Separate Charts ausschaltet
-
+Bemerkung: History Chart wird nicht zurückgesetzt, wenn sich die Maschine ändert was zu eine Parse Error führt (BEHEBEN!)
 
 
 
 23. Statistics:
 
-1. HelpButton -> springt noch nicht an die richtige Stelle
+1. HelpButton -> funktioniert
 
 2. Show Extended Stats -> funktioniert
 
@@ -679,7 +675,7 @@ Bemerkungen:
 
 1. View updatet sich wenn sich der Trace ändert -> funktioniert
 
-2. HelpButton springt noch nicht an die richtige Stelle
+2. HelpButton -> funktioniert
 
 3. Suchfunktion wird mit Lowercase und Uppercase getestet (sowohl mit Enter im Suchfeld als auch mit dem Suchbutton)
 
@@ -689,11 +685,26 @@ Tatsächliches Ergebnis: Entsprechende Einträge werden angezeigt
 
 4. Copy u.a. mit CTRL+V -> funktioniert
 
-5. Visualize as Graph -> funktioniert
 
-6. Visualize as Table -> funktioniert
 
-7. Show Details -> funktioniert
+5. Visualize as Graph (BEHEBEN?)
+
+Erwartetes Ergebnis: Formel wird bei Custom Predicate/Expression Formula Tree in der Graphvisualisierung angezeigt
+
+Tatsächliches Ergebnis: Formel wird bei Custom Predicate/Expression Formula Tree in der Graphvisualisierung angezeigt. Falls die Maschine nicht initialisiert ist dann wird eine Exception geworfen
+
+
+
+
+6. Visualize as Table (BEHEBEN?)
+
+Erwartetes Ergebnis: Formel wird bei Expression Table in der Tabellenvisualisierung angezeigt
+
+Tatsächliches Ergebnis: Formel wird bei Expression Table in der Tabellenvisualisierung angezeigt. Falls die Maschine nicht initialisiert ist dann wird eine Exception geworfen
+
+
+
+7. Show Details -> funktioniert, falls die Maschine nicht initialisiert ist, ansonsten ist das Textfeld leer
 
 
 
