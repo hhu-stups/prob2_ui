@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.FXMLInjected;
@@ -117,7 +118,7 @@ public final class ExecuteByPredicateStage extends Stage {
 				this.predicateBuilderView.getPredicate(),
 				1
 			);
-		} catch (IllegalArgumentException | ProBError e) {
+		} catch (IllegalArgumentException | ProBError | EvaluationException e) {
 			LOGGER.info("Execute by predicate failed", e);
 			warningLabel.setText(String.format(bundle.getString("operations.executeByPredicate.alerts.failedToExecuteOperation.content")));
 			return;
