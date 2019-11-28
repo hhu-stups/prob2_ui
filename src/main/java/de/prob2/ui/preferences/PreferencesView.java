@@ -72,10 +72,10 @@ public final class PreferencesView extends BorderPane {
 		
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		
-		tvChanged.setCellValueFactory(features -> Bindings.createStringBinding(() -> {
-			final PrefTreeItem value = features.getValue().getValue();
-			return value == null || value.getValue().equals(value.getDefaultValue()) ? "" : "*";
-		}, features.getValue().valueProperty()));
+		tvChanged.setCellValueFactory(features -> Bindings.createStringBinding(
+			() -> features.getValue().getValue().isChanged() ? "*" : "",
+			features.getValue().valueProperty()
+		));
 		
 		tvValue.setCellFactory(col -> new PreferenceValueCell(this.preferencesProperty()));
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
@@ -174,13 +174,10 @@ public final class PreferencesView extends BorderPane {
 					return ti;
 				});
 
-			final String value = this.getPreferences().getPreferenceValue(pref.name);
 			item.setValue(new PrefTreeItem.Preference(
-				pref.name,
-				value,
+				pref,
 				ProBPreferenceType.fromProBPreference(pref),
-				pref.defaultValue,
-				pref.description
+				this.getPreferences().getPreferenceValue(pref.name)
 			));
 		}
 	}

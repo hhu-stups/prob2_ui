@@ -53,19 +53,14 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(spinner);
 	}
 	
-	private void changeToTextField(final PrefTreeItem item) {
+	private void changeToTextField(final PrefTreeItem.Preference item) {
 		final TextField textField = new TextField(item.getValue());
 		textField.textProperty().addListener((o, from, to) -> this.setPreferenceValue(to));
 		this.setText(null);
 		this.setGraphic(textField);
 	}
 	
-	private void changeToText() {
-		this.setGraphic(null);
-		this.setText(this.getTreeTableRow().getItem().getValue());
-	}
-	
-	private void changeToCheckBox(final PrefTreeItem pti) {
+	private void changeToCheckBox(final PrefTreeItem.Preference pti) {
 		final CheckBox checkBox = new CheckBox();
 		checkBox.setSelected("true".equals(pti.getValue()));
 		checkBox.setOnAction(event -> this.setPreferenceValue(Boolean.toString(checkBox.isSelected())));
@@ -73,7 +68,7 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(checkBox);
 	}
 	
-	private void changeToColorPicker(final PrefTreeItem pti) {
+	private void changeToColorPicker(final PrefTreeItem.Preference pti) {
 		Color color;
 		try {
 			color = Color.web(pti.getValue());
@@ -98,10 +93,10 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(colorPicker);
 	}
 	
-	private void changeToComboBox(final PrefTreeItem pti, final String type) {
+	private void changeToComboBox(final PrefTreeItem.Preference pti, final String type) {
 		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(
 			"[]".equals(type)
-				? pti.getValueType().getValues()
+				? pti.getType().getValues()
 				: PrefConstants.VALID_TYPE_VALUES.get(type)
 		));
 		comboBox.getSelectionModel().select(pti.getValue());
@@ -111,35 +106,37 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
 	}
 	
 	private void changeToItem(final PrefTreeItem pti) {
-		if (pti.getValueType() == null) {
-			// If there is no value type (for categories for example), just display the value text.
-			changeToText();
-		} else {
-			final String type = pti.getValueType().getType();
+		if (pti instanceof PrefTreeItem.Category) {
+			// Categories have no value.
+			this.setText(null);
+			this.setGraphic(null);
+		} else if (pti instanceof PrefTreeItem.Preference) {
+			final PrefTreeItem.Preference pref = (PrefTreeItem.Preference)pti;
+			final String type = pref.getType().getType();
 			if ("bool".equals(type)) {
 				// Booleans get a CheckBox.
-				changeToCheckBox(pti);
+				changeToCheckBox(pref);
 			} else if ("int".equals(type)) {
 				// Integers get a spinner.
-				changeToSpinner(Integer.MIN_VALUE, Integer.MAX_VALUE, pti.getValue());
+				changeToSpinner(Integer.MIN_VALUE, Integer.MAX_VALUE, pref.getValue());
 			} else if ("nat".equals(type)) {
 				// Nonnegative integers get a spinner.
-				changeToSpinner(0, Integer.MAX_VALUE, pti.getValue());
+				changeToSpinner(0, Integer.MAX_VALUE, pref.getValue());
 			} else if ("nat1".equals(type)) {
 				// Positive integers get a spinner.
-				changeToSpinner(1, Integer.MAX_VALUE, pti.getValue());
+				changeToSpinner(1, Integer.MAX_VALUE, pref.getValue());
 			} else if ("neg".equals(type)) {
 				// Nonpositive integers get a spinner.
-				changeToSpinner(Integer.MIN_VALUE, 0, pti.getValue());
+				changeToSpinner(Integer.MIN_VALUE, 0, pref.getValue());
 			} else if ("rgb_color".equals(type)) {
 				// Colors get a ColorPicker.
-				changeToColorPicker(pti);
+				changeToColorPicker(pref);
 			} else if ("[]".equals(type) || PrefConstants.VALID_TYPE_VALUES.containsKey(type)) {
 				// Lists get a ComboBox.
-				changeToComboBox(pti, type);
+				changeToComboBox(pref, type);
 			} else {
 				// Default to a simple text field if type is unknown.
-				changeToTextField(pti);
+				changeToTextField(pref);
 			}
 		}
 	}
