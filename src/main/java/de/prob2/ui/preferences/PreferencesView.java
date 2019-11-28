@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob2.ui.internal.FXMLInjected;
@@ -44,7 +43,7 @@ public final class PreferencesView extends BorderPane {
 	private final InvalidationListener refreshIL;
 	
 	@Inject
-	private PreferencesView(final StageManager stageManager, final Injector injector) {
+	private PreferencesView(final StageManager stageManager) {
 		super();
 		
 		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
