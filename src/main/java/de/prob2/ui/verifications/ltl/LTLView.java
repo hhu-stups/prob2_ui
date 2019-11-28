@@ -358,7 +358,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	@FXML
 	public void checkMachine() {
 		checker.checkMachine();
-		tvFormula.refresh();
+		refresh();
 	}
 	
 	@FXML
