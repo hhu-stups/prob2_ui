@@ -3,12 +3,12 @@ package de.prob2.ui.project.machines;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -139,21 +139,19 @@ public class MachinesTab extends Tab {
 		}
 		
 		private void updatePreferences(final List<Preference> prefs) {
-			startAnimationMenu.getItems().clear();
-			
-			final List<Preference> prefsWithDefault = new ArrayList<>(prefs);
-			prefsWithDefault.add(0, Preference.DEFAULT);
-			for (final Preference preference : prefsWithDefault) {
-				final MenuItem menuItem = new MenuItem();
-				menuItem.textProperty().bind(preference.nameProperty());
-				// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
-				menuItem.setMnemonicParsing(false);
-				menuItem.setOnAction(e -> {
-					currentProject.startAnimation(this.machineProperty.get(), preference);
-					this.machineProperty.get().setLastUsedPreferenceName(preference.getName());
-				});
-				startAnimationMenu.getItems().add(menuItem);
-			}
+			startAnimationMenu.getItems().setAll(Stream.concat(Stream.of(Preference.DEFAULT), prefs.stream())
+				.map(preference -> {
+					final MenuItem menuItem = new MenuItem();
+					menuItem.textProperty().bind(preference.nameProperty());
+					// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
+					menuItem.setMnemonicParsing(false);
+					menuItem.setOnAction(e -> {
+						currentProject.startAnimation(this.machineProperty.get(), preference);
+						this.machineProperty.get().setLastUsedPreferenceName(preference.getName());
+					});
+					return menuItem;
+				})
+				.collect(Collectors.toList()));
 		}
 		
 		@Override
