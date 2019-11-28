@@ -36,7 +36,7 @@ public final class PreferencesView extends BorderPane {
 	@FXML private TreeTableView<PrefTreeItem> tv;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvName;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvChanged;
-	@FXML private TreeTableColumn<PrefTreeItem, String> tvValue;
+	@FXML private TreeTableColumn<PrefTreeItem, PrefTreeItem> tvValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
@@ -78,7 +78,7 @@ public final class PreferencesView extends BorderPane {
 		));
 		
 		tvValue.setCellFactory(col -> new PreferenceValueCell(this.preferencesProperty()));
-		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
+		tvValue.setCellValueFactory(features -> features.getValue().valueProperty());
 
 		tvDefaultValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("defaultValue"));
 		

@@ -20,7 +20,7 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
+class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferenceValueCell.class);
 	
 	private final ReadOnlyObjectProperty<ProBPreferences> preferences;
@@ -114,13 +114,16 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(comboBox);
 	}
 	
-	private void changeToItem(final PrefTreeItem pti) {
-		if (pti instanceof PrefTreeItem.Category) {
-			// Categories have no value.
+	@Override
+	public void updateItem(final PrefTreeItem item, final boolean empty) {
+		super.updateItem(item, empty);
+		
+		if (empty || item instanceof PrefTreeItem.Category) {
+			// Empty rows and categories have no value.
 			this.setText(null);
 			this.setGraphic(null);
-		} else if (pti instanceof PrefTreeItem.Preference) {
-			final PrefTreeItem.Preference pref = (PrefTreeItem.Preference)pti;
+		} else if (item instanceof PrefTreeItem.Preference) {
+			final PrefTreeItem.Preference pref = (PrefTreeItem.Preference)item;
 			if (pref.getPreferenceInfo().type instanceof ListPrologTerm) {
 				// Lists get a ComboBox.
 				changeToComboBox(pref);
@@ -152,20 +155,8 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
 					changeToTextField(pref);
 				}
 			}
-		}
-	}
-	
-	@Override
-	public void updateItem(final String item, final boolean empty) {
-		super.updateItem(item, empty);
-		
-		if (this.getTreeTableRow() != null && this.getTreeTableRow().getItem() != null) {
-			// Item is available, which means we can do fancy stuff!
-			changeToItem(this.getTreeTableRow().getItem());
 		} else {
-			// Row or item is null, so display the item text as is.
-			this.setGraphic(null);
-			this.setText(item);
+			throw new AssertionError("Unhandled PrefTreeItem subclass: " + item);
 		}
 	}
 }
