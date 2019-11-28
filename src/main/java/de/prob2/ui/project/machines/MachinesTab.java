@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +30,7 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -72,7 +72,6 @@ public class MachinesTab extends Tab {
 		
 		@FXML
 		private void initialize() {
-			currentProject.currentMachineProperty().addListener(o -> this.refresh());
 			this.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					boolean saved = injector.getInstance(BEditorView.class).savedProperty().get();
@@ -87,9 +86,20 @@ public class MachinesTab extends Tab {
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
 			this.updatePreferences(currentProject.getPreferences());
-			currentProject.currentMachineProperty().addListener((observable, from, to) -> showInternalItem.setDisable(to == null || machineProperty.get() != to));
-			machineProperty.addListener((observable, from, to) -> showInternalItem.setDisable(to == null || to != currentProject.getCurrentMachine()));
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
+			statusIcon.visibleProperty().bind(machineProperty.isNotNull());
+			this.contextMenuProperty().bind(Bindings.when(machineProperty.isNull()).then((ContextMenu)null).otherwise(contextMenu));
+			
+			final BooleanBinding machineIsCurrent = machineProperty.isEqualTo(currentProject.currentMachineProperty());
+			showInternalItem.disableProperty().bind(machineIsCurrent.not());
+			statusIcon.iconProperty().bind(Bindings.when(machineIsCurrent).then(FontAwesome.Glyph.SPINNER).otherwise(FontAwesome.Glyph.PLAY));
+			machineIsCurrent.addListener((o, from, to) -> {
+				if (to) {
+					statusIcon.getStyleClass().add("running");
+				} else {
+					statusIcon.getStyleClass().remove("running");
+				}
+			});
 		}
 		
 		@FXML
@@ -127,18 +137,6 @@ public class MachinesTab extends Tab {
 			stage.show();
 		}
 		
-		private void refresh() {
-			if (Objects.equals(this.machineProperty.get(), currentProject.getCurrentMachine())) {
-				if (!statusIcon.getStyleClass().contains("running")) {
-					statusIcon.getStyleClass().add("running");
-				}
-				statusIcon.setIcon(FontAwesome.Glyph.SPINNER);
-			} else {
-				statusIcon.getStyleClass().remove("running");
-				statusIcon.setIcon(FontAwesome.Glyph.PLAY);
-			}
-		}
-		
 		private void updatePreferences(final List<Preference> prefs) {
 			startAnimationMenu.getItems().clear();
 			
@@ -171,20 +169,15 @@ public class MachinesTab extends Tab {
 				this.machineProperty.set(null);
 				this.nameLabel.textProperty().unbind();
 				this.nameLabel.setText(null);
-				this.statusIcon.setVisible(false);
 				this.locationLabel.setText(null);
-				this.setContextMenu(null);
 			} else {
 				this.machineProperty.set(item);
-				this.refresh();
 				this.nameLabel.textProperty().bind(
 					Bindings.when(machineProperty.get().lastUsedPreferenceNameProperty().isEqualTo("default"))
 					.then(machineProperty.get().nameProperty())
 					.otherwise(Bindings.format("%s (%s)", machineProperty.get().nameProperty(), machineProperty.get().lastUsedPreferenceNameProperty()))
 				);
-				this.statusIcon.setVisible(true);
 				this.locationLabel.setText(machineProperty.get().getLocation().toString());
-				this.setContextMenu(contextMenu);
 			}
 		}
 
