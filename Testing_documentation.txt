@@ -724,11 +724,11 @@ Besser Lazy auswerten?
 
 27. Trace Replay
 
-1. Alle Traces checken -> funktioniert
+1. Alle Traces animieren -> funktioniert
 
-Erwartetes Ergebnis: Alle Traces werden überprüft, es wird am Ende kein currentTrace neu gesetzt
+Erwartetes Ergebnis: Alle Traces werden nachgespielt, es wird am Ende der aktuelle Pfad nicht neu gesetzt
 
-Tatsächliches Ergebnis: Alle Traces werden überprüft, es wird am Ende kein currentTrace neu gesetzt
+Tatsächliches Ergebnis: Alle Traces werden nachgespielt, es wird am Ende der aktuelle Pfad nicht neu gesetzt
 
 
 
@@ -739,19 +739,19 @@ Erwartetes Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird gestopp
 Tatsächliches Ergebnis: Trace Replay wird unterbrochen, der Ladebalken wird gestoppt
 
 
-3. Nur ein Trace checken -> dieser Trace kann erfolgreich nachgespielt werden
+3. Nur ein Trace nachspielen -> dieser Trace kann erfolgreich nachgespielt werden
 
-Erwartetes Ergebnis: Ausgewählter Trace wird überprüft, es wird am Ende der currentTrace neugesetzt; Show Error ist disabled
+Erwartetes Ergebnis: Ausgewählter Trace wird nachgespielt, es wird am Ende der aktuelle Pfad neu gesetzt; Show Error ist disabled
 
-Tatsächliches Ergebnis: Ausgewählter Trace wird überprüft, es wird am Ende der currentTrace neugesetzt; Show Error ist disabled
+Tatsächliches Ergebnis: Ausgewählter Trace wird nachgespielt, es wird am Ende der aktuelle Pfad neu gesetzt; Show Error ist disabled
 
 
 
-4. Nur ein Trace checken -> dieser Trace kann nicht nachgespielt werden
+4. Nur ein Trace nachspielen -> dieser Trace kann nicht nachgespielt werden
 
-Erwartetes Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann; Show Error ist enabled
+Erwartetes Ergebnis: Nach dem Nachspielen kommt eine Fehlermeldung; Show Error ist enabled
 
-Tatsächliches Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die über Show Error angezeigt werden kann; Show Error ist enabled
+Tatsächliches Ergebnis: Nach dem Nachspielen kommt eine Fehlermeldung; Show Error ist enabled
 
 
 
@@ -759,31 +759,28 @@ Tatsächliches Ergebnis: Nach dem Überprüfen kommt eine Fehlermeldung, die üb
 5. Trace entfernen -> funktioniert
 
 
-6. Hilfebutton -> springt nicht an die richtige Stelle
+6. Hilfebutton -> funktioniert
 
 
 7. Show Error -> funktioniert
 
+8. Hinzufügen von bereits vorhandenen Traces
 
-8. Hilfebutton -> springt noch nicht an die richtige Stelle
+Erwartetes Ergebnis: Trace wird nicht hinzugefügt und der bereits vorhandene Trace abgespielt
 
-9. Hinzufügen von bereits vorhandenen Traces
-
-Erwartetes Ergebnis: Trace wird nicht hinzugefügt
-
-Tatsächliches Ergebnis: Trace wird nicht hinzugefügt
+Tatsächliches Ergebnis: Trace wird nicht hinzugefügt und der bereits vorhandene Trace abgespielt
 
 
 
-10. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
+9. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
 
-11. Trace mit Syntaxfehler laden -> funktioniert
-
-
-12. Deaktivierung eines Traces -> funktioniert
+10. Trace mit Syntaxfehler laden -> funktioniert
 
 
-13. Überprüfen mit deaktivierten Traces
+11. Deaktivierung eines Traces -> funktioniert
+
+
+12. Überprüfen mit deaktivierten Traces
 
 Erwartetes Ergebnis: Deaktivierte Traces werden nicht überprüft
 
@@ -817,21 +814,37 @@ Tatsächliches Ergebnis: Alle laufenden Checks werden abgebrochen und dementspre
 
 4. Neue Strategie überprüfen mit fehlgeschlagenem Check -> funktioniert
 
-5. Eine vorhandene Strategie überprüfen mit erfolgreichem Check -> funktioniert
 
-6. Eine vorhandene Strategie überprüfen mit fehlgeschlagenem Check -> funktioniert
+
+
+5. Eine vorhandene Strategie überprüfen mit erfolgreichem Check
+
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die ausgewählte Strategie bereits geprüft wurde
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die ausgewählte Strategie bereits geprüft wurde
+
+
+
+
+
+6. Eine vorhandene Strategie überprüfen mit fehlgeschlagenem Check
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die ausgewählte Strategie bereits geprüft wurde
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die ausgewählte Strategie bereits geprüft wurde
+
+
+
 
 7. Show Error State
 
-Erwartetes Ergebnis: Item ist nur verfügbar, wenn ein Fehler aufgetreten ist oder ein Timeout stattgefunden hat; Fehlerzustand wird angezeigt
+Erwartetes Ergebnis: MenuItem ist nur verfügbar, wenn ein Fehler aufgetreten ist; Fehlerzustand wird angezeigt
 
-Tatsächliches Ergebnis: Item ist nur verfügbar, wenn ein Fehler aufgetreten ist oder ein Timeout stattgefunden hat; Fehlerzustand wird angezeigt
+Tatsächliches Ergebnis: MenuItem ist nur verfügbar, wenn ein Fehler aufgetreten ist; Fehlerzustand wird angezeigt
 
 
-
-8. Show Details -> funktioniert
-
-9. Search for new errors
+8. Search for new errors
 
 Erwartetes Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt
 
@@ -839,11 +852,11 @@ Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird 
 
 
 
-10. Remove item -> funktioniert
+9. Remove item -> funktioniert
 
-11. Hilfebutton -> funktioniert, springt noch nicht an die richtige Stelle
+10. Hilfebutton -> funktioniert, springt noch nicht an die richtige Stelle
 
-12. Deaktivierung eines Modelchecking Items
+11. Deaktivierung eines Modelchecking Items
 
 
 Erwartetes Ergebnis: Bei Deaktivierung eines Items passt sich der Machine Status und die Status Bar für die Fehler sich an
@@ -852,7 +865,7 @@ Tatsächliches Ergebnis: Bei Deaktivierung eines Items passt sich der Machine St
 
 
 
-13. Überprüfen mit deaktivierten Items
+12. Überprüfen mit deaktivierten Items
 
 Erwartetes Ergebnis: Beim Überprüfen aller Items, werden deaktivierte Items nicht ausgeführt; das MenuItem für Check ist hierbei für dieses Item deaktiviert
 
@@ -875,6 +888,7 @@ Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es 
 Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
 
+BEMERKUNG: Beim Neuausführen der Formel werden Fehlernachrichten und Gegenbeispiele nicht zurückgesetzt (BEHEBEN!)
 
 
 3. Überprüfen einer LTL Formel mit Syntaxfehler
@@ -886,106 +900,127 @@ Tatsächliches Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehl
 
 
 
-4. Hinzufügen von LTL Formeln -> funktioniert
+4. Hinzufügen einer gültigen LTL Formeln -> funktioniert
 
-5. Hinzufügen von LTL Pattern -> funktioniert
-
-6. Ändern von LTL Formel -> funktioniert
-
-Erwartetes Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten sowie Fehlertraces zurückgesetzt
-
-Tatsächliches Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten sowie Fehlertraces zurückgesetzt
-
-
-
-
-7. Ändern von LTL Pattern zu einem gültigen Pattern -> funktioniert
-
-Erwartetes Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt
-
-Tatsächliches Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt
-
-
-
-
-8. Ändern von LTL Pattern zu einem ungültigen Pattern -> funktioniert
-
-Erwartetes Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt und die neue angezeigt
-
-Tatsächliches Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt und die neue angezeigt
-
-
-
-
-9. Ändern von LTL Pattern zu einem bereits vorhandenen Pattern
-
-Erwartetes Ergebnis: Meldung erscheint, dass das Pattern bereits vorhanden ist
-
-Tatsächliches Ergebnis: Meldung erscheint, dass das Pattern bereits vorhanden ist
+5. Hinzufügen eines gültigen LTL Pattern -> funktioniert
 
 
 
 
 
-10. Ändern von LTL Formel zu einer bereits vorhandenen Formel
+6. Hinzufügen einer ungültigen LTL Formeln
 
-Erwartetes Ergebnis: Meldung erscheint, dass die Formel bereits vorhanden ist
+Erwartetes Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt und angezeigt, Fenster wird nicht geschlossen
 
-Tatsächliches Ergebnis: Meldung erscheint, dass die Formel bereits vorhanden ist
-
-
-
-11. Fehlernachricht anzeigen bei LTL Formel -> funktioniert
-
-12. Fehlernachricht anzeigen bei LTL Pattern -> funktioniert
-
-13. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
-
-14. LTL Formel löschen -> funktioniert
-
-15. LTL Pattern löschen -> funktioniert
+Tatsächliches Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt und angezeigt, Fenster wird nicht geschlossen
 
 
 
-16. Alle Formel ausführen
+
+7. Hinzufügen eines ungültigen LTL Pattern
+
+Erwartetes Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt und angezeigt, Fenster wird nicht geschlossen
+
+Tatsächliches Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt und angezeigt, Fenster wird nicht geschlossen
+
+
+
+
+
+8. Ändern von einer LTL Formel zu einer gültigen LTL Formel
+
+Erwartetes Ergebnis: Formel wird geändert, geparst und vorhandene Fehlertraces angezeigt; Fenster wird geschlossen
+
+Tatsächliches Ergebnis: Formel wird geändert, geparst und vorhandene Fehlertraces angezeigt; Fenster wird geschlossen
+
+
+
+9. Ändern von einer LTL Formel zu einer ungültigen LTL Formel
+
+Erwartetes Ergebnis: Formel wird geändert, geparst und Fehlernachrichten angezeigt; Fenster wird nicht geschlossen
+
+Tatsächliches Ergebnis: Formel wird geändert, geparst und Fehlernachrichten angezeigt; Fenster wird nicht geschlossen
+
+
+
+10. Ändern von LTL Pattern zu einem gültigen Pattern
+
+Erwartetes Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt; Fenster wird geschlossen
+
+Tatsächliches Ergebnis: Pattern wird nicht immer geändert (BEHEBEN!)
+
+
+
+
+11. Ändern von LTL Pattern zu einem ungültigen Pattern
+
+Erwartetes Ergebnis: Pattern wird geändert, geparst und Fehlernachrichten zurückgesetzt und die neue angezeigt; Fenster wird nicht geschlossen
+
+Tatsächliches Ergebnis: Pattern wird nicht immer geändert (BEHEBEN!)
+
+
+
+
+12. Ändern von LTL Pattern zu einem bereits vorhandenen Pattern
+
+Erwartetes Ergebnis: Meldung erscheint, dass das Pattern bereits vorhanden ist; Fenster wird nicht geschlossen
+
+Tatsächliches Ergebnis: Meldung erscheint, dass das Pattern bereits vorhanden ist; Fenster wird nicht geschlossen
+
+
+
+
+
+13. Ändern von LTL Formel zu einer bereits vorhandenen Formel
+
+Erwartetes Ergebnis: Meldung erscheint, dass die Formel bereits vorhanden ist; Fenster wird nicht geschlossen
+
+Tatsächliches Ergebnis: Meldung erscheint, dass die Formel bereits vorhanden ist; Fenster wird nicht geschlossen
+
+
+
+14. Fehlernachricht anzeigen bei LTL Formel -> funktioniert
+
+15. Fehlernachricht anzeigen bei LTL Pattern -> funktioniert
+
+16. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
+
+17. LTL Formel löschen -> funktioniert
+
+18. LTL Pattern löschen -> funktioniert
+
+
+
+19. Alle Formel ausführen
 
 Erwartetes Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
 
-Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; Status wird allerdings noch nicht aktualisiert, der Trace wird nicht gewechselt (BEHEBEN!)
 
 
 
-17. Checking abbrechen -> funktioniert
+20. Checking abbrechen -> funktioniert
 
-18. Hilfebutton -> springt noch nicht an die richtige Stelle
+21. Hilfebutton -> funktioniert
 
-
-19. Aufruf von gültigen Patterns innerhalb Patterns -> funktioniert
-
-20. Aufruf von ungültigen Patterns innerhalb Patterns -> funktioniert
-
-21. Aufruf von gültigen Patterns innerhalb Formeln -> funktioniert
-
-22. Aufruf von ungültigen Patterns innerhalb Formeln -> funktioniert
+22. Aufruf von gültigen Patterns innerhalb Patterns -> funktioniert
 
 
+23. Aufruf von ungültigen Patterns innerhalb Patterns -> funktioniert
 
-23. Redundante Definition von Pattern
 
-Erwartetes Ergebnis: Es wird keine zusätzliche Formel hinzugefügt
-
-Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt
+24. Aufruf von gültigen Patterns innerhalb Formeln -> funktioniert
 
 
 
-24. Redundante Definition von Formeln 
+25. Aufruf von ungültigen Patterns innerhalb Formeln
 
-Erwartetes Ergebnis: Es wird keine zusätzliche Formel hinzugefügt
+Erwartetes Ergebnis: Fehlermeldung von angezeigt
 
-Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt
+Tatsächliches Ergebnis: Nullpointer Exception (BEHEBEN!)
 
 
-25. Deaktivierung einer Formel
+26. Deaktivierung einer Formel
 
 Erwartetes Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
 
@@ -993,11 +1028,12 @@ Tatsächliches Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Sta
 
 
 
-26. Überprüfen mit deaktivierten Formel
+27. Überprüfen mit deaktivierten Formel
 
 Erwartetes Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
+
 
 
 
