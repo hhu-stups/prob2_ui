@@ -31,15 +31,15 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 		this.preferences = preferences;
 	}
 	
-	private void setPreferenceValue(final String newValue) {
-		this.preferences.get().setPreferenceValue(this.getTreeTableRow().getItem().getName(), newValue);
+	private void setPreferenceValue(final String name, final String newValue) {
+		this.preferences.get().setPreferenceValue(name, newValue);
 	}
 	
-	private void changeToSpinner(final int min, final int max, final String initial) {
+	private void changeToSpinner(final PrefTreeItem.Preference pti, final int min, final int max) {
 		final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, min));
 		spinner.setEditable(true);
 		spinner.getEditor().textProperty().addListener((o, from, to) -> {
-			this.setPreferenceValue(to);
+			this.setPreferenceValue(pti.getPreferenceInfo().name, to);
 			Integer value;
 			try {
 				value = spinner.getValueFactory().getConverter().fromString(to);
@@ -54,14 +54,14 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 				spinner.getValueFactory().setValue(value);
 			}
 		});
-		spinner.getEditor().setText(initial);
+		spinner.getEditor().setText(pti.getValue());
 		this.setText(null);
 		this.setGraphic(spinner);
 	}
 	
 	private void changeToTextField(final PrefTreeItem.Preference item) {
 		final TextField textField = new TextField(item.getValue());
-		textField.textProperty().addListener((o, from, to) -> this.setPreferenceValue(to));
+		textField.textProperty().addListener((o, from, to) -> this.setPreferenceValue(item.getPreferenceInfo().name, to));
 		this.setText(null);
 		this.setGraphic(textField);
 	}
@@ -69,7 +69,7 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	private void changeToCheckBox(final PrefTreeItem.Preference pti) {
 		final CheckBox checkBox = new CheckBox();
 		checkBox.setSelected("true".equals(pti.getValue()));
-		checkBox.setOnAction(event -> this.setPreferenceValue(Boolean.toString(checkBox.isSelected())));
+		checkBox.setOnAction(event -> this.setPreferenceValue(pti.getPreferenceInfo().name, Boolean.toString(checkBox.isSelected())));
 		this.setText(null);
 		this.setGraphic(checkBox);
 	}
@@ -88,7 +88,7 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 		final ColorPicker colorPicker = new ColorPicker(color);
 		colorPicker.setOnAction(event -> {
 			final Color selected = colorPicker.getValue();
-			this.setPreferenceValue(String.format(
+			this.setPreferenceValue(pti.getPreferenceInfo().name, String.format(
 				"#%02x%02x%02x",
 				(int)(selected.getRed()*255),
 				(int)(selected.getGreen()*255),
@@ -109,7 +109,7 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 		}
 		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(validValues));
 		comboBox.getSelectionModel().select(pti.getValue());
-		comboBox.setOnAction(event -> this.setPreferenceValue(comboBox.getValue()));
+		comboBox.setOnAction(event -> this.setPreferenceValue(pti.getPreferenceInfo().name, comboBox.getValue()));
 		this.setText(null);
 		this.setGraphic(comboBox);
 	}
@@ -134,16 +134,16 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 					changeToCheckBox(pref);
 				} else if ("int".equals(type)) {
 					// Integers get a spinner.
-					changeToSpinner(Integer.MIN_VALUE, Integer.MAX_VALUE, pref.getValue());
+					changeToSpinner(pref, Integer.MIN_VALUE, Integer.MAX_VALUE);
 				} else if ("nat".equals(type)) {
 					// Nonnegative integers get a spinner.
-					changeToSpinner(0, Integer.MAX_VALUE, pref.getValue());
+					changeToSpinner(pref, 0, Integer.MAX_VALUE);
 				} else if ("nat1".equals(type)) {
 					// Positive integers get a spinner.
-					changeToSpinner(1, Integer.MAX_VALUE, pref.getValue());
+					changeToSpinner(pref, 1, Integer.MAX_VALUE);
 				} else if ("neg".equals(type)) {
 					// Nonpositive integers get a spinner.
-					changeToSpinner(Integer.MIN_VALUE, 0, pref.getValue());
+					changeToSpinner(pref, Integer.MIN_VALUE, 0);
 				} else if ("rgb_color".equals(type)) {
 					// Colors get a ColorPicker.
 					changeToColorPicker(pref);
