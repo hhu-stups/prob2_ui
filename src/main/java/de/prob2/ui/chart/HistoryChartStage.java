@@ -17,6 +17,7 @@ import de.prob.statespace.TraceElement;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryItem;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.binding.Bindings;
@@ -148,16 +149,18 @@ public final class HistoryChartStage extends Stage {
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
 
 	private final ObservableList<LineChart<Number, Number>> separateCharts;
 
 	@Inject
-	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle) {
 		super();
 
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.bundle = bundle;
 
 		this.separateCharts = FXCollections.observableArrayList();
@@ -181,6 +184,14 @@ public final class HistoryChartStage extends Stage {
 			}
 			this.updateCharts();
 		});
+		
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if(from != to) {
+				this.formulaList.getItems().clear();
+			}
+		});
+		
+		
 
 		this.removeButton.disableProperty()
 				.bind(Bindings.isEmpty(this.formulaList.getSelectionModel().getSelectedIndices()));

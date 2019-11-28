@@ -888,7 +888,7 @@ Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es 
 Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
 
-BEMERKUNG: Beim Neuausführen der Formel werden Fehlernachrichten und Gegenbeispiele nicht zurückgesetzt (BEHEBEN!)
+Bemerkung: Beim Neuausführen der Formel werden Fehlernachrichten und Gegenbeispiele nicht zurückgesetzt? (evtl. BEHEBEN)
 
 
 3. Überprüfen einer LTL Formel mit Syntaxfehler
@@ -1131,9 +1131,9 @@ Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Formel bereits vor
 
 16. Ändern und überprüfen einer bereits vorhandenen Formel
 
-Erwartetes Ergebnis: Bereits vorhandene Formel wird überprüft
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die Formel bereits vorhanden ist
 
-Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Formel bereits vorhanden ist (BEHEBEN!)
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Formel bereits vorhanden ist
 
 
 
