@@ -91,7 +91,7 @@ public class MachinesTab extends Tab {
 			this.contextMenuProperty().bind(Bindings.when(machineProperty.isNull()).then((ContextMenu)null).otherwise(contextMenu));
 			
 			final BooleanBinding machineIsCurrent = machineProperty.isEqualTo(currentProject.currentMachineProperty());
-			showInternalItem.disableProperty().bind(machineIsCurrent.not());
+			showInternalItem.disableProperty().bind(machineIsCurrent.not().or(currentTrace.existsProperty().not()));
 			statusIcon.iconProperty().bind(Bindings.when(machineIsCurrent).then(FontAwesome.Glyph.SPINNER).otherwise(FontAwesome.Glyph.PLAY));
 			machineIsCurrent.addListener((o, from, to) -> {
 				if (to) {
