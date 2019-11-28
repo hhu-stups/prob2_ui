@@ -3,6 +3,7 @@ package de.prob2.ui.project.machines;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -140,15 +141,9 @@ public class MachinesTab extends Tab {
 		private void updatePreferences(final List<Preference> prefs) {
 			startAnimationMenu.getItems().clear();
 			
-			final MenuItem defItem = new MenuItem();
-			defItem.textProperty().bind(Preference.DEFAULT.nameProperty());
-			defItem.setOnAction(e -> {
-				currentProject.startAnimation(this.machineProperty.get(), Preference.DEFAULT);
-				this.machineProperty.get().setLastUsedPreferenceName(Preference.DEFAULT.getName());
-			});
-			startAnimationMenu.getItems().add(defItem);
-			
-			for (Preference preference : prefs) {
+			final List<Preference> prefsWithDefault = new ArrayList<>(prefs);
+			prefsWithDefault.add(0, Preference.DEFAULT);
+			for (final Preference preference : prefsWithDefault) {
 				final MenuItem menuItem = new MenuItem();
 				menuItem.textProperty().bind(preference.nameProperty());
 				// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
