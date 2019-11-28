@@ -19,7 +19,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
@@ -78,18 +77,8 @@ public final class PreferencesView extends BorderPane {
 			return value == null || value.getValue().equals(value.getDefaultValue()) ? "" : "*";
 		}, features.getValue().valueProperty()));
 		
-		tvValue.setCellFactory(col -> {
-			TreeTableCell<PrefTreeItem, String> cell = new PreferenceValueCell(this.preferencesProperty());
-			cell.tableRowProperty().addListener((observable, from, to) ->
-				to.treeItemProperty().addListener((observable1, from1, to1) ->
-					cell.setEditable(to1 != null && to1.getValue() != null && to1.getValue() instanceof PrefTreeItem.Preference)
-				)
-			);
-			return cell;
-		});
+		tvValue.setCellFactory(col -> new PreferenceValueCell(this.preferencesProperty()));
 		tvValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
-		
-		tvValue.setOnEditCommit(event -> this.getPreferences().setPreferenceValue(event.getRowValue().getValue().getName(), event.getNewValue()));
 
 		tvDefaultValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("defaultValue"));
 		
