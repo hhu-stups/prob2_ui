@@ -61,21 +61,15 @@ interface PrefTreeItem {
 	
 	public static class Preference implements PrefTreeItem {
 		private final ProBPreference preferenceInfo;
-		private final ProBPreferenceType type;
 		private final String value;
 		
-		public Preference(final ProBPreference preferenceInfo, final ProBPreferenceType type, final String value) {
+		public Preference(final ProBPreference preferenceInfo, final String value) {
 			this.preferenceInfo = preferenceInfo;
-			this.type = type;
 			this.value = value;
 		}
 		
 		public ProBPreference getPreferenceInfo() {
 			return this.preferenceInfo;
-		}
-		
-		public ProBPreferenceType getType() {
-			return this.type;
 		}
 		
 		@Override
@@ -108,20 +102,18 @@ interface PrefTreeItem {
 			}
 			final PrefTreeItem.Preference other = (PrefTreeItem.Preference)obj;
 			return this.getPreferenceInfo().equals(other.getPreferenceInfo())
-				&& this.getType().equals(other.getType())
 				&& this.getValue().equals(other.getValue());
 		}
 		
 		@Override
 		public int hashCode() {
-			return Objects.hash(this.getPreferenceInfo(), this.getType(), this.getValue());
+			return Objects.hash(this.getPreferenceInfo(), this.getValue());
 		}
 		
 		@Override
 		public String toString() {
 			return MoreObjects.toStringHelper(this)
 				.add("preferenceInfo", this.getPreferenceInfo())
-				.add("type", this.getType())
 				.add("value", this.getValue())
 				.toString();
 		}

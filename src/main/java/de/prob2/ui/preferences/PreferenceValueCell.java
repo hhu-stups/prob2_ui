@@ -1,5 +1,11 @@
 package de.prob2.ui.preferences;
 
+import java.util.Arrays;
+import java.util.List;
+
+import de.prob.prolog.term.ListPrologTerm;
+import de.prob.prolog.term.PrologTerm;
+
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.CheckBox;
@@ -93,12 +99,15 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
 		this.setGraphic(colorPicker);
 	}
 	
-	private void changeToComboBox(final PrefTreeItem.Preference pti, final String type) {
-		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(
-			"[]".equals(type)
-				? pti.getType().getValues()
-				: PrefConstants.VALID_TYPE_VALUES.get(type)
-		));
+	private void changeToComboBox(final PrefTreeItem.Preference pti) {
+		final List<String> validValues;
+		if (pti.getPreferenceInfo().type instanceof ListPrologTerm) {
+			validValues = PrologTerm.atomicStrings((ListPrologTerm)pti.getPreferenceInfo().type);
+		} else {
+			final String typeName = PrologTerm.atomicString(pti.getPreferenceInfo().type);
+			validValues = Arrays.asList(PrefConstants.VALID_TYPE_VALUES.get(typeName));
+		}
+		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(validValues));
 		comboBox.getSelectionModel().select(pti.getValue());
 		comboBox.setOnAction(event -> this.setPreferenceValue(comboBox.getValue()));
 		this.setText(null);
@@ -112,31 +121,36 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, String> {
 			this.setGraphic(null);
 		} else if (pti instanceof PrefTreeItem.Preference) {
 			final PrefTreeItem.Preference pref = (PrefTreeItem.Preference)pti;
-			final String type = pref.getType().getType();
-			if ("bool".equals(type)) {
-				// Booleans get a CheckBox.
-				changeToCheckBox(pref);
-			} else if ("int".equals(type)) {
-				// Integers get a spinner.
-				changeToSpinner(Integer.MIN_VALUE, Integer.MAX_VALUE, pref.getValue());
-			} else if ("nat".equals(type)) {
-				// Nonnegative integers get a spinner.
-				changeToSpinner(0, Integer.MAX_VALUE, pref.getValue());
-			} else if ("nat1".equals(type)) {
-				// Positive integers get a spinner.
-				changeToSpinner(1, Integer.MAX_VALUE, pref.getValue());
-			} else if ("neg".equals(type)) {
-				// Nonpositive integers get a spinner.
-				changeToSpinner(Integer.MIN_VALUE, 0, pref.getValue());
-			} else if ("rgb_color".equals(type)) {
-				// Colors get a ColorPicker.
-				changeToColorPicker(pref);
-			} else if ("[]".equals(type) || PrefConstants.VALID_TYPE_VALUES.containsKey(type)) {
+			if (pref.getPreferenceInfo().type instanceof ListPrologTerm) {
 				// Lists get a ComboBox.
-				changeToComboBox(pref, type);
+				changeToComboBox(pref);
 			} else {
-				// Default to a simple text field if type is unknown.
-				changeToTextField(pref);
+				final String type = PrologTerm.atomicString(pref.getPreferenceInfo().type);
+				if ("bool".equals(type)) {
+					// Booleans get a CheckBox.
+					changeToCheckBox(pref);
+				} else if ("int".equals(type)) {
+					// Integers get a spinner.
+					changeToSpinner(Integer.MIN_VALUE, Integer.MAX_VALUE, pref.getValue());
+				} else if ("nat".equals(type)) {
+					// Nonnegative integers get a spinner.
+					changeToSpinner(0, Integer.MAX_VALUE, pref.getValue());
+				} else if ("nat1".equals(type)) {
+					// Positive integers get a spinner.
+					changeToSpinner(1, Integer.MAX_VALUE, pref.getValue());
+				} else if ("neg".equals(type)) {
+					// Nonpositive integers get a spinner.
+					changeToSpinner(Integer.MIN_VALUE, 0, pref.getValue());
+				} else if ("rgb_color".equals(type)) {
+					// Colors get a ColorPicker.
+					changeToColorPicker(pref);
+				} else if (PrefConstants.VALID_TYPE_VALUES.containsKey(type)) {
+					// Named list types get a ComboBox.
+					changeToComboBox(pref);
+				} else {
+					// Default to a simple text field if type is unknown.
+					changeToTextField(pref);
+				}
 			}
 		}
 	}

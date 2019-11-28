@@ -174,11 +174,7 @@ public final class PreferencesView extends BorderPane {
 					return ti;
 				});
 
-			item.setValue(new PrefTreeItem.Preference(
-				pref,
-				ProBPreferenceType.fromProBPreference(pref),
-				this.getPreferences().getPreferenceValue(pref.name)
-			));
+			item.setValue(new PrefTreeItem.Preference(pref, this.getPreferences().getPreferenceValue(pref.name)));
 		}
 	}
 }
