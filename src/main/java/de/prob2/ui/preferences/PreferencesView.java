@@ -13,6 +13,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -72,7 +73,10 @@ public final class PreferencesView extends BorderPane {
 		
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		
-		tvChanged.setCellValueFactory(new TreeItemPropertyValueFactory<>("changed"));
+		tvChanged.setCellValueFactory(features -> Bindings.createStringBinding(() -> {
+			final PrefTreeItem value = features.getValue().getValue();
+			return value == null || value.getValue().equals(value.getDefaultValue()) ? "" : "*";
+		}, features.getValue().valueProperty()));
 		
 		tvValue.setCellFactory(col -> {
 			TreeTableCell<PrefTreeItem, String> cell = new PreferenceValueCell(this.preferencesProperty());

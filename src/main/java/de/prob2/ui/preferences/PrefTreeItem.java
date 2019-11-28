@@ -12,7 +12,7 @@ import javafx.beans.property.StringProperty;
 abstract class PrefTreeItem {
 	public static class Category extends PrefTreeItem {
 		Category(String name) {
-			super(name, "", "", null, "", "");
+			super(name, "", null, "", "");
 		}
 	}
 	
@@ -24,12 +24,11 @@ abstract class PrefTreeItem {
 			final String defaultValue,
 			final String description
 		) {
-			super(name, value.equals(defaultValue) ? "" : "*", value, valueType, defaultValue, description);
+			super(name, value, valueType, defaultValue, description);
 		}
 	}
 	
 	private final StringProperty name;
-	private final StringProperty changed;
 	private final StringProperty value;
 	private final ObjectProperty<ProBPreferenceType> valueType;
 	private final StringProperty defaultValue;
@@ -37,7 +36,6 @@ abstract class PrefTreeItem {
 	
 	PrefTreeItem(
 		final String name,
-		final String changed,
 		final String value,
 		final ProBPreferenceType valueType,
 		final String defaultValue,
@@ -45,7 +43,6 @@ abstract class PrefTreeItem {
 	) {
 		super();
 		this.name = new SimpleStringProperty(this, "name", name);
-		this.changed = new SimpleStringProperty(this, "changed", changed);
 		this.value = new SimpleStringProperty(this, "value", value);
 		this.valueType = new SimpleObjectProperty<>(this, "valueType", valueType);
 		this.defaultValue = new SimpleStringProperty(this, "defaultValue", defaultValue);
@@ -58,14 +55,6 @@ abstract class PrefTreeItem {
 	
 	public String getName() {
 		return this.name.get();
-	}
-	
-	public ReadOnlyStringProperty changedProperty() {
-		return this.changed;
-	}
-	
-	public String getChanged() {
-		return this.changed.get();
 	}
 	
 	public ReadOnlyStringProperty valueProperty() {
@@ -104,7 +93,6 @@ abstract class PrefTreeItem {
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			.add("name", this.getName())
-			.add("changed", this.getChanged())
 			.add("value", this.getValue())
 			.add("valueType", this.getValueType())
 			.add("defaultValue", this.getDefaultValue())
