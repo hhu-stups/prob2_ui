@@ -177,11 +177,11 @@ public class MachinesTab extends Tab {
 			} else {
 				this.machineProperty.set(item);
 				this.refresh();
-				this.nameLabel.textProperty().bind(Bindings.format(
-					"%s : %s",
-					machineProperty.get().lastUsedPreferenceNameProperty(),
-					machineProperty.get().nameProperty()
-				));
+				this.nameLabel.textProperty().bind(
+					Bindings.when(machineProperty.get().lastUsedPreferenceNameProperty().isEqualTo("default"))
+					.then(machineProperty.get().nameProperty())
+					.otherwise(Bindings.format("%s (%s)", machineProperty.get().nameProperty(), machineProperty.get().lastUsedPreferenceNameProperty()))
+				);
 				this.statusIcon.setVisible(true);
 				this.locationLabel.setText(machineProperty.get().getLocation().toString());
 				this.setContextMenu(contextMenu);
