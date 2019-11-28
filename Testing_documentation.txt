@@ -1067,26 +1067,27 @@ Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die
 
 5. Überprüfen einer Formel mit Gegenbeispiel
 
-Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird nicht direkt zum Gegenbeispiel gewechselt
+Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
-Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird nicht direkt zum Gegenbeispiel gewechselt
+Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
 
 
 6. Überprüfen ohne Formel mit Gegenbeispiel
 
-Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird nicht direkt zum Gegenbeispiel gewechselt
+Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
-Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird nicht direkt zum Gegenbeispiel gewechselt
-
-
-
-
-7. Hilfebutton -> springt noch nicht an die richtige Stelle
+Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
 
 
-8. Hinzufügen einer Formel -> funktioniert
+
+7. Hilfebutton -> funktioniert
+
+
+
+8. Hinzufügen einer noch Formel -> funktioniert
+
 
 9. Hinzufügen und überprüfen einer Formel -> funktioniert
 
@@ -1112,32 +1113,46 @@ Erwartetes Ergebnis: Vorhandene Formel wird nochmal überprüft
 Tatsächliches Ergebnis: Vorhandene Formel wird nochmal überprüft
 
 
+13. Ändern zu einer noch nicht vorhandenen Formel -> funktioniert
+
+
+14. Ändern und überprüfen zu einer noch nicht vorhandenen Formel -> funktioniert
 
 
 
-13. Abbrechen der Überprüfungen -> Interrupt funktioniert nicht
+15. Ändern zu einer bereits vorhandenen Formel
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die Formel bereits vorhanden ist
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Formel bereits vorhanden ist
 
 
-14. Deaktivierung einer Formel
+
+
+16. Ändern und überprüfen einer bereits vorhandenen Formel
+
+Erwartetes Ergebnis: Bereits vorhandene Formel wird überprüft
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Formel bereits vorhanden ist (BEHEBEN!)
+
+
+
+
+17. Abbrechen der Überprüfungen -> funktioniert
+
+
+18. Deaktivierung einer Formel
 
 Erwartetes Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
 
 Tatsächliches Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
 
 
-15. Überprüfung mit deaktivierter Formel
+19. Überprüfung mit deaktivierter Formel
 
 Erwartetes Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
-
-
-
-
-
-Bemerkungen: 
--Interrupt funktioniert bei SymbolicModelchecking noch nicht ganz
--Können mehrere Gegenbeispiel gefunden werden?
 
 
 
@@ -1273,6 +1288,7 @@ Bemerkung:
 
 32. B Konsole
 
+
 1. Ausführung von Befehlen -> funktioniert
 
 
@@ -1326,7 +1342,11 @@ Erwartetes Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, bei S
 Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, bei STRG + E wird ans Ende der Zeile gesprungen
 
 
-10. Anzeige der Sprache der aktuellen Maschine -> nicht immer richtig?
+10. Anzeige der Sprache der aktuellen Maschine
+
+Erwartetes Ergebnis: Maschinen, die als B repräsentiert werden, werden als Classical B angezeigt, ansonsten die jeweilige Maschine
+
+Tatsächliches Ergebnis: Maschinen, die als B repräsentiert werden, werden als Classical B angezeigt, ansonsten die jeweilige Maschine; Fehler bei XTL (BEHEBEN!)
 
 
 11. Clear mit Button -> funktioniert
