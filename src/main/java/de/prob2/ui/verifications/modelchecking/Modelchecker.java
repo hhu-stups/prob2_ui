@@ -102,21 +102,11 @@ public class Modelchecker implements IModelCheckListener {
 	
 	@Override
 	public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		try {
-			final IModelCheckJob job = jobs.get(jobId);
-			if (job == null) {
-				LOGGER.error("Model check job for ID {} is missing or null", jobId);
-				return;
-			}
-			idToStats.get(jobId).updateStats(job, timeElapsed, stats);
-		} catch (RuntimeException e) {
-			LOGGER.error("Exception in updateStats", e);
-			Platform.runLater(
-					() -> stageManager
-							.makeExceptionAlert(e,
-									"verifications.modelchecking.modelchecker.alerts.updatingStatsError.content")
-							.show());
+		final IModelCheckJob job = jobs.get(jobId);
+		if (job == null) {
+			throw new IllegalStateException("updateStats was called for an unknown (or already finished) job: " + jobId);
 		}
+		idToStats.get(jobId).updateStats(job, timeElapsed, stats);
 	}
 	
 	@Override
