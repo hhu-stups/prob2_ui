@@ -123,8 +123,7 @@ public class Modelchecker implements IModelCheckListener {
 	public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
 		final IModelCheckJob job = jobs.remove(jobId);
 		if (job == null) {
-			// isFinished was already called for this job
-			return;
+			throw new IllegalStateException("isFinished was called for an unknown (or already finished) job: " + jobId);
 		}
 		
 		idToStats.get(jobId).isFinished(job, timeElapsed, result);
@@ -171,12 +170,6 @@ public class Modelchecker implements IModelCheckListener {
 			modelcheckingStage.setDisableStart(false);
 		}
 		
-		// The consistency checker sometimes doesn't call isFinished, so
-		// we call it manually here with some dummy information.
-		// If the checker already called isFinished, this call won't do
-		// anything - on the first call, the checker was removed from
-		// the jobs map, so the second call returns right away.
-		isFinished(job.getJobId(), 0, result, new StateSpaceStats(0, 0, 0));
 		if(!checkAll && result instanceof ITraceDescription) {
 			StateSpace s = job.getStateSpace();
 			Trace trace = ((ITraceDescription) result).getTrace(s);
