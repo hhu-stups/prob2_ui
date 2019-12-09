@@ -61,7 +61,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			item.setCounterExample(null);
 			item.setResultItem(null);
 			currentProject.setSaved(false);
-			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, result));
+			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
 			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
