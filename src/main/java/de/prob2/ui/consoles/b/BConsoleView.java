@@ -1,22 +1,20 @@
 package de.prob2.ui.consoles.b;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.CSPModel;
-
+import de.prob.model.representation.XTLModel;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+
+import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -53,6 +51,9 @@ public class BConsoleView extends VBox {
 				} else if (model instanceof CSPModel) {
 					lang = this.bundle.getString("consoles.b.toolbar.language.csp");
 					prompt = this.bundle.getString("consoles.b.prompt.csp");
+				} else if (model instanceof XTLModel) {
+					lang = this.bundle.getString("consoles.b.toolbar.language.xtl");
+					prompt = this.bundle.getString("consoles.b.prompt.xtl");
 				} else {
 					lang = this.bundle.getString("consoles.b.toolbar.language.classicalB");
 					prompt = this.bundle.getString("consoles.b.prompt.classicalB");

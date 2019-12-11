@@ -889,9 +889,6 @@ Erwartetes Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es 
 Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden; es wird direkt zum Gegenbeispiel gewechselt
 
 
-Bemerkung: Beim Neuausführen der Formel werden Fehlernachrichten und Gegenbeispiele nicht zurückgesetzt? (evtl. BEHEBEN)
-
-
 3. Überprüfen einer LTL Formel mit Syntaxfehler
 
 Erwartetes Ergebnis: Check nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
@@ -1345,9 +1342,9 @@ Tatsächliches Ergebnis: Bei STRG + A wird an den Anfang der Zeile gesprungen, b
 
 10. Anzeige der Sprache der aktuellen Maschine
 
-Erwartetes Ergebnis: Maschinen, die als B repräsentiert werden, werden als Classical B angezeigt, ansonsten die jeweilige Maschine
+Erwartetes Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (Klassisches B, CSP, Event-B, XTL)
 
-Tatsächliches Ergebnis: Maschinen, die als B repräsentiert werden, werden als Classical B angezeigt, ansonsten die jeweilige Maschine; Fehler bei XTL (BEHEBEN!)
+Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (Klassisches B, CSP, Event-B, XTL)
 
 
 11. Clear mit Button -> funktioniert
