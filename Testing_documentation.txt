@@ -173,9 +173,9 @@ Auch in der .jar Version testen!
 
 Vorraussetzung: ProB2-UI wird geöffnet, über Help wird entsprechendes Item ausgewählt
 
-Erwartetes Ergebnis: Hilfsfenster öffnet sich mit Informationen über ProB2-UI, ProB2-Kernel und ProB CLI sowie Java
+Erwartetes Ergebnis: Hilfsfenster öffnet sich mit Informationen über ProB2-UI, ProB2-Kernel und ProB CLI sowie Java und JavaFX
 
-Tatsächliches Ergebnis: Hilfsfenster öffnet sich mit Informationen über ProB2-UI, ProB2-Kernel und ProB CLI sowie Java
+Tatsächliches Ergebnis: Hilfsfenster öffnet sich mit Informationen über ProB2-UI, ProB2-Kernel und ProB CLI sowie Java und JavaFX
 
 Auch in der .jar Version testen!
 
@@ -258,7 +258,7 @@ Tatsächliches Ergebnis: Komponenten werden detacht und sind funktionsfähig. Be
 
 
 
-11. User erhält nicht immer Feedback wenn probcli abgestürzt ist -> UI lässt sich nicht mehr bedienen
+11. User erhält Feedback wenn probcli abgestürzt ist
 
 
 12. UI Persistence enthält Bugs insbesondere beim Detachen von Views und wenn fehlerhafte FXML Dateien als View gesetzt werden
@@ -294,13 +294,33 @@ Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, entsprechender Eintrag f�
 
 5. Disabled operations anzeigen -> funktioniert
 
-6. Execute random events + abbrechen -> funktioniert
+6. Operationen mit Parameter anzeigen -> funktioniert
 
-7. Reload -> funktioniert
+7. Execute random events + abbrechen -> funktioniert
 
-8. Show Details -> funktioniert
+8. Reload -> funktioniert
 
-9. Execute By Predicate -> funktioniert
+9. Show Details -> funktioniert
+
+10. Execute By Predicate mit ausführbarem Prädikat
+
+Erwartetes Ergebnis: Operation mit entsprechendem Prädikat wird ausgeführt, Fenster schließt sich
+
+Tatsächliches Ergebnis: Operation mit entsprechendem Prädikat wird ausgeführt, Fenster schließt sich
+
+
+11. Execute by Predicate mit nicht ausführbarem Prädikat
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass Operation mit gegebenem Prädikat nicht ausgeführt werden konnte, Fenster bleibt geöffnet
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass Operation mit gegebenem Prädikat nicht ausgeführt werden konnte, Fenster bleibt geöffnet
+
+
+12. Execute by Predicate mit nicht parsebarem Prädikat
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass Operation mit gegebenem Prädikat nicht ausgeführt werden konnte, Fenster bleibt geöffnet
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass Operation mit gegebenem Prädikat nicht ausgeführt werden konnte, Fenster bleibt geöffnet
 
 
 
@@ -325,6 +345,8 @@ Tatsächliches Ergebnis: Hilfe Fenster wird geöffnet, wird nicht zum entspreche
 
 5. Trace abspeichern -> funktioniert außer bei CSP
 
+Bemerkung: Falls man sich nicht in der letzten Position im Trace befindet und die nächsten Einträge in der History manuell nachspielt, dann wird der gesamte Trace nicht ersetzt. Stattdessen wird die Position im Trace um 1 erhöht. Ansonsten wird der gesamte Trace ersetzt
+
 
 
 
@@ -336,9 +358,9 @@ Testfälle:
 
 1. Ungültige Location 
 
-Erwartetes Ergebnis: Fehlermeldung
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die gewählte Location nicht möglich ist
 
-Tatsächliches Ergebnis: Fehlermeldung
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die gewählte Location nicht möglich ist
 
 2. Gültige Location
 
