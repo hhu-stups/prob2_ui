@@ -143,11 +143,8 @@ def readCurrentGitCommit() {
 }
 
 processResources {
-	doFirst {
-		def f = file("src/main/resources/de/prob2/ui/build.properties")
-		f.delete()
-		f.append("version=${project.version}\n")
-		f.append("commit=${readCurrentGitCommit()}\n")
+	filesMatching("de/prob2/ui/build.properties") {
+		expand(version: project.version, commit: readCurrentGitCommit())
 	}
 }
 

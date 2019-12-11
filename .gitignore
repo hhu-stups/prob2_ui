@@ -17,9 +17,6 @@
 .gradle/
 /build/
 
-# Build info
-/src/main/resources/de/prob2/ui/build.properties
-
 # ProB
 prob_log.txt
 prob_test_log.txt
