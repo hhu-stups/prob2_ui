@@ -231,11 +231,9 @@ Tatsächliches Ergebnis: Die Perspektive wird korrekt geladen und dargestellt
 
 Es wird eine Perspektive als FXML geladen. Hierbei ist die FXML ungültig
 
-Erwartetes Ergebnis: Fehlermeldung mit Exception, ProB2-UI stürzt nicht ab
+Erwartetes Ergebnis: Fehlermeldung mit Exception, ProB2-UI stürzt nicht ab, fehlerhafte Perspektive wird nicht persistiert
 
-Tatsächliches Ergebnis: Fehlermeldung mit Exception, ProB2-UI stürzt nicht ab
-
-Allerdings wird die fehlerhafte FXML persistiert, sodass ein Laden vom prob2-ui nicht mehr möglich ist (BEHEBEN!)
+Tatsächliches Ergebnis: Fehlermeldung mit Exception, ProB2-UI stürzt nicht ab, fehlerhafte Perspektive wird nicht persistiert
 
 Bemerkung: Anleitung für das Erstellen einzelner Sichten
 
@@ -950,7 +948,7 @@ Tatsächliches Ergebnis: Formel wird geändert, geparst und Fehlernachrichten an
 
 Erwartetes Ergebnis: Pattern wird geändert, geparst und vorhandene Fehlernachrichten zurückgesetzt; Fenster wird geschlossen
 
-Tatsächliches Ergebnis: Pattern wird nicht immer geändert (BEHEBEN!)
+Tatsächliches Ergebnis: geparst und vorhandene Fehlernachrichten zurückgesetzt; Fenster wird geschlossen
 
 
 
@@ -959,7 +957,7 @@ Tatsächliches Ergebnis: Pattern wird nicht immer geändert (BEHEBEN!)
 
 Erwartetes Ergebnis: Pattern wird geändert, geparst und Fehlernachrichten zurückgesetzt und die neue angezeigt; Fenster wird nicht geschlossen
 
-Tatsächliches Ergebnis: Pattern wird nicht immer geändert (BEHEBEN!)
+Tatsächliches Ergebnis: Pattern wird geändert, geparst und Fehlernachrichten zurückgesetzt und die neue angezeigt; Fenster wird nicht geschlossen
 
 
 
@@ -1020,7 +1018,7 @@ Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die
 
 Erwartetes Ergebnis: Fehlermeldung von angezeigt
 
-Tatsächliches Ergebnis: Nullpointer Exception (BEHEBEN!)
+Tatsächliches Ergebnis: Fehlermeldung von angezeigt
 
 
 26. Deaktivierung einer Formel
