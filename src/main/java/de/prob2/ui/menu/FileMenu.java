@@ -108,8 +108,6 @@ public class FileMenu extends Menu {
 	@FXML
 	private void handleViewFormattedCode() {
 		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
-		stage.setTitle(currentProject.getCurrentMachine().getName());
-		stage.setCode();
 		stage.show();
 	}
 

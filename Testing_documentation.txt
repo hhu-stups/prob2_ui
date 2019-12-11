@@ -52,7 +52,7 @@ Vorraussetzung: ProB2-UI ist geöffnet, über File wird entsprechendes Item ausg
 
 Testfälle:
 
-1. Machine ist gültig
+1. Machine ist gültig und eine B oder CSP Maschine
 
 Erwartetes Ergebnis: Machine wird korrekt formatiert angezeigt und Unicode Darstellung ist möglich
 
@@ -60,7 +60,7 @@ Tatsächliches Ergebnis: Machine wird korrekt formatiert angezeigt und Unicode D
 
 
 
-2. Machine ist ungültig
+2. Machine ist ungültig und eine B oder CSP Maschine
 
 Erwartetes Ergebnis: Zuerst wird Parsefehler geworfen, entsprechendes Item wird deaktiviert
 
@@ -74,7 +74,12 @@ Erwartetes Ergebnis: Save Dialog wird angezeigt mit mch als Endung
 Tatsächliches Ergebnis: Save Dialog wird angezeigt mit mch als Endung
 
 
+4. Machine ist keine B oder CSP Maschine
 
+Erwartetes Ergebnis: Formatierte Maschine kann nicht angezeigt werden, speichern ist nicht möglich
+
+
+Tatsächliches Ergebnis: Formatierte Maschine kann nicht angezeigt werden, speichern ist nicht möglich
 
 
 

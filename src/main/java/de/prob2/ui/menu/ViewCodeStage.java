@@ -1,5 +1,27 @@
 package de.prob2.ui.menu;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.representation.AbstractModel;
+import de.prob.model.representation.CSPModel;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextArea;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,25 +32,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
 
-import com.google.inject.Inject;
-
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
-import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextArea;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Singleton
 @FXMLInjected
 public final class ViewCodeStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ViewCodeStage.class);
@@ -45,17 +49,20 @@ public final class ViewCodeStage extends Stage {
 	private final StageManager stageManager;
 	
 	private final CurrentTrace currentTrace;
+
+	private final CurrentProject currentProject;
 	
 	private final ResourceBundle bundle;
 	
 	private final StringProperty code;
 	
 	@Inject
-	private ViewCodeStage(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	private ViewCodeStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		super();
 		
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.bundle = bundle;
 		
 		this.code = new SimpleStringProperty(this, "code", null);
@@ -67,6 +74,26 @@ public final class ViewCodeStage extends Stage {
 	private void initialize() {
 		this.codeTextArea.textProperty().bind(this.codeProperty());
 		this.cbUnicode.selectedProperty().addListener((observable, from, to) -> setCode());
+
+		this.currentTrace.addListener((observable, from, to) -> {
+			if(to != null) {
+				AbstractModel model = to.getModel();
+				if(model instanceof ClassicalBModel || model instanceof CSPModel) {
+					saveAsButton.setDisable(false);
+				} else {
+					saveAsButton.setDisable(true);
+				}
+				this.setTitle(currentProject.getCurrentMachine().getName());
+				this.setCode();
+			}
+		});
+
+		this.setOnShown(e -> {
+			if(currentTrace.get() != null) {
+				this.setTitle(currentProject.getCurrentMachine().getName());
+				this.setCode();
+			}
+		});
 	}
 	
 	public StringProperty codeProperty() {
