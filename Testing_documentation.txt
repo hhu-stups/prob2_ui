@@ -573,11 +573,11 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 
 9. Help Buttons -> funktionieren
 
-10. Status (BEHEBEN?)
+10. Status
 
-Erwartetes Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt?. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
+Erwartetes Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
 
-Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, es wird nicht zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
+Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
 
 
 

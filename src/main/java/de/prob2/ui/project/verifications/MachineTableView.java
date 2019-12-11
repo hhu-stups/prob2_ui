@@ -1,22 +1,19 @@
 package de.prob2.ui.project.verifications;
 
-import javax.inject.Inject;
-
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-
 import org.controlsfx.glyphfont.FontAwesome;
+
+import javax.inject.Inject;
 
 @FXMLInjected
 @Singleton
@@ -36,7 +33,7 @@ public class MachineTableView extends TableView<Machine> {
 		protected void updateItem(final Machine.CheckingStatus item, final boolean empty) {
 			super.updateItem(item, empty);
 			
-			final BindableGlyph graphic = (BindableGlyph)this.getGraphic();
+			final BindableGlyph graphic = (BindableGlyph) this.getGraphic();
 			graphic.getStyleClass().removeAll("unknown", "successful", "failed");
 			if (empty || item == null) {
 				graphic.setVisible(false);
@@ -92,5 +89,11 @@ public class MachineTableView extends TableView<Machine> {
 		machineModelcheckColumn.setCellValueFactory(features -> features.getValue().modelcheckingStatusProperty());
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		this.itemsProperty().bind(currentProject.machinesProperty());
+
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			to.setModelcheckingStatus(Machine.CheckingStatus.UNKNOWN);
+			to.setLtlStatus(Machine.CheckingStatus.UNKNOWN);
+			to.setSymbolicCheckingStatus(Machine.CheckingStatus.UNKNOWN);
+		});
 	}
 }
