@@ -91,9 +91,11 @@ public class MachineTableView extends TableView<Machine> {
 		this.itemsProperty().bind(currentProject.machinesProperty());
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			to.setModelcheckingStatus(Machine.CheckingStatus.UNKNOWN);
-			to.setLtlStatus(Machine.CheckingStatus.UNKNOWN);
-			to.setSymbolicCheckingStatus(Machine.CheckingStatus.UNKNOWN);
+			if(to != null) {
+				to.setModelcheckingStatus(Machine.CheckingStatus.UNKNOWN);
+				to.setLtlStatus(Machine.CheckingStatus.UNKNOWN);
+				to.setSymbolicCheckingStatus(Machine.CheckingStatus.UNKNOWN);
+			}
 		});
 	}
 }
