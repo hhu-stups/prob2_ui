@@ -1,32 +1,34 @@
 package de.prob2.ui.menu;
 
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.ResourceBundle;
-
-import javax.annotation.Nullable;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import de.codecentric.centerdevice.MenuToolkit;
 import de.codecentric.centerdevice.util.StageUtils;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
-
-import de.prob2.ui.output.PrologOutput;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.ResourceBundle;
 
 @FXMLInjected
 public class WindowMenu extends Menu {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WindowMenu.class);
+
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -105,8 +107,19 @@ public class WindowMenu extends Menu {
 
 	private void switchToPerspective(final PerspectiveKind kind, final String perspective) {
 		injector.getInstance(DetachViewStageController.class).attachAllViews();
-		this.uiState.setPerspectiveKind(kind);
-		this.uiState.setPerspective(perspective);
-		injector.getInstance(MainController.class).reloadMainView();
+		PerspectiveKind prevKind = this.uiState.getPerspectiveKind();
+		String prevPerspective = this.uiState.getPerspective();
+
+		try {
+			this.uiState.setPerspectiveKind(kind);
+			this.uiState.setPerspective(perspective);
+			injector.getInstance(MainController.class).reloadMainView();
+		} catch(Exception e) {
+			this.uiState.setPerspectiveKind(prevKind);
+			this.uiState.setPerspective(prevPerspective);
+			LOGGER.error("Exception during switching perspective", e);
+			ExceptionAlert alert = new ExceptionAlert(injector, bundle.getString("menu.window.switchingPerspective.error"), e);
+			alert.show();
+		}
 	}
 }
