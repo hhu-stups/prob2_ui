@@ -591,6 +591,7 @@ Tatsächliches Ergebnis: Präferenzen werden geändert und gespeichert; die Änd
 9. Show in external editor -> funktioniert
 10. Highlighting -> funktioniert
 
+
 11. Maschineninklusion
 
 Erwartetes Ergebnis: für eine Maschine mit inkludierten und verfeinerten Maschinen werden ebenfalls die inkludierten und verfeinerten Maschinen angezeigt. Diese können ausgewählt und bearbeitet werden
@@ -609,6 +610,8 @@ Tatsächliches Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen
 
 
 
+
+
 19. Save Project -> funktioniert
 
 
@@ -621,19 +624,23 @@ Tatsächliches Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen
 
 3. Edit machine file in external editor -> funktioniert
 
-4. Start animation -> funktioniert
+4. Show internal representation -> funktioniert
 
-5. Edit machine configuration -> funktioniert
+5. Start animation -> funktioniert
 
-6. Show machine description -> funktioniert
+6. Edit machine configuration -> funktioniert
 
-7. Remove machine -> funktioniert
+7. Show machine description -> funktioniert
 
-8. Add machine -> funktioniert
+8. Remove machine -> funktioniert
 
-9. Help Buttons -> funktionieren
+9. Add existing machine -> funktioniert
 
-10. Status
+10. Create new machine -> funktioniert
+
+11. Help Buttons -> funktionieren
+
+12. Status
 
 Erwartetes Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
 
@@ -641,15 +648,15 @@ Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Succ
 
 
 
-11. Add Preference -> funktioniert
+13. Add Preference -> funktioniert
 
-12. Edit Preference -> funktioniert
+14. Edit Preference -> funktioniert
 
-13. Remove Preference -> funktioniert
+15. Remove Preference -> funktioniert
 
-14. Edit Project -> funktioniert
+16. Edit Project -> funktioniert
 
-15. Edit Description -> funktioniert
+17. Edit Description -> funktioniert
 
 
 
@@ -738,11 +745,11 @@ Tatsächliches Ergebnis: History Chart wird zurückgesetzt -> Liste der Formel w
 
 2. HelpButton -> funktioniert
 
-3. Suchfunktion wird mit Lowercase und Uppercase getestet (sowohl mit Enter im Suchfeld als auch mit dem Suchbutton)
+3. Suchfunktion wird mit Lowercase und Uppercase getestet
 
-Erwartetes Ergebnis: Entsprechende Einträge werden angezeigt
+Erwartetes Ergebnis: Entsprechende Einträge werden bereits beim Tippen angezeigt
 
-Tatsächliches Ergebnis: Entsprechende Einträge werden angezeigt
+Tatsächliches Ergebnis: Entsprechende Einträge werden bereits beim Tippen angezeigt
 
 4. Copy u.a. mit CTRL+V -> funktioniert
 
@@ -769,11 +776,16 @@ Tatsächliches Ergebnis: Formel wird bei Expression Table in der Tabellenvisuali
 
 
 
+8. SETUP Constants nicht möglich
+
+
+Erwartetes Ergebnis: Unsat Core Button wird angezeigt; beim Klicken wird der Unsat Core in der StateView gehighlightet und in einem separaten Fenster angezeigt
+
+Tatsächliches Ergebnis: Unsat Core Button wird angezeigt; beim Klicken wird der Unsat Core in der StateView gehighlightet und in einem separaten Fenster angezeigt
+
+
+
 25. State Visualization -> funktioniert
-
-Bemerkungen:
-
-Besser Lazy auswerten?
 
 
 
@@ -819,13 +831,27 @@ Tatsächliches Ergebnis: Nach dem Nachspielen kommt eine Fehlermeldung; Show Err
 
 5. Trace entfernen -> funktioniert
 
+6. Open Trace in External Editor -> funktioniert
 
-6. Hilfebutton -> funktioniert
+
+7. Hilfebutton -> funktioniert
 
 
-7. Show Error -> funktioniert
+8. Show Error -> funktioniert
 
-8. Hinzufügen von bereits vorhandenen Traces
+
+
+9. Show Trace Description
+
+Erwartetes Ergebnis: Textfeld öffnet sich, wo man die Beschreibung bearbeiten und speichern kann
+
+Tatsächliches Ergebnis: Textfeld öffnet sich, wo man die Beschreibung bearbeiten und speichern kann
+
+
+
+
+
+10. Hinzufügen von bereits vorhandenen Traces
 
 Erwartetes Ergebnis: Trace wird nicht hinzugefügt und der bereits vorhandene Trace abgespielt
 
@@ -833,19 +859,27 @@ Tatsächliches Ergebnis: Trace wird nicht hinzugefügt und der bereits vorhanden
 
 
 
-9. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
+11. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
 
-10. Trace mit Syntaxfehler laden -> funktioniert
-
-
-11. Deaktivierung eines Traces -> funktioniert
+12. Trace mit Syntaxfehler laden -> funktioniert
 
 
-12. Überprüfen mit deaktivierten Traces
+13. Deaktivierung eines Traces -> funktioniert
 
-Erwartetes Ergebnis: Deaktivierte Traces werden nicht überprüft
+14. Überprüfen mit deaktivierten Traces
 
-Tatsächliches Ergebnis: Deaktivierte Traces werden nicht überprüft
+Erwartetes Ergebnis: Deaktivierte Traces werden nicht nachgespielt
+
+Tatsächliches Ergebnis: Deaktivierte Traces werden nicht nachgespielt
+
+
+15. Reload -> funktioniert
+
+16. Trace laden
+
+Erwartetes Ergebnis: Trace wird von der Datei geladen und nachgespielt
+
+Tatsächliches Ergebnis: Trace wird von der Datei geladen und nachgespielt
 
 
 
@@ -905,11 +939,11 @@ Erwartetes Ergebnis: MenuItem ist nur verfügbar, wenn ein Fehler aufgetreten is
 Tatsächliches Ergebnis: MenuItem ist nur verfügbar, wenn ein Fehler aufgetreten ist; Fehlerzustand wird angezeigt
 
 
-8. Search for new errors
+8. Continue Model Checking
 
-Erwartetes Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt
+Erwartetes Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt, falls vorhanden. Ansonsten war der Check erfolgreich. Es werden Informationen zu allen Checks beibehalten.
 
-Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt
+Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt, falls vorhanden. Ansonsten war der Check erfolgreich. Es werden Informationen zu allen Checks beibehalten.
 
 
 
