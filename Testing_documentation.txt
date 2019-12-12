@@ -203,6 +203,7 @@ Auch in der .jar Version testen!
 -Preferences/General/Select Location
 -Project View/Open
 -Project View/New Project
+-Graph Visualisierung - als SVG speichern
 
 
 
@@ -465,6 +466,14 @@ Cursor?
 
 14. Hilfe Button -> funktioniert; Dokumentation ist allerdings leer
 
+15. Ändern der Präferenzen 
+
+Erwartetes Ergebnis: Präferenzen werden geändert und gespeichert; die Änderungen sind sofort in der Graphvisualisierung sichtbar
+
+Tatsächliches Ergebnis: Präferenzen werden geändert und gespeichert; die Änderungen sind sofort in der Graphvisualisierung sichtbar
+
+16. Speichern als SVG -> funktioniert
+
 
 Bemerkung: Renderingfehler in der HTML View
 
@@ -558,6 +567,15 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 
 11. Hilfe Button -> funktioniert
 
+12. Ändern der Präferenzen 
+
+Erwartetes Ergebnis: Präferenzen werden geändert und gespeichert; die Änderungen sind sofort in der Tabellenvisualisierung sichtbar
+
+Tatsächliches Ergebnis: Präferenzen werden geändert und gespeichert; die Änderungen sind sofort in der Tabellenvisualisierung sichtbar
+
+
+13. Tabelle als CSV speichern -> funktioniert
+
 
 
 18. BEditor
@@ -570,8 +588,23 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 6. Delete -> funktioniert
 7. Select all -> funktioniert
 8. Save Machine File -> funktioniert
-9. Highlighting -> funktioniert
-10. Help Button -> funktioniert
+9. Show in external editor -> funktioniert
+10. Highlighting -> funktioniert
+
+11. Maschineninklusion
+
+Erwartetes Ergebnis: für eine Maschine mit inkludierten und verfeinerten Maschinen werden ebenfalls die inkludierten und verfeinerten Maschinen angezeigt. Diese können ausgewählt und bearbeitet werden
+
+Tatsächliches Ergebnis: für eine Maschine mit inkludierten und verfeinerten Maschinen werden ebenfalls die inkludierten und verfeinerten Maschinen angezeigt. Diese können ausgewählt und bearbeitet werden
+
+12. FileWatcher
+
+Erwartetes Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen mit einem externen Editor wird beim Speichern der Stand der Maschine im B Editor aktualisiert
+
+Tatsächliches Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen mit einem externen Editor wird beim Speichern der Stand der Maschine im B Editor aktualisiert; allerdings mit einem Schritt Verspätung (BEHEBEN!)
+
+
+13. Help Button -> funktioniert
 
 
 
