@@ -1071,19 +1071,23 @@ Tatsächliches Ergebnis: Meldung erscheint, dass die Formel bereits vorhanden is
 
 
 
-14. Fehlernachricht anzeigen bei LTL Formel -> funktioniert
+14. Fehlernachricht anzeigen bei LTL Formel über MenuItem -> funktioniert
 
-15. Fehlernachricht anzeigen bei LTL Pattern -> funktioniert
+15. Fehlernachricht anzeigen bei LTL Pattern über MenuItem -> funktioniert
 
-16. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
+16. Fehlernachricht anzeigen beim Editieren einer LTL Formel -> funktioniert
 
-17. LTL Formel löschen -> funktioniert
+17. Fehlernachricht anzeigen beim Editieren eines LTL Patterns -> funktioniert
 
-18. LTL Pattern löschen -> funktioniert
+18. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
+
+19. LTL Formel löschen -> funktioniert
+
+20. LTL Pattern löschen -> funktioniert
 
 
 
-19. Alle Formel ausführen
+21. Alle Formel ausführen
 
 Erwartetes Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
 
@@ -1091,28 +1095,28 @@ Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die
 
 
 
-20. Checking abbrechen -> funktioniert
+22. Checking abbrechen -> funktioniert
 
-21. Hilfebutton -> funktioniert
+23. Hilfebutton -> funktioniert
 
-22. Aufruf von gültigen Patterns innerhalb Patterns -> funktioniert
-
-
-23. Aufruf von ungültigen Patterns innerhalb Patterns -> funktioniert
+24. Aufruf von gültigen Patterns innerhalb Patterns -> funktioniert
 
 
-24. Aufruf von gültigen Patterns innerhalb Formeln -> funktioniert
+25. Aufruf von ungültigen Patterns innerhalb Patterns -> funktioniert
+
+
+26. Aufruf von gültigen Patterns innerhalb Formeln -> funktioniert
 
 
 
-25. Aufruf von ungültigen Patterns innerhalb Formeln
+27. Aufruf von ungültigen Patterns innerhalb Formeln
 
 Erwartetes Ergebnis: Fehlermeldung von angezeigt
 
 Tatsächliches Ergebnis: Fehlermeldung von angezeigt
 
 
-26. Deaktivierung einer Formel
+28. Deaktivierung einer Formel
 
 Erwartetes Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
 
@@ -1120,14 +1124,14 @@ Tatsächliches Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Sta
 
 
 
-27. Überprüfen mit deaktivierten Formel
+29. Überprüfen mit deaktivierten Formel
 
 Erwartetes Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 
-
+30. Anzeigen von eingebauten Pattern -> funktioniert
 
 
 
