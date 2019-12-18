@@ -11,8 +11,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicView;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
@@ -99,7 +97,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@Override
 	protected void removeFormula(Machine machine, SymbolicAnimationItem item) {
 		machine.removeSymbolicAnimationFormula(item);
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_ANIMATION);
 	}
 	
 	@Override
