@@ -48,11 +48,13 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 
 	public TestCaseGenerationItem(String name, TestCaseGenerationType type) {
 		super(name, type.getName(), "");
+		this.type = type;
 		this.additionalInformation = new HashMap<>();
 	}
 	
 	public TestCaseGenerationItem(String name, TestCaseGenerationType type, Map<String, Object> additionalInformation) {
 		super(name, type.getName(), "");
+		this.type = type;
 		this.additionalInformation = additionalInformation;
 	}
 	

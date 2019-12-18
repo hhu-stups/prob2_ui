@@ -13,7 +13,6 @@ import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGeneratorCreato
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.internal.AbstractResultHandler;
 
 @Singleton
 public class TestCaseGenerationItemHandler {
@@ -23,8 +22,6 @@ public class TestCaseGenerationItemHandler {
 	private final TestCaseGenerator testCaseGenerator;
 	
 	private final TestCaseGeneratorCreator testCaseGeneratorCreator;
-
-	private final TestCaseGenerationResultHandler resultHandler;
 
 	private final CurrentProject currentProject;
 
@@ -37,7 +34,6 @@ public class TestCaseGenerationItemHandler {
 		this.currentProject = currentProject;
 		this.testCaseGenerator = testCaseGenerator;
 		this.testCaseGeneratorCreator = testCaseGeneratorCreator;
-		this.resultHandler = resultHandler;
 	}
 
 	public void addItem(String name, TestCaseGenerationType type, boolean checking) {
@@ -60,8 +56,6 @@ public class TestCaseGenerationItemHandler {
 		if (currentMachine != null) {
 			if(!currentMachine.getTestCases().contains(item)) {
 				currentMachine.addTestCase(item);
-			} else if(!checking) {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
 		}
 	}
