@@ -1133,6 +1133,34 @@ Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 30. Anzeigen von eingebauten Pattern -> funktioniert
 
+31. Verwendung von eingebauten Patterns -> funktioniert
+
+
+32. Speichern von LTL Patterns und LTL Formel
+
+Erwartetes Ergebnis: Beim Speichern werden die LTL Patterns und LTL Formel in eine Datei mit der Endung .ltl gespeichert
+
+Tatsächliches Ergebnis: Beim Speichern werden die LTL Patterns und LTL Formel in eine Datei mit der Endung .ltl gespeichert
+
+
+
+
+33. Laden von LTL Patterns und LTL Formel
+
+Erwartetes Ergebnis: Beim Laden werden die LTL Patterns und Formel in die LTL View geladen
+
+Tatsächliches Ergebnis: Beim Laden werden die LTL Patterns und Formel in die LTL View geladen
+
+
+
+
+Bemerkung: Beim Hinzufügen von mehreren Patterns, wobei einige Patterns fehlerhaft sind, können die korrekten Patterns dennoch verwendet werden. Der Name eines Pattern Items setzt sich aus der Signatur der einzelnen Patterns durch Newlines getrennt zusammen
+
+
+
+
+
+
 
 
 
@@ -1182,14 +1210,14 @@ Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden;
 
 
 
-8. Hinzufügen einer noch Formel -> funktioniert
+8. Hinzufügen einer Formel -> funktioniert
 
 
 9. Hinzufügen und überprüfen einer Formel -> funktioniert
 
 
 
-10. Überprüfen aller Strategien (Sequence, Invariant, Deadlock, Find deadlock, Find redundant invariants, check refinement, check assertions, find valid state, check all operations, IC3, TINDUCTION, KINDUCTION, BMC) -> funktioniert
+10. Überprüfen aller Strategien (Invariant, Deadlock, Find redundant invariants, check refinement, check assertions, check all operations, IC3, TINDUCTION, KINDUCTION, BMC) -> funktioniert
 
 
 
@@ -1255,7 +1283,123 @@ Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 
 
-31. Groovy Konsole
+31. Symbolic Animation
+
+1. Animieren einer erfolgreichen Konfiguration -> funktioniert
+
+2. Animieren einer Konfiguration mit Syntaxfehler
+
+Erwartetes Ergebnis: Animieren nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
+
+Tatsächliches Ergebnis: Animieren nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
+
+
+3. Animieren einer Konfiguration ohne Formel -> funktioniert
+
+
+
+4. Alle Konfigurationen animieren
+
+Erwartetes Ergebnis: Alle Formeln werden animiert und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+
+Tatsächliches Ergebnis: Alle Formeln werden animiert und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+
+
+
+
+5. Abspielen einer Konfiguration mit Formel mit Trace
+
+Erwartetes Ergebnis: Konfiguration wird animiert und ein Trace gefunden; es wird direkt zum Gegenbeispiel gewechselt
+
+Tatsächliches Ergebnis: Konfiguration wird animiert und ein Trace gefunden; es wird direkt zum Gegenbeispiel gewechselt
+
+
+
+6. Abspielen einer Konfiguration ohne Formel mit Trace
+
+Erwartetes Ergebnis: Konfiguration wird animiert und ein Trace gefunden; es wird direkt zum Gegenbeispiel gewechselt
+
+Tatsächliches Ergebnis: Konfiguration wird animiert und ein Trace gefunden; es wird direkt zum Gegenbeispiel gewechselt
+
+
+
+
+7. Hilfebutton -> funktioniert
+
+
+
+8. Hinzufügen einer Konfiguration -> funktioniert
+
+
+9. Hinzufügen und animieren einer Konfiguration -> funktioniert
+
+
+
+10. Überprüfen aller Strategien (Sequence, Find valid state) -> funktioniert
+
+
+
+11. Hinzufügen bereits vorhandener Konfiguration
+
+Erwartetes Ergebnis: Es wird keine zusätzliche Konfiguration hinzugefügt und der Nutzer benachrichtigt
+
+Tatsächliches ergebnis: Es wird keine zusätzliche Konfiguration hinzugefügt und der Nutzer benachrichtigt
+
+
+
+
+12. Animieren bereits vorhandener Konfiguration über Hinzufügen-Button
+
+Erwartetes Ergebnis: Vorhandene Konfiguration wird nochmal überprüft
+
+Tatsächliches Ergebnis: Vorhandene Konfiguration wird nochmal überprüft
+
+
+13. Ändern zu einer noch nicht vorhandenen Konfiguration -> funktioniert
+
+
+14. Ändern und animieren zu einer noch nicht vorhandenen Konfiguration -> funktioniert
+
+
+
+15. Ändern zu einer bereits vorhandenen Konfiguration
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die Konfiguration bereits vorhanden ist
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Konfiguration bereits vorhanden ist
+
+
+
+
+16. Ändern und überprüfen einer bereits vorhandenen Konfiguration
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die Konfiguration bereits vorhanden ist
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Konfiguration bereits vorhanden ist
+
+
+
+
+17. Abbrechen der Animation -> funktioniert
+
+
+18. Deaktivierung einer Konfiguration -> funktioniert
+
+
+19. Animation mit deaktivierter Konfiguration
+
+Erwartetes Ergebnis: Deaktivierte Konfigurationen werden nicht animiert
+
+Tatsächliches Ergebnis: Deaktivierte Konfigurationen werden nicht animiert
+
+
+Bemerkung: Symbolic Animation beeinflusst die Status Bar nicht
+
+
+
+
+
+32. Groovy Konsole
 
 1. Inspect groovy objects
 
@@ -1277,7 +1421,7 @@ Tatsächliches Ergebnis: Es wird die gesamte Auswahl hinter dem Punkt ergänzt
 
 
 
-3. Code Completion mittendrin im Vorschlag
+3. Code Completion mitten im Vorschlag
 
 Erwartetes Ergebnis: Der rechte Teilstring wird an den linken bereits eingegebenen Teilstring hinzugefügt, der Vorschlag ist von dem linken Teilstring abhängig
 
@@ -1382,7 +1526,7 @@ Bemerkung:
 
 
 
-32. B Konsole
+33. B Konsole
 
 
 1. Ausführung von Befehlen -> funktioniert
@@ -1453,7 +1597,7 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 
 
 
-33. Plugin Mechanismus
+34. Plugin Mechanismus
 -Momentan kann man mit Plugins Features ohne Einschränkungen erstellen
 -Plugins müssen geändert werden, wenn sich die API in der ProB2-UI ändert -> schwierig ohne Release?
 -Exceptions in der ProB2-UI können aufgrund fehlerhafter Implementierung von Plugins auftreten
@@ -1463,7 +1607,7 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 
 
 
-34. UI Persistenz
+35. UI Persistenz
 
 1. Geöffnete Stages beim Schließen öffnen sich beim Starten -> funktioniert
 
@@ -1500,5 +1644,11 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 17. Selbstgeschriebenes Layout -> funktioniert
 
 18. Selbstgeschriebenes Layout mit Detachen -> funktioniert
+
+
+
+
+
+36. Prolog Output -> Es werden nicht alle Kommandos von Prolog angezeigt? (BEHEBEN?)
 
 
