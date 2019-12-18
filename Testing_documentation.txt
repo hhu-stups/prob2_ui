@@ -1232,9 +1232,9 @@ Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt und der 
 
 12. Überprüfen bereits vorhandener Formeln über Hinzufügen-Button
 
-Erwartetes Ergebnis: Vorhandene Formel wird nochmal überprüft
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass Formel bereits vorhanden ist
 
-Tatsächliches Ergebnis: Vorhandene Formel wird nochmal überprüft
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass Formel bereits vorhanden ist
 
 
 13. Ändern zu einer noch nicht vorhandenen Formel -> funktioniert
@@ -1350,9 +1350,9 @@ Tatsächliches ergebnis: Es wird keine zusätzliche Konfiguration hinzugefügt u
 
 12. Animieren bereits vorhandener Konfiguration über Hinzufügen-Button
 
-Erwartetes Ergebnis: Vorhandene Konfiguration wird nochmal überprüft
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass Konfiguration bereits vorhanden ist
 
-Tatsächliches Ergebnis: Vorhandene Konfiguration wird nochmal überprüft
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass Konfiguration bereits vorhanden ist
 
 
 13. Ändern zu einer noch nicht vorhandenen Konfiguration -> funktioniert
@@ -1397,9 +1397,159 @@ Bemerkung: Symbolic Animation beeinflusst die Status Bar nicht
 
 
 
+32. Test Case Generation
+
+1. Hinzufügen von MCDC Testing mit korrekter Angabe von Level und Search Depth
+
+Erwartetes Ergebnis: Entsprechender Eintrag wird hinzugefügt
+
+Tatsächliches Ergebnis: Entsprechender Eintrag wird hinzugefügt
 
 
-32. Groovy Konsole
+
+2. Hinzufügen von MCDC Testing mit falscher Angabe von Level und Search Depth
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+
+
+3. Hinzufügen und generieren von MCDC Testing mit korrekter Angabe von Level und Search Depth
+
+Erwartetes Ergebnis: Entsprechender Eintrag wird hinzugefügt und für den entsprechenden Eintrag werden Testfälle generiert
+
+Tatsächliches Ergebnis: Entsprechender Eintrag wird hinzugefügt und für den entsprechenden Eintrag werden Testfälle generiert
+
+
+
+
+4. Hinzufügen und generieren von MCDC Testing mit falscher Angabe von Level und Search Depth
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+
+
+5. Hinzufügen von Covered Operations mit korrekter Angabe von Operations und Search Depth
+
+Erwartetes Ergebnis: Entsprechender Eintrag wird hinzugefügt
+
+Tatsächliches Ergebnis: Entsprechender Eintrag wird hinzugefügt
+
+
+
+
+6. Hinzufügen von Covered Operations mit falscher Angabe von Operations und Search Depth
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+
+
+7. Hinzufügen und generieren von Covered Operations mit korrekter Angabe von Operations und Search Depth
+
+Erwartetes Ergebnis: Entsprechender Eintrag wird hinzugefügt und für den entsprechenden Eintrag werden Testfälle generiert
+
+Tatsächliches Ergebnis: Entsprechender Eintrag wird hinzugefügt und für den entsprechenden Eintrag werden Testfälle generiert
+
+
+
+8. Hinzufügen und generieren von Covered Operations mit falscher Angabe von Operations und Search Depth
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+
+
+9. Generieren einer MCDC Konfiguration -> funktioniert
+
+10. Generieren einer Covered Operations Konfiguration -> funktioniert
+
+11. Aus allen Konfigurationen generieren -> funktioniert
+
+
+
+12. Generieren abbrechen -> funktioniert
+
+13. Hilfebutton -> springt noch nicht an die richtige Stelle (BEHEBEN)
+
+
+
+14. Ändern einer Konfiguration zu einer noch nicht vorhandenen Konfiguration -> funktioniert
+
+
+15. Ändern einer Konfiguration zu einer vorhandenen Konfiguration
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, Nutzer wird benachrichtigt
+
+
+16. Ändern und generieren einer Konfiguration zu einer noch nicht vorhandenen Konfiguration -> funktioniert
+
+
+
+17. Ändern und generieren einer Konfiguration zu einer vorhandenen Konfiguration
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, Nutzer wird benachrichtigt
+
+
+
+18. Konfiguration löschen -> funktioniert
+
+19. Show Details -> funktioniert
+
+
+
+20. Doppelklick eines Traces in Show Details
+
+Erwartetes Ergebnis: Aktueller Trace wird zu dem angeklickten Trace gewechselt
+
+Tatsächliches Ergebnis: Aktueller Trace wird zu dem angeklickten Trace gewechselt
+
+Bemerkung: Es können auch Traces ausgewählt werden, die nicht vollständig nachgespielt werden können. Diese werden dann bis zu dem Punkt nachgespielt, wo es möglich ist
+
+
+
+21. Fehlernachricht anzeigen -> funktioniert
+
+22. Zu eine der generierten Pfade wechseln -> funktioniert
+
+
+
+
+23. Für Trace Replay speichern
+
+Erwartetes Ergebnis: es wird ein Ordner mit dem angegebenen Namen für alle Traces angelegt, worin die generierten Traces gespeichert werden; die Traces werden außerdem in Trace Replay hinzugefügt
+
+Tatsächliches Ergebnis: es wird ein Ordner mit dem angegebenen Namen für alle Traces angelegt, worin die generierten Traces gespeichert werden; die Traces werden außerdem in Trace Replay hinzugefügt
+
+
+
+
+24. Deaktivierung von Konfigurationen -> funktioniert
+
+
+
+25. Generieren mit deaktivierten Konfigurationen
+
+Erwartetes Ergebnis: Es werden nur Traces für die aktivierten Konfigurationen generiert
+
+Tatsächliches Ergebnis: Es werden nur Traces für die aktivierten Konfigurationen generiert
+
+
+
+
+
+
+
+33. Groovy Konsole
 
 1. Inspect groovy objects
 
@@ -1526,7 +1676,7 @@ Bemerkung:
 
 
 
-33. B Konsole
+34. B Konsole
 
 
 1. Ausführung von Befehlen -> funktioniert
@@ -1597,7 +1747,7 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 
 
 
-34. Plugin Mechanismus
+35. Plugin Mechanismus
 -Momentan kann man mit Plugins Features ohne Einschränkungen erstellen
 -Plugins müssen geändert werden, wenn sich die API in der ProB2-UI ändert -> schwierig ohne Release?
 -Exceptions in der ProB2-UI können aufgrund fehlerhafter Implementierung von Plugins auftreten
@@ -1607,7 +1757,7 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 
 
 
-35. UI Persistenz
+36. UI Persistenz
 
 1. Geöffnete Stages beim Schließen öffnen sich beim Starten -> funktioniert
 
@@ -1649,6 +1799,6 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 
 
 
-36. Prolog Output -> Es werden nicht alle Kommandos von Prolog angezeigt? (BEHEBEN?)
+37. Prolog Output -> Es werden nicht alle Kommandos von Prolog angezeigt? (BEHEBEN?)
 
 
