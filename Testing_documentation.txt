@@ -1802,3 +1802,51 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 37. Prolog Output -> Es werden nicht alle Kommandos von Prolog angezeigt? (BEHEBEN?)
 
 
+
+38. Magic Layout
+
+1. New Edge Group -> funktioniert
+
+2. New Node Group -> funktioniert
+
+
+
+3. Save Settings
+
+Erwartetes Ergebnis: Einstellung mit Edge Group und Node Group werden in eine .prob2magic Datei geschrieben
+
+Tatsächliches Ergebnis: Einstellung mit Edge Group und Node Group werden in eine .prob2magic Datei geschrieben
+
+
+
+4. Load Settings 
+
+Erwartetes Ergebnis: Einstellung wird von .prob2magic Datei geladen und in der View dargestellt
+
+Tatsächliches Ergebnis: Einstellung wird von .prob2magic Datei geladen und in der View dargestellt
+
+
+
+5. Save Graph as Image
+
+Erwartetes Ergebnis: Es wird das zugehörige Bild als PNG in dem Ordner magic_graph in dem Projektordner gespeichert und geöffnet
+
+Tatsächliches Ergebnis: Es wird das zugehörige Bild als PNG in dem Ordner magic_graph in dem Projektordner gespeichert und geöffnet
+
+
+6. Update -> funktioniert
+
+7. Layout -> funktioniert
+
+8. Reinzoomen -> funktioniert
+
+9. Rauszoomen -> funktioniert
+
+10. Hilfebutton -> funktioniert
+
+11. Einstellung des Styles für Nodes -> funktioniert
+
+12. Einstellung des Styles für Edges -> funktioniert
+
+
+Bemerkung: Die MagicLayoutView updatet sich, falls sich der aktuelle Zustand wechselt
