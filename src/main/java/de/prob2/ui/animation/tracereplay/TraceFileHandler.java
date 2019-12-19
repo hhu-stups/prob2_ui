@@ -2,10 +2,8 @@ package de.prob2.ui.animation.tracereplay;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Inject;
 import de.prob.check.tracereplay.PersistentTrace;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.internal.AbstractFileHandler;

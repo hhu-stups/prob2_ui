@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;

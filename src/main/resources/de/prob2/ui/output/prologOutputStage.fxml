@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.stage.Stage?>
+<?import javafx.scene.Scene?>
+<?import de.prob2.ui.output.PrologOutput?>
+
+<fx:root type="Stage" title="%menu.advanced.items.prologoutput.title" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<PrologOutput />
+		</Scene>
+	</scene>
+</fx:root>
