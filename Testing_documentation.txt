@@ -1475,7 +1475,7 @@ Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benach
 
 12. Generieren abbrechen -> funktioniert
 
-13. Hilfebutton -> springt noch nicht an die richtige Stelle (BEHEBEN)
+13. Hilfebutton -> funktioniert
 
 
 
