@@ -602,7 +602,7 @@ Tatsächliches Ergebnis: für eine Maschine mit inkludierten und verfeinerten Ma
 
 Erwartetes Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen mit einem externen Editor wird beim Speichern der Stand der Maschine im B Editor aktualisiert
 
-Tatsächliches Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen mit einem externen Editor wird beim Speichern der Stand der Maschine im B Editor aktualisiert; allerdings mit einem Schritt Verspätung (BEHEBEN!)
+Tatsächliches Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen mit einem externen Editor wird beim Speichern der Stand der Maschine im B Editor aktualisiert
 
 
 13. Help Button -> funktioniert

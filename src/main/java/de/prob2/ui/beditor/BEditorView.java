@@ -240,6 +240,9 @@ public class BEditorView extends BorderPane {
 			while (true) {
 				try {
 					key = watcher.take();
+					//However, in Linux there is the problem that modifying and saving a file takes a moment
+					//When registering a modification of a file without Thread.sleep, the changes are not applied and saved to the file yet.
+					Thread.sleep(200);
 				} catch (InterruptedException ignored) {
 					Thread.currentThread().interrupt();
 					return;
