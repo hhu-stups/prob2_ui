@@ -1,26 +1,25 @@
 package de.prob2.ui.symbolic;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
+import de.prob2.ui.internal.AbstractResultHandler;
+import de.prob2.ui.internal.AbstractResultHandler.ItemType;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
-import de.prob2.ui.internal.AbstractResultHandler;
-import de.prob2.ui.internal.AbstractResultHandler.ItemType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox {
 	
@@ -126,7 +125,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 		} else if(choosingStage.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
 		} else {
-			formula = choosingStage.getExecutionType().getName();
+			formula = choosingStage.getExecutionType().name();
 		}
 		return formula;
 	}

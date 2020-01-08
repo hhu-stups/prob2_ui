@@ -81,8 +81,11 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 			default:
 				formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
 				switch(checkingType) {
-					case CHECK_ASSERTIONS:
-						symbolicCheckingFormulaHandler.handleAssertions(formulaItem, false);
+					case CHECK_STATIC_ASSERTIONS:
+						symbolicCheckingFormulaHandler.handleStaticAssertions(formulaItem, false);
+						break;
+					case CHECK_DYNAMIC_ASSERTIONS:
+						symbolicCheckingFormulaHandler.handleDynamicAssertions(formulaItem, false);
 						break;
 					case CHECK_REFINEMENT:
 						symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false);

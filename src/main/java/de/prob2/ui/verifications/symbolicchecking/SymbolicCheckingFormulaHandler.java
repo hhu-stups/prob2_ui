@@ -74,9 +74,15 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 	
-	public void handleAssertions(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public void handleStaticAssertions(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(stateSpace);
+		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
+		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
+	}
+
+	public void handleDynamicAssertions(SymbolicCheckingFormulaItem item, boolean checkAll) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 	
@@ -111,8 +117,11 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 			case CHECK_REFINEMENT:
 				handleRefinement(item, checkAll);
 				break;
-			case CHECK_ASSERTIONS:
-				handleAssertions(item, checkAll);
+			case CHECK_STATIC_ASSERTIONS:
+				handleStaticAssertions(item, checkAll);
+				break;
+			case CHECK_DYNAMIC_ASSERTIONS:
+				handleDynamicAssertions(item, checkAll);
 				break;
 			case DEADLOCK:
 				handleDeadlock(item.getCode(), checkAll);
