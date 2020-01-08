@@ -1,21 +1,23 @@
 package de.prob2.ui.visualisation.magiclayout.graph.layout;
 
+import de.prob2.ui.visualisation.magiclayout.graph.Edge;
+import de.prob2.ui.visualisation.magiclayout.graph.Graph;
+import de.prob2.ui.visualisation.magiclayout.graph.Model;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.DummyVertex;
+import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.Stack;
 import java.util.TreeMap;
-
-import de.prob2.ui.visualisation.magiclayout.graph.Edge;
-import de.prob2.ui.visualisation.magiclayout.graph.Graph;
-import de.prob2.ui.visualisation.magiclayout.graph.Model;
-import de.prob2.ui.visualisation.magiclayout.graph.vertex.DummyVertex;
-import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 
 /**
  * The implementations of a layered graph layout in this class are based on the
@@ -61,7 +63,11 @@ public class LayeredLayout implements Layout {
 
 		// update Style of part edges when style of edge changes
 		splittedEdges.keySet().forEach(edge -> edge.edgeStyleProperty().addListener(
-				(observable, from, to) -> splittedEdges.get(edge).forEach(partEdge -> partEdge.setStyle(to))));
+			(observable, from, to) -> {
+				if(to != null && splittedEdges.get(edge) != null) {
+					splittedEdges.get(edge).forEach(partEdge -> partEdge.setStyle(to));
+				}
+			}));
 
 //		positionEdges();
 	}
@@ -132,6 +138,9 @@ public class LayeredLayout implements Layout {
 		splittedEdges = new HashMap<>();
 		Set<Edge> newEdges = new HashSet<>();
 		acyclicEdges.forEach(edge -> {
+			if(!layers.containsKey(edge.getSource()) || !layers.containsKey(edge.getTarget())) {
+				return;
+			}
 			int sourceLayer = layers.get(edge.getSource());
 			int targetLayer = layers.get(edge.getTarget());
 			if (sourceLayer - targetLayer > 1) {
@@ -167,28 +176,45 @@ public class LayeredLayout implements Layout {
 	 * calculated layer to the vertexLayerMap.
 	 * 
 	 */
-	private int calculateLayer(Vertex vertex, Set<Edge> edges) {
-		if (vertexLayerMap.containsKey(vertex)) {
-			return vertexLayerMap.get(vertex);
-		}
+	private void calculateLayer(Vertex vertex, Set<Edge> edges) {
+		Stack<Vertex> initialisationStack = new Stack<>();
+		initialisationStack.push(vertex);
 
-		if (isSink(vertex, edges)) {
-			vertexLayerMap.put(vertex, 0);
-			return 0;
-		}
+		LinkedList<Vertex> verticesStackQueue = new LinkedList<>();
+		Set<Vertex> verticesSet = new HashSet<>();
 
-		Integer layer = 0;
-		Set<Vertex> succesors = getSuccessors(vertex, edges);
-		for (Vertex succ : succesors) {
-			int succLayer = calculateLayer(succ, edges);
-
-			if (succLayer > layer) {
-				layer = succLayer;
+		while(!initialisationStack.isEmpty()) {
+			Vertex currentVertex = initialisationStack.pop();
+			verticesStackQueue.push(currentVertex);
+			if(!verticesSet.contains(currentVertex)) {
+				if(isSink(currentVertex, edges)) {
+					vertexLayerMap.put(currentVertex, 0);
+				} else {
+					getSuccessors(currentVertex, edges).forEach(initialisationStack::push);
+				}
+				verticesSet.add(currentVertex);
 			}
 		}
 
-		vertexLayerMap.put(vertex, layer + 1);
-		return layer + 1;
+		int deadlockCounter = 0;
+
+		//TODO: Are cyclic dependencies allowed? That was the problem that cause StackOverflowError (see PROB2UI-339)
+		while(verticesStackQueue.size() > 0 && verticesStackQueue.size() > deadlockCounter) {
+			Vertex currentVertex = verticesStackQueue.pollLast();
+			if(!vertexLayerMap.containsKey(currentVertex)) {
+				Set<Vertex> successors = getSuccessors(currentVertex, edges);
+				boolean allSuccessorsCalculated = successors.stream().map(vertexLayerMap::containsKey).reduce(true, (acc, e) -> acc && e);
+				if(allSuccessorsCalculated) {
+					vertexLayerMap.put(currentVertex, 1 + successors.stream()
+							.map(vertexLayerMap::get)
+							.reduce(0, Math::max));
+					deadlockCounter = 0;
+				} else {
+					verticesStackQueue.addFirst(currentVertex);
+					deadlockCounter++;
+				}
+			}
+		}
 	}
 
 	/**
