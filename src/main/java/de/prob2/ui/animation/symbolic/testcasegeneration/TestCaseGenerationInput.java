@@ -91,7 +91,7 @@ public class TestCaseGenerationInput extends VBox {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractItem(choosingStage);
 		TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
-		int maxDepth = item.getMaxDepth();
+		int maxDepth = Integer.parseInt(testCaseGenerationSettingsHandler.extractDepth(choosingStage, mcdcInputView, operationCoverageInputView));
 		Map<String, Object> additionalInformation = testCaseGenerationSettingsHandler.extractAdditionalInformation(choosingStage, mcdcInputView, operationCoverageInputView);
 		boolean valid = testCaseGenerationSettingsHandler.isValid(choosingStage, mcdcInputView, operationCoverageInputView);
 		TestCaseGenerationItem newItem = new TestCaseGenerationItem(formula, type, additionalInformation);

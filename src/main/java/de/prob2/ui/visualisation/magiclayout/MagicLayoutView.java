@@ -231,11 +231,16 @@ public class MagicLayoutView extends Stage {
 		}
 
 		// try to open image with external viewer
-		try {
-			Desktop.getDesktop().open(file);
-		} catch (IOException e) {
-			stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotOpenImage.content");
-		}
+		// This needs to be done in a background thread to avoid an issue on Linux,
+		// where calling Desktop.open on the JavaFX application thread causes the UI to hang.
+		final File finalFile = file;
+		new Thread(() -> {
+			try {
+				Desktop.getDesktop().open(finalFile);
+			} catch (IOException e) {
+				stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotOpenImage.content");
+			}
+		}, "Magic Layout Image Opener").start();
 		
 		zoom(zoomFactor);
 	}

@@ -56,7 +56,6 @@ public class StatusBar extends HBox {
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private final ObjectProperty<StatusBar.CheckingStatus> ltlStatus;
 	private final ObjectProperty<StatusBar.CheckingStatus> symbolicCheckingStatus;
-	private final ObjectProperty<StatusBar.CheckingStatus> symbolicAnimationStatus;
 	private final ObjectProperty<StatusBar.CheckingStatus> modelcheckingStatus;
 	private BooleanExpression updating;
 	
@@ -71,7 +70,6 @@ public class StatusBar extends HBox {
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.CheckingStatus.SUCCESSFUL);
 		this.symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", StatusBar.CheckingStatus.SUCCESSFUL);
-		this.symbolicAnimationStatus = new SimpleObjectProperty<>(this, "symbolicAnimationStatus", StatusBar.CheckingStatus.SUCCESSFUL);
 		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", StatusBar.CheckingStatus.SUCCESSFUL);
 		this.updating = Bindings.createBooleanBinding(() -> false);
 		
@@ -89,7 +87,6 @@ public class StatusBar extends HBox {
 		this.loadingStatusProperty().addListener((observable, from, to) -> this.update());
 		this.ltlStatusProperty().addListener((observable, from, to) -> this.update());
 		this.symbolicCheckingStatusProperty().addListener((observable, from, to) -> this.update());
-		this.symbolicAnimationStatusProperty().addListener((observable, from, to) -> this.update());
 		this.modelcheckingStatusProperty().addListener((observable, from, to) -> this.update());
 		// this.updating doesn't have a listener; instead each individual expression has a listener added in addUpdatingExpression.
 	}
@@ -130,18 +127,6 @@ public class StatusBar extends HBox {
 		this.symbolicCheckingStatusProperty().set(symbolicCheckingStatus);
 	}
 
-	public ObjectProperty<StatusBar.CheckingStatus> symbolicAnimationStatusProperty() {
-		return this.symbolicAnimationStatus;
-	}
-
-	public StatusBar.CheckingStatus getSymbolicAnimationStatus() {
-		return this.symbolicAnimationStatusProperty().get();
-	}
-
-	public void setSymbolicAnimationStatus(final StatusBar.CheckingStatus symbolicAnimationStatus) {
-		this.symbolicAnimationStatusProperty().set(symbolicAnimationStatus);
-	}
-	
 	public ObjectProperty<StatusBar.CheckingStatus> modelcheckingStatusProperty() {
 		return this.modelcheckingStatus;
 	}
@@ -197,10 +182,6 @@ public class StatusBar extends HBox {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.symbolic.checking.error"));
 		}
 
-		if (this.getSymbolicAnimationStatus() == StatusBar.CheckingStatus.ERROR) {
-			errorMessages.add(resourceBundle.getString("statusbar.errors.symbolic.animation.error"));
-		}
-
 		if (this.getModelcheckingStatus() == StatusBar.CheckingStatus.ERROR) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
 		}
@@ -211,7 +192,6 @@ public class StatusBar extends HBox {
 		setModelcheckingStatus(CheckingStatus.SUCCESSFUL);
 		setLtlStatus(CheckingStatus.SUCCESSFUL);
 		setSymbolicCheckingStatus(CheckingStatus.SUCCESSFUL);
-		setSymbolicAnimationStatus(CheckingStatus.SUCCESSFUL);
 		setLoadingStatus(LoadingStatus.NOT_LOADING);
 	}
 	

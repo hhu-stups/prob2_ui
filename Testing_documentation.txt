@@ -203,6 +203,7 @@ Auch in der .jar Version testen!
 -Preferences/General/Select Location
 -Project View/Open
 -Project View/New Project
+-Graph Visualisierung - als SVG speichern
 
 
 
@@ -465,6 +466,14 @@ Cursor?
 
 14. Hilfe Button -> funktioniert; Dokumentation ist allerdings leer
 
+15. Ändern der Präferenzen 
+
+Erwartetes Ergebnis: Präferenzen werden geändert und gespeichert; die Änderungen sind sofort in der Graphvisualisierung sichtbar
+
+Tatsächliches Ergebnis: Präferenzen werden geändert und gespeichert; die Änderungen sind sofort in der Graphvisualisierung sichtbar
+
+16. Speichern als SVG -> funktioniert
+
 
 Bemerkung: Renderingfehler in der HTML View
 
@@ -558,6 +567,15 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 
 11. Hilfe Button -> funktioniert
 
+12. Ändern der Präferenzen 
+
+Erwartetes Ergebnis: Präferenzen werden geändert und gespeichert; die Änderungen sind sofort in der Tabellenvisualisierung sichtbar
+
+Tatsächliches Ergebnis: Präferenzen werden geändert und gespeichert; die Änderungen sind sofort in der Tabellenvisualisierung sichtbar
+
+
+13. Tabelle als CSV speichern -> funktioniert
+
 
 
 18. BEditor
@@ -570,8 +588,26 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 6. Delete -> funktioniert
 7. Select all -> funktioniert
 8. Save Machine File -> funktioniert
-9. Highlighting -> funktioniert
-10. Help Button -> funktioniert
+9. Show in external editor -> funktioniert
+10. Highlighting -> funktioniert
+
+
+11. Maschineninklusion
+
+Erwartetes Ergebnis: für eine Maschine mit inkludierten und verfeinerten Maschinen werden ebenfalls die inkludierten und verfeinerten Maschinen angezeigt. Diese können ausgewählt und bearbeitet werden
+
+Tatsächliches Ergebnis: für eine Maschine mit inkludierten und verfeinerten Maschinen werden ebenfalls die inkludierten und verfeinerten Maschinen angezeigt. Diese können ausgewählt und bearbeitet werden
+
+12. FileWatcher
+
+Erwartetes Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen mit einem externen Editor wird beim Speichern der Stand der Maschine im B Editor aktualisiert
+
+Tatsächliches Ergebnis: beim Bearbeiten einer im B Editor geöffneten Maschinen mit einem externen Editor wird beim Speichern der Stand der Maschine im B Editor aktualisiert
+
+
+13. Help Button -> funktioniert
+
+
 
 
 
@@ -588,19 +624,23 @@ Tatsächliches Ergebnis: Bei Enter wird die Formel dargestellt und kein Zeilenum
 
 3. Edit machine file in external editor -> funktioniert
 
-4. Start animation -> funktioniert
+4. Show internal representation -> funktioniert
 
-5. Edit machine configuration -> funktioniert
+5. Start animation -> funktioniert
 
-6. Show machine description -> funktioniert
+6. Edit machine configuration -> funktioniert
 
-7. Remove machine -> funktioniert
+7. Show machine description -> funktioniert
 
-8. Add machine -> funktioniert
+8. Remove machine -> funktioniert
 
-9. Help Buttons -> funktionieren
+9. Add existing machine -> funktioniert
 
-10. Status
+10. Create new machine -> funktioniert
+
+11. Help Buttons -> funktionieren
+
+12. Status
 
 Erwartetes Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Success oder Failed angezeigt, beim Neuladen der Maschine wird es zurückgesetzt. Ebenso wird die Anzeige verändert wenn die zu auswertenden Formel in der Verifications View geändert wurden
 
@@ -608,15 +648,15 @@ Tatsächliches Ergebnis: Nach dem Prüfen einer Formel wird dementsprechend Succ
 
 
 
-11. Add Preference -> funktioniert
+13. Add Preference -> funktioniert
 
-12. Edit Preference -> funktioniert
+14. Edit Preference -> funktioniert
 
-13. Remove Preference -> funktioniert
+15. Remove Preference -> funktioniert
 
-14. Edit Project -> funktioniert
+16. Edit Project -> funktioniert
 
-15. Edit Description -> funktioniert
+17. Edit Description -> funktioniert
 
 
 
@@ -705,11 +745,11 @@ Tatsächliches Ergebnis: History Chart wird zurückgesetzt -> Liste der Formel w
 
 2. HelpButton -> funktioniert
 
-3. Suchfunktion wird mit Lowercase und Uppercase getestet (sowohl mit Enter im Suchfeld als auch mit dem Suchbutton)
+3. Suchfunktion wird mit Lowercase und Uppercase getestet
 
-Erwartetes Ergebnis: Entsprechende Einträge werden angezeigt
+Erwartetes Ergebnis: Entsprechende Einträge werden bereits beim Tippen angezeigt
 
-Tatsächliches Ergebnis: Entsprechende Einträge werden angezeigt
+Tatsächliches Ergebnis: Entsprechende Einträge werden bereits beim Tippen angezeigt
 
 4. Copy u.a. mit CTRL+V -> funktioniert
 
@@ -736,11 +776,16 @@ Tatsächliches Ergebnis: Formel wird bei Expression Table in der Tabellenvisuali
 
 
 
+8. SETUP Constants nicht möglich
+
+
+Erwartetes Ergebnis: Unsat Core Button wird angezeigt; beim Klicken wird der Unsat Core in der StateView gehighlightet und in einem separaten Fenster angezeigt
+
+Tatsächliches Ergebnis: Unsat Core Button wird angezeigt; beim Klicken wird der Unsat Core in der StateView gehighlightet und in einem separaten Fenster angezeigt
+
+
+
 25. State Visualization -> funktioniert
-
-Bemerkungen:
-
-Besser Lazy auswerten?
 
 
 
@@ -786,13 +831,27 @@ Tatsächliches Ergebnis: Nach dem Nachspielen kommt eine Fehlermeldung; Show Err
 
 5. Trace entfernen -> funktioniert
 
+6. Open Trace in External Editor -> funktioniert
 
-6. Hilfebutton -> funktioniert
+
+7. Hilfebutton -> funktioniert
 
 
-7. Show Error -> funktioniert
+8. Show Error -> funktioniert
 
-8. Hinzufügen von bereits vorhandenen Traces
+
+
+9. Show Trace Description
+
+Erwartetes Ergebnis: Textfeld öffnet sich, wo man die Beschreibung bearbeiten und speichern kann
+
+Tatsächliches Ergebnis: Textfeld öffnet sich, wo man die Beschreibung bearbeiten und speichern kann
+
+
+
+
+
+10. Hinzufügen von bereits vorhandenen Traces
 
 Erwartetes Ergebnis: Trace wird nicht hinzugefügt und der bereits vorhandene Trace abgespielt
 
@@ -800,19 +859,27 @@ Tatsächliches Ergebnis: Trace wird nicht hinzugefügt und der bereits vorhanden
 
 
 
-9. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
+11. Trace ohne Syntaxfehler laden und überprüfen -> funktioniert
 
-10. Trace mit Syntaxfehler laden -> funktioniert
-
-
-11. Deaktivierung eines Traces -> funktioniert
+12. Trace mit Syntaxfehler laden -> funktioniert
 
 
-12. Überprüfen mit deaktivierten Traces
+13. Deaktivierung eines Traces -> funktioniert
 
-Erwartetes Ergebnis: Deaktivierte Traces werden nicht überprüft
+14. Überprüfen mit deaktivierten Traces
 
-Tatsächliches Ergebnis: Deaktivierte Traces werden nicht überprüft
+Erwartetes Ergebnis: Deaktivierte Traces werden nicht nachgespielt
+
+Tatsächliches Ergebnis: Deaktivierte Traces werden nicht nachgespielt
+
+
+15. Reload -> funktioniert
+
+16. Trace laden
+
+Erwartetes Ergebnis: Trace wird von der Datei geladen und nachgespielt
+
+Tatsächliches Ergebnis: Trace wird von der Datei geladen und nachgespielt
 
 
 
@@ -872,11 +939,11 @@ Erwartetes Ergebnis: MenuItem ist nur verfügbar, wenn ein Fehler aufgetreten is
 Tatsächliches Ergebnis: MenuItem ist nur verfügbar, wenn ein Fehler aufgetreten ist; Fehlerzustand wird angezeigt
 
 
-8. Search for new errors
+8. Continue Model Checking
 
-Erwartetes Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt
+Erwartetes Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt, falls vorhanden. Ansonsten war der Check erfolgreich. Es werden Informationen zu allen Checks beibehalten.
 
-Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt
+Tatsächliches Ergebnis: Ein anderer Fehlerzustand zum ausgewählten Check wird angezeigt, falls vorhanden. Ansonsten war der Check erfolgreich. Es werden Informationen zu allen Checks beibehalten.
 
 
 
@@ -1004,19 +1071,23 @@ Tatsächliches Ergebnis: Meldung erscheint, dass die Formel bereits vorhanden is
 
 
 
-14. Fehlernachricht anzeigen bei LTL Formel -> funktioniert
+14. Fehlernachricht anzeigen bei LTL Formel über MenuItem -> funktioniert
 
-15. Fehlernachricht anzeigen bei LTL Pattern -> funktioniert
+15. Fehlernachricht anzeigen bei LTL Pattern über MenuItem -> funktioniert
 
-16. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
+16. Fehlernachricht anzeigen beim Editieren einer LTL Formel -> funktioniert
 
-17. LTL Formel löschen -> funktioniert
+17. Fehlernachricht anzeigen beim Editieren eines LTL Patterns -> funktioniert
 
-18. LTL Pattern löschen -> funktioniert
+18. Gegenbeispiel anzeigen bei LTL Formel -> funktioniert
+
+19. LTL Formel löschen -> funktioniert
+
+20. LTL Pattern löschen -> funktioniert
 
 
 
-19. Alle Formel ausführen
+21. Alle Formel ausführen
 
 Erwartetes Ergebnis: Alle Formeln werden überprüft und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
 
@@ -1024,28 +1095,28 @@ Tatsächliches Ergebnis: Alle Formeln werden überprüft und dementsprechend die
 
 
 
-20. Checking abbrechen -> funktioniert
+22. Checking abbrechen -> funktioniert
 
-21. Hilfebutton -> funktioniert
+23. Hilfebutton -> funktioniert
 
-22. Aufruf von gültigen Patterns innerhalb Patterns -> funktioniert
-
-
-23. Aufruf von ungültigen Patterns innerhalb Patterns -> funktioniert
+24. Aufruf von gültigen Patterns innerhalb Patterns -> funktioniert
 
 
-24. Aufruf von gültigen Patterns innerhalb Formeln -> funktioniert
+25. Aufruf von ungültigen Patterns innerhalb Patterns -> funktioniert
+
+
+26. Aufruf von gültigen Patterns innerhalb Formeln -> funktioniert
 
 
 
-25. Aufruf von ungültigen Patterns innerhalb Formeln
+27. Aufruf von ungültigen Patterns innerhalb Formeln
 
 Erwartetes Ergebnis: Fehlermeldung von angezeigt
 
 Tatsächliches Ergebnis: Fehlermeldung von angezeigt
 
 
-26. Deaktivierung einer Formel
+28. Deaktivierung einer Formel
 
 Erwartetes Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Status und die Status Bar für die Fehler sich an
 
@@ -1053,11 +1124,39 @@ Tatsächliches Ergebnis: Bei Deaktivierung der Formel passt sich der Machine Sta
 
 
 
-27. Überprüfen mit deaktivierten Formel
+29. Überprüfen mit deaktivierten Formel
 
 Erwartetes Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
+
+
+30. Anzeigen von eingebauten Pattern -> funktioniert
+
+31. Verwendung von eingebauten Patterns -> funktioniert
+
+
+32. Speichern von LTL Patterns und LTL Formel
+
+Erwartetes Ergebnis: Beim Speichern werden die LTL Patterns und LTL Formel in eine Datei mit der Endung .ltl gespeichert
+
+Tatsächliches Ergebnis: Beim Speichern werden die LTL Patterns und LTL Formel in eine Datei mit der Endung .ltl gespeichert
+
+
+
+
+33. Laden von LTL Patterns und LTL Formel
+
+Erwartetes Ergebnis: Beim Laden werden die LTL Patterns und Formel in die LTL View geladen
+
+Tatsächliches Ergebnis: Beim Laden werden die LTL Patterns und Formel in die LTL View geladen
+
+
+
+
+Bemerkung: Beim Hinzufügen von mehreren Patterns, wobei einige Patterns fehlerhaft sind, können die korrekten Patterns dennoch verwendet werden. Der Name eines Pattern Items setzt sich aus der Signatur der einzelnen Patterns durch Newlines getrennt zusammen
+
+
 
 
 
@@ -1111,14 +1210,14 @@ Tatsächliches Ergebnis: Formel wird überprüft und ein Gegenbeispiel gefunden;
 
 
 
-8. Hinzufügen einer noch Formel -> funktioniert
+8. Hinzufügen einer Formel -> funktioniert
 
 
 9. Hinzufügen und überprüfen einer Formel -> funktioniert
 
 
 
-10. Überprüfen aller Strategien (Sequence, Invariant, Deadlock, Find deadlock, Find redundant invariants, check refinement, check assertions, find valid state, check all operations, IC3, TINDUCTION, KINDUCTION, BMC) -> funktioniert
+10. Überprüfen aller Strategien (Invariant, Deadlock, Find redundant invariants, check refinement, check assertions, check all operations, IC3, TINDUCTION, KINDUCTION, BMC) -> funktioniert
 
 
 
@@ -1133,9 +1232,9 @@ Tatsächliches ergebnis: Es wird keine zusätzliche Formel hinzugefügt und der 
 
 12. Überprüfen bereits vorhandener Formeln über Hinzufügen-Button
 
-Erwartetes Ergebnis: Vorhandene Formel wird nochmal überprüft
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass Formel bereits vorhanden ist
 
-Tatsächliches Ergebnis: Vorhandene Formel wird nochmal überprüft
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass Formel bereits vorhanden ist
 
 
 13. Ändern zu einer noch nicht vorhandenen Formel -> funktioniert
@@ -1184,7 +1283,273 @@ Tatsächliches Ergebnis: Deaktivierte Formel werden nicht überprüft
 
 
 
-31. Groovy Konsole
+31. Symbolic Animation
+
+1. Animieren einer erfolgreichen Konfiguration -> funktioniert
+
+2. Animieren einer Konfiguration mit Syntaxfehler
+
+Erwartetes Ergebnis: Animieren nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
+
+Tatsächliches Ergebnis: Animieren nicht erfolgreich, Syntaxfehler wird bei der Fehlernachricht gesetzt
+
+
+3. Animieren einer Konfiguration ohne Formel -> funktioniert
+
+
+
+4. Alle Konfigurationen animieren
+
+Erwartetes Ergebnis: Alle Formeln werden animiert und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+
+Tatsächliches Ergebnis: Alle Formeln werden animiert und dementsprechend die Ergebnisse angezeigt; der Trace wird nicht gewechselt
+
+
+
+
+5. Abspielen einer Konfiguration mit Formel mit Trace
+
+Erwartetes Ergebnis: Konfiguration wird animiert und ein Trace gefunden; es wird direkt zum Gegenbeispiel gewechselt
+
+Tatsächliches Ergebnis: Konfiguration wird animiert und ein Trace gefunden; es wird direkt zum Gegenbeispiel gewechselt
+
+
+
+6. Abspielen einer Konfiguration ohne Formel mit Trace
+
+Erwartetes Ergebnis: Konfiguration wird animiert und ein Trace gefunden; es wird direkt zum Gegenbeispiel gewechselt
+
+Tatsächliches Ergebnis: Konfiguration wird animiert und ein Trace gefunden; es wird direkt zum Gegenbeispiel gewechselt
+
+
+
+
+7. Hilfebutton -> funktioniert
+
+
+
+8. Hinzufügen einer Konfiguration -> funktioniert
+
+
+9. Hinzufügen und animieren einer Konfiguration -> funktioniert
+
+
+
+10. Überprüfen aller Strategien (Sequence, Find valid state) -> funktioniert
+
+
+
+11. Hinzufügen bereits vorhandener Konfiguration
+
+Erwartetes Ergebnis: Es wird keine zusätzliche Konfiguration hinzugefügt und der Nutzer benachrichtigt
+
+Tatsächliches ergebnis: Es wird keine zusätzliche Konfiguration hinzugefügt und der Nutzer benachrichtigt
+
+
+
+
+12. Animieren bereits vorhandener Konfiguration über Hinzufügen-Button
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass Konfiguration bereits vorhanden ist
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass Konfiguration bereits vorhanden ist
+
+
+13. Ändern zu einer noch nicht vorhandenen Konfiguration -> funktioniert
+
+
+14. Ändern und animieren zu einer noch nicht vorhandenen Konfiguration -> funktioniert
+
+
+
+15. Ändern zu einer bereits vorhandenen Konfiguration
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die Konfiguration bereits vorhanden ist
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Konfiguration bereits vorhanden ist
+
+
+
+
+16. Ändern und überprüfen einer bereits vorhandenen Konfiguration
+
+Erwartetes Ergebnis: Nutzer wird benachrichtigt, dass die Konfiguration bereits vorhanden ist
+
+Tatsächliches Ergebnis: Nutzer wird benachrichtigt, dass die Konfiguration bereits vorhanden ist
+
+
+
+
+17. Abbrechen der Animation -> funktioniert
+
+
+18. Deaktivierung einer Konfiguration -> funktioniert
+
+
+19. Animation mit deaktivierter Konfiguration
+
+Erwartetes Ergebnis: Deaktivierte Konfigurationen werden nicht animiert
+
+Tatsächliches Ergebnis: Deaktivierte Konfigurationen werden nicht animiert
+
+
+Bemerkung: Symbolic Animation beeinflusst die Status Bar nicht
+
+
+
+32. Test Case Generation
+
+1. Hinzufügen von MCDC Testing mit korrekter Angabe von Level und Search Depth
+
+Erwartetes Ergebnis: Entsprechender Eintrag wird hinzugefügt
+
+Tatsächliches Ergebnis: Entsprechender Eintrag wird hinzugefügt
+
+
+
+2. Hinzufügen von MCDC Testing mit falscher Angabe von Level und Search Depth
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+
+
+3. Hinzufügen und generieren von MCDC Testing mit korrekter Angabe von Level und Search Depth
+
+Erwartetes Ergebnis: Entsprechender Eintrag wird hinzugefügt und für den entsprechenden Eintrag werden Testfälle generiert
+
+Tatsächliches Ergebnis: Entsprechender Eintrag wird hinzugefügt und für den entsprechenden Eintrag werden Testfälle generiert
+
+
+
+
+4. Hinzufügen und generieren von MCDC Testing mit falscher Angabe von Level und Search Depth
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+
+
+5. Hinzufügen von Covered Operations mit korrekter Angabe von Operations und Search Depth
+
+Erwartetes Ergebnis: Entsprechender Eintrag wird hinzugefügt
+
+Tatsächliches Ergebnis: Entsprechender Eintrag wird hinzugefügt
+
+
+
+
+6. Hinzufügen von Covered Operations mit falscher Angabe von Operations und Search Depth
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+
+
+7. Hinzufügen und generieren von Covered Operations mit korrekter Angabe von Operations und Search Depth
+
+Erwartetes Ergebnis: Entsprechender Eintrag wird hinzugefügt und für den entsprechenden Eintrag werden Testfälle generiert
+
+Tatsächliches Ergebnis: Entsprechender Eintrag wird hinzugefügt und für den entsprechenden Eintrag werden Testfälle generiert
+
+
+
+8. Hinzufügen und generieren von Covered Operations mit falscher Angabe von Operations und Search Depth
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, der Nutzer wird benachrichtigt
+
+
+
+9. Generieren einer MCDC Konfiguration -> funktioniert
+
+10. Generieren einer Covered Operations Konfiguration -> funktioniert
+
+11. Aus allen Konfigurationen generieren -> funktioniert
+
+
+
+12. Generieren abbrechen -> funktioniert
+
+13. Hilfebutton -> funktioniert
+
+
+
+14. Ändern einer Konfiguration zu einer noch nicht vorhandenen Konfiguration -> funktioniert
+
+
+15. Ändern einer Konfiguration zu einer vorhandenen Konfiguration
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, Nutzer wird benachrichtigt
+
+
+16. Ändern und generieren einer Konfiguration zu einer noch nicht vorhandenen Konfiguration -> funktioniert
+
+
+
+17. Ändern und generieren einer Konfiguration zu einer vorhandenen Konfiguration
+
+Erwartetes Ergebnis: Eintrag wird nicht hinzugefügt, Nutzer wird benachrichtigt
+
+Tatsächliches Ergebnis: Eintrag wird nicht hinzugefügt, Nutzer wird benachrichtigt
+
+
+
+18. Konfiguration löschen -> funktioniert
+
+19. Show Details -> funktioniert
+
+
+
+20. Doppelklick eines Traces in Show Details
+
+Erwartetes Ergebnis: Aktueller Trace wird zu dem angeklickten Trace gewechselt
+
+Tatsächliches Ergebnis: Aktueller Trace wird zu dem angeklickten Trace gewechselt
+
+Bemerkung: Es können auch Traces ausgewählt werden, die nicht vollständig nachgespielt werden können. Diese werden dann bis zu dem Punkt nachgespielt, wo es möglich ist
+
+
+
+21. Fehlernachricht anzeigen -> funktioniert
+
+22. Zu eine der generierten Pfade wechseln -> funktioniert
+
+
+
+
+23. Für Trace Replay speichern
+
+Erwartetes Ergebnis: es wird ein Ordner mit dem angegebenen Namen für alle Traces angelegt, worin die generierten Traces gespeichert werden; die Traces werden außerdem in Trace Replay hinzugefügt
+
+Tatsächliches Ergebnis: es wird ein Ordner mit dem angegebenen Namen für alle Traces angelegt, worin die generierten Traces gespeichert werden; die Traces werden außerdem in Trace Replay hinzugefügt
+
+
+
+
+24. Deaktivierung von Konfigurationen -> funktioniert
+
+
+
+25. Generieren mit deaktivierten Konfigurationen
+
+Erwartetes Ergebnis: Es werden nur Traces für die aktivierten Konfigurationen generiert
+
+Tatsächliches Ergebnis: Es werden nur Traces für die aktivierten Konfigurationen generiert
+
+
+
+
+
+
+
+33. Groovy Konsole
 
 1. Inspect groovy objects
 
@@ -1206,7 +1571,7 @@ Tatsächliches Ergebnis: Es wird die gesamte Auswahl hinter dem Punkt ergänzt
 
 
 
-3. Code Completion mittendrin im Vorschlag
+3. Code Completion mitten im Vorschlag
 
 Erwartetes Ergebnis: Der rechte Teilstring wird an den linken bereits eingegebenen Teilstring hinzugefügt, der Vorschlag ist von dem linken Teilstring abhängig
 
@@ -1311,7 +1676,7 @@ Bemerkung:
 
 
 
-32. B Konsole
+34. B Konsole
 
 
 1. Ausführung von Befehlen -> funktioniert
@@ -1382,7 +1747,7 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 
 
 
-33. Plugin Mechanismus
+35. Plugin Mechanismus
 -Momentan kann man mit Plugins Features ohne Einschränkungen erstellen
 -Plugins müssen geändert werden, wenn sich die API in der ProB2-UI ändert -> schwierig ohne Release?
 -Exceptions in der ProB2-UI können aufgrund fehlerhafter Implementierung von Plugins auftreten
@@ -1392,7 +1757,7 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 
 
 
-34. UI Persistenz
+36. UI Persistenz
 
 1. Geöffnete Stages beim Schließen öffnen sich beim Starten -> funktioniert
 
@@ -1431,3 +1796,57 @@ Tatsächliches Ergebnis: Sprache der aktuellen Maschine wird korrekt angezeigt (
 18. Selbstgeschriebenes Layout mit Detachen -> funktioniert
 
 
+
+
+
+37. Prolog Output -> Es werden nicht alle Kommandos von Prolog angezeigt? (BEHEBEN?)
+
+
+
+38. Magic Layout
+
+1. New Edge Group -> funktioniert
+
+2. New Node Group -> funktioniert
+
+
+
+3. Save Settings
+
+Erwartetes Ergebnis: Einstellung mit Edge Group und Node Group werden in eine .prob2magic Datei geschrieben
+
+Tatsächliches Ergebnis: Einstellung mit Edge Group und Node Group werden in eine .prob2magic Datei geschrieben
+
+
+
+4. Load Settings 
+
+Erwartetes Ergebnis: Einstellung wird von .prob2magic Datei geladen und in der View dargestellt
+
+Tatsächliches Ergebnis: Einstellung wird von .prob2magic Datei geladen und in der View dargestellt
+
+
+
+5. Save Graph as Image
+
+Erwartetes Ergebnis: Es wird das zugehörige Bild als PNG in dem Ordner magic_graph in dem Projektordner gespeichert und geöffnet
+
+Tatsächliches Ergebnis: Es wird das zugehörige Bild als PNG in dem Ordner magic_graph in dem Projektordner gespeichert und geöffnet
+
+
+6. Update -> funktioniert
+
+7. Layout -> funktioniert
+
+8. Reinzoomen -> funktioniert
+
+9. Rauszoomen -> funktioniert
+
+10. Hilfebutton -> funktioniert
+
+11. Einstellung des Styles für Nodes -> funktioniert
+
+12. Einstellung des Styles für Edges -> funktioniert
+
+
+Bemerkung: Die MagicLayoutView updatet sich, falls sich der aktuelle Zustand wechselt

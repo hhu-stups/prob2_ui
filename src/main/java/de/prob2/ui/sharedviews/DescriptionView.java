@@ -44,7 +44,7 @@ public class DescriptionView extends AnchorPane {
 		titelLabel.setText(String.format(bundle.getString("project.machines.machineDescriptionView.title"), describable.getName()));
 		String description = describable.getDescription();
 		if(description == null) {
-			Platform.runLater(() -> closeDescriptionView());
+			Platform.runLater(this::closeDescriptionView);
 			return;
 		}
 		descriptionText.setText(description.isEmpty()? bundle.getString("project.machines.machineDescriptionView.placeholder") : describable.getDescription());

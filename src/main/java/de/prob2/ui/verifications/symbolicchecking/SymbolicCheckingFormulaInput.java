@@ -37,6 +37,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
 	}
 
+	@Override
 	protected boolean updateFormula(SymbolicCheckingFormulaItem item, SymbolicView<SymbolicCheckingFormulaItem> view, SymbolicChoosingStage<SymbolicCheckingFormulaItem> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractFormula(choosingStage);
@@ -52,11 +53,6 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 			return true;
 		}
 		return false;
-	}
-	
-	protected void setCheckListeners() {
-		btAdd.setOnAction(e -> addFormula(false));
-		btCheck.setOnAction(e -> checkFormula());
 	}
 
 	@Override

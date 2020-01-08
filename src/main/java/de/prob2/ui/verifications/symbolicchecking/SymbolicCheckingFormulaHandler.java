@@ -21,7 +21,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
-import de.prob2.ui.internal.AbstractResultHandler;
 
 @Singleton
 public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<SymbolicCheckingFormulaItem> {
@@ -29,8 +28,6 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	private final CurrentTrace currentTrace;
 	
 	private final SymbolicFormulaChecker symbolicChecker;
-	
-	private final SymbolicCheckingResultHandler resultHandler;
 	
 	private final CurrentProject currentProject;
 	
@@ -42,7 +39,6 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.symbolicChecker = symbolicChecker;
-		this.resultHandler = resultHandler;
 	}
 	
 	public void addFormula(String name, String code, SymbolicExecutionType type, boolean checking) {
@@ -55,8 +51,6 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		if (currentMachine != null) {
 			if(!currentMachine.getSymbolicCheckingFormulas().contains(formula)) {
 				currentMachine.addSymbolicCheckingFormula(formula);
-			} else if(!checking) {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 			}
 		}
 	}

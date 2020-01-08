@@ -149,7 +149,7 @@ public final class StatesView extends StackPane {
 			if (to != null) {
 				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
 				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) || 
-						operations.stream().map(trans -> trans.getName()).collect(Collectors.toList()).contains("$partial_setup_constants")) {
+						operations.stream().map(Transition::getName).collect(Collectors.toList()).contains("$partial_setup_constants")) {
 					showUnsatCoreButton = true;
 				}
 			}

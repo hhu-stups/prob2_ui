@@ -44,9 +44,6 @@
 						<TitledPane text="%common.views.project" id="projectTP" fx:id="projectTP">
 							<ProjectView fx:id="projectView"/>
 						</TitledPane>
-						<TitledPane text="%common.views.prologoutput" id="prologTP" fx:id="prologTP">
-							<PrologOutput fx:id="prologOutput"/>
-						</TitledPane>
 					</panes>
 				</Accordion>
 				<Accordion fx:id="rightAccordion2" expandedPane="$historyTP">

@@ -47,12 +47,6 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 		}
 		return false;
 	}
-	
-	protected void setCheckListeners() {
-		btAdd.setOnAction(e -> addFormula(false));
-		btCheck.setOnAction(e -> checkFormula());
-	}
-
 
 	@Override
 	public void checkFormula() {

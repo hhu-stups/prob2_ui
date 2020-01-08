@@ -45,4 +45,12 @@ public class TestCaseGenerationSettingsHandler {
 		return additionalInformation;
 	}
 	
+	public String extractDepth(TestCaseGenerationChoosingStage choosingStage, MCDCInputView mcdcInputView, OperationCoverageInputView operationCoverageInputView) {
+		if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
+			return mcdcInputView.getDepth();
+		} else {
+			return operationCoverageInputView.getDepth();
+		}
+	}
+	
 }

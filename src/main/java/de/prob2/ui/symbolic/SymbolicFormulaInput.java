@@ -84,7 +84,10 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 		predicateBuilderView.setItems(items);
 	}
 	
-	protected abstract void setCheckListeners();
+	protected void setCheckListeners() {
+		btAdd.setOnAction(e -> addFormula(false));
+		btCheck.setOnAction(e -> checkFormula());
+	}
 	
 	public void changeGUIType(final SymbolicGUIType guiType) {
 		this.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView);
@@ -160,7 +163,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 			stage.close();
 		});
 		
-		btCheck.setOnAction(e-> {
+		btCheck.setOnAction(e -> {
 			if(updateFormula(item, view, stage)) {
 				checkFormula();
 			} else {
