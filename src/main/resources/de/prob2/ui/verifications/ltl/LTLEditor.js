@@ -18,6 +18,7 @@ LtlEditor = function() {
 				autoCloseBrackets: true,
 				extraKeys: {"Ctrl-Space": "autocomplete"},
 				gutters: ["CodeMirror-linenumbers", "markers"],
+				scrollbarStyle: "simple",
 			};
 			extern.cm = CodeMirror.fromTextArea(codeElement, cmSettings);
 			extern.showPatternMarkers = options.showPatternMarkers;

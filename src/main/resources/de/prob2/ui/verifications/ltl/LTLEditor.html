@@ -3,6 +3,7 @@
 	<head>
 		<!-- CSS -->
 		<link rel="stylesheet" href="../../codemirror/codemirror.css"/>
+		<link rel="stylesheet" href="../../codemirror/simplescrollbars.css"/>
 		<link rel="stylesheet" href="editor.css"/>
 		<link rel="stylesheet" href="ltl.css"/>
 		
@@ -12,6 +13,7 @@
 		<script type="text/javascript" src="ltl.js"></script>
 		<script type="text/javascript" src="../../codemirror/matchbrackets.js"></script>
 		<script type="text/javascript" src="../../codemirror/closebrackets.js"></script>
+		<script type="text/javascript" src="../../codemirror/simplescrollbars.js"></script>
 		<script type="text/javascript" src="ltl-hint.js"></script>
 		<script type="text/javascript" src="LTLEditor.js"></script>
 	</head>
@@ -28,6 +30,7 @@
 				matchBrackets: true,
 				mode: "text/ltl",
 				gutters: ["CodeMirror-linenumbers", "markers"],
+				scrollbarStyle: "simple",
 			});
 			LtlEditor.registerChangeHandlers();
 			LtlEditor.parseInput();
