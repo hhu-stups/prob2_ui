@@ -25,6 +25,7 @@ import de.prob.scripting.StateSpaceProvider;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.error.WarningAlert;
+import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 
@@ -125,6 +126,8 @@ public class ProB2Module extends AbstractModule {
 		bind(StateSpaceProvider.class).to(CustomStateSpaceProvider.class);
 		
 		bind(MagicGraphI.class).to(MagicGraphFX.class);
+
+		bind(PrologOutput.class);
 	}
 
 	@Provides
