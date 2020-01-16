@@ -1,13 +1,20 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
-import de.prob.animator.command.EvaluationCommand;
-import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;
+import de.prob.check.IModelCheckingResult;
+import de.prob.check.LTLChecker;
 import de.prob.check.LTLError;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
@@ -26,6 +33,7 @@ import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLView;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -33,11 +41,6 @@ import javafx.collections.FXCollections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -154,10 +157,8 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 	}
 	
 	private Object getResult(LtlParser parser, List<LTLMarker> errorMarkers, LTLFormulaItem item) {
-		State stateid = currentTrace.getCurrentState();
 		LTLParseListener parseListener = parseFormula(parser);
 		errorMarkers.addAll(parseListener.getErrorMarkers());
-		EvaluationCommand lcc = null;
 		LTL formula = null;
 		try {
 			if(!parseListener.getErrorMarkers().isEmpty()) {
@@ -165,15 +166,15 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			} else {
 				formula = new LTL(item.getCode(), new ClassicalBParser(), parser);
 			}
-			lcc = formula.getCommand(stateid);
-			currentTrace.getStateSpace().execute(lcc);
-			AbstractEvalResult res = lcc.getValue();
+			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
+			final IModelCheckingResult res = checker.call();
 			if(res instanceof LTLError) {
 				//TODO
 				//LTLError error = (LTLError) res;
 				//errorMarkers.add(new LTLMarker("error", res.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), error.getMessage()));
 			}
 			injector.getInstance(StatsView.class).update(currentTrace.get());
+			return res;
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
 			ProBError parseError = error;
@@ -191,7 +192,6 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			errorMarkers.add(new LTLMarker("error", parseError.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), parseError.getMessage()));
 			return error;
 		}
-		return lcc;
 	}
 	
 	private LTLParseListener parseFormula(LtlParser parser) {

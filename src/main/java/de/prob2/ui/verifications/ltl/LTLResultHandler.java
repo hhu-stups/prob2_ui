@@ -10,7 +10,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.be4.ltl.core.parser.LtlParseException;
-import de.prob.animator.command.EvaluationCommand;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
@@ -41,14 +40,6 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 	}
 	
 	public Checked handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, State stateid) {
-		if(result instanceof EvaluationCommand)  {
-			if (((EvaluationCommand) result).isInterrupted()) {
-				item.setChecked(Checked.INTERRUPTED);
-				return Checked.INTERRUPTED;
-			} else {
-				result = ((EvaluationCommand) result).getValue();
-			}
-		}
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			item.setChecked(Checked.SUCCESS);
