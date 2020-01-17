@@ -176,11 +176,12 @@ wrapper {
 
 final helpScript = "./help.sh"
 final helpDir = file("src/main/resources/help")
-task createHelp(type: Exec) {
+task createHelp(//type: Exec
+) {
 	inputs.file(helpScript)
 	inputs.dir(helpDir)
 	outputs.dir(helpDir)
-	commandLine(helpScript)
+	//commandLine(helpScript)
 }
 
 task cleanHelp(type: Delete) {
