@@ -387,6 +387,9 @@
 	-fx-background-color: transparent;
 	-fx-shape: " ";
 }
+.scroll-pane {
+	-fx-padding: 0.0;
+}
 .scroll-pane > .corner {
 	-fx-background-color: transparent;
 	-fx-background-insets: 0.0 1.0 1.0 0.0;
@@ -438,6 +441,9 @@
 /************************************************************************************
  * SplitView																		  *
  ************************************************************************************/
+.split-pane {
+	-fx-padding: 0.0;
+}
 .split-pane > .split-pane-divider {
 	-fx-padding: 0.0 0.15em 0.0 0.2em;
 }
