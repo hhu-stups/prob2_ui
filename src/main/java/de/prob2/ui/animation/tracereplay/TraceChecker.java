@@ -35,8 +35,6 @@ import javafx.collections.FXCollections;
 @Singleton
 public class TraceChecker {
 
-	private static final String TRACE_REPLAY_ALERT_HEADER = "animation.tracereplay.alerts.traceReplayError.header";
-
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
@@ -177,7 +175,7 @@ public class TraceChecker {
 				Platform.runLater(
 						() -> stageManager
 								.makeExceptionAlert(e,
-										TRACE_REPLAY_ALERT_HEADER,
+										"animation.tracereplay.alerts.traceReplayError.header",
 										"animation.tracereplay.traceChecker.alerts.traceReplayError.content")
 								.showAndWait());
 				return false;
