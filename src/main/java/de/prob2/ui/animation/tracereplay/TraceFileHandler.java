@@ -1,22 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.inject.Inject;
-import de.prob.check.tracereplay.PersistentTrace;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
-import de.prob2.ui.internal.AbstractFileHandler;
-import de.prob2.ui.internal.InvalidFileFormatException;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.stage.FileChooser.ExtensionFilter;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,6 +12,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.inject.Inject;
+
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
+import de.prob2.ui.internal.AbstractFileHandler;
+import de.prob2.ui.internal.InvalidFileFormatException;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.slf4j.LoggerFactory;
 
 public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 
@@ -144,8 +147,8 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		}
 		if(traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION,
-					"animation.symbolic.testcasegeneration.notAllTestCasesGenerated.header",
-					"animation.symbolic.testcasegeneration.notAllTestCasesGenerated.content",
+					"animation.testcase.notAllTestCasesGenerated.header",
+					"animation.testcase.notAllTestCasesGenerated.content",
 					NUMBER_MAXIMUM_GENERATED_TRACES).showAndWait();
 		}
 	}

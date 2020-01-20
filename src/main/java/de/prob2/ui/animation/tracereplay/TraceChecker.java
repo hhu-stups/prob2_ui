@@ -176,7 +176,7 @@ public class TraceChecker {
 						() -> stageManager
 								.makeExceptionAlert(e,
 										"animation.tracereplay.alerts.traceReplayError.header",
-										"animation.tracereplay.traceChecker.alerts.traceReplayError.content")
+										"animation.tracereplay.alerts.traceReplayError.content")
 								.showAndWait());
 				return false;
 			}
