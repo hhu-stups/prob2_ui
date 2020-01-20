@@ -1,12 +1,18 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -14,10 +20,6 @@ import javafx.collections.FXCollections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 
 @Singleton
 public class TestCaseGenerator {
@@ -44,7 +46,7 @@ public class TestCaseGenerator {
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator, boolean checkAll) {
-		final TestCaseGenerationItem currentItem = (TestCaseGenerationItem) getItemIfAlreadyExists(item);
+		final TestCaseGenerationItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			Object result;
 			try {
