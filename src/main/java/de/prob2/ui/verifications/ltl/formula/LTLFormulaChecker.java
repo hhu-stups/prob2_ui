@@ -158,8 +158,8 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 	private Object getResult(LtlParser parser, List<LTLMarker> errorMarkers, LTLFormulaItem item) {
 		LTLParseListener parseListener = parseFormula(parser);
 		errorMarkers.addAll(parseListener.getErrorMarkers());
-		LTL formula = null;
 		try {
+			final LTL formula;
 			if(!parseListener.getErrorMarkers().isEmpty()) {
 				formula = new LTL(item.getCode(), new ClassicalBParser());
 			} else {
