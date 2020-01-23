@@ -11,7 +11,6 @@ import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
-import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLChecker;
@@ -177,13 +176,10 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			return res;
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
-			List<ErrorItem.Location> errorLocations = error.getErrors().stream()
-					.flatMap(err -> err.getLocations().stream())
-					.collect(Collectors.toList());
-			errorMarkers.addAll(errorLocations
-				.stream()
+			error.getErrors().stream()
+				.flatMap(err -> err.getLocations().stream())
 				.map(location -> new LTLMarker("error", location.getStartLine(), location.getStartColumn(), location.getEndColumn() - location.getStartColumn(), error.getMessage()))
-				.collect(Collectors.toList()));
+				.collect(Collectors.toCollection(() -> errorMarkers));
 			return error;
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
