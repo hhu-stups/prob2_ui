@@ -8,8 +8,7 @@ import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerator;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
-import de.prob2.ui.verifications.modelchecking.Modelchecker;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 
 import javafx.beans.binding.BooleanExpression;
@@ -27,13 +26,12 @@ public class DisablePropertyController {
 	@Inject
 	public DisablePropertyController(final Injector injector) {
 		this.disableProperty = injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not()
-				.or(injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().not())
 				.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
 				.or(injector.getInstance(TestCaseGenerator.class).currentJobThreadsProperty().emptyProperty().not())
 				.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not()
 				.or(injector.getInstance(OperationsView.class).randomExecutionThreadProperty().isNotNull())
-				.or(injector.getInstance(OperationsView.class).runningProperty()));
+				.or(injector.getInstance(OperationsView.class).runningProperty())
+				.or(injector.getInstance(CurrentTrace.class).animatorBusyProperty());
 	}
 
 	public void addDisableProperty(final BooleanProperty guiDisableProperty) {

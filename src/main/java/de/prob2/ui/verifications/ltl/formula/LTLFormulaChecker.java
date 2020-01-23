@@ -11,7 +11,6 @@ import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
-import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLChecker;
@@ -159,8 +158,8 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 	private Object getResult(LtlParser parser, List<LTLMarker> errorMarkers, LTLFormulaItem item) {
 		LTLParseListener parseListener = parseFormula(parser);
 		errorMarkers.addAll(parseListener.getErrorMarkers());
-		LTL formula = null;
 		try {
+			final LTL formula;
 			if(!parseListener.getErrorMarkers().isEmpty()) {
 				formula = new LTL(item.getCode(), new ClassicalBParser());
 			} else {
@@ -177,19 +176,14 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			return res;
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
-			ProBError parseError = error;
-			List<ErrorItem.Location> errorLocations = parseError.getErrors().stream()
-					.flatMap(err -> err.getLocations().stream())
-					.collect(Collectors.toList());
-			errorMarkers.addAll(errorLocations
-				.stream()
+			error.getErrors().stream()
+				.flatMap(err -> err.getLocations().stream())
 				.map(location -> new LTLMarker("error", location.getStartLine(), location.getStartColumn(), location.getEndColumn() - location.getStartColumn(), error.getMessage()))
-				.collect(Collectors.toList()));
+				.collect(Collectors.toCollection(() -> errorMarkers));
 			return error;
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
-			LtlParseException parseError = error;
-			errorMarkers.add(new LTLMarker("error", parseError.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), parseError.getMessage()));
+			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getMessage().length(), error.getMessage()));
 			return error;
 		}
 	}
