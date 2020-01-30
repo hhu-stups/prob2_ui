@@ -34,7 +34,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
@@ -201,40 +200,24 @@ public final class StageManager {
 
 		// If possible, make the stage respect the minimum size of its content.
 		// For some reason, this is not the default behavior in JavaFX.
-		// Loosely based on https://community.oracle.com/thread/2511660
-		final ChangeListener<Parent> rootListener = (o, from, to) -> {
-			if (to instanceof Region) {
-				final Region region = (Region)to;
-				stage.minWidthProperty().bind(
-					Bindings.createDoubleBinding(
-						() -> region.minWidth(Region.USE_COMPUTED_SIZE),
-						region.minWidthProperty(),
-						region.widthProperty()
-					).add(this.stageSceneWidthDifference)
-				);
-				stage.minHeightProperty().bind(
-					Bindings.createDoubleBinding(
-						() -> region.minHeight(Region.USE_COMPUTED_SIZE),
-						region.minHeightProperty(),
-						region.heightProperty()
-					).add(this.stageSceneHeightDifference)
-				);
+		stage.widthProperty().addListener((o, from, to) -> {
+			final double minWidth;
+			if (stage.getScene() == null || stage.getScene().getRoot() == null) {
+				minWidth = 0.0;
 			} else {
-				stage.minWidthProperty().unbind();
-				stage.minHeightProperty().unbind();
+				minWidth = stage.getScene().getRoot().minWidth(-1);
 			}
-		};
-		final ChangeListener<Scene> sceneListener = (o, from, to) -> {
-			if (from != null) {
-				from.rootProperty().removeListener(rootListener);
+			stage.setMinWidth(minWidth + this.stageSceneWidthDifference.get());
+		});
+		stage.heightProperty().addListener((o, from, to) -> {
+			final double minHeight;
+			if (stage.getScene() == null || stage.getScene().getRoot() == null) {
+				minHeight = 0.0;
+			} else {
+				minHeight = stage.getScene().getRoot().minHeight(-1);
 			}
-			if (to != null) {
-				to.rootProperty().addListener(rootListener);
-				rootListener.changed(to.rootProperty(), null, to.getRoot());
-			}
-		};
-		stage.sceneProperty().addListener(sceneListener);
-		sceneListener.changed(stage.sceneProperty(), null, stage.getScene());
+			stage.setMinHeight(minHeight + this.stageSceneHeightDifference.get());
+		});
 
 		stage.focusedProperty().addListener(e -> {
 			final String stageId = getPersistenceID(stage);
