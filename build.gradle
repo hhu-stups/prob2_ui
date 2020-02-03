@@ -165,7 +165,7 @@ macAppBundle {
 macAppBundle.mainClassName = mainClassName
 
 wrapper {
-	gradleVersion = "5.6.2"
+	gradleVersion = "6.1.1"
 	distributionType = Wrapper.DistributionType.ALL
 }
 
