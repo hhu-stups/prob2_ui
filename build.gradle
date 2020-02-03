@@ -41,10 +41,6 @@ repositories {
 		name "sonatype snapshots"
 		url "https://oss.sonatype.org/content/repositories/snapshots"
 	}
-	maven {
-		name "sonatype release"
-		url "https://oss.sonatype.org/content/repositories/releases"
-	}
 }
 
 // Our actual application class is de.prob2.ui.ProB2.
