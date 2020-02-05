@@ -7,7 +7,6 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
@@ -58,12 +57,6 @@
 										<TextArea editable="false" fx:id="taErrors" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
 									</VBox>
 								</VBox>
-							</VBox>
-							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
-								<padding>
-									<Insets topRightBottomLeft="10.0"/>
-								</padding>
-								<CheckBox text="%table.expressionTableView.continuousUpdate" fx:id="cbContinuous" VBox.vgrow="NEVER"/>
 							</VBox>
 						</VBox>
 						<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border"/>

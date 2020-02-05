@@ -14,7 +14,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -27,7 +26,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public abstract class DynamicCommandStage extends Stage {
@@ -68,9 +66,6 @@ public abstract class DynamicCommandStage extends Stage {
 
 	@FXML
 	protected Label lbDescription;
-
-	@FXML
-	protected CheckBox cbContinuous;
 
 	@FXML
 	protected ScrollPane pane;
@@ -125,9 +120,18 @@ public abstract class DynamicCommandStage extends Stage {
 			}
 			preferences.setIncludedPreferenceNames(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
 		});
-		
+
+		this.showingProperty().addListener((observable, from, to) -> {
+			if(!from && to) {
+				DynamicCommandItem choice = lvChoice.getSelectionModel().getSelectedItem();
+				if(choice != null) {
+					visualize(choice);
+				}
+			}
+		});
+
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if (to == null || currentTrace.get() == null) {
+			if (to == null || currentTrace.get() == null || !this.isShowing()) {
 				return;
 			}
 			if (!to.isAvailable()) {
@@ -144,22 +148,12 @@ public abstract class DynamicCommandStage extends Stage {
 			//only visualize if
 			//1. No formula is needed and command is changed or continuous update is selected
 			//2. Formula is needed and command is not changed and continuous update is selected
-			if ((!needFormula || to.equals(lastItem)) && (lastItem == null
-					|| !Objects.equals(lastItem.getCommand(), to.getCommand()) || cbContinuous.isSelected())) {
+			if (!needFormula || to.equals(lastItem)) {
 				visualize(to);
 			}
 			lastItem = to;
 		});
 		lvChoice.disableProperty().bind(currentThread.isNotNull().or(currentTrace.stateSpaceProperty().isNull()));
-
-		cbContinuous.selectedProperty().addListener((observable, from, to) -> {
-			if(!from && to) {
-				DynamicCommandItem choice = lvChoice.getSelectionModel().getSelectedItem();
-				if(choice != null) {
-					visualize(choice);
-				}
-			}
-		});
 
 		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
 		currentTrace.addListener((observable, from, to) -> refresh());
