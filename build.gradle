@@ -9,7 +9,6 @@ plugins {
 
 apply plugin: 'application'
 apply plugin: 'eclipse'
-apply plugin: 'idea'
 
 project.group = "de.hhu.stups"
 project.version = "1.0.1-SNAPSHOT"
