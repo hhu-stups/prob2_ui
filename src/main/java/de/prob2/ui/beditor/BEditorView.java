@@ -245,7 +245,10 @@ public class BEditorView extends BorderPane {
 					return;
 				}
 				for (WatchEvent<?> event : key.pollEvents()) {
-					Platform.runLater(() -> loadText(path));
+					if (path.getFileName().equals(event.context())) {
+						// Only reload on events for the file itself, not for other files in the directory.
+						Platform.runLater(() -> loadText(path));
+					}
 				}
 				key.reset();
 			}
