@@ -6,6 +6,8 @@ de.prob2.ui.project.machines.MachinesTab,Projekt.html#Machines
 de.prob2.ui.project.preferences.PreferencesTab,Projekt.html#Preferences
 de.prob2.ui.stats.StatsView,Statistik.html
 de.prob2.ui.verifications.ltl.LTLView,Überprüfungen.html#LTL
+de.prob2.ui.verifications.ltl.formula.LTLFormulaStage,Überprüfungen.html#LTL
+de.prob2.ui.verifications.ltl.patterns.LTLPatternStage,Überprüfungen.html#LTL
 de.prob2.ui.verifications.modelchecking.ModelcheckingView,Überprüfungen.html#Model
 de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView,Überprüfungen.html#Symbolic
 de.prob2.ui.animation.tracereplay.TraceReplayView,Animation.html#Trace

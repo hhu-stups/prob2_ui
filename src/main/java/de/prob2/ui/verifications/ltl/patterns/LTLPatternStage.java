@@ -7,6 +7,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.internal.AbstractResultHandler;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
@@ -19,9 +20,9 @@ import netscape.javascript.JSObject;
 public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		
 	@Inject
-	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, 
+	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize,
 			final LTLPatternParser patternParser, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
-		super(currentProject, patternParser, resultHandler, builtinsStage);
+		super(currentProject, fontSize, patternParser, resultHandler, builtinsStage);
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}
 	

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
@@ -20,7 +21,12 @@
 						<padding>
 							<Insets topRightBottomLeft="15.0"/>
 						</padding>
-						<Label text="%verifications.ltl.formula.ltlFormulaStage.formula" VBox.vgrow="NEVER"/>
+						<HBox alignment="CENTER_LEFT">
+							<Label text="%verifications.ltl.formula.ltlFormulaStage.formula" HBox.hgrow="ALWAYS"/>
+							<HBox alignment="CENTER_RIGHT">
+								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
+							</HBox>
+						</HBox>
 						<WebView fx:id="taCode" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 						<Button styleClass="button-blue" text="%verifications.ltl.formula.ltlFormulaStage.showBuiltins" onAction="#showBuiltins" VBox.vgrow="NEVER"/>
 						<Label text="%verifications.ltl.formula.ltlFormulaStage.description" VBox.vgrow="NEVER"/>
