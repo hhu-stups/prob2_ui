@@ -60,8 +60,6 @@ By pressing the "Add LTL Formula" or "Add LTL Pattern" buttons an editor for eac
 > Each parameter is of the form:
 * `<identifier>` : `<type>` for num and seq variables
 * `<identifier>` for var variables
-> Die Parameter sind durch Kommata getrennt. Der Rumpf kann Variablen definieren und zuweisen und Schleifen enthalten. Das Überladen von Mustern ist erlaubt.
-
 
 >The parameters are separated by a comma. The body contains statements such as definition or assignment of variables as well as loops. Patterns can be overloaded.
 
