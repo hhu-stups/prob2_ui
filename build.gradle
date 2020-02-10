@@ -129,6 +129,16 @@ eclipse.classpath.file.whenMerged {
 		}
 }
 
+final generatedResourcesDir = new File(project.buildDir, "generated-src/main/resources")
+
+sourceSets {
+	main {
+		resources {
+			srcDir(generatedResourcesDir)
+		}
+	}
+}
+
 def readCurrentGitCommit() {
 	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
 	def exitCode = proc.waitFor()
@@ -170,23 +180,36 @@ wrapper {
 	distributionType = Wrapper.DistributionType.ALL
 }
 
-final helpScript = "./help.sh"
-final helpDir = file("src/main/resources/help")
-task createHelp(type: Exec) {
-	inputs.file(helpScript)
-	inputs.dir(helpDir)
-	outputs.dir(helpDir)
-	commandLine(helpScript)
+final helpSourceDir = file("src/main/resources/help")
+final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
+final helpOutputDir = new File(generatedResourcesDir, "help")
+final helpFilterLuaScript = file("pandoc_links_to_html.lua")
+task createHelp {
+	inputs.file(helpFilterLuaScript)
+	inputs.files(helpSourceFiles)
+	outputs.dir(helpOutputDir)
+	
+	doLast {
+		helpSourceFiles.each {inputFile ->
+			final relativePath = helpSourceDir.toPath().relativize(inputFile.toPath())
+			final relativePathWithNewExtension = relativePath.parent.resolve(relativePath.fileName.toString().replaceAll(/\.md$/, ".html"))
+			final outputFile = helpOutputDir.toPath().resolve(relativePathWithNewExtension).toFile()
+			outputFile.parentFile.mkdirs()
+			exec {
+				executable = "pandoc"
+				args = [
+					"--from=markdown_github",
+					"--to=html",
+					"--standalone",
+					"--lua-filter=${helpFilterLuaScript}",
+					"--output=${outputFile}",
+					"${inputFile}",
+				]
+			}
+		}
+	}
 }
-
-task cleanHelp(type: Delete) {
-	delete(fileTree(dir: helpDir, include: ["**/*.adoc", "**/*.html"]))
-}
-
-if (!project.hasProperty("skipHelp") || project.skipHelp != "true") {
-	processResources.dependsOn(createHelp)
-	clean.dependsOn(cleanHelp)
-}
+processResources.dependsOn(createHelp)
 
 if (project.hasProperty("probHome")) {
 	allprojects {
