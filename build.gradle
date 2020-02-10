@@ -183,10 +183,8 @@ task cleanHelp(type: Delete) {
 	delete(fileTree(dir: helpDir, include: ["**/*.adoc", "**/*.html"]))
 }
 
-if (!project.hasProperty("skipHelp") || project.skipHelp != "true") {
-	processResources.dependsOn(createHelp)
-	clean.dependsOn(cleanHelp)
-}
+processResources.dependsOn(createHelp)
+clean.dependsOn(cleanHelp)
 
 if (project.hasProperty("probHome")) {
 	allprojects {
