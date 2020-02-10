@@ -43,7 +43,7 @@ By pressing the "Add LTL Formula" or "Add LTL Pattern" buttons an editor for eac
 
 ### Summary of LTL Patterns
 
-* Supported types: Non negative whole numbers, sequences, LTL formula
+* Supported types: num (non-negative whole numbers), seq (sequences), var (LTL formulae)
 * Definition of variables: `<type>` `<identifier>`: `<value>`
 * Assignment of variables: `<identifier>`: `<value>`
 * Scopes for variables: Loop, pattern, global (a lookup for a variable checks the inner scopes first until the variable is found)
@@ -55,8 +55,15 @@ By pressing the "Add LTL Formula" or "Add LTL Pattern" buttons an editor for eac
 		`<body>`
 ```
 
->The parameters are separated by a comma. Each parameter is of the form `<identifier>` : `<type>`
-The body contains statements such as definition or assignment of variables as well as loops. Patterns can be overloaded.
+
+
+> Each parameter is of the form:
+* `<identifier>` : `<type>` for num and seq variables
+* `<identifier>` for var variables
+> Die Parameter sind durch Kommata getrennt. Der Rumpf kann Variablen definieren und zuweisen und Schleifen enthalten. Das Überladen von Mustern ist erlaubt.
+
+
+>The parameters are separated by a comma. The body contains statements such as definition or assignment of variables as well as loops. Patterns can be overloaded.
 
 * Pattern Invocation: `<name>`( `<arguments>` )
 

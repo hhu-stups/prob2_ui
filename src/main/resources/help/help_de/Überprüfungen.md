@@ -44,7 +44,7 @@ Durch Drücken von "LTL-Formel hinzufügen" oder "LTL-Pattern hinzufügen" wird 
 
 ### Zusammenfassung der von ProB unterstützten LTL Syntax für Muster
 
-* Vorhandene Typen: Nicht negative ganze Zahlen, Sequenzen, LTL Formel
+* Vorhandene Typen: num (Nicht negative ganze Zahlen), seq (Sequenzen), var (LTL Formel)
 * Definition von Variablen: `<Typ>` `<Bezeichner>`: `<Wert>`
 * Zuweisung von Variablen: `<Bezeichner>`: `<Wert>`
 * Scopes für Variablen: Schleife, Muster, Global (bei der Benutzung einer Variable wird von einem lokale Scope immer ein Scope weiter nach außen geschaut, bis die passende Variable gefunden ist)
@@ -56,8 +56,10 @@ Durch Drücken von "LTL-Formel hinzufügen" oder "LTL-Pattern hinzufügen" wird 
 		<Rumpf>
 ```
 
->Hierbei enthält die Parameterliste Parameter von der Form `<Bezeichner>` : `<Typ-Bezeichner>`, wobei die Parameter durch Kommata getrennt sind.
-Der Rumpf kann Variablen definieren und zuweisen und Schleifen enthalten. Das Überladen von Mustern ist erlaubt.
+> Die Parameterliste enthält Parameter, die von folgender Form sind:
+* `<Bezeichner>` : `<Typ-Bezeichner>` für Variablen vom Typ num und seq
+* `<Bezeichner>` für Variablen vom Typ var
+> Die Parameter sind durch Kommata getrennt. Der Rumpf kann Variablen definieren und zuweisen und Schleifen enthalten. Das Überladen von Mustern ist erlaubt.
 
 * Musteraufruf: `<Name>`( `<Argument-Liste>` )
 
