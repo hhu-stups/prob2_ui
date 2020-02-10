@@ -24,9 +24,5 @@ prob_test_log.txt
 *.log.*
 *.prob
 
-# Help
-/src/main/resources/help/**/*.html
-/src/main/resources/help/**/*.adoc
-
 # TestFX screenshots
 screenshot*.png
