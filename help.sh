@@ -25,5 +25,4 @@ fi
 
 find src/main/resources/help -name "*.md" -print0 | while IFS="" read -r -d "" file; do
 	convert_single "${file}" html html
-	convert_single "${file}" asciidoc adoc
 done
