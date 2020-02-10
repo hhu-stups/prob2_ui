@@ -252,6 +252,8 @@ public final class OperationsView extends VBox {
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 
 		randomButton.disableProperty().bind(Bindings.or(currentTrace.existsProperty().not(), randomExecutionThread.isNotNull()));
+		randomButton.visibleProperty().bind(randomExecutionThread.isNull());
+		cancelButton.visibleProperty().bind(randomExecutionThread.isNotNull());
 
 		randomText.textProperty().addListener((observable, from, to) -> {
 			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
@@ -261,7 +263,6 @@ public final class OperationsView extends VBox {
 
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
-		cancelButton.disableProperty().bind(randomExecutionThread.isNull());
 
 		showDisabledOps.addListener((o, from, to) -> {
 			((BindableGlyph)disabledOpsToggle.getGraphic()).setIcon(to ? FontAwesome.Glyph.EYE : FontAwesome.Glyph.EYE_SLASH);
