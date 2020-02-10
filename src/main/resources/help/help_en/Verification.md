@@ -65,7 +65,7 @@ By pressing the "Add LTL Formula" or "Add LTL Pattern" buttons an editor for eac
 
 * Pattern Invocation: `<name>`( `<arguments>` )
 
->Remark: Pattern Invocations do not depend on the order of the definitions of the used patterns. So patterns can be invocated before they are defined.
+>Remark: Pattern Invocations do not depend on the order of the definitions of the used patterns. So patterns can be invoked before they are defined.
 Patterns can only be defined in the global scope. It is not possible to define patterns within other patterns.
 
 * Loops:
@@ -107,6 +107,49 @@ after_until(`<left endpoint>`, `<right endpoint>`, `<property>`)
 * One-line comment : // comment
 * Multiline comment: /* comment */
 
+* Examples:
+
+Example with LTL formula:
+
+```
+//To describe a portion of a system's execution which contains only states that have a desired property. Also known as Henceforth and Always.
+
+def universality(p):
+  G(p)
+```
+
+Example with loops and overloading:
+
+```
+//To describe a portion of a system's execution that contains an instance of certain events or states. Also known as Eventually.
+//With a given n, you can describe, that a certain state can occur at most n-times.
+
+def existence(p):
+  F(p)
+
+def existence(p, n : num):
+  var result: G(!p)
+  count 0 up to n:
+	result: !p W (p W result)
+  end
+  result
+```
+
+Example with sequence invocation and overloading:
+
+```
+//To describe cause-effect relationships between a pair of events/states. An occurrence of the first, the cause, must be followed by an occurrence of the second, the effect. Also known as Follows and Leads-to.
+//With a given sequence of states, you can describe, that e.g. the sequence of states follows a certain state.
+
+def response(s, p):
+  G(p => F(s))
+	
+def response(s : seq, p):
+  G(p => F(seq(s)))
+	
+def response(s, p : seq):
+  G(seq(p) => F(s))
+```
 
 ## <a id="Symbolic"> Symbolic Checking </a>
 

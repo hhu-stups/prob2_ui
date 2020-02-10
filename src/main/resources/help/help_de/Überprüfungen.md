@@ -107,6 +107,50 @@ after_until(`<Linker Begrenzer>`, `<Rechter Begrenzer>`, `<Eigenschaft>`)
 * Einzeilige Kommentare : // Kommentar
 * Mehrzeilige Kommentare: /* Kommentar */
 
+* Beispiele:
+
+Beispiel mit LTL Formel:
+
+```
+//Beschreibung eines Teils der Systemausführung, der nur Zustände mit einer gewünschten Eigenschaft enthält. Dies ist auch bekannt als "Always"
+
+def universality(p):
+  G(p)
+```
+
+Beispiel mit Schleife und Überladen:
+
+```
+//Beschreibung eines Teils der Systemausführung, der eine Instanz bestimmter Ereignisse und Zustände enthält. Dies ist auch bekannt als "Eventually" 
+//Mit einem gegebenen n, ist es möglich anzugeben, dass diese Zustände maximal n Mal auftreten.
+
+def existence(p):
+  F(p)
+
+def existence(p, n : num):
+  var result: G(!p)
+  count 0 up to n:
+	result: !p W (p W result)
+  end
+  result
+```
+
+Beispiel mit Sequenzaufruf und Überladen:
+
+```
+//Beschreibung von Ursache-Wirkungs-Beziehungen zwischen zwei Ereignissen bzw. Zuständen. Auf das Auftreten des ersten Ereignisses (Ursache) muss das Auftreten des zweiten Ereignisses (Wirkung) folgen. Dies ist auch bekannt als Follows und Leads-to.
+// Mit einer gegebenen Sequenz von Zuständen, kann man z.B. beschreiben dass eine bestimmte Folge von Zuständen auf einen Zustand folgt
+
+def response(s, p):
+  G(p => F(s))
+	
+def response(s : seq, p):
+  G(p => F(seq(s)))
+	
+def response(s, p : seq):
+  G(seq(p) => F(s))
+```
+
 ## <a id="Symbolic"> Symbolic Checking </a>
 
 ![Symbolic Checking](../screenshots/Verifications/Symbolic%20Checking.png)
