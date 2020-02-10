@@ -12,14 +12,11 @@ convert_single() {
 	echo "Converting ${file} to ${format} (.${extension})..."
 	
 	rm -f "${file}.${extension}"
-	pandoc "${file}" -f markdown_github -t "${format}" -s | sed "s/\.md/.${extension}/g" > "${file%.md}.${extension}"
+	pandoc "${file}" -f markdown_github -t "${format}" --lua-filter pandoc_links_to_html.lua -o "${file%.md}.${extension}"
 }
 
 if ! which pandoc &> /dev/null; then
 	echo "pandoc is not installed. Aborting..."
-	exit 1
-elif ! which sed &> /dev/null; then
-	echo "sed is not installed. Aborting..."
 	exit 1
 fi
 
