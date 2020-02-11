@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 
 @Singleton
 public class HelpSystemStage extends Stage {
-	HelpSystem help;
+	private HelpSystem help;
 
 	@Inject
 	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final HelpSystem helpSystem) {

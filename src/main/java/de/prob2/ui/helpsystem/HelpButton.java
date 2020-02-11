@@ -52,7 +52,7 @@ public class HelpButton extends Button{
 	@FXML
 	public void openHelp() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-		helpSystemStage.help.isHelpButton = true;
+		injector.getInstance(HelpSystem.class).isHelpButton = true;
 		if (helpContent!=null) {
 			helpSystemStage.setContent(helpContent, anchor);
 		}
@@ -61,7 +61,7 @@ public class HelpButton extends Button{
 	}
 
 	public void setHelpContent(Class<?> clazz) {
-		HelpSystem help = injector.getInstance(HelpSystemStage.class).help;
+		HelpSystem help = injector.getInstance(HelpSystem.class);
 		String helpSubdirectory = help.helpSubdirectoryString;
 		String main;
 		if (help.isJar) {
