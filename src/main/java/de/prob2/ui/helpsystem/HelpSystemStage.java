@@ -16,12 +16,9 @@ import javafx.stage.Stage;
 
 @Singleton
 public class HelpSystemStage extends Stage {
-	private HelpSystem help;
-
 	@Inject
-	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final HelpSystem helpSystem) {
+	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final HelpSystem help) {
 		this.setTitle(bundle.getString("helpsystem.stage.title"));
-		help = helpSystem;
 		this.setScene(new Scene(help));
 		stageManager.register(this, this.getClass().getName());
 		String defaultDir;
