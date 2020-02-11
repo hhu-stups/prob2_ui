@@ -104,7 +104,7 @@ public class ProB2 extends Application {
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
 
-		ProB2Module module = new ProB2Module(runtimeOptions);
+		ProB2Module module = new ProB2Module(this, runtimeOptions);
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		bundle = injector.getInstance(ResourceBundle.class);
 		this.stopActions = injector.getInstance(StopActions.class);
