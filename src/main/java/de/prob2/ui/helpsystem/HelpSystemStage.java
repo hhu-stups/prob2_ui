@@ -1,16 +1,12 @@
 package de.prob2.ui.helpsystem;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
-
 import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
@@ -23,9 +19,9 @@ public class HelpSystemStage extends Stage {
 	HelpSystem help;
 
 	@Inject
-	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final Injector injector) throws URISyntaxException, IOException{
+	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final HelpSystem helpSystem) {
 		this.setTitle(bundle.getString("helpsystem.stage.title"));
-		help = new HelpSystem(stageManager, injector);
+		help = helpSystem;
 		this.setScene(new Scene(help));
 		stageManager.register(this, this.getClass().getName());
 		String defaultDir;

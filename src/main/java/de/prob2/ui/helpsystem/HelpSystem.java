@@ -54,7 +54,7 @@ public class HelpSystem extends StackPane {
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
 
 	@Inject
-	public HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
+	private HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
 		isJar = helpURI.toString().startsWith("jar:");
