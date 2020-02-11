@@ -62,19 +62,20 @@ public class HelpButton extends Button{
 
 	public void setHelpContent(Class<?> clazz) {
 		HelpSystem help = injector.getInstance(HelpSystem.class);
-		String helpSubdirectory = help.helpSubdirectoryString;
-		String main;
+		setHelp(clazz, getHelpSubdirectoryPath(help), prepareMap(this.getClass().getClassLoader().getResourceAsStream("help/"+ help.helpSubdirectoryString +".txt")));
+	}
+
+	private static String getHelpSubdirectoryPath(final HelpSystem help) {
 		if (help.isJar) {
-			main = Main.getProBDirectory() +
+			return Main.getProBDirectory() +
 					"prob2ui" + File.separator +
 					"help" + File.separator +
-					helpSubdirectory + File.separator;
+					help.helpSubdirectoryString + File.separator;
 		} else {
-			main = ProB2.class.getClassLoader().getResource(
+			return ProB2.class.getClassLoader().getResource(
 					"help" + File.separator +
-					helpSubdirectory + File.separator).toString();
+					help.helpSubdirectoryString + File.separator).toString();
 		}
-		setHelp(clazz, main, prepareMap(this.getClass().getClassLoader().getResourceAsStream("help/"+helpSubdirectory+".txt")));
 	}
 
 	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
