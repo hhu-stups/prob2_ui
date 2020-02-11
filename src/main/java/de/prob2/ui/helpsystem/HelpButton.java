@@ -1,23 +1,16 @@
 package de.prob2.ui.helpsystem;
 
 import java.io.File;
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.prob.Main;
-
-import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 public class HelpButton extends Button{
@@ -29,24 +22,6 @@ public class HelpButton extends Button{
 	private HelpButton(StageManager stageManager, Injector injector) {
 		this.injector = injector;
 		stageManager.loadFXML(this, "helpbutton.fxml");
-	}
-
-	private Map<Class<?>, String> prepareMap(InputStream stream) {
-		Map<Class<?>, String> map = new HashMap<>();
-		Scanner scanner = new Scanner(stream);
-		while (scanner.hasNext()) {
-			String s = scanner.nextLine();
-			int splitIndex = s.indexOf(',');
-			String className = s.substring(0, splitIndex);
-			String htmlFileName = s.substring(splitIndex + 1);
-			try {
-				map.put(Class.forName(className), htmlFileName);
-			} catch (ClassNotFoundException e) {
-				LoggerFactory.getLogger(HelpButton.class).error("No class with this name found", e);
-			}
-		}
-		scanner.close();
-		return map;
 	}
 
 	@FXML
@@ -62,20 +37,7 @@ public class HelpButton extends Button{
 
 	public void setHelpContent(Class<?> clazz) {
 		HelpSystem help = injector.getInstance(HelpSystem.class);
-		setHelp(clazz, getHelpSubdirectoryPath(help), prepareMap(this.getClass().getClassLoader().getResourceAsStream("help/"+ help.helpSubdirectoryString +".txt")));
-	}
-
-	private static String getHelpSubdirectoryPath(final HelpSystem help) {
-		if (help.isJar) {
-			return Main.getProBDirectory() +
-					"prob2ui" + File.separator +
-					"help" + File.separator +
-					help.helpSubdirectoryString + File.separator;
-		} else {
-			return ProB2.class.getClassLoader().getResource(
-					"help" + File.separator +
-					help.helpSubdirectoryString + File.separator).toString();
-		}
+		setHelp(clazz, help.getHelpSubdirectoryPath(), help.prepareMap());
 	}
 
 	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {

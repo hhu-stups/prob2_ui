@@ -2,6 +2,7 @@ package de.prob2.ui.helpsystem;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -20,6 +21,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -93,6 +95,38 @@ public class HelpSystem extends StackPane {
 		}
 
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
+	}
+
+	Map<Class<?>, String> prepareMap() {
+		Map<Class<?>, String> map = new HashMap<>();
+		final InputStream stream = this.getClass().getClassLoader().getResourceAsStream("help/" + this.helpSubdirectoryString + ".txt");
+		Scanner scanner = new Scanner(stream);
+		while (scanner.hasNext()) {
+			String s = scanner.nextLine();
+			int splitIndex = s.indexOf(',');
+			String className = s.substring(0, splitIndex);
+			String htmlFileName = s.substring(splitIndex + 1);
+			try {
+				map.put(Class.forName(className), htmlFileName);
+			} catch (ClassNotFoundException e) {
+				LoggerFactory.getLogger(HelpButton.class).error("No class with this name found", e);
+			}
+		}
+		scanner.close();
+		return map;
+	}
+
+	String getHelpSubdirectoryPath() {
+		if (this.isJar) {
+			return Main.getProBDirectory() +
+					"prob2ui" + File.separator +
+					"help" + File.separator +
+					this.helpSubdirectoryString + File.separator;
+		} else {
+			return ProB2.class.getClassLoader().getResource(
+					"help" + File.separator +
+					this.helpSubdirectoryString + File.separator).toString();
+		}
 	}
 
 	private TreeItem<String> createNode(final File file) {
