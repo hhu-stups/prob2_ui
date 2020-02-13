@@ -1,5 +1,6 @@
 package de.prob2.ui.helpsystem;
 
+import java.io.File;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -23,12 +24,12 @@ public class HelpSystemStage extends Stage {
 		this.setTitle(bundle.getString("helpsystem.stage.title"));
 		this.setScene(new Scene(help));
 		stageManager.register(this, this.getClass().getName());
-		final String defaultPage = help.getHelpSubdirectoryUrl() + "ProB2UI.html";
+		final File defaultPage = new File(help.getHelpSubdirectory(), "ProB2UI.html");
 		setContent(defaultPage,"");
 	}
 
-	public void setContent(String fileUrl, String anchor) {
-		final String url = fileUrl + anchor;
+	public void setContent(File file, String anchor) {
+		final String url = file.toURI() + anchor;
 		LOGGER.debug("Opening URL in help: {}", url);
 		Platform.runLater(() -> ((HelpSystem) this.getScene().getRoot()).webEngine.load(url));
 	}

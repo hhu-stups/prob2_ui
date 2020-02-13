@@ -116,16 +116,20 @@ public class HelpSystem extends StackPane {
 		return map;
 	}
 
-	String getHelpSubdirectoryUrl() {
+	File getHelpSubdirectory() {
 		if (this.isJar) {
 			return new File(Main.getProBDirectory() +
 					"prob2ui" + File.separator +
 					"help" + File.separator +
-					this.helpSubdirectoryString).toURI() + "/";
+					this.helpSubdirectoryString);
 		} else {
-			return ProB2.class.getClassLoader().getResource(
-					"help/" +
-					this.helpSubdirectoryString) + "/";
+			try {
+				return new File(ProB2.class.getClassLoader().getResource(
+						"help/" +
+						this.helpSubdirectoryString).toURI());
+			} catch (URISyntaxException e) {
+				throw new AssertionError("Help directory URL is not a valid URI", e);
+			}
 		}
 	}
 
