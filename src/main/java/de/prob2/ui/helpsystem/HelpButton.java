@@ -39,7 +39,7 @@ public class HelpButton extends Button{
 
 	public void setHelpContent(Class<?> clazz) {
 		HelpSystem help = injector.getInstance(HelpSystem.class);
-		setHelp(clazz, help.getHelpSubdirectory(), help.prepareMap());
+		setHelp(clazz, help.getHelpSubdirectory(), help.getClassToHelpFileMap());
 	}
 
 	private void setHelp(Class<?> clazz, File main, Map<Class<?>, String> map) {
