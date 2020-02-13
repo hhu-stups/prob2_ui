@@ -1,6 +1,5 @@
 package de.prob2.ui.helpsystem;
 
-import java.io.File;
 import java.util.Map;
 
 import com.google.inject.Inject;
@@ -15,7 +14,7 @@ import javafx.scene.control.Button;
 @FXMLInjected
 public class HelpButton extends Button{
 	private final Injector injector;
-	private File helpContent;
+	private String helpContent;
 	private String anchor = "";
 
 	@Inject
@@ -37,11 +36,11 @@ public class HelpButton extends Button{
 
 	public void setHelpContent(Class<?> clazz) {
 		HelpSystem help = injector.getInstance(HelpSystem.class);
-		setHelp(clazz, help.getHelpSubdirectoryPath(), help.prepareMap());
+		setHelp(clazz, help.getHelpSubdirectoryUrl(), help.prepareMap());
 	}
 
 	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
-		helpContent = new File(main + "ProB2UI.html");
+		helpContent = main + "ProB2UI.html";
 		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> {
 			String link = e.getValue();
 			String htmlFile = link;
@@ -50,7 +49,7 @@ public class HelpButton extends Button{
 				htmlFile = link.substring(0, splitIndex);
 				anchor = link.substring(splitIndex);
 			}
-			helpContent = new File(main + htmlFile);
+			helpContent = main + htmlFile;
 		});
 	}
 }

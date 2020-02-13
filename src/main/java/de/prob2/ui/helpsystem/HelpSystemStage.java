@@ -1,6 +1,5 @@
 package de.prob2.ui.helpsystem;
 
-import java.io.File;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -12,20 +11,25 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public class HelpSystemStage extends Stage {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HelpSystemStage.class);
+
 	@Inject
 	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final HelpSystem help) {
 		this.setTitle(bundle.getString("helpsystem.stage.title"));
 		this.setScene(new Scene(help));
 		stageManager.register(this, this.getClass().getName());
-		File defaultPage = new File(help.getHelpSubdirectoryPath() + "ProB2UI.html");
+		final String defaultPage = help.getHelpSubdirectoryUrl() + "ProB2UI.html";
 		setContent(defaultPage,"");
 	}
 
-	public void setContent(File file, String anchor) {
-		String uri = file.toURI().toString();
-		int lastIndex = uri.lastIndexOf("file:/");
-		Platform.runLater(() ->	((HelpSystem) this.getScene().getRoot()).webEngine.load(uri.substring(lastIndex).replace("%25","%") + anchor));
+	public void setContent(String fileUrl, String anchor) {
+		final String url = fileUrl + anchor;
+		LOGGER.debug("Opening URL in help: {}", url);
+		Platform.runLater(() -> ((HelpSystem) this.getScene().getRoot()).webEngine.load(url));
 	}
 }

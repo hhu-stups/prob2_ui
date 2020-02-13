@@ -116,16 +116,16 @@ public class HelpSystem extends StackPane {
 		return map;
 	}
 
-	String getHelpSubdirectoryPath() {
+	String getHelpSubdirectoryUrl() {
 		if (this.isJar) {
-			return Main.getProBDirectory() +
+			return new File(Main.getProBDirectory() +
 					"prob2ui" + File.separator +
 					"help" + File.separator +
-					this.helpSubdirectoryString + File.separator;
+					this.helpSubdirectoryString).toURI() + "/";
 		} else {
 			return ProB2.class.getClassLoader().getResource(
-					"help" + File.separator +
-					this.helpSubdirectoryString + File.separator).toString();
+					"help/" +
+					this.helpSubdirectoryString) + "/";
 		}
 	}
 
