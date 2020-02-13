@@ -1,14 +1,7 @@
 package de.prob2.ui.verifications.ltl.formula;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.domainobjects.LTL;
@@ -32,14 +25,17 @@ import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLView;
-
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -171,6 +167,7 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 				//TODO
 				//LTLError error = (LTLError) res;
 				//errorMarkers.add(new LTLMarker("error", res.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), error.getMessage()));
+				errorMarkers.add(new LTLMarker("error", 0, 0, res.getMessage().length(), res.getMessage()));
 			}
 			injector.getInstance(StatsView.class).update(currentTrace.get());
 			return res;
@@ -183,7 +180,7 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			return error;
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
-			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getMessage().length(), error.getMessage()));
+			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.toString().length(), error.toString()));
 			return error;
 		}
 	}

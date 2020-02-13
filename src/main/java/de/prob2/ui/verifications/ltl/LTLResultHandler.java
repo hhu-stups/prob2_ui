@@ -59,7 +59,7 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		}
 		if(resultItem != null) {
 			//errorMarkers contains errors, resultItem only contains errors from the exception
-			String errorMessage = String.join("\n", errorMarkers.stream().map(LTLMarker::getMsg).collect(Collectors.toList()));
+			String errorMessage = errorMarkers.stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
 			item.setResultItem(new LTLCheckingResultItem(resultItem.getChecked(), errorMarkers, resultItem.getHeaderBundleKey(), resultItem.getMessageBundleKey(), errorMessage));
 			return resultItem.getChecked();
 		}
