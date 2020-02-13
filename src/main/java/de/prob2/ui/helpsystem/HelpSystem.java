@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -175,9 +176,7 @@ public class HelpSystem extends StackPane {
 	private void extractHelpFiles() throws IOException {
 		if (isJar) {
 			Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
-			Map<String, String> env = new HashMap<>();
-			env.put("create", "true");
-			try (FileSystem jarFileSystem = FileSystems.newFileSystem(helpURI, env)) {
+			try (FileSystem jarFileSystem = FileSystems.newFileSystem(helpURI, Collections.emptyMap())) {
 				Path source = jarFileSystem.getPath("/help/");
 				if (!target.toFile().exists()) {
 					copyHelp(source, target);
