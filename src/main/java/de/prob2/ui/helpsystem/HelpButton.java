@@ -3,7 +3,6 @@ package de.prob2.ui.helpsystem;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -39,12 +38,9 @@ public class HelpButton extends Button{
 
 	public void setHelpContent(Class<?> clazz) {
 		HelpSystem help = injector.getInstance(HelpSystem.class);
-		setHelp(clazz, help.getHelpSubdirectory(), help.getClassToHelpFileMap());
-	}
-
-	private void setHelp(Class<?> clazz, File main, Map<Class<?>, String> map) {
+		File main = help.getHelpSubdirectory();
 		helpContent = new File(main, "ProB2UI.html");
-		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> {
+		help.getClassToHelpFileMap().entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> {
 			String link = e.getValue();
 			String htmlFile = link;
 			if (link.contains("#")) {
