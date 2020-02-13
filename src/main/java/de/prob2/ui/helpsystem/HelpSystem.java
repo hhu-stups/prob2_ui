@@ -105,20 +105,28 @@ public class HelpSystem extends StackPane {
 	Map<Class<?>, String> prepareMap() {
 		if (this.classToHelpFileMap == null) {
 			this.classToHelpFileMap = new HashMap<>();
-			final InputStream stream = this.getClass().getClassLoader().getResourceAsStream("help/" + this.helpSubdirectoryString + ".txt");
-			Scanner scanner = new Scanner(stream);
-			while (scanner.hasNext()) {
-				String s = scanner.nextLine();
-				int splitIndex = s.indexOf(',');
-				String className = s.substring(0, splitIndex);
-				String htmlFileName = s.substring(splitIndex + 1);
-				try {
-					this.classToHelpFileMap.put(Class.forName(className), htmlFileName);
-				} catch (ClassNotFoundException e) {
-					LOGGER.error("No class with this name found", e);
+			final String resourceName = "help/" + this.helpSubdirectoryString + ".txt";
+			try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(resourceName)) {
+				if (stream != null) {
+					try (Scanner scanner = new Scanner(stream)) {
+						while (scanner.hasNext()) {
+							String s = scanner.nextLine();
+							int splitIndex = s.indexOf(',');
+							String className = s.substring(0, splitIndex);
+							String htmlFileName = s.substring(splitIndex + 1);
+							try {
+								this.classToHelpFileMap.put(Class.forName(className), htmlFileName);
+							} catch (ClassNotFoundException e) {
+								LOGGER.error("No class with this name found", e);
+							}
+						}
+					}
+				} else {
+					LOGGER.error("Help file mapping does not exist: {}", resourceName);
 				}
+			} catch (IOException e) {
+				LOGGER.error("IOException while reading help file mapping", e);
 			}
-			scanner.close();
 		}
 		return Collections.unmodifiableMap(this.classToHelpFileMap);
 	}
