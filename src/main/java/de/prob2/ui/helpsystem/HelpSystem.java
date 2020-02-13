@@ -3,12 +3,15 @@ package de.prob2.ui.helpsystem;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -22,7 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Properties;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -105,17 +108,17 @@ public class HelpSystem extends StackPane {
 	Map<Class<?>, String> getClassToHelpFileMap() {
 		if (this.classToHelpFileMap == null) {
 			this.classToHelpFileMap = new HashMap<>();
-			final String resourceName = "help/" + this.helpSubdirectoryString + ".txt";
+			final String resourceName = "help/" + this.helpSubdirectoryString + ".properties";
 			try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(resourceName)) {
 				if (stream != null) {
-					try (Scanner scanner = new Scanner(stream)) {
-						while (scanner.hasNext()) {
-							String s = scanner.nextLine();
-							int splitIndex = s.indexOf(',');
-							String className = s.substring(0, splitIndex);
-							String htmlFileName = s.substring(splitIndex + 1);
+					try (final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+						final Properties props = new Properties();
+						props.load(reader);
+						for (final String key : props.stringPropertyNames()) {
+							final String value = props.getProperty(key);
+							assert value != null;
 							try {
-								this.classToHelpFileMap.put(Class.forName(className), htmlFileName);
+								this.classToHelpFileMap.put(Class.forName(key), value);
 							} catch (ClassNotFoundException e) {
 								LOGGER.error("No class with this name found", e);
 							}
