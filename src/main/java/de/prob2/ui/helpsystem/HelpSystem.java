@@ -58,6 +58,7 @@ public class HelpSystem extends StackPane {
 	boolean isHelpButton;
 	final String helpSubdirectoryString;
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
+	private Map<Class<?>, String> classToHelpFileMap;
 
 	@Inject
 	private HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
@@ -102,22 +103,24 @@ public class HelpSystem extends StackPane {
 	}
 
 	Map<Class<?>, String> prepareMap() {
-		Map<Class<?>, String> map = new HashMap<>();
-		final InputStream stream = this.getClass().getClassLoader().getResourceAsStream("help/" + this.helpSubdirectoryString + ".txt");
-		Scanner scanner = new Scanner(stream);
-		while (scanner.hasNext()) {
-			String s = scanner.nextLine();
-			int splitIndex = s.indexOf(',');
-			String className = s.substring(0, splitIndex);
-			String htmlFileName = s.substring(splitIndex + 1);
-			try {
-				map.put(Class.forName(className), htmlFileName);
-			} catch (ClassNotFoundException e) {
-				LOGGER.error("No class with this name found", e);
+		if (this.classToHelpFileMap == null) {
+			this.classToHelpFileMap = new HashMap<>();
+			final InputStream stream = this.getClass().getClassLoader().getResourceAsStream("help/" + this.helpSubdirectoryString + ".txt");
+			Scanner scanner = new Scanner(stream);
+			while (scanner.hasNext()) {
+				String s = scanner.nextLine();
+				int splitIndex = s.indexOf(',');
+				String className = s.substring(0, splitIndex);
+				String htmlFileName = s.substring(splitIndex + 1);
+				try {
+					this.classToHelpFileMap.put(Class.forName(className), htmlFileName);
+				} catch (ClassNotFoundException e) {
+					LOGGER.error("No class with this name found", e);
+				}
 			}
+			scanner.close();
 		}
-		scanner.close();
-		return map;
+		return Collections.unmodifiableMap(this.classToHelpFileMap);
 	}
 
 	File getHelpSubdirectory() {
