@@ -105,7 +105,7 @@ public class HelpSystem extends StackPane {
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
 	}
 
-	Map<Class<?>, String> getClassToHelpFileMap() {
+	private Map<Class<?>, String> getClassToHelpFileMap() {
 		if (this.classToHelpFileMap == null) {
 			this.classToHelpFileMap = new HashMap<>();
 			final String resourceName = "help/" + this.helpSubdirectoryString + ".properties";
@@ -132,6 +132,10 @@ public class HelpSystem extends StackPane {
 			}
 		}
 		return Collections.unmodifiableMap(this.classToHelpFileMap);
+	}
+
+	String getHelpFileForClass(final Class<?> clazz) {
+		return this.getClassToHelpFileMap().get(clazz);
 	}
 
 	File getHelpSubdirectory() {
