@@ -62,9 +62,9 @@ public class HelpSystem extends StackPane {
 		isJar = helpURI.toString().startsWith("jar:");
 		isHelpButton = false;
 		helpSubdirectoryString = findHelpSubdirectory();
-		File helpSubdirectory = getHelpDirectory();
+		extractHelpFiles();
 
-		treeView.setRoot(createNode(helpSubdirectory));
+		treeView.setRoot(createNode(this.getHelpSubdirectory()));
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
@@ -172,7 +172,7 @@ public class HelpSystem extends StackPane {
 		});
 	}
 
-	private File getHelpDirectory() throws IOException, URISyntaxException {
+	private void extractHelpFiles() throws IOException {
 		if (isJar) {
 			Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
 			Map<String, String> env = new HashMap<>();
@@ -183,9 +183,6 @@ public class HelpSystem extends StackPane {
 					copyHelp(source, target);
 				}
 			}
-			return new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + helpSubdirectoryString);
-		} else {
-			return new File(ProB2.class.getClassLoader().getResource("help/" + helpSubdirectoryString).toURI());
 		}
 	}
 
