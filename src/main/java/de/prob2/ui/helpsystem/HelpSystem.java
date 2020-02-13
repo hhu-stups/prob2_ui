@@ -42,10 +42,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public class HelpSystem extends StackPane {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HelpSystem.class);
+
 	@FXML private Button external;
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
@@ -110,7 +113,7 @@ public class HelpSystem extends StackPane {
 			try {
 				map.put(Class.forName(className), htmlFileName);
 			} catch (ClassNotFoundException e) {
-				LoggerFactory.getLogger(HelpButton.class).error("No class with this name found", e);
+				LOGGER.error("No class with this name found", e);
 			}
 		}
 		scanner.close();
@@ -195,7 +198,7 @@ public class HelpSystem extends StackPane {
 					Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
 				}
 			} catch (MalformedURLException | UnsupportedEncodingException e) {
-				LoggerFactory.getLogger(HelpSystem.class).error("URL not found", e);
+				LOGGER.error("URL not found", e);
 			}
 		}
 	}
