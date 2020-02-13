@@ -61,7 +61,7 @@ public class HelpSystem extends StackPane {
 	boolean isHelpButton;
 	final String helpSubdirectoryString;
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
-	private Map<Class<?>, String> classToHelpFileMap;
+	private Properties classToHelpFileMap;
 
 	@Inject
 	private HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
@@ -105,24 +105,14 @@ public class HelpSystem extends StackPane {
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
 	}
 
-	private Map<Class<?>, String> getClassToHelpFileMap() {
+	private Properties getClassToHelpFileMap() {
 		if (this.classToHelpFileMap == null) {
-			this.classToHelpFileMap = new HashMap<>();
 			final String resourceName = "help/" + this.helpSubdirectoryString + ".properties";
 			try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(resourceName)) {
 				if (stream != null) {
 					try (final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-						final Properties props = new Properties();
-						props.load(reader);
-						for (final String key : props.stringPropertyNames()) {
-							final String value = props.getProperty(key);
-							assert value != null;
-							try {
-								this.classToHelpFileMap.put(Class.forName(key), value);
-							} catch (ClassNotFoundException e) {
-								LOGGER.error("No class with this name found", e);
-							}
-						}
+						this.classToHelpFileMap = new Properties();
+						this.classToHelpFileMap.load(reader);
 					}
 				} else {
 					LOGGER.error("Help file mapping does not exist: {}", resourceName);
@@ -131,11 +121,11 @@ public class HelpSystem extends StackPane {
 				LOGGER.error("IOException while reading help file mapping", e);
 			}
 		}
-		return Collections.unmodifiableMap(this.classToHelpFileMap);
+		return this.classToHelpFileMap;
 	}
 
 	String getHelpFileForClass(final Class<?> clazz) {
-		return this.getClassToHelpFileMap().get(clazz);
+		return this.getClassToHelpFileMap().getProperty(clazz.getName());
 	}
 
 	File getHelpSubdirectory() {
