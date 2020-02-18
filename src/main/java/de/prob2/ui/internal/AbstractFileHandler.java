@@ -1,14 +1,5 @@
 package de.prob2.ui.internal;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonStreamParser;
-import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import org.slf4j.Logger;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,11 +13,22 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonStreamParser;
+
+import de.prob2.ui.prob2fx.CurrentProject;
+
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.slf4j.Logger;
+
 public abstract class AbstractFileHandler<T> {
 	
 	protected static final Charset CHARSET = StandardCharsets.UTF_8;
 	protected Logger LOGGER;
-	protected String FILE_ENDING;
 	
 	private final Class<T> clazz;
 	

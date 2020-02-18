@@ -34,14 +34,13 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import org.slf4j.LoggerFactory;
 
 public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
-
+	private static final String FILE_ENDING = "*.prob2trace";
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	@Inject
 	public TraceFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
 		super(gson, currentProject, stageManager, bundle, versionInfo, PersistentTrace.class);
 		this.LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
-		this.FILE_ENDING = "*.prob2trace";
 	}
 
 	@Override
