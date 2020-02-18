@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFileHandler<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileHandler.class);
-	protected static final Charset CHARSET = StandardCharsets.UTF_8;
+	private static final Charset CHARSET = StandardCharsets.UTF_8;
 	
 	private final Class<T> clazz;
 	
