@@ -19,8 +19,8 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class LTLFileHandler extends AbstractFileHandler<LTLData> {
-	private static final String LTL_FILE_EXTENSION = "ltl";
-	private static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
+	public static final String LTL_FILE_EXTENSION = "ltl";
+	public static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
 
 	@Inject
 	public LTLFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {

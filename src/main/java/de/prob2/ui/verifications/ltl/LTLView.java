@@ -55,9 +55,6 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 @Singleton
 public class LTLView extends AnchorPane implements ISelectableCheckingView {
-
-	private static final String LTL_FILE_ENDING = "*.ltl";
-
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	@FXML 
@@ -382,10 +379,10 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.loadLTL.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters()
-				.add(new FileChooser.ExtensionFilter(
-						String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_ENDING),
-						LTL_FILE_ENDING));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+			String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTLFileHandler.LTL_FILE_PATTERN),
+			LTLFileHandler.LTL_FILE_PATTERN
+		));
 		Path ltlFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if(ltlFile == null) {
 			return;

@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 
 public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
-	private static final String TRACE_FILE_EXTENSION = "prob2trace";
-	private static final String TRACE_FILE_PATTERN = "*." + TRACE_FILE_EXTENSION;
+	public static final String TRACE_FILE_EXTENSION = "prob2trace";
+	public static final String TRACE_FILE_PATTERN = "*." + TRACE_FILE_EXTENSION;
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	@Inject
