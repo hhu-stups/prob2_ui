@@ -24,11 +24,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFileHandler<T> {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileHandler.class);
 	protected static final Charset CHARSET = StandardCharsets.UTF_8;
-	protected Logger LOGGER;
 	
 	private final Class<T> clazz;
 	
