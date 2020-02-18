@@ -34,7 +34,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import org.slf4j.LoggerFactory;
 
 public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
-	private static final String FILE_ENDING = "*.prob2trace";
+	private static final String TRACE_FILE_EXTENSION = "prob2trace";
+	private static final String TRACE_FILE_PATTERN = "*." + TRACE_FILE_EXTENSION;
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	@Inject
@@ -155,10 +156,11 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	public void save(PersistentTrace trace, Machine machine) {
 		File file = showSaveDialog(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"),
 				currentProject.getLocation().toFile(),
-				machine.getName() + FILE_ENDING.substring(1),
+				machine.getName() + "." + TRACE_FILE_EXTENSION,
 				new ExtensionFilter(
-						String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), FILE_ENDING),
-						FILE_ENDING));
+					String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_PATTERN),
+					TRACE_FILE_PATTERN
+				));
 		save(trace, file);
 		if(file != null) {
 			final Path projectLocation = currentProject.getLocation();
