@@ -20,6 +20,7 @@ import com.google.gson.JsonStreamParser;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -73,10 +74,10 @@ public abstract class AbstractFileHandler<T> {
 	}
 
 	protected File showSaveDialogForManyFiles(String title, File initialDirectory) {
-		FileChooser fileChooser = new FileChooser();
+		DirectoryChooser fileChooser = new DirectoryChooser();
 		fileChooser.setTitle(title);
 		fileChooser.setInitialDirectory(initialDirectory);
-		return fileChooser.showSaveDialog(stageManager.getCurrent());
+		return fileChooser.showDialog(stageManager.getCurrent());
 	}
 	
 	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) {

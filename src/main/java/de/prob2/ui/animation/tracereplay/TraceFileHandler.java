@@ -6,12 +6,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
+	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
 	public static final String TRACE_FILE_PATTERN = "*." + TRACE_FILE_EXTENSION;
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
@@ -99,18 +101,6 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		}
 	}
 
-	private void deleteFile(File file) throws IOException {
-		if(file.isDirectory() && file.exists()) {
-			String[] children = file.list();
-			if(children != null) {
-				for (String child : children) {
-					deleteFile(new File(file, child));
-				}
-			}
-		}
-		Files.deleteIfExists(Paths.get(file.getAbsolutePath()));
-	}
-
 	public void save(TestCaseGenerationItem item, Machine machine) {
 		List<PersistentTrace> traces = item.getExamples().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
@@ -124,17 +114,24 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		if(file == null) {
 			return;
 		}
-		int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
-		try {
-			deleteFile(file);
-			Files.createDirectory(Paths.get(file.getAbsolutePath()));
+
+		try (final Stream<Path> children = Files.list(file.toPath())) {
+			if (children.anyMatch(p -> p.getFileName().toString().startsWith(TEST_CASE_TRACE_PREFIX))) {
+				// Directory already contains test case trace - ask if the user really wants to save here.
+				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", file).showAndWait();
+				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
+					return;
+				}
+			}
 		} catch (IOException e) {
-			LOGGER.warn("Failed to create directory", e);
+			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
 			return;
 		}
+
+		int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 		for(int i = 0; i < numberGeneratedTraces; i++) {
 			StringBuilder sb = new StringBuilder();
-			sb.append("TestCaseGeneration_");
+			sb.append(TEST_CASE_TRACE_PREFIX);
 			sb.append(i);
 			sb.append(".prob2trace");
 			String fileName = sb.toString();
