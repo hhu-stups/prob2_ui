@@ -1,25 +1,20 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
-
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public class TestCaseGenerator {
@@ -58,7 +53,7 @@ public class TestCaseGenerator {
 			final Object finalResult = result;
 			Platform.runLater(() -> {
 				resultHandler.handleTestCaseGenerationResult(currentItem, finalResult, checkAll);
-				updateMachine(currentProject.getCurrentMachine());
+				updateMachine();
 			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "Test Case Generation Thread");
@@ -76,7 +71,7 @@ public class TestCaseGenerator {
 		currentJobThreads.removeAll(removedThreads);
 	}
 	
-	public void updateMachine(Machine machine) {
+	public void updateMachine() {
 		injector.getInstance(TestCaseGenerationView.class).refresh();
 	}
 	
