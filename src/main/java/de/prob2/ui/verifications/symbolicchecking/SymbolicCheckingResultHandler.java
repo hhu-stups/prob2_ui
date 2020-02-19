@@ -1,13 +1,8 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
@@ -34,6 +29,11 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+
 @Singleton
 public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHandler implements ISymbolicResultHandler {
 	
@@ -47,7 +47,7 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
-		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
+		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class, CommandInterruptedException.class));
 		this.parseErrors.addAll(Arrays.asList(CheckError.class, EvaluationException.class));
 	}
 	
@@ -55,12 +55,12 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			item.setChecked(Checked.SUCCESS);
+		} else if(interrupted.contains(clazz)) {
+			item.setChecked(Checked.INTERRUPTED);
 		} else if(parseErrors.contains(clazz)) {
 			item.setChecked(Checked.PARSE_ERROR);
 		} else if(error.contains(clazz) || counterExample.contains(clazz) || result instanceof Throwable) {
 			item.setChecked(Checked.FAIL);
-		} else {
-			item.setChecked(Checked.INTERRUPTED);
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, currentTrace.getCurrentState(), traces);
