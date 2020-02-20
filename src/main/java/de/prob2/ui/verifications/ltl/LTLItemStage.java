@@ -1,8 +1,12 @@
 package de.prob2.ui.verifications.ltl;
 
+import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.layout.BindableGlyph;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
+
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -23,8 +27,13 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	@FXML
 	protected TextArea taErrors;
+
+	@FXML
+	protected HelpButton helpButton;
 	
 	protected final CurrentProject currentProject;
+
+	protected final FontSize fontSize;
 	
 	protected final ILTLItemHandler ltlItemHandler;
 	
@@ -36,9 +45,10 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected WebEngine engine;
 
-	public LTLItemStage(final CurrentProject currentProject, final ILTLItemHandler ltlItemHandler, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
+	public LTLItemStage(final CurrentProject currentProject, final FontSize fontSize, final ILTLItemHandler ltlItemHandler, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
 		super();
 		this.currentProject = currentProject;
+		this.fontSize = fontSize;
 		this.ltlItemHandler = ltlItemHandler;
 		this.resultHandler = resultHandler;
 		this.builtinsStage = builtinsStage;
@@ -47,6 +57,8 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	@FXML
 	public void initialize() {
+		helpButton.setHelpContent(this.getClass());
+		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
 		engine = taCode.getEngine();
 		engine.load(LTLItemStage.class.getResource("LTLEditor.html").toExternalForm());
 		engine.setJavaScriptEnabled(true);

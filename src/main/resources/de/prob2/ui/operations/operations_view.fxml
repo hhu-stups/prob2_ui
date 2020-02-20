@@ -18,6 +18,7 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="OperationsView" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -64,35 +65,37 @@
 					<Tooltip text="%operations.operationsView.tooltips.showUnambiguous"/>
 				</tooltip>
 			</ToggleButton>
-			<MenuButton fx:id="randomButton">
-				<items>
-					<MenuItem fx:id="oneRandomEvent" onAction="#random" text="%operations.operationsView.random.one" />
-					<MenuItem fx:id="fiveRandomEvents" onAction="#random" text="%operations.operationsView.random.five" />
-					<MenuItem fx:id="tenRandomEvents" onAction="#random" text="%operations.operationsView.random.ten" />
-					<CustomMenuItem fx:id="someRandomEvents">
-						<content>
-							<AnchorPane>
-								<TextField fx:id="randomText" onAction="#random"
-									promptText="%operations.operationsView.random.some.prompt" />
-							</AnchorPane>
-						</content>
-					</CustomMenuItem>
-				</items>
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RANDOM" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%operations.operationsView.tooltips.random" />
-				</tooltip>
-			</MenuButton>
-			<Button fx:id="cancelButton" onAction="#cancel">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="STOP" bindableFontSize="${fontSize.fontSize + 2}"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%operations.operationsView.tooltips.cancelRandom"/>
-				</tooltip>
-			</Button>
+			<StackPane>
+				<MenuButton fx:id="randomButton">
+					<items>
+						<MenuItem fx:id="oneRandomEvent" onAction="#random" text="%operations.operationsView.random.one" />
+						<MenuItem fx:id="fiveRandomEvents" onAction="#random" text="%operations.operationsView.random.five" />
+						<MenuItem fx:id="tenRandomEvents" onAction="#random" text="%operations.operationsView.random.ten" />
+						<CustomMenuItem fx:id="someRandomEvents">
+							<content>
+								<AnchorPane>
+									<TextField fx:id="randomText" onAction="#random"
+										promptText="%operations.operationsView.random.some.prompt" />
+								</AnchorPane>
+							</content>
+						</CustomMenuItem>
+					</items>
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RANDOM" bindableFontSize="${fontSize.fontSize + 2}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%operations.operationsView.tooltips.random" />
+					</tooltip>
+				</MenuButton>
+				<Button fx:id="cancelButton" visible="false" onAction="#cancel">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="STOP" bindableFontSize="${fontSize.fontSize + 2}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%operations.operationsView.tooltips.cancelRandom"/>
+					</tooltip>
+				</Button>
+			</StackPane>
 		</HBox>
 	</VBox>
 	<ListView fx:id="opsListView" VBox.vgrow="always" />

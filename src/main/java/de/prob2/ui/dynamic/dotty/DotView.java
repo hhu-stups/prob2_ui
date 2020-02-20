@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetAllDotCommands;
 import de.prob.animator.command.GetDotForVisualizationCommand;
@@ -152,7 +153,7 @@ public class DotView extends DynamicCommandStage {
 				if(!Thread.currentThread().isInterrupted()) {
 					loadGraph(text);
 				}
-			} catch (InterruptedException e) {
+			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Dot visualization interrupted", e);
 				Thread.currentThread().interrupt();
 				Platform.runLater(this::reset);
@@ -185,9 +186,6 @@ public class DotView extends DynamicCommandStage {
 				new GetDotForVisualizationCommand(trace.getCurrentState(), item, dotFilePath.toFile(), formulas)
 			);
 			trace.getStateSpace().execute(ccmd);
-			if (ccmd.isInterrupted()) {
-				throw new InterruptedException("Visualization command execution was interrupted");
-			}
 			final String dot = getDotCmd.getValue();
 			final String dotEngine = item.getAdditionalInfo().stream()
 				.filter(t -> "preferred_dot_type".equals(t.getFunctor()))

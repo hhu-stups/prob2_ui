@@ -1,14 +1,7 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
@@ -25,6 +18,12 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLParseError;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 @Singleton
 public class LTLResultHandler extends AbstractVerificationsResultHandler {
@@ -59,7 +58,9 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 			item.setCounterExample(null);
 		}
 		if(resultItem != null) {
-			item.setResultItem(new LTLCheckingResultItem(resultItem.getChecked(), errorMarkers, resultItem.getHeaderBundleKey(), resultItem.getMessageBundleKey(), resultItem.getMessageParams()));
+			//errorMarkers contains errors, resultItem only contains errors from the exception
+			String errorMessage = errorMarkers.stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
+			item.setResultItem(new LTLCheckingResultItem(resultItem.getChecked(), errorMarkers, resultItem.getHeaderBundleKey(), resultItem.getMessageBundleKey(), errorMessage));
 			return resultItem.getChecked();
 		}
 		return Checked.FAIL;

@@ -35,8 +35,6 @@ import de.prob2.ui.verifications.CheckingResultItem;
 @Singleton
 public class SymbolicAnimationResultHandler extends AbstractResultHandler implements ISymbolicResultHandler {
 
-	private static final String GENERAL_RESULT_MESSAGE = "common.result.message";
-	
 	private final CurrentTrace currentTrace;
 	
 	protected ArrayList<Class<?>> success;
@@ -130,10 +128,10 @@ public class SymbolicAnimationResultHandler extends AbstractResultHandler implem
 					"animation.symbolic.result.succeeded.message");
 		} else if(parseErrors.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
-					GENERAL_RESULT_MESSAGE, result);
+					"common.result.message", result);
 		} else if(interrupted.contains(result.getClass())) {
 			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
-					GENERAL_RESULT_MESSAGE, ((IModelCheckingResult) result).getMessage());
+					"common.result.message", ((IModelCheckingResult) result).getMessage());
 		}
 		return resultItem;
 	}

@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.Objects;
+
 import com.google.inject.Injector;
 
 import de.prob.animator.command.ComputeCoverageCommand;
@@ -15,12 +17,12 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import java.util.Objects;
 
 
 public final class ModelCheckStats extends AnchorPane {
@@ -64,10 +66,6 @@ public final class ModelCheckStats extends AnchorPane {
 		final StateSpace stateSpace = modelChecker.getStateSpace();
 		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
 		stateSpace.execute(cmd);
-		if (cmd.isInterrupted()) {
-			Thread.currentThread().interrupt();
-			return;
-		}
 		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
 
 		if (coverage != null) {

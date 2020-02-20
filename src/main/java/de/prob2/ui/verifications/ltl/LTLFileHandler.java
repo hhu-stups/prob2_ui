@@ -18,25 +18,24 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
 import javafx.stage.FileChooser.ExtensionFilter;
 
-import org.slf4j.LoggerFactory;
-
 public class LTLFileHandler extends AbstractFileHandler<LTLData> {
+	public static final String LTL_FILE_EXTENSION = "ltl";
+	public static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
 
 	@Inject
 	public LTLFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
 		super(gson, currentProject, stageManager, bundle, versionInfo, LTLData.class);
-		this.LOGGER = LoggerFactory.getLogger(LTLFileHandler.class);
-		this.FILE_ENDING = "*.ltl";
 	}
 	
 	public void save() {
 		Machine machine = currentProject.getCurrentMachine();
 		File file = showSaveDialog(bundle.getString("verifications.ltl.ltlView.fileChooser.saveLTL.title"),
 				currentProject.getLocation().toFile(), 
-				machine.getName() + FILE_ENDING.substring(1),
+				machine.getName() + "." + LTL_FILE_EXTENSION,
 				new ExtensionFilter(
-						String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), FILE_ENDING),
-						FILE_ENDING));
+					String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_PATTERN),
+					LTL_FILE_PATTERN
+				));
 		List<LTLFormulaItem> formulas = machine.getLTLFormulas().stream()
 				.filter(LTLFormulaItem::selected)
 				.collect(Collectors.toList());

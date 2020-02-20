@@ -44,7 +44,7 @@ Durch Drücken von "LTL-Formel hinzufügen" oder "LTL-Pattern hinzufügen" wird 
 
 ### Zusammenfassung der von ProB unterstützten LTL Syntax für Muster
 
-* Vorhandene Typen: Nicht negative ganze Zahlen, Sequenzen, LTL Formel
+* Vorhandene Typen: num (Nicht negative ganze Zahlen), seq (Sequenzen), var (LTL Formel)
 * Definition von Variablen: `<Typ>` `<Bezeichner>`: `<Wert>`
 * Zuweisung von Variablen: `<Bezeichner>`: `<Wert>`
 * Scopes für Variablen: Schleife, Muster, Global (bei der Benutzung einer Variable wird von einem lokale Scope immer ein Scope weiter nach außen geschaut, bis die passende Variable gefunden ist)
@@ -56,8 +56,10 @@ Durch Drücken von "LTL-Formel hinzufügen" oder "LTL-Pattern hinzufügen" wird 
 		<Rumpf>
 ```
 
->Hierbei enthält die Parameterliste Parameter von der Form `<Bezeichner>` : `<Typ-Bezeichner>`, wobei die Parameter durch Kommata getrennt sind.
-Der Rumpf kann Variablen definieren und zuweisen und Schleifen enthalten. Das Überladen von Mustern ist erlaubt.
+> Die Parameterliste enthält Parameter, die von folgender Form sind:
+* `<Bezeichner>` : `<Typ-Bezeichner>` für Variablen vom Typ num und seq
+* `<Bezeichner>` für Variablen vom Typ var
+> Die Parameter sind durch Kommata getrennt. Der Rumpf kann Variablen definieren und zuweisen und Schleifen enthalten. Das Überladen von Mustern ist erlaubt.
 
 * Musteraufruf: `<Name>`( `<Argument-Liste>` )
 
@@ -104,6 +106,50 @@ after_until(`<Linker Begrenzer>`, `<Rechter Begrenzer>`, `<Eigenschaft>`)
 
 * Einzeilige Kommentare : // Kommentar
 * Mehrzeilige Kommentare: /* Kommentar */
+
+* Beispiele:
+
+Beispiel mit LTL Formel:
+
+```
+//Beschreibung eines Teils der Systemausführung, der nur Zustände mit einer gewünschten Eigenschaft enthält. Dies ist auch bekannt als "Always"
+
+def universality(p):
+  G(p)
+```
+
+Beispiel mit Schleife und Überladen:
+
+```
+//Beschreibung eines Teils der Systemausführung, der eine Instanz bestimmter Ereignisse und Zustände enthält. Dies ist auch bekannt als "Eventually" 
+//Mit einem gegebenen n, ist es möglich anzugeben, dass diese Zustände maximal n Mal auftreten.
+
+def existence(p):
+  F(p)
+
+def existence(p, n : num):
+  var result: G(!p)
+  count 0 up to n:
+	result: !p W (p W result)
+  end
+  result
+```
+
+Beispiel mit Sequenzaufruf und Überladen:
+
+```
+//Beschreibung von Ursache-Wirkungs-Beziehungen zwischen zwei Ereignissen bzw. Zuständen. Auf das Auftreten des ersten Ereignisses (Ursache) muss das Auftreten des zweiten Ereignisses (Wirkung) folgen. Dies ist auch bekannt als Follows und Leads-to.
+// Mit einer gegebenen Sequenz von Zuständen, kann man z.B. beschreiben dass eine bestimmte Folge von Zuständen auf einen Zustand folgt
+
+def response(s, p):
+  G(p => F(s))
+	
+def response(s : seq, p):
+  G(p => F(seq(s)))
+	
+def response(s, p : seq):
+  G(seq(p) => F(s))
+```
 
 ## <a id="Symbolic"> Symbolic Checking </a>
 

@@ -1,22 +1,7 @@
 package de.prob2.ui.config;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.model.brules.RulesModelFactory;
 import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
@@ -29,9 +14,21 @@ import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob2.ui.project.ProjectManager;
-
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 @Singleton
 public class FileChooserManager {
@@ -56,7 +53,6 @@ public class FileChooserManager {
 
 	private final ResourceBundle bundle;
 
-	private final Collection<String> machineExtensionPatterns;
 	private final List<FileChooser.ExtensionFilter> machineExtensionFilters;
 
 	private final Map<Kind, Path> initialDirectories = new EnumMap<>(Kind.class);
@@ -65,7 +61,6 @@ public class FileChooserManager {
 	private FileChooserManager(final Config config, final ResourceBundle bundle) {
 		this.bundle = bundle;
 
-		this.machineExtensionPatterns = FactoryProvider.EXTENSION_TO_FACTORY_MAP.keySet().stream().map(ext -> "*." + ext).collect(Collectors.toSet());
 		this.machineExtensionFilters = new ArrayList<>();
 		FactoryProvider.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
 			final String name;
@@ -142,14 +137,14 @@ public class FileChooserManager {
 		if (projects) {
 			allExts.add(ProjectManager.PROJECT_FILE_PATTERN);
 			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), ProjectManager.PROJECT_FILE_PATTERN), ProjectManager.PROJECT_FILE_PATTERN));
+			allExts.sort(String::compareTo);
 		}
 		
 		if (machines) {
-			allExts.addAll(this.machineExtensionPatterns);
+			allExts.addAll(FactoryProvider.EXTENSION_PATTERNS_ORDERED);
 			fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		}
-		
-		allExts.sort(String::compareTo);
+
 		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
 		return this.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
@@ -194,11 +189,10 @@ public class FileChooserManager {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
 		
-		final List<String> allExts = new ArrayList<>(this.machineExtensionPatterns);
+		final List<String> allExts = new ArrayList<>(FactoryProvider.EXTENSION_PATTERNS_ORDERED);
 		fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
-		
-		allExts.sort(String::compareTo);
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
+
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
 		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 

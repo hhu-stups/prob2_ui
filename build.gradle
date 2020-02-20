@@ -1,7 +1,7 @@
 import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 plugins {
-	id "com.github.johnrengelman.shadow" version "5.0.0"
+	id "com.github.johnrengelman.shadow" version "5.2.0"
 	id "edu.sc.seis.macAppBundle" version "2.3.0"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
 	id "org.openjfx.javafxplugin" version "0.0.8" apply false
@@ -9,7 +9,6 @@ plugins {
 
 apply plugin: 'application'
 apply plugin: 'eclipse'
-apply plugin: 'idea'
 
 project.group = "de.hhu.stups"
 project.version = "1.0.1-SNAPSHOT"
@@ -35,15 +34,10 @@ sourceCompatibility="1.8"
 targetCompatibility="1.8"
 
 repositories {
-	mavenLocal()
 	jcenter()
 	maven {
 		name "sonatype snapshots"
 		url "https://oss.sonatype.org/content/repositories/snapshots"
-	}
-	maven {
-		name "sonatype release"
-		url "https://oss.sonatype.org/content/repositories/releases"
 	}
 }
 
@@ -96,16 +90,18 @@ configurations.all {
 }
 
 dependencies {
-	compile group: "com.google.code.gson", name: "gson", version: "2.8.5"
-	compile group: "com.googlecode.java-diff-utils", name: "diffutils", version: "1.3.0"
-	compile group: "de.codecentric.centerdevice", name: "centerdevice-nsmenufx", version: "2.1.6"
-	compile group: "de.hhu.stups", name: "de.prob2.kernel", version: "4.0.0-SNAPSHOT", changing: true
-	compile group: "org.controlsfx", name: "controlsfx", version: "8.40.15"
-	compile group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.1"
-	compile group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
-	compile group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.2"
-	compile group: "org.pf4j", name: "pf4j", version: "2.6.0"
-	compile group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
+	implementation group: "com.google.code.gson", name: "gson", version: "2.8.6"
+	implementation group: "com.google.guava", name: "guava", version: "28.2-jre"
+	implementation group: "com.googlecode.java-diff-utils", name: "diffutils", version: "1.3.0"
+	implementation group: "commons-cli", name: "commons-cli", version: "1.4"
+	implementation group: "de.codecentric.centerdevice", name: "centerdevice-nsmenufx", version: "2.1.7"
+	implementation group: "de.hhu.stups", name: "de.prob2.kernel", version: "4.0.0-SNAPSHOT"
+	implementation group: "org.controlsfx", name: "controlsfx", version: "8.40.16"
+	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.3"
+	implementation group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
+	implementation group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.2"
+	implementation group: "org.pf4j", name: "pf4j", version: "2.6.0"
+	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 }
 
 if (JavaVersion.current().java11Compatible) {
@@ -131,6 +127,16 @@ eclipse.classpath.file.whenMerged {
 					entry.accessRules.add(new AccessRule('accessible', 'netscape/**'))
 			}
 		}
+}
+
+final generatedResourcesDir = new File(project.buildDir, "generated-src/main/resources")
+
+sourceSets {
+	main {
+		resources {
+			srcDir(generatedResourcesDir)
+		}
+	}
 }
 
 def readCurrentGitCommit() {
@@ -170,28 +176,40 @@ macAppBundle {
 macAppBundle.mainClassName = mainClassName
 
 wrapper {
-	gradleVersion = "5.6.2"
+	gradleVersion = "6.2"
 	distributionType = Wrapper.DistributionType.ALL
 }
 
-final helpScript = "./help.sh"
-final helpDir = file("src/main/resources/help")
-task createHelp(//type: Exec
-) {
-	inputs.file(helpScript)
-	inputs.dir(helpDir)
-	outputs.dir(helpDir)
-	//commandLine(helpScript)
-}
+final helpSourceDir = file("src/main/resources/help")
+final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
+final helpOutputDir = new File(generatedResourcesDir, "help")
+final helpFilterLuaScript = file("pandoc_links_to_html.lua")
+task createHelp {
+	inputs.file(helpFilterLuaScript)
+	inputs.files(helpSourceFiles)
+	outputs.dir(helpOutputDir)
 
-task cleanHelp(type: Delete) {
-	delete(fileTree(dir: helpDir, include: ["**/*.adoc", "**/*.html"]))
+	doLast {
+		helpSourceFiles.each {inputFile ->
+			final relativePath = helpSourceDir.toPath().relativize(inputFile.toPath())
+			final relativePathWithNewExtension = relativePath.parent.resolve(relativePath.fileName.toString().replaceAll(/\.md$/, ".html"))
+			final outputFile = helpOutputDir.toPath().resolve(relativePathWithNewExtension).toFile()
+			outputFile.parentFile.mkdirs()
+			exec {
+				executable = "pandoc"
+				args = [
+					"--from=markdown_github",
+					"--to=html",
+					"--standalone",
+					"--lua-filter=${helpFilterLuaScript}",
+					"--output=${outputFile}",
+					"${inputFile}",
+				]
+			}
+		}
+	}
 }
-
-if (!project.hasProperty("skipHelp") || project.skipHelp != "true") {
-	processResources.dependsOn(createHelp)
-	clean.dependsOn(cleanHelp)
-}
+processResources.dependsOn(createHelp)
 
 if (project.hasProperty("probHome")) {
 	allprojects {

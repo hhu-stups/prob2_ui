@@ -387,6 +387,9 @@
 	-fx-background-color: transparent;
 	-fx-shape: " ";
 }
+.scroll-pane {
+	-fx-padding: 0.0;
+}
 .scroll-pane > .corner {
 	-fx-background-color: transparent;
 	-fx-background-insets: 0.0 1.0 1.0 0.0;
@@ -438,6 +441,9 @@
 /************************************************************************************
  * SplitView																		  *
  ************************************************************************************/
+.split-pane {
+	-fx-padding: 0.0;
+}
 .split-pane > .split-pane-divider {
 	-fx-padding: 0.0 0.15em 0.0 0.2em;
 }
@@ -467,7 +473,7 @@
  * BEditor																			*
  ************************************************************************************/
 
-.editor .text {
+.code-area.editor {
 	-fx-font-weight: bold;
 	-fx-font-size: 15;
 }
@@ -478,47 +484,38 @@
 
 .editor .editor_identifier {
 	-fx-fill:black;
-	-fx-font-style: normal;
 }
 
 .editor .editor_assignments {
 	-fx-fill:darkblue;
-	-fx-font-style: normal;
 }
 
 .editor .editor_logical{
 	-fx-fill:tomato;
-	-fx-font-style: normal;
 }
 
 .editor .editor_arithmetic{
 	-fx-fill:#5883be;
-	-fx-font-style: normal;
 }
 
 .editor .editor_types {
 	-fx-fill:darkred;
-	-fx-font-style: normal;
 }
 
 .editor .editor_string {
 	-fx-fill:green;
-	-fx-font-style: normal;
 }
 
 .editor .editor_unsupported{
 	-fx-background-color: yellow;
-	-fx-font-style: normal;
 }
 
 .editor .editor_ctrlkeyword {
 	-fx-fill:darkviolet;
-	-fx-font-style: normal;
 }
 
 .editor .editor_keyword {
 	-fx-fill:blue;
-	-fx-font-style: normal;
 }
 
 .editor .editor_comment {
@@ -577,10 +574,6 @@
 }
 .text-area .scroll-bar {
 	-fx-background-color: white;
-}
-
-.text-area-error {
-	-fx-text-fill: red;
 }
 
 .text-area-with-border {

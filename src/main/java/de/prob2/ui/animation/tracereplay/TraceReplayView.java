@@ -55,8 +55,6 @@ import org.controlsfx.glyphfont.FontAwesome;
 @FXMLInjected
 @Singleton
 public class TraceReplayView extends ScrollPane implements ISelectableCheckingView {
-	private static final String TRACE_FILE_ENDING = "*.prob2trace";
-
 	@FXML
 	private TableView<ReplayTrace> traceTableView;
 	@FXML
@@ -282,10 +280,10 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.loadTrace.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters()
-		.add(new ExtensionFilter(
-				String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_ENDING),
-				TRACE_FILE_ENDING));
+		fileChooser.getExtensionFilters().add(new ExtensionFilter(
+			String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TraceFileHandler.TRACE_FILE_PATTERN),
+			TraceFileHandler.TRACE_FILE_PATTERN
+		));
 		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			Path relative = currentProject.getLocation().relativize(traceFile);

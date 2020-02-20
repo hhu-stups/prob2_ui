@@ -1,23 +1,17 @@
 package de.prob2.ui.helpsystem;
 
 import java.io.File;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.prob.Main;
-
-import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 public class HelpButton extends Button{
@@ -31,28 +25,10 @@ public class HelpButton extends Button{
 		stageManager.loadFXML(this, "helpbutton.fxml");
 	}
 
-	private Map<Class<?>, String> prepareMap(InputStream stream) {
-		Map<Class<?>, String> map = new HashMap<>();
-		Scanner scanner = new Scanner(stream);
-		while (scanner.hasNext()) {
-			String s = scanner.nextLine();
-			int splitIndex = s.indexOf(',');
-			String className = s.substring(0, splitIndex);
-			String htmlFileName = s.substring(splitIndex + 1);
-			try {
-				map.put(Class.forName(className), htmlFileName);
-			} catch (ClassNotFoundException e) {
-				LoggerFactory.getLogger(HelpButton.class).error("No class with this name found", e);
-			}
-		}
-		scanner.close();
-		return map;
-	}
-
 	@FXML
 	public void openHelp() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-		helpSystemStage.help.isHelpButton = true;
+		injector.getInstance(HelpSystem.class).isHelpButton = true;
 		if (helpContent!=null) {
 			helpSystemStage.setContent(helpContent, anchor);
 		}
@@ -61,33 +37,23 @@ public class HelpButton extends Button{
 	}
 
 	public void setHelpContent(Class<?> clazz) {
-		HelpSystem help = injector.getInstance(HelpSystemStage.class).help;
-		String helpSubdirectory = help.helpSubdirectoryString;
-		String main;
-		if (help.isJar) {
-			main = Main.getProBDirectory() +
-					"prob2ui" + File.separator +
-					"help" + File.separator +
-					helpSubdirectory + File.separator;
-		} else {
-			main = ProB2.class.getClassLoader().getResource(
-					"help" + File.separator +
-					helpSubdirectory + File.separator).toString();
+		HelpSystem help = injector.getInstance(HelpSystem.class);
+		File main = help.getHelpSubdirectory();
+		String link = help.getHelpFileForClass(clazz);
+		String htmlFile = link;
+		if (link.contains("#")) {
+			int splitIndex = link.indexOf('#');
+			htmlFile = link.substring(0, splitIndex);
+			anchor = link.substring(splitIndex);
 		}
-		setHelp(clazz, main, prepareMap(this.getClass().getClassLoader().getResourceAsStream("help/"+helpSubdirectory+".txt")));
-	}
-
-	private void setHelp(Class<?> clazz, String main, Map<Class<?>, String> map) {
-		helpContent = new File(main + "ProB2UI.html");
-		map.entrySet().stream().filter(e -> clazz.equals(e.getKey())).forEach(e -> {
-			String link = e.getValue();
-			String htmlFile = link;
-			if (link.contains("#")) {
-				int splitIndex = link.indexOf('#');
-				htmlFile = link.substring(0, splitIndex);
-				anchor = link.substring(splitIndex);
-			}
-			helpContent = new File(main + htmlFile);
-		});
+		final URI htmlFileUri;
+		try {
+			// Use the multi-arg URI constructor to quote (percent-encode) the htmlFile path.
+			// This is needed for help files with spaces in the path, which are not valid URIs without quoting the spaces first.
+			htmlFileUri = new URI(null, htmlFile, null);
+		} catch (URISyntaxException exc) {
+			throw new AssertionError("Invalid help file name", exc);
+		}
+		helpContent = new File(main.toURI().resolve(htmlFileUri));
 	}
 }

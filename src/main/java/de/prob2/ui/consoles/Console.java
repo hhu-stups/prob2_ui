@@ -1,14 +1,5 @@
 package de.prob2.ui.consoles;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.ContextMenu;
@@ -20,11 +11,19 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
-
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public abstract class Console extends StyleClassedTextArea {
@@ -247,6 +246,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.moveTo(this.getLength());
 		deselect();
 		currentPosInLine = charCounterInLine;
+		requestFollowCaret(); //This forces the text area to scroll to the bottom. Invoking scrollYToPixel does not have the expected effect
 	}
 	
 	public void reset() {
@@ -298,7 +298,6 @@ public abstract class Console extends StyleClassedTextArea {
 		searchHandler.handleEnter();
 		this.appendText('\n' + prompt.get());
 		this.setStyle(getLineNumber(), Collections.emptyList());
-		this.scrollYToPixel(Double.MAX_VALUE);
 		goToLastPos();
 	}
 		
@@ -357,7 +356,6 @@ public abstract class Console extends StyleClassedTextArea {
 		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
 		currentPosInLine = charCounterInLine;
-		this.scrollYToPixel(Double.MAX_VALUE);
 	}
 	
 	private void handleDeletion(KeyEvent e) {

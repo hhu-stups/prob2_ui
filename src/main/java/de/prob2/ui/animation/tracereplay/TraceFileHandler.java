@@ -1,8 +1,23 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
+
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
@@ -12,33 +27,24 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
+	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
+	public static final String TRACE_FILE_EXTENSION = "prob2trace";
+	public static final String TRACE_FILE_PATTERN = "*." + TRACE_FILE_EXTENSION;
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	@Inject
 	public TraceFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
 		super(gson, currentProject, stageManager, bundle, versionInfo, PersistentTrace.class);
-		this.LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
-		this.FILE_ENDING = "*.prob2trace";
 	}
 
 	@Override
@@ -95,18 +101,6 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		}
 	}
 
-	private void deleteFile(File file) throws IOException {
-		if(file.isDirectory() && file.exists()) {
-			String[] children = file.list();
-			if(children != null) {
-				for (String child : children) {
-					deleteFile(new File(file, child));
-				}
-			}
-		}
-		Files.deleteIfExists(Paths.get(file.getAbsolutePath()));
-	}
-
 	public void save(TestCaseGenerationItem item, Machine machine) {
 		List<PersistentTrace> traces = item.getExamples().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
@@ -120,17 +114,24 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		if(file == null) {
 			return;
 		}
-		int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
-		try {
-			deleteFile(file);
-			Files.createDirectory(Paths.get(file.getAbsolutePath()));
+
+		try (final Stream<Path> children = Files.list(file.toPath())) {
+			if (children.anyMatch(p -> p.getFileName().toString().startsWith(TEST_CASE_TRACE_PREFIX))) {
+				// Directory already contains test case trace - ask if the user really wants to save here.
+				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", file).showAndWait();
+				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
+					return;
+				}
+			}
 		} catch (IOException e) {
-			LOGGER.warn("Failed to create directory", e);
+			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
 			return;
 		}
+
+		int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 		for(int i = 0; i < numberGeneratedTraces; i++) {
 			StringBuilder sb = new StringBuilder();
-			sb.append("TestCaseGeneration_");
+			sb.append(TEST_CASE_TRACE_PREFIX);
 			sb.append(i);
 			sb.append(".prob2trace");
 			String fileName = sb.toString();
@@ -144,8 +145,8 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		}
 		if(traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION,
-					"animation.symbolic.testcasegeneration.notAllTestCasesGenerated.header",
-					"animation.symbolic.testcasegeneration.notAllTestCasesGenerated.content",
+					"animation.testcase.notAllTestCasesGenerated.header",
+					"animation.testcase.notAllTestCasesGenerated.content",
 					NUMBER_MAXIMUM_GENERATED_TRACES).showAndWait();
 		}
 	}
@@ -153,10 +154,11 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	public void save(PersistentTrace trace, Machine machine) {
 		File file = showSaveDialog(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"),
 				currentProject.getLocation().toFile(),
-				machine.getName() + FILE_ENDING.substring(1),
+				machine.getName() + "." + TRACE_FILE_EXTENSION,
 				new ExtensionFilter(
-						String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), FILE_ENDING),
-						FILE_ENDING));
+					String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_PATTERN),
+					TRACE_FILE_PATTERN
+				));
 		save(trace, file);
 		if(file != null) {
 			final Path projectLocation = currentProject.getLocation();

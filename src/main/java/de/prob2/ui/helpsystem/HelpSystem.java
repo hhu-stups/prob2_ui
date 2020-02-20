@@ -2,12 +2,16 @@ package de.prob2.ui.helpsystem;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -17,9 +21,11 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -39,10 +45,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public class HelpSystem extends StackPane {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HelpSystem.class);
+
 	@FXML private Button external;
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
@@ -52,17 +61,18 @@ public class HelpSystem extends StackPane {
 	boolean isHelpButton;
 	final String helpSubdirectoryString;
 	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
+	private Properties classToHelpFileMap;
 
 	@Inject
-	public HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
+	private HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
 		stageManager.loadFXML(this, "helpsystem.fxml");
 		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
 		isJar = helpURI.toString().startsWith("jar:");
 		isHelpButton = false;
 		helpSubdirectoryString = findHelpSubdirectory();
-		File helpSubdirectory = getHelpDirectory();
+		extractHelpFiles();
 
-		treeView.setRoot(createNode(helpSubdirectory));
+		treeView.setRoot(createNode(this.getHelpSubdirectory()));
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
@@ -93,6 +103,46 @@ public class HelpSystem extends StackPane {
 		}
 
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
+	}
+
+	private Properties getClassToHelpFileMap() {
+		if (this.classToHelpFileMap == null) {
+			final String resourceName = "help/" + this.helpSubdirectoryString + ".properties";
+			try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(resourceName)) {
+				if (stream != null) {
+					try (final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+						this.classToHelpFileMap = new Properties();
+						this.classToHelpFileMap.load(reader);
+					}
+				} else {
+					LOGGER.error("Help file mapping does not exist: {}", resourceName);
+				}
+			} catch (IOException e) {
+				LOGGER.error("IOException while reading help file mapping", e);
+			}
+		}
+		return this.classToHelpFileMap;
+	}
+
+	String getHelpFileForClass(final Class<?> clazz) {
+		return this.getClassToHelpFileMap().getProperty(clazz.getName());
+	}
+
+	File getHelpSubdirectory() {
+		if (this.isJar) {
+			return new File(Main.getProBDirectory() +
+					"prob2ui" + File.separator +
+					"help" + File.separator +
+					this.helpSubdirectoryString);
+		} else {
+			try {
+				return new File(ProB2.class.getClassLoader().getResource(
+						"help/" +
+						this.helpSubdirectoryString).toURI());
+			} catch (URISyntaxException e) {
+				throw new AssertionError("Help directory URL is not a valid URI", e);
+			}
+		}
 	}
 
 	private TreeItem<String> createNode(final File file) {
@@ -134,20 +184,15 @@ public class HelpSystem extends StackPane {
 		});
 	}
 
-	private File getHelpDirectory() throws IOException, URISyntaxException {
+	private void extractHelpFiles() throws IOException {
 		if (isJar) {
 			Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
-			Map<String, String> env = new HashMap<>();
-			env.put("create", "true");
-			try (FileSystem jarFileSystem = FileSystems.newFileSystem(helpURI, env)) {
+			try (FileSystem jarFileSystem = FileSystems.newFileSystem(helpURI, Collections.emptyMap())) {
 				Path source = jarFileSystem.getPath("/help/");
 				if (!target.toFile().exists()) {
 					copyHelp(source, target);
 				}
 			}
-			return new File(Main.getProBDirectory() + "prob2ui" + File.separator + "help" + File.separator + helpSubdirectoryString);
-		} else {
-			return new File(ProB2.class.getClassLoader().getResource("help/" + helpSubdirectoryString).toURI());
 		}
 	}
 
@@ -161,7 +206,7 @@ public class HelpSystem extends StackPane {
 					Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
 				}
 			} catch (MalformedURLException | UnsupportedEncodingException e) {
-				LoggerFactory.getLogger(HelpSystem.class).error("URL not found", e);
+				LOGGER.error("URL not found", e);
 			}
 		}
 	}

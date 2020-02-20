@@ -15,7 +15,6 @@ import de.prob2.ui.animation.AnimationView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;

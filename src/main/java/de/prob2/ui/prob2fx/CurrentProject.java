@@ -1,14 +1,9 @@
 package de.prob2.ui.prob2fx;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationView;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -23,7 +18,6 @@ import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -39,6 +33,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -156,6 +155,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(LTLView.class).bindMachine(m);
 		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
 		injector.getInstance(ModelcheckingView.class).bindMachine(m);
+		injector.getInstance(TestCaseGenerationView.class).bindMachine(m);
 		injector.getInstance(TraceReplayView.class).refresh();
 		injector.getInstance(StatusBar.class).reset();
 	}

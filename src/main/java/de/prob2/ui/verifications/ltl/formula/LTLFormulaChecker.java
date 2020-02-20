@@ -1,17 +1,9 @@
 package de.prob2.ui.verifications.ltl.formula;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
-import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLChecker;
@@ -33,14 +25,17 @@ import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLView;
-
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -159,8 +154,8 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 	private Object getResult(LtlParser parser, List<LTLMarker> errorMarkers, LTLFormulaItem item) {
 		LTLParseListener parseListener = parseFormula(parser);
 		errorMarkers.addAll(parseListener.getErrorMarkers());
-		LTL formula = null;
 		try {
+			final LTL formula;
 			if(!parseListener.getErrorMarkers().isEmpty()) {
 				formula = new LTL(item.getCode(), new ClassicalBParser());
 			} else {
@@ -172,24 +167,20 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 				//TODO
 				//LTLError error = (LTLError) res;
 				//errorMarkers.add(new LTLMarker("error", res.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), error.getMessage()));
+				errorMarkers.add(new LTLMarker("error", 0, 0, res.getMessage().length(), res.getMessage()));
 			}
 			injector.getInstance(StatsView.class).update(currentTrace.get());
 			return res;
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
-			ProBError parseError = error;
-			List<ErrorItem.Location> errorLocations = parseError.getErrors().stream()
-					.flatMap(err -> err.getLocations().stream())
-					.collect(Collectors.toList());
-			errorMarkers.addAll(errorLocations
-				.stream()
+			error.getErrors().stream()
+				.flatMap(err -> err.getLocations().stream())
 				.map(location -> new LTLMarker("error", location.getStartLine(), location.getStartColumn(), location.getEndColumn() - location.getStartColumn(), error.getMessage()))
-				.collect(Collectors.toList()));
+				.collect(Collectors.toCollection(() -> errorMarkers));
 			return error;
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
-			LtlParseException parseError = error;
-			errorMarkers.add(new LTLMarker("error", parseError.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), parseError.getMessage()));
+			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.toString().length(), error.toString()));
 			return error;
 		}
 	}

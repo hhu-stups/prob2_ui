@@ -2,6 +2,7 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
@@ -46,7 +47,7 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		this.success.addAll(Arrays.asList(ModelCheckOk.class));
 		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
 												RefinementCheckCounterExample.class));
-		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class));
+		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class, CommandInterruptedException.class));
 		this.parseErrors.addAll(Arrays.asList(CheckError.class, EvaluationException.class));
 	}
 	
@@ -54,12 +55,12 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			item.setChecked(Checked.SUCCESS);
+		} else if(interrupted.contains(clazz)) {
+			item.setChecked(Checked.INTERRUPTED);
 		} else if(parseErrors.contains(clazz)) {
 			item.setChecked(Checked.PARSE_ERROR);
 		} else if(error.contains(clazz) || counterExample.contains(clazz) || result instanceof Throwable) {
 			item.setChecked(Checked.FAIL);
-		} else {
-			item.setChecked(Checked.INTERRUPTED);
 		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, currentTrace.getCurrentState(), traces);
@@ -118,9 +119,7 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 	
 	public void handleFindRedundantInvariants(SymbolicCheckingFormulaItem item, GetRedundantInvariantsCommand cmd) {
 		List<String> result = cmd.getRedundantInvariants();
-		if(cmd.isInterrupted()) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.interrupted", Checked.INTERRUPTED);
-		} else if (result.isEmpty()) {
+		if (result.isEmpty()) {
 			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound", Checked.SUCCESS);
 		} else {
 			final String header = cmd.isTimeout() ? "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.timeout" : "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found";
@@ -165,10 +164,6 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 	
 	public void handleSymbolicChecking(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand cmd) {
 		SymbolicModelcheckCommand.ResultType result = cmd.getResult();
-		if(cmd.isInterrupted()) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.interrupted", Checked.INTERRUPTED);
-			return;
-		}
 		switch(result) {
 			case SUCCESSFUL:
 				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success", Checked.SUCCESS);

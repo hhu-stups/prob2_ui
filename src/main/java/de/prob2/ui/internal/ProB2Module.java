@@ -23,12 +23,14 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob.scripting.StateSpaceProvider;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.ProB2;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
@@ -61,11 +63,13 @@ public class ProB2Module extends AbstractModule {
 
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
 
+	private final ProB2 application;
 	private final RuntimeOptions runtimeOptions;
 	private final BuilderFactory javafxDefaultBuilderFactory;
 
-	public ProB2Module(final RuntimeOptions runtimeOptions) {
+	public ProB2Module(final ProB2 application, final RuntimeOptions runtimeOptions) {
 		super();
+		this.application = application;
 		this.runtimeOptions = runtimeOptions;
 		this.javafxDefaultBuilderFactory = new JavaFXBuilderFactory();
 	}
@@ -83,6 +87,8 @@ public class ProB2Module extends AbstractModule {
 				? MenuToolkit.toolkit(locale)
 				: null;
 		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
+		bind(Application.class).toInstance(this.application);
+		bind(ProB2.class).toInstance(this.application);
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 		bind(Gson.class).toInstance(FxGson.coreBuilder()
 			.disableHtmlEscaping()
