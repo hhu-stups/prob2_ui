@@ -50,7 +50,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -64,6 +66,15 @@ public class DotView extends DynamicCommandStage {
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
+
+	private static final Map<TargetFormat, String> formatToFlag;
+
+	static {
+		formatToFlag = new HashMap<>();
+		formatToFlag.put(TargetFormat.SVG, "-Tsvg");
+		formatToFlag.put(TargetFormat.PNG, "-Tpng");
+		formatToFlag.put(TargetFormat.PDF, "-Tpdf");
+	}
 
 	@FXML
 	private WebView dotView;
@@ -205,20 +216,7 @@ public class DotView extends DynamicCommandStage {
 	}
 
 	private static void writeFileFromDot(final TargetFormat format, final String dotCommand, final String dotEngine, final Path dotFilePath, final Path targetFilePath) throws IOException, InterruptedException {
-		ProcessBuilder dotProcessBuilder;
-		switch(format) {
-			case SVG:
-				dotProcessBuilder = new ProcessBuilder(dotCommand, "-K" + dotEngine, "-Tsvg", dotFilePath.toString(), "-o", targetFilePath.toString());
-				break;
-			case PNG:
-				dotProcessBuilder = new ProcessBuilder(dotCommand, "-K" + dotEngine, "-Tpng", dotFilePath.toString(), "-o", targetFilePath.toString());
-				break;
-			case PDF:
-				dotProcessBuilder = new ProcessBuilder(dotCommand, "-K" + dotEngine, "-Tpdf", dotFilePath.toString(), "-o", targetFilePath.toString());
-				break;
-			default:
-				throw new RuntimeException("Format not supported: " + format);
-		}
+		ProcessBuilder dotProcessBuilder = new ProcessBuilder(dotCommand, "-K" + dotEngine, formatToFlag.get(format), dotFilePath.toString(), "-o", targetFilePath.toString());
 
 		LOGGER.debug("Starting dot command: {}", dotProcessBuilder.command());
 		final Process dotProcess = dotProcessBuilder.start();
@@ -281,48 +279,40 @@ public class DotView extends DynamicCommandStage {
 			return;
 		}
 		FileChooser.ExtensionFilter selectedFilter = fileChooser.getSelectedExtensionFilter();
-		if(selectedFilter.equals(svgFilter)) {
-			saveSvg(file);
-		} else if(selectedFilter.equals(dotFilter)) {
+		if(selectedFilter.equals(dotFilter)) {
 			saveDot(file);
-		} else if(selectedFilter.equals(pdfFilter)) {
-			savePdf(file);
+		} else {
+			TargetFormat format = getTargetFormat(selectedFilter, svgFilter, pngFilter, pdfFilter);
+			saveConverted(format, file);
+		}
+	}
+
+	private TargetFormat getTargetFormat(FileChooser.ExtensionFilter selectedFilter, FileChooser.ExtensionFilter svgFilter, FileChooser.ExtensionFilter pngFilter, FileChooser.ExtensionFilter pdfFilter) {
+		if(selectedFilter.equals(svgFilter)) {
+			return TargetFormat.SVG;
 		} else if(selectedFilter.equals(pngFilter)) {
-			savePng(file);
+			return TargetFormat.PNG;
+		} else if(selectedFilter.equals(pdfFilter)) {
+			return TargetFormat.PDF;
+		} else {
+			throw new RuntimeException("Target Format cannot be extracted from selected filter: " + selectedFilter);
 		}
 	}
-
-	private void saveSvg(File file) {
-		try {
-			writeFileFromDot(TargetFormat.SVG, dot, dotEngine, dotFilePath.get(), file.toPath());
-		} catch (IOException | InterruptedException e) {
-			LOGGER.error("Failed to save SVG", e);
-		}
-	}
-
-	private void savePng(File file) {
-		try {
-			writeFileFromDot(TargetFormat.PNG, dot, dotEngine, dotFilePath.get(), file.toPath());
-		} catch (IOException | InterruptedException e) {
-			LOGGER.error("Failed to save PNG", e);
-		}
-	}
-
 
 	private void saveDot(File file) {
 		try {
 			byte[] fileContent = Files.readString(Paths.get(dotFilePath.get().toUri())).getBytes(StandardCharsets.UTF_8);
 			Files.write(file.toPath(), fileContent);
 		} catch (IOException e) {
-			LOGGER.error("Failed to save DOT", e);
+			LOGGER.error("Failed to save Dot", e);
 		}
 	}
 
-	private void savePdf(File file) {
+	private void saveConverted(TargetFormat format, File file) {
 		try {
-			writeFileFromDot(TargetFormat.PDF, dot, dotEngine, dotFilePath.get(), file.toPath());
+			writeFileFromDot(format, dot, dotEngine, dotFilePath.get(), file.toPath());
 		} catch (IOException | InterruptedException e) {
-			LOGGER.error("Failed to save PDF", e);
+			LOGGER.error("Failed to save file converted from dot", e);
 		}
 	}
 
