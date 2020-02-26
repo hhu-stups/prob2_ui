@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -250,7 +249,7 @@ public class DotView extends DynamicCommandStage {
 
 	private void loadGraph() {
 		try {
-			String svg = Files.readString(svgFilePath.get());
+			String svg = new String(Files.readAllBytes(svgFilePath.get()));
 			Thread thread = Thread.currentThread();
 			Platform.runLater(() -> {
 				if (!thread.isInterrupted()) {
@@ -301,7 +300,7 @@ public class DotView extends DynamicCommandStage {
 
 	private void saveDot(File file) {
 		try {
-			byte[] fileContent = Files.readString(Paths.get(dotFilePath.get().toUri())).getBytes(StandardCharsets.UTF_8);
+			byte[] fileContent = Files.readAllBytes(Paths.get(dotFilePath.get().toUri()));
 			Files.write(file.toPath(), fileContent);
 		} catch (IOException e) {
 			LOGGER.error("Failed to save Dot", e);
