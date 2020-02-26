@@ -12,9 +12,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.be4.classicalb.core.parser.exceptions.BLexerException;
 import de.be4.classicalb.core.parser.parser.ParserException;
-import de.be4.eventbalg.core.parser.EventBLexerException;
-import de.be4.eventbalg.core.parser.EventBParseException;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ComputationNotCompletedResult;
 import de.prob.animator.domainobjects.EnumerationWarning;
@@ -27,7 +24,6 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.animator.domainobjects.WDError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
-
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.ConsoleInstruction;
@@ -100,7 +96,6 @@ public class BInterpreter implements Executable {
 		if ((
 			e instanceof EvaluationException
 			|| (e instanceof BException && ((BException)e).getLocations().isEmpty())
-			|| e instanceof de.be4.eventbalg.core.parser.BException
 		) && e.getCause() instanceof Exception) {
 			// Check for known "wrapper exceptions" and look at their cause instead.
 			return this.getParseErrorFromException((Exception)e.getCause());
@@ -115,22 +110,12 @@ public class BInterpreter implements Executable {
 		} else if (e instanceof BLexerException) {
 			final BLexerException ex = (BLexerException)e;
 			return new ParseError(ex.getLastLine(), ex.getLastPos(), e.getMessage());
-		} else if (e instanceof EventBLexerException) {
-			final EventBLexerException ex = (EventBLexerException)e;
-			return new ParseError(ex.getLastLine(), ex.getLastPos(), e.getMessage());
-		} else if (e instanceof EventBParseException) {
-			final EventBParseException ex = (EventBParseException)e;
-			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), e.getMessage());
 		} else if (e instanceof de.be4.classicalb.core.preparser.parser.ParserException) {
 			final de.be4.classicalb.core.preparser.parser.ParserException ex =
 				(de.be4.classicalb.core.preparser.parser.ParserException)e;
 			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), ex.getRealMsg());
 		} else if (e instanceof ParserException) {
 			final ParserException ex = (ParserException)e;
-			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), ex.getRealMsg());
-		} else if (e instanceof de.be4.eventbalg.core.parser.parser.ParserException) {
-			final de.be4.eventbalg.core.parser.parser.ParserException ex =
-				(de.be4.eventbalg.core.parser.parser.ParserException)e;
 			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), ex.getRealMsg());
 		} else {
 			// The exception doesn't have any accessible position info.
