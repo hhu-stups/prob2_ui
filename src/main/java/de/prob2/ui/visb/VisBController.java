@@ -133,7 +133,7 @@ public class VisBController {
                     updateInfo("visb.infobox.visualisation.error");
                     return;
                 }
-                LOGGER.debug("Running script: "+svgChanges);
+                //LOGGER.debug("Running script: "+svgChanges);
                 updateInfo("visb.infobox.visualisation.updated");
             }
         } else{
@@ -275,7 +275,7 @@ public class VisBController {
             loadOnClickFunctions();
             startVisualisation();
             reloadVisualisationIfPossible();
-            LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
+            //LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
             updateInfo("visb.infobox.visualisation.updated");
         }
     }

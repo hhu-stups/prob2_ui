@@ -1,6 +1,8 @@
 package de.prob2.ui.visb;
 
 import com.google.inject.Injector;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.ui.ListViewEvent;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 
 /**
@@ -50,6 +53,8 @@ public class VisBStage extends Stage {
     private StageManager stageManager;
     private CurrentProject currentProject;
     private ChangeListener<Worker.State> stateListener = null;
+    private boolean connectorSet = false;
+	private FileChooserManager fileChooserManager;
 
     @FXML
     private Button button_loadVis;
@@ -83,13 +88,14 @@ public class VisBStage extends Stage {
      * @param currentProject ProB2-UI currentProject
      */
     @Inject
-    public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject, final ResourceBundle bundle) {
+    public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
         super();
         stageManager.loadFXML(this, "vis_plugin_stage.fxml");
         this.injector = injector;
         this.bundle = bundle;
         this.stageManager = stageManager;
         this.currentProject = currentProject;
+        this.fileChooserManager = fileChooserManager;
     }
 
     /**
@@ -112,45 +118,55 @@ public class VisBStage extends Stage {
      * @param svgFile the image/ svg, that should to be loaded into the context of the WebView
      */
     void initialiseWebView(String svgFile) {
-        if (svgFile != null) {
-            this.placeholder.setVisible(false);
-            this.webView.setVisible(true);
-            String htmlFile = "<!DOCTYPE html>\n" +
-                    "<html>\n" +
-                    "<head>\n" +
-                    //This is for zooming in and out and scaling the image to the right width and height
-                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-                    "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n" +
-                    "<script>\n" +
-                    "function changeAttribute(id, attribute, value){\n" +
-                    "  $(document).ready(function(){\n" +
-                    "    $(id).attr(attribute, value);\n" +
-                    "  });\n" +
-                    "};" +
-                    "</script>\n" +
-                    "</head>\n" +
-                    "<body>\n" +
-                    "\n" +
-                    "<div text-align=\"center\">" +
-                    svgFile +
-                    "\n" +
-                    "</div>"+
-                    "</body>\n" +
-                    "</html>";
-            this.webView.getEngine().loadContent(htmlFile);
-            LOGGER.debug("HTML was loaded into WebView");
-            this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-                if (newState == Worker.State.SUCCEEDED) {
-                    JSObject jsobj = (JSObject) webView.getEngine().executeScript("window");
-                    jsobj.setMember("visBConnector", injector.getInstance(VisBConnector.class));
-                }
-            });
-            this.webView.getEngine().setOnError(e -> {
-                alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.error");
-            });
-            LOGGER.debug("VisBConnector was set into globals.");
-        }
-    }
+		if (svgFile != null) {
+			this.placeholder.setVisible(false);
+			this.webView.setVisible(true);
+			String htmlFile = "<!DOCTYPE html>\n" +
+					"<html>\n" +
+					"<head>\n" +
+					//This is for zooming in and out and scaling the image to the right width and height
+					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+					"<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n" +
+					"<script>\n" +
+					"function changeAttribute(id, attribute, value){\n" +
+					"  $(document).ready(function(){\n" +
+					"    $(id).attr(attribute, value);\n" +
+					"  });\n" +
+					"};" +
+					"</script>\n" +
+					"</head>\n" +
+					"<body>\n" +
+					"\n" +
+					"<div text-align=\"center\">" +
+					svgFile +
+					"\n" +
+					"</div>" +
+					"</body>\n" +
+					"</html>";
+			this.webView.getEngine().loadContent(htmlFile);
+			LOGGER.debug("HTML was loaded into WebView");
+			addVisBConnector();
+		}
+	}
+
+    private void addVisBConnector() {
+    	if(connectorSet){
+    		LOGGER.debug("Connector is already set, no action needed.");
+		} else {
+			LOGGER.debug("VisBConnector is set into globals.");
+			connectorSet = true;
+			this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+				if (newState == Worker.State.SUCCEEDED) {
+					JSObject jsobj = (JSObject) webView.getEngine().executeScript("window");
+					jsobj.setMember("visBConnector", injector.getInstance(VisBConnector.class));
+				}
+			});
+			this.webView.getEngine().setOnError(e -> {
+				alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.error");
+			});
+			LOGGER.debug("VisBConnector was set into globals.");
+		}
+	}
 
     /**
      * After loading the JSON/ VisB file and preparing it in the {@link VisBController} the ListViews are initialised.
@@ -168,7 +184,9 @@ public class VisBStage extends Stage {
      * This method clears our the WebView and the ListView and removes possible listeners, so that the VisBStage no longer interacts with anything.
      */
     void clear(){
-        if(stateListener != null) {
+    	LOGGER.debug("Clear the stage!");
+        if(connectorSet && stateListener != null) {
+        	LOGGER.debug("Remove State Listener - VisBConnector - from VisBStage");
             this.webView.getEngine().getLoadWorker().stateProperty().removeListener(stateListener);
             stateListener = null;
         }
@@ -176,12 +194,6 @@ public class VisBStage extends Stage {
         this.placeholder.setVisible(true);
         this.visBEvents.setItems(null);
         this.visBItems.setItems(null);
-    }
-
-    @Override
-    public void close(){
-        this.clear();
-        super.close();
     }
 
     /**
@@ -226,6 +238,7 @@ public class VisBStage extends Stage {
      * On click function for the button and file menu item
      */
     private void loadVisBFile() {
+    	clear();
         if(!currentProject.exists() || currentProject.getCurrentMachine() == null){
         	LOGGER.debug("Tried to start visualisation when no machine was loaded.");
             alert(new VisBException(),  "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
@@ -236,8 +249,11 @@ public class VisBStage extends Stage {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Visualisation", "*.json")
         );
-        File visFile = fileChooser.showOpenDialog(stageManager.getCurrent());
-        injector.getInstance(VisBController.class).setupVisBFile(visFile);
+		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		if(path != null) {
+			File visBfile = path.toFile();
+			injector.getInstance(VisBController.class).setupVisBFile(visBfile);
+		}
     }
 
     /**
@@ -247,4 +263,5 @@ public class VisBStage extends Stage {
 		this.stageManager.makeExceptionAlert(ex, header, body, params).showAndWait();
     }
 }
+
 
