@@ -16,11 +16,14 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Worker;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
@@ -31,9 +34,12 @@ import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
@@ -75,6 +81,8 @@ public class VisBStage extends Stage {
     private MenuItem fileMenu_close;
     @FXML
     private MenuItem fileMenu_visB;
+	@FXML
+	private MenuItem fileMenu_export;
     @FXML
     private MenuItem viewMenu_zoomIn;
     @FXML
@@ -112,6 +120,7 @@ public class VisBStage extends Stage {
         this.button_loadVis.setOnAction(e -> loadVisBFile());
         this.fileMenu_visB.setOnAction(e -> loadVisBFile());
         this.fileMenu_close.setOnAction(e -> sendCloseRequest());
+        this.fileMenu_export.setOnAction(e -> exportImage());
         this.editMenu_reload.setOnAction(e -> injector.getInstance(VisBController.class).reloadVisualisation());
         this.editMenu_close.setOnAction(e -> injector.getInstance(VisBController.class).closeCurrentVisualisation());
         this.viewMenu_zoomIn.setOnAction(e -> webView.setZoom(webView.getZoom()*1.2));
@@ -264,7 +273,7 @@ public class VisBStage extends Stage {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(bundle.getString("visb.stage.filechooser.title"));
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Visualisation", "*.json")
+                new FileChooser.ExtensionFilter("Visualisation File", "*.json")
         );
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if(path != null) {
@@ -279,6 +288,25 @@ public class VisBStage extends Stage {
     private void alert(Throwable ex, String header, String body, Object... params){
 		this.stageManager.makeExceptionAlert(ex, header, body, params).showAndWait();
     }
+
+	private void exportImage() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("visb.stage.filechooser.export.title"));
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("PNG-File", "*.png")
+		);
+		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		if(path != null) {
+			File file = path.toFile();
+			WritableImage snapshot = webView.snapshot(new SnapshotParameters(), null);
+			RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot, null);
+			try {
+				ImageIO.write(renderedImage, "png", file);
+			} catch (IOException e){
+				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
+			}
+		}
+	}
 }
 
 

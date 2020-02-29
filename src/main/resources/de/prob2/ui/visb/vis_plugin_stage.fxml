@@ -31,7 +31,8 @@
                         <Menu mnemonicParsing="false" text="%visb.menu.file">
                             <MenuItem fx:id="fileMenu_visB" mnemonicParsing="false" text="%visb.menu.file.open" />
                             <MenuItem fx:id="fileMenu_close" mnemonicParsing="false" text="%visb.menu.file.close" />
-                        </Menu>
+							<MenuItem fx:id="fileMenu_export" mnemonicParsing="false" text="%visb.menu.file.export" />
+						</Menu>
                         <Menu mnemonicParsing="false" text="%visb.menu.edit">
                             <MenuItem fx:id="editMenu_reload" mnemonicParsing="false" text="%visb.menu.edit.reload" />
                             <MenuItem fx:id="editMenu_close" mnemonicParsing="false" text="%visb.menu.edit.close" />
@@ -54,7 +55,7 @@
                                     <Insets topRightBottomLeft="4" />
                                 </padding>
                                 <ImageView preserveRatio="true" fitWidth="200.0">
-                                    <Image url="de/prob2/ui/ProB_Logo.png" />
+                                    <Image url="/de/prob2/ui/ProB_Logo.png" />
                                 </ImageView>
                                 <Label text="%visb.placeholder.text" textAlignment="CENTER" />
                             </VBox>
