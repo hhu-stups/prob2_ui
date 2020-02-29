@@ -26,6 +26,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,10 @@ public class VisBStage extends Stage {
     private ListView<VisBItem> visBItems;
     @FXML
     private ListView<VisBEvent> visBEvents;
+	@FXML
+	private MenuItem editMenu_reload;
+	@FXML
+	private MenuItem editMenu_close;
     @FXML
     private MenuItem fileMenu_close;
     @FXML
@@ -106,12 +111,24 @@ public class VisBStage extends Stage {
         this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
         this.button_loadVis.setOnAction(e -> loadVisBFile());
         this.fileMenu_visB.setOnAction(e -> loadVisBFile());
-        this.fileMenu_close.setOnAction(e -> this.close());
+        this.fileMenu_close.setOnAction(e -> sendCloseRequest());
+        this.editMenu_reload.setOnAction(e -> injector.getInstance(VisBController.class).reloadVisualisation());
+        this.editMenu_close.setOnAction(e -> injector.getInstance(VisBController.class).closeCurrentVisualisation());
         this.viewMenu_zoomIn.setOnAction(e -> webView.setZoom(webView.getZoom()*1.2));
         this.viewMenu_zoomOut.setOnAction(e -> webView.setZoom(webView.getZoom()/1.2));
         this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
         this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
+        this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
+        	injector.getInstance(VisBController.class).closeCurrentVisualisation();
+		});
     }
+
+    private void sendCloseRequest(){
+    	this.fireEvent(new WindowEvent(
+				this,
+				WindowEvent.WINDOW_CLOSE_REQUEST)
+		);
+	}
 
     /**
      * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.

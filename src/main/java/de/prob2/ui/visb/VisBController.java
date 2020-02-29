@@ -64,15 +64,6 @@ public class VisBController {
         this.bundle = bundle;
 		this.visBVisualisation = new VisBVisualisation();
 
-		//This is for handling ProB-UI closing, without VisB-UI closed before
-        final EventHandler<WindowEvent> onCloseRequest = stageManager.getMainStage().getOnCloseRequest();
-        this.stageManager.getMainStage().setOnCloseRequest(e -> {
-            onCloseRequest.handle(e);
-            close(e);
-        });
-
-        this.injector.getInstance(VisBStage.class).setOnCloseRequest(this::close);
-
         LOGGER.debug("Initialise TraceChangeListener");
         currentTraceChangeListener = ((observable, oldTrace, newTrace) -> {
             if(newTrace != null){
@@ -81,17 +72,6 @@ public class VisBController {
                 }
             }
         });
-    }
-
-    private void close(WindowEvent event){
-        if(!event.isConsumed()) {
-            LOGGER.debug("Finishing up and closing...");
-            this.clearListeners();
-            this.injector.getInstance(VisBStage.class).clear();
-            this.injector.getInstance(VisBStage.class).close();
-        } else{
-            LOGGER.debug("Event consumed: "+ event);
-        }
     }
 
     /**
@@ -220,6 +200,22 @@ public class VisBController {
         }
     }
 
+    void reloadVisualisation(){
+    	if(visBVisualisation == null) return;
+    	VisBVisualisation currentVisualisation = this.visBVisualisation;
+    	closeCurrentVisualisation();
+    	this.visBVisualisation = currentVisualisation;
+    	setupVisualisation();
+		LOGGER.debug("Visualisation has been reloaded.");
+	}
+
+	void closeCurrentVisualisation(){
+    	if(visBVisualisation == null) return;
+    	this.clearListeners();
+    	this.injector.getInstance(VisBStage.class).clear();
+		LOGGER.debug("Current visualisation is cleared and closed.");
+	}
+
     /**
      * Setting up the JSON / VisB file for internal usage via {@link VisBFileHandler}.
      * @param visFile JSON / VisB file to be used
@@ -274,16 +270,16 @@ public class VisBController {
             this.injector.getInstance(VisBStage.class).initialiseListViews(visBVisualisation);
             loadOnClickFunctions();
             startVisualisation();
-            reloadVisualisationIfPossible();
+            updateVisualisationIfPossible();
             //LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
             updateInfo("visb.infobox.visualisation.updated");
         }
     }
 
     /**
-     * As the name says, it reloads the visualisation, if it is possible.
+     * As the name says, it updates the visualisation, if it is possible.
      */
-    private void reloadVisualisationIfPossible(){
+    private void updateVisualisationIfPossible(){
         LOGGER.debug("Trying to reload visualisation.");
         if(this.currentTrace.getCurrentState() != null && this.currentTrace.getCurrentState().isInitialised()){
             LOGGER.debug("Reloading visualisation...");
