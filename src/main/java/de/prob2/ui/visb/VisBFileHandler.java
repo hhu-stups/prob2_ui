@@ -1,8 +1,7 @@
 package de.prob2.ui.visb;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
 import de.prob2.ui.visb.visbobjects.VisBItem;
@@ -29,36 +28,36 @@ class VisBFileHandler {
 
     /**
      * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
-     * @param visFile File class object
+     * @param inputFile File class object
      * @return VisBVisualisation object
      * @throws IOException If the file cannot be found, does not exist or is otherwise not accessible.
      * @throws VisBParseException If the file does not have the VisB format.
      */
-    static VisBVisualisation constructVisualisationFromJSON(File visFile) throws IOException, VisBParseException {
-        JsonParser jsonParser = new JsonParser();
-        Object object = jsonParser.parse(new FileReader(visFile));
-        JsonObject visBFile = (JsonObject) object;
+    static VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException {
+        Gson gson = new Gson();
+		JsonReader reader = new JsonReader(new FileReader(inputFile));
+        JsonObject visBFile = gson.fromJson(reader, JsonObject.class);
         Path svgPath;
-        if(((JsonObject) object).has("svg")){
+        if(visBFile.has("svg")){
             String filePath = visBFile.get("svg").getAsString();
             if(filePath == null ||filePath.isEmpty()){
                 throw new VisBParseException("There was no path to an SVG file found in your file. Make sure, that you include one under the id \"svg\".");
             } else {
                 svgPath = Paths.get(filePath);
                 if (!svgPath.isAbsolute()) {
-                    svgPath = Paths.get(visFile.getParentFile().toString(), filePath);
+                    svgPath = Paths.get(inputFile.getParentFile().toString(), filePath);
                 }
             }
         } else{
             throw new VisBParseException("There was no path to an SVG file found in your file. Make sure, that you include one under the id \"svg\".");
         }
         ArrayList<VisBItem> visBItems = new ArrayList<>();
-        if(((JsonObject) object).has("items")) {
+        if(visBFile.has("items")) {
             JsonArray visArray = (JsonArray) visBFile.get("items");
             visBItems = assembleVisList(visArray);
         }
         ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-        if(((JsonObject) object).has("events")) {
+        if(visBFile.has("events")) {
             JsonArray eventsArray = (JsonArray) visBFile.get("events");
              visBEvents = assembleEventList(eventsArray);
         }
