@@ -26,3 +26,15 @@ prob_test_log.txt
 
 # TestFX screenshots
 screenshot*.png
+
+src/main/resources/help/help_de/*.html
+src/main/resources/help/help_de/*.adoc
+
+src/main/resources/help/help_en/*.html
+src/main/resources/help/help_en/*.adoc
+
+src/main/resources/help/help_de/Hauptansicht/*.html
+src/main/resources/help/help_de/Hauptansicht/*.adoc
+
+src/main/resources/help/help_en/Main View/*.html
+src/main/resources/help/help_en/Main View/*.adoc
