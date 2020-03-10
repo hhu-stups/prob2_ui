@@ -6,6 +6,7 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
 
@@ -96,8 +97,8 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected abstract void changeItem(T item, T result);
 	
-	public void showErrors(LTLCheckingResultItem resultItem) {
-		if(resultItem == null || resultItem.getChecked() != Checked.PARSE_ERROR) {
+	public void showErrors(CheckingResultItem resultItem) {
+		if(resultItem.getChecked() != Checked.PARSE_ERROR) {
 			this.close();
 			return;
 		}
@@ -105,15 +106,17 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 		markText(resultItem);
 	}
 	
-	private void markText(LTLCheckingResultItem resultItem) {
-		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		for(LTLMarker marker : resultItem.getErrorMarkers()) {
-			LTLMark mark = marker.getMark();
-			int line = mark.getLine() - 1;				
-			JSObject from = (JSObject) engine.executeScript("from = {line:" + line +", ch:" + mark.getPos() +"}");
-			JSObject to = (JSObject) engine.executeScript("to = {line:" + line +", ch:" + (mark.getPos() + mark.getLength()) +"}");
-			JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
-			editor.call("markText", from, to, style);
+	private void markText(CheckingResultItem resultItem) {
+		if(resultItem instanceof LTLCheckingResultItem) {
+			final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
+			for (LTLMarker marker : ((LTLCheckingResultItem) resultItem).getErrorMarkers()) {
+				LTLMark mark = marker.getMark();
+				int line = mark.getLine() - 1;
+				JSObject from = (JSObject) engine.executeScript("from = {line:" + line + ", ch:" + mark.getPos() + "}");
+				JSObject to = (JSObject) engine.executeScript("to = {line:" + line + ", ch:" + (mark.getPos() + mark.getLength()) + "}");
+				JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
+				editor.call("markText", from, to, style);
+			}
 		}
 	}
 

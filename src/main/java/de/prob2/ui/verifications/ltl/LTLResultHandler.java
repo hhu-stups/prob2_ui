@@ -64,6 +64,8 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 				errorMessage = "Parse Error in typed formula";
 			}
 			item.setResultItem(new LTLCheckingResultItem(resultItem.getChecked(), errorMarkers, resultItem.getHeaderBundleKey(), resultItem.getMessageBundleKey(), errorMessage));
+		} else {
+			item.setResultItem(resultItem);
 		}
 	}
 	

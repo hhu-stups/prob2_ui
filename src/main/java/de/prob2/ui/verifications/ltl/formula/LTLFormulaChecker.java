@@ -134,7 +134,7 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			Platform.runLater(() -> {
 				updateMachine(machine);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-				formulaStage.showErrors((LTLCheckingResultItem) item.getResultItem());
+				formulaStage.showErrors(item.getResultItem());
 			});
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
