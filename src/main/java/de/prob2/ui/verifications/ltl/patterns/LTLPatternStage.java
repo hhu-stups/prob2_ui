@@ -1,13 +1,11 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.internal.AbstractResultHandler;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
@@ -16,6 +14,8 @@ import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 import javafx.fxml.FXML;
 import netscape.javascript.JSObject;
+
+import java.util.stream.Collectors;
 
 public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		
@@ -45,7 +45,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		if(!machine.getLTLPatterns().contains(item)) {
 			patternParser.addPattern(item, machine);
 			machine.addLTLPattern(item);
-			setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, item));
+			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
@@ -65,7 +65,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 			item.setData(result.getName(), result.getDescription(), result.getCode());
 			patternParser.addPattern(item, machine);
 			currentProject.setSaved(false);
-			setHandleItem(new LTLHandleItem<LTLPatternItem>(HandleType.CHANGE, item));
+			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			showErrors((LTLCheckingResultItem) result.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);

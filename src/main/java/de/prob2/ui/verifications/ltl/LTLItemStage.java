@@ -5,6 +5,7 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
 
@@ -95,8 +96,8 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected abstract void changeItem(T item, T result);
 	
-	protected void showErrors(LTLCheckingResultItem resultItem) {
-		if(resultItem == null) {
+	public void showErrors(LTLCheckingResultItem resultItem) {
+		if(resultItem == null || resultItem.getChecked() != Checked.PARSE_ERROR) {
 			this.close();
 			return;
 		}
@@ -114,5 +115,9 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 			JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
 			editor.call("markText", from, to, style);
 		}
+	}
+
+	public void setErrors(String text) {
+		taErrors.setText(text);
 	}
 }
