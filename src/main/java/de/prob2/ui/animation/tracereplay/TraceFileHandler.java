@@ -14,7 +14,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 
@@ -24,7 +23,8 @@ import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 
@@ -43,8 +43,8 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	@Inject
-	public TraceFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
-		super(gson, currentProject, stageManager, bundle, versionInfo, PersistentTrace.class);
+	public TraceFileHandler(JsonManager jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+		super(jsonManager, currentProject, stageManager, bundle, PersistentTrace.class, "Trace", 0);
 	}
 
 	@Override
@@ -169,7 +169,7 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	}
 
 	public void save(PersistentTrace trace, File location) {
-		writeToFile(location, trace, true, "User");
+		writeToFile(location, trace, true, JsonMetadata.USER_CREATOR);
 	}
 
 	@Override

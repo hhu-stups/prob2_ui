@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -23,8 +23,8 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 	public static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
 
 	@Inject
-	public LTLFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
-		super(gson, currentProject, stageManager, bundle, versionInfo, LTLData.class);
+	public LTLFileHandler(JsonManager jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+		super(jsonManager, currentProject, stageManager, bundle, LTLData.class, "LTL", 0);
 	}
 	
 	public void save() {
@@ -42,7 +42,7 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 		List<LTLPatternItem> patterns = machine.getLTLPatterns().stream()
 				.filter(LTLPatternItem::selected)
 				.collect(Collectors.toList());
-		writeToFile(file, new LTLData(formulas, patterns), false, "User");
+		writeToFile(file, new LTLData(formulas, patterns), false, JsonMetadata.USER_CREATOR);
 	}
 
 

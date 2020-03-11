@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -90,7 +91,7 @@ public class ProB2Module extends AbstractModule {
 		bind(Application.class).toInstance(this.application);
 		bind(ProB2.class).toInstance(this.application);
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
-		bind(Gson.class).toInstance(FxGson.coreBuilder()
+		bind(Gson.class).toInstance(Converters.registerAll(FxGson.coreBuilder())
 			.disableHtmlEscaping()
 			.setPrettyPrinting()
 			.addSerializationExclusionStrategy(new ExclusionStrategy() {

@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,6 +26,8 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
@@ -54,8 +55,10 @@ public class ProjectManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
 	public static final String PROJECT_FILE_PATTERN = "*." + PROJECT_FILE_EXTENSION;
+	private static final String FILE_TYPE = "Project";
+	private static final int CURRENT_FORMAT_VERSION = 0;
 
-	private final Gson gson;
+	private final JsonManager jsonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -64,8 +67,8 @@ public class ProjectManager {
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config) {
-		this.gson = gson;
+	public ProjectManager(JsonManager jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config) {
+		this.jsonManager = jsonManager;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -146,7 +149,11 @@ public class ProjectManager {
 
 	private File saveProject(Project project, File location) {
 		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), PROJECT_CHARSET)) {
-			gson.toJson(project, writer);
+			final JsonMetadata metadata = this.jsonManager.metadataBuilder(FILE_TYPE, CURRENT_FORMAT_VERSION)
+				.withCurrentInfo()
+				.withUserCreator()
+				.build();
+			this.jsonManager.write(writer, project, metadata);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
 			return null;
@@ -206,7 +213,7 @@ public class ProjectManager {
 
 	private Project loadProject(Path path) {
 		try (final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET)) {
-			final Project project = gson.fromJson(reader, Project.class);
+			final Project project = this.jsonManager.read(reader, Project.class, FILE_TYPE, CURRENT_FORMAT_VERSION).getObject();
 			project.setLocation(path.getParent());
 			return project;
 		} catch (IOException | JsonSyntaxException exc) {

@@ -11,34 +11,36 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonStreamParser;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MagicLayoutSettingsManager {
 	private static final Charset CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(MagicLayoutSettingsManager.class);
 	private static final String MAGIC_FILE_ENDING = "*.prob2magic";
+	private static final String FILE_TYPE = "Magic Layout settings";
+	private static final int CURRENT_FORMAT_VERSION = 0;
 
-	private final Gson gson;
+	private final JsonManager jsonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	public MagicLayoutSettingsManager(Gson gson, CurrentProject currentProject, StageManager stageManager,
+	public MagicLayoutSettingsManager(JsonManager jsonManager, CurrentProject currentProject, StageManager stageManager,
 			ResourceBundle bundle) {
-		this.gson = gson;
+		this.jsonManager = jsonManager;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -64,7 +66,12 @@ public class MagicLayoutSettingsManager {
 
 		if (file != null) {
 			try (final Writer writer = Files.newBufferedWriter(file.toPath(), CHARSET)) {
-				gson.toJson(layoutSettings, writer);
+				final JsonMetadata metadata = this.jsonManager.metadataBuilder(FILE_TYPE, CURRENT_FORMAT_VERSION)
+					.withCurrentInfo()
+					.withUserCreator()
+					.withModelName(layoutSettings.getMachineName())
+					.build();
+				this.jsonManager.write(writer, layoutSettings, metadata);
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create layout settings file", exc);
 				stageManager.makeExceptionAlert(exc,
@@ -97,13 +104,9 @@ public class MagicLayoutSettingsManager {
 		if (file != null) {
 			try {
 				Reader reader = Files.newBufferedReader(file.toPath(), CHARSET);
-				JsonStreamParser parser = new JsonStreamParser(reader);
-				JsonElement element = parser.next();
-				if (element.isJsonObject()) {
-					MagicLayoutSettings layoutSettings = gson.fromJson(element, MagicLayoutSettings.class);
-					if (isValidMagicLayoutSettings(layoutSettings)) {
-						return layoutSettings;
-					}
+				MagicLayoutSettings layoutSettings = this.jsonManager.read(reader, MagicLayoutSettings.class, FILE_TYPE, CURRENT_FORMAT_VERSION).getObject();
+				if (isValidMagicLayoutSettings(layoutSettings)) {
+					return layoutSettings;
 				}
 				LOGGER.warn(String.format("Could not open file '%s'. The file does not contain valid Magic Layout settings.", file));
 				stageManager.makeAlert(AlertType.ERROR, "", "visualisation.magicLayout.settingsManager.alert.noValidLayoutSettings.content", file);
