@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +135,14 @@ public final class Config {
 		}
 
 		try (final Writer writer = Files.newBufferedWriter(LOCATION)) {
-			this.jsonManager.write(writer, configData);
+			// The metadata includes all of the usual information, except for the CLI version.
+			// This is because the config is saved while the UI is shut down, and at that point it may no longer be possible to obtain the CLI version, because the shared empty state space has already been shut down.
+			final JsonMetadata metadata = this.jsonManager.metadataBuilder()
+				.withSavedNow()
+				.withCurrentProB2KernelVersion()
+				.withUserCreator()
+				.build();
+			this.jsonManager.write(writer, configData, metadata);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
