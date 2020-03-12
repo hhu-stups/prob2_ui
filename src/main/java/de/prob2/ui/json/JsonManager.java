@@ -64,12 +64,32 @@ public class JsonManager<T> {
 	}
 	
 	/**
+	 * Create a builder for a new {@link JsonMetadata} object. The file type and version are initialized based on the settings in the context.
+	 *
+	 * @return a builder for a new {@link JsonMetadata object}
+	 */
+	public JsonMetadataBuilder metadataBuilder() {
+		return this.jsonManager.metadataBuilder(this.getContext().fileType, this.getContext().currentFormatVersion);
+	}
+	
+	/**
+	 * Create a builder for a {@link JsonMetadata} object based on an existing metadata object.
+	 *
+	 * @param metadata an existing {@link JsonMetadata} object used to initialize this builder
+	 *
+	 * @return a builder for a {@link JsonMetadata} object based on an existing metadata object
+	 */
+	public JsonMetadataBuilder metadataBuilder(final JsonMetadata metadata) {
+		return this.jsonManager.metadataBuilder(metadata);
+	}
+	
+	/**
 	 * Create a builder for a {@link JsonMetadata} object with default settings. Subclasses may override this method to change the defaults.
 	 * 
 	 * @return a builder for a {@link JsonMetadata} object with default settings
 	 */
 	public JsonMetadataBuilder defaultMetadataBuilder() {
-		return this.jsonManager.metadataBuilder(this.getContext().fileType, this.getContext().currentFormatVersion)
+		return this.metadataBuilder()
 			.withCurrentInfo()
 			.withUserCreator();
 	}
