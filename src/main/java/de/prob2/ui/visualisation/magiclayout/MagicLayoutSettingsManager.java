@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
-import de.prob2.ui.json.JsonMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.scene.control.Alert.AlertType;
@@ -29,18 +28,17 @@ public class MagicLayoutSettingsManager {
 	private static final Charset CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(MagicLayoutSettingsManager.class);
 	private static final String MAGIC_FILE_ENDING = "*.prob2magic";
-	private static final String FILE_TYPE = "Magic Layout settings";
-	private static final int CURRENT_FORMAT_VERSION = 0;
 
-	private final JsonManager jsonManager;
+	private final JsonManager<MagicLayoutSettings> jsonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	public MagicLayoutSettingsManager(JsonManager jsonManager, CurrentProject currentProject, StageManager stageManager,
+	public MagicLayoutSettingsManager(JsonManager<MagicLayoutSettings> jsonManager, CurrentProject currentProject, StageManager stageManager,
 			ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
+		this.jsonManager.initContext(new JsonManager.Context<>(MagicLayoutSettings.class, "Magic Layout settings", 0));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -66,12 +64,9 @@ public class MagicLayoutSettingsManager {
 
 		if (file != null) {
 			try (final Writer writer = Files.newBufferedWriter(file.toPath(), CHARSET)) {
-				final JsonMetadata metadata = this.jsonManager.metadataBuilder(FILE_TYPE, CURRENT_FORMAT_VERSION)
-					.withCurrentInfo()
-					.withUserCreator()
+				this.jsonManager.write(writer, layoutSettings, this.jsonManager.defaultMetadataBuilder()
 					.withModelName(layoutSettings.getMachineName())
-					.build();
-				this.jsonManager.write(writer, layoutSettings, metadata);
+					.build());
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create layout settings file", exc);
 				stageManager.makeExceptionAlert(exc,
@@ -104,7 +99,7 @@ public class MagicLayoutSettingsManager {
 		if (file != null) {
 			try {
 				Reader reader = Files.newBufferedReader(file.toPath(), CHARSET);
-				MagicLayoutSettings layoutSettings = this.jsonManager.read(reader, MagicLayoutSettings.class, FILE_TYPE, CURRENT_FORMAT_VERSION).getObject();
+				MagicLayoutSettings layoutSettings = this.jsonManager.read(reader).getObject();
 				if (isValidMagicLayoutSettings(layoutSettings)) {
 					return layoutSettings;
 				}

@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
+import de.prob2.ui.json.JsonMetadataBuilder;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
@@ -25,29 +26,23 @@ public abstract class AbstractFileHandler<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileHandler.class);
 	private static final Charset CHARSET = StandardCharsets.UTF_8;
 	
-	private final Class<T> clazz;
-	private final String fileType;
-	private final int currentFormatVersion;
+	private final JsonManager<T> jsonContext;
 	
-	protected final JsonManager jsonManager;
 	protected final CurrentProject currentProject;
 	protected final StageManager stageManager;
 	protected final ResourceBundle bundle;
 
-	protected AbstractFileHandler(JsonManager jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Class<T> clazz, String fileType, int currentFormatVersion) {
-		this.jsonManager = jsonManager;
+	protected AbstractFileHandler(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, JsonManager<T> jsonContext) {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.clazz = clazz;
-		this.fileType = fileType;
-		this.currentFormatVersion = currentFormatVersion;
+		this.jsonContext = jsonContext;
 	}
 	
 	public T load(Path path) throws InvalidFileFormatException, IOException {
 		path = currentProject.get().getLocation().resolve(path);
 		try (final Reader reader = Files.newBufferedReader(path, CHARSET)) {
-			final T data = this.jsonManager.read(reader, this.clazz, this.fileType, this.currentFormatVersion).getObject();
+			final T data = this.jsonContext.read(reader).getObject();
 			if (!isValidData(data)) {
 				throw new InvalidFileFormatException("The file does not contain valid data.");
 			}
@@ -78,13 +73,12 @@ public abstract class AbstractFileHandler<T> {
 			final Path absolute = file.toPath();
 			
 			try (final Writer writer = Files.newBufferedWriter(absolute, CHARSET)) {
-				JsonManager.MetadataBuilder metadataBuilder = this.jsonManager.metadataBuilder(this.fileType, this.currentFormatVersion)
-					.withCurrentInfo()
+				JsonMetadataBuilder metadataBuilder = this.jsonContext.defaultMetadataBuilder()
 					.withCreator(createdBy);
 				if (headerWithMachineName) {
 					metadataBuilder.withCurrentModelName();
 				}
-				this.jsonManager.write(writer, data, metadataBuilder.build());
+				this.jsonContext.write(writer, data, metadataBuilder.build());
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create file", exc);
 			} catch (IOException exc) {

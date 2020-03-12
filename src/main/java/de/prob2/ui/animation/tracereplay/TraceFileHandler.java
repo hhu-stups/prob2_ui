@@ -43,8 +43,9 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	@Inject
-	public TraceFileHandler(JsonManager jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
-		super(jsonManager, currentProject, stageManager, bundle, PersistentTrace.class, "Trace", 0);
+	public TraceFileHandler(JsonManager<PersistentTrace> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+		super(currentProject, stageManager, bundle, jsonManager);
+		jsonManager.initContext(new JsonManager.Context<>(PersistentTrace.class, "Trace", 0));
 	}
 
 	@Override

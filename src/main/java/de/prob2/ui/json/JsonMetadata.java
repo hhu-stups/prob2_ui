@@ -20,7 +20,7 @@ public final class JsonMetadata {
 	/**
 	 * <p>Identifies the type of data stored in the JSON data.</p>
 	 * 
-	 * <p>When reading JSON data using {@link JsonManager#read(Reader, Class, String, int)}, this value is compared against the expected file type (provided by the caller), and an exception is thrown if it does not match the expected type.</p>
+	 * <p>When reading JSON data using {@link JsonManager#read(Reader)}, this value is compared against the expected file type (provided by the caller), and an exception is thrown if it does not match the expected type.</p>
 	 * 
 	 * <p>When reading old JSON files that have no file type metadata, this value is {@code null}. In all other cases, it should never be {@code null}.</p>
 	 */
@@ -29,7 +29,7 @@ public final class JsonMetadata {
 	/**
 	 * <p>Identifies the version of the data format. Newer UI versions can (in general) read older format versions, but not the other way around. This number must be incremented when an incompatible change is made to the data format (i. e. a change that makes the data unreadable to older UI versions).</p>
 	 * 
-	 * <p>When reading JSON data using {@link JsonManager#read(Reader, Class, String, int)}, this value is compared against the current format version (provided by the caller), and an exception is thrown if the version in the file is higher than the current supported version.</p>
+	 * <p>When reading JSON data using {@link JsonManager#read(Reader)}, this value is compared against the current format version (provided by the caller), and an exception is thrown if the version in the file is higher than the current supported version.</p>
 	 * 
 	 * <p>When reading old JSON files that have no format version metadata, this value is {@code 0}.</p>
 	 */

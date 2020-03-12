@@ -20,7 +20,6 @@ import com.google.inject.Singleton;
 import de.prob.Main;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.json.JsonManager;
-import de.prob2.ui.json.JsonMetadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,20 +29,19 @@ public final class Config {
 	// This Gson instance is for loadBasicConfig only. Everywhere else, JsonManager should be used.
 	private static final Gson BASIC_GSON = new GsonBuilder().create();
 	private static final Path LOCATION = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
-	private static final String FILE_TYPE = "Config";
-	private static final int CURRENT_FORMAT_VERSION = 0;
 
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
-	private final JsonManager jsonManager;
+	private final JsonManager<ConfigData> jsonManager;
 	private final RuntimeOptions runtimeOptions;
 	
 	private ConfigData currentConfigData;
 	private final List<ConfigListener> listeners;
 
 	@Inject
-	private Config(final JsonManager jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
+	private Config(final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
 		this.jsonManager = jsonManager;
+		this.jsonManager.initContext(new JsonManager.Context<>(ConfigData.class, "Config", 0));
 		this.runtimeOptions = runtimeOptions;
 
 		this.listeners = new ArrayList<>();
@@ -99,7 +97,7 @@ public final class Config {
 		ConfigData configData;
 		if (this.runtimeOptions.isLoadConfig()) {
 			try (final Reader reader = Files.newBufferedReader(LOCATION)) {
-				configData = this.jsonManager.read(reader, ConfigData.class, FILE_TYPE, CURRENT_FORMAT_VERSION).getObject();
+				configData = this.jsonManager.read(reader).getObject();
 				if (configData == null) {
 					// Config file is empty, use default config.
 					configData = new ConfigData();
@@ -136,11 +134,7 @@ public final class Config {
 		}
 
 		try (final Writer writer = Files.newBufferedWriter(LOCATION)) {
-			final JsonMetadata metadata = this.jsonManager.metadataBuilder(FILE_TYPE, CURRENT_FORMAT_VERSION)
-				.withCurrentInfo()
-				.withUserCreator()
-				.build();
-			this.jsonManager.write(writer, configData, metadata);
+			this.jsonManager.write(writer, configData);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
