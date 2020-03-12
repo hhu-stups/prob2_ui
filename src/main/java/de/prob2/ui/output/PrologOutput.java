@@ -27,11 +27,15 @@ public class PrologOutput extends TextArea {
 
 		@Override
 		public void write(int b) {
-			sb.append((char) b);
-			if(b == 10) {
-				Platform.runLater(() -> this.textArea.appendText(sb.toString()));
-				sb = new StringBuilder();
-			}
+			Platform.runLater(() -> {
+				//Append each character to a StringBuilder until the string terminator and only set the final result in the end.
+				//This avoids the UI from hanging up.
+				sb.append((char) b);
+				if(b == 10) {
+					this.textArea.appendText(sb.toString());
+					this.sb = new StringBuilder();
+				}
+			});
 		}
 	}
 
