@@ -1,32 +1,46 @@
 package de.prob2.ui.verifications.ltl.formula;
 
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.internal.AbstractResultHandler;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
+import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
-import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import netscape.javascript.JSObject;
 
+import java.util.stream.Collectors;
+
 public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
+
+    @FXML
+    private Button applyButton;
+
+    private final CurrentTrace currentTrace;
 			
 	@Inject
-	public LTLFormulaStage(final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize,
-			final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
+	public LTLFormulaStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final FontSize fontSize,
+                           final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
 		super(currentProject, fontSize, formulaChecker, resultHandler, builtinsStage);
-		stageManager.loadFXML(this, "ltlformula_stage.fxml"); 
+		this.currentTrace = currentTrace;
+		stageManager.loadFXML(this, "ltlformula_stage.fxml");
 	}
-	
+
 	@FXML
+    public void initialize() {
+	    super.initialize();
+	    LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
+	    applyButton.disableProperty().bind(formulaChecker.currentJobThreadsProperty().emptyProperty().not());
+    }
+
+    @FXML
 	private void applyFormula() {
 		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
 		String code = editor.call("getValue").toString();
@@ -42,9 +56,8 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
-			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
+			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
-			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
@@ -62,16 +75,19 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			item.setCounterExample(null);
 			item.setResultItem(null);
 			currentProject.setSaved(false);
-			setHandleItem(new LTLHandleItem<LTLFormulaItem>(HandleType.CHANGE, item));
+			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
-			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
 	}
-	
-	public void setErrors(String text) {
-		taErrors.setText(text);
-	}
+
+	@FXML
+    private void cancel() {
+	    if(((LTLFormulaChecker) ltlItemHandler).currentJobThreadsProperty().emptyProperty().not().get()) {
+            currentTrace.getStateSpace().sendInterrupt();
+        }
+        this.close();
+    }
 
 }

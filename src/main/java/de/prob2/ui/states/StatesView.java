@@ -1,19 +1,8 @@
 package de.prob2.ui.states;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.ExpandFormulaCommand;
 import de.prob.animator.command.GetTopLevelFormulasCommand;
@@ -41,7 +30,6 @@ import de.prob2.ui.persistence.TableUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.unsatcore.UnsatCoreCalculator;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -61,9 +49,18 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -178,6 +175,14 @@ public final class StatesView extends StackPane {
 		filterState.textProperty().addListener(o -> {
 			final Trace trace = this.currentTrace.get();
 			this.updateRootAsync(trace, trace);
+		});
+
+		//Deselect selected column when the TreeTableView loses the focus
+		//This is the way how to avoid an IllegalStateException (see PROB2UI-377)
+		tv.focusedProperty().addListener((observable, from, to) -> {
+			if (!to) {
+				tv.getSelectionModel().clearSelection();
+			}
 		});
 	}
 

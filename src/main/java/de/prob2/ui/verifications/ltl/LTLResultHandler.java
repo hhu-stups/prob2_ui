@@ -38,7 +38,7 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		this.parseErrors.addAll(Arrays.asList(LTLParseError.class, LtlParseException.class, ProBError.class, LTLError.class));
 	}
 	
-	public Checked handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, State stateid) {
+	public void handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, State stateid) {
 		Class<?> clazz = result.getClass();
 		if(success.contains(clazz)) {
 			item.setChecked(Checked.SUCCESS);
@@ -57,13 +57,16 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		} else {
 			item.setCounterExample(null);
 		}
-		if(resultItem != null) {
+		if(item.getChecked() == Checked.PARSE_ERROR) {
 			//errorMarkers contains errors, resultItem only contains errors from the exception
 			String errorMessage = errorMarkers.stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
+			if(errorMessage.isEmpty()) {
+				errorMessage = "Parse Error in typed formula";
+			}
 			item.setResultItem(new LTLCheckingResultItem(resultItem.getChecked(), errorMarkers, resultItem.getHeaderBundleKey(), resultItem.getMessageBundleKey(), errorMessage));
-			return resultItem.getChecked();
+		} else {
+			item.setResultItem(resultItem);
 		}
-		return Checked.FAIL;
 	}
 	
 	public void handlePatternResult(LTLParseListener parseListener, AbstractCheckableItem item) {

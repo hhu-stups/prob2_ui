@@ -1,13 +1,8 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -32,7 +27,6 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
-
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -48,9 +42,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -322,8 +319,8 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		patternParser.removePattern(item, machine);
 	}
 	
-	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
-		return checker.checkFormula(item, machine);
+	public void checkFormula(LTLFormulaItem item, Machine machine) {
+		checker.checkFormula(item, machine);
 	}
 			
 	private void showCurrentItemDialog(LTLFormulaItem item) {
