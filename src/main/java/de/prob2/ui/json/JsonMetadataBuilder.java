@@ -85,15 +85,43 @@ public final class JsonMetadataBuilder {
 	}
 	
 	/**
+	 * Shorthand for setting the built metadata's {@code savedAt} to the current time.
+	 * 
+	 * @return {@code this}
+	 */
+	public JsonMetadataBuilder withSavedNow() {
+		return this.withSavedAt(Instant.now());
+	}
+	
+	/**
+	 * Shorthand for setting the built metadata's {@code proB2KernelVersion} to the version currently in use.
+	 * 
+	 * @return {@code this}
+	 */
+	public JsonMetadataBuilder withCurrentProB2KernelVersion() {
+		final VersionInfo versionInfo = versionInfoProvider.get();
+		return this.withProB2KernelVersion(versionInfo.getKernelVersion());
+	}
+	
+	/**
+	 * Shorthand for setting the built metadata's {@code proBCliVersion} to the version currently in use.
+	 * 
+	 * @return {@code this}
+	 */
+	public JsonMetadataBuilder withCurrentProBCliVersion() {
+		final VersionInfo versionInfo = versionInfoProvider.get();
+		return this.withProBCliVersion(versionInfo.getFormattedCliVersion());
+	}
+	
+	/**
 	 * Shorthand for setting the built metadata's {@code savedAt} to the current time, and {@code proB2KernelVersion} and {@code proBCliVersion} to the versions currently in use.
 	 * 
 	 * @return {@code this}
 	 */
 	public JsonMetadataBuilder withCurrentInfo() {
-		final VersionInfo versionInfo = versionInfoProvider.get();
-		return this.withSavedAt(Instant.now())
-			.withProB2KernelVersion(versionInfo.getKernelVersion())
-			.withProBCliVersion(versionInfo.getFormattedCliVersion());
+		return this.withSavedNow()
+			.withCurrentProB2KernelVersion()
+			.withCurrentProBCliVersion();
 	}
 	
 	/**
