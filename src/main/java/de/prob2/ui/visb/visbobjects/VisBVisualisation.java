@@ -12,9 +12,9 @@ import java.util.ArrayList;
  * The VisBVisualisation Object contains the functions needed to store all the visualisation information.
  * */
 public class VisBVisualisation {
+	private Path svgPath;
     private ArrayList<VisBItem> visBItems;
     private ArrayList<VisBEvent> visBEvents;
-    private Path svgPath;
 
     public VisBVisualisation(){
         this.visBItems = null;

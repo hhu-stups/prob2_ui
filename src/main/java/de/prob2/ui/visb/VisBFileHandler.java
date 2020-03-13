@@ -7,10 +7,7 @@ import de.prob2.ui.visb.visbobjects.VisBEvent;
 import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -41,7 +38,7 @@ class VisBFileHandler {
         if(visBFile.has("svg")){
             String filePath = visBFile.get("svg").getAsString();
             if(filePath == null ||filePath.isEmpty()){
-                throw new VisBParseException("There was no path to an SVG file found in your file. Make sure, that you include one under the id \"svg\".");
+                throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
             } else {
                 svgPath = Paths.get(filePath);
                 if (!svgPath.isAbsolute()) {
@@ -49,7 +46,7 @@ class VisBFileHandler {
                 }
             }
         } else{
-            throw new VisBParseException("There was no path to an SVG file found in your file. Make sure, that you include one under the id \"svg\".");
+            throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
         }
         ArrayList<VisBItem> visBItems = new ArrayList<>();
         if(visBFile.has("items")) {
@@ -64,7 +61,8 @@ class VisBFileHandler {
         if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
             return null;
         } else {
-            return new VisBVisualisation(visBItems, visBEvents, svgPath);
+
+        	return new VisBVisualisation(visBItems, visBEvents, svgPath);
         }
     }
 
