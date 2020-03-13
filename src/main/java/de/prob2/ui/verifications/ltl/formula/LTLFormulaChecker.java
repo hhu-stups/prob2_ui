@@ -21,6 +21,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.ILTLItemHandler;
+import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
@@ -67,12 +68,11 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		final ArrayList<Boolean> failed = new ArrayList<>();
 		failed.add(false);
 		for (LTLFormulaItem item : machine.getLTLFormulas()) {
-			Checked result = this.checkFormula(item, machine);
-			if(result == Checked.FAIL) {
+			this.checkFormula(item, machine);
+			if(item.getChecked() == Checked.FAIL) {
 				failed.set(0, true);
 				machine.setLtlStatus(Machine.CheckingStatus.FAILED);
 			}
-			item.setChecked(result);
 			if(Thread.currentThread().isInterrupted()) {
 				return;
 			}
@@ -98,23 +98,22 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		injector.getInstance(LTLView.class).refresh();
 	}
 	
-	public Checked checkFormula(LTLFormulaItem item, Machine machine) {
+	public void checkFormula(LTLFormulaItem item, Machine machine) {
 		if(!item.selected()) {
-			return Checked.NOT_CHECKED;
+			return;
 		}
 		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
 		List<LTLMarker> errorMarkers = new ArrayList<>();
 		Object result = getResult(parser, errorMarkers, item);
-		return resultHandler.handleFormulaResult(item, errorMarkers, result, stateid);
+		resultHandler.handleFormulaResult(item, errorMarkers, result, stateid);
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {
 		Machine machine = currentProject.getCurrentMachine();
 		Thread checkingThread = new Thread(() -> {
-			Checked result = checkFormula(item, machine);
-			item.setChecked(result);
+			checkFormula(item, machine);
 			Platform.runLater(() -> {
 				updateMachine(machine);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
@@ -122,25 +121,20 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}
-			
 			currentJobThreads.remove(Thread.currentThread());
 		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);
 		checkingThread.start();
 	}
-	
+
 	public void checkFormula(LTLFormulaItem item, LTLFormulaStage formulaStage) {
 		Machine machine = currentProject.getCurrentMachine();
-		Checked result = checkFormula(item, machine);
-		item.setChecked(result);
 		Thread checkingThread = new Thread(() -> {
+			checkFormula(item, machine);
 			Platform.runLater(() -> {
-				if(item.getChecked() == Checked.PARSE_ERROR) {
-					formulaStage.setErrors(item.getResultItem().getMessage());
-					return;
-				}
-				formulaStage.close();
+				updateMachine(machine);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				formulaStage.showErrors(item.getResultItem());
 			});
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
