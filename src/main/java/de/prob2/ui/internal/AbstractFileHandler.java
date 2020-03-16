@@ -39,18 +39,12 @@ public abstract class AbstractFileHandler<T> {
 		this.jsonContext = jsonContext;
 	}
 	
-	public T load(Path path) throws InvalidFileFormatException, IOException {
+	public T load(Path path) throws IOException {
 		path = currentProject.get().getLocation().resolve(path);
 		try (final Reader reader = Files.newBufferedReader(path, CHARSET)) {
-			final T data = this.jsonContext.read(reader).getObject();
-			if (!isValidData(data)) {
-				throw new InvalidFileFormatException("The file does not contain valid data.");
-			}
-			return data;
+			return this.jsonContext.read(reader).getObject();
 		}
 	}
-	
-	protected abstract boolean isValidData(T data);
 	
 	protected File showSaveDialog(String title, File initialDirectory, String initialFileName, ExtensionFilter filter) {
 		FileChooser fileChooser = new FileChooser();

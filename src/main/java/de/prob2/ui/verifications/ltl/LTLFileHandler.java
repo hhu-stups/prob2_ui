@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadata;
+import de.prob2.ui.json.ObjectWithMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -25,7 +28,20 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 	@Inject
 	public LTLFileHandler(JsonManager<LTLData> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
 		super(currentProject, stageManager, bundle, jsonManager);
-		jsonManager.initContext(new JsonManager.Context<>(LTLData.class, "LTL", 1));
+		jsonManager.initContext(new JsonManager.Context<LTLData>(LTLData.class, "LTL", 1) {
+			@Override
+			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
+				if (oldMetadata.getFileType() == null) {
+					assert oldMetadata.getFormatVersion() == 0;
+					for (final String fieldName : new String[] {"formulas", "patterns"}) {
+						if (!oldObject.has(fieldName)) {
+							throw new JsonParseException("Not a valid LTL file - missing required field " + fieldName);
+						}
+					}
+				}
+				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+			}
+		});
 	}
 	
 	public void save() {
@@ -45,10 +61,4 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 				.collect(Collectors.toList());
 		writeToFile(file, new LTLData(formulas, patterns), false, JsonMetadata.USER_CREATOR);
 	}
-
-
-	protected boolean isValidData(LTLData data) {
-		return data.getFormulas() != null && data.getPatterns() != null;
-	}
-
 }
