@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,34 +7,15 @@ import java.util.Objects;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class TestCaseGenerationItem extends AbstractCheckableItem {
-	
-	private static class TestCaseGenerationFormulaExtractor {
-
-		private TestCaseGenerationFormulaExtractor(){}
-
-		private static int extractLevel(String formula) {
-			String[] splittedStringBySlash = formula.replace(" ", "").split("/");
-			String[] splittedStringByColon = splittedStringBySlash[0].split(":");
-			return Integer.parseInt(splittedStringByColon[1]);
-		}
-
-		private static List<String> extractOperations(String formula) {
-			String[] splittedString = formula.replace(" ", "").split("/");
-			return Arrays.asList(splittedString[0].split(":")[1].split(","));
-		}
-
-	}
-	
-
-	private static final String LEVEL = "level";
-
-	private static final String OPERATIONS = "operations";
+	public static final String LEVEL = "level";
+	public static final String OPERATIONS = "operations";
 	
 	private int maxDepth;
 	
@@ -81,28 +61,6 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 			this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		} else {
 			this.examples.setValue(FXCollections.observableArrayList());
-		}
-		if(this.additionalInformation == null) {
-			this.additionalInformation = new HashMap<>();
-		}
-		if(type == TestCaseGenerationType.MCDC) {
-			replaceMissingMCDCOptionsByDefaults();
-		} else if(type == TestCaseGenerationType.COVERED_OPERATIONS) {
-			replaceMissingCoveredOperationsOptionsByDefaults();
-		}
-	}
-	
-	private void replaceMissingMCDCOptionsByDefaults() {
-		if(additionalInformation.get(LEVEL) == null) {
-			int level = TestCaseGenerationFormulaExtractor.extractLevel(this.code);
-			additionalInformation.put(LEVEL, level);
-		}
-	}
-	
-	private void replaceMissingCoveredOperationsOptionsByDefaults() {
-		if(additionalInformation.get(OPERATIONS) == null) {
-			List<String> operations = TestCaseGenerationFormulaExtractor.extractOperations(this.code);
-			additionalInformation.put(OPERATIONS, operations);
 		}
 	}
 	

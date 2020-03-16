@@ -11,7 +11,6 @@ import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
-import de.prob2.ui.internal.OnlyDeserialize;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -42,22 +41,17 @@ public class Machine implements DescriptionView.Describable {
 	private transient ObjectProperty<CheckingStatus> symbolicCheckingStatus;
 	private transient ObjectProperty<CheckingStatus> symbolicAnimationStatus;
 	private transient ObjectProperty<CheckingStatus> modelcheckingStatus;
-	private StringProperty name;
-	private StringProperty description;
-	private Path location;
-	/**
-	 * No longer used, except for backwards compatibility with old projects. Replaced by {@link #lastUsedPreferenceName}.
-	 */
-	@OnlyDeserialize
-	private ObjectProperty<Preference> lastUsed;
-	private StringProperty lastUsedPreferenceName;
-	private ListProperty<LTLFormulaItem> ltlFormulas;
-	private ListProperty<LTLPatternItem> ltlPatterns;
-	private ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
-	private ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
-	private ListProperty<TestCaseGenerationItem> testCases;
-	private SetProperty<Path> traces;
-	private ListProperty<ModelCheckingItem> modelcheckingItems;
+	private final StringProperty name;
+	private final StringProperty description;
+	private final Path location;
+	private final StringProperty lastUsedPreferenceName;
+	private final ListProperty<LTLFormulaItem> ltlFormulas;
+	private final ListProperty<LTLPatternItem> ltlPatterns;
+	private final ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
+	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
+	private final ListProperty<TestCaseGenerationItem> testCases;
+	private final SetProperty<Path> traces;
+	private final ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
 	private transient BooleanProperty changed;
 
@@ -65,6 +59,14 @@ public class Machine implements DescriptionView.Describable {
 		this.name = new SimpleStringProperty(this, "name", name);
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = location;
+		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
+		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
+		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
+		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
+		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
+		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
+		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
+		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 		this.replaceMissingWithDefaults();
 		this.resetStatus();
 	}
@@ -100,26 +102,14 @@ public class Machine implements DescriptionView.Describable {
 	}
 	
 	public void resetStatus() {
-		if (ltlFormulas != null) {
-			ltlFormulas.forEach(LTLFormulaItem::initialize);
-		}
-		if (ltlPatterns != null) {
-			ltlPatterns.forEach(LTLPatternItem::initialize);
-		}
+		ltlFormulas.forEach(LTLFormulaItem::initialize);
+		ltlPatterns.forEach(LTLPatternItem::initialize);
 		patternManager = new PatternManager();
-		if (symbolicCheckingFormulas != null) {
-			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initialize);
-			symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
-		}
-		if (symbolicAnimationFormulas != null) {
-			symbolicAnimationFormulas.forEach(SymbolicAnimationItem::initialize);
-		}
-		if (testCases != null) {
-			testCases.forEach(TestCaseGenerationItem::initialize);
-		}
-		if (modelcheckingItems != null) {
-			modelcheckingItems.forEach(ModelCheckingItem::initialize);
-		}
+		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initialize);
+		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
+		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::initialize);
+		testCases.forEach(TestCaseGenerationItem::initialize);
+		modelcheckingItems.forEach(ModelCheckingItem::initialize);
 	}
 	
 	public ObjectProperty<CheckingStatus> ltlStatusProperty() {
@@ -335,31 +325,6 @@ public class Machine implements DescriptionView.Describable {
 		}
 		if (modelcheckingStatus == null) {
 			this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);
-		}
-		if(ltlFormulas == null) {
-			this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
-		}
-		if(ltlPatterns == null) {
-			this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
-		}
-		if(symbolicCheckingFormulas == null) {
-			this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
-		}
-		if(symbolicAnimationFormulas == null) {
-			this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
-		}
-		if(testCases == null) {
-			this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
-		}
-		if(traces == null) {
-			this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
-		}
-		if(modelcheckingItems == null) {
-			this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-		}
-		if (lastUsedPreferenceName == null) {
-			final Preference pref = this.lastUsed == null || this.lastUsed.get() == null ? Preference.DEFAULT : this.lastUsed.get();
-			lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", pref.getName());
 		}
 		this.changed = new SimpleBooleanProperty(false);
 		this.nameProperty().addListener(o -> this.setChanged(true));

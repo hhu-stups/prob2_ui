@@ -34,11 +34,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.resultItem = new SimpleObjectProperty<>(null);
 	}
 
-	public void replaceMissingWithDefaults() {
-		if(selected == null) {
-			this.selected = new SimpleBooleanProperty(true);
-		}
-	}
+	public void replaceMissingWithDefaults() {}
 	
 	public String getName() {
 		return name;
