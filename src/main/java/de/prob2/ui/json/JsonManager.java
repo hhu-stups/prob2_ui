@@ -17,14 +17,28 @@ import org.slf4j.LoggerFactory;
  */
 public class JsonManager<T> {
 	public static class Context<T> {
-		final Class<T> clazz;
-		final String fileType;
-		final int currentFormatVersion;
+		protected final Class<T> clazz;
+		protected final String fileType;
+		protected final int currentFormatVersion;
 		
 		public Context(final Class<T> clazz, final String fileType, final int currentFormatVersion) {
 			this.clazz = Objects.requireNonNull(clazz, "clazz");
 			this.fileType = Objects.requireNonNull(fileType, "fileType");
 			this.currentFormatVersion = currentFormatVersion;
+		}
+		
+		/**
+		 * <p>Convert data from an older format version to the current version.</p>
+		 * <p>This method must be overridden to support loading data that uses an older format version. The default implementation of this method always throws a {@link JsonParseException}.</p>
+		 * <p>The converted object and metadata are returned from this method. The returned {@link JsonObject} may be a completely new object, or it may be {@code oldObject} after being modified in place. The returned {@link JsonMetadata} does <i>not</i> need to have its version number updated.</p>
+		 * 
+		 * @param oldObject the old data to convert
+		 * @param oldMetadata the metadata attached to the old data
+		 * @return the converted data and updated metadata
+		 * @throws JsonParseException if the data could not be converted
+		 */
+		public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
+			throw new JsonParseException("JSON data uses old format version " + oldMetadata.getFormatVersion() + ", which cannot be converted to the current version " + this.currentFormatVersion);
 		}
 	}
 	
@@ -103,7 +117,8 @@ public class JsonManager<T> {
 	public ObjectWithMetadata<T> read(final Reader reader) {
 		LOGGER.trace("Attempting to load JSON data of type {}, current version {}", this.getContext().fileType, this.getContext().currentFormatVersion);
 		final ObjectWithMetadata<JsonObject> rawWithMetadata = this.jsonManager.readRaw(reader);
-		final JsonMetadata metadata = rawWithMetadata.getMetadata();
+		JsonObject rawObject = rawWithMetadata.getObject();
+		JsonMetadata metadata = rawWithMetadata.getMetadata();
 		LOGGER.trace("Found JSON data of type {}, version {}", metadata.getFileType(), metadata.getFormatVersion());
 		// TODO Perform additional type validation checks if file type is missing (null)?
 		if (metadata.getFileType() != null && !metadata.getFileType().equals(this.getContext().fileType)) {
@@ -113,10 +128,12 @@ public class JsonManager<T> {
 			throw new JsonParseException("JSON data uses format version " + metadata.getFormatVersion() + ", which is newer than the newest supported version (" + this.getContext().currentFormatVersion + ")");
 		}
 		if (metadata.getFormatVersion() < this.getContext().currentFormatVersion) {
-			// TODO Convert/update old data
-			throw new JsonParseException("JSON data uses format version " + metadata.getFormatVersion() + ", which is older than the current version (" + this.getContext().currentFormatVersion + "), and conversion of old data is not supported yet");
+			LOGGER.info("Converting JSON data from old version {} to current version {}", metadata.getFormatVersion(), this.getContext().currentFormatVersion);
+			final ObjectWithMetadata<JsonObject> converted = this.getContext().convertOldData(rawObject, metadata);
+			rawObject = converted.getObject();
+			metadata = converted.getMetadata();
 		}
-		final T obj = this.gson.fromJson(rawWithMetadata.getObject(), this.getContext().clazz);
+		final T obj = this.gson.fromJson(rawObject, this.getContext().clazz);
 		return new ObjectWithMetadata<>(obj, metadata);
 	}
 	
