@@ -11,13 +11,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
+import de.prob2.ui.json.ObjectWithMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 
-import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -38,7 +41,20 @@ public class MagicLayoutSettingsManager {
 	public MagicLayoutSettingsManager(JsonManager<MagicLayoutSettings> jsonManager, CurrentProject currentProject, StageManager stageManager,
 			ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new JsonManager.Context<>(MagicLayoutSettings.class, "Magic Layout settings", 1));
+		this.jsonManager.initContext(new JsonManager.Context<MagicLayoutSettings>(MagicLayoutSettings.class, "Magic Layout settings", 1) {
+			@Override
+			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
+				if (oldMetadata.getFileType() == null) {
+					assert oldMetadata.getFormatVersion() == 0;
+					for (final String fieldName : new String[] {"machineName", "nodegroups", "edgegroups"}) {
+						if (!oldObject.has(fieldName)) {
+							throw new JsonParseException("Not a valid Magic Layout settings file - missing required field " + fieldName);
+						}
+					}
+				}
+				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+			}
+		});
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -99,12 +115,7 @@ public class MagicLayoutSettingsManager {
 		if (file != null) {
 			try {
 				Reader reader = Files.newBufferedReader(file.toPath(), CHARSET);
-				MagicLayoutSettings layoutSettings = this.jsonManager.read(reader).getObject();
-				if (isValidMagicLayoutSettings(layoutSettings)) {
-					return layoutSettings;
-				}
-				LOGGER.warn(String.format("Could not open file '%s'. The file does not contain valid Magic Layout settings.", file));
-				stageManager.makeAlert(AlertType.ERROR, "", "visualisation.magicLayout.settingsManager.alert.noValidLayoutSettings.content", file);
+				return this.jsonManager.read(reader).getObject();
 			} catch (IOException e) {
 				LOGGER.warn("Failed to read magic layout settings file", e);
 				stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotReadFile.content", file);
@@ -112,10 +123,4 @@ public class MagicLayoutSettingsManager {
 		}
 		return null;
 	}
-
-	private boolean isValidMagicLayoutSettings(MagicLayoutSettings layoutSettings) {
-		return layoutSettings.getMachineName() != null && layoutSettings.getNodegroups() != null
-				&& layoutSettings.getEdgegroups() != null;
-	}
-
 }
