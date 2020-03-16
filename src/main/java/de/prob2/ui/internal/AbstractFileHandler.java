@@ -26,23 +26,23 @@ public abstract class AbstractFileHandler<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileHandler.class);
 	private static final Charset CHARSET = StandardCharsets.UTF_8;
 	
-	private final JsonManager<T> jsonContext;
+	private final JsonManager<T> jsonManager;
 	
 	protected final CurrentProject currentProject;
 	protected final StageManager stageManager;
 	protected final ResourceBundle bundle;
 
-	protected AbstractFileHandler(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, JsonManager<T> jsonContext) {
+	protected AbstractFileHandler(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, JsonManager<T> jsonManager) {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.jsonContext = jsonContext;
+		this.jsonManager = jsonManager;
 	}
 	
 	public T load(Path path) throws IOException {
 		path = currentProject.get().getLocation().resolve(path);
 		try (final Reader reader = Files.newBufferedReader(path, CHARSET)) {
-			return this.jsonContext.read(reader).getObject();
+			return this.jsonManager.read(reader).getObject();
 		}
 	}
 	
@@ -67,12 +67,12 @@ public abstract class AbstractFileHandler<T> {
 			final Path absolute = file.toPath();
 			
 			try (final Writer writer = Files.newBufferedWriter(absolute, CHARSET)) {
-				JsonMetadataBuilder metadataBuilder = this.jsonContext.defaultMetadataBuilder()
+				JsonMetadataBuilder metadataBuilder = this.jsonManager.defaultMetadataBuilder()
 					.withCreator(createdBy);
 				if (headerWithMachineName) {
 					metadataBuilder.withCurrentModelName();
 				}
-				this.jsonContext.write(writer, data, metadataBuilder.build());
+				this.jsonManager.write(writer, data, metadataBuilder.build());
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create file", exc);
 			} catch (IOException exc) {
