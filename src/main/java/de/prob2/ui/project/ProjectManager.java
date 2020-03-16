@@ -2,14 +2,7 @@ package de.prob2.ui.project;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -50,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ProjectManager {
-	private static final Charset PROJECT_CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
 	public static final String PROJECT_FILE_PATTERN = "*." + PROJECT_FILE_EXTENSION;
@@ -146,8 +138,8 @@ public class ProjectManager {
 	}
 
 	private File saveProject(Project project, File location) {
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), PROJECT_CHARSET)) {
-			this.jsonManager.write(writer, project);
+		try {
+			this.jsonManager.writeToFile(location.toPath(), project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
 			return null;
@@ -206,8 +198,8 @@ public class ProjectManager {
 	}
 
 	private Project loadProject(Path path) {
-		try (final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET)) {
-			final Project project = this.jsonManager.read(reader).getObject();
+		try {
+			final Project project = this.jsonManager.readFromFile(path).getObject();
 			project.setLocation(path.getParent());
 			return project;
 		} catch (IOException | JsonSyntaxException exc) {

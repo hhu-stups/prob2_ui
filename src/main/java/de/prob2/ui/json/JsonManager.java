@@ -1,7 +1,10 @@
 package de.prob2.ui.json;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 import com.google.gson.Gson;
@@ -138,6 +141,18 @@ public class JsonManager<T> {
 	}
 	
 	/**
+	 * Read an object along with its metadata from a JSON file. The file type and version number are checked against the settings in the context.
+	 *
+	 * @param path the path of the JSON file to read
+	 * @return the read object along with its metadata
+	 */
+	public ObjectWithMetadata<T> readFromFile(final Path path) throws IOException {
+		try (final Reader reader = Files.newBufferedReader(path)) {
+			return this.read(reader);
+		}
+	}
+	
+	/**
 	 * Write an object as JSON to the writer, along with the provided metadata.
 	 * 
 	 * @param writer the {@link Writer} to which to write the JSON data
@@ -156,5 +171,28 @@ public class JsonManager<T> {
 	 */
 	public void write(final Writer writer, final T src) {
 		this.write(writer, src, this.defaultMetadataBuilder().build());
+	}
+	
+	/**
+	 * Write an object to a JSON file, along with the provided metadata.
+	 *
+	 * @param path the path of the JSON file to write
+	 * @param src the object to write
+	 * @param metadata the metadata to attach to the JSON data
+	 */
+	public void writeToFile(final Path path, final T src, final JsonMetadata metadata) throws IOException {
+		try (final Writer writer = Files.newBufferedWriter(path)) {
+			this.write(writer, src, metadata);
+		}
+	}
+	
+	/**
+	 * Write an object to a JSON file, along with default metadata built using {@link #defaultMetadataBuilder()}.
+	 *
+	 * @param path the path of the JSON file to write
+	 * @param src the object to write
+	 */
+	public void writeToFile(final Path path, final T src) throws IOException {
+		this.writeToFile(path, src, this.defaultMetadataBuilder().build());
 	}
 }

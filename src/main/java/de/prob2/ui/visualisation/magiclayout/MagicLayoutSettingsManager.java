@@ -3,11 +3,6 @@ package de.prob2.ui.visualisation.magiclayout;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
@@ -28,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MagicLayoutSettingsManager {
-	private static final Charset CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(MagicLayoutSettingsManager.class);
 	private static final String MAGIC_FILE_ENDING = "*.prob2magic";
 
@@ -79,8 +73,8 @@ public class MagicLayoutSettingsManager {
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
 
 		if (file != null) {
-			try (final Writer writer = Files.newBufferedWriter(file.toPath(), CHARSET)) {
-				this.jsonManager.write(writer, layoutSettings, this.jsonManager.defaultMetadataBuilder()
+			try {
+				this.jsonManager.writeToFile(file.toPath(), layoutSettings, this.jsonManager.defaultMetadataBuilder()
 					.withModelName(layoutSettings.getMachineName())
 					.build());
 			} catch (FileNotFoundException exc) {
@@ -114,8 +108,7 @@ public class MagicLayoutSettingsManager {
 		File file = fileChooser.showOpenDialog(stageManager.getCurrent());
 		if (file != null) {
 			try {
-				Reader reader = Files.newBufferedReader(file.toPath(), CHARSET);
-				return this.jsonManager.read(reader).getObject();
+				return this.jsonManager.readFromFile(file.toPath()).getObject();
 			} catch (IOException e) {
 				LOGGER.warn("Failed to read magic layout settings file", e);
 				stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotReadFile.content", file);

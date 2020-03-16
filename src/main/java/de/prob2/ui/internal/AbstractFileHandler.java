@@ -3,16 +3,11 @@ package de.prob2.ui.internal;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-import de.prob2.ui.json.JsonMetadataBuilder;
 import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadataBuilder;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.stage.DirectoryChooser;
@@ -24,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFileHandler<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileHandler.class);
-	private static final Charset CHARSET = StandardCharsets.UTF_8;
 	
 	private final JsonManager<T> jsonManager;
 	
@@ -40,10 +34,7 @@ public abstract class AbstractFileHandler<T> {
 	}
 	
 	public T load(Path path) throws IOException {
-		path = currentProject.get().getLocation().resolve(path);
-		try (final Reader reader = Files.newBufferedReader(path, CHARSET)) {
-			return this.jsonManager.read(reader).getObject();
-		}
+		return this.jsonManager.readFromFile(currentProject.get().getLocation().resolve(path)).getObject();
 	}
 	
 	protected File showSaveDialog(String title, File initialDirectory, String initialFileName, ExtensionFilter filter) {
@@ -64,15 +55,13 @@ public abstract class AbstractFileHandler<T> {
 	
 	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) {
 		if(file != null) {
-			final Path absolute = file.toPath();
-			
-			try (final Writer writer = Files.newBufferedWriter(absolute, CHARSET)) {
+			try {
 				JsonMetadataBuilder metadataBuilder = this.jsonManager.defaultMetadataBuilder()
 					.withCreator(createdBy);
 				if (headerWithMachineName) {
 					metadataBuilder.withCurrentModelName();
 				}
-				this.jsonManager.write(writer, data, metadataBuilder.build());
+				this.jsonManager.writeToFile(file.toPath(), data, metadataBuilder.build());
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create file", exc);
 			} catch (IOException exc) {

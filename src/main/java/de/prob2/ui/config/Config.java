@@ -3,7 +3,6 @@ package de.prob2.ui.config;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -127,8 +126,8 @@ public final class Config {
 	public void load() {
 		ConfigData configData;
 		if (this.runtimeOptions.isLoadConfig()) {
-			try (final Reader reader = Files.newBufferedReader(LOCATION)) {
-				configData = this.jsonManager.read(reader).getObject();
+			try {
+				configData = this.jsonManager.readFromFile(LOCATION).getObject();
 				if (configData == null) {
 					// Config file is empty, use default config.
 					configData = new ConfigData();
@@ -164,7 +163,7 @@ public final class Config {
 			listener.saveConfig(configData);
 		}
 
-		try (final Writer writer = Files.newBufferedWriter(LOCATION)) {
+		try {
 			// The metadata includes all of the usual information, except for the CLI version.
 			// This is because the config is saved while the UI is shut down, and at that point it may no longer be possible to obtain the CLI version, because the shared empty state space has already been shut down.
 			final JsonMetadata metadata = this.jsonManager.metadataBuilder()
@@ -172,7 +171,7 @@ public final class Config {
 				.withCurrentProB2KernelVersion()
 				.withUserCreator()
 				.build();
-			this.jsonManager.write(writer, configData, metadata);
+			this.jsonManager.writeToFile(LOCATION, configData, metadata);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
