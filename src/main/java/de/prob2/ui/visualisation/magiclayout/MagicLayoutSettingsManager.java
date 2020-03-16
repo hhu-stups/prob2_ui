@@ -38,7 +38,7 @@ public class MagicLayoutSettingsManager {
 	public MagicLayoutSettingsManager(JsonManager<MagicLayoutSettings> jsonManager, CurrentProject currentProject, StageManager stageManager,
 			ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new JsonManager.Context<>(MagicLayoutSettings.class, "Magic Layout settings", 0));
+		this.jsonManager.initContext(new JsonManager.Context<>(MagicLayoutSettings.class, "Magic Layout settings", 1));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;

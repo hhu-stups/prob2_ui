@@ -25,7 +25,7 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 	@Inject
 	public LTLFileHandler(JsonManager<LTLData> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
 		super(currentProject, stageManager, bundle, jsonManager);
-		jsonManager.initContext(new JsonManager.Context<>(LTLData.class, "LTL", 0));
+		jsonManager.initContext(new JsonManager.Context<>(LTLData.class, "LTL", 1));
 	}
 	
 	public void save() {

@@ -45,7 +45,7 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	@Inject
 	public TraceFileHandler(JsonManager<PersistentTrace> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
 		super(currentProject, stageManager, bundle, jsonManager);
-		jsonManager.initContext(new JsonManager.Context<>(PersistentTrace.class, "Trace", 0));
+		jsonManager.initContext(new JsonManager.Context<>(PersistentTrace.class, "Trace", 1));
 	}
 
 	@Override
