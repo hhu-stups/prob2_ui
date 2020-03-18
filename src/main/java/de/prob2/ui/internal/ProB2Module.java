@@ -31,8 +31,11 @@ import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.verifications.ltl.LTLData;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
+import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
+import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -134,6 +137,9 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(LTLFormulaItem.class, LTLFormulaItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLPatternItem.class, LTLPatternItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLData.class, LTLData.JSON_DESERIALIZER)
+			.registerTypeAdapter(MagicNodegroup.class, MagicNodegroup.JSON_DESERIALIZER)
+			.registerTypeAdapter(MagicEdgegroup.class, MagicEdgegroup.JSON_DESERIALIZER)
+			.registerTypeAdapter(MagicLayoutSettings.class, MagicLayoutSettings.JSON_DESERIALIZER)
 			.create());
 		
 		bind(StateSpaceProvider.class).to(CustomStateSpaceProvider.class);
