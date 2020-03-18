@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides utilities for reading and writing JSON data with attached metadata, in a way that correctly handles data from older and newer UI versions.
  */
-public class JsonManager<T> {
+public final class JsonManager<T> {
 	public static class Context<T> {
 		protected final Class<T> clazz;
 		protected final String fileType;
