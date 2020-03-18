@@ -28,6 +28,9 @@ import de.prob2.ui.ProB2;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.output.PrologOutput;
+import de.prob2.ui.verifications.ltl.LTLData;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 
@@ -128,6 +131,9 @@ public class ProB2Module extends AbstractModule {
 				return new BoundingBox(array[0], array[1], array[2], array[3]);
 			})
 			.registerTypeAdapter(Color.class, new ColorTypeAdapter())
+			.registerTypeAdapter(LTLFormulaItem.class, LTLFormulaItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(LTLPatternItem.class, LTLPatternItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(LTLData.class, LTLData.JSON_DESERIALIZER)
 			.create());
 		
 		bind(StateSpaceProvider.class).to(CustomStateSpaceProvider.class);

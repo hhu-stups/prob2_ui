@@ -1,20 +1,31 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import java.lang.reflect.Type;
+import java.util.Objects;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.ILTLItem;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.util.Objects;
-
 public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
+	public static final JsonDeserializer<LTLFormulaItem> JSON_DESERIALIZER = LTLFormulaItem::new;
 
 	private transient ObjectProperty<Trace> counterExample;
 
 	public LTLFormulaItem(String code, String description) {
 		super("", description, code);
 		this.counterExample = new SimpleObjectProperty<>(null);
+	}
+	
+	private LTLFormulaItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		super(json, typeOfT, context);
 	}
 	
 	@Override
