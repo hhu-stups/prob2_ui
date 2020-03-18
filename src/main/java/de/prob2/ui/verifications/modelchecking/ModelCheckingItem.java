@@ -1,9 +1,17 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
 import de.prob.check.ModelCheckingOptions;
+import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 
@@ -16,6 +24,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
 public class ModelCheckingItem implements IExecutableItem {
+	public static final JsonDeserializer<ModelCheckingItem> JSON_DESERIALIZER = ModelCheckingItem::new;
+	
 	private Checked checked;
 
 	private final ObjectProperty<ModelCheckingOptions> options;
@@ -30,6 +40,14 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.options = new SimpleObjectProperty<>(this, "options", options);
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
+		initialize();
+	}
+	
+	private ModelCheckingItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		final JsonObject object = json.getAsJsonObject();
+		this.checked = JsonManager.checkDeserialize(context, object, "checked", Checked.class);
+		this.options = JsonManager.checkDeserialize(context, object, "options", new TypeToken<ObjectProperty<ModelCheckingOptions>>() {}.getType());
+		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
 		initialize();
 	}
 	

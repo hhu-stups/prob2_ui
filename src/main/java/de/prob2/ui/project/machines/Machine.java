@@ -1,16 +1,23 @@
 package de.prob2.ui.project.machines;
 
+import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
 import com.google.common.io.Files;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
+import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -36,6 +43,8 @@ public class Machine implements DescriptionView.Describable {
 	public enum CheckingStatus {
 		UNKNOWN, SUCCESSFUL, FAILED
 	}
+	
+	public static final JsonDeserializer<Machine> JSON_DESERIALIZER = Machine::new;
 	
 	private transient ObjectProperty<CheckingStatus> ltlStatus;
 	private transient ObjectProperty<CheckingStatus> symbolicCheckingStatus;
@@ -69,6 +78,21 @@ public class Machine implements DescriptionView.Describable {
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 		this.replaceMissingWithDefaults();
 		this.resetStatus();
+	}
+	
+	private Machine(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		final JsonObject object = json.getAsJsonObject();
+		this.name = JsonManager.checkDeserialize(context, object, "name", StringProperty.class);
+		this.description = JsonManager.checkDeserialize(context, object, "description", StringProperty.class);
+		this.location = JsonManager.checkDeserialize(context, object, "location", Path.class);
+		this.lastUsedPreferenceName = JsonManager.checkDeserialize(context, object, "lastUsedPreferenceName", StringProperty.class);
+		this.ltlFormulas = JsonManager.checkDeserialize(context, object, "ltlFormulas", new TypeToken<ListProperty<LTLFormulaItem>>() {}.getType());
+		this.ltlPatterns = JsonManager.checkDeserialize(context, object, "ltlPatterns", new TypeToken<ListProperty<LTLPatternItem>>() {}.getType());
+		this.symbolicCheckingFormulas = JsonManager.checkDeserialize(context, object, "symbolicCheckingFormulas", new TypeToken<ListProperty<SymbolicCheckingFormulaItem>>() {}.getType());
+		this.symbolicAnimationFormulas = JsonManager.checkDeserialize(context, object, "symbolicAnimationFormulas", new TypeToken<ListProperty<SymbolicAnimationItem>>() {}.getType());
+		this.testCases = JsonManager.checkDeserialize(context, object, "testCases", new TypeToken<ListProperty<TestCaseGenerationItem>>() {}.getType());
+		this.traces = JsonManager.checkDeserialize(context, object, "traces", new TypeToken<SetProperty<Path>>() {}.getType());
+		this.modelcheckingItems = JsonManager.checkDeserialize(context, object, "modelcheckingItems", new TypeToken<ListProperty<ModelCheckingItem>>() {}.getType());
 	}
 	
 	public BooleanProperty changedProperty() {

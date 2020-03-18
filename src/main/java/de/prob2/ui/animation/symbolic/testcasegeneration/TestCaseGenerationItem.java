@@ -1,11 +1,19 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
 import de.prob.statespace.Trace;
+import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 
 import javafx.beans.property.ListProperty;
@@ -16,6 +24,8 @@ import javafx.collections.ObservableList;
 public class TestCaseGenerationItem extends AbstractCheckableItem {
 	public static final String LEVEL = "level";
 	public static final String OPERATIONS = "operations";
+	
+	public static final JsonDeserializer<TestCaseGenerationItem> JSON_DESERIALIZER = TestCaseGenerationItem::new;
 	
 	private int maxDepth;
 	
@@ -54,6 +64,14 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new HashMap<>();
 		additionalInformation.put(OPERATIONS, operations);
+	}
+	
+	private TestCaseGenerationItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		super(json, typeOfT, context);
+		final JsonObject object = json.getAsJsonObject();
+		this.maxDepth = JsonManager.checkDeserialize(context, object, "maxDepth", int.class);
+		this.additionalInformation = JsonManager.checkDeserialize(context, object, "additionalInformation", new TypeToken<Map<String, Object>>() {}.getType());
+		this.type = JsonManager.checkDeserialize(context, object, "type", TestCaseGenerationType.class);
 	}
 	
 	public void replaceMissingWithDefaults() {

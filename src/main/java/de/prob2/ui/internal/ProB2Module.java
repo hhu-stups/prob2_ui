@@ -25,12 +25,19 @@ import de.prob.MainModule;
 import de.prob.scripting.StateSpaceProvider;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.ProB2;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.output.PrologOutput;
+import de.prob2.ui.project.Project;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.ltl.LTLData;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
@@ -137,6 +144,13 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(LTLFormulaItem.class, LTLFormulaItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLPatternItem.class, LTLPatternItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLData.class, LTLData.JSON_DESERIALIZER)
+			.registerTypeAdapter(SymbolicCheckingFormulaItem.class, SymbolicCheckingFormulaItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(SymbolicAnimationItem.class, SymbolicAnimationItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(TestCaseGenerationItem.class, TestCaseGenerationItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(ModelCheckingItem.class, ModelCheckingItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(Machine.class, Machine.JSON_DESERIALIZER)
+			.registerTypeAdapter(Preference.class, Preference.JSON_DESERIALIZER)
+			.registerTypeAdapter(Project.class, Project.JSON_DESERIALIZER)
 			.registerTypeAdapter(MagicNodegroup.class, MagicNodegroup.JSON_DESERIALIZER)
 			.registerTypeAdapter(MagicEdgegroup.class, MagicEdgegroup.JSON_DESERIALIZER)
 			.registerTypeAdapter(MagicLayoutSettings.class, MagicLayoutSettings.JSON_DESERIALIZER)
