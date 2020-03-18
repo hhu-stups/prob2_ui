@@ -3,11 +3,14 @@ package de.prob2.ui.json;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
@@ -59,6 +62,26 @@ public final class JsonManager<T> {
 		this.jsonManager = jsonManager;
 		this.gson = gson;
 		this.context = null;
+	}
+	
+	public static JsonElement checkGet(final JsonObject object, final String memberName) {
+		final JsonElement value = object.get(memberName);
+		if (value == null) {
+			throw new JsonParseException("Missing required field " + memberName);
+		}
+		return value;
+	}
+	
+	public static <T> T checkDeserialize(final JsonDeserializationContext context, final JsonObject object, final String memberName, final Type typeOfT) {
+		final T deserialized = context.deserialize(checkGet(object, memberName), typeOfT);
+		if (deserialized == null) {
+			throw new JsonParseException("Value of field " + memberName + " is null or invalid");
+		}
+		return deserialized;
+	}
+	
+	public static <T> T checkDeserialize(final JsonDeserializationContext context, final JsonObject object, final String memberName, final Class<T> classOfT) {
+		return checkDeserialize(context, object, memberName, (Type)classOfT);
 	}
 	
 	public JsonManager.Context<T> getContext() {
