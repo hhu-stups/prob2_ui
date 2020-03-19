@@ -29,7 +29,7 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	private int maxDepth;
 	
-	private transient ListProperty<Trace> examples;
+	private final transient ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 	
 	private Map<String, Object> additionalInformation;
 	
@@ -50,7 +50,6 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	public TestCaseGenerationItem(int maxDepth, int level) {
 		super("MCDC:" + level + "/" + "DEPTH:" + maxDepth, TestCaseGenerationType.MCDC.getName(), "");
-		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.type = TestCaseGenerationType.MCDC;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new HashMap<>();
@@ -59,7 +58,6 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 
 	public TestCaseGenerationItem(int maxDepth, List<String> operations) {
 		super("OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + maxDepth, TestCaseGenerationType.COVERED_OPERATIONS.getName(), "");
-		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.type = TestCaseGenerationType.COVERED_OPERATIONS;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new HashMap<>();
@@ -77,11 +75,7 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	@Override
 	public void initialize() {
 		super.initialize();
-		if(this.examples == null) {
-			this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
-		} else {
-			this.examples.setValue(FXCollections.observableArrayList());
-		}
+		this.examples.clear();
 	}
 	
 	public Object getAdditionalInformation(String key) {

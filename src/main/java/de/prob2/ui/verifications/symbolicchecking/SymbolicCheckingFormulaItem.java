@@ -19,11 +19,10 @@ import javafx.collections.ObservableList;
 public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	public static final JsonDeserializer<SymbolicCheckingFormulaItem> JSON_DESERIALIZER = SymbolicCheckingFormulaItem::new;
 	
-	private transient ListProperty<Trace> counterExamples;
+	private final transient ListProperty<Trace> counterExamples = new SimpleListProperty<>(this, "counterExamples", FXCollections.observableArrayList());
 
 	public SymbolicCheckingFormulaItem(String name, String code, SymbolicExecutionType type) {
 		super(name, code, type);
-		this.initializeCounterExamples();
 	}
 	
 	private SymbolicCheckingFormulaItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
@@ -31,7 +30,7 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	}
 		
 	public void initializeCounterExamples() {
-		this.counterExamples = new SimpleListProperty<>(FXCollections.observableArrayList());
+		this.counterExamples.clear();
 	}
 	
 	public ObservableList<Trace> getCounterExamples() {

@@ -17,11 +17,10 @@ import javafx.beans.property.SimpleObjectProperty;
 public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 	public static final JsonDeserializer<LTLFormulaItem> JSON_DESERIALIZER = LTLFormulaItem::new;
 
-	private transient ObjectProperty<Trace> counterExample;
+	private final transient ObjectProperty<Trace> counterExample = new SimpleObjectProperty<>(this, "counterExample", null);
 
 	public LTLFormulaItem(String code, String description) {
 		super("", description, code);
-		this.counterExample = new SimpleObjectProperty<>(null);
 	}
 	
 	private LTLFormulaItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
@@ -31,7 +30,7 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 	@Override
 	public void initialize() {
 		super.initialize();
-		this.counterExample = new SimpleObjectProperty<>(null);
+		this.setCounterExample(null);
 	}
 			
 	public void setCounterExample(Trace counterExample) {

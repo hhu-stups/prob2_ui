@@ -19,11 +19,10 @@ import javafx.collections.ObservableList;
 public class SymbolicAnimationItem extends SymbolicItem {
 	public static final JsonDeserializer<SymbolicAnimationItem> JSON_DESERIALIZER = SymbolicAnimationItem::new;
 
-	private transient ListProperty<Trace> examples;
+	private final transient ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 
 	public SymbolicAnimationItem(String name, SymbolicExecutionType type) {
 		super(name, type);
-		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 	}
 
 	private SymbolicAnimationItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
@@ -33,11 +32,7 @@ public class SymbolicAnimationItem extends SymbolicItem {
 	@Override
 	public void initialize() {
 		super.initialize();
-		if(this.examples == null) {
-			this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
-		} else {
-			this.examples.setValue(FXCollections.observableArrayList());
-		}
+		this.examples.clear();
 	}
 
 

@@ -19,10 +19,10 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected String description;
 	protected String code;
 	protected BooleanProperty selected;
-	protected transient ObjectProperty<CheckingResultItem> resultItem;
+	protected final transient ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
 	
 	public AbstractCheckableItem(String name, String description, String code) {
-		initialize();
+		this.checked = Checked.NOT_CHECKED;
 		this.name = name;
 		this.description = description;
 		this.code = code;
@@ -31,12 +31,11 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	
 	protected AbstractCheckableItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
-		this.checked = JsonManager.checkDeserialize(context, object, "checked", Checked.class);
+		this.checked = Checked.NOT_CHECKED;
 		this.name = JsonManager.checkDeserialize(context, object, "name", String.class);
 		this.description = JsonManager.checkDeserialize(context, object, "description", String.class);
 		this.code = JsonManager.checkDeserialize(context, object, "code", String.class);
 		this.selected = JsonManager.checkDeserialize(context, object, "selected", BooleanProperty.class);
-		initialize();
 	}
 	
 	public void setData(String name, String description, String code) {
@@ -48,7 +47,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		
 	public void initialize() {
 		this.checked = Checked.NOT_CHECKED;
-		this.resultItem = new SimpleObjectProperty<>(null);
+		this.setResultItem(null);
 	}
 	
 	public String getName() {
@@ -89,10 +88,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	}
 	
 	public void setResultItem(CheckingResultItem resultItem) {
-		if(resultItem == null) {
-			this.resultItem = new SimpleObjectProperty<>(resultItem);
-			return;
-		}
 		this.resultItem.set(resultItem);
 	}
 	
