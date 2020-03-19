@@ -50,11 +50,9 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.BoundingBox;
-import javafx.scene.paint.Color;
 import javafx.util.BuilderFactory;
 
 import org.hildan.fxgson.FxGson;
-import org.hildan.fxgson.adapters.extras.ColorTypeAdapter;
 
 public class ProB2Module extends AbstractModule {
 	/**
@@ -131,7 +129,7 @@ public class ProB2Module extends AbstractModule {
 	@Provides
 	@Singleton
 	private Gson provideGson() {
-		return Converters.registerAll(FxGson.coreBuilder())
+		return Converters.registerAll(FxGson.fullBuilder())
 			.disableHtmlEscaping()
 			.setPrettyPrinting()
 			.addSerializationExclusionStrategy(new ExclusionStrategy() {
@@ -159,7 +157,6 @@ public class ProB2Module extends AbstractModule {
 				}
 				return new BoundingBox(array[0], array[1], array[2], array[3]);
 			})
-			.registerTypeAdapter(Color.class, new ColorTypeAdapter())
 			.registerTypeAdapter(LTLFormulaItem.class, LTLFormulaItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLPatternItem.class, LTLPatternItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLData.class, LTLData.JSON_DESERIALIZER)
