@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
@@ -26,8 +27,8 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 	public static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
 
 	@Inject
-	public LTLFileHandler(JsonManager<LTLData> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
-		super(currentProject, stageManager, bundle, jsonManager);
+	public LTLFileHandler(JsonManager<LTLData> jsonManager, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+		super(currentProject, stageManager, fileChooserManager, bundle, jsonManager);
 		jsonManager.initContext(new JsonManager.Context<LTLData>(LTLData.class, "LTL", 1) {
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -47,7 +48,7 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 	public void save() {
 		Machine machine = currentProject.getCurrentMachine();
 		File file = showSaveDialog(bundle.getString("verifications.ltl.ltlView.fileChooser.saveLTL.title"),
-				currentProject.getLocation().toFile(), 
+				FileChooserManager.Kind.LTL,
 				machine.getName() + "." + LTL_FILE_EXTENSION,
 				new ExtensionFilter(
 					String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_PATTERN),

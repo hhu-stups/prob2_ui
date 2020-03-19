@@ -1,22 +1,5 @@
 package de.prob2.ui.config;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import de.prob.model.brules.RulesModelFactory;
-import de.prob.scripting.AlloyFactory;
-import de.prob.scripting.CSPFactory;
-import de.prob.scripting.ClassicalBFactory;
-import de.prob.scripting.EventBFactory;
-import de.prob.scripting.EventBPackageFactory;
-import de.prob.scripting.FactoryProvider;
-import de.prob.scripting.ModelFactory;
-import de.prob.scripting.TLAFactory;
-import de.prob.scripting.XTLFactory;
-import de.prob.scripting.ZFactory;
-import de.prob2.ui.project.ProjectManager;
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +12,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import de.prob.model.brules.RulesModelFactory;
+import de.prob.scripting.AlloyFactory;
+import de.prob.scripting.CSPFactory;
+import de.prob.scripting.ClassicalBFactory;
+import de.prob.scripting.EventBFactory;
+import de.prob.scripting.EventBPackageFactory;
+import de.prob.scripting.FactoryProvider;
+import de.prob.scripting.ModelFactory;
+import de.prob.scripting.TLAFactory;
+import de.prob.scripting.XTLFactory;
+import de.prob.scripting.ZFactory;
+import de.prob2.ui.project.ProjectManager;
+
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
 @Singleton
 public class FileChooserManager {
@@ -119,6 +122,18 @@ public class FileChooserManager {
 			setInitialDirectory(kind, path.getParent());
 		}
 		return path;
+	}
+
+	public Path showDirectoryChooser(final DirectoryChooser directoryChooser, final Kind kind, final Window window) {
+		if (containsValidInitialDirectory(kind)) {
+			directoryChooser.setInitialDirectory(getInitialDirectory(kind).toFile());
+		}
+		final File dirFile = directoryChooser.showDialog(window);
+		final Path dirPath = dirFile == null ? null : dirFile.toPath();
+		if (dirPath != null) {
+			setInitialDirectory(kind, dirPath);
+		}
+		return dirPath;
 	}
 	
 	/**

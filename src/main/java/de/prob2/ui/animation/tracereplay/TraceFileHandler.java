@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
@@ -44,8 +45,8 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	@Inject
-	public TraceFileHandler(JsonManager<PersistentTrace> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
-		super(currentProject, stageManager, bundle, jsonManager);
+	public TraceFileHandler(JsonManager<PersistentTrace> jsonManager, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+		super(currentProject, stageManager, fileChooserManager, bundle, jsonManager);
 		jsonManager.initContext(new JsonManager.Context<PersistentTrace>(PersistentTrace.class, "Trace", 1) {
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -115,7 +116,7 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 				.stream()
 				.filter(information -> information.getTrace() != null)
 				.collect(Collectors.toList());
-		File file = showSaveDialogForManyFiles(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"), currentProject.getLocation().toFile());
+		File file = showSaveDialogForManyFiles(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"), FileChooserManager.Kind.TRACES);
 		if(file == null) {
 			return;
 		}
@@ -158,7 +159,7 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	
 	public void save(PersistentTrace trace, Machine machine) {
 		File file = showSaveDialog(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"),
-				currentProject.getLocation().toFile(),
+				FileChooserManager.Kind.TRACES,
 				machine.getName() + "." + TRACE_FILE_EXTENSION,
 				new ExtensionFilter(
 					String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_PATTERN),

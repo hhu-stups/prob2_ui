@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadataBuilder;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -24,11 +25,13 @@ public abstract class AbstractFileHandler<T> {
 	
 	protected final CurrentProject currentProject;
 	protected final StageManager stageManager;
+	protected final FileChooserManager fileChooserManager;
 	protected final ResourceBundle bundle;
 
-	protected AbstractFileHandler(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, JsonManager<T> jsonManager) {
+	protected AbstractFileHandler(CurrentProject currentProject, StageManager stageManager, final FileChooserManager fileChooserManager, ResourceBundle bundle, JsonManager<T> jsonManager) {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 		this.jsonManager = jsonManager;
 	}
@@ -37,20 +40,20 @@ public abstract class AbstractFileHandler<T> {
 		return this.jsonManager.readFromFile(currentProject.get().getLocation().resolve(path)).getObject();
 	}
 	
-	protected File showSaveDialog(String title, File initialDirectory, String initialFileName, ExtensionFilter filter) {
+	protected File showSaveDialog(String title, FileChooserManager.Kind kind, String initialFileName, ExtensionFilter filter) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(title);
-		fileChooser.setInitialDirectory(initialDirectory);
 		fileChooser.setInitialFileName(initialFileName);
 		fileChooser.getExtensionFilters().add(filter);
-		return fileChooser.showSaveDialog(stageManager.getCurrent());
+		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, kind, stageManager.getCurrent());
+		return path == null ? null : path.toFile();
 	}
 
-	protected File showSaveDialogForManyFiles(String title, File initialDirectory) {
+	protected File showSaveDialogForManyFiles(String title, final FileChooserManager.Kind kind) {
 		DirectoryChooser fileChooser = new DirectoryChooser();
 		fileChooser.setTitle(title);
-		fileChooser.setInitialDirectory(initialDirectory);
-		return fileChooser.showDialog(stageManager.getCurrent());
+		final Path path = this.fileChooserManager.showDirectoryChooser(fileChooser, kind, stageManager.getCurrent());
+		return path == null ? null : path.toFile();
 	}
 	
 	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) {
