@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.symbolic;
 
 import java.lang.reflect.Type;
-import java.util.Map;
 import java.util.Objects;
 
 import com.google.gson.JsonDeserializationContext;
@@ -27,11 +26,6 @@ public class SymbolicAnimationItem extends SymbolicItem {
 		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 	}
 
-	public SymbolicAnimationItem(String name, SymbolicExecutionType type, Map<String, Object> additionalInformation) {
-		super(name, type);
-		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
-	}
-	
 	private SymbolicAnimationItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		super(json, typeOfT, context);
 	}
