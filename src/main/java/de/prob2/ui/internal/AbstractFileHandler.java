@@ -11,10 +11,6 @@ import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadataBuilder;
 import de.prob2.ui.prob2fx.CurrentProject;
 
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,22 +34,6 @@ public abstract class AbstractFileHandler<T> {
 	
 	public T load(Path path) throws IOException {
 		return this.jsonManager.readFromFile(currentProject.get().getLocation().resolve(path)).getObject();
-	}
-	
-	protected File showSaveDialog(String title, FileChooserManager.Kind kind, String initialFileName, ExtensionFilter filter) {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(title);
-		fileChooser.setInitialFileName(initialFileName);
-		fileChooser.getExtensionFilters().add(filter);
-		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, kind, stageManager.getCurrent());
-		return path == null ? null : path.toFile();
-	}
-
-	protected File showSaveDialogForManyFiles(String title, final FileChooserManager.Kind kind) {
-		DirectoryChooser fileChooser = new DirectoryChooser();
-		fileChooser.setTitle(title);
-		final Path path = this.fileChooserManager.showDirectoryChooser(fileChooser, kind, stageManager.getCurrent());
-		return path == null ? null : path.toFile();
 	}
 	
 	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) {

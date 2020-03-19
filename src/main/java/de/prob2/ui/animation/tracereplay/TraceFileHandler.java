@@ -32,7 +32,8 @@ import de.prob2.ui.project.machines.Machine;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,15 +117,17 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 				.stream()
 				.filter(information -> information.getTrace() != null)
 				.collect(Collectors.toList());
-		File file = showSaveDialogForManyFiles(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"), FileChooserManager.Kind.TRACES);
-		if(file == null) {
+		final DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"));
+		final Path path = this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+		if (path == null) {
 			return;
 		}
 
-		try (final Stream<Path> children = Files.list(file.toPath())) {
+		try (final Stream<Path> children = Files.list(path)) {
 			if (children.anyMatch(p -> p.getFileName().toString().startsWith(TEST_CASE_TRACE_PREFIX))) {
 				// Directory already contains test case trace - ask if the user really wants to save here.
-				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", file).showAndWait();
+				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
 				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
 					return;
 				}
@@ -136,18 +139,10 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 
 		int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 		for(int i = 0; i < numberGeneratedTraces; i++) {
-			StringBuilder sb = new StringBuilder();
-			sb.append(TEST_CASE_TRACE_PREFIX);
-			sb.append(i);
-			sb.append(".prob2trace");
-			String fileName = sb.toString();
-			File traceFile = new File(file.getAbsolutePath() + File.separator + fileName);
+			final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 			String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
-			writeToFile(traceFile, traces.get(i), true, createdBy);
-			final Path projectLocation = currentProject.getLocation();
-			final Path absolute = traceFile.toPath();
-			final Path relative = projectLocation.relativize(absolute);
-			machine.addTraceFile(relative);
+			writeToFile(traceFilePath.toFile(), traces.get(i), true, createdBy);
+			machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 		}
 		if(traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION,
@@ -158,19 +153,17 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	}
 	
 	public void save(PersistentTrace trace, Machine machine) {
-		File file = showSaveDialog(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"),
-				FileChooserManager.Kind.TRACES,
-				machine.getName() + "." + TRACE_FILE_EXTENSION,
-				new ExtensionFilter(
-					String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_PATTERN),
-					TRACE_FILE_PATTERN
-				));
-		save(trace, file);
-		if(file != null) {
-			final Path projectLocation = currentProject.getLocation();
-			final Path absolute = file.toPath();
-			final Path relative = projectLocation.relativize(absolute);
-			machine.addTraceFile(relative);
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
+		fileChooser.setInitialFileName(machine.getName() + "." + TRACE_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+			String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_PATTERN),
+			TRACE_FILE_PATTERN
+		));
+		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+		if (path != null) {
+			save(trace, path.toFile());
+			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
 	}
 

@@ -1,6 +1,6 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
-import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.FileChooser;
 
 public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 	public static final String LTL_FILE_EXTENSION = "ltl";
@@ -47,19 +47,22 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 	
 	public void save() {
 		Machine machine = currentProject.getCurrentMachine();
-		File file = showSaveDialog(bundle.getString("verifications.ltl.ltlView.fileChooser.saveLTL.title"),
-				FileChooserManager.Kind.LTL,
-				machine.getName() + "." + LTL_FILE_EXTENSION,
-				new ExtensionFilter(
-					String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_PATTERN),
-					LTL_FILE_PATTERN
-				));
-		List<LTLFormulaItem> formulas = machine.getLTLFormulas().stream()
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.saveLTL.title"));
+		fileChooser.setInitialFileName(machine.getName() + "." + LTL_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+			String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_PATTERN),
+			LTL_FILE_PATTERN
+		));
+		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
+		if (path != null) {
+			List<LTLFormulaItem> formulas = machine.getLTLFormulas().stream()
 				.filter(LTLFormulaItem::selected)
 				.collect(Collectors.toList());
-		List<LTLPatternItem> patterns = machine.getLTLPatterns().stream()
+			List<LTLPatternItem> patterns = machine.getLTLPatterns().stream()
 				.filter(LTLPatternItem::selected)
 				.collect(Collectors.toList());
-		writeToFile(file, new LTLData(formulas, patterns), false, JsonMetadata.USER_CREATOR);
+			writeToFile(path.toFile(), new LTLData(formulas, patterns), false, JsonMetadata.USER_CREATOR);
+		}
 	}
 }
