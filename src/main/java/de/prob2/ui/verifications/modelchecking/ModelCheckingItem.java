@@ -32,15 +32,13 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private BooleanProperty shouldExecute;
 	
-	private transient ListProperty<ModelCheckingJobItem> items;
+	private final transient ListProperty<ModelCheckingJobItem> items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 
 	public ModelCheckingItem(ModelCheckingOptions options) {
 		Objects.requireNonNull(options);
 		this.checked = Checked.NOT_CHECKED;
 		this.options = new SimpleObjectProperty<>(this, "options", options);
 		this.shouldExecute = new SimpleBooleanProperty(true);
-		this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
-		initialize();
 	}
 	
 	private ModelCheckingItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
@@ -48,7 +46,6 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.checked = JsonManager.checkDeserialize(context, object, "checked", Checked.class);
 		this.options = JsonManager.checkDeserialize(context, object, "options", new TypeToken<ObjectProperty<ModelCheckingOptions>>() {}.getType());
 		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
-		initialize();
 	}
 	
 	@Override
@@ -84,15 +81,9 @@ public class ModelCheckingItem implements IExecutableItem {
 	public BooleanProperty selectedProperty() {
 		return shouldExecute;
 	}
-
-
-	/*
-	* This function is needed for initializing checked for items that are loaded via JSON and might not contain these fields.
-	*/
+	
 	public void initialize() {
-		if(this.items == null) {
-			this.items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
-		}
+		this.itemsProperty().clear();
 		this.setChecked(Checked.NOT_CHECKED);
 	}
 	
