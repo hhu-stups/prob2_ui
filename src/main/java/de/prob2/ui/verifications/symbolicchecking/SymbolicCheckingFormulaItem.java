@@ -42,8 +42,8 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	}
 	
 	@Override
-	public void reset() {
-		this.initialize();
+	public void initialize() {
+		super.initialize();
 		this.counterExamples.clear();
 	}
 	

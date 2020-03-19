@@ -31,10 +31,6 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 		this.type = JsonManager.checkDeserialize(context, object, "type", SymbolicExecutionType.class);
 	}
 	
-	public void reset() {
-		this.initialize();
-	}
-	
 	public void setType(SymbolicExecutionType type) {
 		this.type = type;
 	}

@@ -1,5 +1,7 @@
 package de.prob2.ui.animation.symbolic;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -14,8 +16,8 @@ import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
 import de.prob2.ui.symbolic.SymbolicView;
+
 import javafx.fxml.FXML;
-import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -41,7 +43,7 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
 			SymbolicExecutionType type = choosingStage.getExecutionType();
 			item.setData(formula, type.getName(), formula, type);
-			item.reset();
+			item.initialize();
 			view.refresh();
 			return true;
 		}

@@ -43,11 +43,6 @@ public class SymbolicAnimationItem extends SymbolicItem {
 	public ListProperty<Trace> examplesProperty() {
 		return examples;
 	}
-
-	@Override
-	public void reset() {
-		this.initialize();
-	}
 	
 	@Override
 	public boolean equals(Object obj) {

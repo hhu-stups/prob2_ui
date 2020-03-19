@@ -102,10 +102,6 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		return examples.get();
 	}
 	
-	public void reset() {
-		this.initialize();
-	}
-	
 	public void setData(String name, String description, String code, TestCaseGenerationType type, int maxDepth, Map<String, Object> additionalInformation) {
 		super.setData(name, description, code);
 		this.type = type;

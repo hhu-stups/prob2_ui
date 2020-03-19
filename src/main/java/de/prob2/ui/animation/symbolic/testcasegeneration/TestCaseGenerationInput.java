@@ -1,26 +1,26 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.LoadedMachine;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationSettingsHandler;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -98,7 +98,7 @@ public class TestCaseGenerationInput extends VBox {
 		if(!currentMachine.getTestCases().contains(newItem)) {
 			if(valid) {
 				item.setData(formula, type.getName(), "", type, maxDepth, additionalInformation);
-				item.reset();
+				item.initialize();
 				view.refresh();
 			}
 			return true;
