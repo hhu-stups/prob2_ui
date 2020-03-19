@@ -11,23 +11,23 @@ import javafx.stage.Stage;
 
 @Singleton
 public class UserManualStage extends Stage {
-    @FXML
-    private WebView userManualWebView;
+	@FXML
+	private WebView userManualWebView;
 
-    private Injector injector;
+	private Injector injector;
 
-    @Inject
-    public UserManualStage(final Injector injector, final StageManager stageManager) {
-        super();
-        stageManager.loadFXML(this, "user_manual_stage.fxml");
-    }
+	@Inject
+	public UserManualStage(final Injector injector, final StageManager stageManager) {
+		super();
+		stageManager.loadFXML(this, "user_manual_stage.fxml");
+	}
 
-    @FXML
-    public void initialize(){
-        try {
-            this.userManualWebView.getEngine().load(this.getClass().getResource("user_manual.html").toExternalForm());
-        } catch(Exception e){
-            new ExceptionAlert(injector, "User manual cannot be shown.", e).show();
-        }
-    }
+	@FXML
+	public void initialize(){
+		try {
+			this.userManualWebView.getEngine().load(this.getClass().getResource("user_manual.html").toExternalForm());
+		} catch(Exception e){
+			new ExceptionAlert(injector, "User manual cannot be shown.", e).show();
+		}
+	}
 }

@@ -13,64 +13,64 @@ import java.util.ArrayList;
  * */
 public class VisBVisualisation {
 	private Path svgPath;
-    private ArrayList<VisBItem> visBItems;
-    private ArrayList<VisBEvent> visBEvents;
+	private ArrayList<VisBItem> visBItems;
+	private ArrayList<VisBEvent> visBEvents;
 
-    public VisBVisualisation(){
-        this.visBItems = null;
-        this.visBEvents = null;
-        this.svgPath = null;
-    }
+	public VisBVisualisation(){
+		this.visBItems = null;
+		this.visBEvents = null;
+		this.svgPath = null;
+	}
 
-    public VisBVisualisation(ArrayList<VisBItem> visBItems, ArrayList<VisBEvent> visBEvents, Path svgPath) {
-        this.visBItems = visBItems;
-        this.visBEvents = visBEvents;
-        this.svgPath = svgPath;
-    }
+	public VisBVisualisation(ArrayList<VisBItem> visBItems, ArrayList<VisBEvent> visBEvents, Path svgPath) {
+		this.visBItems = visBItems;
+		this.visBEvents = visBEvents;
+		this.svgPath = svgPath;
+	}
 
-    public ArrayList<VisBEvent> getVisBEvents() {
-        return visBEvents;
-    }
+	public ArrayList<VisBEvent> getVisBEvents() {
+		return visBEvents;
+	}
 
-    public ArrayList<VisBItem> getVisBItems() {
-        return visBItems;
-    }
+	public ArrayList<VisBItem> getVisBItems() {
+		return visBItems;
+	}
 
-    public Path getSvgPath() {
-        return svgPath;
-    }
+	public Path getSvgPath() {
+		return svgPath;
+	}
 
-    public VisBEvent getEventForID(String id){
-        if(visBEvents != null && !visBEvents.isEmpty()){
-            for(VisBEvent visBEvent : visBEvents){
-                if(id.equals(visBEvent.getId())){
-                    return visBEvent;
-                }
-            }
-        }
-        return null;
-    }
+	public VisBEvent getEventForID(String id){
+		if(visBEvents != null && !visBEvents.isEmpty()){
+			for(VisBEvent visBEvent : visBEvents){
+				if(id.equals(visBEvent.getId())){
+					return visBEvent;
+				}
+			}
+		}
+		return null;
+	}
 
-    public boolean isReady(){
-        return ((visBEvents != null && !visBEvents.isEmpty()) || (visBItems != null && !visBItems.isEmpty())) && svgPath != null;
-    }
+	public boolean isReady(){
+		return ((visBEvents != null && !visBEvents.isEmpty()) || (visBItems != null && !visBItems.isEmpty())) && svgPath != null;
+	}
 
-    @Override
-    public String toString(){
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Visualisation Items List:\n");
-        for (VisBItem visBItem : visBItems){
-            stringBuilder.append(visBItem.toString());
-            stringBuilder.append("\n");
-        }
-        stringBuilder.append("Visualisation Events List:\n");
-        for (VisBEvent visBEvent : visBEvents){
-            stringBuilder.append(visBEvent.toString());
-            stringBuilder.append("\n");
-        }
-        stringBuilder.append("SVG: \n");
-        stringBuilder.append(svgPath.toString());
-        stringBuilder.append("\n");
-        return stringBuilder.toString();
-    }
+	@Override
+	public String toString(){
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("Visualisation Items List:\n");
+		for (VisBItem visBItem : visBItems){
+			stringBuilder.append(visBItem.toString());
+			stringBuilder.append("\n");
+		}
+		stringBuilder.append("Visualisation Events List:\n");
+		for (VisBEvent visBEvent : visBEvents){
+			stringBuilder.append(visBEvent.toString());
+			stringBuilder.append("\n");
+		}
+		stringBuilder.append("SVG: \n");
+		stringBuilder.append(svgPath.toString());
+		stringBuilder.append("\n");
+		return stringBuilder.toString();
+	}
 }

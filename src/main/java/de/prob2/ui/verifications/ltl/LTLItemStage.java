@@ -98,7 +98,7 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	protected abstract void changeItem(T item, T result);
 	
 	public void showErrors(CheckingResultItem resultItem) {
-	    //resultItem can be null when LTL model checking is interrupted
+		//resultItem can be null when LTL model checking is interrupted
 		if(resultItem == null || resultItem.getChecked() != Checked.PARSE_ERROR) {
 			this.close();
 			return;
