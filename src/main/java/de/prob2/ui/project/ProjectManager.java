@@ -322,7 +322,6 @@ public class ProjectManager {
 		final Path absPath = path.toAbsolutePath();
 		Project project = loadProject(absPath);
 		if (project != null) {
-			replaceMissingWithDefaults(project);
 			project.getMachines().forEach(Machine::resetStatus);
 			boolean replacingProject = currentProject.confirmReplacingProject();
 			if(replacingProject) {
@@ -363,8 +362,5 @@ public class ProjectManager {
 			this.openAutomaticProjectFromMachine(path);
 		}
 	}
-
-	private void replaceMissingWithDefaults(Project project) {
-		project.getMachines().forEach(Machine::replaceMissingWithDefaults);
-	}
+	
 }

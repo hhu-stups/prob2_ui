@@ -46,10 +46,10 @@ public class Machine implements DescriptionView.Describable {
 	
 	public static final JsonDeserializer<Machine> JSON_DESERIALIZER = Machine::new;
 	
-	private transient ObjectProperty<CheckingStatus> ltlStatus;
-	private transient ObjectProperty<CheckingStatus> symbolicCheckingStatus;
-	private transient ObjectProperty<CheckingStatus> symbolicAnimationStatus;
-	private transient ObjectProperty<CheckingStatus> modelcheckingStatus;
+	private final transient ObjectProperty<CheckingStatus> ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", CheckingStatus.UNKNOWN);
+	private final transient ObjectProperty<CheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", CheckingStatus.UNKNOWN);
+	private final transient ObjectProperty<CheckingStatus> symbolicAnimationStatus = new SimpleObjectProperty<>(this, "symbolicAnimationStatus", CheckingStatus.UNKNOWN);
+	private final transient ObjectProperty<CheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);
 	private final StringProperty name;
 	private final StringProperty description;
 	private final Path location;
@@ -62,11 +62,13 @@ public class Machine implements DescriptionView.Describable {
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
 	private transient PatternManager patternManager;
-	private transient BooleanProperty changed;
+	private final transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Machine(String name, String description, Path location) {
 		this.name = new SimpleStringProperty(this, "name", name);
+		this.nameProperty().addListener(o -> this.setChanged(true));
 		this.description = new SimpleStringProperty(this, "description", description);
+		this.descriptionProperty().addListener(o -> this.setChanged(true));
 		this.location = location;
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
@@ -76,14 +78,15 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-		this.replaceMissingWithDefaults();
 		this.resetStatus();
 	}
 	
 	private Machine(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
 		this.name = JsonManager.checkDeserialize(context, object, "name", StringProperty.class);
+		this.nameProperty().addListener(o -> this.setChanged(true));
 		this.description = JsonManager.checkDeserialize(context, object, "description", StringProperty.class);
+		this.descriptionProperty().addListener(o -> this.setChanged(true));
 		this.location = JsonManager.checkDeserialize(context, object, "location", Path.class);
 		this.lastUsedPreferenceName = JsonManager.checkDeserialize(context, object, "lastUsedPreferenceName", StringProperty.class);
 		this.ltlFormulas = JsonManager.checkDeserialize(context, object, "ltlFormulas", new TypeToken<ListProperty<LTLFormulaItem>>() {}.getType());
@@ -335,24 +338,6 @@ public class Machine implements DescriptionView.Describable {
 	
 	public SetProperty<Path> tracesProperty() {
 		return traces;
-	}
-		
-	public void replaceMissingWithDefaults() {
-		if (ltlStatus == null) {
-			this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", CheckingStatus.UNKNOWN);
-		}
-		if (symbolicCheckingStatus == null) {
-			this.symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", CheckingStatus.UNKNOWN);
-		}
-		if (symbolicAnimationStatus == null) {
-			this.symbolicAnimationStatus = new SimpleObjectProperty<>(this, "symbolicAnimationStatus", CheckingStatus.UNKNOWN);
-		}
-		if (modelcheckingStatus == null) {
-			this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);
-		}
-		this.changed = new SimpleBooleanProperty(false);
-		this.nameProperty().addListener(o -> this.setChanged(true));
-		this.descriptionProperty().addListener(o -> this.setChanged(true));
 	}
 	
 	public Path getLocation() {
