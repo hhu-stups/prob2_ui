@@ -366,6 +366,5 @@ public class ProjectManager {
 
 	private void replaceMissingWithDefaults(Project project) {
 		project.getMachines().forEach(Machine::replaceMissingWithDefaults);
-		project.getPreferences().forEach(Preference::replaceMissingWithDefaults);
 	}
 }

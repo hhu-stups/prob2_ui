@@ -24,7 +24,7 @@ public class Preference {
 
 	private final StringProperty name;
 	private Map<String, String> preferences;
-	private transient BooleanProperty changed = new SimpleBooleanProperty(false);
+	private final transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Preference(String name, Map<String, String> preferences) {
 		this.name = new SimpleStringProperty(this, "name", name);
@@ -66,9 +66,5 @@ public class Preference {
 	@Override
 	public String toString() {
 		return this.getName();
-	}
-
-	public void replaceMissingWithDefaults() {
-		changed = new SimpleBooleanProperty(false);
 	}
 }
