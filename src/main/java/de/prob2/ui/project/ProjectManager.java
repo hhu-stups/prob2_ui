@@ -322,7 +322,6 @@ public class ProjectManager {
 		final Path absPath = path.toAbsolutePath();
 		Project project = loadProject(absPath);
 		if (project != null) {
-			project.getMachines().forEach(Machine::resetStatus);
 			boolean replacingProject = currentProject.confirmReplacingProject();
 			if(replacingProject) {
 				currentProject.switchTo(project, false);
