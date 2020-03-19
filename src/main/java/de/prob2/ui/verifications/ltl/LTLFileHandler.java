@@ -11,7 +11,6 @@ import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadata;
@@ -23,13 +22,19 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
 import javafx.stage.FileChooser;
 
-public class LTLFileHandler extends AbstractFileHandler<LTLData> {
+public class LTLFileHandler {
 	public static final String LTL_FILE_EXTENSION = "ltl";
 	public static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
 
+	private final JsonManager<LTLData> jsonManager;
+	private final CurrentProject currentProject;
+	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
+	private final ResourceBundle bundle;
+
 	@Inject
 	public LTLFileHandler(JsonManager<LTLData> jsonManager, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
-		super(currentProject, stageManager, fileChooserManager, bundle, jsonManager);
+		this.jsonManager = jsonManager;
 		jsonManager.initContext(new JsonManager.Context<LTLData>(LTLData.class, "LTL", 1) {
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -44,6 +49,10 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 				return new ObjectWithMetadata<>(oldObject, oldMetadata);
 			}
 		});
+		this.currentProject = currentProject;
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
+		this.bundle = bundle;
 	}
 	
 	public LTLData load(Path path) throws IOException {

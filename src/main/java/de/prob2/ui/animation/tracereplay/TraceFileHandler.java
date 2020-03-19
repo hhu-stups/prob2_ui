@@ -21,7 +21,6 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.AbstractFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadata;
@@ -37,16 +36,22 @@ import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
+public class TraceFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
 	public static final String TRACE_FILE_PATTERN = "*." + TRACE_FILE_EXTENSION;
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
+	private final JsonManager<PersistentTrace> jsonManager;
+	private final CurrentProject currentProject;
+	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
+	private final ResourceBundle bundle;
+
 	@Inject
 	public TraceFileHandler(JsonManager<PersistentTrace> jsonManager, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
-		super(currentProject, stageManager, fileChooserManager, bundle, jsonManager);
+		this.jsonManager = jsonManager;
 		jsonManager.initContext(new JsonManager.Context<PersistentTrace>(PersistentTrace.class, "Trace", 1) {
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -59,6 +64,10 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 				return new ObjectWithMetadata<>(oldObject, oldMetadata);
 			}
 		});
+		this.currentProject = currentProject;
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
+		this.bundle = bundle;
 	}
 
 	public PersistentTrace load(Path path) {
