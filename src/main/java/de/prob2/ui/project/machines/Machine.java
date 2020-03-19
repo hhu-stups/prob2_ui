@@ -61,7 +61,7 @@ public class Machine implements DescriptionView.Describable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
-	private transient PatternManager patternManager;
+	private transient PatternManager patternManager = new PatternManager();
 	private final transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Machine(String name, String description, Path location) {
@@ -78,7 +78,6 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-		this.resetStatus();
 	}
 	
 	private Machine(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
