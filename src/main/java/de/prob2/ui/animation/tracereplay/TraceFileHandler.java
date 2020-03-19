@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -138,7 +137,10 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 			for(int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
-				writeToFile(traceFilePath.toFile(), traces.get(i), true, createdBy);
+				this.jsonManager.writeToFile(traceFilePath, traces.get(i), this.jsonManager.defaultMetadataBuilder()
+					.withCreator(createdBy)
+					.withCurrentModelName()
+					.build());
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
 		} catch (IOException e) {
@@ -163,14 +165,17 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		));
 		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
-			save(trace, path.toFile());
+			save(trace, path);
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
 	}
 
-	public void save(PersistentTrace trace, File location) {
+	public void save(PersistentTrace trace, Path location) {
 		try {
-			writeToFile(location, trace, true, JsonMetadata.USER_CREATOR);
+			this.jsonManager.writeToFile(location, trace, this.jsonManager.defaultMetadataBuilder()
+				.withCreator(JsonMetadata.USER_CREATOR)
+				.withCurrentModelName()
+				.build());
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
 		}

@@ -68,7 +68,7 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 				.filter(LTLPatternItem::selected)
 				.collect(Collectors.toList());
 			try {
-				writeToFile(path.toFile(), new LTLData(formulas, patterns), false, JsonMetadata.USER_CREATOR);
+				this.jsonManager.writeToFile(path, new LTLData(formulas, patterns));
 			} catch (IOException e) {
 				stageManager.makeExceptionAlert(e, "verifications.ltl.ltlView.saveLTL.error").showAndWait();
 			}
