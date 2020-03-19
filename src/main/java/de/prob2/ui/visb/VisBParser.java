@@ -28,13 +28,8 @@ import de.prob2.ui.visb.visbobjects.VisBItem;
 import javafx.scene.paint.Color;
 
 /**
- * Created by
- * @author Michelle Werth
- * @since 21.03.2019
- * @version 0.1.0
- *
  * This class will get the items of an VisB visualisation and evaluate them to construct executable JQueries.
- * */
+ */
 @Singleton
 public class VisBParser {
 	private final CurrentTrace currentTrace;

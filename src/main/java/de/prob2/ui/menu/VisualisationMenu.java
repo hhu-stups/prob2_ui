@@ -16,10 +16,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
-/**
- * @author Christoph Heinzen
- * @since 21.09.17
- */
 @FXMLInjected
 @Singleton
 public class VisualisationMenu extends Menu {

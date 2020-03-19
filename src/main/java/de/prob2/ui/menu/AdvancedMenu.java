@@ -18,9 +18,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by Christoph Heinzen on 27.07.17.
- */
 @FXMLInjected
 @Singleton
 public class AdvancedMenu extends Menu {

@@ -24,10 +24,6 @@ import javafx.scene.control.TitledPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Christoph Heinzen
- * @since 11.08.17
- */
 @FXMLInjected
 @Singleton
 public class ProBPluginHelper {

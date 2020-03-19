@@ -49,10 +49,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Christoph Heinzen
- * @since 14.09.17
- */
 @FXMLInjected
 @Singleton
 public class VisualisationController {

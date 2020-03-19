@@ -4,13 +4,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 /**
- * Created by
- * @author Michelle Werth
- * @since 21.03.2019
- * @version 0.1.0
- *
  * The VisBVisualisation Object contains the functions needed to store all the visualisation information.
- * */
+ */
 public class VisBVisualisation {
 	private Path svgPath;
 	private ArrayList<VisBItem> visBItems;

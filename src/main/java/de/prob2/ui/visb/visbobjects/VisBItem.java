@@ -3,14 +3,8 @@ package de.prob2.ui.visb.visbobjects;
 import de.prob2.ui.visb.VisBParser;
 
 /**
- * Created by
- * @author Michelle Werth
- * @since 21.03.2019
- * @version 0.1.0
- *
  * The VisBItem is designed for the JSON / VisB file
- * */
-
+ */
 public class VisBItem {
 	private String id;
 	private String attribute;

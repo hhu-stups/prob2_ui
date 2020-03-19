@@ -1,13 +1,7 @@
 package de.prob2.ui.plugin;
 
-
 import org.pf4j.PluginWrapper;
 
-/**
- * @author Christoph Heinzen
- * @version 0.1.0
- * @since 29.01.18
- */
 public class InvalidPlugin extends ProBPlugin{
 
 	private Exception exception;

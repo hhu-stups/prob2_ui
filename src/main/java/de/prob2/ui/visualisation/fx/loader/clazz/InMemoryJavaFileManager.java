@@ -1,10 +1,12 @@
 package de.prob2.ui.visualisation.fx.loader.clazz;
 
-import javax.tools.*;
+import javax.tools.DiagnosticCollector;
+import javax.tools.FileObject;
+import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
 
-/**
- * Created by Christoph Heinzen on 27.04.17.
- */
 public class InMemoryJavaFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
 
 	private final InMemoryClassloader classLoader;

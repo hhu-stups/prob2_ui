@@ -19,14 +19,8 @@ import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 /**
- * Created by
- * @author Michelle Werth
- * @since 21.03.2019
- * @version 0.1.0
- *
  * The VisBFileHandler handles everything, that needs to be done with files for the {@link VisBController}.
- * */
-
+ */
 class VisBFileHandler {
 
 	/**

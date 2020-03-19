@@ -3,9 +3,6 @@ package de.prob2.ui.visualisation.fx.loader.clazz;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Christoph Heinzen on 27.04.17.
- */
 public class InMemoryClassloader extends ClassLoader {
 
 	private final Map<String, InMemoryJavaFileObject> classFiles = new HashMap<>();

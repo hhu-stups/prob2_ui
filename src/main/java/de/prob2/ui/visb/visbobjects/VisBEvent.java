@@ -3,13 +3,8 @@ package de.prob2.ui.visb.visbobjects;
 import java.util.ArrayList;
 
 /**
- * Created by
- * @author Michelle Werth
- * @since 21.03.2019
- * @version 0.1.0
- *
  * The VisBEvent is designed for the JSON / VisB file
- * */
+ */
 public class VisBEvent {
 	private String id;
 	private String event;

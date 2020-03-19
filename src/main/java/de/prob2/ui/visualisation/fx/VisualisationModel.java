@@ -7,9 +7,6 @@ import java.util.Map;
 
 import de.hhu.stups.prob.translator.BValue;
 import de.hhu.stups.prob.translator.exceptions.TranslationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -21,15 +18,15 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.fx.exception.VisualisationParseException;
+
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 
-/**
- * @author Christoph Heinzen
- * @since 25.09.17
- */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class VisualisationModel {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationModel.class);

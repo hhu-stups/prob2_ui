@@ -47,14 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by
- * @author Michelle Werth
- * @since 21.03.2019
- * @version 0.1.0
- *
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
- * */
-
+ */
 @Singleton
 public class VisBStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBStage.class);

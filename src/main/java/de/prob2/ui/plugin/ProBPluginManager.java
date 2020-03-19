@@ -58,9 +58,6 @@ import org.slf4j.LoggerFactory;
  *
  * {@link ProBPluginManager} has methods to start the plugin manager, to reload the plugins and
  * to add plugins using a {@link FileChooser}.
- *
- * @author  Christoph Heinzen
- * @since   10.08.2017
  */
 @FXMLInjected
 @Singleton
@@ -406,8 +403,6 @@ public class ProBPluginManager {
 	 * the {@code createPluginsRoot} method to set the plugins directory and the {@code getRuntimeMode}
 	 * to avoid the development mode of PF4J.
 	 *
-	 * @author  Christoph Heinzen
-	 * @since   23.08.2017
 	 * @see org.pf4j.DefaultPluginManager
 	 * @see org.pf4j.AbstractPluginManager
 	 */
