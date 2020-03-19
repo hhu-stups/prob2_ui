@@ -28,10 +28,6 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	private SymbolicCheckingFormulaItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		super(json, typeOfT, context);
 	}
-		
-	public void initializeCounterExamples() {
-		this.counterExamples.clear();
-	}
 	
 	public ObservableList<Trace> getCounterExamples() {
 		return counterExamples.get();

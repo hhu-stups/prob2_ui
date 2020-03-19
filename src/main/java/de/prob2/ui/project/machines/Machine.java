@@ -132,7 +132,6 @@ public class Machine implements DescriptionView.Describable {
 		ltlPatterns.forEach(LTLPatternItem::reset);
 		patternManager = new PatternManager();
 		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::reset);
-		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
 		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
 		testCases.forEach(TestCaseGenerationItem::reset);
 		modelcheckingItems.forEach(ModelCheckingItem::reset);
