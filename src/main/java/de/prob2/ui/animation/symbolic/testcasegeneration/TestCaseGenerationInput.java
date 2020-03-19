@@ -98,7 +98,7 @@ public class TestCaseGenerationInput extends VBox {
 		if(!currentMachine.getTestCases().contains(newItem)) {
 			if(valid) {
 				item.setData(formula, type.getName(), "", type, maxDepth, additionalInformation);
-				item.initialize();
+				item.reset();
 				view.refresh();
 			}
 			return true;

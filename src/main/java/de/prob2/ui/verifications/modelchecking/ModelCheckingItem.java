@@ -82,7 +82,7 @@ public class ModelCheckingItem implements IExecutableItem {
 		return shouldExecute;
 	}
 	
-	public void initialize() {
+	public void reset() {
 		this.itemsProperty().clear();
 		this.setChecked(Checked.NOT_CHECKED);
 	}

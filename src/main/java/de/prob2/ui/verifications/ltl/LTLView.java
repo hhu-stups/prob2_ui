@@ -396,13 +396,13 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		data.getFormulas().stream()
 				.filter(formula -> !machine.getLTLFormulas().contains(formula))
 				.forEach(formula -> {
-					formula.initialize();
+					formula.reset();
 					machine.addLTLFormula(formula);
 				});
 		data.getPatterns().stream()
 				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {
-					pattern.initialize();
+					pattern.reset();
 					machine.addLTLPattern(pattern);
 					patternParser.parsePattern(pattern, machine);
 					patternParser.addPattern(pattern, machine);

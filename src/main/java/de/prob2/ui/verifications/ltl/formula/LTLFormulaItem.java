@@ -28,8 +28,8 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 	}
 	
 	@Override
-	public void initialize() {
-		super.initialize();
+	public void reset() {
+		super.reset();
 		this.setCounterExample(null);
 	}
 			

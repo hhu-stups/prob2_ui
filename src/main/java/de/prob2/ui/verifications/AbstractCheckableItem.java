@@ -39,13 +39,13 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	}
 	
 	public void setData(String name, String description, String code) {
-		initialize();
+		reset();
 		setName(name);
 		setDescription(description);
 		setCode(code);
 	}
 		
-	public void initialize() {
+	public void reset() {
 		this.checked = Checked.NOT_CHECKED;
 		this.setResultItem(null);
 	}

@@ -128,14 +128,14 @@ public class Machine implements DescriptionView.Describable {
 	}
 	
 	public void resetStatus() {
-		ltlFormulas.forEach(LTLFormulaItem::initialize);
-		ltlPatterns.forEach(LTLPatternItem::initialize);
+		ltlFormulas.forEach(LTLFormulaItem::reset);
+		ltlPatterns.forEach(LTLPatternItem::reset);
 		patternManager = new PatternManager();
-		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initialize);
+		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::reset);
 		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::initializeCounterExamples);
-		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::initialize);
-		testCases.forEach(TestCaseGenerationItem::initialize);
-		modelcheckingItems.forEach(ModelCheckingItem::initialize);
+		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
+		testCases.forEach(TestCaseGenerationItem::reset);
+		modelcheckingItems.forEach(ModelCheckingItem::reset);
 	}
 	
 	public ObjectProperty<CheckingStatus> ltlStatusProperty() {
