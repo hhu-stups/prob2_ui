@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
@@ -104,7 +105,33 @@ public class ProB2Module extends AbstractModule {
 		bind(Application.class).toInstance(this.application);
 		bind(ProB2.class).toInstance(this.application);
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
-		bind(Gson.class).toInstance(Converters.registerAll(FxGson.coreBuilder())
+		
+		bind(StateSpaceProvider.class).to(CustomStateSpaceProvider.class);
+		
+		bind(MagicGraphI.class).to(MagicGraphFX.class);
+
+		bind(PrologOutput.class);
+	}
+
+	@Provides
+	public FXMLLoader provideLoader(final Injector injector, ResourceBundle bundle) {
+		FXMLLoader fxmlLoader = new FXMLLoader();
+		fxmlLoader.setBuilderFactory(type -> {
+			if (injector.getExistingBinding(Key.get(type)) != null || type.isAnnotationPresent(FXMLInjected.class)) {
+				return () -> injector.getInstance(type);
+			} else {
+				return javafxDefaultBuilderFactory.getBuilder(type);
+			}
+		});
+		fxmlLoader.setControllerFactory(injector::getInstance);
+		fxmlLoader.setResources(bundle);
+		return fxmlLoader;
+	}
+
+	@Provides
+	@Singleton
+	private Gson provideGson() {
+		return Converters.registerAll(FxGson.coreBuilder())
 			.disableHtmlEscaping()
 			.setPrettyPrinting()
 			.addSerializationExclusionStrategy(new ExclusionStrategy() {
@@ -146,27 +173,6 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(MagicNodegroup.class, MagicNodegroup.JSON_DESERIALIZER)
 			.registerTypeAdapter(MagicEdgegroup.class, MagicEdgegroup.JSON_DESERIALIZER)
 			.registerTypeAdapter(MagicLayoutSettings.class, MagicLayoutSettings.JSON_DESERIALIZER)
-			.create());
-		
-		bind(StateSpaceProvider.class).to(CustomStateSpaceProvider.class);
-		
-		bind(MagicGraphI.class).to(MagicGraphFX.class);
-
-		bind(PrologOutput.class);
-	}
-
-	@Provides
-	public FXMLLoader provideLoader(final Injector injector, ResourceBundle bundle) {
-		FXMLLoader fxmlLoader = new FXMLLoader();
-		fxmlLoader.setBuilderFactory(type -> {
-			if (injector.getExistingBinding(Key.get(type)) != null || type.isAnnotationPresent(FXMLInjected.class)) {
-				return () -> injector.getInstance(type);
-			} else {
-				return javafxDefaultBuilderFactory.getBuilder(type);
-			}
-		});
-		fxmlLoader.setControllerFactory(injector::getInstance);
-		fxmlLoader.setResources(bundle);
-		return fxmlLoader;
+			.create();
 	}
 }
