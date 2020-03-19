@@ -62,10 +62,9 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 		});
 	}
 
-	@Override
 	public PersistentTrace load(Path path) {
 		try {
-			return super.load(path);
+			return this.jsonManager.readFromFile(currentProject.getLocation().resolve(path)).getObject();
 		} catch (FileNotFoundException | NoSuchFileException e) {
 			LOGGER.warn("Trace file not found", e);
 			handleFailedTraceLoad(path, e);

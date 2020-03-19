@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -43,6 +44,10 @@ public class LTLFileHandler extends AbstractFileHandler<LTLData> {
 				return new ObjectWithMetadata<>(oldObject, oldMetadata);
 			}
 		});
+	}
+	
+	public LTLData load(Path path) throws IOException {
+		return this.jsonManager.readFromFile(path).getObject();
 	}
 	
 	public void save() {

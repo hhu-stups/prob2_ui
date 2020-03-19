@@ -3,7 +3,6 @@ package de.prob2.ui.internal;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ResourceBundle;
 
 import de.prob2.ui.config.FileChooserManager;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractFileHandler<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileHandler.class);
 	
-	private final JsonManager<T> jsonManager;
+	protected final JsonManager<T> jsonManager;
 	
 	protected final CurrentProject currentProject;
 	protected final StageManager stageManager;
@@ -30,10 +29,6 @@ public abstract class AbstractFileHandler<T> {
 		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 		this.jsonManager = jsonManager;
-	}
-	
-	public T load(Path path) throws IOException {
-		return this.jsonManager.readFromFile(currentProject.get().getLocation().resolve(path)).getObject();
 	}
 	
 	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) {
