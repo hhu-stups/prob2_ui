@@ -50,7 +50,6 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
 			SymbolicExecutionType type = choosingStage.getExecutionType();
 			item.setData(formula, type.getName(), formula, type);
-			item.reset();
 			view.refresh();
 			return true;
 		}
