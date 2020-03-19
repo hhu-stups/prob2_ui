@@ -123,25 +123,27 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 			return;
 		}
 
-		try (final Stream<Path> children = Files.list(path)) {
-			if (children.anyMatch(p -> p.getFileName().toString().startsWith(TEST_CASE_TRACE_PREFIX))) {
-				// Directory already contains test case trace - ask if the user really wants to save here.
-				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
-				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
-					return;
+		try {
+			try (final Stream<Path> children = Files.list(path)) {
+				if (children.anyMatch(p -> p.getFileName().toString().startsWith(TEST_CASE_TRACE_PREFIX))) {
+					// Directory already contains test case trace - ask if the user really wants to save here.
+					final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
+					if (!selected.isPresent() || selected.get() != ButtonType.YES) {
+						return;
+					}
 				}
+			}
+
+			int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
+			for(int i = 0; i < numberGeneratedTraces; i++) {
+				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
+				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
+				writeToFile(traceFilePath.toFile(), traces.get(i), true, createdBy);
+				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
 			return;
-		}
-
-		int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
-		for(int i = 0; i < numberGeneratedTraces; i++) {
-			final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
-			String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
-			writeToFile(traceFilePath.toFile(), traces.get(i), true, createdBy);
-			machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 		}
 		if(traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION,
@@ -167,6 +169,10 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	}
 
 	public void save(PersistentTrace trace, File location) {
-		writeToFile(location, trace, true, JsonMetadata.USER_CREATOR);
+		try {
+			writeToFile(location, trace, true, JsonMetadata.USER_CREATOR);
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
+		}
 	}
 }

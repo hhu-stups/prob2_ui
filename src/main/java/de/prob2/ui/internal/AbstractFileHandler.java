@@ -1,7 +1,6 @@
 package de.prob2.ui.internal;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
@@ -10,12 +9,7 @@ import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadataBuilder;
 import de.prob2.ui.prob2fx.CurrentProject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public abstract class AbstractFileHandler<T> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileHandler.class);
-	
 	protected final JsonManager<T> jsonManager;
 	
 	protected final CurrentProject currentProject;
@@ -31,20 +25,14 @@ public abstract class AbstractFileHandler<T> {
 		this.jsonManager = jsonManager;
 	}
 	
-	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) {
+	protected void writeToFile(File file, T data, boolean headerWithMachineName, String createdBy) throws IOException {
 		if(file != null) {
-			try {
-				JsonMetadataBuilder metadataBuilder = this.jsonManager.defaultMetadataBuilder()
-					.withCreator(createdBy);
-				if (headerWithMachineName) {
-					metadataBuilder.withCurrentModelName();
-				}
-				this.jsonManager.writeToFile(file.toPath(), data, metadataBuilder.build());
-			} catch (FileNotFoundException exc) {
-				LOGGER.warn("Failed to create file", exc);
-			} catch (IOException exc) {
-				LOGGER.warn("Failed to save file", exc);
+			JsonMetadataBuilder metadataBuilder = this.jsonManager.defaultMetadataBuilder()
+				.withCreator(createdBy);
+			if (headerWithMachineName) {
+				metadataBuilder.withCurrentModelName();
 			}
+			this.jsonManager.writeToFile(file.toPath(), data, metadataBuilder.build());
 		}
 	}
 }
