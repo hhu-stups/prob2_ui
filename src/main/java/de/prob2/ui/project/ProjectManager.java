@@ -2,14 +2,7 @@ package de.prob2.ui.project;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,15 +11,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
+import de.prob2.ui.json.ObjectWithMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
@@ -50,12 +49,11 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ProjectManager {
-	private static final Charset PROJECT_CHARSET = StandardCharsets.UTF_8;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
 	public static final String PROJECT_FILE_PATTERN = "*." + PROJECT_FILE_EXTENSION;
 
-	private final Gson gson;
+	private final JsonManager<Project> jsonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
@@ -64,8 +62,96 @@ public class ProjectManager {
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config) {
-		this.gson = gson;
+	public ProjectManager(JsonManager<Project> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config) {
+		this.jsonManager = jsonManager;
+		this.jsonManager.initContext(new JsonManager.Context<Project>(Project.class, "Project", 1) {
+			private void updateV0CheckableItem(final JsonObject checkableItem) {
+				if (!checkableItem.has("selected")) {
+					checkableItem.addProperty("selected", true);
+				}
+			}
+			
+			private void updateV0TestCaseItem(final JsonObject testCaseItem) {
+				if (!testCaseItem.has("additionalInformation")) {
+					testCaseItem.add("additionalInformation", new JsonObject());
+				}
+				final JsonObject additionalInformation = testCaseItem.getAsJsonObject("additionalInformation");
+				final String type = testCaseItem.get("type").getAsString();
+				final String code = testCaseItem.get("code").getAsString();
+				if (TestCaseGenerationType.MCDC.name().equals(type)) {
+					if (!additionalInformation.has(TestCaseGenerationItem.LEVEL)) {
+						final String[] splittedStringBySlash = code.replace(" ", "").split("/");
+						final String[] splittedStringByColon = splittedStringBySlash[0].split(":");
+						additionalInformation.addProperty(TestCaseGenerationItem.LEVEL, Integer.parseInt(splittedStringByColon[1]));
+					}
+				} else if (TestCaseGenerationType.COVERED_OPERATIONS.name().equals(type)) {
+					if (!additionalInformation.has(TestCaseGenerationItem.OPERATIONS)) {
+						final String[] splittedString = code.replace(" ", "").split("/");
+						final String[] operationNames = splittedString[0].split(":")[1].split(",");
+						final JsonArray operationNamesJsonArray = new JsonArray(operationNames.length);
+						for (final String operationName : operationNames) {
+							operationNamesJsonArray.add(operationName);
+						}
+						additionalInformation.add(TestCaseGenerationItem.OPERATIONS, operationNamesJsonArray);
+					}
+				}
+			}
+			
+			private void updateV0Machine(final JsonObject machine) {
+				if (!machine.has("lastUsedPreferenceName")) {
+					final String lastUsedPreferenceName;
+					if (machine.has("lastUsed")) {
+						lastUsedPreferenceName = machine.getAsJsonObject("lastUsed").get("name").getAsString();
+					} else {
+						lastUsedPreferenceName = Preference.DEFAULT.getName();
+					}
+					machine.addProperty("lastUsedPreferenceName", lastUsedPreferenceName);
+				}
+				for (final String checkableItemFieldName : new String[] {"ltlFormulas", "ltlPatterns", "symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
+					if (!machine.has(checkableItemFieldName)) {
+						machine.add(checkableItemFieldName, new JsonArray());
+					}
+					machine.getAsJsonArray(checkableItemFieldName).forEach(checkableItemElement ->
+						this.updateV0CheckableItem(checkableItemElement.getAsJsonObject())
+					);
+				}
+				machine.getAsJsonArray("testCases").forEach(testCaseItemElement ->
+					this.updateV0TestCaseItem(testCaseItemElement.getAsJsonObject())
+				);
+				if (!machine.has("traces")) {
+					machine.add("traces", new JsonArray());
+				}
+				if (!machine.has("modelcheckingItems")) {
+					machine.add("modelcheckingItems", new JsonArray());
+				}
+			}
+			
+			private void updateV0Project(final JsonObject project) {
+				if (!project.has("name")) {
+					project.addProperty("name", "");
+				}
+				if (!project.has("description")) {
+					project.addProperty("description", "");
+				}
+				if (!project.has("machines")) {
+					project.add("machines", new JsonArray());
+				}
+				project.getAsJsonArray("machines").forEach(machineElement ->
+					this.updateV0Machine(machineElement.getAsJsonObject())
+				);
+				if (!project.has("preferences")) {
+					project.add("preferences", new JsonArray());
+				}
+			}
+			
+			@Override
+			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
+				if (oldMetadata.getFormatVersion() <= 0) {
+					updateV0Project(oldObject);
+				}
+				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+			}
+		});
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -145,8 +231,8 @@ public class ProjectManager {
 	}
 
 	private File saveProject(Project project, File location) {
-		try (final Writer writer = new OutputStreamWriter(new FileOutputStream(location), PROJECT_CHARSET)) {
-			gson.toJson(project, writer);
+		try {
+			this.jsonManager.writeToFile(location.toPath(), project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
 			return null;
@@ -205,8 +291,8 @@ public class ProjectManager {
 	}
 
 	private Project loadProject(Path path) {
-		try (final Reader reader = Files.newBufferedReader(path, PROJECT_CHARSET)) {
-			final Project project = gson.fromJson(reader, Project.class);
+		try {
+			final Project project = this.jsonManager.readFromFile(path).getObject();
 			project.setLocation(path.getParent());
 			return project;
 		} catch (IOException | JsonSyntaxException exc) {
@@ -279,19 +365,7 @@ public class ProjectManager {
 	}
 
 	private void replaceMissingWithDefaults(Project project) {
-		project.setName((project.getName() == null) ? "" : project.getName());
-		project.setDescription((project.getDescription() == null) ? "" : project.getDescription());
-		List<Machine> machineList = new ArrayList<>();
-		if (project.getMachines() != null) {
-			machineList = project.getMachines();
-			machineList.forEach(Machine::replaceMissingWithDefaults);
-		}
-		project.setMachines(machineList);
-		List<Preference> prefList = new ArrayList<>();
-		if (project.getPreferences() != null) {
-			prefList = project.getPreferences();
-			prefList.forEach(Preference::replaceMissingWithDefaults);
-		}
-		project.setPreferences(prefList);
+		project.getMachines().forEach(Machine::replaceMissingWithDefaults);
+		project.getPreferences().forEach(Preference::replaceMissingWithDefaults);
 	}
 }

@@ -14,17 +14,18 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.internal.AbstractFileHandler;
-import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
+import de.prob2.ui.json.ObjectWithMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 
@@ -43,8 +44,20 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	@Inject
-	public TraceFileHandler(Gson gson, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, VersionInfo versionInfo) {
-		super(gson, currentProject, stageManager, bundle, versionInfo, PersistentTrace.class);
+	public TraceFileHandler(JsonManager<PersistentTrace> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+		super(currentProject, stageManager, bundle, jsonManager);
+		jsonManager.initContext(new JsonManager.Context<PersistentTrace>(PersistentTrace.class, "Trace", 1) {
+			@Override
+			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
+				if (oldMetadata.getFileType() == null) {
+					assert oldMetadata.getFormatVersion() == 0;
+					if (!oldObject.has("transitionList")) {
+						throw new JsonParseException("Not a valid trace file - missing required field transitionList");
+					}
+				}
+				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+			}
+		});
 	}
 
 	@Override
@@ -55,12 +68,8 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 			LOGGER.warn("Trace file not found", e);
 			handleFailedTraceLoad(path, e);
 			return null;
-		} catch (InvalidFileFormatException e) {
+		} catch (JsonParseException e) {
 			LOGGER.warn("Invalid trace file", e);
-			handleFailedTraceLoad(path, e);
-			return null;
-		} catch ( JsonSyntaxException e) {
-			LOGGER.warn("Invalid syntax in trace file", e);
 			handleFailedTraceLoad(path, e);
 			return null;
 		} catch (IOException e) {
@@ -79,14 +88,10 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 			alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
 				"animation.tracereplay.traceChecker.alerts.fileNotFound.header",
 				"animation.tracereplay.traceChecker.alerts.fileNotFound.content", path);
-		} else if (exception instanceof InvalidFileFormatException) {
+		} else if (exception instanceof JsonParseException) {
 			alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
 				"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header",
 				"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content", path);
-		} else if (exception instanceof JsonSyntaxException) {
-			alert = stageManager.makeExceptionAlert(exception,
-				"animation.tracereplay.traceChecker.alerts.syntaxError.header",
-				"animation.tracereplay.traceChecker.alerts.syntaxError.content", path);
 		} else {
 			alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
 				"animation.tracereplay.alerts.traceReplayError.header",
@@ -169,12 +174,6 @@ public class TraceFileHandler extends AbstractFileHandler<PersistentTrace> {
 	}
 
 	public void save(PersistentTrace trace, File location) {
-		writeToFile(location, trace, true, "User");
+		writeToFile(location, trace, true, JsonMetadata.USER_CREATOR);
 	}
-
-	@Override
-	protected boolean isValidData(PersistentTrace data) {
-		return data.getTransitionList() != null;
-	}
-	
 }

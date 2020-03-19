@@ -1,17 +1,24 @@
 package de.prob2.ui.animation.symbolic;
 
+import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.Objects;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicItem;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.Map;
-import java.util.Objects;
-
 public class SymbolicAnimationItem extends SymbolicItem {
+	public static final JsonDeserializer<SymbolicAnimationItem> JSON_DESERIALIZER = SymbolicAnimationItem::new;
 
 	private transient ListProperty<Trace> examples;
 
@@ -23,6 +30,10 @@ public class SymbolicAnimationItem extends SymbolicItem {
 	public SymbolicAnimationItem(String name, SymbolicExecutionType type, Map<String, Object> additionalInformation) {
 		super(name, type);
 		this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
+	}
+	
+	private SymbolicAnimationItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		super(json, typeOfT, context);
 	}
 
 	@Override

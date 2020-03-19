@@ -1,15 +1,25 @@
 package de.prob2.ui.project;
 
+import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 
 public class Project {
+	public static final JsonDeserializer<Project> JSON_DESERIALIZER = Project::new;
+	
 	private String name;
 	private String description;
 	private List<Machine> machines;
@@ -22,6 +32,14 @@ public class Project {
 		this.machines = new ArrayList<>(machines);
 		this.preferences = new ArrayList<>(preferences);
 		this.location = location;
+	}
+	
+	private Project(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		final JsonObject object = json.getAsJsonObject();
+		this.name = JsonManager.checkDeserialize(context, object, "name", String.class);
+		this.description = JsonManager.checkDeserialize(context, object, "description", String.class);
+		this.machines = JsonManager.checkDeserialize(context, object, "machines", new TypeToken<List<Machine>>() {}.getType());
+		this.preferences = JsonManager.checkDeserialize(context, object, "preferences", new TypeToken<List<Preference>>() {}.getType());
 	}
 
 	public String getName() {

@@ -1,5 +1,14 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import java.lang.reflect.Type;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import de.prob2.ui.json.JsonManager;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -7,6 +16,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
 public class MagicNodegroup extends MagicComponent {
+	public static final JsonDeserializer<MagicNodegroup> JSON_DESERIALIZER = MagicNodegroup::new;
 	
 	private final BooleanProperty cluster = new SimpleBooleanProperty();
 	private final ObjectProperty<MagicShape> shape = new SimpleObjectProperty<>();
@@ -30,6 +40,15 @@ public class MagicNodegroup extends MagicComponent {
 		this.cluster.set(nodes.isCluster());
 		this.shape.set(nodes.getShape());
 		this.nodeColor.set(nodes.getNodeColor());
+	}
+	
+	private MagicNodegroup(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		super(json, typeOfT, context);
+		
+		final JsonObject object = json.getAsJsonObject();
+		this.cluster.set(JsonManager.checkDeserialize(context, object, "cluster", Boolean.class));
+		this.shape.set(JsonManager.checkDeserialize(context, object, "shape", MagicShape.class));
+		this.nodeColor.set(JsonManager.checkDeserialize(context, object, "nodeColor", Color.class));
 	}
 
 	public BooleanProperty clusterProperty() {

@@ -1,8 +1,18 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import de.prob2.ui.json.JsonManager;
+
 public class MagicLayoutSettings {
+	public static final JsonDeserializer<MagicLayoutSettings> JSON_DESERIALIZER = MagicLayoutSettings::new;
 
 	private String machineName;
 	private List<MagicNodegroup> nodegroups;
@@ -12,6 +22,13 @@ public class MagicLayoutSettings {
 		this.machineName = machineName;
 		this.nodegroups = nodegroups;
 		this.edgegroups = edgegroups;
+	}
+	
+	private MagicLayoutSettings(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		final JsonObject object = json.getAsJsonObject();
+		this.machineName = JsonManager.checkDeserialize(context, object, "machineName", String.class);
+		this.nodegroups = JsonManager.checkDeserialize(context, object, "nodegroups", new TypeToken<List<MagicNodegroup>>() {}.getType());
+		this.edgegroups = JsonManager.checkDeserialize(context, object, "edgegroups", new TypeToken<List<MagicEdgegroup>>() {}.getType());
 	}
 	
 	public String getMachineName() {

@@ -1,6 +1,13 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import de.prob2.ui.json.JsonManager;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -40,6 +47,18 @@ public abstract class MagicComponent {
 		this.lineColor.set(component.getLineColor());
 		this.lineWidth.set(component.getLineWidth());
 		this.textColor.set(component.getTextColor());
+	}
+	
+	protected MagicComponent(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		final JsonObject object = json.getAsJsonObject();
+		
+		this.name.set(JsonManager.checkDeserialize(context, object, "name", String.class));
+		this.expression.set(JsonManager.checkDeserialize(context, object, "expression", String.class));
+		
+		this.lineType.set(JsonManager.checkDeserialize(context, object, "lineType", MagicLineType.class));
+		this.lineColor.set(JsonManager.checkDeserialize(context, object, "lineColor", Color.class));
+		this.lineWidth.set(JsonManager.checkDeserialize(context, object, "lineWidth", MagicLineWidth.class));
+		this.textColor.set(JsonManager.checkDeserialize(context, object, "textColor", Color.class));
 	}
 	
 	public StringProperty nameProperty() {

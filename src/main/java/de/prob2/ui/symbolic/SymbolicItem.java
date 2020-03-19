@@ -1,6 +1,13 @@
 package de.prob2.ui.symbolic;
 
 
+import java.lang.reflect.Type;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 
 public abstract class SymbolicItem extends AbstractCheckableItem {
@@ -15,6 +22,13 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 	public SymbolicItem(String name, SymbolicExecutionType type) {
 		super(name, type.getName(), name);
 		this.type = type;
+	}
+	
+	protected SymbolicItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		super(json, typeOfT, context);
+		
+		final JsonObject object = json.getAsJsonObject();
+		this.type = JsonManager.checkDeserialize(context, object, "type", SymbolicExecutionType.class);
 	}
 	
 	public void reset() {
