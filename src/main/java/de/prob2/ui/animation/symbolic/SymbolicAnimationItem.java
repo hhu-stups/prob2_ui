@@ -37,8 +37,8 @@ public class SymbolicAnimationItem extends SymbolicItem {
 	}
 
 	@Override
-	public void replaceMissingWithDefaults() {
-		super.replaceMissingWithDefaults();
+	public void initialize() {
+		super.initialize();
 		if(this.examples == null) {
 			this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		} else {

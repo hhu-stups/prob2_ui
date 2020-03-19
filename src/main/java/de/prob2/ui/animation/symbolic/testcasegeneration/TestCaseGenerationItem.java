@@ -74,7 +74,9 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.type = JsonManager.checkDeserialize(context, object, "type", TestCaseGenerationType.class);
 	}
 	
-	public void replaceMissingWithDefaults() {
+	@Override
+	public void initialize() {
+		super.initialize();
 		if(this.examples == null) {
 			this.examples = new SimpleListProperty<>(FXCollections.observableArrayList());
 		} else {
