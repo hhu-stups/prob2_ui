@@ -13,6 +13,7 @@ import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadata;
 import de.prob2.ui.json.ObjectWithMetadata;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 	ProjectJsonContext() {
@@ -22,6 +23,25 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
 		if (!checkableItem.has("selected")) {
 			checkableItem.addProperty("selected", true);
+		}
+	}
+	
+	private static void updateV0SymbolicCheckingItem(final JsonObject symbolicCheckingItem) {
+		// The names of some symbolic checking types have changed in the past and need to be updated.
+		SymbolicExecutionType newType = null;
+		if (symbolicCheckingItem.get("type").isJsonNull()) {
+			// If a project was loaded after a type renaming,
+			// and the UI version in question did not support file format versioning/conversion,
+			// the type will be null when the project is saved again.
+			// In this case, the type needs to be restored from the code string.
+			final String code = symbolicCheckingItem.get("code").getAsString();
+			if ("CHECK_ASSERTIONS".equals(code)) {
+				newType = SymbolicExecutionType.CHECK_STATIC_ASSERTIONS;
+			}
+		}
+		
+		if (newType != null) {
+			symbolicCheckingItem.addProperty("type", newType.name());
 		}
 	}
 	
@@ -139,6 +159,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 				ProjectJsonContext.updateV0CheckableItem(checkableItemElement.getAsJsonObject())
 			);
 		}
+		machine.getAsJsonArray("symbolicCheckingFormulas").forEach(symbolicCheckingItemElement ->
+			updateV0SymbolicCheckingItem(symbolicCheckingItemElement.getAsJsonObject())
+		);
 		final JsonArray testCases = machine.getAsJsonArray("testCases");
 		final JsonArray symbolicAnimationFormulas = machine.getAsJsonArray("symbolicAnimationFormulas");
 		moveV0TestCaseSymbolicAnimationItems(symbolicAnimationFormulas, testCases);
