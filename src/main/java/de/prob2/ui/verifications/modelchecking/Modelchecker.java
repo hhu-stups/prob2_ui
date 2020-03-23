@@ -1,15 +1,8 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
@@ -25,16 +18,20 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
-
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 public class Modelchecker implements IModelCheckListener {
@@ -174,8 +171,7 @@ public class Modelchecker implements IModelCheckListener {
 			thread.interrupt();
 			removedThreads.add(thread);
 		}
-		List<IModelCheckJob> removedJobs = new ArrayList<>();
-		removedJobs.addAll(currentJobs);
+		List<IModelCheckJob> removedJobs = new ArrayList<>(currentJobs);
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
