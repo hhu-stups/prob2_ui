@@ -1,8 +1,14 @@
 package de.prob2.ui.prob2fx;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationView;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.config.Config;
@@ -18,6 +24,7 @@ import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -33,11 +40,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -221,10 +223,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.currentPreferenceProperty().get();
 	}
 
-	public void initializeMachines() {
-		machines.forEach(Machine::resetStatus);
-	}
-
 	public void changeName(String newName) {
 		this.setNewProject(true);
 		this.set(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(), this.getLocation()));
@@ -238,7 +236,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		currentTrace.set(null);
 		this.updateCurrentMachine(null, null);
 		this.set(project);
-		initializeMachines();
 		this.setSaved(true);
 		this.setNewProject(newProject);
 	}

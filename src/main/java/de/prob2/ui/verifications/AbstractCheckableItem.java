@@ -1,5 +1,13 @@
 package de.prob2.ui.verifications;
 
+import java.lang.reflect.Type;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import de.prob2.ui.json.JsonManager;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -11,33 +19,35 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected String description;
 	protected String code;
 	protected BooleanProperty selected;
-	protected transient ObjectProperty<CheckingResultItem> resultItem;
+	protected final transient ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
 	
 	public AbstractCheckableItem(String name, String description, String code) {
-		initialize();
+		this.checked = Checked.NOT_CHECKED;
 		this.name = name;
 		this.description = description;
 		this.code = code;
 		this.selected = new SimpleBooleanProperty(true);
 	}	
 	
+	protected AbstractCheckableItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+		final JsonObject object = json.getAsJsonObject();
+		this.checked = Checked.NOT_CHECKED;
+		this.name = JsonManager.checkDeserialize(context, object, "name", String.class);
+		this.description = JsonManager.checkDeserialize(context, object, "description", String.class);
+		this.code = JsonManager.checkDeserialize(context, object, "code", String.class);
+		this.selected = JsonManager.checkDeserialize(context, object, "selected", BooleanProperty.class);
+	}
+	
 	public void setData(String name, String description, String code) {
-		initialize();
+		reset();
 		setName(name);
 		setDescription(description);
 		setCode(code);
 	}
 		
-	public void initialize() {
-		replaceMissingWithDefaults();
+	public void reset() {
 		this.checked = Checked.NOT_CHECKED;
-		this.resultItem = new SimpleObjectProperty<>(null);
-	}
-
-	public void replaceMissingWithDefaults() {
-		if(selected == null) {
-			this.selected = new SimpleBooleanProperty(true);
-		}
+		this.setResultItem(null);
 	}
 	
 	public String getName() {
@@ -78,10 +88,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	}
 	
 	public void setResultItem(CheckingResultItem resultItem) {
-		if(resultItem == null) {
-			this.resultItem = new SimpleObjectProperty<>(resultItem);
-			return;
-		}
 		this.resultItem.set(resultItem);
 	}
 	

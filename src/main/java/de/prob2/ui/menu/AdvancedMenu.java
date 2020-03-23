@@ -9,6 +9,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.plugin.ProBPluginManager;
+import de.prob2.ui.visb.VisBStage;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
@@ -17,9 +18,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by Christoph Heinzen on 27.07.17.
- */
 @FXMLInjected
 @Singleton
 public class AdvancedMenu extends Menu {
@@ -97,6 +95,14 @@ public class AdvancedMenu extends Menu {
 	void detachVisualisation() {
 		LOGGER.debug("Detach menu-item called.");
 		visualisationController.detachVisualisation();
+	}
+
+	@FXML
+	void openVisB(){
+		LOGGER.debug("Open Visb.");
+		final Stage visBStage = injector.getInstance(VisBStage.class);
+		visBStage.show();
+		visBStage.toFront();
 	}
 
 }

@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -17,6 +18,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.util.Providers;
 
 import de.codecentric.centerdevice.MenuToolkit;
@@ -24,22 +26,33 @@ import de.prob.MainModule;
 import de.prob.scripting.StateSpaceProvider;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.ProB2;
+import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.output.PrologOutput;
+import de.prob2.ui.project.Project;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.verifications.ltl.LTLData;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
+import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
+import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.BoundingBox;
-import javafx.scene.paint.Color;
 import javafx.util.BuilderFactory;
 
 import org.hildan.fxgson.FxGson;
-import org.hildan.fxgson.adapters.extras.ColorTypeAdapter;
 
 public class ProB2Module extends AbstractModule {
 	/**
@@ -90,44 +103,6 @@ public class ProB2Module extends AbstractModule {
 		bind(Application.class).toInstance(this.application);
 		bind(ProB2.class).toInstance(this.application);
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
-		bind(Gson.class).toInstance(FxGson.coreBuilder()
-			.disableHtmlEscaping()
-			.setPrettyPrinting()
-			.addSerializationExclusionStrategy(new ExclusionStrategy() {
-				@Override
-				public boolean shouldSkipField(final FieldAttributes f) {
-					return f.getAnnotation(OnlyDeserialize.class) != null;
-				}
-				
-				@Override
-				public boolean shouldSkipClass(final Class<?> clazz) {
-					return false;
-				}
-			})
-			.registerTypeAdapter(Class.class, (JsonSerializer<Class<?>>)(src, typeOfSrc, context) -> context.serialize(src.getName()))
-			.registerTypeAdapter(Class.class, (JsonDeserializer<Class<?>>)(json, typeOfT, context) -> {
-				try {
-					return Class.forName(json.getAsString());
-				} catch (ClassNotFoundException e) {
-					throw new IllegalArgumentException(e);
-				}
-			})
-			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
-			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(json.getAsString()))
-			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
-			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsString()))
-			.registerTypeAdapter(BoundingBox.class, (JsonSerializer<BoundingBox>)(src, typeOfSrc, context) ->
-				context.serialize(new double[] {src.getMinX(), src.getMinY(), src.getWidth(), src.getHeight()})
-			)
-			.registerTypeAdapter(BoundingBox.class, (JsonDeserializer<BoundingBox>)(json, typeOfT, context) -> {
-				final double[] array = context.deserialize(json, double[].class);
-				if (array.length != 4) {
-					throw new IllegalArgumentException("JSON array representing a BoundingBox must have exactly 4 elements");
-				}
-				return new BoundingBox(array[0], array[1], array[2], array[3]);
-			})
-			.registerTypeAdapter(Color.class, new ColorTypeAdapter())
-			.create());
 		
 		bind(StateSpaceProvider.class).to(CustomStateSpaceProvider.class);
 		
@@ -149,5 +124,52 @@ public class ProB2Module extends AbstractModule {
 		fxmlLoader.setControllerFactory(injector::getInstance);
 		fxmlLoader.setResources(bundle);
 		return fxmlLoader;
+	}
+
+	@Provides
+	@Singleton
+	private Gson provideGson() {
+		return Converters.registerAll(FxGson.fullBuilder())
+			.disableHtmlEscaping()
+			.setPrettyPrinting()
+			.addSerializationExclusionStrategy(new ExclusionStrategy() {
+				@Override
+				public boolean shouldSkipField(final FieldAttributes f) {
+					return f.getAnnotation(OnlyDeserialize.class) != null;
+				}
+				
+				@Override
+				public boolean shouldSkipClass(final Class<?> clazz) {
+					return false;
+				}
+			})
+			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
+			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(json.getAsString()))
+			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
+			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsString()))
+			.registerTypeAdapter(BoundingBox.class, (JsonSerializer<BoundingBox>)(src, typeOfSrc, context) ->
+				context.serialize(new double[] {src.getMinX(), src.getMinY(), src.getWidth(), src.getHeight()})
+			)
+			.registerTypeAdapter(BoundingBox.class, (JsonDeserializer<BoundingBox>)(json, typeOfT, context) -> {
+				final double[] array = context.deserialize(json, double[].class);
+				if (array.length != 4) {
+					throw new IllegalArgumentException("JSON array representing a BoundingBox must have exactly 4 elements");
+				}
+				return new BoundingBox(array[0], array[1], array[2], array[3]);
+			})
+			.registerTypeAdapter(LTLFormulaItem.class, LTLFormulaItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(LTLPatternItem.class, LTLPatternItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(LTLData.class, LTLData.JSON_DESERIALIZER)
+			.registerTypeAdapter(SymbolicCheckingFormulaItem.class, SymbolicCheckingFormulaItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(SymbolicAnimationItem.class, SymbolicAnimationItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(TestCaseGenerationItem.class, TestCaseGenerationItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(ModelCheckingItem.class, ModelCheckingItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(Machine.class, Machine.JSON_DESERIALIZER)
+			.registerTypeAdapter(Preference.class, Preference.JSON_DESERIALIZER)
+			.registerTypeAdapter(Project.class, Project.JSON_DESERIALIZER)
+			.registerTypeAdapter(MagicNodegroup.class, MagicNodegroup.JSON_DESERIALIZER)
+			.registerTypeAdapter(MagicEdgegroup.class, MagicEdgegroup.JSON_DESERIALIZER)
+			.registerTypeAdapter(MagicLayoutSettings.class, MagicLayoutSettings.JSON_DESERIALIZER)
+			.create();
 	}
 }

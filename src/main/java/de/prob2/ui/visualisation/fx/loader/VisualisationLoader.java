@@ -20,10 +20,6 @@ import javafx.scene.control.Alert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Christoph Heinzen
- * @since 23.09.17
- */
 public class VisualisationLoader {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationLoader.class);

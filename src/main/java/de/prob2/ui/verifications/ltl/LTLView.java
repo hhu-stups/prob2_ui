@@ -1,13 +1,17 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.InvalidFileFormatException;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -27,6 +31,7 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
+
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -42,12 +47,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -387,20 +389,16 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		LTLData data;
 		try {
 			data = ltlFileHandler.load(ltlFile);
-		} catch (IOException | InvalidFileFormatException e) {
+		} catch (IOException e) {
 			logger.error("Could not load LTL file: ", e);
 			return;
 		}
 		data.getFormulas().stream()
 				.filter(formula -> !machine.getLTLFormulas().contains(formula))
-				.forEach(formula -> {
-					formula.initialize();
-					machine.addLTLFormula(formula);
-				});
+				.forEach(machine::addLTLFormula);
 		data.getPatterns().stream()
 				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {
-					pattern.initialize();
 					machine.addLTLPattern(pattern);
 					patternParser.parsePattern(pattern, machine);
 					patternParser.addPattern(pattern, machine);

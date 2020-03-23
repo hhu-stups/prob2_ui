@@ -6,9 +6,6 @@ import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;
 
-/**
- * Created by Christoph Heinzen on 27.04.17.
- */
 public class InMemoryJavaFileObject extends SimpleJavaFileObject {
 
 	private final ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
