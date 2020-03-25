@@ -4,13 +4,6 @@ import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
 
-/**
- * Description of class
- *
- * @author Christoph Heinzen
- * @version 0.1.0
- * @since 09.10.17
- */
 public class InMemoryCompilerException extends Exception {
 	private static final long serialVersionUID = 1L;
 

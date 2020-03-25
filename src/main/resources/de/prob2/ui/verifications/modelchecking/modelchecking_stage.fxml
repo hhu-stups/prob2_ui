@@ -45,6 +45,11 @@
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
 						</AnchorPane>
 						<AnchorPane VBox.vgrow="ALWAYS">
+							<CheckBox fx:id="findOtherErrors" selected="true"
+									  text="%verifications.modelchecking.modelcheckingStage.options.findOtherErrors"
+									  AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
+						</AnchorPane>
+						<AnchorPane VBox.vgrow="ALWAYS">
 							<CheckBox fx:id="findGoal"
 								text="%verifications.modelchecking.modelcheckingStage.options.findGoal"
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />

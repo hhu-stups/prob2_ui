@@ -7,12 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
+import de.prob.animator.command.GetVersionCommand;
 import de.prob.cli.CliVersionNumber;
-import de.prob.scripting.Api;
+import de.prob2.ui.project.MachineLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,17 +21,17 @@ import org.slf4j.LoggerFactory;
 public final class VersionInfo {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionInfo.class);
 	
-	private final Injector injector;
+	private final MachineLoader machineLoader;
 	private final Properties buildInfo;
 	private final Object lock;
 	
 	private CliVersionNumber cliVersion;
 	
 	@Inject
-	private VersionInfo(final Injector injector) {
+	private VersionInfo(final MachineLoader machineLoader) {
 		super();
 		
-		this.injector = injector;
+		this.machineLoader = machineLoader;
 		
 		this.buildInfo = new Properties();
 		try (final Reader reader = new InputStreamReader(
@@ -65,8 +65,10 @@ public final class VersionInfo {
 	public CliVersionNumber getCliVersion() {
 		synchronized (this.lock) {
 			if (this.cliVersion == null) {
-				// Computed lazily, because Api.getVersion() starts a CLI.
-				this.cliVersion = this.injector.getInstance(Api.class).getVersion();
+				// Computed lazily, because the empty state space potentially still needs to be started, which takes a few seconds.
+				final GetVersionCommand cmd = new GetVersionCommand();
+				this.machineLoader.getEmptyStateSpace().execute(cmd);
+				this.cliVersion = cmd.getVersion();
 			}
 		}
 		return this.cliVersion;

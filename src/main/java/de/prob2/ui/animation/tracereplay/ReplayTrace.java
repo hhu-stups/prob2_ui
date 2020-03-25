@@ -123,7 +123,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		if (trace != null) {
 			trace.setDescription(description);
 			injector.getInstance(TraceFileHandler.class)
-				.save(trace, injector.getInstance(CurrentProject.class).getLocation().resolve(location).toFile());
+				.save(trace, injector.getInstance(CurrentProject.class).getLocation().resolve(location));
 		}
 	}
 

@@ -1,9 +1,5 @@
 package de.prob2.ui.visualisation.fx.listener;
 
-/**
- * @author Christoph Heinzen
- * @since 26.09.17
- */
 public abstract class FormulaListener {
 
 	private final String[] formulas;

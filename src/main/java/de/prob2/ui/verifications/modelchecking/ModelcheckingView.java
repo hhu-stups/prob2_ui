@@ -1,13 +1,9 @@
 package de.prob2.ui.verifications.modelchecking;
 
 
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -25,7 +21,6 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -44,6 +39,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
+
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 
 @FXMLInjected
@@ -76,9 +74,12 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	
 	@FXML
 	private TableColumn<ModelCheckingItem, Boolean> invariantsViolationsColumn;
-	
+
 	@FXML
 	private TableColumn<ModelCheckingItem, Boolean> assertionViolationsColumn;
+
+	@FXML
+	private TableColumn<ModelCheckingItem, Boolean> otherErrorsColumn;
 	
 	@FXML
 	private TableColumn<ModelCheckingItem, Boolean> goalsColumn;
@@ -133,11 +134,13 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		setContextMenus();
 	}
 	
-	private Callback<TableColumn.CellDataFeatures<ModelCheckingItem, Boolean>, ObservableValue<Boolean>> makeOptionValueFactory(final ModelCheckingOptions.Options option) {
-		return features -> Bindings.createBooleanBinding(
-			() -> features.getValue().getOptions().getPrologOptions().contains(option),
-			features.getValue().optionsProperty()
-		);
+	private Callback<TableColumn.CellDataFeatures<ModelCheckingItem, Boolean>, ObservableValue<Boolean>> makeOptionValueFactory(final ModelCheckingOptions.Options option, boolean negated) {
+		return features -> {
+			BooleanBinding binding = Bindings.createBooleanBinding(
+					() -> features.getValue().getOptions().getPrologOptions().contains(option),
+					features.getValue().optionsProperty());
+			return negated ? binding.not() : binding;
+		};
 	}
 	
 	private void setBindings() {
@@ -150,15 +153,17 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 			bundle.getString(SearchStrategy.fromOptions(features.getValue().getOptions()).getName())
 		));
 		deadlockColumn.setCellFactory(col -> new BooleanCell<>());
-		deadlockColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_DEADLOCKS));
+		deadlockColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_DEADLOCKS, false));
 		invariantsViolationsColumn.setCellFactory(col -> new BooleanCell<>());
-		invariantsViolationsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS));
+		invariantsViolationsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS, false));
 		assertionViolationsColumn.setCellFactory(col -> new BooleanCell<>());
-		assertionViolationsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_ASSERTION_VIOLATIONS));
+		assertionViolationsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_ASSERTION_VIOLATIONS, false));
+		otherErrorsColumn.setCellFactory(col -> new BooleanCell<>());
+		otherErrorsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_OTHER_ERRORS, true));
 		goalsColumn.setCellFactory(col -> new BooleanCell<>());
-		goalsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_GOAL));
+		goalsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_GOAL, false));
 		stopAtFullCoverageColumn.setCellFactory(col -> new BooleanCell<>());
-		stopAtFullCoverageColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.STOP_AT_FULL_COVERAGE));
+		stopAtFullCoverageColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.STOP_AT_FULL_COVERAGE, false));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.MODELCHECKING, injector, this));
 		
 		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());

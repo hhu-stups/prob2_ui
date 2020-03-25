@@ -3,7 +3,6 @@ package de.prob2.ui.config;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -14,32 +13,65 @@ import java.util.Locale;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
+import de.prob2.ui.MainController;
+import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
+import de.prob2.ui.json.ObjectWithMetadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class Config {
-	// This Gson instance is for loadBasicConfig only. Everywhere else, injection should be used to get a GSON object.
+	// This Gson instance is for loadBasicConfig only. Everywhere else, JsonManager should be used.
 	private static final Gson BASIC_GSON = new GsonBuilder().create();
 	private static final Path LOCATION = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
 
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
-	private final Gson gson;
+	private final JsonManager<ConfigData> jsonManager;
 	private final RuntimeOptions runtimeOptions;
 	
 	private ConfigData currentConfigData;
 	private final List<ConfigListener> listeners;
 
 	@Inject
-	private Config(final Gson gson, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
-		this.gson = gson;
+	private Config(final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
+		this.jsonManager = jsonManager;
+		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(ConfigData.class, "Config", 1) {
+			private static final String GUI_STATE_FIELD = "guiState";
+			private static final String PERSPECTIVE_KIND_FIELD = "perspectiveKind";
+			private static final String PERSPECTIVE_FIELD = "perspective";
+			
+			@Override
+			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
+				if (oldMetadata.getFormatVersion() <= 0 && oldObject.has(GUI_STATE_FIELD)) {
+					final String guiState = oldObject.remove(GUI_STATE_FIELD).getAsString();
+					final PerspectiveKind perspectiveKind;
+					final String perspective;
+					if (guiState.contains("detached")) {
+						perspectiveKind = PerspectiveKind.PRESET;
+						perspective = MainController.DEFAULT_PERSPECTIVE;
+					} else if (guiState.startsWith("custom ")) {
+						perspectiveKind = PerspectiveKind.CUSTOM;
+						perspective = guiState.replace("custom ", "");
+					} else {
+						perspectiveKind = PerspectiveKind.PRESET;
+						perspective = guiState;
+					}
+					oldObject.addProperty(PERSPECTIVE_KIND_FIELD, perspectiveKind.name());
+					oldObject.addProperty(PERSPECTIVE_FIELD, perspective);
+				}
+				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+			}
+		});
 		this.runtimeOptions = runtimeOptions;
 
 		this.listeners = new ArrayList<>();
@@ -94,8 +126,8 @@ public final class Config {
 	public void load() {
 		ConfigData configData;
 		if (this.runtimeOptions.isLoadConfig()) {
-			try (final Reader reader = Files.newBufferedReader(LOCATION)) {
-				configData = gson.fromJson(reader, ConfigData.class);
+			try {
+				configData = this.jsonManager.readFromFile(LOCATION).getObject();
 				if (configData == null) {
 					// Config file is empty, use default config.
 					configData = new ConfigData();
@@ -131,8 +163,15 @@ public final class Config {
 			listener.saveConfig(configData);
 		}
 
-		try (final Writer writer = Files.newBufferedWriter(LOCATION)) {
-			gson.toJson(configData, writer);
+		try {
+			// The metadata includes all of the usual information, except for the CLI version.
+			// This is because the config is saved while the UI is shut down, and at that point it may no longer be possible to obtain the CLI version, because the shared empty state space has already been shut down.
+			final JsonMetadata metadata = this.jsonManager.metadataBuilder()
+				.withSavedNow()
+				.withCurrentProB2KernelVersion()
+				.withUserCreator()
+				.build();
+			this.jsonManager.writeToFile(LOCATION, configData, metadata);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {

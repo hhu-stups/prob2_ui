@@ -16,15 +16,26 @@ import java.io.OutputStream;
 
 @Singleton
 public class PrologOutput extends TextArea {
+
 	private static class PrologOutputAppender extends OutputStream {
+		StringBuilder sb;
 		TextArea textArea;
 		private PrologOutputAppender(TextArea textArea) {
+			this.sb = new StringBuilder();
 			this.textArea = textArea;
 		}
 
 		@Override
 		public void write(int b) {
-			Platform.runLater(() -> this.textArea.appendText(String.valueOf((char) b)));
+			Platform.runLater(() -> {
+				//Append each character to a StringBuilder until the string terminator and only set the final result in the end.
+				//This avoids the UI from hanging up.
+				sb.append((char) b);
+				if(b == 10) {
+					this.textArea.appendText(sb.toString());
+					this.sb = new StringBuilder();
+				}
+			});
 		}
 	}
 
@@ -36,18 +47,21 @@ public class PrologOutput extends TextArea {
 		PrologOutputAppender prologOutputAppender = new PrologOutputAppender(this);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-		encoder.setContext(context);
-		encoder.setPattern("%replace(%msg){'\\[0m', ''}%n");
-		encoder.start();
+		Thread thread = new Thread(() -> {
+			PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+			encoder.setContext(context);
+			encoder.setPattern("%replace(%msg){'\\[0m', ''}%n");
+			encoder.start();
 
-		OutputStreamAppender<ILoggingEvent> outputStreamAppender = new OutputStreamAppender<>();
-		outputStreamAppender.setContext(context);
-		outputStreamAppender.setEncoder(encoder);
-		outputStreamAppender.setOutputStream(prologOutputAppender);
-		outputStreamAppender.start();
+			OutputStreamAppender<ILoggingEvent> outputStreamAppender = new OutputStreamAppender<>();
+			outputStreamAppender.setContext(context);
+			outputStreamAppender.setEncoder(encoder);
+			outputStreamAppender.setOutputStream(prologOutputAppender);
+			outputStreamAppender.start();
 
-		Logger log = (Logger) LoggerFactory.getLogger(ProBInstance.class);
-		log.addAppender(outputStreamAppender);
+			Logger log = (Logger) LoggerFactory.getLogger(ProBInstance.class);
+			log.addAppender(outputStreamAppender);
+		});
+		thread.start();
 	}
 }

@@ -11,9 +11,6 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-/**
- * Created by Christoph Heinzen on 27.04.17.
- */
 public class InMemoryCompiler {
 
 	public Class<?> compile(String className, Path javaClassFile, InMemoryClassloader classloader)

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListCell?>
+<?import javafx.scene.layout.VBox?>
+
+<fx:root type="ListCell" stylesheets="@/prob.css" styleClass="machines-item" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox fx:id="event_box">
+        <Label fx:id="event_id" styleClass="name"/>
+        <Label fx:id="label_event" styleClass="location" />
+        <Label fx:id="label_predicates" styleClass="location" />
+    </VBox>
+</fx:root>

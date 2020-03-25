@@ -50,18 +50,6 @@ public class UIState {
 				if (configData.perspectiveKind != null && configData.perspective != null) {
 					setPerspectiveKind(configData.perspectiveKind);
 					setPerspective(configData.perspective);
-				} else if (configData.guiState != null) {
-					// Old config field, supported for backward compatibility.
-					if (configData.guiState.contains("detached")) {
-						setPerspectiveKind(PerspectiveKind.PRESET);
-						setPerspective(MainController.DEFAULT_PERSPECTIVE);
-					} else if (configData.guiState.startsWith("custom ")) {
-						setPerspectiveKind(PerspectiveKind.CUSTOM);
-						setPerspective(configData.guiState.replace("custom ", ""));
-					} else {
-						setPerspectiveKind(PerspectiveKind.PRESET);
-						setPerspective(configData.guiState);
-					}
 				}
 				
 				if (configData.visibleStages != null) {

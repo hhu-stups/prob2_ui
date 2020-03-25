@@ -2,12 +2,9 @@ package de.prob2.ui.visualisation.fx;
 
 import de.prob2.ui.visualisation.fx.listener.EventListener;
 import de.prob2.ui.visualisation.fx.listener.FormulaListener;
+
 import javafx.scene.Node;
 
-/**
- * @author Christoph Heinzen
- * @since 14.09.17
- */
 public abstract class Visualisation {
 
 	private VisualisationController controller;

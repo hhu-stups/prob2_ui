@@ -1,11 +1,8 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -21,6 +18,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+import java.util.ResourceBundle;
+
 @FXMLInjected
 @Singleton
 public class ModelcheckingStage extends Stage {
@@ -34,6 +33,8 @@ public class ModelcheckingStage extends Stage {
 	private CheckBox findInvViolations;
 	@FXML
 	private CheckBox findBAViolations;
+	@FXML
+	private CheckBox findOtherErrors;
 	@FXML
 	private CheckBox findGoal;
 	@FXML
@@ -106,6 +107,7 @@ public class ModelcheckingStage extends Stage {
 		options = options.checkDeadlocks(findDeadlocks.isSelected());
 		options = options.checkInvariantViolations(findInvViolations.isSelected());
 		options = options.checkAssertions(findBAViolations.isSelected());
+		options = options.checkOtherErrors(findOtherErrors.isSelected());
 		options = options.checkGoal(findGoal.isSelected());
 		options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
 		options = options.recheckExisting(true); // TO DO: set to false if we want new problems; currently seems to have no influence on prob2_interface calls; currently the first call always contains inspect_existing_nodes as an option, e.g., do_modelchecking(500,[find_deadlocks,find_invariant_violations,inspect_existing_nodes],Result,Stats)
