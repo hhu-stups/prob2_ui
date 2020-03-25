@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import de.prob2.ui.animation.tracereplay.TraceDiff?>
+
+<fx:root type="TraceDiff" xmlns:fx="http://javafx.com/fxml/1">
+	<children>
+		<Label fx:id="replayed" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+		<Label fx:id="persistent" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+		<Label fx:id="current" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+		<ListView fx:id="replayedList" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+		<ListView fx:id="persistentList" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+		<ListView fx:id="currentList" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+	</children>
+</fx:root>

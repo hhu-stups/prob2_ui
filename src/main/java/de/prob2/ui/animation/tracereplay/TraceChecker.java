@@ -3,6 +3,8 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -30,6 +32,8 @@ import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 @FXMLInjected
 @Singleton
@@ -97,16 +101,19 @@ public class TraceChecker {
 			});
 			trace.setExploreStateByDefault(true);
 			if (setCurrentAnimation) {
-				// set the current trace in both cases
+				// set the current trace if no error has occured. Otherwise leave the
 				trace.getCurrentState().explore();
-				currentTrace.set(trace);
-
+				final Trace copyTrace = trace;
 				if (replayTrace.getErrorMessageBundleKey() != null) {
 					Platform.runLater(() -> {
 						TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams());
 						alert.initOwner(stageManager.getCurrent());
-						alert.show();
+						boolean isEqual = currentTrace.get().getTransitionList().equals(copyTrace.getTransitionList());
+						alert.setErrorMessage(isEqual, copyTrace.getTransitionList().size(), persistentTrace.getTransitionList().size());
+						setAlertButtons(isEqual, copyTrace, persistentTrace, alert);
 					});
+				} else {
+					currentTrace.set(trace);
 				}
 
 			}
@@ -114,6 +121,35 @@ public class TraceChecker {
 		}, "Trace Replay Thread");
 		currentJobThreads.add(replayThread);
 		replayThread.start();
+	}
+
+	private void setAlertButtons(boolean isEqual, Trace copyTrace, PersistentTrace persistentTrace, Alert alert) {
+		if (isEqual) {
+			alert.getButtonTypes().addAll(ButtonType.OK);
+			alert.showAndWait();
+		} else {
+			ButtonType traceDiffButton = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
+			alert.getButtonTypes().addAll(traceDiffButton, ButtonType.YES, ButtonType.NO);
+			Optional<ButtonType> type = alert.showAndWait();
+			if (type.get() == ButtonType.YES) {
+				currentTrace.set(copyTrace);
+			} else if (type.get() == traceDiffButton) {
+				TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
+				traceDiffStage.setLists(copyTrace.getTransitionList(), persistentTrace.getTransitionList(),currentTrace.get().getTransitionList());
+				traceDiffStage.show();
+				traceDiffStage.setOnCloseRequest(e -> {
+					System.out.println("diff schließen");
+					Optional<ButtonType> t = alert.showAndWait();
+					if (t.get() == ButtonType.YES) {
+						System.out.println("trace ersetzen");
+						currentTrace.set(copyTrace);
+					} else if (t.get() == traceDiffButton) {
+						System.out.println("diff nochmal zeigen");
+						traceDiffStage.show();
+					}
+				});
+			}
+		}
 	}
 
 	private Transition replayPersistentTransition(ReplayTrace replayTrace, Trace t,
