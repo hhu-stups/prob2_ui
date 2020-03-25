@@ -9,7 +9,7 @@
 <?import javafx.geometry.Insets?>
 <fx:root type="TraceDiff" xmlns:fx="http://javafx.com/fxml/1">
 	<padding>
-		<Insets right="10" left="10" top="10" bottom="10"/>
+		<Insets right="5" left="5" top="5" bottom="5"/>
 	</padding>
 	<children>
 		<Label fx:id="replayed" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -19,6 +19,7 @@
 		<ListView fx:id="persistentList" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 		<ListView fx:id="currentList" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
 		<Button fx:id="setReplayed" GridPane.columnIndex="0" GridPane.rowIndex="2" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.setReplayed"/>
+		<Button fx:id="showAlert" GridPane.columnIndex="1" GridPane.rowIndex="2" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.showAlert"/>
 		<Button fx:id="setCurrent" GridPane.columnIndex="2" GridPane.rowIndex="2" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.setCurrent"/>
 	</children>
 </fx:root>
