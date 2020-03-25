@@ -50,58 +50,40 @@ public class PrologOutput extends TextFlow {
 			boolean underline = false;
 			boolean visible = true;
 			FontWeight weight = FontWeight.NORMAL;
-			boolean hasANSICode = false;
+			String message = s;
 
-			while (s.charAt(0) == 27) {
-				hasANSICode = true;
-				// removing escape
-				s = s.substring(1);
-				// setting font color and attributes for output and removing remaining ANSI code from string
-				if (s.startsWith("[1m")) {
-					s = s.replace("[1m", "");
-					weight = FontWeight.BOLD;
-				} else if (s.startsWith("[4m")) {
-					s = s.replace("[4m", "");
-					underline = true;
-				} else if (s.startsWith("[5m")) {
-					s = s.replace("[5m", "");
-					// not supported
-				} else if (s.startsWith("[7m")) {
-					s = s.replace("[7m", "");
-					// not supported
-				} else if (s.startsWith("[8m")) {
-					s = s.replace("[8m", "");
-					visible = false;
-				} else if (s.startsWith("[31m")) {
-					s = s.replace("[31m", "");
-					fontColor = Color.RED;
-				} else if (s.startsWith("[32m")) {
-					s = s.replace("[32m", "");
-					fontColor = Color.GREEN;
-				} else if (s.startsWith("[33m")) {
-					s = s.replace("[33m", "");
-					fontColor = Color.YELLOW;
-				} else if (s.startsWith("[34m")) {
-					s = s.replace("[34m", "");
-					fontColor = Color.BLUE;
-				} else if (s.startsWith("[35m")) {
-					s = s.replace("[35m", "");
-					fontColor = Color.MAGENTA;
-				} else if (s.startsWith("[36m")) {
-					s = s.replace("[36m", "");
-					fontColor = Color.CYAN;
-				} else if (s.startsWith("[37m")) {
-					s = s.replace("[37m", "");
-					fontColor = Color.WHITE;
+			if (s.charAt(0) == 27) {
+				// ANSI code found
+				int indexOfANSICodeEnd = s.indexOf('!');
+				message = s.substring(indexOfANSICodeEnd + 2);
+				for (String str : s.substring(1, indexOfANSICodeEnd).split("\\u001b")) {
+					// setting supported font color and attributes for output and removing remaining ANSI code from string
+					if (str.equals("[1m")) {
+						weight = FontWeight.BOLD;
+					} else if (str.equals("[4m")) {
+						underline = true;
+					} else if (str.equals("[8m")) {
+						visible = false;
+					} else if (str.equals("[31m")) {
+						fontColor = Color.RED;
+					} else if (str.equals("[32m")) {
+						fontColor = Color.GREEN;
+					} else if (str.equals("[33m")) {
+						fontColor = Color.YELLOW;
+					} else if (str.equals("[34m")) {
+						fontColor = Color.BLUE;
+					} else if (str.equals("[35m")) {
+						fontColor = Color.MAGENTA;
+					} else if (str.equals("[36m")) {
+						fontColor = Color.CYAN;
+					} else if (str.equals("[37m")) {
+						fontColor = Color.WHITE;
+					}
 				}
-			}
-			// remove ANSI code identifier
-			if (hasANSICode && s.startsWith("! ")) {
-				s = s.replace("! ", "");
 			}
 
 			output.setFont(Font.font(output.getFont().getFamily(), weight, output.getFont().getSize()));
-			output.setText(s);
+			output.setText(message);
 			output.setFill(fontColor);
 			output.setUnderline(underline);
 			output.setVisible(visible);
