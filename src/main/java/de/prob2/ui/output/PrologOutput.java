@@ -45,18 +45,34 @@ public class PrologOutput extends TextFlow {
 		}
 
 		private Text handleOutput(String s) {
-			Paint fontColor = Color.BLACK;
 			Text output = new Text();
+			Paint fontColor = Color.BLACK;
 			boolean underline = false;
 			boolean visible = true;
 			FontWeight weight = FontWeight.NORMAL;
 			boolean hasANSICode = false;
+
 			while (s.charAt(0) == 27) {
 				hasANSICode = true;
 				// removing escape
 				s = s.substring(1);
 				// setting font color and attributes for output and removing remaining ANSI code from string
-				if (s.startsWith("[31m")) {
+				if (s.startsWith("[1m")) {
+					s = s.replace("[1m", "");
+					weight = FontWeight.BOLD;
+				} else if (s.startsWith("[4m")) {
+					s = s.replace("[4m", "");
+					underline = true;
+				} else if (s.startsWith("[5m")) {
+					s = s.replace("[5m", "");
+					// not supported
+				} else if (s.startsWith("[7m")) {
+					s = s.replace("[7m", "");
+					// not supported
+				} else if (s.startsWith("[8m")) {
+					s = s.replace("[8m", "");
+					visible = false;
+				} else if (s.startsWith("[31m")) {
 					s = s.replace("[31m", "");
 					fontColor = Color.RED;
 				} else if (s.startsWith("[32m")) {
@@ -77,24 +93,8 @@ public class PrologOutput extends TextFlow {
 				} else if (s.startsWith("[37m")) {
 					s = s.replace("[37m", "");
 					fontColor = Color.WHITE;
-				} else if (s.startsWith("[1m")) {
-					s = s.replace("[1m", "");
-					weight = FontWeight.BOLD;
-				} else if (s.startsWith("[4m")) {
-					s = s.replace("[4m", "");
-					underline = true;
-				} else if (s.startsWith("[5m")) {
-					s = s.replace("[5m", "");
-					// not supported
-				} else if (s.startsWith("[7m")) {
-					s = s.replace("[7m", "");
-					// not supported
-				} else if (s.startsWith("[8m")) {
-					s = s.replace("[8m", "");
-					visible = false;
 				}
 			}
-
 			// remove ANSI code identifier
 			if (hasANSICode && s.startsWith("! ")) {
 				s = s.replace("! ", "");
@@ -105,6 +105,7 @@ public class PrologOutput extends TextFlow {
 			output.setFill(fontColor);
 			output.setUnderline(underline);
 			output.setVisible(visible);
+
 			return output;
 		}
 	}
