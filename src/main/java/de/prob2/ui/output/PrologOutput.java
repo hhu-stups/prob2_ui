@@ -18,8 +18,6 @@ import javafx.scene.text.TextFlow;
 import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 @Singleton
 public class PrologOutput extends TextFlow {
@@ -52,7 +50,9 @@ public class PrologOutput extends TextFlow {
 			boolean underline = false;
 			boolean visible = true;
 			FontWeight weight = FontWeight.NORMAL;
-			while (s.charAt(1) == '[') {
+			boolean hasANSICode = false;
+			while (s.charAt(0) == 27) {
+				hasANSICode = true;
 				// removing escape
 				s = s.substring(1);
 				// setting font color and attributes for output and removing remaining ANSI code from string
@@ -94,6 +94,12 @@ public class PrologOutput extends TextFlow {
 					visible = false;
 				}
 			}
+
+			// remove ANSI code identifier
+			if (hasANSICode && s.startsWith("! ")) {
+				s = s.replace("! ", "");
+			}
+
 			output.setFont(Font.font(output.getFont().getFamily(), weight, output.getFont().getSize()));
 			output.setText(s);
 			output.setFill(fontColor);
