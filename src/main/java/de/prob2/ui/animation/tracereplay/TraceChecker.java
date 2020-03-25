@@ -131,23 +131,14 @@ public class TraceChecker {
 			ButtonType traceDiffButton = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
 			alert.getButtonTypes().addAll(traceDiffButton, ButtonType.YES, ButtonType.NO);
 			Optional<ButtonType> type = alert.showAndWait();
+
 			if (type.get() == ButtonType.YES) {
 				currentTrace.set(copyTrace);
 			} else if (type.get() == traceDiffButton) {
+				alert.close();
 				TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
-				traceDiffStage.setLists(copyTrace.getTransitionList(), persistentTrace.getTransitionList(),currentTrace.get().getTransitionList());
+				traceDiffStage.setLists(copyTrace, persistentTrace, currentTrace.get());
 				traceDiffStage.show();
-				traceDiffStage.setOnCloseRequest(e -> {
-					System.out.println("diff schließen");
-					Optional<ButtonType> t = alert.showAndWait();
-					if (t.get() == ButtonType.YES) {
-						System.out.println("trace ersetzen");
-						currentTrace.set(copyTrace);
-					} else if (t.get() == traceDiffButton) {
-						System.out.println("diff nochmal zeigen");
-						traceDiffStage.show();
-					}
-				});
 			}
 		}
 	}
