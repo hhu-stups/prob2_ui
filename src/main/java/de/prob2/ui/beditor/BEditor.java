@@ -1,21 +1,6 @@
 package de.prob2.ui.beditor;
 
-import java.io.IOException;
-import java.io.PushbackReader;
-import java.io.StringReader;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.google.inject.Inject;
-
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
@@ -153,23 +138,39 @@ import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
 import de.be4.classicalb.core.parser.node.Token;
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.scripting.ClassicalBFactory;
+import de.prob.scripting.EventBFactory;
+import de.prob.scripting.ModelFactory;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
-
+import de.prob2.ui.project.machines.Machine;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.PushbackReader;
+import java.io.StringReader;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @FXMLInjected
 public class BEditor extends CodeArea {
@@ -222,7 +223,7 @@ public class BEditor extends CodeArea {
 	private final FontSize fontSize;
 	
 	private final CurrentProject currentProject;
-	
+
 	private final ResourceBundle bundle;
 
 	private final ObservableList<ErrorItem.Location> errorLocations;
@@ -294,7 +295,7 @@ public class BEditor extends CodeArea {
 				this.applyHighlighting(highlighting);
 			});
 		this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>)change ->
-			this.applyHighlighting(computeHighlighting(this.getText()))
+			this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
 		);
 
 		fontSize.fontSizeProperty().addListener((observable, from, to) ->
@@ -373,7 +374,7 @@ public class BEditor extends CodeArea {
 			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
 				@Override
 				protected StyleSpans<Collection<String>> call() {
-					return computeHighlighting(text);
+					return computeHighlighting(text, currentProject.getCurrentMachine());
 				}
 			};
 			executor.execute(task);
@@ -381,20 +382,28 @@ public class BEditor extends CodeArea {
 		}
 	}
 
-	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
+	private static StyleSpans<Collection<String>> computeHighlighting(String text, Machine machine) {
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-		try {
-			Token t;
-			do {
-				t = lexer.next();
-				String string = syntaxClasses.get(t.getClass());
-				spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
-			} while (!(t instanceof EOF));
-		} catch (LexerException | IOException e) {
-			LOGGER.info("Failed to lex", e);
+		if(machine == null) {
+			return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
 		}
-		return spansBuilder.create();
+		Class<? extends ModelFactory> modelFactoryClass = machine.getModelFactoryClass();
+		if(modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
+			try {
+				Token t;
+				do {
+					t = lexer.next();
+					String string = syntaxClasses.get(t.getClass());
+					spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
+				} while (!(t instanceof EOF));
+			} catch (LexerException | IOException e) {
+				LOGGER.info("Failed to lex", e);
+			}
+			return spansBuilder.create();
+		} else {
+			return StyleSpans.singleton(Collections.emptySet(), text.length());
+		}
 	}
 	
 	public void clearHistory() {
