@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert?>
 <?import javafx.scene.control.Alert?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.TextArea?>
 
+<?import javafx.scene.text.Text?>
 <fx:root type="Alert" resizable="true" alertType="ERROR" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane>
 			<content>
-				<TextArea fx:id="taError" editable="false"/>
+				<Text fx:id="error"/>
 			</content>
+			<expandableContent>
+				<TextArea fx:id="taError" editable="false" wrapText="true"/>
+			</expandableContent>
 		</DialogPane>
 	</dialogPane>
 </fx:root>
