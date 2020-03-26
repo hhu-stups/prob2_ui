@@ -386,6 +386,7 @@ public class BEditor extends CodeArea {
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
 		if(machine == null) {
+			//Prompt text is a comment text
 			return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
 		}
 		Class<? extends ModelFactory> modelFactoryClass = machine.getModelFactoryClass();
@@ -402,6 +403,7 @@ public class BEditor extends CodeArea {
 			}
 			return spansBuilder.create();
 		} else {
+			//Do not highlight for languages other than B and EventB
 			return StyleSpans.singleton(Collections.emptySet(), text.length());
 		}
 	}
