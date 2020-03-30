@@ -17,11 +17,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
-import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.prob2fx.CurrentProject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,39 +39,12 @@ final class JsonManagerRaw {
 		.toFormatter();
 	
 	private final Gson gson;
-	private final Provider<VersionInfo> versionInfoProvider;
-	private final Provider<CurrentProject> currentProjectProvider;
 	
 	@Inject
-	private JsonManagerRaw(final Gson gson, final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider) {
+	private JsonManagerRaw(final Gson gson) {
 		super();
 		
 		this.gson = gson;
-		this.versionInfoProvider = versionInfoProvider;
-		this.currentProjectProvider = currentProjectProvider;
-	}
-	
-	/**
-	 * Create a builder for a new {@link JsonMetadata} object.
-	 * 
-	 * @param fileType identifier for the type of data that this metadata belongs to, should never be {@code null}
-	 * @param formatVersion version of the data format
-	 * 
-	 * @return a builder for a new {@link JsonMetadata object}
-	 */
-	public JsonMetadataBuilder metadataBuilder(final String fileType, final int formatVersion) {
-		return new JsonMetadataBuilder(this.versionInfoProvider, this.currentProjectProvider, fileType, formatVersion);
-	}
-	
-	/**
-	 * Create a builder for a {@link JsonMetadata} object based on an existing metadata object.
-	 * 
-	 * @param metadata an existing {@link JsonMetadata} object used to initialize this builder
-	 * 
-	 * @return a builder for a {@link JsonMetadata} object based on an existing metadata object
-	 */
-	public JsonMetadataBuilder metadataBuilder(final JsonMetadata metadata) {
-		return new JsonMetadataBuilder(this.versionInfoProvider, this.currentProjectProvider, metadata);
 	}
 	
 	private static JsonMetadata convertOldMetadata(final JsonElement metadataElement) {

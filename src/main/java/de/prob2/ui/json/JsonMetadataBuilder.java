@@ -19,7 +19,7 @@ public final class JsonMetadataBuilder {
 	private String proBCliVersion = null;
 	private String modelName = null;
 	
-	JsonMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider, final String fileType, final int formatVersion) {
+	public JsonMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider, final String fileType, final int formatVersion) {
 		this.versionInfoProvider = versionInfoProvider;
 		this.currentProjectProvider = currentProjectProvider;
 		
@@ -27,7 +27,7 @@ public final class JsonMetadataBuilder {
 		this.formatVersion = formatVersion;
 	}
 	
-	JsonMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider, final JsonMetadata metadata) {
+	public JsonMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider, final JsonMetadata metadata) {
 		this.versionInfoProvider = versionInfoProvider;
 		this.currentProjectProvider = currentProjectProvider;
 		

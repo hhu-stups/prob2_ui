@@ -14,6 +14,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,15 +56,19 @@ public final class JsonManager<T> {
 	
 	private final JsonManagerRaw jsonManager;
 	private final Gson gson;
+	private final Provider<VersionInfo> versionInfoProvider;
+	private final Provider<CurrentProject> currentProjectProvider;
 	
 	private JsonManager.Context<T> context;
 	
 	@Inject
-	private JsonManager(final JsonManagerRaw jsonManager, final Gson gson) {
+	private JsonManager(final JsonManagerRaw jsonManager, final Gson gson, final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider) {
 		super();
 		
 		this.jsonManager = jsonManager;
 		this.gson = gson;
+		this.versionInfoProvider = versionInfoProvider;
+		this.currentProjectProvider = currentProjectProvider;
 		this.context = null;
 	}
 	
@@ -109,7 +117,7 @@ public final class JsonManager<T> {
 	 * @return a builder for a new {@link JsonMetadata object}
 	 */
 	public JsonMetadataBuilder metadataBuilder() {
-		return this.jsonManager.metadataBuilder(this.getContext().fileType, this.getContext().currentFormatVersion);
+		return new JsonMetadataBuilder(this.versionInfoProvider, this.currentProjectProvider, this.getContext().fileType, this.getContext().currentFormatVersion);
 	}
 	
 	/**
@@ -120,7 +128,7 @@ public final class JsonManager<T> {
 	 * @return a builder for a {@link JsonMetadata} object based on an existing metadata object
 	 */
 	public JsonMetadataBuilder metadataBuilder(final JsonMetadata metadata) {
-		return this.jsonManager.metadataBuilder(metadata);
+		return new JsonMetadataBuilder(this.versionInfoProvider, this.currentProjectProvider, metadata);
 	}
 	
 	/**
