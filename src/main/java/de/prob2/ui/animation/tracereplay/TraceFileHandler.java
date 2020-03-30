@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -84,33 +83,32 @@ public class TraceFileHandler {
 			return this.jsonManager.readFromFile(currentProject.getLocation().resolve(path)).getObject();
 		} catch (JsonParseException | IOException e) {
 			LOGGER.warn("Failed to load trace file", e);
-			Alert alert;
-			List<ButtonType> buttons = new ArrayList<>();
-			buttons.add(ButtonType.YES);
-			buttons.add(ButtonType.NO);
+			final String headerBundleKey;
+			final String contentBundleKey;
 			if (e instanceof NoSuchFileException || e instanceof FileNotFoundException) {
-				alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
-					"animation.tracereplay.traceChecker.alerts.fileNotFound.header",
-					"animation.tracereplay.traceChecker.alerts.fileNotFound.content", path
-				);
+				headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
+				contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
 			} else if (e instanceof JsonParseException) {
-				alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
-					"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header",
-					"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content", path
-				);
+				headerBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header";
+				contentBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content";
 			} else {
-				alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
-					"animation.tracereplay.alerts.traceReplayError.header",
-					"animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content", path
-				);
+				headerBundleKey = "animation.tracereplay.alerts.traceReplayError.header";
+				contentBundleKey = "animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content";
 			}
-			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-				Machine currentMachine = currentProject.getCurrentMachine();
-				if (currentMachine.getTraceFiles().contains(path)) {
-					currentMachine.removeTraceFile(path);
+			stageManager.makeAlert(
+				Alert.AlertType.ERROR,
+				Arrays.asList(ButtonType.YES, ButtonType.NO),
+				headerBundleKey,
+				contentBundleKey,
+				path
+			).showAndWait().ifPresent(buttonType -> {
+				if (buttonType.equals(ButtonType.YES)) {
+					Machine currentMachine = currentProject.getCurrentMachine();
+					if (currentMachine.getTraceFiles().contains(path)) {
+						currentMachine.removeTraceFile(path);
+					}
 				}
-			}
+			});
 			return null;
 		}
 	}
