@@ -82,45 +82,36 @@ public class TraceFileHandler {
 	public PersistentTrace load(Path path) {
 		try {
 			return this.jsonManager.readFromFile(currentProject.getLocation().resolve(path)).getObject();
-		} catch (FileNotFoundException | NoSuchFileException e) {
-			LOGGER.warn("Trace file not found", e);
-			handleFailedTraceLoad(path, e);
-			return null;
-		} catch (JsonParseException e) {
-			LOGGER.warn("Invalid trace file", e);
-			handleFailedTraceLoad(path, e);
-			return null;
-		} catch (IOException e) {
-			LOGGER.warn("Failed to open trace file", e);
-			handleFailedTraceLoad(path, e);
-			return null;
-		}
-	}
-
-	private void handleFailedTraceLoad(Path path, Exception exception) {
-		Alert alert;
-		List<ButtonType> buttons = new ArrayList<>();
-		buttons.add(ButtonType.YES);
-		buttons.add(ButtonType.NO);
-		if (exception instanceof NoSuchFileException || exception instanceof FileNotFoundException) {
-			alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
-				"animation.tracereplay.traceChecker.alerts.fileNotFound.header",
-				"animation.tracereplay.traceChecker.alerts.fileNotFound.content", path);
-		} else if (exception instanceof JsonParseException) {
-			alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
-				"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header",
-				"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content", path);
-		} else {
-			alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
-				"animation.tracereplay.alerts.traceReplayError.header",
-				"animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content", path);
-		}
-		Optional<ButtonType> result = alert.showAndWait();
-		if (result.isPresent() && result.get().equals(ButtonType.YES)) {
-			Machine currentMachine = currentProject.getCurrentMachine();
-			if (currentMachine.getTraceFiles().contains(path)) {
-				currentMachine.removeTraceFile(path);
+		} catch (JsonParseException | IOException e) {
+			LOGGER.warn("Failed to load trace file", e);
+			Alert alert;
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(ButtonType.YES);
+			buttons.add(ButtonType.NO);
+			if (e instanceof NoSuchFileException || e instanceof FileNotFoundException) {
+				alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
+					"animation.tracereplay.traceChecker.alerts.fileNotFound.header",
+					"animation.tracereplay.traceChecker.alerts.fileNotFound.content", path
+				);
+			} else if (e instanceof JsonParseException) {
+				alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
+					"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header",
+					"animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content", path
+				);
+			} else {
+				alert = stageManager.makeAlert(Alert.AlertType.ERROR, buttons,
+					"animation.tracereplay.alerts.traceReplayError.header",
+					"animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content", path
+				);
 			}
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+				Machine currentMachine = currentProject.getCurrentMachine();
+				if (currentMachine.getTraceFiles().contains(path)) {
+					currentMachine.removeTraceFile(path);
+				}
+			}
+			return null;
 		}
 	}
 
