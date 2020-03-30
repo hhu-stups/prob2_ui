@@ -37,6 +37,12 @@ public final class JsonManager<T> {
 			this.currentFormatVersion = currentFormatVersion;
 		}
 		
+		public JsonMetadataBuilder getDefaultMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider) {
+			return new JsonMetadataBuilder(versionInfoProvider, currentProjectProvider, this.fileType, this.currentFormatVersion)
+				.withCurrentInfo()
+				.withUserCreator();
+		}
+		
 		/**
 		 * <p>Convert data from an older format version to the current version.</p>
 		 * <p>This method must be overridden to support loading data that uses an older format version. The default implementation of this method always throws a {@link JsonParseException}.</p>
@@ -132,14 +138,12 @@ public final class JsonManager<T> {
 	}
 	
 	/**
-	 * Create a builder for a {@link JsonMetadata} object with default settings. Subclasses may override this method to change the defaults.
+	 * Create a builder for a {@link JsonMetadata} object with default settings. The builder may be customized by overriding {@link JsonManager.Context#getDefaultMetadataBuilder(Provider, Provider)} in the context.
 	 * 
 	 * @return a builder for a {@link JsonMetadata} object with default settings
 	 */
 	public JsonMetadataBuilder defaultMetadataBuilder() {
-		return this.metadataBuilder()
-			.withCurrentInfo()
-			.withUserCreator();
+		return this.getContext().getDefaultMetadataBuilder(this.versionInfoProvider, this.currentProjectProvider);
 	}
 	
 	/**

@@ -15,15 +15,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
 import de.prob2.ui.MainController;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadata;
+import de.prob2.ui.json.JsonMetadataBuilder;
 import de.prob2.ui.json.ObjectWithMetadata;
+import de.prob2.ui.prob2fx.CurrentProject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +53,16 @@ public final class Config {
 			private static final String GUI_STATE_FIELD = "guiState";
 			private static final String PERSPECTIVE_KIND_FIELD = "perspectiveKind";
 			private static final String PERSPECTIVE_FIELD = "perspective";
+			
+			@Override
+			public JsonMetadataBuilder getDefaultMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider) {
+				// The metadata includes all of the usual information, except for the CLI version.
+				// This is because the config is saved while the UI is shut down, and at that point it may no longer be possible to obtain the CLI version, because the shared empty state space has already been shut down.
+				return new JsonMetadataBuilder(versionInfoProvider, currentProjectProvider, this.fileType, this.currentFormatVersion)
+					.withSavedNow()
+					.withCurrentProB2KernelVersion()
+					.withUserCreator();
+			}
 			
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -164,14 +178,7 @@ public final class Config {
 		}
 
 		try {
-			// The metadata includes all of the usual information, except for the CLI version.
-			// This is because the config is saved while the UI is shut down, and at that point it may no longer be possible to obtain the CLI version, because the shared empty state space has already been shut down.
-			final JsonMetadata metadata = this.jsonManager.metadataBuilder()
-				.withSavedNow()
-				.withCurrentProB2KernelVersion()
-				.withUserCreator()
-				.build();
-			this.jsonManager.writeToFile(LOCATION, configData, metadata);
+			this.jsonManager.writeToFile(LOCATION, configData);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {

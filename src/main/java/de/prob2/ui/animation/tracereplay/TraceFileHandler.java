@@ -16,14 +16,17 @@ import java.util.stream.Stream;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadata;
+import de.prob2.ui.json.JsonMetadataBuilder;
 import de.prob2.ui.json.ObjectWithMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -53,6 +56,12 @@ public class TraceFileHandler {
 	public TraceFileHandler(JsonManager<PersistentTrace> jsonManager, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
 		jsonManager.initContext(new JsonManager.Context<PersistentTrace>(PersistentTrace.class, "Trace", 1) {
+			@Override
+			public JsonMetadataBuilder getDefaultMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider) {
+				return super.getDefaultMetadataBuilder(versionInfoProvider, currentProjectProvider)
+					.withCurrentModelName();
+			}
+			
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
 				if (oldMetadata.getFileType() == null) {
@@ -148,7 +157,6 @@ public class TraceFileHandler {
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
 				this.jsonManager.writeToFile(traceFilePath, traces.get(i), this.jsonManager.defaultMetadataBuilder()
 					.withCreator(createdBy)
-					.withCurrentModelName()
 					.build());
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
@@ -181,10 +189,7 @@ public class TraceFileHandler {
 
 	public void save(PersistentTrace trace, Path location) {
 		try {
-			this.jsonManager.writeToFile(location, trace, this.jsonManager.defaultMetadataBuilder()
-				.withCreator(JsonMetadata.USER_CREATOR)
-				.withCurrentModelName()
-				.build());
+			this.jsonManager.writeToFile(location, trace);
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
 		}
