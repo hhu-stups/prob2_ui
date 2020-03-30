@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +55,7 @@ public class FileChooserManager {
 
 	private final ResourceBundle bundle;
 
+	private final List<String> machineExtensionPatterns;
 	private final List<FileChooser.ExtensionFilter> machineExtensionFilters;
 
 	private final Map<Kind, Path> initialDirectories = new EnumMap<>(Kind.class);
@@ -64,6 +64,10 @@ public class FileChooserManager {
 	private FileChooserManager(final Config config, final ResourceBundle bundle) {
 		this.bundle = bundle;
 
+		this.machineExtensionPatterns = FactoryProvider.EXTENSION_TO_FACTORY_MAP.keySet()
+			.stream()
+			.map(ext -> "*." + ext)
+			.collect(Collectors.toList());
 		this.machineExtensionFilters = new ArrayList<>();
 		FactoryProvider.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
 			final String name;
@@ -78,7 +82,6 @@ public class FileChooserManager {
 				extensionPatterns
 			));
 		});
-		this.machineExtensionFilters.sort(Comparator.comparing(FileChooser.ExtensionFilter::getDescription));
 
 		config.addListener(new ConfigListener() {
 			@Override
@@ -156,7 +159,7 @@ public class FileChooserManager {
 		}
 		
 		if (machines) {
-			allExts.addAll(FactoryProvider.EXTENSION_PATTERNS_ORDERED);
+			allExts.addAll(this.machineExtensionPatterns);
 			fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		}
 
@@ -203,11 +206,8 @@ public class FileChooserManager {
 	public Path showSaveMachineChooser(final Window window) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
-		
-		final List<String> allExts = new ArrayList<>(FactoryProvider.EXTENSION_PATTERNS_ORDERED);
 		fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
-
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), this.machineExtensionPatterns));
 		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 
