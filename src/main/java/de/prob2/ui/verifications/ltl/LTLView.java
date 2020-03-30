@@ -2,8 +2,12 @@ package de.prob2.ui.verifications.ltl;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -13,6 +17,9 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.json.JsonManager;
+import de.prob2.ui.json.JsonMetadata;
+import de.prob2.ui.json.ObjectWithMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -55,6 +62,11 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
+	
+	private static final String LTL_FILE_EXTENSION = "prob2ltl";
+	private static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
+	private static final String OLD_LTL_FILE_EXTENSION = "ltl";
+	private static final String OLD_LTL_FILE_PATTERN = "*." + OLD_LTL_FILE_EXTENSION;
 	
 	@FXML 
 	private MenuButton addMenuButton;
@@ -99,16 +111,17 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	private final LTLFormulaChecker checker;
 	private final LTLPatternParser patternParser;
 	private final LTLResultHandler resultHandler;
-	private final LTLFileHandler ltlFileHandler;
 	private final FileChooserManager fileChooserManager;
 	private final CheckBox formulaSelectAll;
+	private final JsonManager<LTLData> jsonManager;
 				
 	@Inject
 	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,
 					final CurrentTrace currentTrace, final CurrentProject currentProject,
 					final LTLFormulaChecker checker, final LTLPatternParser patternParser,
-					final LTLResultHandler resultHandler, final LTLFileHandler ltlFileHandler,
-					final FileChooserManager fileChooserManager) {
+					final LTLResultHandler resultHandler,
+					final FileChooserManager fileChooserManager,
+					final JsonManager<LTLData> jsonManager) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.injector = injector;
@@ -117,8 +130,22 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		this.checker = checker;
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;
-		this.ltlFileHandler = ltlFileHandler;
 		this.fileChooserManager = fileChooserManager;
+		this.jsonManager = jsonManager;
+		jsonManager.initContext(new JsonManager.Context<LTLData>(LTLData.class, "LTL", 1) {
+			@Override
+			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
+				if (oldMetadata.getFileType() == null) {
+					assert oldMetadata.getFormatVersion() == 0;
+					for (final String fieldName : new String[] {"formulas", "patterns"}) {
+						if (!oldObject.has(fieldName)) {
+							throw new JsonParseException("Not a valid LTL file - missing required field " + fieldName);
+						}
+					}
+				}
+				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+			}
+		});
 		this.formulaSelectAll = new CheckBox();
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
@@ -369,7 +396,28 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 
 	@FXML
 	private void saveLTL() {
-		ltlFileHandler.save();
+		Machine machine = currentProject.getCurrentMachine();
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.saveLTL.title"));
+		fileChooser.setInitialFileName(machine.getName() + "." + LTL_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+			String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_PATTERN),
+			LTL_FILE_PATTERN
+		));
+		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
+		if (path != null) {
+			List<LTLFormulaItem> formulas = machine.getLTLFormulas().stream()
+				.filter(LTLFormulaItem::selected)
+				.collect(Collectors.toList());
+			List<LTLPatternItem> patterns = machine.getLTLPatterns().stream()
+				.filter(LTLPatternItem::selected)
+				.collect(Collectors.toList());
+			try {
+				this.jsonManager.writeToFile(path, new LTLData(formulas, patterns));
+			} catch (IOException e) {
+				stageManager.makeExceptionAlert(e, "verifications.ltl.ltlView.saveLTL.error").showAndWait();
+			}
+		}
 	}
 
 	@FXML
@@ -379,9 +427,9 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.loadLTL.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-			String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTLFileHandler.LTL_FILE_PATTERN + ", " + LTLFileHandler.OLD_LTL_FILE_PATTERN),
-			LTLFileHandler.LTL_FILE_PATTERN,
-			LTLFileHandler.OLD_LTL_FILE_PATTERN
+			String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_PATTERN + ", " + OLD_LTL_FILE_PATTERN),
+			LTL_FILE_PATTERN,
+			OLD_LTL_FILE_PATTERN
 		));
 		Path ltlFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if(ltlFile == null) {
@@ -389,7 +437,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		}
 		LTLData data;
 		try {
-			data = ltlFileHandler.load(ltlFile);
+			data = this.jsonManager.readFromFile(ltlFile).getObject();
 		} catch (IOException e) {
 			logger.error("Could not load LTL file: ", e);
 			return;
