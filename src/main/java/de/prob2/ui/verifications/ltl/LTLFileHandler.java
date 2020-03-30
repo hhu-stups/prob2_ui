@@ -23,8 +23,10 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.stage.FileChooser;
 
 public class LTLFileHandler {
-	public static final String LTL_FILE_EXTENSION = "ltl";
+	public static final String LTL_FILE_EXTENSION = "prob2ltl";
 	public static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
+	public static final String OLD_LTL_FILE_EXTENSION = "ltl";
+	public static final String OLD_LTL_FILE_PATTERN = "*." + OLD_LTL_FILE_EXTENSION;
 
 	private final JsonManager<LTLData> jsonManager;
 	private final CurrentProject currentProject;
