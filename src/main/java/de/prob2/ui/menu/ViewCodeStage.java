@@ -1,6 +1,5 @@
 package de.prob2.ui.menu;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -131,9 +130,6 @@ public final class ViewCodeStage extends Stage {
 		
 		try (final Writer out = Files.newBufferedWriter(selected)) {
 			out.write(this.getCode());
-		} catch (FileNotFoundException e) {
-			LOGGER.error("Could not open file for writing", e);
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotWriteFile.content", selected).showAndWait();
 		} catch (IOException e) {
 			LOGGER.error("Failed to save value to file", e);
 			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", selected).showAndWait();
