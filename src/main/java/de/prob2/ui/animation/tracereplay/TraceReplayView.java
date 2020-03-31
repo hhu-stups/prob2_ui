@@ -48,7 +48,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 import org.controlsfx.glyphfont.FontAwesome;
 
@@ -280,10 +279,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.loadTrace.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters().add(new ExtensionFilter(
-			String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TraceFileHandler.TRACE_FILE_PATTERN),
-			TraceFileHandler.TRACE_FILE_PATTERN
-		));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
 		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
 			Path relative = currentProject.getLocation().relativize(traceFile);

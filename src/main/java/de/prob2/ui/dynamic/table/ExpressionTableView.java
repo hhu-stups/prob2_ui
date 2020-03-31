@@ -23,6 +23,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -58,13 +59,16 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private HelpButton helpButton;
 	
+	private final FileChooserManager fileChooserManager;
+	
 	private ObjectProperty<TableData> currentTable;
 	
 	
 	@Inject
 	public ExpressionTableView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace, 
-			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector) {
+			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector, final FileChooserManager fileChooserManager) {
 		super(stageManager, preferences, currentTrace, currentProject, bundle, injector);
+		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");
 	}
@@ -166,8 +170,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@FXML
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
-		FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
-		fileChooser.getExtensionFilters().add(filter);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv"));
 		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
 		File file = fileChooser.showSaveDialog(new Stage());
 		if(file == null || currentTable == null) {

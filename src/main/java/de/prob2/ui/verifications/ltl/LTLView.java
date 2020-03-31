@@ -64,9 +64,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	private static final String LTL_FILE_EXTENSION = "prob2ltl";
-	private static final String LTL_FILE_PATTERN = "*." + LTL_FILE_EXTENSION;
 	private static final String OLD_LTL_FILE_EXTENSION = "ltl";
-	private static final String OLD_LTL_FILE_PATTERN = "*." + OLD_LTL_FILE_EXTENSION;
 	
 	@FXML 
 	private MenuButton addMenuButton;
@@ -400,10 +398,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.saveLTL.title"));
 		fileChooser.setInitialFileName(machine.getName() + "." + LTL_FILE_EXTENSION);
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-			String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_PATTERN),
-			LTL_FILE_PATTERN
-		));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if (path != null) {
 			List<LTLFormulaItem> formulas = machine.getLTLFormulas().stream()
@@ -426,11 +421,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.loadLTL.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-			String.format(bundle.getString("common.fileChooser.fileTypes.ltl"), LTL_FILE_PATTERN + ", " + OLD_LTL_FILE_PATTERN),
-			LTL_FILE_PATTERN,
-			OLD_LTL_FILE_PATTERN
-		));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION, OLD_LTL_FILE_EXTENSION));
 		Path ltlFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if(ltlFile == null) {
 			return;

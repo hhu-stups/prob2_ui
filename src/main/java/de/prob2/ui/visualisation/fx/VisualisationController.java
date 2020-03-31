@@ -166,9 +166,10 @@ public class VisualisationController {
 		LOGGER.debug("Show filechooser to select a visualisation.");
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("visualisation.fx.controller.fileChooser.selectVisualisation"));
-		fileChooser.getExtensionFilters()
-				.addAll(new FileChooser.ExtensionFilter(bundle.getString("visualisation.fx.controller.fileChooser.fileTypes.visualisationJar"), "*.jar"),
-						new FileChooser.ExtensionFilter(format("visualisation.fx.controller.fileChooser.fileTypes.visualisationClass", "*.java"), "*.java"));
+		fileChooser.getExtensionFilters().addAll(
+			fileChooserManager.getExtensionFilter("visualisation.fx.controller.fileChooser.fileTypes.visualisationJar", "jar"),
+			fileChooserManager.getExtensionFilter("visualisation.fx.controller.fileChooser.fileTypes.visualisationClass", "java")
+		);
 		Path selectedVisualisation = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		
 		

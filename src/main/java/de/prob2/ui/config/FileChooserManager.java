@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ public class FileChooserManager {
 		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL
 	}
 
+	public static final String EXTENSION_PATTERN_PREFIX = "*.";
 	private static final Map<Class<? extends ModelFactory<?>>, String> FACTORY_TO_TYPE_KEY_MAP;
 	static {
 		final Map<Class<? extends ModelFactory<?>>, String> map = new HashMap<>();
@@ -66,7 +68,7 @@ public class FileChooserManager {
 
 		this.machineExtensionPatterns = FactoryProvider.EXTENSION_TO_FACTORY_MAP.keySet()
 			.stream()
-			.map(ext -> "*." + ext)
+			.map(ext -> EXTENSION_PATTERN_PREFIX + ext)
 			.collect(Collectors.toList());
 		this.machineExtensionFilters = new ArrayList<>();
 		FactoryProvider.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
@@ -76,11 +78,7 @@ public class FileChooserManager {
 			} else {
 				name = factory.getSimpleName();
 			}
-			final List<String> extensionPatterns = extensions.stream().map(ext -> "*." + ext).collect(Collectors.toList());
-			this.machineExtensionFilters.add(new FileChooser.ExtensionFilter(
-				String.format(name, String.join(", ", extensionPatterns)),
-				extensionPatterns
-			));
+			this.machineExtensionFilters.add(getExtensionFilterUnlocalized(name, extensions));
 		});
 
 		config.addListener(new ConfigListener() {
@@ -101,6 +99,62 @@ public class FileChooserManager {
 				configData.fileChooserInitialDirectories.putAll(getInitialDirectories());
 			}
 		});
+	}
+	
+	/**
+	 * <p>Create a {@link FileChooser.ExtensionFilter} with the list of extensions automatically appended to the description.</p>
+	 * <p>Note: The extension strings passed into this method should be plain extensions and not patterns, unlike with the {@link FileChooser.ExtensionFilter#ExtensionFilter(String, List)} constructor. The extension strings should <i>not</i> include a {@code *.} prefix (it is added automatically by this method).</p>
+	 * 
+	 * @param description the description for this filter
+	 * @param extensions the list of extensions for this filter, each as a plain extension without a {@code *.} prefix
+	 * @return an extension filter with the given settings
+	 */
+	public static FileChooser.ExtensionFilter getExtensionFilterUnlocalized(final String description, final List<String> extensions) {
+		final List<String> extensionPatterns = extensions.stream()
+			.map(ext -> {
+				if (ext.startsWith(EXTENSION_PATTERN_PREFIX)) {
+					throw new IllegalArgumentException(String.format("Extensions passed to getExtensionFilter must not include a pattern (%s) prefix: %s", EXTENSION_PATTERN_PREFIX, ext));
+				}
+				return EXTENSION_PATTERN_PREFIX + ext;
+			})
+			.collect(Collectors.toList());
+		final String descriptionWithPatterns = String.format(
+			"%s (%s)",
+			description,
+			String.join(", ", extensionPatterns)
+		);
+		return new FileChooser.ExtensionFilter(descriptionWithPatterns, extensionPatterns);
+	}
+	
+	/**
+	 * Convenience method, equivalent to {@link #getExtensionFilterUnlocalized(String, List)}, but accepts a bundle key for the description.
+	 * 
+	 * @param descriptionBundleKey bundle key for the description for this filter
+	 * @param extensions the list of extensions for this filter, each as a plain extension without a {@code *.} prefix
+	 * @return an extension filter with the given settings
+	 */
+	public FileChooser.ExtensionFilter getExtensionFilter(final String descriptionBundleKey, final List<String> extensions) {
+		return getExtensionFilterUnlocalized(bundle.getString(descriptionBundleKey), extensions);
+	}
+	
+	/**
+	 * Convenience method, equivalent to {@link #getExtensionFilter(String, List)}, but accepts an array or varargs.
+	 * 
+	 * @param descriptionBundleKey bundle key for the description for this filter
+	 * @param extensions the list of extensions for this filter, each as a plain extension without a {@code *.} prefix
+	 * @return an extension filter with the given settings
+	 */
+	public FileChooser.ExtensionFilter getExtensionFilter(final String descriptionBundleKey, final String... extensions) {
+		return this.getExtensionFilter(descriptionBundleKey, Arrays.asList(extensions));
+	}
+	
+	/**
+	 * Create a {@link FileChooser.ExtensionFilter} that matches all file types.
+	 * 
+	 * @return an extension filter that matches all file types
+	 */
+	public FileChooser.ExtensionFilter getAllExtensionsFilter() {
+		return new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.all"), "*.*");
 	}
 
 	public Path showOpenFileChooser(final FileChooser fileChooser, final Kind kind, final Window window) {
@@ -151,18 +205,20 @@ public class FileChooserManager {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
 		
-		final List<String> allExts = new ArrayList<>();
+		final List<String> allExtensionPatterns = new ArrayList<>();
 		if (projects) {
-			allExts.add(ProjectManager.PROJECT_FILE_PATTERN);
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), ProjectManager.PROJECT_FILE_PATTERN), ProjectManager.PROJECT_FILE_PATTERN));
+			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + ProjectManager.PROJECT_FILE_EXTENSION);
+			fileChooser.getExtensionFilters().add(this.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", ProjectManager.PROJECT_FILE_EXTENSION));
 		}
 		
 		if (machines) {
-			allExts.addAll(this.machineExtensionPatterns);
+			allExtensionPatterns.addAll(this.machineExtensionPatterns);
 			fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		}
 
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExts));
+		// This extension filter is created manually instead of with getExtensionFilter,
+		// so that the list of extensions doesn't get appended (it would be very long).
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExtensionPatterns));
 		return this.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	
@@ -206,6 +262,8 @@ public class FileChooserManager {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
 		fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
+		// This extension filter is created manually instead of with getExtensionFilter,
+		// so that the list of extensions doesn't get appended (it would be very long).
 		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), this.machineExtensionPatterns));
 		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}

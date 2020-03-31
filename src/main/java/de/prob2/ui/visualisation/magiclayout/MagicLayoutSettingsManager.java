@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.json.JsonMetadata;
@@ -17,23 +18,23 @@ import de.prob2.ui.json.ObjectWithMetadata;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MagicLayoutSettingsManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MagicLayoutSettingsManager.class);
-	private static final String MAGIC_FILE_ENDING = "*.prob2magic";
+	private static final String MAGIC_FILE_EXTENSION = "prob2magic";
 
 	private final JsonManager<MagicLayoutSettings> jsonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 
 	@Inject
 	public MagicLayoutSettingsManager(JsonManager<MagicLayoutSettings> jsonManager, CurrentProject currentProject, StageManager stageManager,
-			ResourceBundle bundle) {
+			FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new JsonManager.Context<MagicLayoutSettings>(MagicLayoutSettings.class, "Magic Layout settings", 1) {
 			@Override
@@ -51,6 +52,7 @@ public class MagicLayoutSettingsManager {
 		});
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 	}
 
@@ -65,11 +67,8 @@ public class MagicLayoutSettingsManager {
 		}
 		fileChooser.setInitialDirectory(magicSettingsFolder.toFile());
 
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + MAGIC_FILE_ENDING.substring(1));
-		fileChooser.getExtensionFilters()
-				.add(new ExtensionFilter(String
-						.format(bundle.getString("common.fileChooser.fileTypes.proB2MagicSettings"), MAGIC_FILE_ENDING),
-						MAGIC_FILE_ENDING));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + MAGIC_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2MagicSettings", MAGIC_FILE_EXTENSION));
 		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
 
 		if (file != null) {
@@ -101,10 +100,7 @@ public class MagicLayoutSettingsManager {
 			magicSettingsFolder.toFile().mkdirs();
 		}
 		fileChooser.setInitialDirectory(magicSettingsFolder.toFile());
-		fileChooser.getExtensionFilters()
-				.add(new ExtensionFilter(String
-						.format(bundle.getString("common.fileChooser.fileTypes.proB2MagicSettings"), MAGIC_FILE_ENDING),
-						MAGIC_FILE_ENDING));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2MagicSettings", MAGIC_FILE_EXTENSION));
 		File file = fileChooser.showOpenDialog(stageManager.getCurrent());
 		if (file != null) {
 			try {

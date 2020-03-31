@@ -42,7 +42,6 @@ public class TraceFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
-	public static final String TRACE_FILE_PATTERN = "*." + TRACE_FILE_EXTENSION;
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	private final JsonManager<PersistentTrace> jsonManager;
@@ -165,10 +164,7 @@ public class TraceFileHandler {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(machine.getName() + "." + TRACE_FILE_EXTENSION);
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-			String.format(bundle.getString("common.fileChooser.fileTypes.proB2Trace"), TRACE_FILE_PATTERN),
-			TRACE_FILE_PATTERN
-		));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TRACE_FILE_EXTENSION));
 		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			save(trace, path);

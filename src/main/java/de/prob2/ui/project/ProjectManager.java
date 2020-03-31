@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -36,7 +37,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,22 +45,23 @@ import org.slf4j.LoggerFactory;
 public class ProjectManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
-	public static final String PROJECT_FILE_PATTERN = "*." + PROJECT_FILE_EXTENSION;
 
 	private final JsonManager<Project> jsonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 	
 	private final ObservableList<Path> recentProjects;
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(JsonManager<Project> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config) {
+	public ProjectManager(JsonManager<Project> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new ProjectJsonContext());
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 		
 		this.recentProjects = FXCollections.observableArrayList();
@@ -172,7 +173,7 @@ public class ProjectManager {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 				fileChooser.setInitialFileName(project.getName() + "." + PROJECT_FILE_EXTENSION);
-				fileChooser.getExtensionFilters().add(new ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), PROJECT_FILE_PATTERN), PROJECT_FILE_PATTERN));
+				fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", PROJECT_FILE_EXTENSION));
 				location = fileChooser.showSaveDialog(stageManager.getCurrent());
 				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
 			}

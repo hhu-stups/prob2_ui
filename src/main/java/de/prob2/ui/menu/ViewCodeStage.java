@@ -1,27 +1,5 @@
 package de.prob2.ui.menu;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.representation.AbstractModel;
-import de.prob.model.representation.CSPModel;
-import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextArea;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -30,7 +8,32 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.ResourceBundle;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.representation.AbstractModel;
+import de.prob.model.representation.CSPModel;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextArea;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 @FXMLInjected
@@ -48,22 +51,22 @@ public final class ViewCodeStage extends Stage {
 	
 	private final StageManager stageManager;
 	
+	private final FileChooserManager fileChooserManager;
+	
 	private final CurrentTrace currentTrace;
 
 	private final CurrentProject currentProject;
 	
-	private final ResourceBundle bundle;
-	
 	private final StringProperty code;
 	
 	@Inject
-	private ViewCodeStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	private ViewCodeStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final CurrentProject currentProject, final CurrentTrace currentTrace) {
 		super();
 		
 		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.bundle = bundle;
 		
 		this.code = new SimpleStringProperty(this, "code", null);
 		
@@ -120,8 +123,8 @@ public final class ViewCodeStage extends Stage {
 	private void saveAs() {
 		final FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(
-			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), "*.mch"),
-			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.all"), "*.*")
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.classicalB", "mch"),
+			fileChooserManager.getAllExtensionsFilter()
 		);
 		chooser.setInitialFileName(this.getTitle() + ".mch");
 		final File selected = chooser.showSaveDialog(this);

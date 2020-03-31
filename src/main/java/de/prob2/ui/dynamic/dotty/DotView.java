@@ -1,43 +1,5 @@
 package de.prob2.ui.dynamic.dotty;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import de.prob.animator.CommandInterruptedException;
-import de.prob.animator.command.ComposedCommand;
-import de.prob.animator.command.GetAllDotCommands;
-import de.prob.animator.command.GetDotForVisualizationCommand;
-import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.exception.ProBError;
-import de.prob.parser.BindingGenerator;
-import de.prob.prolog.term.PrologTerm;
-import de.prob.statespace.Trace;
-import de.prob2.ui.dynamic.DynamicCommandStage;
-import de.prob2.ui.dynamic.DynamicPreferencesStage;
-import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.fxml.FXML;
-import javafx.geometry.Orientation;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.layout.HBox;
-import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +18,48 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+
+import de.prob.animator.CommandInterruptedException;
+import de.prob.animator.command.ComposedCommand;
+import de.prob.animator.command.GetAllDotCommands;
+import de.prob.animator.command.GetDotForVisualizationCommand;
+import de.prob.animator.command.GetPreferenceCommand;
+import de.prob.animator.domainobjects.DynamicCommandItem;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
+import de.prob.parser.BindingGenerator;
+import de.prob.prolog.term.PrologTerm;
+import de.prob.statespace.Trace;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.DynamicCommandStage;
+import de.prob2.ui.dynamic.DynamicPreferencesStage;
+import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.fxml.FXML;
+import javafx.geometry.Orientation;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.layout.HBox;
+import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DotView extends DynamicCommandStage {
@@ -96,6 +100,8 @@ public class DotView extends DynamicCommandStage {
 	@FXML
 	private HelpButton helpButton;
 
+	private final FileChooserManager fileChooserManager;
+
 	private String dot;
 	private String dotEngine;
 	private ObjectProperty<Path> dotFilePath;
@@ -108,8 +114,11 @@ public class DotView extends DynamicCommandStage {
 
 	@Inject
 	public DotView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector) {
+			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector, final FileChooserManager fileChooserManager) {
 		super(stageManager, preferences, currentTrace, currentProject, bundle, injector);
+		
+		this.fileChooserManager = fileChooserManager;
+		
 		this.dot = null;
 		this.dotEngine = null;
 		this.dotFilePath = new SimpleObjectProperty<>(this, "dotFilePath", null);
@@ -267,10 +276,10 @@ public class DotView extends DynamicCommandStage {
 	@FXML
 	private void save() {
 		final FileChooser fileChooser = new FileChooser();
-		FileChooser.ExtensionFilter svgFilter = new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.svg"), "*.svg");
-		FileChooser.ExtensionFilter pngFilter = new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.png"), "*.png");
-		FileChooser.ExtensionFilter dotFilter = new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.dot"), "*.dot");
-		FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.pdf"), "*.pdf");
+		FileChooser.ExtensionFilter svgFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
+		FileChooser.ExtensionFilter pngFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png");
+		FileChooser.ExtensionFilter dotFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.dot", "dot");
+		FileChooser.ExtensionFilter pdfFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.pdf", "pdf");
 		fileChooser.getExtensionFilters().setAll(svgFilter, pngFilter, dotFilter, pdfFilter);
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
 		final File file = fileChooser.showSaveDialog(this.getScene().getWindow());

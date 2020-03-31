@@ -270,7 +270,7 @@ public class VisBStage extends Stage {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("visb.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("Visualisation File", "*.json")
+				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if(path != null) {
@@ -290,7 +290,7 @@ public class VisBStage extends Stage {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("visb.stage.filechooser.export.title"));
 		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("PNG-File", "*.png")
+				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
 		);
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if(path != null) {

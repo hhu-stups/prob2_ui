@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 
 import difflib.DiffUtils;
@@ -54,6 +55,7 @@ public class FullValueStage extends Stage {
 	@FXML private Button saveAsButton;
 	
 	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 	
 	private final StringProperty currentValue;
@@ -61,8 +63,9 @@ public class FullValueStage extends Stage {
 	private final BooleanProperty formattingEnabled;
 	
 	@Inject
-	public FullValueStage(final StageManager stageManager, final ResourceBundle bundle) {
+	public FullValueStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 		this.currentValue = new SimpleStringProperty(this, "currentValue", null);
 		this.previousValue = new SimpleStringProperty(this, "previousValue", null);
@@ -222,12 +225,12 @@ public class FullValueStage extends Stage {
 	private void saveAs() {
 		final FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(
-			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.text"), "*.txt"),
-			new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.all"), "*.*")
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.text", "txt"),
+			fileChooserManager.getAllExtensionsFilter()
 		);
 		final String defaultExtension;
 		if (diffTab.isSelected()) {
-			chooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.diff"), "*.diff"));
+			chooser.getExtensionFilters().add(0, fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.diff", "diff"));
 			defaultExtension = ".diff";
 		} else {
 			defaultExtension = ".txt";

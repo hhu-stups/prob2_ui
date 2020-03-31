@@ -1,7 +1,14 @@
 package de.prob2.ui.menu;
 
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.ResourceBundle;
+
+import javax.annotation.Nullable;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.codecentric.centerdevice.MenuToolkit;
 import de.codecentric.centerdevice.util.StageUtils;
 import de.prob2.ui.MainController;
@@ -11,18 +18,15 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.ResourceBundle;
 
 @FXMLInjected
 public class WindowMenu extends Menu {
@@ -97,7 +101,7 @@ public class WindowMenu extends Menu {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
 		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.fxml"), "*.fxml"));
+				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.fxml", "fxml"));
 		Path selectedFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PERSPECTIVES,
 				stageManager.getMainStage());
 		if (selectedFile != null) {
