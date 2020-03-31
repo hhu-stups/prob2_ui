@@ -269,7 +269,7 @@ public class FileChooserManager {
 	}
 
 	private boolean containsValidInitialDirectory(Kind kind) {
-		return initialDirectories.containsKey(kind) && Files.exists(initialDirectories.get(kind));
+		return kind != null && initialDirectories.containsKey(kind) && Files.exists(initialDirectories.get(kind));
 	}
 
 	private Path getInitialDirectory(Kind kind) {
@@ -277,7 +277,7 @@ public class FileChooserManager {
 	}
 
 	private void setInitialDirectory(Kind kind, Path dir) {
-		if (dir != null && Files.exists(dir)) {
+		if (kind != null && dir != null && Files.exists(dir)) {
 			initialDirectories.put(kind, dir);
 		}
 	}
