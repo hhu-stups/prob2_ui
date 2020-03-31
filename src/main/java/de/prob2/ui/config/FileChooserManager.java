@@ -155,7 +155,6 @@ public class FileChooserManager {
 		if (projects) {
 			allExts.add(ProjectManager.PROJECT_FILE_PATTERN);
 			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(String.format(bundle.getString("common.fileChooser.fileTypes.proB2Project"), ProjectManager.PROJECT_FILE_PATTERN), ProjectManager.PROJECT_FILE_PATTERN));
-			allExts.sort(String::compareTo);
 		}
 		
 		if (machines) {
