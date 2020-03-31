@@ -1,7 +1,6 @@
 package de.prob2.ui.dynamic.dotty;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -282,16 +281,16 @@ public class DotView extends DynamicCommandStage {
 		FileChooser.ExtensionFilter pdfFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.pdf", "pdf");
 		fileChooser.getExtensionFilters().setAll(svgFilter, pngFilter, dotFilter, pdfFilter);
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
-		final File file = fileChooser.showSaveDialog(this.getScene().getWindow());
-		if (file == null) {
+		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this.getScene().getWindow());
+		if (path == null) {
 			return;
 		}
 		FileChooser.ExtensionFilter selectedFilter = fileChooser.getSelectedExtensionFilter();
 		if(selectedFilter.equals(dotFilter)) {
-			saveDot(file);
+			saveDot(path);
 		} else {
 			TargetFormat format = getTargetFormat(selectedFilter, svgFilter, pngFilter, pdfFilter);
-			saveConverted(format, file);
+			saveConverted(format, path);
 		}
 	}
 
@@ -307,18 +306,18 @@ public class DotView extends DynamicCommandStage {
 		}
 	}
 
-	private void saveDot(File file) {
+	private void saveDot(final Path path) {
 		try {
 			byte[] fileContent = Files.readAllBytes(Paths.get(dotFilePath.get().toUri()));
-			Files.write(file.toPath(), fileContent);
+			Files.write(path, fileContent);
 		} catch (IOException e) {
 			LOGGER.error("Failed to save Dot", e);
 		}
 	}
 
-	private void saveConverted(TargetFormat format, File file) {
+	private void saveConverted(TargetFormat format, final Path path) {
 		try {
-			writeFileFromDot(format, dot, dotEngine, dotFilePath.get(), file.toPath());
+			writeFileFromDot(format, dot, dotEngine, dotFilePath.get(), path);
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}

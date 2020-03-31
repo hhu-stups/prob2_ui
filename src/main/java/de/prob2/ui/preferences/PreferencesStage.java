@@ -1,6 +1,7 @@
 package de.prob2.ui.preferences;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
@@ -15,6 +16,7 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.TabPersistenceHandler;
 import de.prob2.ui.persistence.UIState;
@@ -65,6 +67,7 @@ public final class PreferencesStage extends Stage {
 	@FXML private TabPane tabPane;
 
 	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;
@@ -77,6 +80,7 @@ public final class PreferencesStage extends Stage {
 	@Inject
 	private PreferencesStage(
 		final StageManager stageManager,
+		final FileChooserManager fileChooserManager,
 		final ResourceBundle bundle,
 		final ProjectManager projectManager,
 		final CurrentProject currentProject,
@@ -87,6 +91,7 @@ public final class PreferencesStage extends Stage {
 		final MachineLoader machineLoader
 	) {
 		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 		this.projectManager = projectManager;
 		this.currentProject = currentProject;
@@ -179,10 +184,10 @@ public final class PreferencesStage extends Stage {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.directoryChooser.selectLocation.title"));
 		dirChooser.setInitialDirectory(new File(defaultLocationField.getText()));
-		File file = dirChooser.showDialog(this.getOwner());
+		final Path path = fileChooserManager.showDirectoryChooser(dirChooser, null, this.getOwner());
 		
-		if (file != null) {
-			defaultLocationField.setText(file.getAbsolutePath());
+		if (path != null) {
+			defaultLocationField.setText(path.toString());
 		}
 	}
 

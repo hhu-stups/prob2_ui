@@ -1,8 +1,8 @@
 package de.prob2.ui.dynamic.table;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +30,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -41,7 +42,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,15 +172,15 @@ public class ExpressionTableView extends DynamicCommandStage {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv"));
 		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
-		File file = fileChooser.showSaveDialog(new Stage());
-		if(file == null || currentTable == null) {
+		Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this);
+		if(path == null || currentTable == null) {
 			return;
 		}
-		if(!file.getPath().endsWith(".csv")) {
-			file = new File(file.getPath() + ".csv");
+		if(!path.endsWith(".csv")) {
+			path = path.resolveSibling(path.getFileName() + ".csv");
 		}
 		try {
-			Files.write(file.toPath(), toCSV(currentTable.get()));
+			Files.write(path, toCSV(currentTable.get()));
 		} catch (IOException e) {
 			LOGGER.error("Saving as CSV failed", e);
 		}

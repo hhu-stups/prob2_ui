@@ -1,6 +1,5 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -69,11 +68,11 @@ public class MagicLayoutSettingsManager {
 
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + MAGIC_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2MagicSettings", MAGIC_FILE_EXTENSION));
-		File file = fileChooser.showSaveDialog(stageManager.getCurrent());
+		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, stageManager.getCurrent());
 
-		if (file != null) {
+		if (path != null) {
 			try {
-				this.jsonManager.writeToFile(file.toPath(), layoutSettings, this.jsonManager.defaultMetadataBuilder()
+				this.jsonManager.writeToFile(path, layoutSettings, this.jsonManager.defaultMetadataBuilder()
 					.withModelName(layoutSettings.getMachineName())
 					.build());
 			} catch (FileNotFoundException exc) {
@@ -101,13 +100,13 @@ public class MagicLayoutSettingsManager {
 		}
 		fileChooser.setInitialDirectory(magicSettingsFolder.toFile());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2MagicSettings", MAGIC_FILE_EXTENSION));
-		File file = fileChooser.showOpenDialog(stageManager.getCurrent());
-		if (file != null) {
+		final Path path = fileChooserManager.showOpenFileChooser(fileChooser, null, stageManager.getCurrent());
+		if (path != null) {
 			try {
-				return this.jsonManager.readFromFile(file.toPath()).getObject();
+				return this.jsonManager.readFromFile(path).getObject();
 			} catch (IOException e) {
 				LOGGER.warn("Failed to read magic layout settings file", e);
-				stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotReadFile.content", file);
+				stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotReadFile.content", path);
 			}
 		}
 		return null;

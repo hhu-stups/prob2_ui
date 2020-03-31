@@ -1,6 +1,5 @@
 package de.prob2.ui.plugin;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -199,7 +198,7 @@ public class ProBPluginManager {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle(bundle.getString("plugin.pluginMenu.directoryChooser.changePath.title"));
 		chooser.setInitialDirectory(getPluginDirectory().toFile());
-		File newPath = chooser.showDialog(stageManager.getCurrent());
+		final Path newPath = fileChooserManager.showDirectoryChooser(chooser, null, stageManager.getCurrent());
 		if (newPath != null) {
 			//unload all plugins
 			List<PluginWrapper> loadedPlugins = pluginManager.getPlugins();
@@ -207,7 +206,7 @@ public class ProBPluginManager {
 				pluginManager.unloadPlugin(plugin.getPluginId());
 			}
 			//set new path
-			pluginDirectory = newPath.toPath();
+			pluginDirectory = newPath;
 			//initialize the PluginManager using the new path
 			pluginManager = new ProBJarPluginManager();
 			//load an start the plugins

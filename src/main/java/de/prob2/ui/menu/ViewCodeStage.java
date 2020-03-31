@@ -1,13 +1,10 @@
 package de.prob2.ui.menu;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -127,15 +124,12 @@ public final class ViewCodeStage extends Stage {
 			fileChooserManager.getAllExtensionsFilter()
 		);
 		chooser.setInitialFileName(this.getTitle() + ".mch");
-		final File selected = chooser.showSaveDialog(this);
+		final Path selected = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, this);
 		if (selected == null) {
 			return;
 		}
 		
-		try (
-			final OutputStream os = new FileOutputStream(selected);
-			final Writer out = new OutputStreamWriter(os, StandardCharsets.UTF_8)
-		) {
+		try (final Writer out = Files.newBufferedWriter(selected)) {
 			out.write(this.getCode());
 		} catch (FileNotFoundException e) {
 			LOGGER.error("Could not open file for writing", e);

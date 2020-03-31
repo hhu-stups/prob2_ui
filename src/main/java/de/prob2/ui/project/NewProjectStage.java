@@ -1,6 +1,5 @@
 package de.prob2.ui.project;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -8,6 +7,7 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
@@ -32,11 +32,13 @@ public class NewProjectStage extends Stage {
 	@FXML
 	private Label errorExplanationLabel;
 
+	private final FileChooserManager fileChooserManager;
 	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
 
 	@Inject
-	private NewProjectStage(CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+	private NewProjectStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+		this.fileChooserManager = fileChooserManager;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -53,9 +55,9 @@ public class NewProjectStage extends Stage {
 	void selectLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 		dirChooser.setTitle(bundle.getString("project.newProjectStage.directoryChooser.selectLocation.title"));
-		File file = dirChooser.showDialog(this.getOwner());
-		if (file != null) {
-			locationField.setText(file.getAbsolutePath());
+		final Path path = fileChooserManager.showDirectoryChooser(dirChooser, null, this.getOwner());
+		if (path != null) {
+			locationField.setText(path.toString());
 		}
 	}
 
