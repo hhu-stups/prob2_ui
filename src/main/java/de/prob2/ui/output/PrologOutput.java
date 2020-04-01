@@ -46,6 +46,7 @@ public class PrologOutput extends TextFlow {
 
 		private Text handleOutput(String s) {
 			Text output = new Text();
+			// default settings
 			Paint fontColor = Color.BLACK;
 			boolean underline = false;
 			boolean visible = true;
@@ -57,27 +58,38 @@ public class PrologOutput extends TextFlow {
 				int indexOfANSICodeEnd = s.indexOf('!');
 				message = s.substring(indexOfANSICodeEnd + 2);
 				for (String str : s.substring(1, indexOfANSICodeEnd).split("\\u001b")) {
-					// setting supported font color and attributes for output and removing remaining ANSI code from string
-					if (str.equals("[1m")) {
-						weight = FontWeight.BOLD;
-					} else if (str.equals("[4m")) {
-						underline = true;
-					} else if (str.equals("[8m")) {
-						visible = false;
-					} else if (str.equals("[31m")) {
-						fontColor = Color.RED;
-					} else if (str.equals("[32m")) {
-						fontColor = Color.GREEN;
-					} else if (str.equals("[33m")) {
-						fontColor = Color.YELLOW;
-					} else if (str.equals("[34m")) {
-						fontColor = Color.BLUE;
-					} else if (str.equals("[35m")) {
-						fontColor = Color.MAGENTA;
-					} else if (str.equals("[36m")) {
-						fontColor = Color.CYAN;
-					} else if (str.equals("[37m")) {
-						fontColor = Color.WHITE;
+					// setting supported font color and attributes for output
+					switch (str) {
+						case "[1m":
+							weight = FontWeight.BOLD;
+							break;
+						case "[4m":
+							underline = true;
+							break;
+						case "[8m":
+							visible = false;
+							break;
+						case "[31m":
+							fontColor = Color.RED;
+							break;
+						case "[32m":
+							fontColor = Color.GREEN;
+							break;
+						case "[33m":
+							fontColor = Color.YELLOW;
+							break;
+						case "[34m":
+							fontColor = Color.BLUE;
+							break;
+						case "[35m":
+							fontColor = Color.MAGENTA;
+							break;
+						case "[36m":
+							fontColor = Color.CYAN;
+							break;
+						case "[37m":
+							fontColor = Color.WHITE;
+							break;
 					}
 				}
 			}

@@ -1,4 +1,4 @@
-package de.prob2.ui.animation.tracereplay;
+package de.prob2.ui.tracediff;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -20,11 +20,11 @@ public class TraceDiffStage extends Stage {
 		this.setScene(scene);
 	}
 
-	void setLists(Trace replayed, PersistentTrace persistent, Trace current) {
+	public void setLists(Trace replayed, PersistentTrace persistent, Trace current) {
 		traceDiff.setLists(replayed, persistent, current);
 	}
 
-	void setAlert(Alert alert) {
+	public void setAlert(Alert alert) {
 		traceDiff.setAlert(alert);
 	}
 }

@@ -26,6 +26,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.tracediff.TraceDiffStage;
 import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
@@ -134,7 +135,7 @@ public class TraceChecker {
 		}
 	}
 
-	void handleAlert(Alert alert, Trace copyTrace, PersistentTrace persistentTrace, ButtonType traceDiffButton) {
+	public void handleAlert(Alert alert, Trace copyTrace, PersistentTrace persistentTrace, ButtonType traceDiffButton) {
 		injector.getInstance(TraceDiffStage.class).close();
 		Optional<ButtonType> type = alert.showAndWait();
 		if (type.get() == ButtonType.YES) {
