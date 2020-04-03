@@ -523,6 +523,14 @@
 	-fx-font-style: italic
 }
 
+.editor .editor_xtl_functor {
+	-fx-fill:black;
+}
+
+.editor .editor_xtl_variable {
+	-fx-fill:darkviolet;
+}
+
 .editor .error {
 	-rtfx-underline-color: red;
 	-rtfx-underline-width: 2px;

@@ -141,6 +141,7 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.ModelFactory;
+import de.prob.scripting.XTLFactory;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -155,6 +156,7 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,253 +168,373 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @FXMLInjected
 public class BEditor extends CodeArea {
-	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
 
-	private ExecutorService executor;
+    private ExecutorService executor;
 
-	private static final Map<Class<? extends Token>, String> syntaxClasses = new HashMap<>();
+    private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();
 
-	static {
-		addTokens("editor_identifier", TIdentifierLiteral.class);
-		addTokens("editor_assignments", TAssign.class, TOutputParameters.class,
-				TDoubleVerticalBar.class, TAssert.class,
-				TClosure.class, TClosure1.class, TDirectProduct.class, TDivision.class,
-				TEmptySet.class, TDoubleColon.class, TImplies.class,  TLogicalOr.class,
-				TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
-				TTotalBijection.class, TTotalFunction.class, TTotalInjection.class,
-				TTotalRelation.class, TTotalSurjection.class, TFalse.class, TTrue.class,
-				TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class,
-				TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
-				TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
-				TIseq1.class, TNot.class);
-		addTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class);
-		addTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
-				TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class,
-				TNotEqual.class, TGreater.class, TLess.class);
-		addTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
-				TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class);
-		addTokens("editor_string", TStringLiteral.class);
-		addTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
-				TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
-				TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-				TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
-		addTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
-				TVar.class, TIn.class, TAny.class, TWhile.class,
-				TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
-				TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
-				TChoice.class, TWhere.class, TOf.class, TEnd.class);
-		addTokens("editor_keyword", TMachine.class, TOperations.class, TRefinement.class, TImplementation.class,
-				TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
-				TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
-				TModel.class, TInvariant.class, TConcreteVariables.class,
-				TAbstractVariables.class, TVariables.class, TProperties.class,
-				TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
-				TConstraints.class, TSets.class, TDefinitions.class);
-		addTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
-				TLineComment.class);
-	}
-	
-	private final FontSize fontSize;
-	
-	private final CurrentProject currentProject;
+    private static final LinkedHashMap<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
 
-	private final ResourceBundle bundle;
+    private static class Range implements Comparable<Range> {
+        private String key;
+        private int start;
+        private int end;
 
-	private final ObservableList<ErrorItem.Location> errorLocations;
+        public Range(String key, int start, int end) {
+            this.key = key;
+            this.start = start;
+            this.end = end;
+        }
 
-	@Inject
-	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject) {
-		this.fontSize = fontSize;
-		this.currentProject = currentProject;
-		this.bundle = bundle;
-		this.errorLocations = FXCollections.observableArrayList();
-		initialize();
-		initializeContextMenu();
-	}
+        public String getKey() {
+            return key;
+        }
 
-	private void initializeContextMenu() {
-		final ContextMenu contextMenu = new ContextMenu();
-		
-		final MenuItem undoItem = new MenuItem(bundle.getString("common.contextMenu.undo"));
-		undoItem.setOnAction(e -> this.getUndoManager().undo());
-		contextMenu.getItems().add(undoItem);
-		
-		final MenuItem redoItem = new MenuItem(bundle.getString("common.contextMenu.redo"));
-		redoItem.setOnAction(e -> this.getUndoManager().redo());
-		contextMenu.getItems().add(redoItem);
-		
-		final MenuItem cutItem = new MenuItem(bundle.getString("common.contextMenu.cut"));
-		cutItem.setOnAction(e -> this.cut());
-		contextMenu.getItems().add(cutItem);
-		
-		final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
-		copyItem.setOnAction(e -> this.copy());
-		contextMenu.getItems().add(copyItem);
-		
-		final MenuItem pasteItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
-		pasteItem.setOnAction(e -> this.paste());
-		contextMenu.getItems().add(pasteItem);
-		
-		final MenuItem deleteItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
-		deleteItem.setOnAction(e -> this.deleteText(this.getSelection()));
-		contextMenu.getItems().add(deleteItem);
-		
-		final MenuItem selectAllItem = new MenuItem(bundle.getString("common.contextMenu.selectAll"));
-		selectAllItem.setOnAction(e -> this.selectAll());
-		contextMenu.getItems().add(selectAllItem);
-		
-		this.setContextMenu(contextMenu);
-	}
-	
-	private void initialize() {
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			this.clear(); 
-			this.appendText(bundle.getString("beditor.hint"));
-		});
-		this.setParagraphGraphicFactory(LineNumberFactory.get(this));
-		this.richChanges()
-			.filter(ch -> !ch.isPlainTextIdentity())
-			.successionEnds(Duration.ofMillis(100))
-			.supplyTask(this::computeHighlightingAsync)
-			.awaitLatest(this.richChanges())
-			.filterMap(t -> {
-				if (t.isSuccess()) {
-					return Optional.of(t.get());
-				} else {
-					LOGGER.info("Highlighting failed", t.getFailure());
-					return Optional.empty();
-				}
-			}).subscribe(highlighting -> {
-				this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
-				this.applyHighlighting(highlighting);
-			});
-		this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>)change ->
-			this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
-		);
+        public int getStart() {
+            return start;
+        }
 
-		fontSize.fontSizeProperty().addListener((observable, from, to) ->
-			this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
-		);
-	}
+        public int getEnd() {
+            return end;
+        }
 
-	public void startHighlighting() {
-		if (this.executor == null) {
-			this.executor = Executors.newSingleThreadExecutor();
-		}
-	}
+        @Override
+        public int compareTo(@NotNull Range other) {
+            return this.start - other.start;
+        }
+    }
 
-	public void stopHighlighting() {
-		if(this.executor != null) {
-			this.executor.shutdown();
-			this.executor = null;   
-		}
-	}
+    static {
+        //B Tokens
+        addBTokens("editor_identifier", TIdentifierLiteral.class);
+        addBTokens("editor_assignments", TAssign.class, TOutputParameters.class,
+                TDoubleVerticalBar.class, TAssert.class,
+                TClosure.class, TClosure1.class, TDirectProduct.class, TDivision.class,
+                TEmptySet.class, TDoubleColon.class, TImplies.class, TLogicalOr.class,
+                TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
+                TTotalBijection.class, TTotalFunction.class, TTotalInjection.class,
+                TTotalRelation.class, TTotalSurjection.class, TFalse.class, TTrue.class,
+                TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class,
+                TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
+                TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
+                TIseq1.class, TNot.class);
+        addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class);
+        addBTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
+                TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class,
+                TNotEqual.class, TGreater.class, TLess.class);
+        addBTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
+                TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class);
+        addBTokens("editor_string", TStringLiteral.class);
+        addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
+                TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
+                TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
+                TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
+        addBTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
+                TVar.class, TIn.class, TAny.class, TWhile.class,
+                TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
+                TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
+                TChoice.class, TWhere.class, TOf.class, TEnd.class);
+        addBTokens("editor_keyword", TMachine.class, TOperations.class, TRefinement.class, TImplementation.class,
+                TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
+                TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
+                TModel.class, TInvariant.class, TConcreteVariables.class,
+                TAbstractVariables.class, TVariables.class, TProperties.class,
+                TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
+                TConstraints.class, TSets.class, TDefinitions.class);
+        addBTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
+                TLineComment.class);
 
-	@SafeVarargs
-	private static void addTokens(String syntaxclass, Class<? extends Token>... tokens) {
-		for (Class<? extends Token> c : tokens) {
-			syntaxClasses.put(c, syntaxclass);
-		}
-	}
+        //XTL Regex
+        syntaxClassesForXTL.put("(start|trans|prop|heuristic_function_result|heuristic_function_active|animation_(function_result|image|image_right_click_transition|image_click_transition))", "editor_keyword");
+        syntaxClassesForXTL.put("(true|fail|atomic|nonvar|var|functor|op|is|ground|member|append|length)", "editor_types");
+        syntaxClassesForXTL.put("((\"(.*)*\")|(\'(.*)*\'))", "editor_string");
+        syntaxClassesForXTL.put("[A-Z][_a-zA-Z0-9]*", "editor_xtl_variable");
+        syntaxClassesForXTL.put("[_a-z][_a-zA-Z0-9]*", "editor_xtl_functor");
+        syntaxClassesForXTL.put(":-|!|-->|;|\\.", "editor_assignments");
+        syntaxClassesForXTL.put("%(.*)", "editor_comment");
+        syntaxClassesForXTL.put("( |\t|\r|\n)+", "editor_ignored");
+    }
 
-	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
-		final Collection<T> ret = new ArrayList<>(a);
-		ret.addAll(b);
-		return ret;
-	}
+    private final FontSize fontSize;
 
-	private StyleSpans<Collection<String>> addErrorHighlighting(final StyleSpans<Collection<String>> highlighting) {
-		StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
-		for (final ErrorItem.Location location : this.getErrorLocations()) {
-			final int startParagraph = location.getStartLine() - 1;
-			final int endParagraph = location.getEndLine() - 1;
-			final int startIndex = this.getAbsolutePosition(startParagraph, location.getStartColumn());
-			final int endIndex;
-			if (startParagraph == endParagraph) {
-				final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
-				endIndex = this.getAbsolutePosition(startParagraph, displayedEndColumn);
-			} else {
-				endIndex = this.getAbsolutePosition(endParagraph, location.getEndColumn());
-			}
-			highlightingWithErrors = highlightingWithErrors.overlay(
-				new StyleSpansBuilder<Collection<String>>()
-					.add(Collections.emptyList(), startIndex)
-					.add(Collections.singletonList("error"), endIndex-startIndex)
-					.create(),
-				BEditor::combineCollections
-			);
-		}
-		return highlightingWithErrors;
-	}
+    private final CurrentProject currentProject;
 
-	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
-		this.setStyleSpans(0, addErrorHighlighting(highlighting));
-	}
+    private final ResourceBundle bundle;
 
-	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
-		final String text = this.getText();
-		if (executor == null) {
-			// No executor - run and return a dummy task that does no highlighting
-			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-				@Override
-				protected StyleSpans<Collection<String>> call() {
-					return StyleSpans.singleton(Collections.emptySet(), text.length());
-				}
-			};
-			task.run();
-			return task;
-		} else {
-			// Executor exists - do proper highlighting
-			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-				@Override
-				protected StyleSpans<Collection<String>> call() {
-					return computeHighlighting(text, currentProject.getCurrentMachine());
-				}
-			};
-			executor.execute(task);
-			return task;
-		}
-	}
+    private final ObservableList<ErrorItem.Location> errorLocations;
 
-	private static StyleSpans<Collection<String>> computeHighlighting(String text, Machine machine) {
-		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
-		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-		if(machine == null) {
-			//Prompt text is a comment text
-			return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
-		}
-		Class<? extends ModelFactory> modelFactoryClass = machine.getModelFactoryClass();
-		if(modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
-			try {
-				Token t;
-				do {
-					t = lexer.next();
-					String string = syntaxClasses.get(t.getClass());
-					spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
-				} while (!(t instanceof EOF));
-			} catch (LexerException | IOException e) {
-				LOGGER.info("Failed to lex", e);
-			}
-			return spansBuilder.create();
-		} else {
-			//Do not highlight for languages other than B and EventB
-			return StyleSpans.singleton(Collections.emptySet(), text.length());
-		}
-	}
-	
-	public void clearHistory() {
-		this.getUndoManager().forgetHistory();
-	}
-	
-	public ObservableList<ErrorItem.Location> getErrorLocations() {
-		return this.errorLocations;
-	}
+    @Inject
+    private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject) {
+        this.fontSize = fontSize;
+        this.currentProject = currentProject;
+        this.bundle = bundle;
+        this.errorLocations = FXCollections.observableArrayList();
+        initialize();
+        initializeContextMenu();
+    }
+
+    private void initializeContextMenu() {
+        final ContextMenu contextMenu = new ContextMenu();
+
+        final MenuItem undoItem = new MenuItem(bundle.getString("common.contextMenu.undo"));
+        undoItem.setOnAction(e -> this.getUndoManager().undo());
+        contextMenu.getItems().add(undoItem);
+
+        final MenuItem redoItem = new MenuItem(bundle.getString("common.contextMenu.redo"));
+        redoItem.setOnAction(e -> this.getUndoManager().redo());
+        contextMenu.getItems().add(redoItem);
+
+        final MenuItem cutItem = new MenuItem(bundle.getString("common.contextMenu.cut"));
+        cutItem.setOnAction(e -> this.cut());
+        contextMenu.getItems().add(cutItem);
+
+        final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
+        copyItem.setOnAction(e -> this.copy());
+        contextMenu.getItems().add(copyItem);
+
+        final MenuItem pasteItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
+        pasteItem.setOnAction(e -> this.paste());
+        contextMenu.getItems().add(pasteItem);
+
+        final MenuItem deleteItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
+        deleteItem.setOnAction(e -> this.deleteText(this.getSelection()));
+        contextMenu.getItems().add(deleteItem);
+
+        final MenuItem selectAllItem = new MenuItem(bundle.getString("common.contextMenu.selectAll"));
+        selectAllItem.setOnAction(e -> this.selectAll());
+        contextMenu.getItems().add(selectAllItem);
+
+        this.setContextMenu(contextMenu);
+    }
+
+    private void initialize() {
+        currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+            this.clear();
+            this.appendText(bundle.getString("beditor.hint"));
+        });
+        this.setParagraphGraphicFactory(LineNumberFactory.get(this));
+        this.richChanges()
+                .filter(ch -> !ch.isPlainTextIdentity())
+                .successionEnds(Duration.ofMillis(100))
+                .supplyTask(this::computeHighlightingAsync)
+                .awaitLatest(this.richChanges())
+                .filterMap(t -> {
+                    if (t.isSuccess()) {
+                        return Optional.of(t.get());
+                    } else {
+                        LOGGER.info("Highlighting failed", t.getFailure());
+                        return Optional.empty();
+                    }
+                }).subscribe(highlighting -> {
+            this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
+            this.applyHighlighting(highlighting);
+        });
+        this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>) change ->
+                this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
+        );
+
+        fontSize.fontSizeProperty().addListener((observable, from, to) ->
+                this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
+        );
+    }
+
+    public void startHighlighting() {
+        if (this.executor == null) {
+            this.executor = Executors.newSingleThreadExecutor();
+        }
+    }
+
+    public void stopHighlighting() {
+        if (this.executor != null) {
+            this.executor.shutdown();
+            this.executor = null;
+        }
+    }
+
+    @SafeVarargs
+    private static void addBTokens(String syntaxclass, Class<? extends Token>... tokens) {
+        for (Class<? extends Token> c : tokens) {
+            syntaxClassesForB.put(c, syntaxclass);
+        }
+    }
+
+    private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
+        final Collection<T> ret = new ArrayList<>(a);
+        ret.addAll(b);
+        return ret;
+    }
+
+    private StyleSpans<Collection<String>> addErrorHighlighting(final StyleSpans<Collection<String>> highlighting) {
+        StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
+        for (final ErrorItem.Location location : this.getErrorLocations()) {
+            final int startParagraph = location.getStartLine() - 1;
+            final int endParagraph = location.getEndLine() - 1;
+            final int startIndex = this.getAbsolutePosition(startParagraph, location.getStartColumn());
+            final int endIndex;
+            if (startParagraph == endParagraph) {
+                final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
+                endIndex = this.getAbsolutePosition(startParagraph, displayedEndColumn);
+            } else {
+                endIndex = this.getAbsolutePosition(endParagraph, location.getEndColumn());
+            }
+            highlightingWithErrors = highlightingWithErrors.overlay(
+                    new StyleSpansBuilder<Collection<String>>()
+                            .add(Collections.emptyList(), startIndex)
+                            .add(Collections.singletonList("error"), endIndex - startIndex)
+                            .create(),
+                    BEditor::combineCollections
+            );
+        }
+        return highlightingWithErrors;
+    }
+
+    private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
+        this.setStyleSpans(0, addErrorHighlighting(highlighting));
+    }
+
+    private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
+        final String text = this.getText();
+        if (executor == null) {
+            // No executor - run and return a dummy task that does no highlighting
+            final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+                @Override
+                protected StyleSpans<Collection<String>> call() {
+                    return StyleSpans.singleton(Collections.emptySet(), text.length());
+                }
+            };
+            task.run();
+            return task;
+        } else {
+            // Executor exists - do proper highlighting
+            final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+                @Override
+                protected StyleSpans<Collection<String>> call() {
+                    return computeHighlighting(text, currentProject.getCurrentMachine());
+                }
+            };
+            executor.execute(task);
+            return task;
+        }
+    }
+
+    private static StyleSpans<Collection<String>> computeHighlighting(String text, Machine machine) {
+
+        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+        if (machine == null) {
+            //Prompt text is a comment text
+            return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
+        }
+        Class<? extends ModelFactory> modelFactoryClass = machine.getModelFactoryClass();
+        if (modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
+            return computeBHighlighting(text);
+        } else if (modelFactoryClass == XTLFactory.class) {
+            return computeXTLHighlighting(text);
+        } else {
+            //Do not highlight for languages other than B and EventB
+            return StyleSpans.singleton(Collections.emptySet(), text.length());
+        }
+    }
+
+    private static StyleSpans<Collection<String>> computeBHighlighting(String text) {
+        BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
+        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+        try {
+            Token t;
+            do {
+                t = lexer.next();
+                String string = syntaxClassesForB.get(t.getClass());
+                spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
+            } while (!(t instanceof EOF));
+        } catch (LexerException | IOException e) {
+            LOGGER.info("Failed to lex", e);
+        }
+        return spansBuilder.create();
+    }
+
+    private static StyleSpans<Collection<String>> computeXTLHighlighting(String text) {
+        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+        LinkedList<Range> range = new LinkedList<>();
+
+
+        // Extract ranges
+        for (String key : syntaxClassesForXTL.keySet()) {
+            Pattern pattern = Pattern.compile(key);
+            Matcher matcher = pattern.matcher(text);
+            while (matcher.find()) {
+                range.add(new Range(key, matcher.start(), matcher.end()));
+            }
+        }
+        Collections.sort(range);
+
+        // Longest match
+        LinkedList<Range> rangeWithLongestMatch = new LinkedList<>();
+        int i = 0;
+        while (i < range.size()) {
+            int j = i + 1;
+            int longestIndex = i;
+            boolean finished = false;
+            while (!finished) {
+                if (j == range.size()) {
+                    finished = true;
+                } else {
+                    Range current = range.get(longestIndex);
+                    Range next = range.get(j);
+                    if (current.start != next.start) {
+                        finished = true;
+                    } else {
+                        longestIndex = next.end > current.end ? j : longestIndex;
+                        j++;
+                    }
+                }
+            }
+            i = j;
+            rangeWithLongestMatch.add(range.get(longestIndex));
+        }
+
+
+        // Fill in spans
+        String currentText = text;
+        int pos = 0;
+        while (!currentText.isEmpty()) {
+            Range first = rangeWithLongestMatch.getFirst();
+            if (pos == first.getStart()) {
+                int length = first.end - first.start;
+                spansBuilder.add(Collections.singleton(syntaxClassesForXTL.get(first.key)), length);
+                pos = first.end;
+                currentText = currentText.substring(length);
+                rangeWithLongestMatch.removeFirst();
+            } else if (pos > first.getStart()) {
+                rangeWithLongestMatch.removeFirst();
+            } else {
+                int length = first.start - pos;
+                spansBuilder.add(Collections.singleton("ignored"), length);
+                pos = first.start;
+                currentText = currentText.substring(length);
+            }
+        }
+
+
+        return spansBuilder.create();
+    }
+
+    public void clearHistory() {
+        this.getUndoManager().forgetHistory();
+    }
+
+    public ObservableList<ErrorItem.Location> getErrorLocations() {
+        return this.errorLocations;
+    }
 }
