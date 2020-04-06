@@ -258,8 +258,8 @@ public class BEditor extends CodeArea {
                 TLineComment.class);
 
         //XTL Regex
-        syntaxClassesForXTL.put("(start|trans|prop|heuristic_function_result|heuristic_function_active|animation_(function_result|image|image_right_click_transition|image_click_transition))", "editor_keyword");
-        syntaxClassesForXTL.put("(true|fail|atomic|nonvar|var|functor|op|is|ground|member|append|length)", "editor_types");
+        syntaxClassesForXTL.put("(start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(function_result|image|image_right_click_transition|image_click_transition))", "editor_keyword");
+        syntaxClassesForXTL.put("(true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth|nth1|nth0|perm|perm2|permutation|same_length|add_error|print|write|sort)", "editor_types");
         syntaxClassesForXTL.put("((\"(.*)*\")|(\'(.*)*\'))", "editor_string");
         syntaxClassesForXTL.put("[A-Z][_a-zA-Z0-9]*", "editor_xtl_variable");
         syntaxClassesForXTL.put("[_a-z][_a-zA-Z0-9]*", "editor_xtl_functor");
