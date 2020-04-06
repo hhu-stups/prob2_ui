@@ -141,6 +141,7 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.ModelFactory;
+import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
@@ -187,6 +188,8 @@ public class BEditor extends CodeArea {
     private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();
 
     private static final LinkedHashMap<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
+
+    private static final LinkedHashMap<String, String> syntaxClassesForTLA = new LinkedHashMap<>();
 
     private static class Range implements Comparable<Range> {
         private String key;
@@ -267,6 +270,17 @@ public class BEditor extends CodeArea {
         //The + in (.)+, (\n)+ and (\r)+ avoids possible StackOverflowError
         syntaxClassesForXTL.put("(%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
         syntaxClassesForXTL.put("( |\t|\r|\n)+", "editor_ignored");
+
+        //TLA Regex
+        syntaxClassesForTLA.put("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLE|VARIABLES|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)", "editor_keyword");
+        syntaxClassesForTLA.put("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)", "editor_ctrlkeyword");
+        syntaxClassesForTLA.put("(Next|Init|Spec|Inv)", "editor_types");
+        syntaxClassesForTLA.put("\\\\\\*[^\n\r]*", "editor_comment");
+        syntaxClassesForTLA.put("\\(\\*(.|[\n\r]*)*\\*\\)", "editor_comment");
+        syntaxClassesForTLA.put("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|/|Int|Nat", "editor_arithmetic");
+        syntaxClassesForTLA.put("<=>|=>|<<|>>|!|#|/=|~|<>|->|->|~\\\\|\"|\\[\\]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\", "editor_logical");
+        syntaxClassesForTLA.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
+        syntaxClassesForTLA.put("( |\t|\r|\n)+", "editor_ignored");
     }
 
     private final FontSize fontSize;
@@ -442,7 +456,9 @@ public class BEditor extends CodeArea {
         if (modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
             return computeBHighlighting(text);
         } else if (modelFactoryClass == XTLFactory.class) {
-            return computeXTLHighlighting(text);
+            return computeHighlighting(syntaxClassesForXTL, text);
+        } else if (modelFactoryClass == TLAFactory.class) {
+            return computeHighlighting(syntaxClassesForTLA, text);
         } else {
             //Do not highlight for languages other than B and EventB
             return StyleSpans.singleton(Collections.emptySet(), text.length());
@@ -465,13 +481,13 @@ public class BEditor extends CodeArea {
         return spansBuilder.create();
     }
 
-    private static StyleSpans<Collection<String>> computeXTLHighlighting(String text) {
+    private static StyleSpans<Collection<String>> computeHighlighting(Map<String, String> syntaxClasses, String text) {
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
         LinkedList<Range> range = new LinkedList<>();
 
 
         // Extract ranges
-        for (String key : syntaxClassesForXTL.keySet()) {
+        for (String key : syntaxClasses.keySet()) {
             Pattern pattern = Pattern.compile(key);
             Matcher matcher = pattern.matcher(text);
             while (matcher.find()) {
@@ -509,11 +525,11 @@ public class BEditor extends CodeArea {
         // Fill in spans
         String currentText = text;
         int pos = 0;
-        while (!currentText.isEmpty()) {
+        while (!currentText.isEmpty() && !rangeWithLongestMatch.isEmpty()) {
             Range first = rangeWithLongestMatch.getFirst();
             if (pos == first.getStart()) {
                 int length = first.end - first.start;
-                spansBuilder.add(Collections.singleton(syntaxClassesForXTL.get(first.key)), length);
+                spansBuilder.add(Collections.singleton(syntaxClasses.get(first.key)), length);
                 pos = first.end;
                 currentText = currentText.substring(length);
                 rangeWithLongestMatch.removeFirst();
@@ -526,8 +542,7 @@ public class BEditor extends CodeArea {
                 currentText = currentText.substring(length);
             }
         }
-
-
+        
         return spansBuilder.create();
     }
 
