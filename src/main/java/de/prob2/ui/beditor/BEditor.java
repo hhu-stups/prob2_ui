@@ -138,6 +138,7 @@ import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
 import de.be4.classicalb.core.parser.node.Token;
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
@@ -193,6 +194,8 @@ public class BEditor extends CodeArea {
     private static final LinkedHashMap<String, String> syntaxClassesForTLA = new LinkedHashMap<>();
 
     private static final LinkedHashMap<String, String> syntaxClassesForCSP = new LinkedHashMap<>();
+
+    private static final LinkedHashMap<String, String> syntaxClassesForAlloy = new LinkedHashMap<>();
 
     private static class Range implements Comparable<Range> {
         private String key;
@@ -295,6 +298,11 @@ public class BEditor extends CodeArea {
         syntaxClassesForCSP.put("(\\{-(.|[\n\r]*)*-\\})|(--(.*))", "editor_comment");
         syntaxClassesForCSP.put("( |\t|\r|\n)+", "editor_ignored");
 
+        //Alloy Regex
+        syntaxClassesForAlloy.put("module|sig|fact|extends|run|abstract|open|fun|pred|check|assert|plus|minus|mul|div|rem|sum", "editor_keyword");
+        syntaxClassesForAlloy.put("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|\\~|->|&|\\+|-|=|\\#", "editor_types");
+        syntaxClassesForAlloy.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
+        syntaxClassesForAlloy.put("(//[^\n\r]*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
     }
 
     private final FontSize fontSize;
@@ -475,6 +483,8 @@ public class BEditor extends CodeArea {
             return computeHighlighting(syntaxClassesForTLA, text);
         } else if (modelFactoryClass == CSPFactory.class) {
             return computeHighlighting(syntaxClassesForCSP, text);
+        } else if (modelFactoryClass == AlloyFactory.class) {
+            return computeHighlighting(syntaxClassesForAlloy, text);
         } else {
             //Do not highlight for languages other than B and EventB
             return StyleSpans.singleton(Collections.emptySet(), text.length());
