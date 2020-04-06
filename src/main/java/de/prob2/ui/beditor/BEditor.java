@@ -138,6 +138,7 @@ import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
 import de.be4.classicalb.core.parser.node.Token;
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.scripting.CSPFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.ModelFactory;
@@ -190,6 +191,8 @@ public class BEditor extends CodeArea {
     private static final LinkedHashMap<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
 
     private static final LinkedHashMap<String, String> syntaxClassesForTLA = new LinkedHashMap<>();
+
+    private static final LinkedHashMap<String, String> syntaxClassesForCSP = new LinkedHashMap<>();
 
     private static class Range implements Comparable<Range> {
         private String key;
@@ -275,12 +278,23 @@ public class BEditor extends CodeArea {
         syntaxClassesForTLA.put("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLE|VARIABLES|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)", "editor_keyword");
         syntaxClassesForTLA.put("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)", "editor_ctrlkeyword");
         syntaxClassesForTLA.put("(Next|Init|Spec|Inv)", "editor_types");
-        syntaxClassesForTLA.put("\\\\\\*[^\n\r]*", "editor_comment");
-        syntaxClassesForTLA.put("\\(\\*(.|[\n\r]*)*\\*\\)", "editor_comment");
+        syntaxClassesForTLA.put("(\\\\\\*[^\n\r]*)|(\\(\\*(.|[\n\r]*)*\\*\\))", "editor_comment");
         syntaxClassesForTLA.put("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|/|Int|Nat", "editor_arithmetic");
         syntaxClassesForTLA.put("<=>|=>|<<|>>|!|#|/=|~|<>|->|->|~\\\\|\"|\\[\\]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\", "editor_logical");
         syntaxClassesForTLA.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
         syntaxClassesForTLA.put("( |\t|\r|\n)+", "editor_ignored");
+
+        //CSP Regex
+        syntaxClassesForCSP.put("if|then|else|@@|let|within|\\{|\\}|<->|<-|\\[\\||\\|\\]|\\[|\\]|\\\\", "editor_keyword");
+        syntaxClassesForCSP.put("!|\\?|->|\\[\\]|\\|~\\||\\|\\|\\||;|STOP|SKIP|CHAOS|/\\|\\[>|@", "editor_types");
+        syntaxClassesForCSP.put("agent|MAIN|channel|datatype|subtype|nametype|machine|Events", "editor_arithmetic");
+        syntaxClassesForCSP.put("assert|transparent|diamond|print|include", "editor_assignments");
+        syntaxClassesForCSP.put("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|\\!=|>|<|<=|>=|=<|&&|\\|\\||Int|Bool", "editor_logical");
+        syntaxClassesForCSP.put("external|extensions|productions|Proc", "editor_unsupported");
+        syntaxClassesForCSP.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
+        syntaxClassesForCSP.put("(\\{-(.|[\n\r]*)*-\\})|(--(.*))", "editor_comment");
+        syntaxClassesForCSP.put("( |\t|\r|\n)+", "editor_ignored");
+
     }
 
     private final FontSize fontSize;
@@ -459,6 +473,8 @@ public class BEditor extends CodeArea {
             return computeHighlighting(syntaxClassesForXTL, text);
         } else if (modelFactoryClass == TLAFactory.class) {
             return computeHighlighting(syntaxClassesForTLA, text);
+        } else if (modelFactoryClass == CSPFactory.class) {
+            return computeHighlighting(syntaxClassesForCSP, text);
         } else {
             //Do not highlight for languages other than B and EventB
             return StyleSpans.singleton(Collections.emptySet(), text.length());
@@ -542,7 +558,7 @@ public class BEditor extends CodeArea {
                 currentText = currentText.substring(length);
             }
         }
-        
+
         return spansBuilder.create();
     }
 
