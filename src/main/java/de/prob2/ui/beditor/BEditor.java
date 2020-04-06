@@ -264,7 +264,8 @@ public class BEditor extends CodeArea {
         syntaxClassesForXTL.put("[A-Z][_a-zA-Z0-9]*", "editor_xtl_variable");
         syntaxClassesForXTL.put("[_a-z][_a-zA-Z0-9]*", "editor_xtl_functor");
         syntaxClassesForXTL.put(":-|!|-->|;|\\.", "editor_assignments");
-        syntaxClassesForXTL.put("%(.*)", "editor_comment");
+        //The + in (.)+, (\n)+ and (\r)+ avoids possible StackOverflowError
+        syntaxClassesForXTL.put("(%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
         syntaxClassesForXTL.put("( |\t|\r|\n)+", "editor_ignored");
     }
 
