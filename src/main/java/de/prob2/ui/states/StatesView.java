@@ -14,17 +14,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.ComposedCommand;
-import de.prob.animator.command.ExpandFormulaCommand;
-import de.prob.animator.command.GetTopLevelFormulasCommand;
+import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.FormulaId;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.exception.ProBError;
-import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.config.Config;
@@ -297,7 +293,7 @@ public final class StatesView extends StackPane {
 			final ExpandedFormula previous;
 			if (previousFormulas.isEmpty()) {
 				// Previous state not available, use a placeholder formula with an inactive value.
-				previous = new ExpandedFormula(current.getLabel(), BVisual2Value.Inactive.INSTANCE, current.getId(), Collections.emptyList());
+				previous = new ExpandedFormula(current.getLabel(), BVisual2Value.Inactive.INSTANCE, current.getFormula(), Collections.emptyList());
 			} else {
 				previous = previousFormulas.get(i);
 			}
@@ -327,16 +323,6 @@ public final class StatesView extends StackPane {
 		this.updater.execute(() -> this.updateRoot(from, to));
 	}
 
-	private static List<ExpandedFormula> expandFormulasInState(final List<FormulaId> formulas, final State state) {
-		final List<ExpandFormulaCommand> expandCommands = formulas.stream()
-			.map(id -> new ExpandFormulaCommand(id, state))
-			.collect(Collectors.toList());
-		state.getStateSpace().execute(new ComposedCommand(expandCommands));
-		return expandCommands.stream()
-			.map(ExpandFormulaCommand::getResult)
-			.collect(Collectors.toList());
-	}
-
 	private void updateRoot(final Trace from, final Trace to) {
 		if (to == null) {
 			this.tv.getRoot().getChildren().clear();
@@ -351,9 +337,7 @@ public final class StatesView extends StackPane {
 		// JavaFX incorrectly throws an IllegalStateException with message "Not a permutation change".
 		tv.getSelectionModel().clearSelection();
 
-		final GetTopLevelFormulasCommand getTopLevelCommand = new GetTopLevelFormulasCommand();
-		to.getStateSpace().execute(getTopLevelCommand);
-		final List<FormulaId> topLevel = getTopLevelCommand.getFormulaIds();
+		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(to.getStateSpace());
 		
 		if (to.equals(from)) {
 			// Trace hasn't changed, keep all existing values.
@@ -373,13 +357,13 @@ public final class StatesView extends StackPane {
 
 		if (this.currentFormulas == null) {
 			// Recalculate values in the current state.
-			this.currentFormulas = expandFormulasInState(topLevel, to.getCurrentState());
+			this.currentFormulas = BVisual2Formula.expandMultiple(topLevel, to.getCurrentState());
 		}
 
 		if (this.previousFormulas == null) {
 			if (to.canGoBack()) {
 				// Recalculate values in the previous state.
-				this.previousFormulas = expandFormulasInState(topLevel, to.getPreviousState());
+				this.previousFormulas = BVisual2Formula.expandMultiple(topLevel, to.getPreviousState());
 			} else {
 				// At the start of a trace there is no previous state, so there is nothing that can be evaluated.
 				this.previousFormulas = Collections.emptyList();
