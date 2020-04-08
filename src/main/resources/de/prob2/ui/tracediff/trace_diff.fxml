@@ -6,22 +6,23 @@
 <?import javafx.scene.control.ListView?>
 <?import de.prob2.ui.tracediff.TraceDiff?>
 
+<?import javafx.scene.layout.VBox?>
 <fx:root type="TraceDiff" xmlns:fx="http://javafx.com/fxml/1" prefWidth="600" stylesheets="@/prob.css" spacing="5">
 	<children>
-		<HBox spacing="5">
-			<Label fx:id="replayed" HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"/>
+		<VBox spacing="5" HBox.hgrow="ALWAYS">
+			<Label fx:id="replayed" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"/>
+			<ListView fx:id="replayedList" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+			<Button fx:id="setReplayed" styleClass="button-dark2" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.setReplayed"/>
+		</VBox>
+		<VBox spacing="5" fx:id="persistentBox" HBox.hgrow="ALWAYS">
 			<Label fx:id="persistent" HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.persistent"/>
+			<ListView fx:id="persistentList" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+			<Button fx:id="showAlert" styleClass="button-dark2" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.showAlert"/>
+		</VBox>
+		<VBox spacing="5" HBox.hgrow="ALWAYS">
 			<Label fx:id="current" HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.current"/>
-		</HBox>
-		<HBox spacing="5">
-			<ListView fx:id="replayedList" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-			<ListView fx:id="persistentList" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-			<ListView fx:id="currentList" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-		</HBox>
-		<HBox spacing="5">
-			<Button fx:id="setReplayed" styleClass="button-dark2" HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.setReplayed"/>
-			<Button fx:id="showAlert" styleClass="button-dark2" HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.showAlert"/>
-			<Button fx:id="setCurrent" styleClass="button-dark2" HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.setCurrent"/>
-		</HBox>
+			<ListView fx:id="currentList" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+			<Button fx:id="setCurrent" styleClass="button-dark2" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.setCurrent"/>
+		</VBox>
 	</children>
 </fx:root>
