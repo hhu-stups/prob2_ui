@@ -484,8 +484,6 @@ public class BEditor extends CodeArea {
     }
 
     private static StyleSpans<Collection<String>> computeHighlighting(String text, Machine machine) {
-
-        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
         if (machine == null) {
             //Prompt text is a comment text
             return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
