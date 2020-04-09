@@ -145,6 +145,7 @@ import de.prob.scripting.EventBFactory;
 import de.prob.scripting.ModelFactory;
 import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
+import de.prob.scripting.ZFactory;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -196,6 +197,8 @@ public class BEditor extends CodeArea {
     private static final LinkedHashMap<String, String> syntaxClassesForCSP = new LinkedHashMap<>();
 
     private static final LinkedHashMap<String, String> syntaxClassesForAlloy = new LinkedHashMap<>();
+
+    private static final LinkedHashMap<String, String> syntaxClassesForZ = new LinkedHashMap<>();
 
     private static class Range implements Comparable<Range> {
         private String key;
@@ -303,6 +306,16 @@ public class BEditor extends CodeArea {
         syntaxClassesForAlloy.put("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|\\~|->|&|\\+|-|=|\\#", "editor_types");
         syntaxClassesForAlloy.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
         syntaxClassesForAlloy.put("(//[^\n\r]*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
+
+        //Z Regex
+        syntaxClassesForZ.put("(head|tail|last|front|squash|rev|min|max|first|second|succ|count|items|\\\\(\\{|\\}|notin|in|inbag|(big)?cup|(big)?cap|subset|subseteq|subbageq|disjoint|partition|plus|oplus|uplus|uminus|otimes|setminus|emptyset|leq|geq|neq|div|mod|dom|(n)?(d|r)res|langle|rangle|lbag|rbag|ran|id|inv|mapsto|succ|cat|dcat|prefix|suffix|inseq|filter|extract|bcount|\\#))", "editor_arithmetic");
+        syntaxClassesForZ.put("\\\\(power(_1)?|nat(_1)?|num|bag|cross|upto|rel|(p)?fun|(p)?inj|bij|seq(_1)?|iseq(_1)?|(b)?tree)", "editor_types");
+        syntaxClassesForZ.put("\\\\(land|lor|implies|iff|lnot|forall|exists(_1)?|mu|lambda|true|false)", "editor_logical");
+        syntaxClassesForZ.put("(\\\\(where|also|Delta))|(\\\\(begin|end)\\{(schema|zed|axdef)\\})", "editor_keyword");
+        syntaxClassesForZ.put("::=|=|\\\\(IF|THEN|ELSE|LET|defs)", "editor_assignments");
+        syntaxClassesForZ.put("(\\\\|[_a-zA-Z])[_a-zA-Z0-9]*", "editor_identifier");
+        syntaxClassesForZ.put("%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/|\\\\(noindent|documentclass|(begin|end)\\{(document)\\}|(sub)?section|(usepackage)\\{(fuzz|z-eves)\\}|\\\\)", "editor_comment");
+        syntaxClassesForZ.put("\\\\(infix|arithmos)", "editor_unsupported");
     }
 
     private final FontSize fontSize;
@@ -485,6 +498,8 @@ public class BEditor extends CodeArea {
             return computeHighlighting(syntaxClassesForCSP, text);
         } else if (modelFactoryClass == AlloyFactory.class) {
             return computeHighlighting(syntaxClassesForAlloy, text);
+        } else if (modelFactoryClass == ZFactory.class) {
+            return computeHighlighting(syntaxClassesForZ, text);
         } else {
             //Do not highlight for languages other than B and EventB
             return StyleSpans.singleton(Collections.emptySet(), text.length());
