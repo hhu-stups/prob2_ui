@@ -284,8 +284,8 @@ public final class StatesView extends StackPane {
 
 		assert previousFormulas.isEmpty() || currentFormulas.size() == previousFormulas.size();
 
-		final Map<String, TreeItem<StateItem>> existingItems = treeItem.getChildren().stream()
-			.collect(Collectors.toMap(ti -> ti.getValue().getCurrent().getId(), ti -> ti));
+		final Map<BVisual2Formula, TreeItem<StateItem>> existingItems = treeItem.getChildren().stream()
+			.collect(Collectors.toMap(ti -> ti.getValue().getCurrent().getFormula(), ti -> ti));
 
 		final List<TreeItem<StateItem>> newChildren = new ArrayList<>();
 		for (int i = 0; i < currentFormulas.size(); i++) {
@@ -300,8 +300,8 @@ public final class StatesView extends StackPane {
 
 			// Reuse an existing tree item (with the same formula ID) if possible.
 			final TreeItem<StateItem> subTreeItem;
-			if (existingItems.containsKey(current.getId())) {
-				subTreeItem = existingItems.remove(current.getId());
+			if (existingItems.containsKey(current.getFormula())) {
+				subTreeItem = existingItems.remove(current.getFormula());
 			} else {
 				subTreeItem = new TreeItem<>();
 			}
