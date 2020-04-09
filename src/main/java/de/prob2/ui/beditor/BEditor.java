@@ -517,12 +517,8 @@ public class BEditor extends CodeArea {
         return spansBuilder.create();
     }
 
-    private static StyleSpans<Collection<String>> computeHighlighting(Map<String, String> syntaxClasses, String text) {
-        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+    private static LinkedList<Range> extractRanges(Map<String, String> syntaxClasses, String text) {
         LinkedList<Range> range = new LinkedList<>();
-
-
-        // Extract ranges
         for (String key : syntaxClasses.keySet()) {
             Pattern pattern = Pattern.compile(key);
             Matcher matcher = pattern.matcher(text);
@@ -531,8 +527,10 @@ public class BEditor extends CodeArea {
             }
         }
         Collections.sort(range);
+        return range;
+    }
 
-        // Longest match
+    private static LinkedList<Range> filterLongestMatch(LinkedList<Range> range) {
         LinkedList<Range> rangeWithLongestMatch = new LinkedList<>();
         int i = 0;
         while (i < range.size()) {
@@ -556,21 +554,23 @@ public class BEditor extends CodeArea {
             i = j;
             rangeWithLongestMatch.add(range.get(longestIndex));
         }
+        return rangeWithLongestMatch;
+    }
 
-
-        // Fill in spans
+    private static StyleSpans<Collection<String>> createSpansBuilder(LinkedList<Range> ranges, Map<String, String> syntaxClasses, String text) {
+        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
         String currentText = text;
         int pos = 0;
-        while (!currentText.isEmpty() && !rangeWithLongestMatch.isEmpty()) {
-            Range first = rangeWithLongestMatch.getFirst();
+        while (!currentText.isEmpty() && !ranges.isEmpty()) {
+            Range first = ranges.getFirst();
             if (pos == first.getStart()) {
                 int length = first.end - first.start;
                 spansBuilder.add(Collections.singleton(syntaxClasses.get(first.key)), length);
                 pos = first.end;
                 currentText = currentText.substring(length);
-                rangeWithLongestMatch.removeFirst();
+                ranges.removeFirst();
             } else if (pos > first.getStart()) {
-                rangeWithLongestMatch.removeFirst();
+                ranges.removeFirst();
             } else {
                 int length = first.start - pos;
                 spansBuilder.add(Collections.singleton("ignored"), length);
@@ -578,8 +578,13 @@ public class BEditor extends CodeArea {
                 currentText = currentText.substring(length);
             }
         }
-
         return spansBuilder.create();
+    }
+
+    private static StyleSpans<Collection<String>> computeHighlighting(Map<String, String> syntaxClasses, String text) {
+        LinkedList<Range> ranges = extractRanges(syntaxClasses, text);
+        LinkedList<Range> rangesWithLongestMatch = filterLongestMatch(ranges);
+        return createSpansBuilder(rangesWithLongestMatch, syntaxClasses, text);
     }
 
     public void clearHistory() {
