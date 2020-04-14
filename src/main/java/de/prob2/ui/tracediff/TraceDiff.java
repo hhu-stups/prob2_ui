@@ -20,7 +20,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -36,17 +35,21 @@ import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
-public class TraceDiff extends HBox {
+public class TraceDiff extends VBox {
 	@FXML private Label replayed;
-	@FXML private Label persistent;
-	@FXML private Label current;
+
 	@FXML private ListView<String> replayedList;
 	@FXML private ListView<String> persistentList;
 	@FXML private ListView<String> currentList;
+
 	@FXML private Button setReplayed;
 	@FXML private Button showAlert;
 	@FXML private Button setCurrent;
+
 	@FXML private VBox persistentBox;
+
+	@FXML private HBox listBox;
+
 	private ResourceBundle bundle;
 	private CurrentTrace currentTrace;
 	private Alert alert;
@@ -63,16 +66,19 @@ public class TraceDiff extends HBox {
 	@FXML
 	private void initialize() {
 		this.setPadding(new Insets(5,5,5,5));
-		persistentBox.setAlignment(Pos.BOTTOM_CENTER);
+		double initialWidth = this.getWidth()/3;
+		setReplayed.setPrefWidth(initialWidth);
+		showAlert.setPrefWidth(initialWidth);
+		setCurrent.setPrefWidth(initialWidth);
 	}
 
 	void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
-		replayedList.setItems(FXCollections.observableList(replayedOrLost.getTransitionList().stream().map(t -> getTransitionRep(t)).collect(Collectors.toList())));
+		replayedList.setItems(FXCollections.observableList(replayedOrLost.getTransitionList().stream().map(this::getTransitionRep).collect(Collectors.toList())));
 		// if triggered by HistoryView: No persistent trace available
 		if (persistent != null) {
-			persistentList.setItems(FXCollections.observableList(persistent.getTransitionList().stream().map(t -> getPersistentTransitionRep(t)).collect(Collectors.toList())));
+			persistentList.setItems(FXCollections.observableList(persistent.getTransitionList().stream().map(this::getPersistentTransitionRep).collect(Collectors.toList())));
 		}
-		currentList.setItems(FXCollections.observableList(current.getTransitionList().stream().map(t -> getTransitionRep(t)).collect(Collectors.toList())));
+		currentList.setItems(FXCollections.observableList(current.getTransitionList().stream().map(this::getTransitionRep).collect(Collectors.toList())));
 
 		setReplayed.setOnAction(e -> {
 			currentTrace.set(replayedOrLost);
@@ -124,9 +130,13 @@ public class TraceDiff extends HBox {
 			}
 		}
 
-		if ("$setup_constants".equals(t.getName()) && t.getDestination().getConstantValues(FormulaExpand.EXPAND) != null && !t.getDestination().getConstantValues(FormulaExpand.EXPAND).isEmpty()) {
+		if ("$setup_constants".equals(t.getName())
+				&& t.getDestination().getConstantValues(FormulaExpand.EXPAND) != null
+				&& !t.getDestination().getConstantValues(FormulaExpand.EXPAND).isEmpty()) {
 			t.getDestination().getConstantValues(FormulaExpand.EXPAND).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
-		} else if ("$initialise_machine".equals(t.getName()) && t.getDestination().getVariableValues(FormulaExpand.EXPAND) != null && !t.getDestination().getVariableValues(FormulaExpand.EXPAND).isEmpty()) {
+		} else if ("$initialise_machine".equals(t.getName())
+				&& t.getDestination().getVariableValues(FormulaExpand.EXPAND) != null
+				&& !t.getDestination().getVariableValues(FormulaExpand.EXPAND).isEmpty()) {
 			t.getDestination().getVariableValues(FormulaExpand.EXPAND).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
 		}
 
@@ -182,17 +192,15 @@ public class TraceDiff extends HBox {
 		// the alert is either a TraceReplayErrorAlert or triggered by trying to save a trace
 		if (alert instanceof TraceReplayErrorAlert) {
 			replayed.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
-
-			if (!persistentBox.getChildren().contains(persistent)) {
-				persistentBox.getChildren().remove(showAlert);
-				persistentBox.getChildren().addAll(persistent, persistentList, showAlert);
-			}
+			 if (!listBox.getChildren().contains(persistentBox)) {
+			 	listBox.getChildren().add(persistentBox);
+			 }
 		} else {
 			//TODO: integrate "show alert again" button
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
 
-			if (persistentBox.getChildren().contains(persistent)) {
-				persistentBox.getChildren().removeAll(persistent, persistentList);
+			if (listBox.getChildren().contains(persistentBox)) {
+				listBox.getChildren().remove(persistentBox);
 			}
 		}
 	}
