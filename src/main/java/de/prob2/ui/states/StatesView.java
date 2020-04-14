@@ -1,11 +1,7 @@
 package de.prob2.ui.states;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +17,7 @@ import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.exception.ProBError;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.config.Config;
@@ -41,6 +38,7 @@ import de.prob2.ui.unsatcore.UnsatCoreCalculator;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -92,8 +90,6 @@ public final class StatesView extends StackPane {
 	private final UnsatCoreCalculator unsatCoreCalculator;
 
 	private final BackgroundUpdater updater;
-	private List<ExpandedFormula> currentFormulas;
-	private List<ExpandedFormula> previousFormulas;
 	private List<Double> columnWidthsToRestore;
 
 	@Inject
@@ -108,8 +104,6 @@ public final class StatesView extends StackPane {
 		this.updater = new BackgroundUpdater("StatesView Updater");
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
-		this.currentFormulas = null;
-		this.previousFormulas = null;
 		this.unsatCoreCalculator = unsatCoreCalculator;
 
 		stageManager.loadFXML(this, "states_view.fxml");
@@ -129,12 +123,7 @@ public final class StatesView extends StackPane {
 		this.tvValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "current"));
 		this.tvPreviousValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "previous"));
 
-		final ExpandedFormula rootPlaceholderFormula = ExpandedFormula.withoutChildren(
-			null,
-			"Machine (this root item should be invisible)",
-			BVisual2Value.Inactive.INSTANCE
-		);
-		this.tv.getRoot().setValue(new StateItem(rootPlaceholderFormula, rootPlaceholderFormula));
+		this.tv.getRoot().setValue(null);
 
 		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> this.tv.setDisable(to)));
 
@@ -276,46 +265,35 @@ public final class StatesView extends StackPane {
 		return string.toLowerCase().contains(filter.toLowerCase());
 	}
 
-	private static void updateTree(final TreeItem<StateItem> treeItem, final List<ExpandedFormula> currentFormulas, final List<ExpandedFormula> previousFormulas, final String filter) {
-		Objects.requireNonNull(treeItem);
-		Objects.requireNonNull(currentFormulas);
-		Objects.requireNonNull(previousFormulas);
+	private static void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState) {
+		// Generate the tree items for treeItem's children right away.
+		// This must be done even if treeItem is not expanded, because otherwise treeItem would have no child items and thus no expansion arrow, even if it actually has subformulas.
+		final List<TreeItem<StateItem>> children = subformulas.stream()
+			.map(f -> new TreeItem<>(new StateItem(f, currentState, previousState)))
+			.collect(Collectors.toList());
 
-		assert previousFormulas.isEmpty() || currentFormulas.size() == previousFormulas.size();
-
-		final Map<BVisual2Formula, TreeItem<StateItem>> existingItems = treeItem.getChildren().stream()
-			.collect(Collectors.toMap(ti -> ti.getValue().getCurrent().getFormula(), ti -> ti));
-
-		final List<TreeItem<StateItem>> newChildren = new ArrayList<>();
-		for (int i = 0; i < currentFormulas.size(); i++) {
-			final ExpandedFormula current = currentFormulas.get(i);
-			final ExpandedFormula previous;
-			if (previousFormulas.isEmpty()) {
-				// Previous state not available, use a placeholder formula with an inactive value.
-				previous = ExpandedFormula.withoutChildren(current.getFormula(), current.getLabel(), BVisual2Value.Inactive.INSTANCE);
-			} else {
-				previous = previousFormulas.get(i);
+		// The tree items for the children of treeItem's children are generated once treeItem is expanded.
+		// This needs to be an anonymous class instead of a lambda,
+		// so that the listener can remove itself after it runs once.
+		final ChangeListener<Boolean> listener = new ChangeListener<Boolean>() {
+			@Override
+			public void changed(final ObservableValue<? extends Boolean> o, final Boolean from, final Boolean to) {
+				if (to) {
+					for (final TreeItem<StateItem> subTreeItem : children) {
+						addSubformulaItems(subTreeItem, subTreeItem.getValue().getCurrent().getSubformulas(), currentState, previousState);
+					}
+					treeItem.expandedProperty().removeListener(this);
+				}
 			}
+		};
+		treeItem.expandedProperty().addListener(listener);
 
-			// Reuse an existing tree item (with the same formula ID) if possible.
-			final TreeItem<StateItem> subTreeItem;
-			if (existingItems.containsKey(current.getFormula())) {
-				subTreeItem = existingItems.remove(current.getFormula());
-			} else {
-				subTreeItem = new TreeItem<>();
-			}
-			subTreeItem.setValue(new StateItem(current, previous));
-
-			final boolean itemMatches = matchesFilter(filter, current.getLabel());
-			// If this item matches the filter, don't filter its children.
-			updateTree(subTreeItem, current.getChildren(), previous.getChildren(), itemMatches ? "" : filter);
-
-			// Only display this item if it or any of its children match the filter.
-			if (itemMatches || !subTreeItem.getChildren().isEmpty()) {
-				newChildren.add(subTreeItem);
-			}
+		// If treeItem is already expanded, generate the children's children immediately.
+		if (treeItem.isExpanded()) {
+			listener.changed(treeItem.expandedProperty(), false, true);
 		}
-		treeItem.getChildren().setAll(newChildren);
+
+		treeItem.getChildren().setAll(children);
 	}
 
 	private void updateRootAsync(final Trace from, final Trace to) {
@@ -325,8 +303,6 @@ public final class StatesView extends StackPane {
 	private void updateRoot(final Trace from, final Trace to) {
 		if (to == null) {
 			this.tv.getRoot().getChildren().clear();
-			this.currentFormulas = null;
-			this.previousFormulas = null;
 			return;
 		}
 
@@ -337,43 +313,8 @@ public final class StatesView extends StackPane {
 		tv.getSelectionModel().clearSelection();
 
 		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(to.getStateSpace());
-		
-		if (to.equals(from)) {
-			// Trace hasn't changed, keep all existing values.
-		} else if (from != null && to.canGoBack() && to.getPreviousState().equals(from.getCurrentState())) {
-			// Trace went one step forward, reuse old current values as new previous values.
-			this.previousFormulas = this.currentFormulas;
-			this.currentFormulas = null;
-		} else if (from != null && from.canGoBack() && to.getCurrentState().equals(from.getPreviousState())) {
-			// Trace went one step back, reuse old previous values as new current values.
-			this.currentFormulas = this.previousFormulas;
-			this.previousFormulas = null;
-		} else {
-			// Trace changed in some other way (or previous trace is null), need to recalculate everything.
-			this.currentFormulas = null;
-			this.previousFormulas = null;
-		}
-
-		if (this.currentFormulas == null) {
-			// Recalculate values in the current state.
-			this.currentFormulas = BVisual2Formula.expandMultiple(topLevel, to.getCurrentState());
-		}
-
-		if (this.previousFormulas == null) {
-			if (to.canGoBack()) {
-				// Recalculate values in the previous state.
-				this.previousFormulas = BVisual2Formula.expandMultiple(topLevel, to.getPreviousState());
-			} else {
-				// At the start of a trace there is no previous state, so there is nothing that can be evaluated.
-				this.previousFormulas = Collections.emptyList();
-			}
-		}
-
-		// The formulas are stored in local variables to avoid a race condition where another updateRoot call reassigns the fields before the Platform.runLater block runs.
-		final List<ExpandedFormula> currentFormulasLocal = this.currentFormulas;
-		final List<ExpandedFormula> previousFormulasLocal = this.previousFormulas;
 		Platform.runLater(() -> {
-			updateTree(this.tvRootItem, currentFormulasLocal, previousFormulasLocal, filterState.getText());
+			addSubformulaItems(this.tv.getRoot(), topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null);
 			this.tv.getSelectionModel().select(selectedRow);
 		});
 	}
