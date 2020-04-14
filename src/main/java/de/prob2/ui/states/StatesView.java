@@ -129,11 +129,10 @@ public final class StatesView extends StackPane {
 		this.tvValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "current"));
 		this.tvPreviousValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "previous"));
 
-		final ExpandedFormula rootPlaceholderFormula = new ExpandedFormula(
-			"Machine (this root item should be invisible)",
-			BVisual2Value.Inactive.INSTANCE,
+		final ExpandedFormula rootPlaceholderFormula = ExpandedFormula.withoutChildren(
 			null,
-			Collections.emptyList()
+			"Machine (this root item should be invisible)",
+			BVisual2Value.Inactive.INSTANCE
 		);
 		this.tv.getRoot().setValue(new StateItem(rootPlaceholderFormula, rootPlaceholderFormula));
 
@@ -293,7 +292,7 @@ public final class StatesView extends StackPane {
 			final ExpandedFormula previous;
 			if (previousFormulas.isEmpty()) {
 				// Previous state not available, use a placeholder formula with an inactive value.
-				previous = new ExpandedFormula(current.getLabel(), BVisual2Value.Inactive.INSTANCE, current.getFormula(), Collections.emptyList());
+				previous = ExpandedFormula.withoutChildren(current.getFormula(), current.getLabel(), BVisual2Value.Inactive.INSTANCE);
 			} else {
 				previous = previousFormulas.get(i);
 			}
