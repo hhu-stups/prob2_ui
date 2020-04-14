@@ -196,9 +196,7 @@ public class TraceDiff extends VBox {
 			 	listBox.getChildren().add(persistentBox);
 			 }
 		} else {
-			//TODO: integrate "show alert again" button
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
-
 			if (listBox.getChildren().contains(persistentBox)) {
 				listBox.getChildren().remove(persistentBox);
 			}
