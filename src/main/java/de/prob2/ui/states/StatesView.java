@@ -307,7 +307,7 @@ public final class StatesView extends StackPane {
 		// The tree items for the children of treeItem's children are generated once treeItem is expanded.
 		// This needs to be an anonymous class instead of a lambda,
 		// so that the listener can remove itself after it runs once.
-		final ChangeListener<Boolean> listener = new ChangeListener<Boolean>() {
+		final ChangeListener<Boolean> generateGrandchildrenListener = new ChangeListener<Boolean>() {
 			@Override
 			public void changed(final ObservableValue<? extends Boolean> o, final Boolean from, final Boolean to) {
 				if (to) {
@@ -321,29 +321,35 @@ public final class StatesView extends StackPane {
 					}
 					treeItem.expandedProperty().removeListener(this);
 				}
-
-				// The root item has its value set to null. Its expanded state does not need to be stored.
-				if (treeItem.getValue() != null) {
-					final BVisual2Formula formula = treeItem.getValue().getFormula();
-					if (to) {
-						expandedFormulas.add(formula);
-					} else {
-						expandedFormulas.remove(formula);
-					}
-				}
-
-				if (to) {
-					visibleFormulas.addAll(subformulas);
-				} else {
-					visibleFormulas.removeAll(subformulas);
-				}
 			}
 		};
-		treeItem.expandedProperty().addListener(listener);
+		treeItem.expandedProperty().addListener(generateGrandchildrenListener);
 
-		// If treeItem is already expanded, generate the children's children immediately.
+		// This listener tracks the expanded and visible states of each formula.
+		// Unlike the previous listener, this one does *not* remove itself after it runs.
+		final ChangeListener<Boolean> trackExpandedVisibleListener = (o, from, to) -> {
+			// The root item has its value set to null. Its expanded state does not need to be stored.
+			if (treeItem.getValue() != null) {
+				final BVisual2Formula formula = treeItem.getValue().getFormula();
+				if (to) {
+					expandedFormulas.add(formula);
+				} else {
+					expandedFormulas.remove(formula);
+				}
+			}
+
+			if (to) {
+				visibleFormulas.addAll(subformulas);
+			} else {
+				visibleFormulas.removeAll(subformulas);
+			}
+		};
+		treeItem.expandedProperty().addListener(trackExpandedVisibleListener);
+
+		// If treeItem is already expanded, immediately fire the appropriate listeners.
 		if (treeItem.isExpanded()) {
-			listener.changed(treeItem.expandedProperty(), false, true);
+			generateGrandchildrenListener.changed(treeItem.expandedProperty(), false, true);
+			trackExpandedVisibleListener.changed(treeItem.expandedProperty(), false, true);
 		}
 
 		treeItem.getChildren().setAll(children);
