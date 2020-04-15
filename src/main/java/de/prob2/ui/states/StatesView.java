@@ -1,6 +1,8 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -279,6 +281,21 @@ public final class StatesView extends StackPane {
 			.computeIfAbsent(state, s -> new HashMap<>())
 			.computeIfAbsent(formula, f -> f.expandNonrecursive(state));
 	}
+	
+	/**
+	 * <p>Evaluate the given formulas and cache their values, if they are not already present in the cache.</p>
+	 * <p>This is faster than evaluating each formula individually via {@link StateItem} and {@link #evaluateFormulaWithCaching(BVisual2Formula, State)}, because this method internally evaluates all formulas in a single Prolog command, instead of one command per formula.</p>
+	 * 
+	 * @param formulas the formulas for which to cache the values
+	 * @param state the state in which to evaluate the formulas
+	 */
+	private void cacheMissingFormulaValues(final Collection<BVisual2Formula> formulas, final State state) {
+		final Map<BVisual2Formula, ExpandedFormula> cacheForState = this.formulaValueCache.computeIfAbsent(state, s -> new HashMap<>());
+		final List<BVisual2Formula> notYetCached = new ArrayList<>(formulas);
+		notYetCached.removeAll(cacheForState.keySet());
+		BVisual2Formula.expandNonrecursiveMultiple(notYetCached, state)
+			.forEach(expanded -> cacheForState.put(expanded.getFormula(), expanded));
+	}
 
 	private void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState) {
 		// Generate the tree items for treeItem's children right away.
@@ -294,6 +311,11 @@ public final class StatesView extends StackPane {
 			@Override
 			public void changed(final ObservableValue<? extends Boolean> o, final Boolean from, final Boolean to) {
 				if (to) {
+					// Pre-cache the current and previous values of the newly visible formulas.
+					cacheMissingFormulaValues(subformulas, currentState);
+					if (previousState != null) {
+						cacheMissingFormulaValues(subformulas, previousState);
+					}
 					for (final TreeItem<StateItem> subTreeItem : children) {
 						addSubformulaItems(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState);
 					}
@@ -349,6 +371,12 @@ public final class StatesView extends StackPane {
 			this.expandedFormulas.clear();
 			this.visibleFormulas.clear();
 			this.formulaValueCache.clear();
+		} else {
+			// Pre-cache the current and previous values of all visible formulas.
+			cacheMissingFormulaValues(this.visibleFormulas, to.getCurrentState());
+			if (to.canGoBack()) {
+				cacheMissingFormulaValues(this.visibleFormulas, to.getPreviousState());
+			}
 		}
 
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
