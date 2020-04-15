@@ -3,12 +3,11 @@ package de.prob2.ui.states;
 import java.util.ResourceBundle;
 
 import de.prob.animator.domainobjects.BVisual2Value;
-import de.prob.animator.domainobjects.ExpandedFormula;
 
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
 
-final class ValueCell extends TreeTableCell<StateItem, ExpandedFormula> {
+final class ValueCell extends TreeTableCell<StateItem, BVisual2Value> {
 	private final ResourceBundle bundle;
 	
 	ValueCell(final ResourceBundle bundle) {
@@ -20,7 +19,7 @@ final class ValueCell extends TreeTableCell<StateItem, ExpandedFormula> {
 	}
 	
 	@Override
-	protected void updateItem(final ExpandedFormula item, final boolean empty) {
+	protected void updateItem(final BVisual2Value item, final boolean empty) {
 		super.updateItem(item, empty);
 		
 		this.getStyleClass().removeAll("false", "true", "not-initialized", "error");
@@ -28,7 +27,7 @@ final class ValueCell extends TreeTableCell<StateItem, ExpandedFormula> {
 		if (item == null || empty) {
 			this.setText(null);
 		} else {
-			checkResult(item.getValue());
+			checkResult(item);
 		}
 	}
 

@@ -1,5 +1,7 @@
 package de.prob2.ui.states;
 
+import java.util.List;
+
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.ExpandedFormula;
@@ -33,27 +35,38 @@ public final class StateItem {
 		return this.previousState;
 	}
 
-	private void evaluate() {
-		this.current = this.getFormula().expandNonrecursive(this.getCurrentState());
-		if (this.getPreviousState() == null) {
-			// Previous state not available, use a placeholder formula with an inactive value.
-			this.previous = ExpandedFormula.withoutChildren(this.getCurrent().getFormula(), this.getCurrent().getLabel(), BVisual2Value.Inactive.INSTANCE);
-		} else {
-			this.previous = this.getFormula().expandNonrecursive(this.getPreviousState());
-		}
-	}
-
-	public ExpandedFormula getCurrent() {
+	private ExpandedFormula getCurrent() {
 		if (this.current == null) {
-			this.evaluate();
+			this.current = this.getFormula().expandNonrecursive(this.getCurrentState());
 		}
 		return this.current;
 	}
 
-	public ExpandedFormula getPrevious() {
+	private ExpandedFormula getPrevious() {
 		if (this.previous == null) {
-			this.evaluate();
+			if (this.getPreviousState() == null) {
+				// Previous state not available, use a placeholder formula with an inactive value.
+				this.previous = ExpandedFormula.withoutChildren(this.getCurrent().getFormula(), this.getCurrent().getLabel(), BVisual2Value.Inactive.INSTANCE);
+			} else {
+				this.previous = this.getFormula().expandNonrecursive(this.getPreviousState());
+			}
 		}
 		return this.previous;
+	}
+
+	public String getLabel() {
+		return this.getCurrent().getLabel();
+	}
+
+	public BVisual2Value getCurrentValue() {
+		return this.getCurrent().getValue();
+	}
+
+	public BVisual2Value getPreviousValue() {
+		return this.getPrevious().getValue();
+	}
+
+	public List<BVisual2Formula> getSubformulas() {
+		return this.getCurrent().getSubformulas();
 	}
 }
