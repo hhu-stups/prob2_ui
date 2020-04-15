@@ -1,6 +1,7 @@
 package de.prob2.ui.states;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -90,6 +91,7 @@ public final class StatesView extends StackPane {
 	private final UnsatCoreCalculator unsatCoreCalculator;
 
 	private final BackgroundUpdater updater;
+	private final Set<BVisual2Formula> expandedFormulas;
 	private List<Double> columnWidthsToRestore;
 
 	@Inject
@@ -104,6 +106,7 @@ public final class StatesView extends StackPane {
 		this.updater = new BackgroundUpdater("StatesView Updater");
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
+		this.expandedFormulas = new HashSet<>();
 		this.unsatCoreCalculator = unsatCoreCalculator;
 
 		stageManager.loadFXML(this, "states_view.fxml");
@@ -265,7 +268,7 @@ public final class StatesView extends StackPane {
 		return string.toLowerCase().contains(filter.toLowerCase());
 	}
 
-	private static void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState) {
+	private void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState) {
 		// Generate the tree items for treeItem's children right away.
 		// This must be done even if treeItem is not expanded, because otherwise treeItem would have no child items and thus no expansion arrow, even if it actually has subformulas.
 		final List<TreeItem<StateItem>> children = subformulas.stream()
@@ -284,6 +287,16 @@ public final class StatesView extends StackPane {
 					}
 					treeItem.expandedProperty().removeListener(this);
 				}
+
+				// The root item has its value set to null. Its expanded state does not need to be stored.
+				if (treeItem.getValue() != null) {
+					final BVisual2Formula formula = treeItem.getValue().getFormula();
+					if (to) {
+						expandedFormulas.add(formula);
+					} else {
+						expandedFormulas.remove(formula);
+					}
+				}
 			}
 		};
 		treeItem.expandedProperty().addListener(listener);
@@ -294,6 +307,11 @@ public final class StatesView extends StackPane {
 		}
 
 		treeItem.getChildren().setAll(children);
+		
+		// Restore the previous expanded state of treeItem.
+		// If this expands treeItem, this triggers the listener above.
+		// The root item has its value set to null. It should always be expanded.
+		treeItem.setExpanded(treeItem.getValue() == null || this.expandedFormulas.contains(treeItem.getValue().getFormula()));
 	}
 
 	private void updateRootAsync(final Trace from, final Trace to) {
@@ -303,7 +321,12 @@ public final class StatesView extends StackPane {
 	private void updateRoot(final Trace from, final Trace to) {
 		if (to == null) {
 			this.tv.getRoot().getChildren().clear();
+			this.expandedFormulas.clear();
 			return;
+		}
+
+		if (from == null || !from.getStateSpace().equals(to.getStateSpace())) {
+			this.expandedFormulas.clear();
 		}
 
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
