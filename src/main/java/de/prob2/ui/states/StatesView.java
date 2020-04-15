@@ -1,8 +1,10 @@
 package de.prob2.ui.states;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +16,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.exception.ProBError;
@@ -91,6 +94,8 @@ public final class StatesView extends StackPane {
 
 	private final BackgroundUpdater updater;
 	private final Set<BVisual2Formula> expandedFormulas;
+	private final Set<BVisual2Formula> visibleFormulas;
+	private final Map<State, Map<BVisual2Formula, ExpandedFormula>> formulaValueCache;
 	private List<Double> columnWidthsToRestore;
 
 	@Inject
@@ -106,6 +111,8 @@ public final class StatesView extends StackPane {
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		this.expandedFormulas = new HashSet<>();
+		this.visibleFormulas = new HashSet<>();
+		this.formulaValueCache = new HashMap<>();
 		this.unsatCoreCalculator = unsatCoreCalculator;
 
 		stageManager.loadFXML(this, "states_view.fxml");
@@ -267,11 +274,17 @@ public final class StatesView extends StackPane {
 		return string.toLowerCase().contains(filter.toLowerCase());
 	}
 
+	private ExpandedFormula evaluateFormulaWithCaching(final BVisual2Formula formula, final State state) {
+		return this.formulaValueCache
+			.computeIfAbsent(state, s -> new HashMap<>())
+			.computeIfAbsent(formula, f -> f.expandNonrecursive(state));
+	}
+
 	private void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState) {
 		// Generate the tree items for treeItem's children right away.
 		// This must be done even if treeItem is not expanded, because otherwise treeItem would have no child items and thus no expansion arrow, even if it actually has subformulas.
 		final List<TreeItem<StateItem>> children = subformulas.stream()
-			.map(f -> new TreeItem<>(new StateItem(f, currentState, previousState)))
+			.map(f -> new TreeItem<>(new StateItem(f, currentState, previousState, this::evaluateFormulaWithCaching)))
 			.collect(Collectors.toList());
 
 		// The tree items for the children of treeItem's children are generated once treeItem is expanded.
@@ -295,6 +308,12 @@ public final class StatesView extends StackPane {
 					} else {
 						expandedFormulas.remove(formula);
 					}
+				}
+
+				if (to) {
+					visibleFormulas.addAll(subformulas);
+				} else {
+					visibleFormulas.removeAll(subformulas);
 				}
 			}
 		};
@@ -321,11 +340,15 @@ public final class StatesView extends StackPane {
 		if (to == null) {
 			this.tv.getRoot().getChildren().clear();
 			this.expandedFormulas.clear();
+			this.visibleFormulas.clear();
+			this.formulaValueCache.clear();
 			return;
 		}
 
 		if (from == null || !from.getStateSpace().equals(to.getStateSpace())) {
 			this.expandedFormulas.clear();
+			this.visibleFormulas.clear();
+			this.formulaValueCache.clear();
 		}
 
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();

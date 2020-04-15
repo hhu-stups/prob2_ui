@@ -9,16 +9,23 @@ import de.prob.statespace.State;
 
 // This class needs to be public (even though it's only used inside this package) so that Bindings.select can access its getters.
 public final class StateItem {
+	@FunctionalInterface
+	public interface FormulaEvaluator {
+		public abstract ExpandedFormula evaluate(final BVisual2Formula formula, final State state);
+	}
+
 	private final BVisual2Formula formula;
 	private final State currentState;
 	private final State previousState;
+	private final StateItem.FormulaEvaluator evaluator;
 	private ExpandedFormula current;
 	private ExpandedFormula previous;
 
-	StateItem(final BVisual2Formula formula, final State currentState, final State previousState) {
+	StateItem(final BVisual2Formula formula, final State currentState, final State previousState, final StateItem.FormulaEvaluator evaluator) {
 		this.formula = formula;
 		this.currentState = currentState;
 		this.previousState = previousState;
+		this.evaluator = evaluator;
 		this.current = null;
 		this.previous = null;
 	}
@@ -37,7 +44,7 @@ public final class StateItem {
 
 	private ExpandedFormula getCurrent() {
 		if (this.current == null) {
-			this.current = this.getFormula().expandNonrecursive(this.getCurrentState());
+			this.current = this.evaluator.evaluate(this.getFormula(), this.getCurrentState());
 		}
 		return this.current;
 	}
@@ -48,7 +55,7 @@ public final class StateItem {
 				// Previous state not available, use a placeholder formula with an inactive value.
 				this.previous = ExpandedFormula.withoutChildren(this.getCurrent().getFormula(), this.getCurrent().getLabel(), BVisual2Value.Inactive.INSTANCE);
 			} else {
-				this.previous = this.getFormula().expandNonrecursive(this.getPreviousState());
+				this.previous = this.evaluator.evaluate(this.getFormula(), this.getPreviousState());
 			}
 		}
 		return this.previous;
