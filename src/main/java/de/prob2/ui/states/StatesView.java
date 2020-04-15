@@ -342,6 +342,14 @@ public final class StatesView extends StackPane {
 				visibleFormulas.addAll(subformulas);
 			} else {
 				visibleFormulas.removeAll(subformulas);
+
+				// When treeItem is collapsed, also collapse all of its children.
+				// This will recurse automatically as the children's expanded listeners are fired.
+				// JavaFX does not do this automatically by default,
+				// which leads to problems with visibleFormulas containing formulas where the parent is expanded,
+				// but (for example) the grandparent is collapsed.
+				// In that case our code incorrectly thinks that the children are visible, even though they aren't.
+				treeItem.getChildren().forEach(subTreeItem -> subTreeItem.setExpanded(false));
 			}
 		};
 		treeItem.expandedProperty().addListener(trackExpandedVisibleListener);
