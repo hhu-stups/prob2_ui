@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -139,7 +140,7 @@ public final class StatesView extends StackPane {
 		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> this.tv.setDisable(to)));
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-			this.updateRootAsync(from, to);
+			this.updateRootAsync(from, to, this.filterState.getText());
 			boolean showUnsatCoreButton = false;
 			if (to != null) {
 				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
@@ -170,9 +171,9 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-		filterState.textProperty().addListener(o -> {
+		filterState.textProperty().addListener((o, from, to) -> {
 			final Trace trace = this.currentTrace.get();
-			this.updateRootAsync(trace, trace);
+			this.updateRootAsync(trace, trace, to);
 		});
 	}
 
@@ -297,7 +298,7 @@ public final class StatesView extends StackPane {
 			.forEach(expanded -> cacheForState.put(expanded.getFormula(), expanded));
 	}
 
-	private void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState) {
+	private void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState, final String filter) {
 		// Generate the tree items for treeItem's children right away.
 		// This must be done even if treeItem is not expanded, because otherwise treeItem would have no child items and thus no expansion arrow, even if it actually has subformulas.
 		final List<TreeItem<StateItem>> children = subformulas.stream()
@@ -317,7 +318,17 @@ public final class StatesView extends StackPane {
 						cacheMissingFormulaValues(subformulas, previousState);
 					}
 					for (final TreeItem<StateItem> subTreeItem : children) {
-						addSubformulaItems(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState);
+						// If treeItem or subTreeItem matches the filter, don't filter subTreeItem's children.
+						final String subFilter;
+						if (
+							(treeItem.getValue() != null && matchesFilter(filter, treeItem.getValue().getLabel()))
+							|| matchesFilter(filter, subTreeItem.getValue().getLabel())
+						) {
+							subFilter = "";
+						} else {
+							subFilter = filter;
+						}
+						addSubformulaItems(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState, subFilter);
 					}
 					treeItem.expandedProperty().removeListener(this);
 				}
@@ -329,7 +340,8 @@ public final class StatesView extends StackPane {
 		// Unlike the previous listener, this one does *not* remove itself after it runs.
 		final ChangeListener<Boolean> trackExpandedVisibleListener = (o, from, to) -> {
 			// The root item has its value set to null. Its expanded state does not need to be stored.
-			if (treeItem.getValue() != null) {
+			// Don't track expanded states while a filter is present, because the filtering code automatically expands items.
+			if (treeItem.getValue() != null && filter.isEmpty()) {
 				final BVisual2Formula formula = treeItem.getValue().getFormula();
 				if (to) {
 					expandedFormulas.add(formula);
@@ -361,18 +373,35 @@ public final class StatesView extends StackPane {
 		}
 
 		treeItem.getChildren().setAll(children);
-		
+
+		// If treeItem does not match the filter, filter its children.
+		if (treeItem.getValue() == null || !matchesFilter(filter, treeItem.getValue().getLabel())) {
+			for (final Iterator<TreeItem<StateItem>> it = treeItem.getChildren().iterator(); it.hasNext();) {
+				final TreeItem<StateItem> subTreeItem = it.next();
+				// If subTreeItem does not match the filter, expand it.
+				// This will fire the listeners to generate and filter its children.
+				if (!matchesFilter(filter, subTreeItem.getValue().getLabel())) {
+					subTreeItem.setExpanded(true);
+					// If subTreeItem's children (which have already been filtered) are empty, remove subTreeItem,
+					// because it and its children do not match the filter.
+					if (subTreeItem.getChildren().isEmpty()) {
+						it.remove();
+					}
+				}
+			}
+		}
+
 		// Restore the previous expanded state of treeItem.
 		// If this expands treeItem, this triggers the listener above.
 		// The root item has its value set to null. It should always be expanded.
 		treeItem.setExpanded(treeItem.getValue() == null || this.expandedFormulas.contains(treeItem.getValue().getFormula()));
 	}
 
-	private void updateRootAsync(final Trace from, final Trace to) {
-		this.updater.execute(() -> this.updateRoot(from, to));
+	private void updateRootAsync(final Trace from, final Trace to, final String filter) {
+		this.updater.execute(() -> this.updateRoot(from, to, filter));
 	}
 
-	private void updateRoot(final Trace from, final Trace to) {
+	private void updateRoot(final Trace from, final Trace to, final String filter) {
 		if (to == null) {
 			this.tv.getRoot().getChildren().clear();
 			this.expandedFormulas.clear();
@@ -401,7 +430,7 @@ public final class StatesView extends StackPane {
 
 		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(to.getStateSpace());
 		Platform.runLater(() -> {
-			addSubformulaItems(this.tv.getRoot(), topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null);
+			addSubformulaItems(this.tv.getRoot(), topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
 			this.tv.getSelectionModel().select(selectedRow);
 		});
 	}
