@@ -280,7 +280,26 @@ public final class StatesView extends StackPane {
 			.computeIfAbsent(state, s -> new HashMap<>())
 			.computeIfAbsent(formula, f -> f.expandNonrecursive(state));
 	}
-	
+
+	private Map<BVisual2Formula, ExpandedFormula> getFormulaValueCacheForState(final State state) {
+		return this.formulaValueCache.computeIfAbsent(state, s -> new HashMap<>());
+	}
+
+	/**
+	 * Add the given expanded formula values (and their children, recursively) to a cache map.
+	 * 
+	 * @param expandedValues the expanded formula values to add
+	 * @param cache the cache to which to add the expanded formula values
+	 */
+	private static void addFormulaValuesToCache(final Collection<ExpandedFormula> expandedValues, final Map<BVisual2Formula, ExpandedFormula> cache) {
+		for (final ExpandedFormula expanded : expandedValues) {
+			cache.put(expanded.getFormula(), expanded);
+			if (expanded.getChildren() != null) {
+				addFormulaValuesToCache(expanded.getChildren(), cache);
+			}
+		}
+	}
+
 	/**
 	 * <p>Evaluate the given formulas and cache their values, if they are not already present in the cache.</p>
 	 * <p>This is faster than evaluating each formula individually via {@link StateItem} and {@link #evaluateFormulaWithCaching(BVisual2Formula, State)}, because this method internally evaluates all formulas in a single Prolog command, instead of one command per formula.</p>
@@ -289,11 +308,20 @@ public final class StatesView extends StackPane {
 	 * @param state the state in which to evaluate the formulas
 	 */
 	private void cacheMissingFormulaValues(final Collection<BVisual2Formula> formulas, final State state) {
-		final Map<BVisual2Formula, ExpandedFormula> cacheForState = this.formulaValueCache.computeIfAbsent(state, s -> new HashMap<>());
+		final Map<BVisual2Formula, ExpandedFormula> cacheForState = getFormulaValueCacheForState(state);
 		final List<BVisual2Formula> notYetCached = new ArrayList<>(formulas);
 		notYetCached.removeAll(cacheForState.keySet());
-		BVisual2Formula.expandNonrecursiveMultiple(notYetCached, state)
-			.forEach(expanded -> cacheForState.put(expanded.getFormula(), expanded));
+		addFormulaValuesToCache(BVisual2Formula.expandNonrecursiveMultiple(notYetCached, state), cacheForState);
+	}
+
+	/**
+	 * Evaluate the given formulas recursively and cache their values.
+	 * 
+	 * @param formulas the formulas for which to recursively cache the values
+	 * @param state the state in which to evaluate the formulas
+	 */
+	private void cacheFormulaValuesRecursive(final List<BVisual2Formula> formulas, final State state) {
+		addFormulaValuesToCache(BVisual2Formula.expandMultiple(formulas, state), getFormulaValueCacheForState(state));
 	}
 
 	private void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState, final String filter) {
@@ -433,6 +461,14 @@ public final class StatesView extends StackPane {
 		tv.getSelectionModel().clearSelection();
 
 		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(to.getStateSpace());
+		// If there is a filter, recursively expand and evaluate the entire tree beforehand.
+		// The filtering code usually has to expand most of the tree to search for matching items, so this improves performance when filtering.
+		if (!filter.isEmpty()) {
+			cacheFormulaValuesRecursive(topLevel, to.getCurrentState());
+			if (to.canGoBack()) {
+				cacheFormulaValuesRecursive(topLevel, to.getPreviousState());
+			}
+		}
 		final TreeItem<StateItem> newRoot = createRootItem();
 		addSubformulaItems(newRoot, topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
 		Platform.runLater(() -> {
