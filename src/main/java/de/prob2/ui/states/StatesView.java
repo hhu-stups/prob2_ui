@@ -85,8 +85,6 @@ public final class StatesView extends StackPane {
 	private TreeTableColumn<StateItem, BVisual2Value> tvValue;
 	@FXML
 	private TreeTableColumn<StateItem, BVisual2Value> tvPreviousValue;
-	@FXML
-	private TreeItem<StateItem> tvRootItem;
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
@@ -135,7 +133,7 @@ public final class StatesView extends StackPane {
 		this.tvValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "currentValue"));
 		this.tvPreviousValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "previousValue"));
 
-		this.tv.getRoot().setValue(null);
+		this.tv.setRoot(createRootItem());
 
 		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> this.tv.setDisable(to)));
 
@@ -397,13 +395,19 @@ public final class StatesView extends StackPane {
 		treeItem.setExpanded(treeItem.getValue() == null || this.expandedFormulas.contains(treeItem.getValue().getFormula()));
 	}
 
+	private static TreeItem<StateItem> createRootItem() {
+		final TreeItem<StateItem> rootItem = new TreeItem<>(null);
+		rootItem.setExpanded(true);
+		return rootItem;
+	}
+
 	private void updateRootAsync(final Trace from, final Trace to, final String filter) {
 		this.updater.execute(() -> this.updateRoot(from, to, filter));
 	}
 
 	private void updateRoot(final Trace from, final Trace to, final String filter) {
 		if (to == null) {
-			this.tv.getRoot().getChildren().clear();
+			Platform.runLater(() -> this.tv.setRoot(createRootItem()));
 			this.expandedFormulas.clear();
 			this.visibleFormulas.clear();
 			this.formulaValueCache.clear();
@@ -429,8 +433,10 @@ public final class StatesView extends StackPane {
 		tv.getSelectionModel().clearSelection();
 
 		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(to.getStateSpace());
+		final TreeItem<StateItem> newRoot = createRootItem();
+		addSubformulaItems(newRoot, topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
 		Platform.runLater(() -> {
-			addSubformulaItems(this.tv.getRoot(), topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
+			this.tv.setRoot(newRoot);
 			this.tv.getSelectionModel().select(selectedRow);
 		});
 	}
