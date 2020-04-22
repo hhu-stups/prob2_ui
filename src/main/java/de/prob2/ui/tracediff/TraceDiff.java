@@ -18,12 +18,14 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -70,15 +72,81 @@ public class TraceDiff extends VBox {
 		setReplayed.setPrefWidth(initialWidth);
 		showAlert.setPrefWidth(initialWidth);
 		setCurrent.setPrefWidth(initialWidth);
+
+		MultipleSelectionModel<String> notSelectable = new MultipleSelectionModel<String>() {
+			@Override
+			public ObservableList<Integer> getSelectedIndices() {
+				return FXCollections.emptyObservableList();
+			}
+
+			@Override
+			public ObservableList<String> getSelectedItems() {
+				return FXCollections.emptyObservableList();
+			}
+
+			@Override
+			public void selectIndices(int index, int... indices) {}
+
+			@Override
+			public void selectAll() {}
+
+			@Override
+			public void selectFirst() {}
+
+			@Override
+			public void selectLast() {}
+
+			@Override
+			public void clearAndSelect(int index) {}
+
+			@Override
+			public void select(int index) {}
+
+			@Override
+			public void select(String obj) {}
+
+			@Override
+			public void clearSelection(int index) {}
+
+			@Override
+			public void clearSelection() {}
+
+			@Override
+			public boolean isSelected(int index) {
+				return false;
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return true;
+			}
+
+			@Override
+			public void selectPrevious() {}
+
+			@Override
+			public void selectNext() {}
+		};
+		replayedList.setSelectionModel(notSelectable);
+		persistentList.setSelectionModel(notSelectable);
+		currentList.setSelectionModel(notSelectable);
 	}
 
 	void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
-		replayedList.setItems(FXCollections.observableList(replayedOrLost.getTransitionList().stream().map(this::getTransitionRep).collect(Collectors.toList())));
+		List<Transition> rTransitions = replayedOrLost.getTransitionList();
+		translateList(rTransitions, replayedList);
+
+		List<PersistentTransition> pTransitions;
 		// if triggered by HistoryView: No persistent trace available
-		if (persistent != null) {
-			persistentList.setItems(FXCollections.observableList(persistent.getTransitionList().stream().map(this::getPersistentTransitionRep).collect(Collectors.toList())));
+		if (persistent == null) {
+			pTransitions = FXCollections.emptyObservableList();
+		} else {
+			pTransitions = persistent.getTransitionList();
 		}
-		currentList.setItems(FXCollections.observableList(current.getTransitionList().stream().map(this::getTransitionRep).collect(Collectors.toList())));
+		translateList(pTransitions, persistentList);
+
+		List<Transition> cTransitions = current.getTransitionList();
+		translateList(cTransitions, currentList);
 
 		setReplayed.setOnAction(e -> {
 			currentTrace.set(replayedOrLost);
@@ -99,7 +167,26 @@ public class TraceDiff extends VBox {
 		});
 	}
 
-	private String getTransitionRep(Transition t) {
+	private void translateList(List<?> list, ListView<String> listView) {
+		List<String> placeholder = new ArrayList<>();
+		placeholder.add("");
+		if (list.isEmpty()) {
+			listView.setItems(FXCollections.observableList(placeholder));
+		} else if (list.get(0) instanceof Transition || list.get(0) instanceof PersistentTransition) {
+			listView.setItems(FXCollections.observableList(list.stream().map(this::getRep).collect(Collectors.toList())));
+		}
+	}
+
+	private String getRep(Object t) {
+		if (t instanceof Transition) {
+			return getRep((Transition) t);
+		} else if (t instanceof PersistentTransition) {
+			return getRep((PersistentTransition) t);
+		}
+		return null;
+	}
+
+	private String getRep(Transition t) {
 		LoadedMachine loadedMachine = t.getStateSpace().getLoadedMachine();
 		OperationInfo opInfo;
 		try {
@@ -154,7 +241,7 @@ public class TraceDiff extends VBox {
 		return stringBuilder.toString();
 	}
 
-	private String getPersistentTransitionRep(PersistentTransition t) {
+	private String getRep(PersistentTransition t) {
 		StringBuilder stringBuilder;
 		boolean isArtificialTransition = false;
 		if ("$setup_constants".equals(t.getOperationName())) {
