@@ -23,9 +23,10 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -38,7 +39,9 @@ import java.util.stream.Collectors;
 @FXMLInjected
 @Singleton
 public class TraceDiff extends VBox {
-	@FXML private Label replayed;
+	@FXML private CheckBox replayed;
+	@FXML private CheckBox persistent;
+	@FXML private CheckBox current;
 
 	@FXML private ListView<String> replayedList;
 	@FXML private ListView<String> persistentList;
@@ -72,6 +75,65 @@ public class TraceDiff extends VBox {
 		setReplayed.setPrefWidth(initialWidth);
 		showAlert.setPrefWidth(initialWidth);
 		setCurrent.setPrefWidth(initialWidth);
+
+		//TODO: syncronity (scrolling at the same time but not side by side)
+
+		replayed.selectedProperty().addListener((observable, oldValue, newValue) -> {
+			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
+			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
+			ScrollBar csc = (ScrollBar) currentList.lookup(".scroll-bar:vertical");
+			if (rsc != null) {
+				if (newValue) {
+					if (persistent.isSelected() && psc != null) {
+						rsc.valueProperty().bindBidirectional(psc.valueProperty());
+					}
+					if (current.isSelected() && csc != null) {
+						rsc.valueProperty().bindBidirectional(csc.valueProperty());
+					}
+				} else {
+					rsc.valueProperty().unbindBidirectional(psc.valueProperty());
+					rsc.valueProperty().unbindBidirectional(csc.valueProperty());
+				}
+			}
+		});
+
+		persistent.selectedProperty().addListener((observable, oldValue, newValue) -> {
+			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
+			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
+			ScrollBar csc = (ScrollBar) currentList.lookup(".scroll-bar:vertical");
+			if (psc != null) {
+				if (newValue) {
+					if (replayed.isSelected() && rsc != null) {
+						psc.valueProperty().bindBidirectional(rsc.valueProperty());
+					}
+					if (current.isSelected() && csc != null) {
+						psc.valueProperty().bindBidirectional(csc.valueProperty());
+					}
+				} else {
+					psc.valueProperty().unbindBidirectional(rsc.valueProperty());
+					psc.valueProperty().unbindBidirectional(csc.valueProperty());
+				}
+			}
+		});
+
+		current.selectedProperty().addListener((observable, oldValue, newValue) -> {
+			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
+			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
+			ScrollBar csc = (ScrollBar) currentList.lookup(".scroll-bar:vertical");
+			if (csc != null) {
+				if (newValue) {
+					if (replayed.isSelected() && rsc != null) {
+						csc.valueProperty().bindBidirectional(rsc.valueProperty());
+					}
+					if (persistent.isSelected() && psc != null) {
+						csc.valueProperty().bindBidirectional(psc.valueProperty());
+					}
+				} else {
+					csc.valueProperty().unbindBidirectional(rsc.valueProperty());
+					csc.valueProperty().unbindBidirectional(psc.valueProperty());
+				}
+			}
+		});
 
 		MultipleSelectionModel<String> notSelectable = new MultipleSelectionModel<String>() {
 			@Override
