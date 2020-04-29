@@ -58,9 +58,6 @@ public class TraceDiff extends VBox {
 	private CurrentTrace currentTrace;
 	private Alert alert;
 	private Injector injector;
-	private ChangeListener<? super Number> replayedListCL;
-	private ChangeListener<? super Number> persistentListCL;
-	private ChangeListener<? super Number> currentListCL;
 
 	@Inject
 	private TraceDiff(StageManager stageManager, Injector injector, CurrentTrace currentTrace) {
@@ -68,26 +65,6 @@ public class TraceDiff extends VBox {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		stageManager.loadFXML(this,"trace_diff.fxml");
-
-		replayedListCL = createChangeListener(persistent, persistentList, current, currentList);
-		persistentListCL = createChangeListener(replayed, replayedList, current, currentList);
-		currentListCL = createChangeListener(replayed, replayedList, persistent, persistentList);
-	}
-
-	private ChangeListener<? super Number> createChangeListener(CheckBox firstCB, ListView firstLV, CheckBox secondCB, ListView secondLV) {
-		return (obs, o, n) -> {
-			if (firstCB.isSelected()) {
-				firstLV.getSelectionModel().select(n.intValue());
-				firstLV.getFocusModel().focus(n.intValue());
-				firstLV.scrollTo(n.intValue());
-			}
-
-			if (secondCB.isSelected()) {
-				secondLV.getSelectionModel().select(n.intValue());
-				secondLV.getFocusModel().focus(n.intValue());
-				secondLV.scrollTo(n.intValue());
-			}
-		};
 	}
 
 	@FXML
@@ -97,6 +74,11 @@ public class TraceDiff extends VBox {
 		setReplayed.setPrefWidth(initialWidth);
 		showAlert.setPrefWidth(initialWidth);
 		setCurrent.setPrefWidth(initialWidth);
+
+		// Arrow key synchronicity
+		ChangeListener<? super Number> replayedListCL = createChangeListener(persistent, persistentList, current, currentList);
+		ChangeListener<? super Number> persistentListCL = createChangeListener(replayed, replayedList, current, currentList);
+		ChangeListener<? super Number> currentListCL = createChangeListener(replayed, replayedList, persistent, persistentList);
 
 		replayed.selectedProperty().addListener(((observable, oldValue, newValue) -> {
 			if (newValue) {
@@ -122,8 +104,7 @@ public class TraceDiff extends VBox {
 			}
 		}));
 
-		//TODO: syncronity (scrolling at the same time but not side by side)
-
+		// Scrollbar synchronicity
 		replayed.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
 			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
@@ -182,6 +163,22 @@ public class TraceDiff extends VBox {
 		});
 	}
 
+	private ChangeListener<? super Number> createChangeListener(CheckBox firstCB, ListView firstLV, CheckBox secondCB, ListView secondLV) {
+		return (obs, o, n) -> {
+			if (firstCB.isSelected()) {
+				firstLV.getSelectionModel().select(n.intValue());
+				firstLV.getFocusModel().focus(n.intValue());
+				firstLV.scrollTo(n.intValue());
+			}
+
+			if (secondCB.isSelected()) {
+				secondLV.getSelectionModel().select(n.intValue());
+				secondLV.getFocusModel().focus(n.intValue());
+				secondLV.scrollTo(n.intValue());
+			}
+		};
+	}
+
 	void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
 		List<Transition> rTransitions = replayedOrLost.getTransitionList();
 		List<PersistentTransition> pTransitions;
@@ -233,8 +230,7 @@ public class TraceDiff extends VBox {
 		} else if (t instanceof PersistentTransition) {
 			return getRep((PersistentTransition) t);
 		}
-		return "";
-		//return null;
+		return null;
 	}
 
 	private String getRep(Transition t) {
