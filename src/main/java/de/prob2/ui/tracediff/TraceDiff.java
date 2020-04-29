@@ -76,13 +76,13 @@ public class TraceDiff extends VBox {
 
 	private ChangeListener<? super Number> createChangeListener(CheckBox firstCB, ListView firstLV, CheckBox secondCB, ListView secondLV) {
 		return (obs, o, n) -> {
-			if (firstCB.isSelected() && firstLV.getItems().size()>n.intValue()) {
+			if (firstCB.isSelected()) {
 				firstLV.getSelectionModel().select(n.intValue());
 				firstLV.getFocusModel().focus(n.intValue());
 				firstLV.scrollTo(n.intValue());
 			}
 
-			if (secondCB.isSelected() && secondLV.getItems().size()>n.intValue()) {
+			if (secondCB.isSelected()) {
 				secondLV.getSelectionModel().select(n.intValue());
 				secondLV.getFocusModel().focus(n.intValue());
 				secondLV.scrollTo(n.intValue());
@@ -124,7 +124,7 @@ public class TraceDiff extends VBox {
 
 		//TODO: syncronity (scrolling at the same time but not side by side)
 
-		/*replayed.selectedProperty().addListener((observable, oldValue, newValue) -> {
+		replayed.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
 			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
 			ScrollBar csc = (ScrollBar) currentList.lookup(".scroll-bar:vertical");
@@ -179,13 +179,11 @@ public class TraceDiff extends VBox {
 					csc.valueProperty().unbindBidirectional(psc.valueProperty());
 				}
 			}
-		});*/
+		});
 	}
 
 	void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
 		List<Transition> rTransitions = replayedOrLost.getTransitionList();
-		translateList(rTransitions, replayedList);
-
 		List<PersistentTransition> pTransitions;
 		// if triggered by HistoryView: No persistent trace available
 		if (persistent == null) {
@@ -193,10 +191,13 @@ public class TraceDiff extends VBox {
 		} else {
 			pTransitions = persistent.getTransitionList();
 		}
-		translateList(pTransitions, persistentList);
-
 		List<Transition> cTransitions = current.getTransitionList();
-		translateList(cTransitions, currentList);
+
+		int maxSize = Math.max(Math.max(rTransitions.size(), pTransitions.size()), cTransitions.size());
+
+		translateList(rTransitions, replayedList, maxSize);
+		translateList(pTransitions, persistentList, maxSize);
+		translateList(cTransitions, currentList, maxSize);
 
 		setReplayed.setOnAction(e -> {
 			currentTrace.set(replayedOrLost);
@@ -217,14 +218,13 @@ public class TraceDiff extends VBox {
 		});
 	}
 
-	private void translateList(List<?> list, ListView<String> listView) {
-		List<String> placeholder = new ArrayList<>();
-		placeholder.add("");
-		if (list.isEmpty()) {
-			listView.setItems(FXCollections.observableList(placeholder));
-		} else if (list.get(0) instanceof Transition || list.get(0) instanceof PersistentTransition) {
-			listView.setItems(FXCollections.observableList(list.stream().map(this::getRep).collect(Collectors.toList())));
+	private void translateList(List<?> list, ListView<String> listView, int maxSize) {
+		List<String> stringList = list.stream().map(this::getRep).collect(Collectors.toList());
+		//Add "empty" entries to ensure same length (needed for synchronized scrolling)
+		while (stringList.size() < maxSize) {
+			stringList.add("");
 		}
+		listView.setItems(FXCollections.observableList(stringList));
 	}
 
 	private String getRep(Object t) {
@@ -233,7 +233,8 @@ public class TraceDiff extends VBox {
 		} else if (t instanceof PersistentTransition) {
 			return getRep((PersistentTransition) t);
 		}
-		return null;
+		return "";
+		//return null;
 	}
 
 	private String getRep(Transition t) {
