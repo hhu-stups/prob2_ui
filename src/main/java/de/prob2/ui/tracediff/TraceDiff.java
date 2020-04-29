@@ -17,15 +17,14 @@ import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -59,6 +58,9 @@ public class TraceDiff extends VBox {
 	private CurrentTrace currentTrace;
 	private Alert alert;
 	private Injector injector;
+	private ChangeListener<? super Number> replayedListCL;
+	private ChangeListener<? super Number> persistentListCL;
+	private ChangeListener<? super Number> currentListCL;
 
 	@Inject
 	private TraceDiff(StageManager stageManager, Injector injector, CurrentTrace currentTrace) {
@@ -66,6 +68,26 @@ public class TraceDiff extends VBox {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		stageManager.loadFXML(this,"trace_diff.fxml");
+
+		replayedListCL = createChangeListener(persistent, persistentList, current, currentList);
+		persistentListCL = createChangeListener(replayed, replayedList, current, currentList);
+		currentListCL = createChangeListener(replayed, replayedList, persistent, persistentList);
+	}
+
+	private ChangeListener<? super Number> createChangeListener(CheckBox firstCB, ListView firstLV, CheckBox secondCB, ListView secondLV) {
+		return (obs, o, n) -> {
+			if (firstCB.isSelected() && firstLV.getItems().size()>n.intValue()) {
+				firstLV.getSelectionModel().select(n.intValue());
+				firstLV.getFocusModel().focus(n.intValue());
+				firstLV.scrollTo(n.intValue());
+			}
+
+			if (secondCB.isSelected() && secondLV.getItems().size()>n.intValue()) {
+				secondLV.getSelectionModel().select(n.intValue());
+				secondLV.getFocusModel().focus(n.intValue());
+				secondLV.scrollTo(n.intValue());
+			}
+		};
 	}
 
 	@FXML
@@ -76,9 +98,33 @@ public class TraceDiff extends VBox {
 		showAlert.setPrefWidth(initialWidth);
 		setCurrent.setPrefWidth(initialWidth);
 
+		replayed.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+			if (newValue) {
+				replayedList.getSelectionModel().selectedIndexProperty().addListener(replayedListCL);
+			} else {
+				replayedList.getSelectionModel().selectedIndexProperty().removeListener(replayedListCL);
+			}
+		}));
+
+		persistent.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+			if (newValue) {
+				persistentList.getSelectionModel().selectedIndexProperty().addListener(persistentListCL);
+			} else {
+				persistentList.getSelectionModel().selectedIndexProperty().removeListener(persistentListCL);
+			}
+		}));
+
+		current.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+			if (newValue) {
+				currentList.getSelectionModel().selectedIndexProperty().addListener(currentListCL);
+			} else {
+				currentList.getSelectionModel().selectedIndexProperty().removeListener(currentListCL);
+			}
+		}));
+
 		//TODO: syncronity (scrolling at the same time but not side by side)
 
-		replayed.selectedProperty().addListener((observable, oldValue, newValue) -> {
+		/*replayed.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
 			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
 			ScrollBar csc = (ScrollBar) currentList.lookup(".scroll-bar:vertical");
@@ -133,65 +179,7 @@ public class TraceDiff extends VBox {
 					csc.valueProperty().unbindBidirectional(psc.valueProperty());
 				}
 			}
-		});
-
-		MultipleSelectionModel<String> notSelectable = new MultipleSelectionModel<String>() {
-			@Override
-			public ObservableList<Integer> getSelectedIndices() {
-				return FXCollections.emptyObservableList();
-			}
-
-			@Override
-			public ObservableList<String> getSelectedItems() {
-				return FXCollections.emptyObservableList();
-			}
-
-			@Override
-			public void selectIndices(int index, int... indices) {}
-
-			@Override
-			public void selectAll() {}
-
-			@Override
-			public void selectFirst() {}
-
-			@Override
-			public void selectLast() {}
-
-			@Override
-			public void clearAndSelect(int index) {}
-
-			@Override
-			public void select(int index) {}
-
-			@Override
-			public void select(String obj) {}
-
-			@Override
-			public void clearSelection(int index) {}
-
-			@Override
-			public void clearSelection() {}
-
-			@Override
-			public boolean isSelected(int index) {
-				return false;
-			}
-
-			@Override
-			public boolean isEmpty() {
-				return true;
-			}
-
-			@Override
-			public void selectPrevious() {}
-
-			@Override
-			public void selectNext() {}
-		};
-		replayedList.setSelectionModel(notSelectable);
-		persistentList.setSelectionModel(notSelectable);
-		currentList.setSelectionModel(notSelectable);
+		});*/
 	}
 
 	void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
@@ -347,6 +335,7 @@ public class TraceDiff extends VBox {
 		} else {
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
 			if (listBox.getChildren().contains(persistentBox)) {
+				persistent.setSelected(false);
 				listBox.getChildren().remove(persistentBox);
 			}
 		}
