@@ -31,7 +31,9 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,7 @@ public class TraceDiff extends VBox {
 	private CurrentTrace currentTrace;
 	private Alert alert;
 	private Injector injector;
+	private Map<CheckBox,ListView<String>> checkBoxListViewMap = new HashMap<>();
 
 	@Inject
 	private TraceDiff(StageManager stageManager, Injector injector, CurrentTrace currentTrace) {
@@ -75,103 +78,73 @@ public class TraceDiff extends VBox {
 		showAlert.setPrefWidth(initialWidth);
 		setCurrent.setPrefWidth(initialWidth);
 
+		this.checkBoxListViewMap.put(replayed, replayedList);
+		this.checkBoxListViewMap.put(persistent, persistentList);
+		this.checkBoxListViewMap.put(current, currentList);
+
 		// Arrow key synchronicity
-		ChangeListener<? super Number> replayedListCL = createChangeListener(persistent, persistentList, current, currentList);
-		ChangeListener<? super Number> persistentListCL = createChangeListener(replayed, replayedList, current, currentList);
-		ChangeListener<? super Number> currentListCL = createChangeListener(replayed, replayedList, persistent, persistentList);
+		ChangeListener<? super Number> replayedListCL = createChangeListenerForListView(persistent, current);
+		ChangeListener<? super Number> persistentListCL = createChangeListenerForListView(replayed, current);
+		ChangeListener<? super Number> currentListCL = createChangeListenerForListView(replayed, persistent);
 
-		replayed.selectedProperty().addListener(((observable, oldValue, newValue) -> {
-			if (newValue) {
-				replayedList.getSelectionModel().selectedIndexProperty().addListener(replayedListCL);
-			} else {
-				replayedList.getSelectionModel().selectedIndexProperty().removeListener(replayedListCL);
-			}
-		}));
-
-		persistent.selectedProperty().addListener(((observable, oldValue, newValue) -> {
-			if (newValue) {
-				persistentList.getSelectionModel().selectedIndexProperty().addListener(persistentListCL);
-			} else {
-				persistentList.getSelectionModel().selectedIndexProperty().removeListener(persistentListCL);
-			}
-		}));
-
-		current.selectedProperty().addListener(((observable, oldValue, newValue) -> {
-			if (newValue) {
-				currentList.getSelectionModel().selectedIndexProperty().addListener(currentListCL);
-			} else {
-				currentList.getSelectionModel().selectedIndexProperty().removeListener(currentListCL);
-			}
-		}));
+		replayed.selectedProperty().addListener(createChangeListenerForCheckBox(replayedList, replayedListCL));
+		persistent.selectedProperty().addListener(createChangeListenerForCheckBox(persistentList, persistentListCL));
+		current.selectedProperty().addListener(createChangeListenerForCheckBox(currentList, currentListCL));
 
 		// Scrollbar synchronicity
-		replayed.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
-			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
-			ScrollBar csc = (ScrollBar) currentList.lookup(".scroll-bar:vertical");
-			if (rsc != null) {
-				if (newValue) {
-					if (persistent.isSelected() && psc != null) {
-						rsc.valueProperty().bindBidirectional(psc.valueProperty());
-					}
-					if (current.isSelected() && csc != null) {
-						rsc.valueProperty().bindBidirectional(csc.valueProperty());
-					}
-				} else {
-					rsc.valueProperty().unbindBidirectional(psc.valueProperty());
-					rsc.valueProperty().unbindBidirectional(csc.valueProperty());
-				}
-			}
-		});
-
-		persistent.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
-			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
-			ScrollBar csc = (ScrollBar) currentList.lookup(".scroll-bar:vertical");
-			if (psc != null) {
-				if (newValue) {
-					if (replayed.isSelected() && rsc != null) {
-						psc.valueProperty().bindBidirectional(rsc.valueProperty());
-					}
-					if (current.isSelected() && csc != null) {
-						psc.valueProperty().bindBidirectional(csc.valueProperty());
-					}
-				} else {
-					psc.valueProperty().unbindBidirectional(rsc.valueProperty());
-					psc.valueProperty().unbindBidirectional(csc.valueProperty());
-				}
-			}
-		});
-
-		current.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			ScrollBar rsc = (ScrollBar) replayedList.lookup(".scroll-bar:vertical");
-			ScrollBar psc = (ScrollBar) persistentList.lookup(".scroll-bar:vertical");
-			ScrollBar csc = (ScrollBar) currentList.lookup(".scroll-bar:vertical");
-			if (csc != null) {
-				if (newValue) {
-					if (replayed.isSelected() && rsc != null) {
-						csc.valueProperty().bindBidirectional(rsc.valueProperty());
-					}
-					if (persistent.isSelected() && psc != null) {
-						csc.valueProperty().bindBidirectional(psc.valueProperty());
-					}
-				} else {
-					csc.valueProperty().unbindBidirectional(rsc.valueProperty());
-					csc.valueProperty().unbindBidirectional(psc.valueProperty());
-				}
-			}
-		});
+		replayed.selectedProperty().addListener(createChangeListenerForCheckBox(replayed));
+		persistent.selectedProperty().addListener(createChangeListenerForCheckBox(persistent));
+		current.selectedProperty().addListener(createChangeListenerForCheckBox(current));
 	}
 
-	private ChangeListener<? super Number> createChangeListener(CheckBox firstCB, ListView firstLV, CheckBox secondCB, ListView secondLV) {
+	private ScrollBar getScrollBar(ListView<String> listView) {
+		return (ScrollBar) listView.lookup(".scroll-bar:vertical");
+	}
+
+	private ChangeListener<? super Boolean> createChangeListenerForCheckBox(CheckBox checkBox) {
+		return (obs, o, n) -> {
+			ScrollBar related = getScrollBar(checkBoxListViewMap.get(checkBox));
+			if (related != null) {
+				if (n) {
+					for (CheckBox cb : checkBoxListViewMap.keySet()) {
+						ScrollBar scrollBar = getScrollBar(checkBoxListViewMap.get(cb));
+						if (cb != checkBox && scrollBar != null && cb.isSelected()) {
+							related.valueProperty().bindBidirectional(scrollBar.valueProperty());
+						}
+					}
+				} else {
+					for (CheckBox cb : checkBoxListViewMap.keySet()) {
+						ScrollBar scrollBar = getScrollBar(checkBoxListViewMap.get(cb));
+						if (cb != checkBox && scrollBar != null) {
+							related.valueProperty().unbindBidirectional(scrollBar.valueProperty());
+						}
+					}
+				}
+			}
+		};
+	}
+
+	private ChangeListener<? super Boolean> createChangeListenerForCheckBox(ListView<String> listView, ChangeListener<? super Number> listViewChangeListener) {
+		return (obs, o, n) -> {
+			if (n) {
+				listView.getSelectionModel().selectedIndexProperty().addListener(listViewChangeListener);
+			} else {
+				listView.getSelectionModel().selectedIndexProperty().removeListener(listViewChangeListener);
+			}
+		};
+	}
+
+	private ChangeListener<? super Number> createChangeListenerForListView(CheckBox firstCB, CheckBox secondCB) {
 		return (obs, o, n) -> {
 			if (firstCB.isSelected()) {
+				ListView<String> firstLV = checkBoxListViewMap.get(firstCB);
 				firstLV.getSelectionModel().select(n.intValue());
 				firstLV.getFocusModel().focus(n.intValue());
 				firstLV.scrollTo(n.intValue());
 			}
 
 			if (secondCB.isSelected()) {
+				ListView<String> secondLV = checkBoxListViewMap.get(secondCB);
 				secondLV.getSelectionModel().select(n.intValue());
 				secondLV.getFocusModel().focus(n.intValue());
 				secondLV.scrollTo(n.intValue());
