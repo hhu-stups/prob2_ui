@@ -40,9 +40,11 @@ public class FullValueStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FullValueStage.class);
 	
 	@FXML private TabPane tabPane;
+	@FXML private Tab formulaTab;
 	@FXML private Tab currentValueTab;
 	@FXML private Tab previousValueTab;
 	@FXML private Tab diffTab;
+	@FXML private TextArea formulaTextarea;
 	@FXML private TextArea currentValueTextarea;
 	@FXML private TextArea previousValueTextarea;
 	@FXML private StyleClassedTextArea diffTextarea;
@@ -70,6 +72,7 @@ public class FullValueStage extends Stage {
 	private void initialize() {
 		this.valueProperty().addListener((o, from, to) -> this.updateValue(to));
 		this.prettifyCheckBox.selectedProperty().addListener(o -> this.updateValue(this.getValue()));
+		this.tabPane.getSelectionModel().select(this.currentValueTab);
 	}
 	
 	private static String prettify(final String s) {
@@ -187,6 +190,7 @@ public class FullValueStage extends Stage {
 	private void updateValue(final StateItem newValue) {
 		if (newValue == null) {
 			this.setTitle(null);
+			this.formulaTextarea.clear();
 			this.currentValueTextarea.clear();
 			this.previousValueTextarea.clear();
 			this.diffTextarea.clear();
@@ -194,6 +198,7 @@ public class FullValueStage extends Stage {
 		}
 		
 		this.setTitle(newValue.getLabel());
+		this.formulaTextarea.setText(newValue.getLabel());
 		final String cv = prettifyIfEnabled(valueToString(newValue.getCurrentValue()));
 		final String pv = prettifyIfEnabled(valueToString(newValue.getPreviousValue()));
 		this.currentValueTextarea.setText(cv);
@@ -229,15 +234,16 @@ public class FullValueStage extends Stage {
 		
 		try (final Writer out = Files.newBufferedWriter(selected)) {
 			final String value;
-			if (currentValueTab.isSelected()) {
+			if (formulaTab.isSelected()) {
+				value = this.formulaTextarea.getText();
+			} else if (currentValueTab.isSelected()) {
 				value = this.currentValueTextarea.getText();
 			} else if (previousValueTab.isSelected()) {
 				value = this.previousValueTextarea.getText();
 			} else if (diffTab.isSelected()) {
 				value = this.diffTextarea.getText();
 			} else {
-				LOGGER.error("No known tab selected");
-				return;
+				throw new AssertionError("No known tab selected");
 			}
 			out.write(value);
 		} catch (IOException e) {

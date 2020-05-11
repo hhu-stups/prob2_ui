@@ -22,6 +22,9 @@
 				</padding>
 				<center>
 					<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+						<Tab fx:id="formulaTab" text="%states.fullValueStage.tabs.formula">
+							<TextArea fx:id="formulaTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
+						</Tab>
 						<Tab fx:id="currentValueTab" text="%states.fullValueStage.tabs.current">
 							<TextArea fx:id="currentValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
 						</Tab>
