@@ -148,9 +148,6 @@ public class FullValueStage extends Stage {
 			this.diffTextarea.appendText(bundle.getString("states.fullValueStage.diff.noDifferencePlaceholder"));
 		} else {
 			for (final String line : uniDiffLines) {
-				this.diffTextarea.appendText(line);
-				this.diffTextarea.appendText("\n");
-				
 				final List<String> styleClasses = new ArrayList<>();
 				switch (line.charAt(0)) {
 					case '@':
@@ -169,11 +166,7 @@ public class FullValueStage extends Stage {
 						// No style class
 				}
 				
-				this.diffTextarea.setStyle(
-					this.diffTextarea.getLength() - line.length() - 1,
-					this.diffTextarea.getLength() - 1,
-					styleClasses
-				);
+				this.diffTextarea.append(line + "\n", styleClasses);
 			}
 		}
 	}
