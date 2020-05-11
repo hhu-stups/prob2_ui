@@ -25,11 +25,8 @@ public final class StateErrorsView extends AnchorPane {
 			
 			this.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY && !this.isEmpty()) {
-					final FullValueStage stage = injector.getInstance(FullValueStage.class);
-					stage.setTitle(this.getItem().getShortDescription());
-					stage.setCurrentValue(this.getItem().getLongDescription());
-					stage.setPreviousValue(null);
-					stage.setFormattingEnabled(false);
+					final StateErrorDetailsStage stage = injector.getInstance(StateErrorDetailsStage.class);
+					stage.setStateError(this.getItem());
 					stage.show();
 				}
 			});

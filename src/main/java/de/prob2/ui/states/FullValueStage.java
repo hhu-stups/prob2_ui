@@ -18,8 +18,6 @@ import de.prob2.ui.internal.StageManager;
 
 import difflib.DiffUtils;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -55,7 +53,6 @@ public class FullValueStage extends Stage {
 	
 	private final StringProperty currentValue;
 	private final StringProperty previousValue;
-	private final BooleanProperty formattingEnabled;
 	
 	@Inject
 	public FullValueStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final ResourceBundle bundle) {
@@ -64,13 +61,7 @@ public class FullValueStage extends Stage {
 		this.bundle = bundle;
 		this.currentValue = new SimpleStringProperty(this, "currentValue", null);
 		this.previousValue = new SimpleStringProperty(this, "previousValue", null);
-		this.formattingEnabled = new SimpleBooleanProperty(this, "formattingEnabled", true);
 		stageManager.loadFXML(this, "full_value_stage.fxml");
-	}
-	
-	@FXML
-	private void initialize() {
-		this.prettifyCheckBox.visibleProperty().bind(this.formattingEnabledProperty());
 	}
 	
 	private static String prettify(final String s) {
@@ -142,18 +133,6 @@ public class FullValueStage extends Stage {
 	public void setPreviousValue(final String previousValue) {
 		this.previousValueProperty().set(previousValue);
 		this.updateTabs();
-	}
-	
-	public BooleanProperty formattingEnabledProperty() {
-		return this.formattingEnabled;
-	}
-	
-	public boolean isFormattingEnabled() {
-		return this.formattingEnabledProperty().get();
-	}
-	
-	public void setFormattingEnabled(final boolean formattingEnabled) {
-		this.formattingEnabledProperty().set(formattingEnabled);
 	}
 	
 	private void updateDiff(final String cv, final String pv) {
