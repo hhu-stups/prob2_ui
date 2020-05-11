@@ -15,31 +15,27 @@
 <fx:root type="Stage" minWidth="240" minHeight="160" width="480" height="320" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
-			<BorderPane maxWidth="Infinity" maxHeight="Infinity"
-				stylesheets="@/prob.css" styleClass="dialog">
-				<padding>
-					<Insets top="1.0" right="0.0" bottom="10.0" left="0.0" />
-				</padding>
+			<BorderPane stylesheets="@/prob.css" styleClass="dialog">
 				<center>
 					<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
 						<Tab fx:id="formulaTab" text="%states.fullValueStage.tabs.formula">
-							<TextArea fx:id="formulaTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
+							<TextArea fx:id="formulaTextarea" editable="false" wrapText="true"/>
 						</Tab>
 						<Tab fx:id="currentValueTab" text="%states.fullValueStage.tabs.current">
-							<TextArea fx:id="currentValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
+							<TextArea fx:id="currentValueTextarea" editable="false" wrapText="true"/>
 						</Tab>
 						<Tab fx:id="previousValueTab" text="%states.fullValueStage.tabs.previous">
-							<TextArea fx:id="previousValueTextarea" editable="false" wrapText="true" maxWidth="Infinity" maxHeight="Infinity" />
+							<TextArea fx:id="previousValueTextarea" editable="false" wrapText="true"/>
 						</Tab>
 						<Tab fx:id="diffTab" text="%states.fullValueStage.tabs.diff">
-							<StyleClassedTextArea fx:id="diffTextarea" editable="false" wrapText="true" styleClass="difftextarea" maxWidth="Infinity" maxHeight="Infinity" />
+							<StyleClassedTextArea fx:id="diffTextarea" editable="false" wrapText="true" styleClass="difftextarea"/>
 						</Tab>
 					</BetterTabPane>
 				</center>
 				<bottom>
-					<HBox spacing="10.0">
+					<HBox spacing="10.0" alignment="CENTER">
 						<padding>
-							<Insets top="10.0" left="15.0" right="15.0"/>
+							<Insets topRightBottomLeft="10.0"/>
 						</padding>
 						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValueStage.prettify" alignment="CENTER_LEFT" HBox.hgrow="NEVER"/>
 						<Spacer/>
