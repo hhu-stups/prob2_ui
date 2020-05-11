@@ -7,19 +7,21 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 
 import difflib.DiffUtils;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -51,17 +53,23 @@ public class FullValueStage extends Stage {
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 	
-	private final StringProperty currentValue;
-	private final StringProperty previousValue;
+	private final ObjectProperty<StateItem> value;
 	
 	@Inject
 	public FullValueStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
-		this.currentValue = new SimpleStringProperty(this, "currentValue", null);
-		this.previousValue = new SimpleStringProperty(this, "previousValue", null);
+		
+		this.value = new SimpleObjectProperty<>(this, "value", null);
+		
 		stageManager.loadFXML(this, "full_value_stage.fxml");
+	}
+	
+	@FXML
+	private void initialize() {
+		this.valueProperty().addListener((o, from, to) -> this.updateValue(to));
+		this.prettifyCheckBox.selectedProperty().addListener(o -> this.updateValue(this.getValue()));
 	}
 	
 	private static String prettify(final String s) {
@@ -109,30 +117,16 @@ public class FullValueStage extends Stage {
 		return this.prettifyCheckBox.isSelected() ? prettify(s) : s;
 	}
 	
-	public StringProperty currentValueProperty() {
-		return this.currentValue;
+	public ObjectProperty<StateItem> valueProperty() {
+		return this.value;
 	}
 	
-	public String getCurrentValue() {
-		return this.currentValueProperty().get();
+	public StateItem getValue() {
+		return this.valueProperty().get();
 	}
 	
-	public void setCurrentValue(final String currentValue) {
-		this.currentValueProperty().set(currentValue);
-		this.updateTabs();
-	}
-	
-	public StringProperty previousValueProperty() {
-		return this.previousValue;
-	}
-	
-	public String getPreviousValue() {
-		return this.previousValueProperty().get();
-	}
-	
-	public void setPreviousValue(final String previousValue) {
-		this.previousValueProperty().set(previousValue);
-		this.updateTabs();
+	public void setValue(final StateItem value) {
+		this.valueProperty().set(value);
 	}
 	
 	private void updateDiff(final String cv, final String pv) {
@@ -171,23 +165,40 @@ public class FullValueStage extends Stage {
 		}
 	}
 	
-	@FXML
-	private void updateTabs() {
-		final String cv = this.getCurrentValue() == null ? null : prettifyIfEnabled(this.getCurrentValue());
-		final String pv = this.getPreviousValue() == null ? null : prettifyIfEnabled(this.getPreviousValue());
-		if (cv != null) {
-			this.currentValueTextarea.setText(cv);
+	private String valueToString(final BVisual2Value value) {
+		Objects.requireNonNull(value, "value");
+		
+		if (value instanceof BVisual2Value.PredicateValue) {
+			return String.valueOf(((BVisual2Value.PredicateValue)value).getValue());
+		} else if (value instanceof BVisual2Value.ExpressionValue) {
+			return ((BVisual2Value.ExpressionValue)value).getValue();
+		} else if (value instanceof BVisual2Value.Inactive) {
+			return bundle.getString("states.fullValueStage.value.inactive");
+		} else if (value instanceof BVisual2Value.Error) {
+			return String.format(
+				bundle.getString("states.fullValueStage.value.error"),
+				((BVisual2Value.Error)value).getMessage()
+			);
+		} else {
+			throw new IllegalArgumentException("Cannot display a BVisual2Value of type " + value.getClass());
 		}
-		if (pv != null) {
-			this.previousValueTextarea.setText(pv);
-		}
-		if (cv != null && pv != null) {
-			this.updateDiff(cv, pv);
+	}
+	
+	private void updateValue(final StateItem newValue) {
+		if (newValue == null) {
+			this.setTitle(null);
+			this.currentValueTab.setText(null);
+			this.previousValueTab.setText(null);
+			this.diffTab.setText(null);
+			return;
 		}
 		
-		this.currentValueTab.setDisable(cv == null);
-		this.previousValueTab.setDisable(pv == null);
-		this.diffTab.setDisable(cv == null || pv == null);
+		this.setTitle(newValue.getLabel());
+		final String cv = prettifyIfEnabled(valueToString(newValue.getCurrentValue()));
+		final String pv = prettifyIfEnabled(valueToString(newValue.getPreviousValue()));
+		this.currentValueTextarea.setText(cv);
+		this.previousValueTextarea.setText(pv);
+		this.updateDiff(cv, pv);
 	}
 	
 	@FXML
@@ -205,8 +216,8 @@ public class FullValueStage extends Stage {
 			defaultExtension = ".txt";
 		}
 		final String defaultFileName;
-		if (this.getTitle().matches("[\\w\\s]+")) {
-			defaultFileName = this.getTitle();
+		if (this.getValue().getLabel().matches("[\\w\\s]+")) {
+			defaultFileName = this.getValue().getLabel();
 		} else {
 			defaultFileName = bundle.getString("states.fullValueStage.saveAs.defaultFileName");
 		}

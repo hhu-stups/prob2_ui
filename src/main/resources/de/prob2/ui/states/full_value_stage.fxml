@@ -38,7 +38,7 @@
 						<padding>
 							<Insets top="10.0" left="15.0" right="15.0"/>
 						</padding>
-						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValueStage.prettify" alignment="CENTER_LEFT" HBox.hgrow="NEVER" onAction="#updateTabs"/>
+						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValueStage.prettify" alignment="CENTER_LEFT" HBox.hgrow="NEVER"/>
 						<Spacer/>
 						<Button fx:id="saveAsButton" text="%common.buttons.saveAs" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs" />
 					</HBox>

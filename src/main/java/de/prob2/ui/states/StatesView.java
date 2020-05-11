@@ -485,25 +485,9 @@ public final class StatesView extends StackPane {
 		clipboard.setContent(content);
 	}
 
-	private static String getResultValue(final BVisual2Value result) {
-		if (result instanceof BVisual2Value.PredicateValue) {
-			return String.valueOf(((BVisual2Value.PredicateValue)result).getValue());
-		} else if (result instanceof BVisual2Value.ExpressionValue) {
-			return ((BVisual2Value.ExpressionValue)result).getValue();
-		} else if (result instanceof BVisual2Value.Error) {
-			return ((BVisual2Value.Error)result).getMessage();
-		} else if (result instanceof BVisual2Value.Inactive) {
-			return "";
-		} else {
-			throw new IllegalArgumentException("Unknown eval result type: " + result.getClass());
-		}
-	}
-
 	private void showDetails(final StateItem item) {
 		final FullValueStage stage = injector.getInstance(FullValueStage.class);
-		stage.setTitle(item.getLabel());
-		stage.setCurrentValue(getResultValue(item.getCurrentValue()));
-		stage.setPreviousValue(getResultValue(item.getPreviousValue()));
+		stage.setValue(item);
 		stage.show();
 	}
 	
