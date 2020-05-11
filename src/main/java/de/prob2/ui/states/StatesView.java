@@ -400,8 +400,9 @@ public final class StatesView extends StackPane {
 
 		treeItem.getChildren().setAll(children);
 
-		// If treeItem does not match the filter, filter its children.
+		// If treeItem does not match the filter, expand it (to set up its children's listeners), then filter its children.
 		if (treeItem.getValue() == null || !matchesFilter(filter, treeItem.getValue().getLabel())) {
+			treeItem.setExpanded(true);
 			for (final Iterator<TreeItem<StateItem>> it = treeItem.getChildren().iterator(); it.hasNext();) {
 				final TreeItem<StateItem> subTreeItem = it.next();
 				// If subTreeItem does not match the filter, expand it.
@@ -415,12 +416,12 @@ public final class StatesView extends StackPane {
 					}
 				}
 			}
+		} else {
+			// Restore the previous expanded state of treeItem.
+			// If this expands treeItem, this triggers the listener above.
+			// The root item has its value set to null. It should always be expanded.
+			treeItem.setExpanded(treeItem.getValue() == null || this.expandedFormulas.contains(treeItem.getValue().getFormula()));
 		}
-
-		// Restore the previous expanded state of treeItem.
-		// If this expands treeItem, this triggers the listener above.
-		// The root item has its value set to null. It should always be expanded.
-		treeItem.setExpanded(treeItem.getValue() == null || this.expandedFormulas.contains(treeItem.getValue().getFormula()));
 	}
 
 	private static TreeItem<StateItem> createRootItem() {
