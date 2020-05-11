@@ -187,9 +187,9 @@ public class FullValueStage extends Stage {
 	private void updateValue(final StateItem newValue) {
 		if (newValue == null) {
 			this.setTitle(null);
-			this.currentValueTab.setText(null);
-			this.previousValueTab.setText(null);
-			this.diffTab.setText(null);
+			this.currentValueTextarea.clear();
+			this.previousValueTextarea.clear();
+			this.diffTextarea.clear();
 			return;
 		}
 		
