@@ -136,43 +136,45 @@ public class FullValueStage extends Stage {
 	}
 	
 	private void updateDiff(final String cv, final String pv) {
+		final String prevName = bundle.getString("states.fullValueStage.diff.previousValueName");
+		final String curName = bundle.getString("states.fullValueStage.diff.currentValueName");
 		final List<String> prevLines = Arrays.asList(pv.split("\n"));
 		final List<String> curLines = Arrays.asList(cv.split("\n"));
-		final List<String> uniDiffLines = DiffUtils.generateUnifiedDiff("", "", prevLines, DiffUtils.diff(prevLines, curLines), 3);
+		final List<String> uniDiffLines = DiffUtils.generateUnifiedDiff(prevName, curName, prevLines, DiffUtils.diff(prevLines, curLines), 3);
 		
 		this.diffTextarea.clear();
-		if (uniDiffLines.isEmpty()) {
-			return;
-		}
 		
-		// Don't display the "file names" in the first two lines
-		for (final String line : uniDiffLines.subList(2, uniDiffLines.size())) {
-			this.diffTextarea.appendText(line);
-			this.diffTextarea.appendText("\n");
-			
-			final List<String> styleClasses = new ArrayList<>();
-			switch (line.charAt(0)) {
-				case '@':
-					styleClasses.add("coords");
-					break;
+		if (uniDiffLines.isEmpty()) {
+			this.diffTextarea.appendText(bundle.getString("states.fullValueStage.diff.noDifferencePlaceholder"));
+		} else {
+			for (final String line : uniDiffLines) {
+				this.diffTextarea.appendText(line);
+				this.diffTextarea.appendText("\n");
 				
-				case '+':
-					styleClasses.add("insert");
-					break;
+				final List<String> styleClasses = new ArrayList<>();
+				switch (line.charAt(0)) {
+					case '@':
+						styleClasses.add("coords");
+						break;
+					
+					case '+':
+						styleClasses.add("insert");
+						break;
+					
+					case '-':
+						styleClasses.add("delete");
+						break;
+					
+					default:
+						// No style class
+				}
 				
-				case '-':
-					styleClasses.add("delete");
-					break;
-				
-				default:
-					// No style class
+				this.diffTextarea.setStyle(
+					this.diffTextarea.getLength() - line.length() - 1,
+					this.diffTextarea.getLength() - 1,
+					styleClasses
+				);
 			}
-			
-			this.diffTextarea.setStyle(
-				this.diffTextarea.getLength() - line.length() - 1,
-				this.diffTextarea.getLength() - 1,
-				styleClasses
-			);
 		}
 	}
 	
