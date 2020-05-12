@@ -121,8 +121,7 @@ public class HelpSystem extends StackPane {
 
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
 
-		final File defaultPage = new File(this.getHelpSubdirectory(), "ProB2UI.html");
-		this.openHelpPage(defaultPage, "");
+		this.openHelpForIdentifier(ProB2.class.getName());
 	}
 
 	private Properties getClassToHelpFileMap() {
