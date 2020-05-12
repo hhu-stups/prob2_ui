@@ -16,21 +16,14 @@ class HelpTreeItem extends TreeItem<String>{
 			this.setValue(file.getName().replace(".html",""));
 		} else {
 			this.setValue(this.getValue().replace(File.separator,""));
-		}
-		this.getChildren().setAll(buildChildren());
-	}
-
-	private ObservableList<TreeItem<String>> buildChildren() {
-		if (this.file != null && this.file.isDirectory()) {
 			ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
 			for (File child : this.file.listFiles()) {
 				if (child.isDirectory() || child.getName().contains(".html")) {
 					children.add(createNode(child));
 				}
 			}
-			return children;
+			this.getChildren().setAll(children);
 		}
-		return FXCollections.emptyObservableList();
 	}
 
 	private TreeItem<String> createNode(final File file) {
