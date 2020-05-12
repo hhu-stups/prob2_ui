@@ -150,11 +150,9 @@ public class HelpSystem extends StackPane {
 
 	private TreeItem<String> createNode(final File file) {
 		HelpTreeItem hti = new HelpTreeItem(file);
-		if (!file.getName().contains(":")) {
-			Platform.runLater(() -> hti.setExpanded(true));
-			if (hti.isLeaf()) {
-				fileMap.put(file, hti);
-			}
+		Platform.runLater(() -> hti.setExpanded(true));
+		if (hti.isLeaf()) {
+			fileMap.put(file, hti);
 		}
 		return hti;
 	}
