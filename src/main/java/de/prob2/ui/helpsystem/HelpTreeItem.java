@@ -1,9 +1,9 @@
 package de.prob2.ui.helpsystem;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 
 class HelpTreeItem extends TreeItem<String>{
@@ -16,13 +16,10 @@ class HelpTreeItem extends TreeItem<String>{
 			this.setValue(file.getName().replace(".html",""));
 		} else {
 			this.setValue(this.getValue().replace(File.separator,""));
-			ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
-			for (File child : this.file.listFiles()) {
-				if (child.isDirectory() || child.getName().contains(".html")) {
-					children.add(createNode(child));
-				}
-			}
-			this.getChildren().setAll(children);
+			Arrays.stream(this.file.listFiles())
+				.filter(child -> child.isDirectory() || child.getName().contains(".html"))
+				.map(this::createNode)
+				.collect(Collectors.toCollection(this::getChildren));
 		}
 	}
 
