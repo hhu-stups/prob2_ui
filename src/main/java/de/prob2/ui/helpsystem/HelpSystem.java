@@ -244,12 +244,6 @@ public class HelpSystem extends StackPane {
 		return HelpSystem.class.getResource("/help/" + helpDirName + ".properties") == null ? "help_en" : helpDirName;
 	}
 
-	public void openHelpPage(File file, String anchor) {
-		final String url = file.toURI() + anchor;
-		LOGGER.debug("Opening URL in help: {}", url);
-		this.webEngine.load(url);
-	}
-
 	public void openHelpForIdentifier(final String identifier) {
 		File main = this.getHelpSubdirectory();
 		String link = this.getHelpFileForIdentifier(identifier);
@@ -271,7 +265,8 @@ public class HelpSystem extends StackPane {
 		} catch (URISyntaxException exc) {
 			throw new AssertionError("Invalid help file name", exc);
 		}
-		final File file = new File(main.toURI().resolve(htmlFileUri));
-		this.openHelpPage(file, anchor);
+		final String url = main.toURI().resolve(htmlFileUri) + anchor;
+		LOGGER.debug("Opening URL in help: {}", url);
+		this.webEngine.load(url);
 	}
 }
