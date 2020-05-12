@@ -24,7 +24,7 @@ class HelpTreeItem extends TreeItem<String>{
 		if (this.file != null && this.file.isDirectory()) {
 			ObservableList<TreeItem<String>> children = FXCollections.observableArrayList();
 			for (File child : this.file.listFiles()) {
-				if ((child.isDirectory() && !child.getName().contains("screenshots"))||child.getName().contains(".html")) {
+				if (child.isDirectory() || child.getName().contains(".html")) {
 					children.add(createNode(child));
 				}
 			}
