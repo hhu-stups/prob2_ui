@@ -147,29 +147,43 @@ public class HelpSystem extends StackPane {
 		return this.getClassToHelpFileMap().getProperty(identifier);
 	}
 
-	File getHelpSubdirectory() {
-		if (this.isJar) {
-			return new File(Main.getProBDirectory() +
-					"prob2ui" + File.separator +
-					"help" + File.separator +
-					this.helpSubdirectoryString);
+	private static URI ensureTrailingSlash(final URI uri) throws URISyntaxException {
+		if (uri.getSchemeSpecificPart().endsWith("/")) {
+			return uri;
 		} else {
-			try {
-				return new File(ProB2.class.getClassLoader().getResource(
-						"help/" +
-						this.helpSubdirectoryString).toURI());
-			} catch (URISyntaxException e) {
-				throw new AssertionError("Help directory URL is not a valid URI", e);
-			}
+			return new URI(uri.getScheme(), uri.getSchemeSpecificPart() + "/", uri.getFragment());
 		}
 	}
 
-	private TreeItem<URI> createNode(final File file) {
-		final URI uri = file.toURI();
+	URI getHelpSubdirectory() {
+		try {
+			final URI uri;
+			if (this.isJar) {
+				uri = new File(Main.getProBDirectory() +
+					"prob2ui" + File.separator +
+					"help" + File.separator +
+					this.helpSubdirectoryString).toURI();
+			} else {
+				uri = ProB2.class.getClassLoader().getResource(
+					"help/" +
+					this.helpSubdirectoryString).toURI();
+			}
+			// The URI represents a directory, so it must end in a slash.
+			// Otherwise resolving a path relative to the URI will not behave as expected
+			// (the last directory would be treated as a file name and removed).
+			return ensureTrailingSlash(uri);
+		} catch (URISyntaxException e) {
+			throw new AssertionError("Could not convert the help directory to a valid URI", e);
+		}
+	}
+
+	private TreeItem<URI> createNode(final URI uri) {
 		final TreeItem<URI> item = new TreeItem<>(uri);
+		final File file = new File(uri);
 		if (file.isDirectory()) {
 			Arrays.stream(file.listFiles())
 				.filter(child -> child.isDirectory() || child.getName().contains(".html"))
+				.map(File::toURI)
 				.map(this::createNode)
 				.collect(Collectors.toCollection(item::getChildren));
 		} else {
@@ -245,7 +259,6 @@ public class HelpSystem extends StackPane {
 	}
 
 	public void openHelpForIdentifier(final String identifier) {
-		File main = this.getHelpSubdirectory();
 		String link = this.getHelpFileForIdentifier(identifier);
 		final String htmlFile;
 		final String anchor;
@@ -265,7 +278,7 @@ public class HelpSystem extends StackPane {
 		} catch (URISyntaxException exc) {
 			throw new AssertionError("Invalid help file name", exc);
 		}
-		final String url = main.toURI().resolve(htmlFileUri) + anchor;
+		final String url = this.getHelpSubdirectory().resolve(htmlFileUri) + anchor;
 		LOGGER.debug("Opening URL in help: {}", url);
 		this.webEngine.load(url);
 	}
