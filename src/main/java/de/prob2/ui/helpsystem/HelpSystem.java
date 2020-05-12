@@ -224,4 +224,29 @@ public class HelpSystem extends StackPane {
 		LOGGER.debug("Opening URL in help: {}", url);
 		this.webEngine.load(url);
 	}
+
+	public void openHelpForClass(final Class<?> clazz) {
+		File main = this.getHelpSubdirectory();
+		String link = this.getHelpFileForClass(clazz);
+		final String htmlFile;
+		final String anchor;
+		if (link.contains("#")) {
+			int splitIndex = link.indexOf('#');
+			htmlFile = link.substring(0, splitIndex);
+			anchor = link.substring(splitIndex);
+		} else {
+			htmlFile = link;
+			anchor = "";
+		}
+		final URI htmlFileUri;
+		try {
+			// Use the multi-arg URI constructor to quote (percent-encode) the htmlFile path.
+			// This is needed for help files with spaces in the path, which are not valid URIs without quoting the spaces first.
+			htmlFileUri = new URI(null, htmlFile, null);
+		} catch (URISyntaxException exc) {
+			throw new AssertionError("Invalid help file name", exc);
+		}
+		final File file = new File(main.toURI().resolve(htmlFileUri));
+		this.openHelpPage(file, anchor);
+	}
 }
