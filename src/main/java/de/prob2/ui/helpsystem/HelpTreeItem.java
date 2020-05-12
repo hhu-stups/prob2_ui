@@ -8,9 +8,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 
 class HelpTreeItem extends TreeItem<String>{
-	private boolean isLeaf;
-	private boolean isFirstTimeChildren = true;
-	private boolean isFirstTimeLeaf = true;
 	private File file;
 
 	HelpTreeItem(final File file) {
@@ -21,24 +18,9 @@ class HelpTreeItem extends TreeItem<String>{
 		} else {
 			this.setValue(this.getValue().replace(File.separator,""));
 		}
+		this.getChildren().setAll(buildChildren(this));
 		this.setExpanded(true);
 		Platform.runLater(() -> this.setExpanded(false));
-	}
-
-	@Override public ObservableList<TreeItem<String>> getChildren() {
-		if (isFirstTimeChildren) {
-			isFirstTimeChildren = false;
-			super.getChildren().setAll(buildChildren(this));
-		}
-		return super.getChildren();
-	}
-
-	@Override public boolean isLeaf() {
-		if (isFirstTimeLeaf) {
-			isFirstTimeLeaf = false;
-			isLeaf = this.file.isFile();
-		}
-		return isLeaf;
 	}
 
 	private ObservableList<TreeItem<String>> buildChildren(HelpTreeItem helpTreeItem) {
