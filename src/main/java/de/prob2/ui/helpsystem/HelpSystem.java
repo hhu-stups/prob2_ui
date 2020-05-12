@@ -123,9 +123,6 @@ public class HelpSystem extends StackPane {
 				findMatchingTreeViewEntryToSelect(url);
 			}
 		});
-		if (!treeView.getRoot().getChildren().isEmpty()) {
-			webEngine.load(treeView.getRoot().getChildren().get(0).getValue().toURI().toString());
-		}
 
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
 
