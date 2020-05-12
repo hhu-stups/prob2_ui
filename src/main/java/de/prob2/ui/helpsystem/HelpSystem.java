@@ -41,6 +41,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.StackPane;
@@ -52,17 +53,36 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class HelpSystem extends StackPane {
+	private static final class HelpCell extends TreeCell<File> {
+		private HelpCell() {
+			super();
+		}
+
+		@Override
+		protected void updateItem(final File item, final boolean empty) {
+			super.updateItem(item, empty);
+
+			if (empty) {
+				this.setText(null);
+			} else if (item.isFile()) {
+				this.setText(item.getName().replace(".html", ""));
+			} else {
+				this.setText(item.getName().replace(File.separator, ""));
+			}
+		}
+	}
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(HelpSystem.class);
 
 	@FXML private Button external;
-	@FXML private TreeView<String> treeView;
+	@FXML private TreeView<File> treeView;
 	@FXML private WebView webView;
 	WebEngine webEngine;
 	private URI helpURI;
 	boolean isJar;
 	boolean isHelpButton;
 	final String helpSubdirectoryString;
-	private final Map<File, HelpTreeItem> fileMap = new HashMap<>();
+	private final Map<File, TreeItem<File>> fileMap = new HashMap<>();
 	private Properties classToHelpFileMap;
 
 	@Inject
@@ -74,13 +94,13 @@ public class HelpSystem extends StackPane {
 		helpSubdirectoryString = findHelpSubdirectory();
 		extractHelpFiles();
 
-		final TreeItem<String> root = createNode(this.getHelpSubdirectory());
+		final TreeItem<File> root = createNode(this.getHelpSubdirectory());
 		root.setExpanded(true);
 		treeView.setRoot(root);
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
-				File f = ((HelpTreeItem) newVal).getFile();
+				File f = newVal.getValue();
 				if (!isHelpButton) {
 					webEngine.load(f.toURI().toString());
 				} else {
@@ -88,6 +108,7 @@ public class HelpSystem extends StackPane {
 				}
 			}
 		});
+		treeView.setCellFactory(tv -> new HelpCell());
 
 		webEngine = webView.getEngine();
 		webEngine.setUserStyleSheetLocation(this.getClass().getResource("help.css").toString());
@@ -103,7 +124,7 @@ public class HelpSystem extends StackPane {
 			}
 		});
 		if (!treeView.getRoot().getChildren().isEmpty()) {
-			webEngine.load(((HelpTreeItem) treeView.getRoot().getChildren().get(0)).getFile().toURI().toString());
+			webEngine.load(treeView.getRoot().getChildren().get(0).getValue().toURI().toString());
 		}
 
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
@@ -152,8 +173,8 @@ public class HelpSystem extends StackPane {
 		}
 	}
 
-	private TreeItem<String> createNode(final File file) {
-		final HelpTreeItem item = new HelpTreeItem(file);
+	private TreeItem<File> createNode(final File file) {
+		final TreeItem<File> item = new TreeItem<>(file);
 		if (file.isDirectory()) {
 			Arrays.stream(file.listFiles())
 				.filter(child -> child.isDirectory() || child.getName().contains(".html"))
@@ -206,8 +227,8 @@ public class HelpSystem extends StackPane {
 	}
 
 	private void findMatchingTreeViewEntryToSelect(String url) {
-		for (Map.Entry<File,HelpTreeItem> entry : fileMap.entrySet()) {
-			final HelpTreeItem hti = entry.getValue();
+		for (Map.Entry<File, TreeItem<File>> entry : fileMap.entrySet()) {
+			final TreeItem<File> hti = entry.getValue();
 			try {
 				if (entry.getKey().toURI().toURL().sameFile(new URL(URLDecoder.decode(url,"UTF-8"))) ||
 						URLDecoder.decode(url,"UTF-8").contains(entry.getKey().toString())) {
