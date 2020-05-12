@@ -5,12 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -53,21 +49,20 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class HelpSystem extends StackPane {
-	private static final class HelpCell extends TreeCell<File> {
+	private static final class HelpCell extends TreeCell<URI> {
 		private HelpCell() {
 			super();
 		}
 
 		@Override
-		protected void updateItem(final File item, final boolean empty) {
+		protected void updateItem(final URI item, final boolean empty) {
 			super.updateItem(item, empty);
 
 			if (empty) {
 				this.setText(null);
-			} else if (item.isFile()) {
-				this.setText(item.getName().replace(".html", ""));
 			} else {
-				this.setText(item.getName().replace(File.separator, ""));
+				final String[] pathParts = item.getPath().split("/");
+				this.setText(pathParts[pathParts.length - 1].replace(".html", ""));
 			}
 		}
 	}
@@ -75,14 +70,14 @@ public class HelpSystem extends StackPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HelpSystem.class);
 
 	@FXML private Button external;
-	@FXML private TreeView<File> treeView;
+	@FXML private TreeView<URI> treeView;
 	@FXML private WebView webView;
 	WebEngine webEngine;
 	private URI helpURI;
 	boolean isJar;
 	boolean isHelpButton;
 	final String helpSubdirectoryString;
-	private final Map<File, TreeItem<File>> fileMap = new HashMap<>();
+	private final Map<URI, TreeItem<URI>> itemsByUri = new HashMap<>();
 	private Properties classToHelpFileMap;
 
 	@Inject
@@ -94,15 +89,15 @@ public class HelpSystem extends StackPane {
 		helpSubdirectoryString = findHelpSubdirectory();
 		extractHelpFiles();
 
-		final TreeItem<File> root = createNode(this.getHelpSubdirectory());
+		final TreeItem<URI> root = createNode(this.getHelpSubdirectory());
 		root.setExpanded(true);
 		treeView.setRoot(root);
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
-				File f = newVal.getValue();
+				URI f = newVal.getValue();
 				if (!isHelpButton) {
-					webEngine.load(f.toURI().toString());
+					webEngine.load(f.toString());
 				} else {
 					isHelpButton = false;
 				}
@@ -170,15 +165,16 @@ public class HelpSystem extends StackPane {
 		}
 	}
 
-	private TreeItem<File> createNode(final File file) {
-		final TreeItem<File> item = new TreeItem<>(file);
+	private TreeItem<URI> createNode(final File file) {
+		final URI uri = file.toURI();
+		final TreeItem<URI> item = new TreeItem<>(uri);
 		if (file.isDirectory()) {
 			Arrays.stream(file.listFiles())
 				.filter(child -> child.isDirectory() || child.getName().contains(".html"))
 				.map(this::createNode)
 				.collect(Collectors.toCollection(item::getChildren));
 		} else {
-			fileMap.put(file, item);
+			itemsByUri.put(uri, item);
 		}
 		return item;
 	}
@@ -223,19 +219,25 @@ public class HelpSystem extends StackPane {
 		}
 	}
 
+	private static URI removeFragment(final URI uri) throws URISyntaxException {
+		return new URI(uri.getScheme(), uri.getSchemeSpecificPart(), null);
+	}
+
 	private void findMatchingTreeViewEntryToSelect(String url) {
-		for (Map.Entry<File, TreeItem<File>> entry : fileMap.entrySet()) {
-			final TreeItem<File> hti = entry.getValue();
-			try {
-				if (entry.getKey().toURI().toURL().sameFile(new URL(URLDecoder.decode(url,"UTF-8"))) ||
-						URLDecoder.decode(url,"UTF-8").contains(entry.getKey().toString())) {
-					expandTree(hti);
-					Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
-				}
-			} catch (MalformedURLException | UnsupportedEncodingException e) {
-				LOGGER.error("URL not found", e);
-			}
+		final URI uriWithoutFragment;
+		try {
+			uriWithoutFragment = removeFragment(new URI(url));
+		} catch (URISyntaxException e) {
+			LOGGER.warn("Help system web view navigated to an invalid URI: {}", url, e);
+			return;
 		}
+		if (!itemsByUri.containsKey(uriWithoutFragment)) {
+			LOGGER.warn("No matching help tree item found for URI {}", uriWithoutFragment);
+			return;
+		}
+		final TreeItem<URI> hti = itemsByUri.get(uriWithoutFragment);
+		expandTree(hti);
+		Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
 	}
 
 	private static String findHelpSubdirectory() {
