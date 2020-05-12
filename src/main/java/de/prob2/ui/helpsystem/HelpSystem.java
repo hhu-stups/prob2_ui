@@ -215,4 +215,10 @@ public class HelpSystem extends StackPane {
 		final String helpDirName = "help_" + Locale.getDefault().getLanguage();
 		return HelpSystem.class.getResource("/help/" + helpDirName + ".txt") == null ? "help_en" : helpDirName;
 	}
+
+	public void openHelpPage(File file, String anchor) {
+		final String url = file.toURI() + anchor;
+		LOGGER.debug("Opening URL in help: {}", url);
+		this.webEngine.load(url);
+	}
 }
