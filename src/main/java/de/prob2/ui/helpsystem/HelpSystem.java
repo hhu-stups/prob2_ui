@@ -1,6 +1,5 @@
 package de.prob2.ui.helpsystem;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,13 +16,13 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -159,10 +158,7 @@ public class HelpSystem extends StackPane {
 		try {
 			final URI uri;
 			if (this.isJar) {
-				uri = new File(Main.getProBDirectory() +
-					"prob2ui" + File.separator +
-					"help" + File.separator +
-					this.helpSubdirectoryString).toURI();
+				uri = Paths.get(Main.getProBDirectory(), "prob2ui", "help", this.helpSubdirectoryString).toUri();
 			} else {
 				uri = ProB2.class.getClassLoader().getResource(
 					"help/" +
@@ -179,13 +175,17 @@ public class HelpSystem extends StackPane {
 
 	private TreeItem<URI> createNode(final URI uri) {
 		final TreeItem<URI> item = new TreeItem<>(uri);
-		final File file = new File(uri);
-		if (file.isDirectory()) {
-			Arrays.stream(file.listFiles())
-				.filter(child -> child.isDirectory() || child.getName().contains(".html"))
-				.map(File::toURI)
-				.map(this::createNode)
-				.collect(Collectors.toCollection(item::getChildren));
+		final Path path = Paths.get(uri);
+		if (Files.isDirectory(path)) {
+			try (final Stream<Path> children = Files.list(path)) {
+				children
+					.filter(child -> Files.isDirectory(child) || child.getFileName().toString().endsWith(".html"))
+					.map(Path::toUri)
+					.map(this::createNode)
+					.collect(Collectors.toCollection(item::getChildren));
+			} catch (IOException e) {
+				LOGGER.error("I/O error while building help page tree for directory {}", path, e);
+			}
 		} else {
 			itemsByUri.put(uri, item);
 		}
@@ -222,7 +222,7 @@ public class HelpSystem extends StackPane {
 
 	private void extractHelpFiles() throws IOException {
 		if (isJar) {
-			Path target = Paths.get(Main.getProBDirectory() + "prob2ui" + File.separator + "help");
+			Path target = Paths.get(Main.getProBDirectory(), "prob2ui", "help");
 			try (FileSystem jarFileSystem = FileSystems.newFileSystem(helpURI, Collections.emptyMap())) {
 				Path source = jarFileSystem.getPath("/help/");
 				if (!target.toFile().exists()) {
