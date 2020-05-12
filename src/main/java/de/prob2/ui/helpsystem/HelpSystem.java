@@ -21,11 +21,13 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -60,7 +62,7 @@ public class HelpSystem extends StackPane {
 	boolean isJar;
 	boolean isHelpButton;
 	final String helpSubdirectoryString;
-	static HashMap<File,HelpTreeItem> fileMap = new HashMap<>();
+	private final Map<File, HelpTreeItem> fileMap = new HashMap<>();
 	private Properties classToHelpFileMap;
 
 	@Inject
@@ -72,7 +74,9 @@ public class HelpSystem extends StackPane {
 		helpSubdirectoryString = findHelpSubdirectory();
 		extractHelpFiles();
 
-		treeView.setRoot(createNode(this.getHelpSubdirectory()));
+		final TreeItem<String> root = createNode(this.getHelpSubdirectory());
+		root.setExpanded(true);
+		treeView.setRoot(root);
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
@@ -149,12 +153,16 @@ public class HelpSystem extends StackPane {
 	}
 
 	private TreeItem<String> createNode(final File file) {
-		HelpTreeItem hti = new HelpTreeItem(file);
-		Platform.runLater(() -> hti.setExpanded(true));
-		if (hti.isLeaf()) {
-			fileMap.put(file, hti);
+		final HelpTreeItem item = new HelpTreeItem(file);
+		if (file.isDirectory()) {
+			Arrays.stream(file.listFiles())
+				.filter(child -> child.isDirectory() || child.getName().contains(".html"))
+				.map(this::createNode)
+				.collect(Collectors.toCollection(item::getChildren));
+		} else {
+			fileMap.put(file, item);
 		}
-		return hti;
+		return item;
 	}
 
 	private void expandTree(TreeItem<?> ti) {
