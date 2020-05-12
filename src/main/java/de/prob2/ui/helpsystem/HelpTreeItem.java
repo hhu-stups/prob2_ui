@@ -2,7 +2,6 @@ package de.prob2.ui.helpsystem;
 
 import java.io.File;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
@@ -19,8 +18,6 @@ class HelpTreeItem extends TreeItem<String>{
 			this.setValue(this.getValue().replace(File.separator,""));
 		}
 		this.getChildren().setAll(buildChildren(this));
-		this.setExpanded(true);
-		Platform.runLater(() -> this.setExpanded(false));
 	}
 
 	private ObservableList<TreeItem<String>> buildChildren(HelpTreeItem helpTreeItem) {
