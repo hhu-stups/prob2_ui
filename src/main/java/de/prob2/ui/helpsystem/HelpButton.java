@@ -12,7 +12,7 @@ import javafx.scene.control.Button;
 @FXMLInjected
 public class HelpButton extends Button{
 	private final Injector injector;
-	private Class<?> helpContent;
+	private String helpIdentifier;
 
 	@Inject
 	private HelpButton(StageManager stageManager, Injector injector) {
@@ -22,22 +22,26 @@ public class HelpButton extends Button{
 
 	@FXML
 	public void openHelp() {
-		if (this.getHelpContent() == null) {
+		if (this.getHelpIdentifier() == null) {
 			throw new IllegalStateException("Help button has no class set");
 		}
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
 		helpSystem.isHelpButton = true;
-		helpSystem.openHelpForClass(this.getHelpContent());
+		helpSystem.openHelpForIdentifier(this.getHelpIdentifier());
 		helpSystemStage.show();
 		helpSystemStage.toFront();
 	}
 
-	public Class<?> getHelpContent() {
-		return this.helpContent;
+	public String getHelpIdentifier() {
+		return this.helpIdentifier;
 	}
 
-	public void setHelpContent(final Class<?> helpContent) {
-		this.helpContent = helpContent;
+	public void setHelpIdentifier(final String helpIdentifier) {
+		this.helpIdentifier = helpIdentifier;
+	}
+
+	public void setHelpContent(final Class<?> clazz) {
+		this.setHelpIdentifier(clazz.getName());
 	}
 }

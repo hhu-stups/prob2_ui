@@ -127,8 +127,8 @@ public class HelpSystem extends StackPane {
 		return this.classToHelpFileMap;
 	}
 
-	String getHelpFileForClass(final Class<?> clazz) {
-		return this.getClassToHelpFileMap().getProperty(clazz.getName());
+	String getHelpFileForIdentifier(final String identifier) {
+		return this.getClassToHelpFileMap().getProperty(identifier);
 	}
 
 	File getHelpSubdirectory() {
@@ -225,9 +225,9 @@ public class HelpSystem extends StackPane {
 		this.webEngine.load(url);
 	}
 
-	public void openHelpForClass(final Class<?> clazz) {
+	public void openHelpForIdentifier(final String identifier) {
 		File main = this.getHelpSubdirectory();
-		String link = this.getHelpFileForClass(clazz);
+		String link = this.getHelpFileForIdentifier(identifier);
 		final String htmlFile;
 		final String anchor;
 		if (link.contains("#")) {
