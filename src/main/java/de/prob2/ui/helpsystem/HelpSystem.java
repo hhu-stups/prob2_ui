@@ -213,7 +213,7 @@ public class HelpSystem extends StackPane {
 
 	private static String findHelpSubdirectory() {
 		final String helpDirName = "help_" + Locale.getDefault().getLanguage();
-		return HelpSystem.class.getResource("/help/" + helpDirName + ".txt") == null ? "help_en" : helpDirName;
+		return HelpSystem.class.getResource("/help/" + helpDirName + ".properties") == null ? "help_en" : helpDirName;
 	}
 
 	public void openHelpPage(File file, String anchor) {
