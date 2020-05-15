@@ -8,6 +8,8 @@ import ch.qos.logback.core.OutputStreamAppender;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.cli.ProBInstance;
+import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -15,6 +17,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.util.Duration;
 import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
@@ -49,6 +52,7 @@ public class PrologOutput extends TextFlow {
 			// default settings
 			Paint fontColor = Color.BLACK;
 			boolean underline = false;
+			boolean blinking = false;
 			boolean visible = true;
 			FontWeight weight = FontWeight.NORMAL;
 			String message = s;
@@ -57,39 +61,44 @@ public class PrologOutput extends TextFlow {
 				// ANSI code found
 				int indexOfANSICodeEnd = s.indexOf('!');
 				message = s.substring(indexOfANSICodeEnd + 2);
-				for (String str : s.substring(1, indexOfANSICodeEnd).split("\\u001b")) {
-					// setting supported font color and attributes for output
-					switch (str) {
-						case "[1m":
-							weight = FontWeight.BOLD;
-							break;
-						case "[4m":
-							underline = true;
-							break;
-						case "[8m":
-							visible = false;
-							break;
-						case "[31m":
-							fontColor = Color.RED;
-							break;
-						case "[32m":
-							fontColor = Color.GREEN;
-							break;
-						case "[33m":
-							fontColor = Color.YELLOW;
-							break;
-						case "[34m":
-							fontColor = Color.BLUE;
-							break;
-						case "[35m":
-							fontColor = Color.MAGENTA;
-							break;
-						case "[36m":
-							fontColor = Color.CYAN;
-							break;
-						case "[37m":
-							fontColor = Color.WHITE;
-							break;
+				if (indexOfANSICodeEnd != -1) {
+					for (String str : s.substring(1, indexOfANSICodeEnd).split("\\u001b")) {
+						// setting supported font color and attributes for output
+						switch (str) {
+							case "[1m":
+								weight = FontWeight.BOLD;
+								break;
+							case "[4m":
+								underline = true;
+								break;
+							case "[5m":
+								blinking = true;
+								break;
+							case "[8m":
+								visible = false;
+								break;
+							case "[31m":
+								fontColor = Color.RED;
+								break;
+							case "[32m":
+								fontColor = Color.GREEN;
+								break;
+							case "[33m":
+								fontColor = Color.YELLOW;
+								break;
+							case "[34m":
+								fontColor = Color.BLUE;
+								break;
+							case "[35m":
+								fontColor = Color.MAGENTA;
+								break;
+							case "[36m":
+								fontColor = Color.CYAN;
+								break;
+							case "[37m":
+								fontColor = Color.WHITE;
+								break;
+						}
 					}
 				}
 			}
@@ -98,6 +107,13 @@ public class PrologOutput extends TextFlow {
 			output.setText(message);
 			output.setFill(fontColor);
 			output.setUnderline(underline);
+			if (blinking) {
+				FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.5), output);
+				fadeTransition.setToValue(0);
+				fadeTransition.setFromValue(1);
+				fadeTransition.setCycleCount(Animation.INDEFINITE);
+				fadeTransition.play();
+			}
 			output.setVisible(visible);
 
 			return output;
