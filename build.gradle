@@ -44,6 +44,39 @@ repositories {
 // Our actual application class is de.prob2.ui.ProB2.
 // See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
 mainClassName = "de.prob2.ui.Main"
+
+def appName = 'ProB2-UI'
+def appVersion = '1.0.1'
+
+task copyDependencies(type: Copy) {
+	dependsOn 'build'
+
+	from configurations.runtime
+	into "build/libs"
+}
+
+
+
+task jpackage(type: Exec) {
+	dependsOn 'clean'
+	dependsOn 'copyDependencies'
+
+	def iconPath;
+
+	if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+		iconPath = 'src/main/deploy/package/macosx/prob2-ui.icns'
+	} else if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+		iconPath = 'src/main/deploy/package/windows/prob2-ui.ico'
+	} else {
+		iconPath = 'src/main/deploy/package/linux/prob2-ui.png'
+	}
+
+	commandLine "jpackage", '--icon', "${iconPath}",
+			"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
+			'--main-jar', "prob2-ui-${project.version}-all.jar",
+			'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020"
+}
+
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [
 	"-Xss2M",
@@ -177,7 +210,7 @@ macAppBundle {
 macAppBundle.mainClassName = mainClassName
 
 wrapper {
-	gradleVersion = "6.2.1"
+	gradleVersion = "6.3"
 	distributionType = Wrapper.DistributionType.ALL
 }
 
