@@ -1,27 +1,8 @@
 package de.prob2.ui.dynamic.dotty;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetAllDotCommands;
@@ -42,10 +23,10 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Cursor;
@@ -56,9 +37,26 @@ import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DotView extends DynamicCommandStage {
@@ -150,7 +148,17 @@ public class DotView extends DynamicCommandStage {
 
 		dotView.setOnMouseMoved(e -> dotView.setCursor(Cursor.HAND));
 		dotView.setOnMouseDragged(e -> dotView.setCursor(Cursor.MOVE));
-		
+
+		dotView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
+			@Override
+			public void onChanged(Change<? extends Node> c) {
+				Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
+				for (Node scrollBar : scrollBars) {
+					scrollBar.setStyle("-fx-opacity: 0.5;");
+				}
+			}
+		});
+
 	}
 
 	@Override
