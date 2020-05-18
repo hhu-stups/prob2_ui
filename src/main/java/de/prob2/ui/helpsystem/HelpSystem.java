@@ -124,6 +124,17 @@ public class HelpSystem extends StackPane {
 	private String resourcePathForPage(final String key) {
 		return this.helpPageResourcePaths.getString(key);
 	}
+	
+	/**
+	 * Ensure that any Unicode characters in the given URI are percent-encoded. Java allows both encoded and unencoded Unicode characters in URIs, which can lead to two URIs being considered unequal even though they are equal when decoded.
+	 * 
+	 * @param uri the URI in which to percent-encode Unicode characters
+	 * @return the input URI with all previously unencoded Unicode characters percent-encoded
+	 * @throws URISyntaxException if the {@link URI#URI(String)} constructor fails to parse the new URI string
+	 */
+	private static URI ensureUnicodePercentEncoded(final URI uri) throws URISyntaxException {
+		return new URI(uri.toASCIIString());
+	}
 
 	private URI uriForPage(final String key) {
 		final String resourcePath = this.resourcePathForPage(key);
@@ -132,7 +143,7 @@ public class HelpSystem extends StackPane {
 			throw new IllegalArgumentException("URL not found for resource path " + resourcePath + " for help page key " + key);
 		}
 		try {
-			return url.toURI();
+			return ensureUnicodePercentEncoded(url.toURI());
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Could not convert URL " + url + " for resource path " + resourcePath + " for help page key " + key + " to URI", e);
 		}
@@ -214,7 +225,7 @@ public class HelpSystem extends StackPane {
 	private void findMatchingTreeViewEntryToSelect(String url) {
 		final URI uriWithoutFragment;
 		try {
-			uriWithoutFragment = removeFragment(new URI(url));
+			uriWithoutFragment = ensureUnicodePercentEncoded(removeFragment(new URI(url)));
 		} catch (URISyntaxException e) {
 			LOGGER.warn("Help system web view navigated to an invalid URI: {}", url, e);
 			return;
