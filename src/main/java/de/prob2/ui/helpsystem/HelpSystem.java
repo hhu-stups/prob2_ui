@@ -6,29 +6,19 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.Main;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
@@ -48,20 +38,19 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class HelpSystem extends StackPane {
-	private static final class HelpCell extends TreeCell<URI> {
+	private final class HelpCell extends TreeCell<String> {
 		private HelpCell() {
 			super();
 		}
 
 		@Override
-		protected void updateItem(final URI item, final boolean empty) {
+		protected void updateItem(final String item, final boolean empty) {
 			super.updateItem(item, empty);
 
 			if (empty) {
 				this.setText(null);
 			} else {
-				final String[] pathParts = item.getPath().split("/");
-				this.setText(pathParts[pathParts.length - 1].replace(".html", ""));
+				this.setText(titleForPage(item));
 			}
 		}
 	}
@@ -69,34 +58,39 @@ public class HelpSystem extends StackPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HelpSystem.class);
 
 	@FXML private Button external;
-	@FXML private TreeView<URI> treeView;
+	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
 	WebEngine webEngine;
-	private URI helpURI;
-	boolean isJar;
 	boolean isHelpButton;
-	final String helpSubdirectoryString;
-	private final Map<URI, TreeItem<URI>> itemsByUri = new HashMap<>();
+	private final ResourceBundle helpPageTitles;
+	private final ResourceBundle helpPageResourcePaths;
+	private final Map<String, TreeItem<String>> itemsByKey;
+	private final Map<URI, String> keysByUri;
+	private final TreeItem<String> root;
 	private Properties classToHelpFileMap;
 
 	@Inject
-	private HelpSystem(final StageManager stageManager, final Injector injector) throws URISyntaxException, IOException {
+	private HelpSystem(final StageManager stageManager, final Injector injector) {
 		stageManager.loadFXML(this, "helpsystem.fxml");
-		helpURI = ProB2.class.getClassLoader().getResource("help/").toURI();
-		isJar = helpURI.toString().startsWith("jar:");
 		isHelpButton = false;
-		helpSubdirectoryString = findHelpSubdirectory();
-		extractHelpFiles();
 
-		final TreeItem<URI> root = createNode(this.getHelpSubdirectory());
+		this.helpPageTitles = ResourceBundle.getBundle("de.prob2.ui.helpsystem.help_page_titles");
+		this.helpPageResourcePaths = ResourceBundle.getBundle("de.prob2.ui.helpsystem.help_page_resource_paths");
+		this.itemsByKey = new HashMap<>(); // populated by findInTreeOrAdd
+		this.keysByUri = this.helpPageResourcePaths.keySet().stream()
+			.collect(Collectors.toMap(this::uriForPage, k -> k));
+
+		this.root = new TreeItem<>();
+		this.helpPageTitles.keySet().forEach(this::findInTreeOrAdd);
+		sortTree(root, Comparator.comparing(item -> titleForPage(item.getValue())));
 		root.setExpanded(true);
 		treeView.setRoot(root);
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal!=null && newVal.isLeaf()){
-				URI f = newVal.getValue();
+				final String key = newVal.getValue();
 				if (!isHelpButton) {
-					webEngine.load(f.toString());
+					webEngine.load(this.uriForPage(key).toString());
 				} else {
 					isHelpButton = false;
 				}
@@ -123,9 +117,30 @@ public class HelpSystem extends StackPane {
 		this.openHelpForIdentifier(ProB2.class.getName());
 	}
 
+	private String titleForPage(final String key) {
+		return this.helpPageTitles.getString(key);
+	}
+
+	private String resourcePathForPage(final String key) {
+		return this.helpPageResourcePaths.getString(key);
+	}
+
+	private URI uriForPage(final String key) {
+		final String resourcePath = this.resourcePathForPage(key);
+		final URL url = this.getClass().getResource(resourcePath);
+		if (url == null) {
+			throw new IllegalArgumentException("URL not found for resource path " + resourcePath + " for help page key " + key);
+		}
+		try {
+			return url.toURI();
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Could not convert URL " + url + " for resource path " + resourcePath + " for help page key " + key + " to URI", e);
+		}
+	}
+
 	private Properties getClassToHelpFileMap() {
 		if (this.classToHelpFileMap == null) {
-			final String resourceName = "help/" + this.helpSubdirectoryString + ".properties";
+			final String resourceName = "help/help.properties";
 			try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(resourceName)) {
 				if (stream != null) {
 					try (final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
@@ -146,50 +161,41 @@ public class HelpSystem extends StackPane {
 		return this.getClassToHelpFileMap().getProperty(identifier);
 	}
 
-	private static URI ensureTrailingSlash(final URI uri) throws URISyntaxException {
-		if (uri.getSchemeSpecificPart().endsWith("/")) {
-			return uri;
+	/**
+	 * <p>Find an item in the help tree that corresponds to the dot-separated path {@code key}. If no matching item exists, it is created and added to the tree (along with all necessary parent items).</p>
+	 * <p>The value of every item in the tree is its full dot-separated path from the root. For example, the item {@code one.two.three} is located under {@code one.two}, which is located under {@code one}, which is located under the root.</p>
+	 * 
+	 * @param key the dot-separated path for which to find a matching item
+	 * @return the item for the key
+	 */
+	private TreeItem<String> findInTreeOrAdd(final String key) {
+		// Try to find a matching existing item in the map.
+		if (this.itemsByKey.containsKey(key)) {
+			return this.itemsByKey.get(key);
+		}
+		
+		// Find the parent item based on the part of the key before the last dot (if any).
+		final TreeItem<String> parent;
+		final int indexOfLastDot = key.lastIndexOf('.');
+		if (indexOfLastDot == -1) {
+			// Key doesn't contain any dots, meaning it is top-level. Use the root item as the parent.
+			parent = this.root;
 		} else {
-			return new URI(uri.getScheme(), uri.getSchemeSpecificPart() + "/", uri.getFragment());
+			// Key contains a dot. Split off the parent key (everything before the last dot) and use the corresponding item as the parent.
+			// This continues recursively until a parent key is reached that has a matching item (or the root is reached, see above).
+			parent = findInTreeOrAdd(key.substring(0, indexOfLastDot));
 		}
-	}
 
-	URI getHelpSubdirectory() {
-		try {
-			final URI uri;
-			if (this.isJar) {
-				uri = Paths.get(Main.getProBDirectory(), "prob2ui", "help", this.helpSubdirectoryString).toUri();
-			} else {
-				uri = ProB2.class.getClassLoader().getResource(
-					"help/" +
-					this.helpSubdirectoryString).toURI();
-			}
-			// The URI represents a directory, so it must end in a slash.
-			// Otherwise resolving a path relative to the URI will not behave as expected
-			// (the last directory would be treated as a file name and removed).
-			return ensureTrailingSlash(uri);
-		} catch (URISyntaxException e) {
-			throw new AssertionError("Could not convert the help directory to a valid URI", e);
-		}
-	}
-
-	private TreeItem<URI> createNode(final URI uri) {
-		final TreeItem<URI> item = new TreeItem<>(uri);
-		final Path path = Paths.get(uri);
-		if (Files.isDirectory(path)) {
-			try (final Stream<Path> children = Files.list(path)) {
-				children
-					.filter(child -> Files.isDirectory(child) || child.getFileName().toString().endsWith(".html"))
-					.map(Path::toUri)
-					.map(this::createNode)
-					.collect(Collectors.toCollection(item::getChildren));
-			} catch (IOException e) {
-				LOGGER.error("I/O error while building help page tree for directory {}", path, e);
-			}
-		} else {
-			itemsByUri.put(uri, item);
-		}
+		// Create a new item for the key and add it to the parent.
+		final TreeItem<String> item = new TreeItem<>(key);
+		parent.getChildren().add(item);
+		this.itemsByKey.put(key, item);
 		return item;
+	}
+
+	private static <T> void sortTree(final TreeItem<T> root, final Comparator<TreeItem<T>> comparator) {
+		root.getChildren().sort(comparator);
+		root.getChildren().forEach(item -> sortTree(item, comparator));
 	}
 
 	private void expandTree(TreeItem<?> ti) {
@@ -197,37 +203,6 @@ public class HelpSystem extends StackPane {
 			expandTree(ti.getParent());
 			if (!ti.isLeaf()) {
 				Platform.runLater(() -> ti.setExpanded(true));
-			}
-		}
-	}
-
-	private void copyHelp(Path source, Path target) throws IOException {
-		Files.createDirectories(target.getParent());
-		Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				Path newdir = target.resolve(source.relativize(dir).toString());
-				Files.copy(dir, newdir);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (file.toString().contains(".htm")||file.toString().contains(".png"))
-					Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-				return FileVisitResult.CONTINUE;
-			}
-		});
-	}
-
-	private void extractHelpFiles() throws IOException {
-		if (isJar) {
-			Path target = Paths.get(Main.getProBDirectory(), "prob2ui", "help");
-			try (FileSystem jarFileSystem = FileSystems.newFileSystem(helpURI, Collections.emptyMap())) {
-				Path source = jarFileSystem.getPath("/help/");
-				if (!target.toFile().exists()) {
-					copyHelp(source, target);
-				}
 			}
 		}
 	}
@@ -244,41 +219,28 @@ public class HelpSystem extends StackPane {
 			LOGGER.warn("Help system web view navigated to an invalid URI: {}", url, e);
 			return;
 		}
-		if (!itemsByUri.containsKey(uriWithoutFragment)) {
+		if (!keysByUri.containsKey(uriWithoutFragment)) {
 			LOGGER.warn("No matching help tree item found for URI {}", uriWithoutFragment);
 			return;
 		}
-		final TreeItem<URI> hti = itemsByUri.get(uriWithoutFragment);
+		final TreeItem<String> hti = itemsByKey.get(keysByUri.get(uriWithoutFragment));
 		expandTree(hti);
 		Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
 	}
 
-	private static String findHelpSubdirectory() {
-		final String helpDirName = "help_" + Locale.getDefault().getLanguage();
-		return HelpSystem.class.getResource("/help/" + helpDirName + ".properties") == null ? "help_en" : helpDirName;
-	}
-
 	public void openHelpForIdentifier(final String identifier) {
 		String link = this.getHelpFileForIdentifier(identifier);
-		final String htmlFile;
+		final String helpPageKey;
 		final String anchor;
 		if (link.contains("#")) {
 			int splitIndex = link.indexOf('#');
-			htmlFile = link.substring(0, splitIndex);
+			helpPageKey = link.substring(0, splitIndex);
 			anchor = link.substring(splitIndex);
 		} else {
-			htmlFile = link;
+			helpPageKey = link;
 			anchor = "";
 		}
-		final URI htmlFileUri;
-		try {
-			// Use the multi-arg URI constructor to quote (percent-encode) the htmlFile path.
-			// This is needed for help files with spaces in the path, which are not valid URIs without quoting the spaces first.
-			htmlFileUri = new URI(null, htmlFile, null);
-		} catch (URISyntaxException exc) {
-			throw new AssertionError("Invalid help file name", exc);
-		}
-		final String url = this.getHelpSubdirectory().resolve(htmlFileUri) + anchor;
+		final String url = this.uriForPage(helpPageKey) + anchor;
 		LOGGER.debug("Opening URL in help: {}", url);
 		this.webEngine.load(url);
 	}
