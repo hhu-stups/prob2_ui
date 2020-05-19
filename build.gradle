@@ -213,7 +213,7 @@ wrapper {
 	distributionType = Wrapper.DistributionType.ALL
 }
 
-final helpSourceDir = file("src/main/resources/help")
+final helpSourceDir = file("src/main/helpsources")
 final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
 final helpOutputDir = new File(generatedResourcesDir, "help")
 final helpFilterLuaScript = file("pandoc_links_to_html.lua")
