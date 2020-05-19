@@ -196,11 +196,11 @@ public class BEditor extends CodeArea {
     private static final Map<Class<? extends ModelFactory<?>>, Map<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
 
     private static class Range {
-        private String key;
-        private int start;
-        private int end;
+        private final String key;
+        private final int start;
+        private final int end;
 
-        public Range(String key, int start, int end) {
+        public Range(final String key, final int start, final int end) {
             this.key = key;
             this.start = start;
             this.end = end;
