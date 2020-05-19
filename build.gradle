@@ -224,6 +224,7 @@ task createHelp {
 
 	doLast {
 		helpSourceFiles.each {inputFile ->
+			final title = inputFile.name.replaceAll(/\.md$/, '')
 			final relativePath = helpSourceDir.toPath().relativize(inputFile.toPath())
 			final relativePathWithNewExtension = relativePath.parent.resolve(relativePath.fileName.toString().replaceAll(/\.md$/, ".html"))
 			final outputFile = helpOutputDir.toPath().resolve(relativePathWithNewExtension).toFile()
@@ -233,6 +234,7 @@ task createHelp {
 				args = [
 					"--from=gfm",
 					"--to=html",
+					"--metadata=title=${title}",
 					"--standalone",
 					"--lua-filter=${helpFilterLuaScript}",
 					"--output=${outputFile}",
