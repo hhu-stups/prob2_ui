@@ -196,18 +196,18 @@ public class BEditor extends CodeArea {
 	private static final Map<Class<? extends ModelFactory<?>>, Map<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
 
 	private static class Range {
-		private final String key;
+		private final String syntaxClass;
 		private final int start;
 		private final int end;
 
-		public Range(final String key, final int start, final int end) {
-			this.key = key;
+		public Range(final String syntaxClass, final int start, final int end) {
+			this.syntaxClass = syntaxClass;
 			this.start = start;
 			this.end = end;
 		}
 
-		public String getKey() {
-			return key;
+		private String getSyntaxClass() {
+			return syntaxClass;
 		}
 
 		public int getStart() {
@@ -515,13 +515,13 @@ public class BEditor extends CodeArea {
 
 	private static LinkedList<Range> extractRanges(Map<String, String> syntaxClasses, String text) {
 		LinkedList<Range> range = new LinkedList<>();
-		for (String key : syntaxClasses.keySet()) {
+		syntaxClasses.forEach((key, syntaxClass) -> {
 			Pattern pattern = Pattern.compile(key);
 			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
-				range.add(new Range(key, matcher.start(), matcher.end()));
+				range.add(new Range(syntaxClass, matcher.start(), matcher.end()));
 			}
-		}
+		});
 		range.sort(Comparator.comparing(Range::getStart));
 		return range;
 	}
@@ -553,7 +553,7 @@ public class BEditor extends CodeArea {
 		return rangeWithLongestMatch;
 	}
 
-	private static StyleSpans<Collection<String>> createSpansBuilder(LinkedList<Range> ranges, Map<String, String> syntaxClasses, String text) {
+	private static StyleSpans<Collection<String>> createSpansBuilder(LinkedList<Range> ranges, String text) {
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
 		String currentText = text;
 		int pos = 0;
@@ -561,7 +561,7 @@ public class BEditor extends CodeArea {
 			Range first = ranges.getFirst();
 			if (pos == first.getStart()) {
 				int length = first.end - first.start;
-				spansBuilder.add(Collections.singleton(syntaxClasses.get(first.key)), length);
+				spansBuilder.add(Collections.singleton(first.getSyntaxClass()), length);
 				pos = first.end;
 				currentText = currentText.substring(length);
 				ranges.removeFirst();
@@ -580,7 +580,7 @@ public class BEditor extends CodeArea {
 	private static StyleSpans<Collection<String>> computeHighlighting(Map<String, String> syntaxClasses, String text) {
 		LinkedList<Range> ranges = extractRanges(syntaxClasses, text);
 		LinkedList<Range> rangesWithLongestMatch = filterLongestMatch(ranges);
-		return createSpansBuilder(rangesWithLongestMatch, syntaxClasses, text);
+		return createSpansBuilder(rangesWithLongestMatch, text);
 	}
 
 	public void clearHistory() {
