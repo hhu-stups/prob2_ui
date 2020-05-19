@@ -231,7 +231,7 @@ task createHelp {
 			exec {
 				executable = "pandoc"
 				args = [
-					"--from=markdown_github",
+					"--from=gfm",
 					"--to=html",
 					"--standalone",
 					"--lua-filter=${helpFilterLuaScript}",
