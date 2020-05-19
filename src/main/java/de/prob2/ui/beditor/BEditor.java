@@ -1,6 +1,26 @@
 package de.prob2.ui.beditor;
 
+import java.io.IOException;
+import java.io.PushbackReader;
+import java.io.StringReader;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.google.inject.Inject;
+
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
@@ -150,37 +170,20 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.PushbackReader;
-import java.io.StringReader;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @FXMLInjected
 public class BEditor extends CodeArea {
@@ -192,7 +195,7 @@ public class BEditor extends CodeArea {
 
     private static final Map<Class<? extends ModelFactory<?>>, Map<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
 
-    private static class Range implements Comparable<Range> {
+    private static class Range {
         private String key;
         private int start;
         private int end;
@@ -213,11 +216,6 @@ public class BEditor extends CodeArea {
 
         public int getEnd() {
             return end;
-        }
-
-        @Override
-        public int compareTo(@NotNull Range other) {
-            return this.start - other.start;
         }
     }
 
@@ -524,7 +522,7 @@ public class BEditor extends CodeArea {
                 range.add(new Range(key, matcher.start(), matcher.end()));
             }
         }
-        Collections.sort(range);
+        range.sort(Comparator.comparing(Range::getStart));
         return range;
     }
 
