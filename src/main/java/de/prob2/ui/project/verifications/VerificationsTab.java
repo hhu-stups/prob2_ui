@@ -19,6 +19,6 @@ public class VerificationsTab extends Tab {
 	
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("project", "Verifications");
 	}
 }

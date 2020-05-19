@@ -52,7 +52,7 @@ public class ProjectTab extends Tab {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("project", "Project");
 		
 		final ChangeListener<Number> widthChangeListener = (o, from, to) -> {
 			if (to == null) {

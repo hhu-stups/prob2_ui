@@ -76,7 +76,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	@Override
 	protected void initialize() {
 		super.initialize();
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("mainView.formulaTableVisualisation", null);
 		currentTable.addListener((observable, from, to) -> {
 			if(to != null) {
 				fillTable(to);

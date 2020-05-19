@@ -181,7 +181,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("animation", "Symbolic");
 		setBindings();
 		tvTestCases.setRowFactory(new TestCaseGenerationCellFactory());
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {

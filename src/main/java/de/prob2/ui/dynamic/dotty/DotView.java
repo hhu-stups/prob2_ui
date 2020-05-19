@@ -129,7 +129,7 @@ public class DotView extends DynamicCommandStage {
 		super.initialize();
 		stageManager.setMacMenuBar(this, this.menuBar);
 		saveButton.disableProperty().bind(dotFilePath.isNull());
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("graphVisualisation", null);
 		initializeZooming();
 	}
 

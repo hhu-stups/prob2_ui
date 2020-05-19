@@ -234,7 +234,7 @@ public final class OperationsView extends VBox {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("operations", null);
 		opsListView.setCellFactory(lv -> new OperationsCell());
 		opsListView.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ENTER) {

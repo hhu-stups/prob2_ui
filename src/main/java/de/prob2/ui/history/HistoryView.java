@@ -94,7 +94,7 @@ public final class HistoryView extends VBox {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("history", null);
 
 		historyTableView.setRowFactory(item -> new TransitionRow());
 		historyTableView.getSelectionModel().setCellSelectionEnabled(true);

@@ -120,7 +120,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 	
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
 		setBindings();
 		setContextMenu();
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {

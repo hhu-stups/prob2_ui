@@ -94,7 +94,13 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicCheckingFormulaItem.class);
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
-
+	
+	@Override
+	public void initialize() {
+		super.initialize();
+		helpButton.setHelpContent("verification", "Symbolic");
+	}
+	
 	protected ListProperty<SymbolicCheckingFormulaItem> formulasProperty(Machine machine) {
 		return machine.symbolicCheckingFormulasProperty();
 	}

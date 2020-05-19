@@ -122,7 +122,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 
 	@FXML
 	private void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("animation", "Trace");
 
 		initTableColumns();
 		initTableRows();

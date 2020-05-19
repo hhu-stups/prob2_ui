@@ -59,7 +59,7 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("verification", "LTL");
 		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
 		engine = taCode.getEngine();
 		engine.load(LTLItemStage.class.getResource("LTLEditor.html").toExternalForm());

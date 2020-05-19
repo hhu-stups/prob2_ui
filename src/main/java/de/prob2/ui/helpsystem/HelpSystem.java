@@ -1,17 +1,12 @@
 package de.prob2.ui.helpsystem;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -67,7 +62,6 @@ public class HelpSystem extends StackPane {
 	private final Map<String, TreeItem<String>> itemsByKey;
 	private final Map<URI, String> keysByUri;
 	private final TreeItem<String> root;
-	private Properties classToHelpFileMap;
 
 	@Inject
 	private HelpSystem(final StageManager stageManager, final Injector injector) {
@@ -114,7 +108,7 @@ public class HelpSystem extends StackPane {
 
 		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
 
-		this.openHelpForIdentifier(ProB2.class.getName());
+		this.openHelpForKeyAndAnchor("proB2UI", null);
 	}
 
 	private String titleForPage(final String key) {
@@ -147,29 +141,6 @@ public class HelpSystem extends StackPane {
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException("Could not convert URL " + url + " for resource path " + resourcePath + " for help page key " + key + " to URI", e);
 		}
-	}
-
-	private Properties getClassToHelpFileMap() {
-		if (this.classToHelpFileMap == null) {
-			final String resourceName = "help/help.properties";
-			try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(resourceName)) {
-				if (stream != null) {
-					try (final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-						this.classToHelpFileMap = new Properties();
-						this.classToHelpFileMap.load(reader);
-					}
-				} else {
-					LOGGER.error("Help file mapping does not exist: {}", resourceName);
-				}
-			} catch (IOException e) {
-				LOGGER.error("IOException while reading help file mapping", e);
-			}
-		}
-		return this.classToHelpFileMap;
-	}
-
-	String getHelpFileForIdentifier(final String identifier) {
-		return this.getClassToHelpFileMap().getProperty(identifier);
 	}
 
 	/**
@@ -218,14 +189,14 @@ public class HelpSystem extends StackPane {
 		}
 	}
 
-	private static URI removeFragment(final URI uri) throws URISyntaxException {
-		return new URI(uri.getScheme(), uri.getSchemeSpecificPart(), null);
+	private static URI replaceFragment(final URI uri, final String fragment) throws URISyntaxException {
+		return new URI(uri.getScheme(), uri.getSchemeSpecificPart(), fragment);
 	}
 
 	private void findMatchingTreeViewEntryToSelect(String url) {
 		final URI uriWithoutFragment;
 		try {
-			uriWithoutFragment = ensureUnicodePercentEncoded(removeFragment(new URI(url)));
+			uriWithoutFragment = ensureUnicodePercentEncoded(replaceFragment(new URI(url), null));
 		} catch (URISyntaxException e) {
 			LOGGER.warn("Help system web view navigated to an invalid URI: {}", url, e);
 			return;
@@ -239,20 +210,20 @@ public class HelpSystem extends StackPane {
 		Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
 	}
 
-	public void openHelpForIdentifier(final String identifier) {
-		String link = this.getHelpFileForIdentifier(identifier);
-		final String helpPageKey;
-		final String anchor;
-		if (link.contains("#")) {
-			int splitIndex = link.indexOf('#');
-			helpPageKey = link.substring(0, splitIndex);
-			anchor = link.substring(splitIndex);
-		} else {
-			helpPageKey = link;
-			anchor = "";
+	public void openHelpForKeyAndAnchor(final String key, final String anchor) {
+		Objects.requireNonNull(key, "key");
+		
+		LOGGER.debug("Opening help page for key {} at anchor {}", key, anchor);
+		
+		final URI helpPageUri = this.uriForPage(key);
+		final URI uriWithAnchor;
+		try {
+			uriWithAnchor = ensureUnicodePercentEncoded(replaceFragment(helpPageUri, anchor));
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
 		}
-		final String url = this.uriForPage(helpPageKey) + anchor;
-		LOGGER.debug("Opening URL in help: {}", url);
-		this.webEngine.load(url);
+		
+		LOGGER.debug("Opening help page at URL: {}", uriWithAnchor);
+		this.webEngine.load(uriWithAnchor.toString());
 	}
 }

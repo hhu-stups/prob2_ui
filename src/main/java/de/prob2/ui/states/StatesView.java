@@ -121,7 +121,7 @@ public final class StatesView extends StackPane {
 
 	@FXML
 	private void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("mainView.stateView", null);
 		
 		tv.setRowFactory(view -> initTableRow());
 

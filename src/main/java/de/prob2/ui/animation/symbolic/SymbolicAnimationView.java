@@ -89,7 +89,13 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicAnimationItem.class);
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
-
+	
+	@Override
+	public void initialize() {
+		super.initialize();
+		helpButton.setHelpContent("animation", "Symbolic");
+	}
+	
 	protected ListProperty<SymbolicAnimationItem> formulasProperty(Machine machine) {
 		return machine.symbolicAnimationFormulasProperty();
 	}

@@ -90,7 +90,7 @@ public class StatsView extends ScrollPane {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("statistics", null);
 		extendedStatsBox.visibleProperty().bind(extendedStatsToggle.selectedProperty());
 		noStatsLabel.visibleProperty().bind(currentTrace.existsProperty().not());
 		statsBox.visibleProperty().bind(noStatsLabel.visibleProperty().not());

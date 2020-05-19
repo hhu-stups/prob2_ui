@@ -127,7 +127,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("verification", "Model");
 		resetView();
 		setBindings();
 		setListeners();

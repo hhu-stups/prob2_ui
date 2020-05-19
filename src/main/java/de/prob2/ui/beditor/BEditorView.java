@@ -166,7 +166,7 @@ public class BEditorView extends BorderPane {
 		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
 		
 		this.stopActions.add(beditor::stopHighlighting);
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("mainView.editor", null);
 	}
 	
 	private void switchMachine(String path) {

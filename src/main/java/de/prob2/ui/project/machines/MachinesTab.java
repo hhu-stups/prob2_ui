@@ -215,7 +215,7 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("project", "Machines");
 
 		splitPane.disableProperty().bind(injector.getInstance(MachineLoader.class).loadingProperty());
 

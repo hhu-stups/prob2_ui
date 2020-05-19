@@ -12,7 +12,8 @@ import javafx.scene.control.Button;
 @FXMLInjected
 public class HelpButton extends Button{
 	private final Injector injector;
-	private String helpIdentifier;
+	private String helpKey;
+	private String helpAnchor;
 
 	@Inject
 	private HelpButton(StageManager stageManager, Injector injector) {
@@ -22,26 +23,35 @@ public class HelpButton extends Button{
 
 	@FXML
 	public void openHelp() {
-		if (this.getHelpIdentifier() == null) {
-			throw new IllegalStateException("Help button has no class set");
+		if (this.getHelpKey() == null) {
+			throw new IllegalStateException("Help button has no help page key set");
 		}
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
 		helpSystem.isHelpButton = true;
-		helpSystem.openHelpForIdentifier(this.getHelpIdentifier());
+		helpSystem.openHelpForKeyAndAnchor(this.getHelpKey(), this.getHelpAnchor());
 		helpSystemStage.show();
 		helpSystemStage.toFront();
 	}
 
-	public String getHelpIdentifier() {
-		return this.helpIdentifier;
+	public String getHelpKey() {
+		return this.helpKey;
 	}
 
-	public void setHelpIdentifier(final String helpIdentifier) {
-		this.helpIdentifier = helpIdentifier;
+	public void setHelpKey(final String helpKey) {
+		this.helpKey = helpKey;
 	}
 
-	public void setHelpContent(final Class<?> clazz) {
-		this.setHelpIdentifier(clazz.getName());
+	public String getHelpAnchor() {
+		return this.helpAnchor;
+	}
+
+	public void setHelpAnchor(final String helpAnchor) {
+		this.helpAnchor = helpAnchor;
+	}
+
+	public void setHelpContent(final String key, final String anchor) {
+		this.setHelpKey(key);
+		this.setHelpAnchor(anchor);
 	}
 }

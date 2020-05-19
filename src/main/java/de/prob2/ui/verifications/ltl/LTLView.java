@@ -150,7 +150,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent(this.getClass());
+		helpButton.setHelpContent("verification", "LTL");
 		setOnItemClicked();
 		setContextMenus();
 		setBindings();
