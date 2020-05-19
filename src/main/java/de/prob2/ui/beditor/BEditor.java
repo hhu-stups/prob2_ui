@@ -187,407 +187,407 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 public class BEditor extends CodeArea {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
 
-    private ExecutorService executor;
+	private ExecutorService executor;
 
-    private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();
+	private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();
 
-    private static final Map<Class<? extends ModelFactory<?>>, Map<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
+	private static final Map<Class<? extends ModelFactory<?>>, Map<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
 
-    private static class Range {
-        private final String key;
-        private final int start;
-        private final int end;
+	private static class Range {
+		private final String key;
+		private final int start;
+		private final int end;
 
-        public Range(final String key, final int start, final int end) {
-            this.key = key;
-            this.start = start;
-            this.end = end;
-        }
+		public Range(final String key, final int start, final int end) {
+			this.key = key;
+			this.start = start;
+			this.end = end;
+		}
 
-        public String getKey() {
-            return key;
-        }
+		public String getKey() {
+			return key;
+		}
 
-        public int getStart() {
-            return start;
-        }
+		public int getStart() {
+			return start;
+		}
 
-        public int getEnd() {
-            return end;
-        }
-    }
+		public int getEnd() {
+			return end;
+		}
+	}
 
-    static {
-        //B Tokens
-        addBTokens("editor_identifier", TIdentifierLiteral.class);
-        addBTokens("editor_assignments", TAssign.class, TOutputParameters.class,
-                TDoubleVerticalBar.class, TAssert.class,
-                TClosure.class, TClosure1.class, TDirectProduct.class, TDivision.class,
-                TEmptySet.class, TDoubleColon.class, TImplies.class, TLogicalOr.class,
-                TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
-                TTotalBijection.class, TTotalFunction.class, TTotalInjection.class,
-                TTotalRelation.class, TTotalSurjection.class, TFalse.class, TTrue.class,
-                TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class,
-                TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
-                TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
-                TIseq1.class, TNot.class);
-        addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class);
-        addBTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
-                TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class,
-                TNotEqual.class, TGreater.class, TLess.class);
-        addBTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
-                TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class);
-        addBTokens("editor_string", TStringLiteral.class);
-        addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
-                TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
-                TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-                TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
-        addBTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
-                TVar.class, TIn.class, TAny.class, TWhile.class,
-                TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
-                TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
-                TChoice.class, TWhere.class, TOf.class, TEnd.class);
-        addBTokens("editor_keyword", TMachine.class, TOperations.class, TRefinement.class, TImplementation.class,
-                TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
-                TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
-                TModel.class, TInvariant.class, TConcreteVariables.class,
-                TAbstractVariables.class, TVariables.class, TProperties.class,
-                TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
-                TConstraints.class, TSets.class, TDefinitions.class);
-        addBTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
-                TLineComment.class);
+	static {
+		//B Tokens
+		addBTokens("editor_identifier", TIdentifierLiteral.class);
+		addBTokens("editor_assignments", TAssign.class, TOutputParameters.class,
+				TDoubleVerticalBar.class, TAssert.class,
+				TClosure.class, TClosure1.class, TDirectProduct.class, TDivision.class,
+				TEmptySet.class, TDoubleColon.class, TImplies.class, TLogicalOr.class,
+				TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
+				TTotalBijection.class, TTotalFunction.class, TTotalInjection.class,
+				TTotalRelation.class, TTotalSurjection.class, TFalse.class, TTrue.class,
+				TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class,
+				TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
+				TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
+				TIseq1.class, TNot.class);
+		addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class);
+		addBTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
+				TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class,
+				TNotEqual.class, TGreater.class, TLess.class);
+		addBTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
+				TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class);
+		addBTokens("editor_string", TStringLiteral.class);
+		addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
+				TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
+				TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
+				TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
+		addBTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
+				TVar.class, TIn.class, TAny.class, TWhile.class,
+				TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
+				TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
+				TChoice.class, TWhere.class, TOf.class, TEnd.class);
+		addBTokens("editor_keyword", TMachine.class, TOperations.class, TRefinement.class, TImplementation.class,
+				TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
+				TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
+				TModel.class, TInvariant.class, TConcreteVariables.class,
+				TAbstractVariables.class, TVariables.class, TProperties.class,
+				TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
+				TConstraints.class, TSets.class, TDefinitions.class);
+		addBTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
+				TLineComment.class);
 
-        //XTL Regex
-        final Map<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
-        syntaxClassesForXTL.put("(start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(function_result|image|image_right_click_transition|image_click_transition))", "editor_keyword");
-        syntaxClassesForXTL.put("(true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth|nth1|nth0|perm|perm2|permutation|same_length|add_error|print|write|sort)", "editor_types");
-        syntaxClassesForXTL.put("((\"(.*)*\")|(\'(.*)*\'))", "editor_string");
-        syntaxClassesForXTL.put("[A-Z][_a-zA-Z0-9]*", "editor_xtl_variable");
-        syntaxClassesForXTL.put("[_a-z][_a-zA-Z0-9]*", "editor_xtl_functor");
-        syntaxClassesForXTL.put(":-|!|-->|;|\\.", "editor_assignments");
-        //The + in (.)+, (\n)+ and (\r)+ avoids possible StackOverflowError
-        syntaxClassesForXTL.put("(%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
-        syntaxClassesForXTL.put("( |\t|\r|\n)+", "editor_ignored");
+		//XTL Regex
+		final Map<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
+		syntaxClassesForXTL.put("(start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(function_result|image|image_right_click_transition|image_click_transition))", "editor_keyword");
+		syntaxClassesForXTL.put("(true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth|nth1|nth0|perm|perm2|permutation|same_length|add_error|print|write|sort)", "editor_types");
+		syntaxClassesForXTL.put("((\"(.*)*\")|(\'(.*)*\'))", "editor_string");
+		syntaxClassesForXTL.put("[A-Z][_a-zA-Z0-9]*", "editor_xtl_variable");
+		syntaxClassesForXTL.put("[_a-z][_a-zA-Z0-9]*", "editor_xtl_functor");
+		syntaxClassesForXTL.put(":-|!|-->|;|\\.", "editor_assignments");
+		//The + in (.)+, (\n)+ and (\r)+ avoids possible StackOverflowError
+		syntaxClassesForXTL.put("(%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
+		syntaxClassesForXTL.put("( |\t|\r|\n)+", "editor_ignored");
 
-        //TLA Regex
-        final Map<String, String> syntaxClassesForTLA = new LinkedHashMap<>();
-        syntaxClassesForTLA.put("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLE|VARIABLES|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)", "editor_keyword");
-        syntaxClassesForTLA.put("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)", "editor_ctrlkeyword");
-        syntaxClassesForTLA.put("(Next|Init|Spec|Inv)", "editor_types");
-        syntaxClassesForTLA.put("(\\\\\\*[^\n\r]*)|(\\(\\*(.|[\n\r]*)*\\*\\))", "editor_comment");
-        syntaxClassesForTLA.put("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|/|Int|Nat", "editor_arithmetic");
-        syntaxClassesForTLA.put("<=>|=>|<<|>>|!|#|/=|~|<>|->|->|~\\\\|\"|\\[\\]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\", "editor_logical");
-        syntaxClassesForTLA.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-        syntaxClassesForTLA.put("( |\t|\r|\n)+", "editor_ignored");
+		//TLA Regex
+		final Map<String, String> syntaxClassesForTLA = new LinkedHashMap<>();
+		syntaxClassesForTLA.put("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLE|VARIABLES|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)", "editor_keyword");
+		syntaxClassesForTLA.put("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)", "editor_ctrlkeyword");
+		syntaxClassesForTLA.put("(Next|Init|Spec|Inv)", "editor_types");
+		syntaxClassesForTLA.put("(\\\\\\*[^\n\r]*)|(\\(\\*(.|[\n\r]*)*\\*\\))", "editor_comment");
+		syntaxClassesForTLA.put("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|/|Int|Nat", "editor_arithmetic");
+		syntaxClassesForTLA.put("<=>|=>|<<|>>|!|#|/=|~|<>|->|->|~\\\\|\"|\\[\\]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\", "editor_logical");
+		syntaxClassesForTLA.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
+		syntaxClassesForTLA.put("( |\t|\r|\n)+", "editor_ignored");
 
-        //CSP Regex
-        final Map<String, String> syntaxClassesForCSP = new LinkedHashMap<>();
-        syntaxClassesForCSP.put("if|then|else|@@|let|within|\\{|\\}|<->|<-|\\[\\||\\|\\]|\\[|\\]|\\\\", "editor_keyword");
-        syntaxClassesForCSP.put("!|\\?|->|\\[\\]|\\|~\\||\\|\\|\\||;|STOP|SKIP|CHAOS|/\\|\\[>|@", "editor_types");
-        syntaxClassesForCSP.put("agent|MAIN|channel|datatype|subtype|nametype|machine|Events", "editor_arithmetic");
-        syntaxClassesForCSP.put("assert|transparent|diamond|print|include", "editor_assignments");
-        syntaxClassesForCSP.put("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|\\!=|>|<|<=|>=|=<|&&|\\|\\||Int|Bool", "editor_logical");
-        syntaxClassesForCSP.put("external|extensions|productions|Proc", "editor_unsupported");
-        syntaxClassesForCSP.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-        syntaxClassesForCSP.put("(\\{-(.|[\n\r]*)*-\\})|(--(.*))", "editor_comment");
-        syntaxClassesForCSP.put("( |\t|\r|\n)+", "editor_ignored");
+		//CSP Regex
+		final Map<String, String> syntaxClassesForCSP = new LinkedHashMap<>();
+		syntaxClassesForCSP.put("if|then|else|@@|let|within|\\{|\\}|<->|<-|\\[\\||\\|\\]|\\[|\\]|\\\\", "editor_keyword");
+		syntaxClassesForCSP.put("!|\\?|->|\\[\\]|\\|~\\||\\|\\|\\||;|STOP|SKIP|CHAOS|/\\|\\[>|@", "editor_types");
+		syntaxClassesForCSP.put("agent|MAIN|channel|datatype|subtype|nametype|machine|Events", "editor_arithmetic");
+		syntaxClassesForCSP.put("assert|transparent|diamond|print|include", "editor_assignments");
+		syntaxClassesForCSP.put("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|\\!=|>|<|<=|>=|=<|&&|\\|\\||Int|Bool", "editor_logical");
+		syntaxClassesForCSP.put("external|extensions|productions|Proc", "editor_unsupported");
+		syntaxClassesForCSP.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
+		syntaxClassesForCSP.put("(\\{-(.|[\n\r]*)*-\\})|(--(.*))", "editor_comment");
+		syntaxClassesForCSP.put("( |\t|\r|\n)+", "editor_ignored");
 
-        //Alloy Regex
-        final Map<String, String> syntaxClassesForAlloy = new LinkedHashMap<>();
-        syntaxClassesForAlloy.put("module|sig|fact|extends|run|abstract|open|fun|pred|check|assert|plus|minus|mul|div|rem|sum", "editor_keyword");
-        syntaxClassesForAlloy.put("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|\\~|->|&|\\+|-|=|\\#", "editor_types");
-        syntaxClassesForAlloy.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-        syntaxClassesForAlloy.put("(//[^\n\r]*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
+		//Alloy Regex
+		final Map<String, String> syntaxClassesForAlloy = new LinkedHashMap<>();
+		syntaxClassesForAlloy.put("module|sig|fact|extends|run|abstract|open|fun|pred|check|assert|plus|minus|mul|div|rem|sum", "editor_keyword");
+		syntaxClassesForAlloy.put("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|\\~|->|&|\\+|-|=|\\#", "editor_types");
+		syntaxClassesForAlloy.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
+		syntaxClassesForAlloy.put("(//[^\n\r]*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
 
-        //Z Regex
-        final Map<String, String> syntaxClassesForZ = new LinkedHashMap<>();
-        syntaxClassesForZ.put("(head|tail|last|front|squash|rev|min|max|first|second|succ|count|items|\\\\(\\{|\\}|notin|in|inbag|(big)?cup|(big)?cap|subset|subseteq|subbageq|disjoint|partition|plus|oplus|uplus|uminus|otimes|setminus|emptyset|leq|geq|neq|div|mod|dom|(n)?(d|r)res|langle|rangle|lbag|rbag|ran|id|inv|mapsto|succ|cat|dcat|prefix|suffix|inseq|filter|extract|bcount|\\#))", "editor_arithmetic");
-        syntaxClassesForZ.put("\\\\(power(_1)?|nat(_1)?|num|bag|cross|upto|rel|(p)?fun|(p)?inj|bij|seq(_1)?|iseq(_1)?|(b)?tree)", "editor_types");
-        syntaxClassesForZ.put("\\\\(land|lor|implies|iff|lnot|forall|exists(_1)?|mu|lambda|true|false)", "editor_logical");
-        syntaxClassesForZ.put("(\\\\(where|also|Delta))|(\\\\(begin|end)\\{(schema|zed|axdef)\\})", "editor_keyword");
-        syntaxClassesForZ.put("::=|=|\\\\(IF|THEN|ELSE|LET|defs)", "editor_assignments");
-        syntaxClassesForZ.put("(\\\\|[_a-zA-Z])[_a-zA-Z0-9]*", "editor_identifier");
-        syntaxClassesForZ.put("%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/|\\\\(noindent|documentclass|(begin|end)\\{(document)\\}|(sub)?section|(usepackage)\\{(fuzz|z-eves)\\}|\\\\)", "editor_comment");
-        syntaxClassesForZ.put("\\\\(infix|arithmos)", "editor_unsupported");
+		//Z Regex
+		final Map<String, String> syntaxClassesForZ = new LinkedHashMap<>();
+		syntaxClassesForZ.put("(head|tail|last|front|squash|rev|min|max|first|second|succ|count|items|\\\\(\\{|\\}|notin|in|inbag|(big)?cup|(big)?cap|subset|subseteq|subbageq|disjoint|partition|plus|oplus|uplus|uminus|otimes|setminus|emptyset|leq|geq|neq|div|mod|dom|(n)?(d|r)res|langle|rangle|lbag|rbag|ran|id|inv|mapsto|succ|cat|dcat|prefix|suffix|inseq|filter|extract|bcount|\\#))", "editor_arithmetic");
+		syntaxClassesForZ.put("\\\\(power(_1)?|nat(_1)?|num|bag|cross|upto|rel|(p)?fun|(p)?inj|bij|seq(_1)?|iseq(_1)?|(b)?tree)", "editor_types");
+		syntaxClassesForZ.put("\\\\(land|lor|implies|iff|lnot|forall|exists(_1)?|mu|lambda|true|false)", "editor_logical");
+		syntaxClassesForZ.put("(\\\\(where|also|Delta))|(\\\\(begin|end)\\{(schema|zed|axdef)\\})", "editor_keyword");
+		syntaxClassesForZ.put("::=|=|\\\\(IF|THEN|ELSE|LET|defs)", "editor_assignments");
+		syntaxClassesForZ.put("(\\\\|[_a-zA-Z])[_a-zA-Z0-9]*", "editor_identifier");
+		syntaxClassesForZ.put("%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/|\\\\(noindent|documentclass|(begin|end)\\{(document)\\}|(sub)?section|(usepackage)\\{(fuzz|z-eves)\\}|\\\\)", "editor_comment");
+		syntaxClassesForZ.put("\\\\(infix|arithmos)", "editor_unsupported");
 
-        syntaxClassesOtherLanguages.put(XTLFactory.class, syntaxClassesForXTL);
-        syntaxClassesOtherLanguages.put(TLAFactory.class, syntaxClassesForTLA);
-        syntaxClassesOtherLanguages.put(CSPFactory.class, syntaxClassesForCSP);
-        syntaxClassesOtherLanguages.put(AlloyFactory.class, syntaxClassesForAlloy);
-        syntaxClassesOtherLanguages.put(ZFactory.class, syntaxClassesForZ);
-    }
+		syntaxClassesOtherLanguages.put(XTLFactory.class, syntaxClassesForXTL);
+		syntaxClassesOtherLanguages.put(TLAFactory.class, syntaxClassesForTLA);
+		syntaxClassesOtherLanguages.put(CSPFactory.class, syntaxClassesForCSP);
+		syntaxClassesOtherLanguages.put(AlloyFactory.class, syntaxClassesForAlloy);
+		syntaxClassesOtherLanguages.put(ZFactory.class, syntaxClassesForZ);
+	}
 
-    private final FontSize fontSize;
+	private final FontSize fontSize;
 
-    private final CurrentProject currentProject;
+	private final CurrentProject currentProject;
 
-    private final ResourceBundle bundle;
+	private final ResourceBundle bundle;
 
-    private final ObservableList<ErrorItem.Location> errorLocations;
+	private final ObservableList<ErrorItem.Location> errorLocations;
 
-    @Inject
-    private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject) {
-        this.fontSize = fontSize;
-        this.currentProject = currentProject;
-        this.bundle = bundle;
-        this.errorLocations = FXCollections.observableArrayList();
-        initialize();
-        initializeContextMenu();
-    }
+	@Inject
+	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject) {
+		this.fontSize = fontSize;
+		this.currentProject = currentProject;
+		this.bundle = bundle;
+		this.errorLocations = FXCollections.observableArrayList();
+		initialize();
+		initializeContextMenu();
+	}
 
-    private void initializeContextMenu() {
-        final ContextMenu contextMenu = new ContextMenu();
+	private void initializeContextMenu() {
+		final ContextMenu contextMenu = new ContextMenu();
 
-        final MenuItem undoItem = new MenuItem(bundle.getString("common.contextMenu.undo"));
-        undoItem.setOnAction(e -> this.getUndoManager().undo());
-        contextMenu.getItems().add(undoItem);
+		final MenuItem undoItem = new MenuItem(bundle.getString("common.contextMenu.undo"));
+		undoItem.setOnAction(e -> this.getUndoManager().undo());
+		contextMenu.getItems().add(undoItem);
 
-        final MenuItem redoItem = new MenuItem(bundle.getString("common.contextMenu.redo"));
-        redoItem.setOnAction(e -> this.getUndoManager().redo());
-        contextMenu.getItems().add(redoItem);
+		final MenuItem redoItem = new MenuItem(bundle.getString("common.contextMenu.redo"));
+		redoItem.setOnAction(e -> this.getUndoManager().redo());
+		contextMenu.getItems().add(redoItem);
 
-        final MenuItem cutItem = new MenuItem(bundle.getString("common.contextMenu.cut"));
-        cutItem.setOnAction(e -> this.cut());
-        contextMenu.getItems().add(cutItem);
+		final MenuItem cutItem = new MenuItem(bundle.getString("common.contextMenu.cut"));
+		cutItem.setOnAction(e -> this.cut());
+		contextMenu.getItems().add(cutItem);
 
-        final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
-        copyItem.setOnAction(e -> this.copy());
-        contextMenu.getItems().add(copyItem);
+		final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
+		copyItem.setOnAction(e -> this.copy());
+		contextMenu.getItems().add(copyItem);
 
-        final MenuItem pasteItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
-        pasteItem.setOnAction(e -> this.paste());
-        contextMenu.getItems().add(pasteItem);
+		final MenuItem pasteItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
+		pasteItem.setOnAction(e -> this.paste());
+		contextMenu.getItems().add(pasteItem);
 
-        final MenuItem deleteItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
-        deleteItem.setOnAction(e -> this.deleteText(this.getSelection()));
-        contextMenu.getItems().add(deleteItem);
+		final MenuItem deleteItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
+		deleteItem.setOnAction(e -> this.deleteText(this.getSelection()));
+		contextMenu.getItems().add(deleteItem);
 
-        final MenuItem selectAllItem = new MenuItem(bundle.getString("common.contextMenu.selectAll"));
-        selectAllItem.setOnAction(e -> this.selectAll());
-        contextMenu.getItems().add(selectAllItem);
+		final MenuItem selectAllItem = new MenuItem(bundle.getString("common.contextMenu.selectAll"));
+		selectAllItem.setOnAction(e -> this.selectAll());
+		contextMenu.getItems().add(selectAllItem);
 
-        this.setContextMenu(contextMenu);
-    }
+		this.setContextMenu(contextMenu);
+	}
 
-    private void initialize() {
-        currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-            this.clear();
-            this.appendText(bundle.getString("beditor.hint"));
-        });
-        this.setParagraphGraphicFactory(LineNumberFactory.get(this));
-        this.richChanges()
-                .filter(ch -> !ch.isPlainTextIdentity())
-                .successionEnds(Duration.ofMillis(100))
-                .supplyTask(this::computeHighlightingAsync)
-                .awaitLatest(this.richChanges())
-                .filterMap(t -> {
-                    if (t.isSuccess()) {
-                        return Optional.of(t.get());
-                    } else {
-                        LOGGER.info("Highlighting failed", t.getFailure());
-                        return Optional.empty();
-                    }
-                }).subscribe(highlighting -> {
-            this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
-            this.applyHighlighting(highlighting);
-        });
-        this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>) change ->
-                this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
-        );
+	private void initialize() {
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			this.clear();
+			this.appendText(bundle.getString("beditor.hint"));
+		});
+		this.setParagraphGraphicFactory(LineNumberFactory.get(this));
+		this.richChanges()
+				.filter(ch -> !ch.isPlainTextIdentity())
+				.successionEnds(Duration.ofMillis(100))
+				.supplyTask(this::computeHighlightingAsync)
+				.awaitLatest(this.richChanges())
+				.filterMap(t -> {
+					if (t.isSuccess()) {
+						return Optional.of(t.get());
+					} else {
+						LOGGER.info("Highlighting failed", t.getFailure());
+						return Optional.empty();
+					}
+				}).subscribe(highlighting -> {
+			this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
+			this.applyHighlighting(highlighting);
+		});
+		this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>) change ->
+				this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
+		);
 
-        fontSize.fontSizeProperty().addListener((observable, from, to) ->
-                this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
-        );
-    }
+		fontSize.fontSizeProperty().addListener((observable, from, to) ->
+				this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
+		);
+	}
 
-    public void startHighlighting() {
-        if (this.executor == null) {
-            this.executor = Executors.newSingleThreadExecutor();
-        }
-    }
+	public void startHighlighting() {
+		if (this.executor == null) {
+			this.executor = Executors.newSingleThreadExecutor();
+		}
+	}
 
-    public void stopHighlighting() {
-        if (this.executor != null) {
-            this.executor.shutdown();
-            this.executor = null;
-        }
-    }
+	public void stopHighlighting() {
+		if (this.executor != null) {
+			this.executor.shutdown();
+			this.executor = null;
+		}
+	}
 
-    @SafeVarargs
-    private static void addBTokens(String syntaxclass, Class<? extends Token>... tokens) {
-        for (Class<? extends Token> c : tokens) {
-            syntaxClassesForB.put(c, syntaxclass);
-        }
-    }
+	@SafeVarargs
+	private static void addBTokens(String syntaxclass, Class<? extends Token>... tokens) {
+		for (Class<? extends Token> c : tokens) {
+			syntaxClassesForB.put(c, syntaxclass);
+		}
+	}
 
-    private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
-        final Collection<T> ret = new ArrayList<>(a);
-        ret.addAll(b);
-        return ret;
-    }
+	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
+		final Collection<T> ret = new ArrayList<>(a);
+		ret.addAll(b);
+		return ret;
+	}
 
-    private StyleSpans<Collection<String>> addErrorHighlighting(final StyleSpans<Collection<String>> highlighting) {
-        StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
-        for (final ErrorItem.Location location : this.getErrorLocations()) {
-            final int startParagraph = location.getStartLine() - 1;
-            final int endParagraph = location.getEndLine() - 1;
-            final int startIndex = this.getAbsolutePosition(startParagraph, location.getStartColumn());
-            final int endIndex;
-            if (startParagraph == endParagraph) {
-                final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
-                endIndex = this.getAbsolutePosition(startParagraph, displayedEndColumn);
-            } else {
-                endIndex = this.getAbsolutePosition(endParagraph, location.getEndColumn());
-            }
-            highlightingWithErrors = highlightingWithErrors.overlay(
-                    new StyleSpansBuilder<Collection<String>>()
-                            .add(Collections.emptyList(), startIndex)
-                            .add(Collections.singletonList("error"), endIndex - startIndex)
-                            .create(),
-                    BEditor::combineCollections
-            );
-        }
-        return highlightingWithErrors;
-    }
+	private StyleSpans<Collection<String>> addErrorHighlighting(final StyleSpans<Collection<String>> highlighting) {
+		StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
+		for (final ErrorItem.Location location : this.getErrorLocations()) {
+			final int startParagraph = location.getStartLine() - 1;
+			final int endParagraph = location.getEndLine() - 1;
+			final int startIndex = this.getAbsolutePosition(startParagraph, location.getStartColumn());
+			final int endIndex;
+			if (startParagraph == endParagraph) {
+				final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
+				endIndex = this.getAbsolutePosition(startParagraph, displayedEndColumn);
+			} else {
+				endIndex = this.getAbsolutePosition(endParagraph, location.getEndColumn());
+			}
+			highlightingWithErrors = highlightingWithErrors.overlay(
+					new StyleSpansBuilder<Collection<String>>()
+							.add(Collections.emptyList(), startIndex)
+							.add(Collections.singletonList("error"), endIndex - startIndex)
+							.create(),
+					BEditor::combineCollections
+			);
+		}
+		return highlightingWithErrors;
+	}
 
-    private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
-        this.setStyleSpans(0, addErrorHighlighting(highlighting));
-    }
+	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
+		this.setStyleSpans(0, addErrorHighlighting(highlighting));
+	}
 
-    private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
-        final String text = this.getText();
-        if (executor == null) {
-            // No executor - run and return a dummy task that does no highlighting
-            final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-                @Override
-                protected StyleSpans<Collection<String>> call() {
-                    return StyleSpans.singleton(Collections.emptySet(), text.length());
-                }
-            };
-            task.run();
-            return task;
-        } else {
-            // Executor exists - do proper highlighting
-            final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-                @Override
-                protected StyleSpans<Collection<String>> call() {
-                    return computeHighlighting(text, currentProject.getCurrentMachine());
-                }
-            };
-            executor.execute(task);
-            return task;
-        }
-    }
+	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
+		final String text = this.getText();
+		if (executor == null) {
+			// No executor - run and return a dummy task that does no highlighting
+			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+				@Override
+				protected StyleSpans<Collection<String>> call() {
+					return StyleSpans.singleton(Collections.emptySet(), text.length());
+				}
+			};
+			task.run();
+			return task;
+		} else {
+			// Executor exists - do proper highlighting
+			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+				@Override
+				protected StyleSpans<Collection<String>> call() {
+					return computeHighlighting(text, currentProject.getCurrentMachine());
+				}
+			};
+			executor.execute(task);
+			return task;
+		}
+	}
 
-    private static StyleSpans<Collection<String>> computeHighlighting(String text, Machine machine) {
-        if (machine == null) {
-            //Prompt text is a comment text
-            return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
-        }
-        Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
-        if (modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
-            return computeBHighlighting(text);
-        } else if(modelFactoryClass == XTLFactory.class || modelFactoryClass == TLAFactory.class || modelFactoryClass == CSPFactory.class || modelFactoryClass == AlloyFactory.class || modelFactoryClass == ZFactory.class) {
-            return computeHighlighting(syntaxClassesOtherLanguages.get(modelFactoryClass), text);
-        } else {
-            //Do not highlight for languages other than B and EventB
-            return StyleSpans.singleton(Collections.emptySet(), text.length());
-        }
-    }
+	private static StyleSpans<Collection<String>> computeHighlighting(String text, Machine machine) {
+		if (machine == null) {
+			//Prompt text is a comment text
+			return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
+		}
+		Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
+		if (modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
+			return computeBHighlighting(text);
+		} else if(modelFactoryClass == XTLFactory.class || modelFactoryClass == TLAFactory.class || modelFactoryClass == CSPFactory.class || modelFactoryClass == AlloyFactory.class || modelFactoryClass == ZFactory.class) {
+			return computeHighlighting(syntaxClassesOtherLanguages.get(modelFactoryClass), text);
+		} else {
+			//Do not highlight for languages other than B and EventB
+			return StyleSpans.singleton(Collections.emptySet(), text.length());
+		}
+	}
 
-    private static StyleSpans<Collection<String>> computeBHighlighting(String text) {
-        BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
-        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-        try {
-            Token t;
-            do {
-                t = lexer.next();
-                String string = syntaxClassesForB.get(t.getClass());
-                spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
-            } while (!(t instanceof EOF));
-        } catch (LexerException | IOException e) {
-            LOGGER.info("Failed to lex", e);
-        }
-        return spansBuilder.create();
-    }
+	private static StyleSpans<Collection<String>> computeBHighlighting(String text) {
+		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
+		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+		try {
+			Token t;
+			do {
+				t = lexer.next();
+				String string = syntaxClassesForB.get(t.getClass());
+				spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
+			} while (!(t instanceof EOF));
+		} catch (LexerException | IOException e) {
+			LOGGER.info("Failed to lex", e);
+		}
+		return spansBuilder.create();
+	}
 
-    private static LinkedList<Range> extractRanges(Map<String, String> syntaxClasses, String text) {
-        LinkedList<Range> range = new LinkedList<>();
-        for (String key : syntaxClasses.keySet()) {
-            Pattern pattern = Pattern.compile(key);
-            Matcher matcher = pattern.matcher(text);
-            while (matcher.find()) {
-                range.add(new Range(key, matcher.start(), matcher.end()));
-            }
-        }
-        range.sort(Comparator.comparing(Range::getStart));
-        return range;
-    }
+	private static LinkedList<Range> extractRanges(Map<String, String> syntaxClasses, String text) {
+		LinkedList<Range> range = new LinkedList<>();
+		for (String key : syntaxClasses.keySet()) {
+			Pattern pattern = Pattern.compile(key);
+			Matcher matcher = pattern.matcher(text);
+			while (matcher.find()) {
+				range.add(new Range(key, matcher.start(), matcher.end()));
+			}
+		}
+		range.sort(Comparator.comparing(Range::getStart));
+		return range;
+	}
 
-    private static LinkedList<Range> filterLongestMatch(LinkedList<Range> range) {
-        LinkedList<Range> rangeWithLongestMatch = new LinkedList<>();
-        int i = 0;
-        while (i < range.size()) {
-            int j = i + 1;
-            int longestIndex = i;
-            boolean finished = false;
-            while (!finished) {
-                if (j == range.size()) {
-                    finished = true;
-                } else {
-                    Range current = range.get(longestIndex);
-                    Range next = range.get(j);
-                    if (current.start != next.start) {
-                        finished = true;
-                    } else {
-                        longestIndex = next.end > current.end ? j : longestIndex;
-                        j++;
-                    }
-                }
-            }
-            i = j;
-            rangeWithLongestMatch.add(range.get(longestIndex));
-        }
-        return rangeWithLongestMatch;
-    }
+	private static LinkedList<Range> filterLongestMatch(LinkedList<Range> range) {
+		LinkedList<Range> rangeWithLongestMatch = new LinkedList<>();
+		int i = 0;
+		while (i < range.size()) {
+			int j = i + 1;
+			int longestIndex = i;
+			boolean finished = false;
+			while (!finished) {
+				if (j == range.size()) {
+					finished = true;
+				} else {
+					Range current = range.get(longestIndex);
+					Range next = range.get(j);
+					if (current.start != next.start) {
+						finished = true;
+					} else {
+						longestIndex = next.end > current.end ? j : longestIndex;
+						j++;
+					}
+				}
+			}
+			i = j;
+			rangeWithLongestMatch.add(range.get(longestIndex));
+		}
+		return rangeWithLongestMatch;
+	}
 
-    private static StyleSpans<Collection<String>> createSpansBuilder(LinkedList<Range> ranges, Map<String, String> syntaxClasses, String text) {
-        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-        String currentText = text;
-        int pos = 0;
-        while (!currentText.isEmpty() && !ranges.isEmpty()) {
-            Range first = ranges.getFirst();
-            if (pos == first.getStart()) {
-                int length = first.end - first.start;
-                spansBuilder.add(Collections.singleton(syntaxClasses.get(first.key)), length);
-                pos = first.end;
-                currentText = currentText.substring(length);
-                ranges.removeFirst();
-            } else if (pos > first.getStart()) {
-                ranges.removeFirst();
-            } else {
-                int length = first.start - pos;
-                spansBuilder.add(Collections.singleton("ignored"), length);
-                pos = first.start;
-                currentText = currentText.substring(length);
-            }
-        }
-        return spansBuilder.create();
-    }
+	private static StyleSpans<Collection<String>> createSpansBuilder(LinkedList<Range> ranges, Map<String, String> syntaxClasses, String text) {
+		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+		String currentText = text;
+		int pos = 0;
+		while (!currentText.isEmpty() && !ranges.isEmpty()) {
+			Range first = ranges.getFirst();
+			if (pos == first.getStart()) {
+				int length = first.end - first.start;
+				spansBuilder.add(Collections.singleton(syntaxClasses.get(first.key)), length);
+				pos = first.end;
+				currentText = currentText.substring(length);
+				ranges.removeFirst();
+			} else if (pos > first.getStart()) {
+				ranges.removeFirst();
+			} else {
+				int length = first.start - pos;
+				spansBuilder.add(Collections.singleton("ignored"), length);
+				pos = first.start;
+				currentText = currentText.substring(length);
+			}
+		}
+		return spansBuilder.create();
+	}
 
-    private static StyleSpans<Collection<String>> computeHighlighting(Map<String, String> syntaxClasses, String text) {
-        LinkedList<Range> ranges = extractRanges(syntaxClasses, text);
-        LinkedList<Range> rangesWithLongestMatch = filterLongestMatch(ranges);
-        return createSpansBuilder(rangesWithLongestMatch, syntaxClasses, text);
-    }
+	private static StyleSpans<Collection<String>> computeHighlighting(Map<String, String> syntaxClasses, String text) {
+		LinkedList<Range> ranges = extractRanges(syntaxClasses, text);
+		LinkedList<Range> rangesWithLongestMatch = filterLongestMatch(ranges);
+		return createSpansBuilder(rangesWithLongestMatch, syntaxClasses, text);
+	}
 
-    public void clearHistory() {
-        this.getUndoManager().forgetHistory();
-    }
+	public void clearHistory() {
+		this.getUndoManager().forgetHistory();
+	}
 
-    public ObservableList<ErrorItem.Location> getErrorLocations() {
-        return this.errorLocations;
-    }
+	public ObservableList<ErrorItem.Location> getErrorLocations() {
+		return this.errorLocations;
+	}
 }
