@@ -190,7 +190,7 @@ public class BEditor extends CodeArea {
 
     private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();
 
-    private static final Map<Class<? extends ModelFactory<?>>, LinkedHashMap<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
+    private static final Map<Class<? extends ModelFactory<?>>, Map<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
 
     private static class Range implements Comparable<Range> {
         private String key;
@@ -262,7 +262,7 @@ public class BEditor extends CodeArea {
                 TLineComment.class);
 
         //XTL Regex
-        LinkedHashMap<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
+        final Map<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
         syntaxClassesForXTL.put("(start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(function_result|image|image_right_click_transition|image_click_transition))", "editor_keyword");
         syntaxClassesForXTL.put("(true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth|nth1|nth0|perm|perm2|permutation|same_length|add_error|print|write|sort)", "editor_types");
         syntaxClassesForXTL.put("((\"(.*)*\")|(\'(.*)*\'))", "editor_string");
@@ -274,7 +274,7 @@ public class BEditor extends CodeArea {
         syntaxClassesForXTL.put("( |\t|\r|\n)+", "editor_ignored");
 
         //TLA Regex
-        LinkedHashMap<String, String> syntaxClassesForTLA = new LinkedHashMap<>();
+        final Map<String, String> syntaxClassesForTLA = new LinkedHashMap<>();
         syntaxClassesForTLA.put("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLE|VARIABLES|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)", "editor_keyword");
         syntaxClassesForTLA.put("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)", "editor_ctrlkeyword");
         syntaxClassesForTLA.put("(Next|Init|Spec|Inv)", "editor_types");
@@ -285,7 +285,7 @@ public class BEditor extends CodeArea {
         syntaxClassesForTLA.put("( |\t|\r|\n)+", "editor_ignored");
 
         //CSP Regex
-        LinkedHashMap<String, String> syntaxClassesForCSP = new LinkedHashMap<>();
+        final Map<String, String> syntaxClassesForCSP = new LinkedHashMap<>();
         syntaxClassesForCSP.put("if|then|else|@@|let|within|\\{|\\}|<->|<-|\\[\\||\\|\\]|\\[|\\]|\\\\", "editor_keyword");
         syntaxClassesForCSP.put("!|\\?|->|\\[\\]|\\|~\\||\\|\\|\\||;|STOP|SKIP|CHAOS|/\\|\\[>|@", "editor_types");
         syntaxClassesForCSP.put("agent|MAIN|channel|datatype|subtype|nametype|machine|Events", "editor_arithmetic");
@@ -297,14 +297,14 @@ public class BEditor extends CodeArea {
         syntaxClassesForCSP.put("( |\t|\r|\n)+", "editor_ignored");
 
         //Alloy Regex
-        LinkedHashMap<String, String> syntaxClassesForAlloy = new LinkedHashMap<>();
+        final Map<String, String> syntaxClassesForAlloy = new LinkedHashMap<>();
         syntaxClassesForAlloy.put("module|sig|fact|extends|run|abstract|open|fun|pred|check|assert|plus|minus|mul|div|rem|sum", "editor_keyword");
         syntaxClassesForAlloy.put("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|\\~|->|&|\\+|-|=|\\#", "editor_types");
         syntaxClassesForAlloy.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
         syntaxClassesForAlloy.put("(//[^\n\r]*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
 
         //Z Regex
-        LinkedHashMap<String, String> syntaxClassesForZ = new LinkedHashMap<>();
+        final Map<String, String> syntaxClassesForZ = new LinkedHashMap<>();
         syntaxClassesForZ.put("(head|tail|last|front|squash|rev|min|max|first|second|succ|count|items|\\\\(\\{|\\}|notin|in|inbag|(big)?cup|(big)?cap|subset|subseteq|subbageq|disjoint|partition|plus|oplus|uplus|uminus|otimes|setminus|emptyset|leq|geq|neq|div|mod|dom|(n)?(d|r)res|langle|rangle|lbag|rbag|ran|id|inv|mapsto|succ|cat|dcat|prefix|suffix|inseq|filter|extract|bcount|\\#))", "editor_arithmetic");
         syntaxClassesForZ.put("\\\\(power(_1)?|nat(_1)?|num|bag|cross|upto|rel|(p)?fun|(p)?inj|bij|seq(_1)?|iseq(_1)?|(b)?tree)", "editor_types");
         syntaxClassesForZ.put("\\\\(land|lor|implies|iff|lnot|forall|exists(_1)?|mu|lambda|true|false)", "editor_logical");
