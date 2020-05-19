@@ -223,6 +223,7 @@ task createHelp {
 	outputs.dir(helpOutputDir)
 
 	doLast {
+		delete(helpOutputDir)
 		helpSourceFiles.each {inputFile ->
 			final title = inputFile.name.replaceAll(/\.md$/, '')
 			final relativePath = helpSourceDir.toPath().relativize(inputFile.toPath())
