@@ -190,7 +190,7 @@ public class BEditor extends CodeArea {
 
     private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();
 
-    private static final Map<Class<? extends ModelFactory>, LinkedHashMap<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
+    private static final Map<Class<? extends ModelFactory<?>>, LinkedHashMap<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
 
     private static class Range implements Comparable<Range> {
         private String key;
@@ -488,7 +488,7 @@ public class BEditor extends CodeArea {
             //Prompt text is a comment text
             return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
         }
-        Class<? extends ModelFactory> modelFactoryClass = machine.getModelFactoryClass();
+        Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
         if (modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
             return computeBHighlighting(text);
         } else if(modelFactoryClass == XTLFactory.class || modelFactoryClass == TLAFactory.class || modelFactoryClass == CSPFactory.class || modelFactoryClass == AlloyFactory.class || modelFactoryClass == ZFactory.class) {
