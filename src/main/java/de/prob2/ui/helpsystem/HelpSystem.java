@@ -84,7 +84,7 @@ public class HelpSystem extends StackPane {
 			if (newVal!=null && newVal.isLeaf()){
 				final String key = newVal.getValue();
 				if (!isHelpButton) {
-					webEngine.load(this.uriForPage(key).toString());
+					this.openHelpForKeyAndAnchor(key, null);
 				} else {
 					isHelpButton = false;
 				}
