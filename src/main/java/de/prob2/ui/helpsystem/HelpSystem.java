@@ -205,7 +205,7 @@ public class HelpSystem extends StackPane {
 		Platform.runLater(() -> {
 			updateTreeSelection = false;
 			try {
-				treeView.getSelectionModel().select(treeView.getRow(hti));
+				treeView.getSelectionModel().select(hti);
 			} finally {
 				updateTreeSelection = true;
 			}
