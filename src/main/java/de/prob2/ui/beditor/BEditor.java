@@ -532,20 +532,16 @@ public class BEditor extends CodeArea {
 		while (i < range.size()) {
 			int j = i + 1;
 			int longestIndex = i;
-			boolean finished = false;
-			while (!finished) {
-				if (j == range.size()) {
-					finished = true;
-				} else {
-					Range current = range.get(longestIndex);
-					Range next = range.get(j);
-					if (current.start != next.start) {
-						finished = true;
-					} else {
-						longestIndex = next.end > current.end ? j : longestIndex;
-						j++;
-					}
+			while (j < range.size()) {
+				Range current = range.get(longestIndex);
+				Range next = range.get(j);
+				if (current.start != next.start) {
+					break;
 				}
+				if (next.end > current.end) {
+					longestIndex = j;
+				}
+				j++;
 			}
 			i = j;
 			rangeWithLongestMatch.add(range.get(longestIndex));
