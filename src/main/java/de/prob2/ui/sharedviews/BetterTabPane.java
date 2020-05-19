@@ -9,6 +9,10 @@ import javafx.scene.layout.Region;
 /**
  * <p>Slightly modified version of {@link TabPane} that calculates a proper minimum size based on its contents.</p>
  */
+// Region.snapSize(double) is deprecated since Java 9,
+// but its suggested replacement methods (snapSizeX and snapSizeY) only exist since Java 9.
+// Because we still target Java 8, we have no choice other than using the deprecated method.
+@SuppressWarnings("deprecation")
 public final class BetterTabPane extends TabPane {
 	public BetterTabPane() {
 		this((Tab[])null);
