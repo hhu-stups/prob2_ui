@@ -56,7 +56,7 @@ public class HelpSystem extends StackPane {
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
 	WebEngine webEngine;
-	boolean isHelpButton;
+	private boolean updateTreeSelection;
 	private final ResourceBundle helpPageTitles;
 	private final ResourceBundle helpPageResourcePaths;
 	private final Map<String, TreeItem<String>> itemsByKey;
@@ -66,7 +66,7 @@ public class HelpSystem extends StackPane {
 	@Inject
 	private HelpSystem(final StageManager stageManager, final Injector injector) {
 		stageManager.loadFXML(this, "helpsystem.fxml");
-		isHelpButton = false;
+		updateTreeSelection = true;
 
 		this.helpPageTitles = ResourceBundle.getBundle("de.prob2.ui.helpsystem.help_page_titles");
 		this.helpPageResourcePaths = ResourceBundle.getBundle("de.prob2.ui.helpsystem.help_page_resource_paths");
@@ -81,13 +81,8 @@ public class HelpSystem extends StackPane {
 		treeView.setRoot(root);
 		treeView.setShowRoot(false);
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-			if (newVal!=null && newVal.isLeaf()){
-				final String key = newVal.getValue();
-				if (!isHelpButton) {
-					this.openHelpForKeyAndAnchor(key, null);
-				} else {
-					isHelpButton = false;
-				}
+			if (newVal != null && newVal.isLeaf() && updateTreeSelection) {
+				this.openHelpForKeyAndAnchor(newVal.getValue(), null);
 			}
 		});
 		treeView.setCellFactory(tv -> new HelpCell());
@@ -207,7 +202,14 @@ public class HelpSystem extends StackPane {
 		}
 		final TreeItem<String> hti = itemsByKey.get(keysByUri.get(uriWithoutFragment));
 		expandTree(hti);
-		Platform.runLater(() -> treeView.getSelectionModel().select(treeView.getRow(hti)));
+		Platform.runLater(() -> {
+			updateTreeSelection = false;
+			try {
+				treeView.getSelectionModel().select(treeView.getRow(hti));
+			} finally {
+				updateTreeSelection = true;
+			}
+		});
 	}
 
 	public void openHelpForKeyAndAnchor(final String key, final String anchor) {

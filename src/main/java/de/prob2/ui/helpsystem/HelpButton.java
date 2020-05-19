@@ -28,7 +28,6 @@ public class HelpButton extends Button{
 		}
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
-		helpSystem.isHelpButton = true;
 		helpSystem.openHelpForKeyAndAnchor(this.getHelpKey(), this.getHelpAnchor());
 		helpSystemStage.show();
 		helpSystemStage.toFront();
