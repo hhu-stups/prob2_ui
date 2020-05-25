@@ -115,6 +115,18 @@ import de.be4.classicalb.core.parser.node.TPerm;
 import de.be4.classicalb.core.parser.node.TPostfix;
 import de.be4.classicalb.core.parser.node.TPow;
 import de.be4.classicalb.core.parser.node.TPow1;
+import de.be4.classicalb.core.parser.node.TPragmaDescription;
+import de.be4.classicalb.core.parser.node.TPragmaEnd;
+import de.be4.classicalb.core.parser.node.TPragmaFile;
+import de.be4.classicalb.core.parser.node.TPragmaFreeText;
+import de.be4.classicalb.core.parser.node.TPragmaGenerated;
+import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
+import de.be4.classicalb.core.parser.node.TPragmaIgnoredText;
+import de.be4.classicalb.core.parser.node.TPragmaImportPackage;
+import de.be4.classicalb.core.parser.node.TPragmaLabel;
+import de.be4.classicalb.core.parser.node.TPragmaPackage;
+import de.be4.classicalb.core.parser.node.TPragmaStart;
+import de.be4.classicalb.core.parser.node.TPragmaSymbolic;
 import de.be4.classicalb.core.parser.node.TPre;
 import de.be4.classicalb.core.parser.node.TPrefix;
 import de.be4.classicalb.core.parser.node.TPromotes;
@@ -149,6 +161,7 @@ import de.be4.classicalb.core.parser.node.TTotalSurjectionRelation;
 import de.be4.classicalb.core.parser.node.TTree;
 import de.be4.classicalb.core.parser.node.TTrue;
 import de.be4.classicalb.core.parser.node.TUnion;
+import de.be4.classicalb.core.parser.node.TUnrecognisedPragma;
 import de.be4.classicalb.core.parser.node.TUses;
 import de.be4.classicalb.core.parser.node.TVar;
 import de.be4.classicalb.core.parser.node.TVariables;
@@ -257,7 +270,10 @@ public class BEditor extends CodeArea {
 				TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
 				TConstraints.class, TSets.class, TDefinitions.class);
 		addBTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
-				TLineComment.class);
+				TLineComment.class, TPragmaDescription.class, TPragmaEnd.class, TPragmaFile.class,
+				TPragmaFreeText.class, TPragmaGenerated.class, TPragmaIdOrString.class, TPragmaIgnoredText.class,
+				TPragmaImportPackage.class, TPragmaLabel.class, TPragmaPackage.class, TPragmaStart.class,
+				TPragmaSymbolic.class, TUnrecognisedPragma.class);
 
 		//XTL Regex
 		final Map<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
