@@ -1,184 +1,20 @@
 package de.prob2.ui.beditor;
 
-import java.io.IOException;
-import java.io.PushbackReader;
-import java.io.StringReader;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.BLexer;
-import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.node.EOF;
-import de.be4.classicalb.core.parser.node.TAbstractConstants;
-import de.be4.classicalb.core.parser.node.TAbstractVariables;
-import de.be4.classicalb.core.parser.node.TAny;
-import de.be4.classicalb.core.parser.node.TArity;
-import de.be4.classicalb.core.parser.node.TAssert;
-import de.be4.classicalb.core.parser.node.TAssertions;
-import de.be4.classicalb.core.parser.node.TAssign;
-import de.be4.classicalb.core.parser.node.TBe;
-import de.be4.classicalb.core.parser.node.TBegin;
-import de.be4.classicalb.core.parser.node.TBool;
-import de.be4.classicalb.core.parser.node.TBtree;
-import de.be4.classicalb.core.parser.node.TCase;
-import de.be4.classicalb.core.parser.node.TChoice;
-import de.be4.classicalb.core.parser.node.TClosure;
-import de.be4.classicalb.core.parser.node.TClosure1;
-import de.be4.classicalb.core.parser.node.TComment;
-import de.be4.classicalb.core.parser.node.TCommentBody;
-import de.be4.classicalb.core.parser.node.TCommentEnd;
-import de.be4.classicalb.core.parser.node.TConcreteConstants;
-import de.be4.classicalb.core.parser.node.TConcreteVariables;
-import de.be4.classicalb.core.parser.node.TConjunction;
-import de.be4.classicalb.core.parser.node.TConst;
-import de.be4.classicalb.core.parser.node.TConstants;
-import de.be4.classicalb.core.parser.node.TConstraints;
-import de.be4.classicalb.core.parser.node.TDefinitions;
-import de.be4.classicalb.core.parser.node.TDirectProduct;
-import de.be4.classicalb.core.parser.node.TDivision;
-import de.be4.classicalb.core.parser.node.TDo;
-import de.be4.classicalb.core.parser.node.TDoubleColon;
-import de.be4.classicalb.core.parser.node.TDoubleEqual;
-import de.be4.classicalb.core.parser.node.TDoubleVerticalBar;
-import de.be4.classicalb.core.parser.node.TEither;
-import de.be4.classicalb.core.parser.node.TElementOf;
-import de.be4.classicalb.core.parser.node.TElse;
-import de.be4.classicalb.core.parser.node.TElsif;
-import de.be4.classicalb.core.parser.node.TEmptySet;
-import de.be4.classicalb.core.parser.node.TEnd;
-import de.be4.classicalb.core.parser.node.TEqual;
-import de.be4.classicalb.core.parser.node.TEquivalence;
-import de.be4.classicalb.core.parser.node.TExists;
-import de.be4.classicalb.core.parser.node.TExtends;
-import de.be4.classicalb.core.parser.node.TFalse;
-import de.be4.classicalb.core.parser.node.TFather;
-import de.be4.classicalb.core.parser.node.TFin;
-import de.be4.classicalb.core.parser.node.TFin1;
-import de.be4.classicalb.core.parser.node.TForAny;
-import de.be4.classicalb.core.parser.node.TGreater;
-import de.be4.classicalb.core.parser.node.TGreaterEqual;
-import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
-import de.be4.classicalb.core.parser.node.TIf;
-import de.be4.classicalb.core.parser.node.TImplementation;
-import de.be4.classicalb.core.parser.node.TImplies;
-import de.be4.classicalb.core.parser.node.TImports;
-import de.be4.classicalb.core.parser.node.TIn;
-import de.be4.classicalb.core.parser.node.TIncludes;
-import de.be4.classicalb.core.parser.node.TInfix;
-import de.be4.classicalb.core.parser.node.TInitialisation;
-import de.be4.classicalb.core.parser.node.TInt;
-import de.be4.classicalb.core.parser.node.TInteger;
-import de.be4.classicalb.core.parser.node.TInterval;
-import de.be4.classicalb.core.parser.node.TInvariant;
-import de.be4.classicalb.core.parser.node.TIseq;
-import de.be4.classicalb.core.parser.node.TIseq1;
-import de.be4.classicalb.core.parser.node.TLeft;
-import de.be4.classicalb.core.parser.node.TLess;
-import de.be4.classicalb.core.parser.node.TLessEqual;
-import de.be4.classicalb.core.parser.node.TLet;
-import de.be4.classicalb.core.parser.node.TLineComment;
-import de.be4.classicalb.core.parser.node.TLogicalOr;
-import de.be4.classicalb.core.parser.node.TMachine;
-import de.be4.classicalb.core.parser.node.TMirror;
-import de.be4.classicalb.core.parser.node.TModel;
-import de.be4.classicalb.core.parser.node.TNat;
-import de.be4.classicalb.core.parser.node.TNat1;
-import de.be4.classicalb.core.parser.node.TNatural;
-import de.be4.classicalb.core.parser.node.TNatural1;
-import de.be4.classicalb.core.parser.node.TNonInclusion;
-import de.be4.classicalb.core.parser.node.TNot;
-import de.be4.classicalb.core.parser.node.TNotEqual;
-import de.be4.classicalb.core.parser.node.TOf;
-import de.be4.classicalb.core.parser.node.TOperations;
-import de.be4.classicalb.core.parser.node.TOr;
-import de.be4.classicalb.core.parser.node.TOutputParameters;
-import de.be4.classicalb.core.parser.node.TPartialBijection;
-import de.be4.classicalb.core.parser.node.TPartialFunction;
-import de.be4.classicalb.core.parser.node.TPartialInjection;
-import de.be4.classicalb.core.parser.node.TPartialSurjection;
-import de.be4.classicalb.core.parser.node.TPerm;
-import de.be4.classicalb.core.parser.node.TPostfix;
-import de.be4.classicalb.core.parser.node.TPow;
-import de.be4.classicalb.core.parser.node.TPow1;
-import de.be4.classicalb.core.parser.node.TPragmaDescription;
-import de.be4.classicalb.core.parser.node.TPragmaEnd;
-import de.be4.classicalb.core.parser.node.TPragmaFile;
-import de.be4.classicalb.core.parser.node.TPragmaFreeText;
-import de.be4.classicalb.core.parser.node.TPragmaGenerated;
-import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
-import de.be4.classicalb.core.parser.node.TPragmaIgnoredText;
-import de.be4.classicalb.core.parser.node.TPragmaImportPackage;
-import de.be4.classicalb.core.parser.node.TPragmaLabel;
-import de.be4.classicalb.core.parser.node.TPragmaPackage;
-import de.be4.classicalb.core.parser.node.TPragmaStart;
-import de.be4.classicalb.core.parser.node.TPragmaSymbolic;
-import de.be4.classicalb.core.parser.node.TPre;
-import de.be4.classicalb.core.parser.node.TPrefix;
-import de.be4.classicalb.core.parser.node.TPromotes;
-import de.be4.classicalb.core.parser.node.TProperties;
-import de.be4.classicalb.core.parser.node.TRank;
-import de.be4.classicalb.core.parser.node.TRefinement;
-import de.be4.classicalb.core.parser.node.TRefines;
-import de.be4.classicalb.core.parser.node.TRight;
-import de.be4.classicalb.core.parser.node.TSees;
-import de.be4.classicalb.core.parser.node.TSelect;
-import de.be4.classicalb.core.parser.node.TSeq;
-import de.be4.classicalb.core.parser.node.TSeq1;
-import de.be4.classicalb.core.parser.node.TSetRelation;
-import de.be4.classicalb.core.parser.node.TSets;
-import de.be4.classicalb.core.parser.node.TSizet;
-import de.be4.classicalb.core.parser.node.TSkip;
-import de.be4.classicalb.core.parser.node.TSon;
-import de.be4.classicalb.core.parser.node.TSons;
-import de.be4.classicalb.core.parser.node.TString;
-import de.be4.classicalb.core.parser.node.TStringLiteral;
-import de.be4.classicalb.core.parser.node.TStruct;
-import de.be4.classicalb.core.parser.node.TSubtree;
-import de.be4.classicalb.core.parser.node.TSystem;
-import de.be4.classicalb.core.parser.node.TThen;
-import de.be4.classicalb.core.parser.node.TTop;
-import de.be4.classicalb.core.parser.node.TTotalBijection;
-import de.be4.classicalb.core.parser.node.TTotalFunction;
-import de.be4.classicalb.core.parser.node.TTotalInjection;
-import de.be4.classicalb.core.parser.node.TTotalRelation;
-import de.be4.classicalb.core.parser.node.TTotalSurjection;
-import de.be4.classicalb.core.parser.node.TTotalSurjectionRelation;
-import de.be4.classicalb.core.parser.node.TTree;
-import de.be4.classicalb.core.parser.node.TTrue;
-import de.be4.classicalb.core.parser.node.TUnion;
-import de.be4.classicalb.core.parser.node.TUnrecognisedPragma;
-import de.be4.classicalb.core.parser.node.TUses;
-import de.be4.classicalb.core.parser.node.TVar;
-import de.be4.classicalb.core.parser.node.TVariables;
-import de.be4.classicalb.core.parser.node.TVariant;
-import de.be4.classicalb.core.parser.node.TWhen;
-import de.be4.classicalb.core.parser.node.TWhere;
-import de.be4.classicalb.core.parser.node.TWhile;
-import de.be4.classicalb.core.parser.node.Token;
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.scripting.AlloyFactory;
-import de.prob.scripting.CSPFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.ModelFactory;
-import de.prob.scripting.TLAFactory;
-import de.prob.scripting.XTLFactory;
-import de.prob.scripting.ZFactory;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -203,137 +39,6 @@ public class BEditor extends CodeArea {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
 
 	private ExecutorService executor;
-
-	private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();
-
-	private static final Map<Class<? extends ModelFactory<?>>, Map<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
-
-	private static class Range {
-		private final String syntaxClass;
-		private final int start;
-		private final int end;
-
-		public Range(final String syntaxClass, final int start, final int end) {
-			this.syntaxClass = syntaxClass;
-			this.start = start;
-			this.end = end;
-		}
-
-		private String getSyntaxClass() {
-			return syntaxClass;
-		}
-
-		public int getStart() {
-			return start;
-		}
-
-		public int getEnd() {
-			return end;
-		}
-	}
-
-	static {
-		//B Tokens
-		addBTokens("editor_identifier", TIdentifierLiteral.class);
-		addBTokens("editor_assignments", TAssign.class, TOutputParameters.class,
-				TDoubleVerticalBar.class, TAssert.class,
-				TClosure.class, TClosure1.class, TDirectProduct.class, TDivision.class,
-				TEmptySet.class, TDoubleColon.class, TImplies.class, TLogicalOr.class,
-				TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
-				TTotalBijection.class, TTotalFunction.class, TTotalInjection.class,
-				TTotalRelation.class, TTotalSurjection.class, TFalse.class, TTrue.class,
-				TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class,
-				TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
-				TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
-				TIseq1.class, TNot.class);
-		addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class);
-		addBTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
-				TElementOf.class, TEquivalence.class, TGreaterEqual.class, TLessEqual.class,
-				TNotEqual.class, TGreater.class, TLess.class);
-		addBTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
-				TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class);
-		addBTokens("editor_string", TStringLiteral.class);
-		addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
-				TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
-				TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-				TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
-		addBTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
-				TVar.class, TIn.class, TAny.class, TWhile.class,
-				TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
-				TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
-				TChoice.class, TWhere.class, TOf.class, TEnd.class);
-		addBTokens("editor_keyword", TMachine.class, TOperations.class, TRefinement.class, TImplementation.class,
-				TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
-				TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
-				TModel.class, TInvariant.class, TConcreteVariables.class,
-				TAbstractVariables.class, TVariables.class, TProperties.class,
-				TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
-				TConstraints.class, TSets.class, TDefinitions.class);
-		addBTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
-				TLineComment.class, TPragmaDescription.class, TPragmaEnd.class, TPragmaFile.class,
-				TPragmaFreeText.class, TPragmaGenerated.class, TPragmaIdOrString.class, TPragmaIgnoredText.class,
-				TPragmaImportPackage.class, TPragmaLabel.class, TPragmaPackage.class, TPragmaStart.class,
-				TPragmaSymbolic.class, TUnrecognisedPragma.class);
-
-		//XTL Regex
-		final Map<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
-		syntaxClassesForXTL.put("(start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(function_result|image|image_right_click_transition|image_click_transition))", "editor_keyword");
-		syntaxClassesForXTL.put("(true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth|nth1|nth0|perm|perm2|permutation|same_length|add_error|print|write|sort)", "editor_types");
-		syntaxClassesForXTL.put("((\"(.*)*\")|(\'(.*)*\'))", "editor_string");
-		syntaxClassesForXTL.put("[A-Z][_a-zA-Z0-9]*", "editor_xtl_variable");
-		syntaxClassesForXTL.put("[_a-z][_a-zA-Z0-9]*", "editor_xtl_functor");
-		syntaxClassesForXTL.put(":-|!|-->|;|\\.", "editor_assignments");
-		//The + in (.)+, (\n)+ and (\r)+ avoids possible StackOverflowError
-		syntaxClassesForXTL.put("(%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
-		syntaxClassesForXTL.put("( |\t|\r|\n)+", "editor_ignored");
-
-		//TLA Regex
-		final Map<String, String> syntaxClassesForTLA = new LinkedHashMap<>();
-		syntaxClassesForTLA.put("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLE|VARIABLES|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)", "editor_keyword");
-		syntaxClassesForTLA.put("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)", "editor_ctrlkeyword");
-		syntaxClassesForTLA.put("(Next|Init|Spec|Inv)", "editor_types");
-		syntaxClassesForTLA.put("(\\\\\\*[^\n\r]*)|(\\(\\*(.|[\n\r]*)*\\*\\))", "editor_comment");
-		syntaxClassesForTLA.put("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|/|Int|Nat", "editor_arithmetic");
-		syntaxClassesForTLA.put("<=>|=>|<<|>>|!|#|/=|~|<>|->|->|~\\\\|\"|\\[\\]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\", "editor_logical");
-		syntaxClassesForTLA.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-		syntaxClassesForTLA.put("( |\t|\r|\n)+", "editor_ignored");
-
-		//CSP Regex
-		final Map<String, String> syntaxClassesForCSP = new LinkedHashMap<>();
-		syntaxClassesForCSP.put("if|then|else|@@|let|within|\\{|\\}|<->|<-|\\[\\||\\|\\]|\\[|\\]|\\\\", "editor_keyword");
-		syntaxClassesForCSP.put("!|\\?|->|\\[\\]|\\|~\\||\\|\\|\\||;|STOP|SKIP|CHAOS|/\\|\\[>|@", "editor_types");
-		syntaxClassesForCSP.put("agent|MAIN|channel|datatype|subtype|nametype|machine|Events", "editor_arithmetic");
-		syntaxClassesForCSP.put("assert|transparent|diamond|print|include", "editor_assignments");
-		syntaxClassesForCSP.put("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|\\!=|>|<|<=|>=|=<|&&|\\|\\||Int|Bool", "editor_logical");
-		syntaxClassesForCSP.put("external|extensions|productions|Proc", "editor_unsupported");
-		syntaxClassesForCSP.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-		syntaxClassesForCSP.put("(\\{-(.|[\n\r]*)*-\\})|(--(.*))", "editor_comment");
-		syntaxClassesForCSP.put("( |\t|\r|\n)+", "editor_ignored");
-
-		//Alloy Regex
-		final Map<String, String> syntaxClassesForAlloy = new LinkedHashMap<>();
-		syntaxClassesForAlloy.put("module|sig|fact|extends|run|abstract|open|fun|pred|check|assert|plus|minus|mul|div|rem|sum", "editor_keyword");
-		syntaxClassesForAlloy.put("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|\\~|->|&|\\+|-|=|\\#", "editor_types");
-		syntaxClassesForAlloy.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-		syntaxClassesForAlloy.put("(//[^\n\r]*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
-
-		//Z Regex
-		final Map<String, String> syntaxClassesForZ = new LinkedHashMap<>();
-		syntaxClassesForZ.put("(head|tail|last|front|squash|rev|min|max|first|second|succ|count|items|\\\\(\\{|\\}|notin|in|inbag|(big)?cup|(big)?cap|subset|subseteq|subbageq|disjoint|partition|plus|oplus|uplus|uminus|otimes|setminus|emptyset|leq|geq|neq|div|mod|dom|(n)?(d|r)res|langle|rangle|lbag|rbag|ran|id|inv|mapsto|succ|cat|dcat|prefix|suffix|inseq|filter|extract|bcount|\\#))", "editor_arithmetic");
-		syntaxClassesForZ.put("\\\\(power(_1)?|nat(_1)?|num|bag|cross|upto|rel|(p)?fun|(p)?inj|bij|seq(_1)?|iseq(_1)?|(b)?tree)", "editor_types");
-		syntaxClassesForZ.put("\\\\(land|lor|implies|iff|lnot|forall|exists(_1)?|mu|lambda|true|false)", "editor_logical");
-		syntaxClassesForZ.put("(\\\\(where|also|Delta))|(\\\\(begin|end)\\{(schema|zed|axdef)\\})", "editor_keyword");
-		syntaxClassesForZ.put("::=|=|\\\\(IF|THEN|ELSE|LET|defs)", "editor_assignments");
-		syntaxClassesForZ.put("(\\\\|[_a-zA-Z])[_a-zA-Z0-9]*", "editor_identifier");
-		syntaxClassesForZ.put("%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/|\\\\(noindent|documentclass|(begin|end)\\{(document)\\}|(sub)?section|(usepackage)\\{(fuzz|z-eves)\\}|\\\\)", "editor_comment");
-		syntaxClassesForZ.put("\\\\(infix|arithmos)", "editor_unsupported");
-
-		syntaxClassesOtherLanguages.put(XTLFactory.class, syntaxClassesForXTL);
-		syntaxClassesOtherLanguages.put(TLAFactory.class, syntaxClassesForTLA);
-		syntaxClassesOtherLanguages.put(CSPFactory.class, syntaxClassesForCSP);
-		syntaxClassesOtherLanguages.put(AlloyFactory.class, syntaxClassesForAlloy);
-		syntaxClassesOtherLanguages.put(ZFactory.class, syntaxClassesForZ);
-	}
 
 	private final FontSize fontSize;
 
@@ -431,13 +136,6 @@ public class BEditor extends CodeArea {
 		}
 	}
 
-	@SafeVarargs
-	private static void addBTokens(String syntaxclass, Class<? extends Token>... tokens) {
-		for (Class<? extends Token> c : tokens) {
-			syntaxClassesForB.put(c, syntaxclass);
-		}
-	}
-
 	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
 		final Collection<T> ret = new ArrayList<>(a);
 		ret.addAll(b);
@@ -504,95 +202,13 @@ public class BEditor extends CodeArea {
 		}
 		Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
 		if (modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
-			return computeBHighlighting(text);
-		} else if(modelFactoryClass == XTLFactory.class || modelFactoryClass == TLAFactory.class || modelFactoryClass == CSPFactory.class || modelFactoryClass == AlloyFactory.class || modelFactoryClass == ZFactory.class) {
-			return computeHighlighting(syntaxClassesOtherLanguages.get(modelFactoryClass), text);
+			return BLexerSyntaxHighlighting.computeBHighlighting(text);
+		} else if (RegexSyntaxHighlighting.canHighlight(modelFactoryClass)) {
+			return RegexSyntaxHighlighting.computeHighlighting(modelFactoryClass, text);
 		} else {
-			//Do not highlight for languages other than B and EventB
+			// Do not highlight unknown languages.
 			return StyleSpans.singleton(Collections.emptySet(), text.length());
 		}
-	}
-
-	private static StyleSpans<Collection<String>> computeBHighlighting(String text) {
-		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
-		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-		try {
-			Token t;
-			do {
-				t = lexer.next();
-				String string = syntaxClassesForB.get(t.getClass());
-				spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
-			} while (!(t instanceof EOF));
-		} catch (LexerException | IOException e) {
-			LOGGER.info("Failed to lex", e);
-		}
-		return spansBuilder.create();
-	}
-
-	private static LinkedList<Range> extractRanges(Map<String, String> syntaxClasses, String text) {
-		LinkedList<Range> range = new LinkedList<>();
-		syntaxClasses.forEach((key, syntaxClass) -> {
-			Pattern pattern = Pattern.compile(key);
-			Matcher matcher = pattern.matcher(text);
-			while (matcher.find()) {
-				range.add(new Range(syntaxClass, matcher.start(), matcher.end()));
-			}
-		});
-		range.sort(Comparator.comparing(Range::getStart));
-		return range;
-	}
-
-	private static LinkedList<Range> filterLongestMatch(LinkedList<Range> range) {
-		LinkedList<Range> rangeWithLongestMatch = new LinkedList<>();
-		int i = 0;
-		while (i < range.size()) {
-			int j = i + 1;
-			int longestIndex = i;
-			while (j < range.size()) {
-				Range current = range.get(longestIndex);
-				Range next = range.get(j);
-				if (current.start != next.start) {
-					break;
-				}
-				if (next.end > current.end) {
-					longestIndex = j;
-				}
-				j++;
-			}
-			i = j;
-			rangeWithLongestMatch.add(range.get(longestIndex));
-		}
-		return rangeWithLongestMatch;
-	}
-
-	private static StyleSpans<Collection<String>> createSpansBuilder(LinkedList<Range> ranges, String text) {
-		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-		String currentText = text;
-		int pos = 0;
-		while (!currentText.isEmpty() && !ranges.isEmpty()) {
-			Range first = ranges.getFirst();
-			if (pos == first.getStart()) {
-				int length = first.end - first.start;
-				spansBuilder.add(Collections.singleton(first.getSyntaxClass()), length);
-				pos = first.end;
-				currentText = currentText.substring(length);
-				ranges.removeFirst();
-			} else if (pos > first.getStart()) {
-				ranges.removeFirst();
-			} else {
-				int length = first.start - pos;
-				spansBuilder.add(Collections.singleton("ignored"), length);
-				pos = first.start;
-				currentText = currentText.substring(length);
-			}
-		}
-		return spansBuilder.create();
-	}
-
-	private static StyleSpans<Collection<String>> computeHighlighting(Map<String, String> syntaxClasses, String text) {
-		LinkedList<Range> ranges = extractRanges(syntaxClasses, text);
-		LinkedList<Range> rangesWithLongestMatch = filterLongestMatch(ranges);
-		return createSpansBuilder(rangesWithLongestMatch, text);
 	}
 
 	public void clearHistory() {
