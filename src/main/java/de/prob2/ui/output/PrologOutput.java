@@ -14,6 +14,7 @@ import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -53,68 +54,115 @@ public class PrologOutput extends TextFlow {
 			Paint fontColor = Color.BLACK;
 			boolean underline = false;
 			boolean blinking = false;
+			double blinkingTime = 1;
 			boolean visible = true;
+			boolean strikethrough = false;
 			FontWeight weight = FontWeight.NORMAL;
+			FontPosture posture = FontPosture.REGULAR;
 			String message = s;
-
-			if (s.charAt(0) == 27) {
-				// ANSI code found
-				int indexOfANSICodeEnd = s.indexOf('!');
-				message = s.substring(indexOfANSICodeEnd + 2);
-				if (indexOfANSICodeEnd != -1) {
-					for (String str : s.substring(1, indexOfANSICodeEnd).split("\\u001b")) {
-						// setting supported font color and attributes for output
-						switch (str) {
-							case "[1m":
-								weight = FontWeight.BOLD;
-								break;
-							case "[4m":
-								underline = true;
-								break;
-							case "[5m":
-								blinking = true;
-								break;
-							case "[8m":
-								visible = false;
-								break;
-							case "[31m":
-								fontColor = Color.RED;
-								break;
-							case "[32m":
-								fontColor = Color.GREEN;
-								break;
-							case "[33m":
-								fontColor = Color.YELLOW;
-								break;
-							case "[34m":
-								fontColor = Color.BLUE;
-								break;
-							case "[35m":
-								fontColor = Color.MAGENTA;
-								break;
-							case "[36m":
-								fontColor = Color.CYAN;
-								break;
-							case "[37m":
-								fontColor = Color.WHITE;
-								break;
-						}
+			while(message.charAt(0) == 27) {
+				// ANSI escape code found. Warning: If ANSI escape code is not ending with m some parts of messages might be lost!
+				// Warning: If codes are not set at beginning of message, e.g. for changing attributes midmessage, chaos might ensue ;)
+				int indexOfANSIEscapeCodeEnd = s.indexOf('m');
+				String str = message.substring(1, indexOfANSIEscapeCodeEnd);
+				if (indexOfANSIEscapeCodeEnd != -1) {
+					// Setting supported font color and attributes for output
+					switch (str) {
+						case "[0":
+							// Reset code. Return to default values.
+							fontColor = Color.BLACK;
+							underline = false;
+							blinking = false;
+							blinkingTime = 1;
+							visible = true;
+							strikethrough = false;
+							weight = FontWeight.NORMAL;
+							posture = FontPosture.REGULAR;
+							break;
+						case "[1":
+							weight = FontWeight.BOLD;
+							break;
+						case "[3":
+							posture = FontPosture.ITALIC;
+							break;
+						case "[4":
+							underline = true;
+							break;
+						case "[5":
+							blinking = true;
+							blinkingTime = 1;
+							break;
+						case "[6":
+							blinking = true;
+							blinkingTime = 0.5;
+							break;
+						case "[8":
+							visible = false;
+							break;
+						case "[9":
+							strikethrough = true;
+							break;
+						case "[22":
+							fontColor = Color.BLACK;
+							weight = FontWeight.NORMAL;
+							break;
+						case "[23":
+							posture = FontPosture.REGULAR;
+							break;
+						case "[24":
+							underline = false;
+							break;
+						case "[25":
+							blinking = false;
+							break;
+						case "[28":
+							visible = true;
+							break;
+						case "[29":
+							strikethrough = false;
+							break;
+						case "[31":
+							fontColor = Color.RED;
+							break;
+						case "[32":
+							fontColor = Color.GREEN;
+							break;
+						case "[33":
+							fontColor = Color.YELLOW;
+							break;
+						case "[34":
+							fontColor = Color.BLUE;
+							break;
+						case "[35":
+							fontColor = Color.MAGENTA;
+							break;
+						case "[36":
+							fontColor = Color.CYAN;
+							break;
+						case "[37":
+							fontColor = Color.WHITE;
+							break;
+						default:
+							// Code not supported (yet?). Do nothing.
+							break;
 					}
 				}
+				message = message.substring(indexOfANSIEscapeCodeEnd + 1);
 			}
 
-			output.setFont(Font.font(output.getFont().getFamily(), weight, output.getFont().getSize()));
+			output.setFont(Font.font(output.getFont().getFamily(), weight, posture, output.getFont().getSize()));
 			output.setText(message);
 			output.setFill(fontColor);
 			output.setUnderline(underline);
 			if (blinking) {
-				FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.5), output);
+				FadeTransition fadeTransition = new FadeTransition(Duration.seconds(blinkingTime), output);
 				fadeTransition.setToValue(0);
 				fadeTransition.setFromValue(1);
 				fadeTransition.setCycleCount(Animation.INDEFINITE);
 				fadeTransition.play();
 			}
 			output.setVisible(visible);
+			output.setStrikethrough(strikethrough);
 
 			return output;
 		}

@@ -136,20 +136,19 @@ public class TraceDiff extends VBox {
 
 	private ChangeListener<? super Number> createChangeListenerForListView(CheckBox firstCB, CheckBox secondCB) {
 		return (obs, o, n) -> {
-			if (firstCB.isSelected()) {
-				ListView<String> firstLV = checkBoxListViewMap.get(firstCB);
-				firstLV.getSelectionModel().select(n.intValue());
-				firstLV.getFocusModel().focus(n.intValue());
-				firstLV.scrollTo(n.intValue());
-			}
-
-			if (secondCB.isSelected()) {
-				ListView<String> secondLV = checkBoxListViewMap.get(secondCB);
-				secondLV.getSelectionModel().select(n.intValue());
-				secondLV.getFocusModel().focus(n.intValue());
-				secondLV.scrollTo(n.intValue());
-			}
+			int value = n.intValue();
+			scrollToEntry(firstCB, value);
+			scrollToEntry(secondCB, value);
 		};
+	}
+
+	private void scrollToEntry(CheckBox cb, int value) {
+		if (cb.isSelected()) {
+			ListView<String> lv = checkBoxListViewMap.get(cb);
+			lv.getSelectionModel().select(value);
+			lv.getFocusModel().focus(value);
+			lv.scrollTo(value);
+		}
 	}
 
 	void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
@@ -299,9 +298,9 @@ public class TraceDiff extends VBox {
 		// the alert is either a TraceReplayErrorAlert or triggered by trying to save a trace
 		if (alert instanceof TraceReplayErrorAlert) {
 			replayed.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
-			 if (!listBox.getChildren().contains(persistentBox)) {
+			if (!listBox.getChildren().contains(persistentBox)) {
 			 	listBox.getChildren().add(persistentBox);
-			 }
+			}
 		} else {
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
 			if (listBox.getChildren().contains(persistentBox)) {
