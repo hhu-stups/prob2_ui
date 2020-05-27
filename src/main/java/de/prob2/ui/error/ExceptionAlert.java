@@ -57,7 +57,7 @@ public final class ExceptionAlert extends Alert {
 		}
 		final String message;
 		if (cliError != null) {
-			message = bundle.getString("error.exceptionAlert.cliErrorExplanation");
+			message = String.format(bundle.getString("error.exceptionAlert.cliErrorExplanation"), cliError.getMessage());
 		} else if (proBError != null) {
 			message = proBError.getOriginalMessage();
 		} else {
