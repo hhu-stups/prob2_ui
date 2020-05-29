@@ -9,7 +9,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public final class AboutBox extends Stage {
 	private final VersionInfo versionInfo;
 
 	@FXML
-	private Label versionInfoLabel;
+	private TextArea versionInfoTextArea;
 
 	@Inject
 	private AboutBox(final StageManager stageManager, final ResourceBundle bundle, final VersionInfo versionInfo) {
@@ -91,6 +91,6 @@ public final class AboutBox extends Stage {
 			System.getProperty("javafx.runtime.version")
 		));
 		
-		this.versionInfoLabel.setText(versionInfoBuilder.toString());
+		this.versionInfoTextArea.setText(versionInfoBuilder.toString());
 	}
 }
