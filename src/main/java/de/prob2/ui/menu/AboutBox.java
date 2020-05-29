@@ -1,6 +1,7 @@
 package de.prob2.ui.menu;
 
 import java.util.ResourceBundle;
+import java.util.StringJoiner;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,15 +40,15 @@ public final class AboutBox extends Stage {
 
 	@FXML
 	private void initialize() {
-		final StringBuilder versionInfoBuilder = new StringBuilder();
+		final StringJoiner versionInfoBuilder = new StringJoiner("\n\n");
 		
-		versionInfoBuilder.append(String.format(
+		versionInfoBuilder.add(String.format(
 			this.bundle.getString("menu.aboutBox.uiInfo"),
 			this.versionInfo.getUIVersion(),
 			this.versionInfo.getUICommit()
 		));
 		
-		versionInfoBuilder.append(String.format(
+		versionInfoBuilder.add(String.format(
 			this.bundle.getString("menu.aboutBox.kernelInfo"),
 			this.versionInfo.getKernelVersion(),
 			this.versionInfo.getKernelCommit()
@@ -64,19 +65,19 @@ public final class AboutBox extends Stage {
 			cliVersion = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
 			cliRevision = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
 		}
-		versionInfoBuilder.append(String.format(
+		versionInfoBuilder.add(String.format(
 			this.bundle.getString("menu.aboutBox.cliInfo"),
 			cliVersion,
 			cliRevision
 		));
 		
-		versionInfoBuilder.append(String.format(
+		versionInfoBuilder.add(String.format(
 			this.bundle.getString("menu.aboutBox.parserInfo"),
 			this.versionInfo.getParserVersion(),
 			this.versionInfo.getParserCommit()
 		));
 		
-		versionInfoBuilder.append(String.format(
+		versionInfoBuilder.add(String.format(
 			this.bundle.getString("menu.aboutBox.javaInfo"),
 			System.getProperty("java.version"),
 			System.getProperty("java.vendor"),
@@ -85,7 +86,7 @@ public final class AboutBox extends Stage {
 			System.getProperty("java.vm.vendor")
 		));
 		
-		versionInfoBuilder.append(String.format(
+		versionInfoBuilder.add(String.format(
 			this.bundle.getString("menu.aboutBox.javaFxInfo"),
 			System.getProperty("javafx.version"),
 			System.getProperty("javafx.runtime.version")
