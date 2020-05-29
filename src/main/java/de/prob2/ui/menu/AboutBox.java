@@ -56,19 +56,27 @@ public final class AboutBox extends Stage {
 		
 		String cliVersion;
 		String cliRevision;
+		String cliLastChangedDate;
+		String cliPrologInfo;
 		try {
 			cliVersion = this.versionInfo.getFormattedCliVersion();
 			cliRevision = this.versionInfo.getCliVersion().revision;
+			cliLastChangedDate = this.versionInfo.getCliLastChangedDate();
+			cliPrologInfo = this.versionInfo.getCliPrologInfo();
 		} catch (RuntimeException e) {
 			LOGGER.error("Failed to start ProB CLI to get version number", e);
 			stageManager.makeExceptionAlert(e, "menu.aboutBox.cliStartFailed.message").show();
 			cliVersion = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
 			cliRevision = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
+			cliLastChangedDate = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
+			cliPrologInfo = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
 		}
 		versionInfoBuilder.add(String.format(
 			this.bundle.getString("menu.aboutBox.cliInfo"),
 			cliVersion,
-			cliRevision
+			cliRevision,
+			cliLastChangedDate,
+			cliPrologInfo
 		));
 		
 		versionInfoBuilder.add(String.format(

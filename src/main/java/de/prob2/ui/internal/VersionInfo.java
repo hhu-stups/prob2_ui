@@ -26,7 +26,7 @@ public final class VersionInfo {
 	private final Properties buildInfo;
 	private final Object lock;
 	
-	private CliVersionNumber cliVersion;
+	private GetVersionCommand cliVersionCommand;
 	
 	@Inject
 	private VersionInfo(final MachineLoader machineLoader) {
@@ -63,21 +63,36 @@ public final class VersionInfo {
 		return Main.getGitSha();
 	}
 	
-	public CliVersionNumber getCliVersion() {
-		synchronized (this.lock) {
-			if (this.cliVersion == null) {
-				// Computed lazily, because the empty state space potentially still needs to be started, which takes a few seconds.
+	private GetVersionCommand loadCliVersionInfo() {
+		if (this.cliVersionCommand == null) {
+			synchronized (this.lock) {
+				// Computed lazily to avoid excessive communication with the CLI.
 				final GetVersionCommand cmd = new GetVersionCommand();
 				this.machineLoader.getEmptyStateSpace().execute(cmd);
-				this.cliVersion = cmd.getVersion();
+				// Set the field only after the command has executed
+				// to prevent storing and using a not fully initialized command object
+				// if the command fails to execute.
+				this.cliVersionCommand = cmd;
 			}
 		}
-		return this.cliVersion;
+		return this.cliVersionCommand;
+	}
+	
+	public CliVersionNumber getCliVersion() {
+		return this.loadCliVersionInfo().getVersion();
 	}
 	
 	public String getFormattedCliVersion() {
 		final CliVersionNumber cvn = this.getCliVersion();
 		return String.format("%s.%s.%s-%s", cvn.major, cvn.minor, cvn.service, cvn.qualifier);
+	}
+	
+	public String getCliLastChangedDate() {
+		return this.loadCliVersionInfo().getLastchangeddate();
+	}
+	
+	public String getCliPrologInfo() {
+		return this.loadCliVersionInfo().getProloginfo();
 	}
 	
 	public String getParserVersion() {
