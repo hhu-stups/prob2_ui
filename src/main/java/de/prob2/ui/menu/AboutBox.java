@@ -11,6 +11,8 @@ import de.prob2.ui.internal.VersionInfo;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -101,5 +103,13 @@ public final class AboutBox extends Stage {
 		));
 		
 		this.versionInfoTextArea.setText(versionInfoBuilder.toString());
+	}
+
+	@FXML
+	private void copyVersionInfo() {
+		final Clipboard clipboard = Clipboard.getSystemClipboard();
+		final ClipboardContent content = new ClipboardContent();
+		content.putString(this.versionInfoTextArea.getText());
+		clipboard.setContent(content);
 	}
 }

@@ -7,6 +7,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+<?import javafx.scene.control.Button?>
 <fx:root type="AboutBox" resizable="false" title="%menu.help.items.about" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
@@ -18,6 +19,7 @@
 					<Image url="/de/prob2/ui/ProB_Logo.png"/>
 				</ImageView>
 				<TextArea fx:id="versionInfoTextArea" wrapText="true" prefWidth="400.0" prefHeight="500.0"/>
+				<Button styleClass="button-blue" text="%common.contextMenu.copy" onAction="#copyVersionInfo"/>
 			</VBox>
 		</Scene>
 	</scene>
