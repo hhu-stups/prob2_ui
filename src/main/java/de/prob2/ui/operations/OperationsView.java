@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
@@ -344,7 +345,11 @@ public final class OperationsView extends VBox {
 		));
 		
 		final LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
-		final Set<String> disabled = new HashSet<>(loadedMachine.getOperationNames());
+		final Set<String> disabled = loadedMachine.getOperationNames().stream()
+			.map(loadedMachine::getMachineOperationInfo)
+			.filter(OperationInfo::isTopLevel)
+			.map(OperationInfo::getOperationName)
+			.collect(Collectors.toSet());
 		disabled.removeAll(operations.stream().map(Transition::getName).collect(Collectors.toSet()));
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		showDisabledAndWithTimeout(loadedMachine, disabled, withTimeout);
