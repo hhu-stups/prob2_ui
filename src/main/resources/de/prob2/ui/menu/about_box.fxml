@@ -10,16 +10,18 @@
 <?import javafx.scene.control.Button?>
 <fx:root type="AboutBox" resizable="false" title="%menu.help.items.about" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
-		<Scene>
+		<Scene width="400.0" height="600.0">
 			<VBox alignment="TOP_CENTER">
-				<padding>
-					<Insets topRightBottomLeft="4"/>
-				</padding>
-				<ImageView preserveRatio="true" fitWidth="350.0">
+				<ImageView preserveRatio="true" fitWidth="350.0" VBox.vgrow="NEVER">
+					<!-- The logo image already contains a transparent border, so we don't need to add a margin here. -->
 					<Image url="/de/prob2/ui/ProB_Logo.png"/>
 				</ImageView>
-				<TextArea fx:id="versionInfoTextArea" wrapText="true" prefWidth="400.0" prefHeight="500.0"/>
-				<Button styleClass="button-blue" text="%common.contextMenu.copy" onAction="#copyVersionInfo"/>
+				<TextArea fx:id="versionInfoTextArea" wrapText="true" VBox.vgrow="ALWAYS"/>
+				<Button styleClass="button-blue" text="%common.contextMenu.copy" VBox.vgrow="NEVER" onAction="#copyVersionInfo">
+					<VBox.margin>
+						<Insets topRightBottomLeft="10.0"/>
+					</VBox.margin>
+				</Button>
 			</VBox>
 		</Scene>
 	</scene>
