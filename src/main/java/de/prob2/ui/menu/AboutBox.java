@@ -25,6 +25,8 @@ public final class AboutBox extends Stage {
 	@FXML
 	private Label cliInfoLabel;
 	@FXML
+	private Label parserInfoLabel;
+	@FXML
 	private Label javaInfoLabel;
 	@FXML
 	private Label javaFxInfoLabel;
@@ -72,6 +74,12 @@ public final class AboutBox extends Stage {
 				this.sizeToScene();
 			});
 		}, "ProB CLI Version Getter").start();
+		
+		this.parserInfoLabel.setText(String.format(
+			this.bundle.getString("menu.aboutBox.parserInfo"),
+			this.versionInfo.getParserVersion(),
+			this.versionInfo.getParserCommit()
+		));
 		
 		this.javaInfoLabel.setText(String.format(
 			this.bundle.getString("menu.aboutBox.javaInfo"),

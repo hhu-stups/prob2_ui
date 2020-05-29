@@ -9,6 +9,7 @@ import java.util.Properties;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.prob.Main;
 import de.prob.animator.command.GetVersionCommand;
 import de.prob.cli.CliVersionNumber;
@@ -77,5 +78,13 @@ public final class VersionInfo {
 	public String getFormattedCliVersion() {
 		final CliVersionNumber cvn = this.getCliVersion();
 		return String.format("%s.%s.%s-%s", cvn.major, cvn.minor, cvn.service, cvn.qualifier);
+	}
+	
+	public String getParserVersion() {
+		return BParser.getVersion();
+	}
+	
+	public String getParserCommit() {
+		return BParser.getGitSha();
 	}
 }
