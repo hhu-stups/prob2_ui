@@ -86,13 +86,9 @@ public class MachineLoader {
 	public StateSpace getEmptyStateSpace() {
 		synchronized (this.emptyStateSpaceLock) {
 			if (this.emptyStateSpace == null) {
-				try {
-					this.emptyStateSpace = injector.getInstance(ClassicalBFactory.class)
-						.create("empty", "MACHINE empty END")
-						.load(this.globalPreferences);
-				} catch (CliError | ProBError e) {
-					throw new IllegalStateException("Failed to load empty machine, this should never happen!", e);
-				}
+				this.emptyStateSpace = injector.getInstance(ClassicalBFactory.class)
+					.create("empty", "MACHINE empty END")
+					.load(this.globalPreferences);
 				if (Thread.currentThread().isInterrupted()) {
 					this.emptyStateSpace.kill();
 				}
