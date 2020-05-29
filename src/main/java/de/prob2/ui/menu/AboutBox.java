@@ -57,23 +57,9 @@ public final class AboutBox extends Stage {
 		
 		this.cliInfoLabel.setText(String.format(
 			this.bundle.getString("menu.aboutBox.cliInfo"),
-			this.bundle.getString("menu.aboutBox.cliInfo.loading"),
-			this.bundle.getString("menu.aboutBox.cliInfo.loading")
+			this.versionInfo.getFormattedCliVersion(),
+			this.versionInfo.getCliVersion().revision
 		));
-		new Thread(() -> {
-			// The CLI version is loaded in the background, because it requires starting a CLI,
-			// which takes a few seconds.
-			final String formattedCliVersion = this.versionInfo.getFormattedCliVersion();
-			final String revision = this.versionInfo.getCliVersion().revision;
-			Platform.runLater(() -> {
-				this.cliInfoLabel.setText(
-					String.format(this.bundle.getString("menu.aboutBox.cliInfo"),
-					formattedCliVersion,
-					revision
-				));
-				this.sizeToScene();
-			});
-		}, "ProB CLI Version Getter").start();
 		
 		this.parserInfoLabel.setText(String.format(
 			this.bundle.getString("menu.aboutBox.parserInfo"),
