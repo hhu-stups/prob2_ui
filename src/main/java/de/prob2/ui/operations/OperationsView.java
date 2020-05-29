@@ -3,11 +3,9 @@ package de.prob2.ui.operations;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -18,9 +16,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.LoadedMachine;
-import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
@@ -195,9 +191,6 @@ public final class OperationsView extends VBox {
 	@FXML
 	private Button cancelButton;
 
-	private AbstractModel currentModel;
-	private final List<String> opNames = new ArrayList<>();
-	private final Map<String, List<String>> opToParams = new HashMap<>();
 	private final List<OperationItem> events = new ArrayList<>();
 	private final BooleanProperty showDisabledOps;
 	private final BooleanProperty showUnambiguous;
@@ -296,7 +289,7 @@ public final class OperationsView extends VBox {
 			}
 			((BindableGlyph)sortButton.getGraphic()).setIcon(icon);
 			
-			doSort();
+			doSort(currentTrace.get().getStateSpace().getLoadedMachine());
 			opsListView.getItems().setAll(applyFilter(searchBar.getText()));
 		});
 
@@ -337,9 +330,6 @@ public final class OperationsView extends VBox {
 
 	public void update(final Trace trace) {
 		if (trace == null) {
-			currentModel = null;
-			opNames.clear();
-			opToParams.clear();
 			opsListView.getItems().clear();
 		} else {
 			this.updater.execute(() -> this.updateBG(trace));
@@ -347,22 +337,19 @@ public final class OperationsView extends VBox {
 	}
 
 	private void updateBG(final Trace trace) {
-		if (!trace.getModel().equals(currentModel)) {
-			updateModel(trace);
-		}
-
 		events.clear();
 		final Set<Transition> operations = trace.getNextTransitions(true, FormulaExpand.TRUNCATE);
 		events.addAll(OperationItem.computeUnambiguousConstantsAndVariables(
 			OperationItem.forTransitions(trace.getStateSpace(), operations)
 		));
 		
-		final Set<String> disabled = new HashSet<>(opNames);
+		final LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
+		final Set<String> disabled = new HashSet<>(loadedMachine.getOperationNames());
 		disabled.removeAll(operations.stream().map(Transition::getName).collect(Collectors.toSet()));
 		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
-		showDisabledAndWithTimeout(disabled, withTimeout);
+		showDisabledAndWithTimeout(loadedMachine, disabled, withTimeout);
 
-		doSort();
+		doSort(loadedMachine);
 
 		final String text;
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
@@ -379,12 +366,12 @@ public final class OperationsView extends VBox {
 		Platform.runLater(() -> opsListView.getItems().setAll(filtered));
 	}
 
-	private void showDisabledAndWithTimeout(final Set<String> notEnabled, final Set<String> withTimeout) {
+	private void showDisabledAndWithTimeout(final LoadedMachine loadedMachine, final Set<String> notEnabled, final Set<String> withTimeout) {
 		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
 				if (!"$initialise_machine".equals(s)) {
 					events.add(OperationItem.forDisabled(
-						s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, opToParams.get(s)
+						s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, loadedMachine.getMachineOperationInfo(s).getParameterNames()
 					));
 				}
 			}
@@ -418,18 +405,20 @@ public final class OperationsView extends VBox {
 		}
 	}
 
-	private int compareModelOrder(final OperationItem left, final OperationItem right) {
-		if (left.getName().equals(right.getName())) {
-			return compareParams(left.getParameterValues(), right.getParameterValues());
-		} else {
-			final int leftIndex = opNames.indexOf(left.getName());
-			final int rightIndex = opNames.indexOf(right.getName());
-			if (leftIndex == -1 && rightIndex == -1) {
-				return left.getName().compareTo(right.getName());
+	private Comparator<OperationItem> modelOrderComparator(final List<String> orderedOperationNames) {
+		return (left, right) -> {
+			if (left.getName().equals(right.getName())) {
+				return compareParams(left.getParameterValues(), right.getParameterValues());
 			} else {
-				return Integer.compare(leftIndex, rightIndex);
+				final int leftIndex = orderedOperationNames.indexOf(left.getName());
+				final int rightIndex = orderedOperationNames.indexOf(right.getName());
+				if (leftIndex == -1 && rightIndex == -1) {
+					return left.getName().compareTo(right.getName());
+				} else {
+					return Integer.compare(leftIndex, rightIndex);
+				}
 			}
-		}
+		};
 	}
 
 	@FXML
@@ -447,11 +436,11 @@ public final class OperationsView extends VBox {
 				.collect(Collectors.toList());
 	}
 
-	private void doSort() {
+	private void doSort(final LoadedMachine loadedMachine) {
 		final Comparator<OperationItem> comparator;
 		switch (this.getSortMode()) {
 		case MODEL_ORDER:
-			comparator = this::compareModelOrder;
+			comparator = this.modelOrderComparator(new ArrayList<String>(loadedMachine.getOperationNames()));
 			break;
 
 		case A_TO_Z:
@@ -539,20 +528,6 @@ public final class OperationsView extends VBox {
 			randomExecutionThread.set(null);
 		}
 	}
-
-
-	private void updateModel(final Trace trace) {
-		currentModel = trace.getModel();
-		opNames.clear();
-		opToParams.clear();
-		LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
-		for (String opName : loadedMachine.getOperationNames()) {
-			OperationInfo machineOperationInfo = loadedMachine.getMachineOperationInfo(opName);
-			opNames.add(opName);
-			opToParams.put(opName, machineOperationInfo.getParameterNames());
-		}
-	}
-	
 
 	private OperationsView.SortMode getSortMode() {
 		return this.sortMode.get();
