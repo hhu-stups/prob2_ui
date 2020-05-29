@@ -17,12 +17,7 @@
 				<ImageView preserveRatio="true" fitWidth="350.0">
 					<Image url="/de/prob2/ui/ProB_Logo.png"/>
 				</ImageView>
-				<Label fx:id="uiInfoLabel" textAlignment="CENTER"/>
-				<Label fx:id="kernelInfoLabel" textAlignment="CENTER"/>
-				<Label fx:id="cliInfoLabel" textAlignment="CENTER"/>
-				<Label fx:id="parserInfoLabel" textAlignment="CENTER"/>
-				<Label fx:id="javaInfoLabel" textAlignment="CENTER"/>
-				<Label fx:id="javaFxInfoLabel" textAlignment="CENTER"/>
+				<Label fx:id="versionInfoLabel" textAlignment="CENTER"/>
 			</VBox>
 		</Scene>
 	</scene>

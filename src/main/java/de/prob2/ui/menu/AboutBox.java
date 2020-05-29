@@ -24,17 +24,7 @@ public final class AboutBox extends Stage {
 	private final VersionInfo versionInfo;
 
 	@FXML
-	private Label uiInfoLabel;
-	@FXML
-	private Label kernelInfoLabel;
-	@FXML
-	private Label cliInfoLabel;
-	@FXML
-	private Label parserInfoLabel;
-	@FXML
-	private Label javaInfoLabel;
-	@FXML
-	private Label javaFxInfoLabel;
+	private Label versionInfoLabel;
 
 	@Inject
 	private AboutBox(final StageManager stageManager, final ResourceBundle bundle, final VersionInfo versionInfo) {
@@ -49,13 +39,15 @@ public final class AboutBox extends Stage {
 
 	@FXML
 	private void initialize() {
-		this.uiInfoLabel.setText(String.format(
+		final StringBuilder versionInfoBuilder = new StringBuilder();
+		
+		versionInfoBuilder.append(String.format(
 			this.bundle.getString("menu.aboutBox.uiInfo"),
 			this.versionInfo.getUIVersion(),
 			this.versionInfo.getUICommit()
 		));
 		
-		this.kernelInfoLabel.setText(String.format(
+		versionInfoBuilder.append(String.format(
 			this.bundle.getString("menu.aboutBox.kernelInfo"),
 			this.versionInfo.getKernelVersion(),
 			this.versionInfo.getKernelCommit()
@@ -72,19 +64,19 @@ public final class AboutBox extends Stage {
 			cliVersion = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
 			cliRevision = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
 		}
-		this.cliInfoLabel.setText(String.format(
+		versionInfoBuilder.append(String.format(
 			this.bundle.getString("menu.aboutBox.cliInfo"),
 			cliVersion,
 			cliRevision
 		));
 		
-		this.parserInfoLabel.setText(String.format(
+		versionInfoBuilder.append(String.format(
 			this.bundle.getString("menu.aboutBox.parserInfo"),
 			this.versionInfo.getParserVersion(),
 			this.versionInfo.getParserCommit()
 		));
 		
-		this.javaInfoLabel.setText(String.format(
+		versionInfoBuilder.append(String.format(
 			this.bundle.getString("menu.aboutBox.javaInfo"),
 			System.getProperty("java.version"),
 			System.getProperty("java.vendor"),
@@ -93,10 +85,12 @@ public final class AboutBox extends Stage {
 			System.getProperty("java.vm.vendor")
 		));
 		
-		this.javaFxInfoLabel.setText(String.format(
+		versionInfoBuilder.append(String.format(
 			this.bundle.getString("menu.aboutBox.javaFxInfo"),
 			System.getProperty("javafx.version"),
 			System.getProperty("javafx.runtime.version")
 		));
+		
+		this.versionInfoLabel.setText(versionInfoBuilder.toString());
 	}
 }
