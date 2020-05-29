@@ -8,13 +8,18 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class AboutBox extends Stage {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AboutBox.class);
+
+	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final VersionInfo versionInfo;
 
@@ -35,6 +40,7 @@ public final class AboutBox extends Stage {
 	private AboutBox(final StageManager stageManager, final ResourceBundle bundle, final VersionInfo versionInfo) {
 		super();
 
+		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.versionInfo = versionInfo;
 
@@ -55,10 +61,21 @@ public final class AboutBox extends Stage {
 			this.versionInfo.getKernelCommit()
 		));
 		
+		String cliVersion;
+		String cliRevision;
+		try {
+			cliVersion = this.versionInfo.getFormattedCliVersion();
+			cliRevision = this.versionInfo.getCliVersion().revision;
+		} catch (RuntimeException e) {
+			LOGGER.error("Failed to start ProB CLI to get version number", e);
+			stageManager.makeExceptionAlert(e, "menu.aboutBox.cliStartFailed.message").show();
+			cliVersion = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
+			cliRevision = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
+		}
 		this.cliInfoLabel.setText(String.format(
 			this.bundle.getString("menu.aboutBox.cliInfo"),
-			this.versionInfo.getFormattedCliVersion(),
-			this.versionInfo.getCliVersion().revision
+			cliVersion,
+			cliRevision
 		));
 		
 		this.parserInfoLabel.setText(String.format(
