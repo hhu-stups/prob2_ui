@@ -41,10 +41,12 @@ public class FullValueStage extends Stage {
 	
 	@FXML private TabPane tabPane;
 	@FXML private Tab formulaTab;
+	@FXML private Tab descriptionTab;
 	@FXML private Tab currentValueTab;
 	@FXML private Tab previousValueTab;
 	@FXML private Tab diffTab;
 	@FXML private TextArea formulaTextarea;
+	@FXML private TextArea descriptionTextarea;
 	@FXML private TextArea currentValueTextarea;
 	@FXML private TextArea previousValueTextarea;
 	@FXML private StyleClassedTextArea diffTextarea;
@@ -191,6 +193,7 @@ public class FullValueStage extends Stage {
 		if (newValue == null) {
 			this.setTitle(null);
 			this.formulaTextarea.clear();
+			this.descriptionTextarea.clear();
 			this.currentValueTextarea.clear();
 			this.previousValueTextarea.clear();
 			this.diffTextarea.clear();
@@ -199,6 +202,7 @@ public class FullValueStage extends Stage {
 		
 		this.setTitle(newValue.getLabel());
 		this.formulaTextarea.setText(newValue.getLabel());
+		this.descriptionTextarea.setText(newValue.getDescription());
 		final String cv = prettifyIfEnabled(valueToString(newValue.getCurrentValue()));
 		final String pv = prettifyIfEnabled(valueToString(newValue.getPreviousValue()));
 		this.currentValueTextarea.setText(cv);

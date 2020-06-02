@@ -50,6 +50,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
@@ -202,6 +203,10 @@ public final class StatesView extends StackPane {
 
 				if (!to.getCurrentValue().equals(to.getPreviousValue())) {
 					row.getStyleClass().add("changed");
+				}
+
+				if (!to.getDescription().isEmpty()) {
+					row.setTooltip(new Tooltip(to.getDescription()));
 				}
 			}
 		});

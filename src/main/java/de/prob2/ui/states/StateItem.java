@@ -53,7 +53,7 @@ public final class StateItem {
 		if (this.previous == null) {
 			if (this.getPreviousState() == null) {
 				// Previous state not available, use a placeholder formula with an inactive value.
-				this.previous = ExpandedFormula.withoutChildren(this.getCurrent().getFormula(), this.getCurrent().getLabel(), BVisual2Value.Inactive.INSTANCE);
+				this.previous = ExpandedFormula.withoutChildren(this.getCurrent().getFormula(), this.getCurrent().getLabel(), this.getCurrent().getDescription(), BVisual2Value.Inactive.INSTANCE);
 			} else {
 				this.previous = this.evaluator.evaluate(this.getFormula(), this.getPreviousState());
 			}
@@ -63,6 +63,10 @@ public final class StateItem {
 
 	public String getLabel() {
 		return this.getCurrent().getLabel();
+	}
+
+	public String getDescription() {
+		return this.getCurrent().getDescription();
 	}
 
 	public BVisual2Value getCurrentValue() {
