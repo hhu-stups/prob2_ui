@@ -1,13 +1,16 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 
+import java.util.List;
+import java.util.ResourceBundle;
+
+import javax.inject.Inject;
+
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -21,11 +24,10 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -38,10 +40,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.ResourceBundle;
 
  
 @FXMLInjected
@@ -109,14 +107,8 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 			showDetails.setOnAction(e -> {
 				TestCaseGenerationItem item = row.getItem();
 				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
-				@SuppressWarnings("unchecked")
-				ObservableList<TraceInformationItem> traces = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation(TestCaseGenerationItem.TRACE_INFORMATION));
-				stage.setTraces(traces);
-				
-				@SuppressWarnings("unchecked")
-				ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation(TestCaseGenerationItem.UNCOVERED_OPERATIONS));
-				stage.setUncoveredOperations(uncoveredOperations);
-				
+				stage.setTraces(item.getTraceInformation());
+				stage.setUncoveredOperations(item.getUncoveredOperations());
 				stage.show();
 			});
 

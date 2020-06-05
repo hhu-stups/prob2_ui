@@ -17,7 +17,7 @@ import de.prob2.ui.symbolic.SymbolicExecutionType;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 	ProjectJsonContext() {
-		super(Project.class, "Project", 1);
+		super(Project.class, "Project", 2);
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
@@ -194,10 +194,29 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		}
 	}
 	
+	private static void updateV1Project(final JsonObject project) {
+		project.getAsJsonArray("machines").forEach(machineElement ->
+			machineElement.getAsJsonObject().getAsJsonArray("testCases").forEach(testCaseItemElement -> {
+				final JsonObject additionalInformation = testCaseItemElement.getAsJsonObject().getAsJsonObject("additionalInformation");
+				// These additionalInformation entries were previously saved in the project file.
+				// However, the code that would read these values could only execute after re-running the test case generation,
+				// which would overwrite these entries with newly generated values.
+				// This means that these saved values were never actually used
+				// and do not need to be stored in the project file.
+				// These entries have now been replaced with regular transient fields.
+				additionalInformation.remove("traceInformation");
+				additionalInformation.remove("uncoveredOperations");
+			})
+		);
+	}
+	
 	@Override
 	public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
 		if (oldMetadata.getFormatVersion() <= 0) {
 			updateV0Project(oldObject);
+		}
+		if (oldMetadata.getFormatVersion() <= 1) {
+			updateV1Project(oldObject);
 		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}

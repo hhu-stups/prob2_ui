@@ -13,12 +13,11 @@ import com.google.inject.Singleton;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
@@ -73,10 +72,8 @@ public class TestCaseGenerationResultHandler extends AbstractResultHandler {
 			showCheckingResult(item, Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found");
 		}
 		item.getExamples().addAll(traces);
-		if(!item.getExamples().isEmpty()) {
-			item.putAdditionalInformation(TestCaseGenerationItem.TRACE_INFORMATION, traceInformation);
-		}
-		item.putAdditionalInformation(TestCaseGenerationItem.UNCOVERED_OPERATIONS, uncoveredOperations);
+		item.getTraceInformation().setAll(traceInformation);
+		item.getUncoveredOperations().setAll(uncoveredOperations);
 	}
 	
 	private List<TraceInformationItem> extractUncoveredOperations(TestCaseGeneratorResult testCaseGeneratorResult) {

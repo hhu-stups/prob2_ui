@@ -116,9 +116,7 @@ public class TraceFileHandler {
 		List<PersistentTrace> traces = item.getExamples().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
 				.collect(Collectors.toList());
-		@SuppressWarnings("unchecked")
-		List<TraceInformationItem> traceInformation = ((List<TraceInformationItem>) item.getAdditionalInformation(TestCaseGenerationItem.TRACE_INFORMATION))
-				.stream()
+		List<TraceInformationItem> traceInformation = item.getTraceInformation().stream()
 				.filter(information -> information.getTrace() != null)
 				.collect(Collectors.toList());
 		final DirectoryChooser directoryChooser = new DirectoryChooser();

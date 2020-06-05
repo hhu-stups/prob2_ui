@@ -24,14 +24,14 @@ import javafx.collections.ObservableList;
 public class TestCaseGenerationItem extends AbstractCheckableItem {
 	public static final String LEVEL = "level";
 	public static final String OPERATIONS = "operations";
-	public static final String TRACE_INFORMATION = "traceInformation";
-	public static final String UNCOVERED_OPERATIONS = "uncoveredOperations";
 	
 	public static final JsonDeserializer<TestCaseGenerationItem> JSON_DESERIALIZER = TestCaseGenerationItem::new;
 	
 	private int maxDepth;
 	
 	private final transient ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
+	private final transient ObservableList<TraceInformationItem> traceInformation = FXCollections.observableArrayList();
+	private final transient ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList();
 	
 	private Map<String, Object> additionalInformation;
 	
@@ -78,6 +78,8 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	public void reset() {
 		super.reset();
 		this.examples.clear();
+		this.getTraceInformation().clear();
+		this.getUncoveredOperations().clear();
 	}
 	
 	public Object getAdditionalInformation(String key) {
@@ -102,6 +104,14 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	public ObservableList<Trace> getExamples() {
 		return examples.get();
+	}
+	
+	public ObservableList<TraceInformationItem> getTraceInformation() {
+		return this.traceInformation;
+	}
+	
+	public ObservableList<TraceInformationItem> getUncoveredOperations() {
+		return this.uncoveredOperations;
 	}
 	
 	public void setData(String name, String description, String code, TestCaseGenerationType type, int maxDepth, Map<String, Object> additionalInformation) {
