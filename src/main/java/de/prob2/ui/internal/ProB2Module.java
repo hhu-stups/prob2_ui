@@ -132,17 +132,6 @@ public class ProB2Module extends AbstractModule {
 		return Converters.registerAll(FxGson.fullBuilder())
 			.disableHtmlEscaping()
 			.setPrettyPrinting()
-			.addSerializationExclusionStrategy(new ExclusionStrategy() {
-				@Override
-				public boolean shouldSkipField(final FieldAttributes f) {
-					return f.getAnnotation(OnlyDeserialize.class) != null;
-				}
-				
-				@Override
-				public boolean shouldSkipClass(final Class<?> clazz) {
-					return false;
-				}
-			})
 			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
 			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(json.getAsString()))
 			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString()))
