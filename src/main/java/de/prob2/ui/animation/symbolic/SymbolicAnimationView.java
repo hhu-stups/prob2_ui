@@ -52,8 +52,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
-							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					showExamples(to, showStateItem);
 				}

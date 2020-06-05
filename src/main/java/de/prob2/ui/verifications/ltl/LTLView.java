@@ -209,8 +209,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 				if(to != null) {
 					checkItem.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty().not()
 							.or(to.selectedProperty().not()));
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
-							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
 				}
 			});
@@ -235,8 +234,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull()
-							.or(Bindings.createBooleanBinding(() -> to.getResultItem() != null && Checked.SUCCESS == to.getResultItem().getChecked(), to.resultItemProperty())));
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 				}
 			});
 			row.contextMenuProperty().bind(
