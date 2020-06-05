@@ -40,9 +40,6 @@ public abstract class AbstractResultHandler {
 	
 	public void showResult(AbstractCheckableItem item) {
 		CheckingResultItem resultItem = item.getResultItem();
-		if(resultItem == null) {
-			return;
-		}
 		Alert alert = stageManager.makeAlert(
 				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
 				resultItem.getHeaderBundleKey(),
