@@ -26,7 +26,7 @@ import javafx.collections.FXCollections;
 public class ModelCheckingItem implements IExecutableItem {
 	public static final JsonDeserializer<ModelCheckingItem> JSON_DESERIALIZER = ModelCheckingItem::new;
 	
-	private Checked checked;
+	private transient Checked checked;
 
 	private final ObjectProperty<ModelCheckingOptions> options;
 	

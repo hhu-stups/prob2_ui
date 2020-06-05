@@ -195,8 +195,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 	}
 	
 	private static void updateV1Project(final JsonObject project) {
-		project.getAsJsonArray("machines").forEach(machineElement ->
-			machineElement.getAsJsonObject().getAsJsonArray("testCases").forEach(testCaseItemElement -> {
+		project.getAsJsonArray("machines").forEach(machineElement -> {
+			final JsonObject machine = machineElement.getAsJsonObject();
+			machine.getAsJsonArray("testCases").forEach(testCaseItemElement -> {
 				final JsonObject additionalInformation = testCaseItemElement.getAsJsonObject().getAsJsonObject("additionalInformation");
 				// These additionalInformation entries were previously saved in the project file.
 				// However, the code that would read these values could only execute after re-running the test case generation,
@@ -206,8 +207,18 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 				// These entries have now been replaced with regular transient fields.
 				additionalInformation.remove("traceInformation");
 				additionalInformation.remove("uncoveredOperations");
-			})
-		);
+			});
+			
+			// The items of all of these lists have a field called checked,
+			// which was previously saved in the project file,
+			// but ignored when loading the project.
+			// The checked field is now transient and no longer saved in the project file.
+			for (final String fieldName : new String[] {"modelcheckingItems", "ltlFormulas", "ltlPatterns", "symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
+				machine.getAsJsonArray(fieldName).forEach(element ->
+					element.getAsJsonObject().remove("checked")
+				);
+			}
+		});
 	}
 	
 	@Override

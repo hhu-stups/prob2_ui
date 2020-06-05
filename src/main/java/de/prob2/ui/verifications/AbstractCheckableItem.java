@@ -14,7 +14,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
-	protected Checked checked;
+	protected transient Checked checked;
 	protected String name;
 	protected String description;
 	protected String code;
