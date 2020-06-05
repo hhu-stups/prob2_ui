@@ -24,6 +24,8 @@ import javafx.collections.ObservableList;
 public class TestCaseGenerationItem extends AbstractCheckableItem {
 	public static final String LEVEL = "level";
 	public static final String OPERATIONS = "operations";
+	public static final String TRACE_INFORMATION = "traceInformation";
+	public static final String UNCOVERED_OPERATIONS = "uncoveredOperations";
 	
 	public static final JsonDeserializer<TestCaseGenerationItem> JSON_DESERIALIZER = TestCaseGenerationItem::new;
 	

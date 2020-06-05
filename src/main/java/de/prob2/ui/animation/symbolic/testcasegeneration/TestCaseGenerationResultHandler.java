@@ -74,9 +74,9 @@ public class TestCaseGenerationResultHandler extends AbstractResultHandler {
 		}
 		item.getExamples().addAll(traces);
 		if(!item.getExamples().isEmpty()) {
-			item.putAdditionalInformation("traceInformation", traceInformation);
+			item.putAdditionalInformation(TestCaseGenerationItem.TRACE_INFORMATION, traceInformation);
 		}
-		item.putAdditionalInformation("uncoveredOperations", uncoveredOperations);
+		item.putAdditionalInformation(TestCaseGenerationItem.UNCOVERED_OPERATIONS, uncoveredOperations);
 	}
 	
 	private List<TraceInformationItem> extractUncoveredOperations(TestCaseGeneratorResult testCaseGeneratorResult) {

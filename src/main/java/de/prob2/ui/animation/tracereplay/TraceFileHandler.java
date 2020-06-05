@@ -117,7 +117,7 @@ public class TraceFileHandler {
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
 				.collect(Collectors.toList());
 		@SuppressWarnings("unchecked")
-		List<TraceInformationItem> traceInformation = ((List<TraceInformationItem>) item.getAdditionalInformation("traceInformation"))
+		List<TraceInformationItem> traceInformation = ((List<TraceInformationItem>) item.getAdditionalInformation(TestCaseGenerationItem.TRACE_INFORMATION))
 				.stream()
 				.filter(information -> information.getTrace() != null)
 				.collect(Collectors.toList());

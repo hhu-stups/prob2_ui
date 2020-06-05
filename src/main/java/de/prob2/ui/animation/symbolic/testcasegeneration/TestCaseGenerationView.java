@@ -110,11 +110,11 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 				TestCaseGenerationItem item = row.getItem();
 				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
 				@SuppressWarnings("unchecked")
-				ObservableList<TraceInformationItem> traces = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation("traceInformation"));
+				ObservableList<TraceInformationItem> traces = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation(TestCaseGenerationItem.TRACE_INFORMATION));
 				stage.setTraces(traces);
 				
 				@SuppressWarnings("unchecked")
-				ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation("uncoveredOperations"));
+				ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList((List<TraceInformationItem>) item.getAdditionalInformation(TestCaseGenerationItem.UNCOVERED_OPERATIONS));
 				stage.setUncoveredOperations(uncoveredOperations);
 				
 				stage.show();

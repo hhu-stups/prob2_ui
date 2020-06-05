@@ -31,14 +31,14 @@ public class TestCaseGeneratorCreator {
 	
 	private ConstraintBasedTestCaseGenerator getMCDCTestCaseGenerator(ClassicalBModel bModel, TestCaseGenerationItem item) {
 		int depth = item.getMaxDepth();
-		int level = (int) Double.parseDouble(item.getAdditionalInformation("level").toString());
+		int level = (int) Double.parseDouble(item.getAdditionalInformation(TestCaseGenerationItem.LEVEL).toString());
 		return new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorMCDCSettings(depth, level), new ArrayList<>());
 	}
 	
 	private ConstraintBasedTestCaseGenerator getCoveredOperationsTestCaseGenerator(ClassicalBModel bModel, TestCaseGenerationItem item) {
 		int depth = item.getMaxDepth();
 		@SuppressWarnings("unchecked")
-		List<String> operations = (List<String>) item.getAdditionalInformation("operations");
+		List<String> operations = (List<String>) item.getAdditionalInformation(TestCaseGenerationItem.OPERATIONS);
 		return new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorOperationCoverageSettings(depth, operations), new ArrayList<>());
 	}
 	
