@@ -43,10 +43,10 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		public TableRow<SymbolicCheckingFormulaItem> call(TableView<SymbolicCheckingFormulaItem> param) {
 			TableRow<SymbolicCheckingFormulaItem> row = createRow();
 			
-			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.removeFormula"));
+			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> removeFormula());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.changeFormula"));
+			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
 			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCounterExample"));

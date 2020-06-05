@@ -158,7 +158,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 			if(updateFormula(item, view, stage)) {
 				addFormula(false);
 			} else {
-				resultHandler.showAlreadyExists(item instanceof SymbolicAnimationItem ? ItemType.CONFIGURATION : ItemType.FORMULA);
+				resultHandler.showAlreadyExists(ItemType.CONFIGURATION);
 			}
 			stage.close();
 		});
@@ -167,7 +167,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 			if(updateFormula(item, view, stage)) {
 				checkFormula();
 			} else {
-				resultHandler.showAlreadyExists(item instanceof SymbolicAnimationItem ? ItemType.CONFIGURATION : ItemType.FORMULA);
+				resultHandler.showAlreadyExists(ItemType.CONFIGURATION);
 			}
 			stage.close();
 		});
