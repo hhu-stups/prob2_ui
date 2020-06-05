@@ -43,7 +43,7 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private ModelCheckingItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
-		this.checked = JsonManager.checkDeserialize(context, object, "checked", Checked.class);
+		this.checked = Checked.NOT_CHECKED;
 		this.options = JsonManager.checkDeserialize(context, object, "options", new TypeToken<ObjectProperty<ModelCheckingOptions>>() {}.getType());
 		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
 	}
