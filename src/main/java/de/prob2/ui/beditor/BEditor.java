@@ -111,9 +111,9 @@ public class BEditor extends CodeArea {
 						return Optional.empty();
 					}
 				}).subscribe(highlighting -> {
-			this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
-			this.applyHighlighting(highlighting);
-		});
+					this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
+					this.applyHighlighting(highlighting);
+				});
 		this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>) change ->
 				this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
 		);
