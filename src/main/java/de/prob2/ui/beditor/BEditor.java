@@ -16,6 +16,7 @@ import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -38,21 +39,20 @@ import org.slf4j.LoggerFactory;
 public class BEditor extends CodeArea {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
 
-	private ExecutorService executor;
-
 	private final FontSize fontSize;
-
 	private final CurrentProject currentProject;
-
 	private final ResourceBundle bundle;
 
+	private final ExecutorService executor;
 	private final ObservableList<ErrorItem.Location> errorLocations;
 
 	@Inject
-	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject) {
+	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject, final StopActions stopActions) {
 		this.fontSize = fontSize;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
+		this.executor = Executors.newSingleThreadExecutor();
+		stopActions.add(this.executor::shutdownNow);
 		this.errorLocations = FXCollections.observableArrayList();
 		initialize();
 		initializeContextMenu();
@@ -123,19 +123,6 @@ public class BEditor extends CodeArea {
 		);
 	}
 
-	public void startHighlighting() {
-		if (this.executor == null) {
-			this.executor = Executors.newSingleThreadExecutor();
-		}
-	}
-
-	public void stopHighlighting() {
-		if (this.executor != null) {
-			this.executor.shutdown();
-			this.executor = null;
-		}
-	}
-
 	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
 		final Collection<T> ret = new ArrayList<>(a);
 		ret.addAll(b);
@@ -172,27 +159,14 @@ public class BEditor extends CodeArea {
 
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
 		final String text = this.getText();
-		if (executor == null) {
-			// No executor - run and return a dummy task that does no highlighting
-			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-				@Override
-				protected StyleSpans<Collection<String>> call() {
-					return StyleSpans.singleton(Collections.emptySet(), text.length());
-				}
-			};
-			task.run();
-			return task;
-		} else {
-			// Executor exists - do proper highlighting
-			final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
-				@Override
-				protected StyleSpans<Collection<String>> call() {
-					return computeHighlighting(text, currentProject.getCurrentMachine());
-				}
-			};
-			executor.execute(task);
-			return task;
-		}
+		final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+			@Override
+			protected StyleSpans<Collection<String>> call() {
+				return computeHighlighting(text, currentProject.getCurrentMachine());
+			}
+		};
+		executor.execute(task);
+		return task;
 	}
 
 	private static StyleSpans<Collection<String>> computeHighlighting(String text, Machine machine) {

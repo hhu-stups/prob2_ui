@@ -89,7 +89,6 @@ public class BEditorView extends BorderPane {
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
-	private final StopActions stopActions;
 	private final Injector injector;
 
 	private final ObjectProperty<Path> path;
@@ -101,12 +100,11 @@ public class BEditorView extends BorderPane {
 	private WatchKey key;
 
 	@Inject
-	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final StopActions stopActions, final Injector injector) {
+	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.stopActions = stopActions;
 		this.injector = injector;
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
@@ -165,7 +163,6 @@ public class BEditorView extends BorderPane {
 		
 		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
 		
-		this.stopActions.add(beditor::stopHighlighting);
 		helpButton.setHelpContent("mainView.editor", null);
 	}
 	
@@ -284,7 +281,6 @@ public class BEditorView extends BorderPane {
 		beditor.clear();
 		beditor.appendText(text);
 		beditor.getStyleClass().add("editor");
-		beditor.startHighlighting();
 		beditor.setEditable(true);
 	}
 	
