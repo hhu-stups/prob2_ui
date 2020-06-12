@@ -1,29 +1,25 @@
 package de.prob2.ui.sharedviews;
 
-import javafx.scene.control.CheckBox;
+import de.prob2.ui.layout.BindableGlyph;
+
 import javafx.scene.control.TableCell;
 
+import org.controlsfx.glyphfont.FontAwesome;
+
 public final class BooleanCell<T> extends TableCell<T, Boolean> {
-	private final CheckBox checkBox;
-	
 	public BooleanCell() {
 		super();
 		
 		this.setText(null);
-		this.checkBox = new CheckBox();
-		this.checkBox.setDisable(true);
-		this.setGraphic(this.checkBox);
+		final BindableGlyph iconView = new BindableGlyph("FontAwesome", FontAwesome.Glyph.CHECK);
+		iconView.setVisible(false);
+		this.setGraphic(iconView);
 	}
 	
 	@Override
 	protected void updateItem(final Boolean item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		if (empty || item == null) {
-			this.checkBox.setVisible(false);
-		} else {
-			this.checkBox.setVisible(true);
-			this.checkBox.setSelected(item);
-		}
+		this.getGraphic().setVisible(!empty && item != null && item);
 	}
 }
