@@ -1,6 +1,5 @@
 package de.prob2.ui.preferences;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,10 +11,6 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.command.ComposedCommand;
-import de.prob.animator.command.GetCurrentPreferencesCommand;
-import de.prob.animator.command.GetDefaultPreferencesCommand;
-import de.prob.animator.command.SetPreferenceCommand;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.statespace.StateSpace;
 
@@ -251,26 +246,18 @@ public final class ProBPreferences {
 	public void apply() {
 		this.checkStateSpace();
 		
-		final List<SetPreferenceCommand> setCmds = new ArrayList<>();
-		for (final Map.Entry<String, String> entry : this.changedPreferences.entrySet()) {
-			setCmds.add(new SetPreferenceCommand(entry.getKey(), entry.getValue()));
-		}
-		
 		try {
-			this.getStateSpace().execute(new ComposedCommand(setCmds));
+			this.getStateSpace().changePreferences(this.changedPreferences);
 		} finally {
 			final Set<String> included = this.getIncludedPreferenceNames();
 			
-			final GetDefaultPreferencesCommand cmd1 = new GetDefaultPreferencesCommand();
-			this.getStateSpace().execute(cmd1);
+			final List<ProBPreference> preferenceInfo = this.getStateSpace().getPreferenceInformation();
 			this.cachedPreferences.clear();
-			this.cachedPreferences.putAll(cmd1.getPreferences().stream()
+			this.cachedPreferences.putAll(preferenceInfo.stream()
 				.filter(pref -> included == null || included.contains(pref.name))
 				.collect(Collectors.toMap(pref -> pref.name, pref -> pref)));
 			
-			final GetCurrentPreferencesCommand cmd2 = new GetCurrentPreferencesCommand();
-			this.getStateSpace().execute(cmd2);
-			final Map<String, String> prefValues = new HashMap<>(cmd2.getPreferences());
+			final Map<String, String> prefValues = new HashMap<>(this.getStateSpace().getCurrentPreferences());
 			if (included != null) {
 				prefValues.keySet().retainAll(included);
 			}
