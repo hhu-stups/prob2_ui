@@ -139,7 +139,7 @@ public class MachineLoader {
 				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
 				Platform.runLater(() -> stageManager
 						.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
-								"project.machineLoader.alerts.fileNotFound.content", getPathToMachine(machine))
+								"project.machineLoader.alerts.fileNotFound.content", currentProject.get().getAbsoluteMachinePath(machine))
 						.showAndWait());
 			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
 				LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
@@ -162,7 +162,7 @@ public class MachineLoader {
 	private void loadInternal(final Machine machine, final Map<String, String> prefs) throws IOException, ModelTranslationError {
 		this.currentTrace.set(null);
 		setLoadingStatus(StatusBar.LoadingStatus.PARSING_FILE);
-		final Path path = getPathToMachine(machine);
+		final Path path = currentProject.get().getAbsoluteMachinePath(machine);
 
 		final ModelFactory<?> modelFactory = injector.getInstance(machine.getModelFactoryClass());
 		final ExtractedModel<?> extract = modelFactory.extract(path.toString());
@@ -210,10 +210,5 @@ public class MachineLoader {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}
 		}
-	}
-
-	private Path getPathToMachine(Machine machine) {
-		assert currentProject.getMachines().contains(machine);
-		return currentProject.get().getLocation().resolve(machine.getLocation());
 	}
 }

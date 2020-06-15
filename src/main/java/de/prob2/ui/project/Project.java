@@ -75,6 +75,13 @@ public class Project {
 		return null;
 	}
 	
+	public Path getAbsoluteMachinePath(final Machine machine) {
+		if (!this.getMachines().contains(machine)) {
+			throw new IllegalArgumentException("Machine " + machine + " is not part of project " + this);
+		}
+		return this.getLocation().resolve(machine.getLocation());
+	}
+	
 	public List<Preference> getPreferences() {
 		return preferences;
 	}

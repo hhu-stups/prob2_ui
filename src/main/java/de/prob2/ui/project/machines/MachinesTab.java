@@ -127,7 +127,7 @@ public class MachinesTab extends Tab {
 		
 		@FXML
 		private void handleEditFileExternal() {
-			injector.getInstance(ExternalEditor.class).open(currentProject.getLocation().resolve(this.machineProperty.get().getLocation()));
+			injector.getInstance(ExternalEditor.class).open(currentProject.get().getAbsoluteMachinePath(this.machineProperty.get()));
 		}
 		
 		@FXML
