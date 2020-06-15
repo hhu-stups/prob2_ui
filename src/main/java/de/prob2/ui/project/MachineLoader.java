@@ -10,6 +10,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.ReusableAnimator;
+import de.prob.animator.command.ComposedCommand;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ClassicalBFactory;
@@ -51,6 +53,7 @@ public class MachineLoader {
 	private final Object openLock;
 	private final Object emptyStateSpaceLock;
 	private StateSpace emptyStateSpace;
+	private ReusableAnimator currentAnimator;
 
 	@Inject
 	public MachineLoader(
@@ -74,6 +77,7 @@ public class MachineLoader {
 		this.openLock = new Object();
 		this.emptyStateSpaceLock = new Object();
 		this.emptyStateSpace = null;
+		this.currentAnimator = null;
 	}
 
 	public ReadOnlyBooleanProperty loadingProperty() {
@@ -84,24 +88,41 @@ public class MachineLoader {
 		return this.loadingProperty().get();
 	}
 
-	private StateSpace load(final ExtractedModel<?> extractedModel, final Map<String, String> preferences) {
-		final StateSpace stateSpace = injector.getInstance(StateSpace.class);
+	private ReusableAnimator getAnimator() {
+		if (this.currentAnimator != null) {
+			// Check that the existing animator is still working,
+			// by executing a command that does nothing and looking for errors.
+			try {
+				this.currentAnimator.execute(new ComposedCommand());
+			} catch (CliError | ProBError e) {
+				LOGGER.warn("Main animator is no longer working - restarting", e);
+				this.currentAnimator.kill();
+				this.currentAnimator = null;
+			}
+		}
+		if (this.currentAnimator == null) {
+			// Create a new animator if there is no existing one (or it was not working anymore).
+			LOGGER.info("Starting a new main animator");
+			this.currentAnimator = injector.getInstance(ReusableAnimator.class);
+		}
+		return this.currentAnimator;
+	}
+
+	private void initStateSpace(final StateSpace stateSpace, final Map<String, String> preferences) {
 		stateSpace.addWarningListener(warnings -> Platform.runLater(() ->
 			new WarningAlert(stageManager, warnings).show()
 		));
 		stateSpace.changePreferences(preferences);
-		extractedModel.loadIntoStateSpace(stateSpace);
-		return stateSpace;
 	}
 
 	public StateSpace getEmptyStateSpace() {
 		synchronized (this.emptyStateSpaceLock) {
 			if (this.emptyStateSpace == null) {
-				this.emptyStateSpace = this.load(
-					injector.getInstance(ClassicalBFactory.class)
-						.create("empty", "MACHINE empty END"),
-					this.globalPreferences
-				);
+				this.emptyStateSpace = injector.getInstance(StateSpace.class);
+				initStateSpace(this.emptyStateSpace, this.globalPreferences);
+				injector.getInstance(ClassicalBFactory.class)
+					.create("empty", "MACHINE empty END")
+					.loadIntoStateSpace(this.emptyStateSpace);
 				if (Thread.currentThread().isInterrupted()) {
 					this.emptyStateSpace.kill();
 				}
@@ -159,7 +180,9 @@ public class MachineLoader {
 					return;
 				}
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
-				final StateSpace stateSpace = this.load(extract, allPrefs);
+				final StateSpace stateSpace = this.getAnimator().createStateSpace();
+				initStateSpace(stateSpace, allPrefs);
+				extract.loadIntoStateSpace(stateSpace);
 				if (Thread.currentThread().isInterrupted()) {
 					stateSpace.kill();
 					return;
