@@ -164,8 +164,6 @@ public class MachineLoader {
 		setLoadingStatus(StatusBar.LoadingStatus.PARSING_FILE);
 		final Path path = getPathToMachine(machine);
 
-		final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
-		allPrefs.putAll(prefs);
 		final ModelFactory<?> modelFactory = injector.getInstance(machine.getModelFactoryClass());
 		final ExtractedModel<?> extract = modelFactory.extract(path.toString());
 		if (Thread.currentThread().isInterrupted()) {
@@ -180,6 +178,8 @@ public class MachineLoader {
 
 		setLoadingStatus(StatusBar.LoadingStatus.PREPARING_ANIMATOR);
 		final StateSpace stateSpace = animator.createStateSpace();
+		final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
+		allPrefs.putAll(prefs);
 		initStateSpace(stateSpace, allPrefs);
 		if (Thread.currentThread().isInterrupted()) {
 			return;
