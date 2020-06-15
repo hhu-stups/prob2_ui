@@ -179,14 +179,27 @@ public class MachineLoader {
 				if (Thread.currentThread().isInterrupted()) {
 					return;
 				}
-				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
-				final StateSpace stateSpace = this.getAnimator().createStateSpace();
+
+				setLoadingStatus(StatusBar.LoadingStatus.STARTING_PROB_CORE);
+				final ReusableAnimator animator = this.getAnimator();
+				if (Thread.currentThread().isInterrupted()) {
+					return;
+				}
+
+				setLoadingStatus(StatusBar.LoadingStatus.PREPARING_ANIMATOR);
+				final StateSpace stateSpace = animator.createStateSpace();
 				initStateSpace(stateSpace, allPrefs);
+				if (Thread.currentThread().isInterrupted()) {
+					return;
+				}
+
+				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
 				extract.loadIntoStateSpace(stateSpace);
 				if (Thread.currentThread().isInterrupted()) {
 					stateSpace.kill();
 					return;
 				}
+
 				setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
 				this.currentTrace.set(new Trace(stateSpace));
 			} finally {

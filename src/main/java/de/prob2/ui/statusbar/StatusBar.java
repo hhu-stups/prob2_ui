@@ -28,6 +28,8 @@ public class StatusBar extends HBox {
 	public enum LoadingStatus {
 		NOT_LOADING("common.noModelLoaded"),
 		PARSING_FILE("statusbar.loadStatus.parsingFile"),
+		STARTING_PROB_CORE("statusbar.loadStatus.startingProBCore"),
+		PREPARING_ANIMATOR("statusbar.loadStatus.preparingAnimator"),
 		LOADING_MODEL("statusbar.loadStatus.loadingModel"),
 		SETTING_CURRENT_MODEL("statusbar.loadStatus.settingCurrentModel"),
 		;
