@@ -159,6 +159,43 @@ public class MachineLoader {
 		});
 	}
 
+	private void loadInternal(final Machine machine, final Map<String, String> prefs) throws IOException, ModelTranslationError {
+		this.currentTrace.set(null);
+		setLoadingStatus(StatusBar.LoadingStatus.PARSING_FILE);
+		final Path path = getPathToMachine(machine);
+
+		final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
+		allPrefs.putAll(prefs);
+		final ModelFactory<?> modelFactory = injector.getInstance(machine.getModelFactoryClass());
+		final ExtractedModel<?> extract = modelFactory.extract(path.toString());
+		if (Thread.currentThread().isInterrupted()) {
+			return;
+		}
+
+		setLoadingStatus(StatusBar.LoadingStatus.STARTING_PROB_CORE);
+		final ReusableAnimator animator = this.getAnimator();
+		if (Thread.currentThread().isInterrupted()) {
+			return;
+		}
+
+		setLoadingStatus(StatusBar.LoadingStatus.PREPARING_ANIMATOR);
+		final StateSpace stateSpace = animator.createStateSpace();
+		initStateSpace(stateSpace, allPrefs);
+		if (Thread.currentThread().isInterrupted()) {
+			return;
+		}
+
+		setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
+		extract.loadIntoStateSpace(stateSpace);
+		if (Thread.currentThread().isInterrupted()) {
+			stateSpace.kill();
+			return;
+		}
+
+		setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
+		this.currentTrace.set(new Trace(stateSpace));
+	}
+
 	private void load(Machine machine, Map<String, String> prefs) throws IOException, ModelTranslationError {
 		// NOTE: This method may be called from outside the JavaFX main thread,
 		// for example from loadAsync.
@@ -168,40 +205,7 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			try {
-				this.currentTrace.set(null);
-				setLoadingStatus(StatusBar.LoadingStatus.PARSING_FILE);
-				final Path path = getPathToMachine(machine);
-
-				final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
-				allPrefs.putAll(prefs);
-				final ModelFactory<?> modelFactory = injector.getInstance(machine.getModelFactoryClass());
-				final ExtractedModel<?> extract = modelFactory.extract(path.toString());
-				if (Thread.currentThread().isInterrupted()) {
-					return;
-				}
-
-				setLoadingStatus(StatusBar.LoadingStatus.STARTING_PROB_CORE);
-				final ReusableAnimator animator = this.getAnimator();
-				if (Thread.currentThread().isInterrupted()) {
-					return;
-				}
-
-				setLoadingStatus(StatusBar.LoadingStatus.PREPARING_ANIMATOR);
-				final StateSpace stateSpace = animator.createStateSpace();
-				initStateSpace(stateSpace, allPrefs);
-				if (Thread.currentThread().isInterrupted()) {
-					return;
-				}
-
-				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
-				extract.loadIntoStateSpace(stateSpace);
-				if (Thread.currentThread().isInterrupted()) {
-					stateSpace.kill();
-					return;
-				}
-
-				setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
-				this.currentTrace.set(new Trace(stateSpace));
+				loadInternal(machine, prefs);
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}
