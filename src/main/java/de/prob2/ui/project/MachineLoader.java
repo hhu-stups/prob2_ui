@@ -18,6 +18,7 @@ import de.prob.scripting.ModelFactory;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.preferences.GlobalPreferences;
@@ -83,12 +84,24 @@ public class MachineLoader {
 		return this.loadingProperty().get();
 	}
 
+	private StateSpace load(final ExtractedModel<?> extractedModel, final Map<String, String> preferences) {
+		final StateSpace stateSpace = injector.getInstance(StateSpace.class);
+		stateSpace.addWarningListener(warnings -> Platform.runLater(() ->
+			new WarningAlert(stageManager, warnings).show()
+		));
+		stateSpace.changePreferences(preferences);
+		extractedModel.loadIntoStateSpace(stateSpace);
+		return stateSpace;
+	}
+
 	public StateSpace getEmptyStateSpace() {
 		synchronized (this.emptyStateSpaceLock) {
 			if (this.emptyStateSpace == null) {
-				this.emptyStateSpace = injector.getInstance(ClassicalBFactory.class)
-					.create("empty", "MACHINE empty END")
-					.load(this.globalPreferences);
+				this.emptyStateSpace = this.load(
+					injector.getInstance(ClassicalBFactory.class)
+						.create("empty", "MACHINE empty END"),
+					this.globalPreferences
+				);
 				if (Thread.currentThread().isInterrupted()) {
 					this.emptyStateSpace.kill();
 				}
@@ -146,7 +159,7 @@ public class MachineLoader {
 					return;
 				}
 				setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
-				final StateSpace stateSpace = extract.load(allPrefs);
+				final StateSpace stateSpace = this.load(extract, allPrefs);
 				if (Thread.currentThread().isInterrupted()) {
 					stateSpace.kill();
 					return;
