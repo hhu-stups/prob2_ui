@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
@@ -43,11 +44,17 @@ public final class TraceReplayErrorAlert extends Alert {
 		error.wrappingWidthProperty().bind(this.getDialogPane().widthProperty());
 	}
 
-	void setErrorMessage(boolean tracesAreEqual, int traceSize, int persistentTraceSize) {
-		if (tracesAreEqual) {
-			error.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreEqual"));
+	void setErrorMessage(boolean triggeredByErrorItem, boolean tracesAreEqual, int traceSize, int persistentTraceSize) {
+		if (triggeredByErrorItem) {
+			error.setText(text);
+			this.getDialogPane().setExpandableContent(null);
+			this.getButtonTypes().add(ButtonType.CLOSE);
 		} else {
-			error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreNotEqual"), traceSize, persistentTraceSize));
+			if (tracesAreEqual) {
+				error.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreEqual"));
+			} else {
+				error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreNotEqual"), traceSize, persistentTraceSize));
+			}
 		}
 	}
 }

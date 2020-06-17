@@ -157,8 +157,6 @@ import de.be4.classicalb.core.parser.node.TWhen;
 import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
 import de.be4.classicalb.core.parser.node.Token;
-import de.prob.scripting.ClassicalBFactory;
-import de.prob.scripting.ModelFactory;
 
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;

@@ -35,6 +35,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.layout.Region;
 
 @FXMLInjected
 @Singleton
@@ -45,6 +46,7 @@ public class TraceChecker {
 	private final StageManager stageManager;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
+	private boolean isNewTrace = false;
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
@@ -102,17 +104,28 @@ public class TraceChecker {
 			});
 			trace.setExploreStateByDefault(true);
 			if (setCurrentAnimation) {
-				// set the current trace if no error has occured. Otherwise leave the
+				// set the current trace if no error has occured. Otherwise leave the decision to the user
 				trace.getCurrentState().explore();
 				final Trace copyTrace = trace;
 				if (replayTrace.getErrorMessageBundleKey() != null) {
-					Platform.runLater(() -> {
-						TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams());
-						alert.initOwner(stageManager.getCurrent());
-						boolean isEqual = currentTrace.get().getTransitionList().equals(copyTrace.getTransitionList());
-						alert.setErrorMessage(isEqual, copyTrace.getTransitionList().size(), persistentTrace.getTransitionList().size());
-						setAlertButtons(isEqual, copyTrace, persistentTrace, alert);
-					});
+					if (isNewTrace) {
+						Platform.runLater(() -> {
+							Alert alert = new Alert(Alert.AlertType.WARNING);
+							alert.initOwner(stageManager.getCurrent());
+							alert.setContentText(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"));
+							alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+							alert.show();
+						});
+						isNewTrace = false;
+					} else {
+						Platform.runLater(() -> {
+							TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams());
+							alert.initOwner(stageManager.getCurrent());
+							boolean isEqual = currentTrace.get().getTransitionList().equals(copyTrace.getTransitionList());
+							alert.setErrorMessage(false, isEqual, copyTrace.getTransitionList().size(), persistentTrace.getTransitionList().size());
+							setAlertButtons(isEqual, copyTrace, persistentTrace, alert);
+						});
+					}
 				} else {
 					currentTrace.set(trace);
 				}
@@ -224,5 +237,9 @@ public class TraceChecker {
 
 	public ListProperty<Thread> currentJobThreadsProperty() {
 		return currentJobThreads;
+	}
+
+	void isNewTrace() {
+		isNewTrace = true;
 	}
 }

@@ -132,6 +132,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(),injector);
 				traceTableView.getItems().add(replayTrace);
 				this.traceChecker.check(replayTrace, true);
+				this.traceChecker.isNewTrace();
 			}
 			if (c.wasRemoved()) {
 				removeFromTraceTableView(c.getElementRemoved());
@@ -213,6 +214,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			showErrorItem.setOnAction(event -> {
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, row.getItem().getErrorMessageBundleKey(), row.getItem().getErrorMessageParams());
 				alert.initOwner(stageManager.getCurrent());
+				alert.setErrorMessage(true, false, 0,0);
 				alert.show();
 			});
 			showErrorItem.setDisable(true);

@@ -12,10 +12,12 @@ import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -50,11 +52,13 @@ public class TraceDiff extends VBox {
 
 	@FXML private Button setReplayed;
 	@FXML private Button showAlert;
+	@FXML private Button savePersistent;
 	@FXML private Button setCurrent;
 
 	@FXML private VBox persistentBox;
 
 	@FXML private HBox listBox;
+	@FXML private HBox buttonBox;
 
 	private ResourceBundle bundle;
 	private CurrentTrace currentTrace;
@@ -73,9 +77,10 @@ public class TraceDiff extends VBox {
 	@FXML
 	private void initialize() {
 		this.setPadding(new Insets(5,5,5,5));
-		double initialWidth = this.getWidth()/3;
+		double initialWidth = this.getWidth()/4;
 		setReplayed.setPrefWidth(initialWidth);
 		showAlert.setPrefWidth(initialWidth);
+		savePersistent.setPrefWidth(initialWidth);
 		setCurrent.setPrefWidth(initialWidth);
 
 		this.checkBoxListViewMap.put(replayed, replayedList);
@@ -181,6 +186,7 @@ public class TraceDiff extends VBox {
 				historyView.handleAlert(alert, replayedOrLost, alert.getButtonTypes().get(0));
 			}
 		});
+		savePersistent.setOnAction(e -> injector.getInstance(TraceFileHandler.class).save(persistent, injector.getInstance(CurrentProject.class).getCurrentMachine()));
 		setCurrent.setOnAction(e -> {
 			currentTrace.set(current);
 			this.getScene().getWindow().hide();
@@ -301,11 +307,17 @@ public class TraceDiff extends VBox {
 			if (!listBox.getChildren().contains(persistentBox)) {
 			 	listBox.getChildren().add(persistentBox);
 			}
+			if (!buttonBox.getChildren().contains(savePersistent)) {
+				buttonBox.getChildren().add(savePersistent);
+			}
 		} else {
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
 			if (listBox.getChildren().contains(persistentBox)) {
 				persistent.setSelected(false);
 				listBox.getChildren().remove(persistentBox);
+			}
+			if (buttonBox.getChildren().contains(savePersistent)) {
+				buttonBox.getChildren().remove(savePersistent);
 			}
 		}
 	}

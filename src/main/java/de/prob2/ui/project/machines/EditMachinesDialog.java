@@ -58,8 +58,7 @@ public class EditMachinesDialog extends Dialog<Machine> {
 		this.machine = machine;
 
 		List<Machine> machinesList = currentProject.getMachines();
-		Set<String> machineNamesSet = new HashSet<>();
-		machineNamesSet.addAll(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
+		Set<String> machineNamesSet = new HashSet<>(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
 		machineNamesSet.remove(machine.getName());
 
 		nameField.textProperty().addListener((observable, from, to) -> {

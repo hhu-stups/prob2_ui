@@ -292,7 +292,7 @@ public class LayeredLayout implements Layout {
 		});
 
 		List<Vertex> permutedLayer = new ArrayList<>();
-		baryMap.values().forEach(permutedLayer::add);
+		permutedLayer.addAll(baryMap.values());
 
 		layers.put(permuteLayerNr, permutedLayer);
 	}

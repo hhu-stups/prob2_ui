@@ -62,8 +62,7 @@ public abstract class SymbolicExecutor {
 			thread.interrupt();
 			removedThreads.add(thread);
 		}
-		List<IModelCheckJob> removedJobs = new ArrayList<>();
-		removedJobs.addAll(currentJobs);
+		List<IModelCheckJob> removedJobs = new ArrayList<>(currentJobs);
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
