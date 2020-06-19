@@ -1,20 +1,15 @@
 package de.prob2.ui.consoles.b;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.be4.classicalb.core.parser.exceptions.BException;
-import de.be4.classicalb.core.parser.exceptions.BLexerException;
-import de.be4.classicalb.core.parser.parser.ParserException;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ComputationNotCompletedResult;
 import de.prob.animator.domainobjects.EnumerationWarning;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationErrorResult;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -35,37 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BInterpreter implements Executable {
-	private static final class ParseError {
-		private final int line;
-		private final int column;
-		private final String message;
-		
-		private ParseError(final int line, final int column, final String message) {
-			super();
-			
-			Objects.requireNonNull(message);
-			
-			this.line = line;
-			this.column = column;
-			this.message = message;
-		}
-		
-		@SuppressWarnings("unused")
-		private int getLine() {
-			return this.line;
-		}
-		
-		private int getColumn() {
-			return this.column;
-		}
-		
-		private String getMessage() {
-			return this.message;
-		}
-	}
-
 	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
-	private static final Pattern MESSAGE_WITH_POSITIONS_PATTERN = Pattern.compile("^\\[(\\d+),(\\d+)\\] (.*)$");
 	
 	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;
@@ -87,53 +52,28 @@ public class BInterpreter implements Executable {
 		return defaultTrace;
 	}
 	
-	// The exceptions thrown while parsing are not standardized in any way.
-	// This method tries to extract line/column info from an exception.
-	// First it checks if the exception has programmatically readable position info and uses that if possible.
-	// If that fails, it tries to parse SableCC-style position info from the exception message.
-	// If that also fails, null is returned.
-	private ParseError getParseErrorFromException(final Exception e) {
-		if ((
-			e instanceof EvaluationException
-			|| (e instanceof BException && ((BException)e).getLocations().isEmpty())
-		) && e.getCause() instanceof Exception) {
-			// Check for known "wrapper exceptions" and look at their cause instead.
-			return this.getParseErrorFromException((Exception)e.getCause());
-		} else if (e instanceof BCompoundException && !((BCompoundException)e).getBExceptions().isEmpty()) {
-			return this.getParseErrorFromException(((BCompoundException)e).getBExceptions().get(0));
-		} else if (e instanceof BException) {
-			final List<BException.Location> locations = ((BException)e).getLocations();
-			assert !locations.isEmpty();
-			final Matcher m = MESSAGE_WITH_POSITIONS_PATTERN.matcher(e.getMessage());
-			final String realMsg = m.find() ? m.group(3) : e.getMessage();
-			return new ParseError(locations.get(0).getStartLine(), locations.get(0).getStartColumn(), realMsg);
-		} else if (e instanceof BLexerException) {
-			final BLexerException ex = (BLexerException)e;
-			return new ParseError(ex.getLastLine(), ex.getLastPos(), e.getMessage());
-		} else if (e instanceof de.be4.classicalb.core.preparser.parser.ParserException) {
-			final de.be4.classicalb.core.preparser.parser.ParserException ex =
-				(de.be4.classicalb.core.preparser.parser.ParserException)e;
-			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), ex.getRealMsg());
-		} else if (e instanceof ParserException) {
-			final ParserException ex = (ParserException)e;
-			return new ParseError(ex.getToken().getLine(), ex.getToken().getPos(), ex.getRealMsg());
-		} else {
-			// The exception doesn't have any accessible position info.
-			// Look for SableCC-style position info in the error message and try to parse it.
-			final Matcher matcher = MESSAGE_WITH_POSITIONS_PATTERN.matcher(e.getMessage());
-			return matcher.find() ? new ParseError(
-				Integer.parseInt(matcher.group(1)),
-				Integer.parseInt(matcher.group(2)),
-				matcher.group(3)
-			) : null;
+	private static ErrorItem getParseErrorFromException(final Exception e) {
+		if (!(e instanceof EvaluationException) || !(e.getCause() instanceof BCompoundException)) {
+			return null;
 		}
+		final ProBError convertedError = new ProBError((BCompoundException)e.getCause());
+		if (convertedError.getErrors().isEmpty()) {
+			return null;
+		}
+		final ErrorItem firstError = convertedError.getErrors().get(0);
+		if (firstError.getLocations().isEmpty()) {
+			return null;
+		}
+		return firstError;
 	}
 	
-	private String formatParseException(final String source, final Exception e) {
-		final ParseError error = this.getParseErrorFromException(e);
+	private static String formatParseException(final String source, final Exception e) {
+		final ErrorItem error = getParseErrorFromException(e);
 		
 		if (error != null) {
-			return String.format("%s\n%" + error.getColumn() + "s\n%s", source, '^', error.getMessage());
+			assert !error.getLocations().isEmpty();
+			final int startColumn = error.getLocations().get(0).getStartColumn();
+			return String.format("%s\n%" + (startColumn + 1) + "s\n%s", source, '^', error.getMessage());
 		} else {
 			return String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage());
 		}
@@ -186,7 +126,7 @@ public class BInterpreter implements Executable {
 			formula = trace.getModel().parseFormula(source, FormulaExpand.EXPAND);
 		} catch (EvaluationException e) {
 			logger.info("Failed to parse B console user input", e);
-			return new ConsoleExecResult("", this.formatParseException(source, e), ConsoleExecResultType.ERROR);
+			return new ConsoleExecResult("", formatParseException(source, e), ConsoleExecResultType.ERROR);
 		}
 		final AbstractEvalResult res;
 		try {
