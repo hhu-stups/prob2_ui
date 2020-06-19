@@ -178,22 +178,28 @@ public class MachineLoader {
 
 		setLoadingStatus(StatusBar.LoadingStatus.PREPARING_ANIMATOR);
 		final StateSpace stateSpace = animator.createStateSpace();
-		final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
-		allPrefs.putAll(prefs);
-		initStateSpace(stateSpace, allPrefs);
-		if (Thread.currentThread().isInterrupted()) {
-			return;
-		}
-
-		setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
-		extract.loadIntoStateSpace(stateSpace);
-		if (Thread.currentThread().isInterrupted()) {
+		try {
+			final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
+			allPrefs.putAll(prefs);
+			initStateSpace(stateSpace, allPrefs);
+			if (Thread.currentThread().isInterrupted()) {
+				return;
+			}
+			
+			setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
+			extract.loadIntoStateSpace(stateSpace);
+			if (Thread.currentThread().isInterrupted()) {
+				stateSpace.kill();
+				return;
+			}
+			
+			setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
+			this.currentTrace.set(new Trace(stateSpace));
+		} catch (RuntimeException e) {
+			// Don't leave state space active if an exception was thrown before the current trace could be set.
 			stateSpace.kill();
-			return;
+			throw e;
 		}
-
-		setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
-		this.currentTrace.set(new Trace(stateSpace));
 	}
 
 	private void load(Machine machine, Map<String, String> prefs) throws IOException, ModelTranslationError {
