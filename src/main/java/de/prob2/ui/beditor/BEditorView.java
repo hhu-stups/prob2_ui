@@ -280,7 +280,6 @@ public class BEditorView extends BorderPane {
 		this.lastSavedText.set(text);
 		beditor.clear();
 		beditor.appendText(text);
-		beditor.getStyleClass().add("editor");
 		beditor.setEditable(true);
 	}
 	

@@ -115,6 +115,7 @@ public class BEditor extends CodeArea {
 	}
 
 	private void initialize() {
+		this.getStyleClass().add("editor");
 		this.setParagraphGraphicFactory(LineNumberFactory.get(this));
 		this.richChanges()
 				.filter(ch -> !ch.isPlainTextIdentity())
