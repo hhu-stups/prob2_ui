@@ -7,6 +7,7 @@ import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
@@ -54,6 +55,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +82,7 @@ public class BEditorView extends BorderPane {
 	private HelpButton helpButton;
 	
 	@FXML 
-	private ChoiceBox<MachineFileInformation> machineChoice;
+	private ChoiceBox<Path> machineChoice;
 	
 	@FXML 
 	private CheckBox cbUnicode;
@@ -140,6 +142,18 @@ public class BEditorView extends BorderPane {
 		);
 		setHint();
 		
+		machineChoice.setConverter(new StringConverter<Path>() {
+			@Override
+			public String toString(final Path object) {
+				return object.getFileName().toString();
+			}
+			
+			@Override
+			public Path fromString(final String string) {
+				throw new AssertionError("Should never be called");
+			}
+		});
+		
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (to == null) {
 				machineChoice.getItems().clear();
@@ -147,7 +161,7 @@ public class BEditorView extends BorderPane {
 			} else {
 				// The correct list of included machines is available once the machine is fully loaded.
 				// Until that happens, display only the main machine.
-				machineChoice.getItems().setAll(currentMachineFileInformation());
+				machineChoice.getItems().setAll(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
 				machineChoice.getSelectionModel().selectFirst();
 			}
 		});
@@ -158,7 +172,7 @@ public class BEditorView extends BorderPane {
 			if(to == null) {
 				return;
 			}
-			switchMachine(to.getPath());
+			switchMachine(to);
 		});
 		
 		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
@@ -166,8 +180,7 @@ public class BEditorView extends BorderPane {
 		helpButton.setHelpContent("mainView.editor", null);
 	}
 	
-	private void switchMachine(String path) {
-		final Path machinePath = currentProject.getLocation().resolve(path);
+	private void switchMachine(final Path machinePath) {
 		resetWatching();
 		registerFile(machinePath);
 		loadText(machinePath);
@@ -205,20 +218,16 @@ public class BEditorView extends BorderPane {
 		beditor.setEditable(false);
 	}
 	
-	private MachineFileInformation currentMachineFileInformation() {
-		final Path machinePath = currentProject.getCurrentMachine().getLocation();
-		final String[] split = machinePath.getFileName().toString().split("\\.", 2);
-		assert split.length == 2;
-		return new MachineFileInformation(split[0], split[1], machinePath.toString());
-	}
-	
 	private void updateIncludedMachines() {
 		GetAllUsedFilenamesCommand cmd = new GetAllUsedFilenamesCommand();
 		currentTrace.getStateSpace().execute(cmd);
 		if(cmd.getFiles().isEmpty()) {
-			machineChoice.getItems().setAll(currentMachineFileInformation());
+			machineChoice.getItems().setAll(this.getPath());
 		} else {
-			machineChoice.getItems().setAll(cmd.getFiles());
+			machineChoice.getItems().setAll(cmd.getFiles().stream()
+				.map(MachineFileInformation::getPath)
+				.map(Paths::get)
+				.collect(Collectors.toList()));
 		}
 		machineChoice.getSelectionModel().selectFirst();
 	}
