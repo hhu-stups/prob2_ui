@@ -330,7 +330,7 @@ public class BEditorView extends BorderPane {
 		injector.getInstance(ExternalEditor.class).open(this.getPath());
 	}
 	
-	public void highlightErrorLocations(final Collection<ErrorItem.Location> locations) {
-		beditor.getErrorLocations().setAll(locations);
+	public void highlightErrors(final Collection<ErrorItem> errors) {
+		beditor.getErrors().setAll(errors);
 	}
 }

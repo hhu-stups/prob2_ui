@@ -98,11 +98,7 @@ public final class ErrorTableView extends TreeTableView<Object> {
 			final BEditorView bEditorView = this.bEditorViewProvider.get();
 			final Path editorPath = bEditorView.getPath();
 			if (editorPath != null && grouped.containsKey(editorPath.toString())) {
-				bEditorView.highlightErrorLocations(
-					grouped.get(editorPath.toString()).stream()
-						.flatMap(item -> item.getLocations().stream())
-						.collect(Collectors.toList())
-				);
+				bEditorView.highlightErrors(grouped.get(editorPath.toString()));
 			}
 			this.setRoot(root);
 		});

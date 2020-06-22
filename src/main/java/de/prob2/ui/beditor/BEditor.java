@@ -44,7 +44,7 @@ public class BEditor extends CodeArea {
 	private final ResourceBundle bundle;
 
 	private final ExecutorService executor;
-	private final ObservableList<ErrorItem.Location> errorLocations;
+	private final ObservableList<ErrorItem> errors;
 
 	@Inject
 	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject, final StopActions stopActions) {
@@ -53,7 +53,7 @@ public class BEditor extends CodeArea {
 		this.bundle = bundle;
 		this.executor = Executors.newSingleThreadExecutor();
 		stopActions.add(this.executor::shutdownNow);
-		this.errorLocations = FXCollections.observableArrayList();
+		this.errors = FXCollections.observableArrayList();
 		initialize();
 		initializeContextMenu();
 	}
@@ -111,10 +111,11 @@ public class BEditor extends CodeArea {
 						return Optional.empty();
 					}
 				}).subscribe(highlighting -> {
-					this.getErrorLocations().clear(); // Remove error highlighting if editor text changes
+					// Remove error highlighting if editor text changes
+					this.getErrors().clear();
 					this.applyHighlighting(highlighting);
 				});
-		this.errorLocations.addListener((ListChangeListener<ErrorItem.Location>) change ->
+		this.getErrors().addListener((ListChangeListener<ErrorItem>) change ->
 				this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
 		);
 
@@ -131,24 +132,26 @@ public class BEditor extends CodeArea {
 
 	private StyleSpans<Collection<String>> addErrorHighlighting(final StyleSpans<Collection<String>> highlighting) {
 		StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
-		for (final ErrorItem.Location location : this.getErrorLocations()) {
-			final int startParagraph = location.getStartLine() - 1;
-			final int endParagraph = location.getEndLine() - 1;
-			final int startIndex = this.getAbsolutePosition(startParagraph, location.getStartColumn());
-			final int endIndex;
-			if (startParagraph == endParagraph) {
-				final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
-				endIndex = this.getAbsolutePosition(startParagraph, displayedEndColumn);
-			} else {
-				endIndex = this.getAbsolutePosition(endParagraph, location.getEndColumn());
+		for (final ErrorItem error : this.getErrors()) {
+			for (final ErrorItem.Location location : error.getLocations()) {
+				final int startParagraph = location.getStartLine() - 1;
+				final int endParagraph = location.getEndLine() - 1;
+				final int startIndex = this.getAbsolutePosition(startParagraph, location.getStartColumn());
+				final int endIndex;
+				if (startParagraph == endParagraph) {
+					final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
+					endIndex = this.getAbsolutePosition(startParagraph, displayedEndColumn);
+				} else {
+					endIndex = this.getAbsolutePosition(endParagraph, location.getEndColumn());
+				}
+				highlightingWithErrors = highlightingWithErrors.overlay(
+						new StyleSpansBuilder<Collection<String>>()
+								.add(Collections.emptyList(), startIndex)
+								.add(Collections.singletonList("error"), endIndex - startIndex)
+								.create(),
+						BEditor::combineCollections
+				);
 			}
-			highlightingWithErrors = highlightingWithErrors.overlay(
-					new StyleSpansBuilder<Collection<String>>()
-							.add(Collections.emptyList(), startIndex)
-							.add(Collections.singletonList("error"), endIndex - startIndex)
-							.create(),
-					BEditor::combineCollections
-			);
 		}
 		return highlightingWithErrors;
 	}
@@ -189,7 +192,7 @@ public class BEditor extends CodeArea {
 		this.getUndoManager().forgetHistory();
 	}
 
-	public ObservableList<ErrorItem.Location> getErrorLocations() {
-		return this.errorLocations;
+	public ObservableList<ErrorItem> getErrors() {
+		return this.errors;
 	}
 }
