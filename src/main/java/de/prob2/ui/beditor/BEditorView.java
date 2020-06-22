@@ -278,8 +278,10 @@ public class BEditorView extends BorderPane {
 	private void setEditorText(String text, Path path) {
 		this.setPath(path);
 		this.lastSavedText.set(text);
-		beditor.clear();
-		beditor.appendText(text);
+		if (!beditor.getText().equals(text)) {
+			beditor.clear();
+			beditor.appendText(text);
+		}
 		beditor.setEditable(true);
 	}
 	
