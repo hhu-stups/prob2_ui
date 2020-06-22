@@ -537,7 +537,7 @@
 }
 
 .editor .problem.warning {
-	-rtfx-underline-color: yellow;
+	-rtfx-underline-color: gold;
 }
 
 .editor .problem.error {
