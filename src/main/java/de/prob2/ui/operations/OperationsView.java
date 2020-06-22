@@ -373,7 +373,7 @@ public final class OperationsView extends VBox {
 	private void showDisabledAndWithTimeout(final LoadedMachine loadedMachine, final Set<String> notEnabled, final Set<String> withTimeout) {
 		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
-				if (!"$initialise_machine".equals(s)) {
+				if (!Transition.INITIALISE_MACHINE_NAME.equals(s)) {
 					events.add(OperationItem.forDisabled(
 						s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, loadedMachine.getMachineOperationInfo(s).getParameterNames()
 					));

@@ -79,9 +79,6 @@ public class OperationItem {
 		}
 	}
 	
-	private static final String SETUP_CONSTANTS = "$setup_constants";
-	private static final String INITIALISE_MACHINE = "$initialise_machine";
-	
 	private final Transition transition;
 	private final String name;
 	private final OperationItem.Status status;
@@ -151,12 +148,12 @@ public class OperationItem {
 			final Map<String, String> constants;
 			final Map<String, String> variables;
 			switch (transition.getName()) {
-				case SETUP_CONSTANTS:
+				case Transition.SETUP_CONSTANTS_NAME:
 					constants = getNextStateValues(transition, loadedMachine.getConstantEvalElements(FormulaExpand.TRUNCATE));
 					variables = Collections.emptyMap();
 					break;
 				
-				case INITIALISE_MACHINE:
+				case Transition.INITIALISE_MACHINE_NAME:
 					variables = getNextStateValues(transition, loadedMachine.getVariableEvalElements(FormulaExpand.TRUNCATE));
 					constants = Collections.emptyMap();
 					break;
@@ -299,21 +296,8 @@ public class OperationItem {
 				.toString();
 	}
 
-	private static String getPrettyName(final String name) {
-		switch (name) {
-		case SETUP_CONSTANTS:
-			return "SETUP_CONSTANTS";
-
-		case INITIALISE_MACHINE:
-			return "INITIALISATION";
-
-		default:
-			return name;
-		}
-	}
-
 	public String toPrettyString(final boolean includeUnambiguous) {
-		StringBuilder sb = new StringBuilder(getPrettyName(this.getName()));
+		StringBuilder sb = new StringBuilder(Transition.prettifyName(this.getName()));
 
 		final List<String> args = new ArrayList<>();
 

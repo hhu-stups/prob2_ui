@@ -221,14 +221,7 @@ public class TraceDiff extends VBox {
 		}
 		List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
 
-		StringBuilder stringBuilder;
-		if ("$setup_constants".equals(t.getName())) {
-			stringBuilder = new StringBuilder("SETUP_CONSTANTS");
-		} else if ("$initialise_machine".equals(t.getName())){
-			stringBuilder = new StringBuilder("INITIALISATION");
-		} else {
-			stringBuilder = new StringBuilder(t.getName());
-		}
+		StringBuilder stringBuilder = new StringBuilder(t.getPrettyName());
 
 		List<String> args = new ArrayList<>();
 		List<String> paramValues = t.getParameterValues();
@@ -242,11 +235,11 @@ public class TraceDiff extends VBox {
 			}
 		}
 
-		if ("$setup_constants".equals(t.getName())
+		if (Transition.SETUP_CONSTANTS_NAME.equals(t.getName())
 				&& t.getDestination().getConstantValues(FormulaExpand.EXPAND) != null
 				&& !t.getDestination().getConstantValues(FormulaExpand.EXPAND).isEmpty()) {
 			t.getDestination().getConstantValues(FormulaExpand.EXPAND).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
-		} else if ("$initialise_machine".equals(t.getName())
+		} else if (Transition.INITIALISE_MACHINE_NAME.equals(t.getName())
 				&& t.getDestination().getVariableValues(FormulaExpand.EXPAND) != null
 				&& !t.getDestination().getVariableValues(FormulaExpand.EXPAND).isEmpty()) {
 			t.getDestination().getVariableValues(FormulaExpand.EXPAND).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
@@ -267,17 +260,8 @@ public class TraceDiff extends VBox {
 	}
 
 	private String getRep(PersistentTransition t) {
-		StringBuilder stringBuilder;
+		final StringBuilder stringBuilder = new StringBuilder(Transition.prettifyName(t.getOperationName()));
 		boolean isArtificialTransition = false;
-		if ("$setup_constants".equals(t.getOperationName())) {
-			stringBuilder = new StringBuilder("SETUP_CONSTANTS");
-			isArtificialTransition = true;
-		} else if ("$initialise_machine".equals(t.getOperationName())){
-			stringBuilder = new StringBuilder("INITIALISATION");
-			isArtificialTransition = true;
-		} else {
-			stringBuilder = new StringBuilder(t.getOperationName());
-		}
 
 		List<String> args = new ArrayList<>();
 		if (t.getParameters()!=null && !t.getParameters().isEmpty()) {
