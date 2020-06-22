@@ -122,7 +122,9 @@ public class WindowMenu extends Menu {
 			this.uiState.setPerspectiveKind(prevKind);
 			this.uiState.setPerspective(prevPerspective);
 			LOGGER.error("Exception during switching perspective", e);
-			ExceptionAlert alert = new ExceptionAlert(injector, bundle.getString("menu.window.switchingPerspective.error"), e);
+			final ExceptionAlert alert = injector.getInstance(ExceptionAlert.class);
+			alert.setText(bundle.getString("menu.window.switchingPerspective.error"));
+			alert.setException(e);
 			alert.show();
 		}
 	}

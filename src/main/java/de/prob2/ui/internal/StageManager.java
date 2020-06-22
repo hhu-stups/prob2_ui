@@ -397,7 +397,10 @@ public final class StageManager {
 	 * @return a new exception alert
 	 */
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {
-		return new ExceptionAlert(this.injector, String.format(bundle.getString(contentBundleKey), contentParams), exc);
+		final ExceptionAlert alert = injector.getInstance(ExceptionAlert.class);
+		alert.setText(String.format(bundle.getString(contentBundleKey), contentParams));
+		alert.setException(exc);
+		return alert;
 	}
 
 	/**

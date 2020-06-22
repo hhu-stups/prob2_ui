@@ -109,9 +109,11 @@ public class MachineLoader {
 	}
 
 	private void initStateSpace(final StateSpace stateSpace, final Map<String, String> preferences) {
-		stateSpace.addWarningListener(warnings -> Platform.runLater(() ->
-			new WarningAlert(stageManager, warnings).show()
-		));
+		stateSpace.addWarningListener(warnings -> Platform.runLater(() -> {
+			final WarningAlert alert = injector.getInstance(WarningAlert.class);
+			alert.getWarnings().setAll(warnings);
+			alert.show();
+		}));
 		stateSpace.changePreferences(preferences);
 	}
 
