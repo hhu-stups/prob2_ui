@@ -531,10 +531,17 @@
 	-fx-fill:darkviolet;
 }
 
-.editor .error {
-	-rtfx-underline-color: red;
+.editor .problem {
 	-rtfx-underline-width: 2px;
 	-rtfx-underline-dash-array: 3px;
+}
+
+.editor .problem.warning {
+	-rtfx-underline-color: yellow;
+}
+
+.editor .problem.error {
+	-rtfx-underline-color: red;
 }
 
 .editorPopupLabel {

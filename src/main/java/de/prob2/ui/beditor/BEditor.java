@@ -2,8 +2,11 @@ package de.prob2.ui.beditor;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +46,15 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 public class BEditor extends CodeArea {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
+
+	private static final Map<ErrorItem.Type, String> ERROR_STYLE_CLASSES;
+	static {
+		final Map<ErrorItem.Type, String> errorStyleClasses = new EnumMap<>(ErrorItem.Type.class);
+		errorStyleClasses.put(ErrorItem.Type.WARNING, "warning");
+		errorStyleClasses.put(ErrorItem.Type.ERROR, "error");
+		errorStyleClasses.put(ErrorItem.Type.INTERNAL_ERROR, "error");
+		ERROR_STYLE_CLASSES = Collections.unmodifiableMap(errorStyleClasses);
+	}
 
 	private final FontSize fontSize;
 	private final CurrentProject currentProject;
@@ -186,7 +198,7 @@ public class BEditor extends CodeArea {
 				highlightingWithErrors = highlightingWithErrors.overlay(
 						new StyleSpansBuilder<Collection<String>>()
 								.add(Collections.emptyList(), startIndex)
-								.add(Collections.singletonList("error"), endIndex - startIndex)
+								.add(Arrays.asList("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
 								.create(),
 						BEditor::combineCollections
 				);
