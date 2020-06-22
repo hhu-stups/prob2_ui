@@ -436,7 +436,7 @@ public final class OperationsView extends VBox {
 	}
 
 	private List<OperationItem> applyFilter(final String filter) {
-		return events.stream().filter(op -> op.getName().toLowerCase().contains(filter.toLowerCase()))
+		return events.stream().filter(op -> op.getPrettyName().toLowerCase().contains(filter.toLowerCase()))
 				.collect(Collectors.toList());
 	}
 

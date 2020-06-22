@@ -90,7 +90,7 @@ class OperationDetailsStage extends Stage {
 			if (to == null) {
 				this.setTitle(bundle.getString("operations.operationDetails.title"));
 			} else {
-				this.setTitle(String.format(bundle.getString("operations.operationDetails.titleWithName"), to.getName()));
+				this.setTitle(String.format(bundle.getString("operations.operationDetails.titleWithName"), to.getPrettyName()));
 				
 				final List<String> paramNames = to.getParameterNames();
 				final List<String> paramValues = to.getParameterValues();

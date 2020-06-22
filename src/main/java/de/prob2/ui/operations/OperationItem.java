@@ -234,6 +234,10 @@ public class OperationItem {
 		return name;
 	}
 
+	public String getPrettyName() {
+		return Transition.prettifyName(this.getName());
+	}
+
 	public OperationItem.Status getStatus() {
 		return status;
 	}
@@ -297,7 +301,7 @@ public class OperationItem {
 	}
 
 	public String toPrettyString(final boolean includeUnambiguous) {
-		StringBuilder sb = new StringBuilder(Transition.prettifyName(this.getName()));
+		StringBuilder sb = new StringBuilder(this.getPrettyName());
 
 		final List<String> args = new ArrayList<>();
 

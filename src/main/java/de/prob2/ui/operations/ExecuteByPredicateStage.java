@@ -76,7 +76,7 @@ public final class ExecuteByPredicateStage extends Stage {
 				this.operationLabel.setText(null);
 				this.predicateBuilderView.setItems(Collections.emptyMap());
 			} else {
-				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getName()));
+				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getPrettyName()));
 				
 				final Map<String, String> items = new LinkedHashMap<>();
 				if (to.getParameterValues().isEmpty()) {
