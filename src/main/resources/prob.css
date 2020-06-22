@@ -537,6 +537,14 @@
 	-rtfx-underline-dash-array: 3px;
 }
 
+.editorPopupLabel {
+	-fx-background-color: -fx-base;
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 1px;
+	-fx-border-radius: 5px;
+	-fx-padding: 10px;
+}
+
 /************************************************************************************
  * TabPane																		  *
  ************************************************************************************/

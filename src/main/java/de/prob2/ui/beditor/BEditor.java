@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
@@ -25,11 +26,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.geometry.Bounds;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.stage.Popup;
 
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.event.MouseOverTextEvent;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.slf4j.Logger;
@@ -45,6 +50,8 @@ public class BEditor extends CodeArea {
 
 	private final ExecutorService executor;
 	private final ObservableList<ErrorItem> errors;
+	private final Popup errorPopup;
+	private final Label errorPopupLabel;
 
 	@Inject
 	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject, final StopActions stopActions) {
@@ -54,6 +61,9 @@ public class BEditor extends CodeArea {
 		this.executor = Executors.newSingleThreadExecutor();
 		stopActions.add(this.executor::shutdownNow);
 		this.errors = FXCollections.observableArrayList();
+		this.errorPopup = new Popup();
+		this.errorPopupLabel = new Label();
+		this.errorPopup.getContent().add(this.errorPopupLabel);
 		initialize();
 		initializeContextMenu();
 	}
@@ -119,6 +129,30 @@ public class BEditor extends CodeArea {
 				this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
 		);
 
+		this.errorPopupLabel.getStyleClass().add("editorPopupLabel");
+
+		this.setMouseOverTextDelay(Duration.ofMillis(500));
+		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
+			// Inefficient, but works - there should never be so many errors that the iteration has a noticeable performance impact.
+			final String errorsText = this.getErrors().stream()
+				.filter(error -> error.getLocations().stream().anyMatch(location ->
+					e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
+						&& e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location))
+				)
+				.map(ErrorItem::getMessage)
+				.collect(Collectors.joining("\n"));
+			if (!errorsText.isEmpty()) {
+				this.errorPopupLabel.setText(errorsText);
+				// Try to position the popup under the text being hovered over,
+				// so that the line in question is not covered by the popup.
+				final double popupY = this.getCharacterBoundsOnScreen(e.getCharacterIndex(), e.getCharacterIndex() + 1)
+					.map(Bounds::getMaxY)
+					.orElse(e.getScreenPosition().getY());
+				this.errorPopup.show(this, e.getScreenPosition().getX(), popupY);
+			}
+		});
+		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_END, e -> this.errorPopup.hide());
+
 		fontSize.fontSizeProperty().addListener((observable, from, to) ->
 				this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
 		);
@@ -130,20 +164,25 @@ public class BEditor extends CodeArea {
 		return ret;
 	}
 
+	private int errorLocationAbsoluteStart(final ErrorItem.Location location) {
+		return this.getAbsolutePosition(location.getStartLine() - 1, location.getStartColumn());
+	}
+
+	private int errorLocationAbsoluteEnd(final ErrorItem.Location location) {
+		if (location.getStartLine() == location.getEndLine()) {
+			final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
+			return this.getAbsolutePosition(location.getStartLine() - 1, displayedEndColumn);
+		} else {
+			return this.getAbsolutePosition(location.getEndLine() - 1, location.getEndColumn());
+		}
+	}
+
 	private StyleSpans<Collection<String>> addErrorHighlighting(final StyleSpans<Collection<String>> highlighting) {
 		StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
 		for (final ErrorItem error : this.getErrors()) {
 			for (final ErrorItem.Location location : error.getLocations()) {
-				final int startParagraph = location.getStartLine() - 1;
-				final int endParagraph = location.getEndLine() - 1;
-				final int startIndex = this.getAbsolutePosition(startParagraph, location.getStartColumn());
-				final int endIndex;
-				if (startParagraph == endParagraph) {
-					final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
-					endIndex = this.getAbsolutePosition(startParagraph, displayedEndColumn);
-				} else {
-					endIndex = this.getAbsolutePosition(endParagraph, location.getEndColumn());
-				}
+				final int startIndex = this.errorLocationAbsoluteStart(location);
+				final int endIndex = this.errorLocationAbsoluteEnd(location);
 				highlightingWithErrors = highlightingWithErrors.overlay(
 						new StyleSpansBuilder<Collection<String>>()
 								.add(Collections.emptyList(), startIndex)
