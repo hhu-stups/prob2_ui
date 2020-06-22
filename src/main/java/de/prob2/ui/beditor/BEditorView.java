@@ -332,6 +332,10 @@ public class BEditorView extends BorderPane {
 	}
 	
 	public void highlightErrors(final Collection<ErrorItem> errors) {
-		beditor.getErrors().setAll(errors);
+		beditor.getErrors().setAll(errors.stream()
+			.filter(error -> error.getLocations().stream()
+				.map(ErrorItem.Location::getFilename)
+				.anyMatch(this.getPath().toString()::equals))
+			.collect(Collectors.toList()));
 	}
 }
