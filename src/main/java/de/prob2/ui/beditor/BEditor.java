@@ -115,10 +115,6 @@ public class BEditor extends CodeArea {
 	}
 
 	private void initialize() {
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			this.clear();
-			this.appendText(bundle.getString("beditor.hint"));
-		});
 		this.setParagraphGraphicFactory(LineNumberFactory.get(this));
 		this.richChanges()
 				.filter(ch -> !ch.isPlainTextIdentity())
