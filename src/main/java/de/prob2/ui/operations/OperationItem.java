@@ -21,6 +21,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
+import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 
@@ -110,73 +111,78 @@ public class OperationItem {
 		this.unambiguousVariableNames = Objects.requireNonNull(unambiguousVariableNames);
 	}
 
-	private static Map<String, String> getNextStateValues(Transition transition, List<IEvalElement> formulas) {
-		// It seems that there is no way to easily find out the
-		// constant/variable values which a specific $setup_constants or
-		// $initialise_machine transition would set.
-		// So we look at the values of all constants/variables in the
-		// transition's destination state.
+	private static Map<String, String> extractValues(final Map<IEvalElement, AbstractEvalResult> results, final Collection<IEvalElement> formulas) {
 		final Map<String, String> values = new LinkedHashMap<>();
-		final List<AbstractEvalResult> results = transition.getDestination().eval(formulas);
-		for (int i = 0; i < formulas.size(); i++) {
-			final AbstractEvalResult value = results.get(i);
+		formulas.forEach(formula -> {
+			final AbstractEvalResult result = results.get(formula);
 			final String valueString;
-			if (value instanceof EvalResult) {
-				valueString = ((EvalResult) value).getValue();
+			if (result instanceof EvalResult) {
+				valueString = ((EvalResult)result).getValue();
 			} else {
-				// noinspection ObjectToString
-				valueString = value.toString();
+				valueString = result.toString();
 			}
-			values.put(formulas.get(i).getCode(), valueString);
-		}
-
+			values.put(formula.getCode(), valueString);
+		});
 		return values;
 	}
 
 	public static Collection<OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions) {
 		final LoadedMachine loadedMachine = stateSpace.getLoadedMachine();
+		final Map<String, List<Transition>> transitionsByName = transitions.stream().collect(Collectors.groupingBy(Transition::getName));
 		final List<OperationItem> items = new ArrayList<>();
-		for (final Transition transition : transitions) {
+		transitionsByName.forEach((name, transitionsWithName) -> {
 			OperationInfo opInfo;
 			try {
-				opInfo = loadedMachine.getMachineOperationInfo(transition.getName());
+				opInfo = loadedMachine.getMachineOperationInfo(name);
 			} catch (ProBError e) {
 				// fallback solution if getMachineOperationInfo throws a ProBError
 				opInfo = null;
 			}
 			
-			final Map<String, String> constants;
-			final Map<String, String> variables;
-			switch (transition.getName()) {
+			final List<IEvalElement> constantEvalElements;
+			final List<IEvalElement> variableEvalElements;
+			switch (name) {
 				case Transition.SETUP_CONSTANTS_NAME:
-					constants = getNextStateValues(transition, loadedMachine.getConstantEvalElements(FormulaExpand.TRUNCATE));
-					variables = Collections.emptyMap();
+					constantEvalElements = loadedMachine.getConstantEvalElements(FormulaExpand.TRUNCATE);
+					variableEvalElements = Collections.emptyList();
 					break;
 				
 				case Transition.INITIALISE_MACHINE_NAME:
-					variables = getNextStateValues(transition, loadedMachine.getVariableEvalElements(FormulaExpand.TRUNCATE));
-					constants = Collections.emptyMap();
+					constantEvalElements = Collections.emptyList();
+					variableEvalElements = loadedMachine.getVariableEvalElements(FormulaExpand.TRUNCATE);
 					break;
 				
 				default:
-					constants = Collections.emptyMap();
+					constantEvalElements = Collections.emptyList();
 					if (opInfo == null) {
-						variables = Collections.emptyMap();
+						variableEvalElements = Collections.emptyList();
 					} else {
-						variables = getNextStateValues(transition,
-							opInfo.getNonDetWrittenVariables().stream()
-								.map(var -> stateSpace.getModel().parseFormula(var, FormulaExpand.TRUNCATE))
-								.collect(Collectors.toList()));
+						variableEvalElements = opInfo.getNonDetWrittenVariables().stream()
+							.map(var -> stateSpace.getModel().parseFormula(var, FormulaExpand.TRUNCATE))
+							.collect(Collectors.toList());
 					}
 			}
 			
-			final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
-			final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
+			final List<IEvalElement> allEvalElements = new ArrayList<>(constantEvalElements);
+			allEvalElements.addAll(variableEvalElements);
+			final List<State> destinationStates = transitionsWithName.stream()
+				.map(Transition::getDestination)
+				.collect(Collectors.toList());
+			final Map<State, Map<IEvalElement, AbstractEvalResult>> valuesByState = stateSpace.evaluateForGivenStates(destinationStates, allEvalElements);
 			
-			items.add(new OperationItem(transition, transition.getName(), Status.ENABLED, paramNames,
-				transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables,
-				Collections.emptySet(), Collections.emptySet()));
-		}
+			for (final Transition transition : transitionsWithName) {
+				final Map<IEvalElement, AbstractEvalResult> results = valuesByState.get(transition.getDestination());
+				final Map<String, String> constants = extractValues(results, constantEvalElements);
+				final Map<String, String> variables = extractValues(results, variableEvalElements);
+				
+				final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
+				final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
+				
+				items.add(new OperationItem(transition, transition.getName(), Status.ENABLED, paramNames,
+					transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables,
+					Collections.emptySet(), Collections.emptySet()));
+			}
+		});
 		return items;
 	}
 
