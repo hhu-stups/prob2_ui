@@ -1,10 +1,12 @@
 package de.prob2.ui.animation.tracereplay;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,6 +27,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.tracediff.TraceDiffStage;
 import de.prob2.ui.verifications.Checked;
@@ -112,7 +115,7 @@ public class TraceChecker {
 						Platform.runLater(() -> {
 							Alert alert = new Alert(Alert.AlertType.WARNING);
 							alert.initOwner(stageManager.getCurrent());
-							alert.setContentText(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"));
+							alert.setContentText(String.format(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"), lineNumber(replayTrace), replayTrace.getErrorMessageParams()[0].toString(), replayTrace.getErrorMessageParams()[1].toString()));
 							alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 							alert.show();
 						});
@@ -241,5 +244,22 @@ public class TraceChecker {
 
 	void isNewTrace() {
 		isNewTrace = true;
+	}
+
+	private int lineNumber(ReplayTrace replayTrace) {
+		int lineNumber = 1;
+		try {
+			Scanner scanner = new Scanner(injector.getInstance(CurrentProject.class).getLocation().resolve(replayTrace.getLocation()));
+			while (scanner.hasNext()) {
+				// Error messages should have already been set at this point so there is no possibility of a NPE
+				if(scanner.nextLine().contains(replayTrace.getErrorMessageParams()[0].toString())) {
+					break;
+				}
+				lineNumber++;
+			}
+		} catch (IOException e) {
+			// Not possible at this position since a persistent trace already exists
+		}
+		return lineNumber;
 	}
 }
