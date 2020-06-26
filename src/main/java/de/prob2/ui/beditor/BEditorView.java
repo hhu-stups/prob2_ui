@@ -95,7 +95,6 @@ public class BEditorView extends BorderPane {
 	private final ObjectProperty<Path> path;
 	private final StringProperty lastSavedText;
 	private final BooleanProperty saved;
-	private final BooleanProperty reloaded;
 	
 	private Thread watchThread;
 	private WatchKey key;
@@ -110,7 +109,6 @@ public class BEditorView extends BorderPane {
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
-		this.reloaded = new SimpleBooleanProperty(this, "reloaded", true);
 		this.watchThread = null;
 		this.key = null;
 		stageManager.loadFXML(this, "beditorView.fxml");
@@ -128,15 +126,11 @@ public class BEditorView extends BorderPane {
 				return;
 			}
 			updateIncludedMachines();
-			reloaded.set(true);
 		});
 		saveButton.disableProperty().bind(saved);
 		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(Bindings.when(saved)
-			.then(Bindings.when(reloaded)
-				.then("")
-				.otherwise(bundle.getString("beditor.reloadWarning"))
-			)
+			.then("")
 			.otherwise(bundle.getString("beditor.unsavedWarning"))
 		);
 		setHint();
@@ -309,7 +303,6 @@ public class BEditorView extends BorderPane {
 	public void handleSave() {
 		resetWatching();
 		lastSavedText.set(beditor.getText());
-		reloaded.set(false);
 		assert this.getPath() != null;
 		try {
 			Files.write(this.getPath(), beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
