@@ -311,14 +311,15 @@ public class BEditorView extends BorderPane {
 		lastSavedText.set(beditor.getText());
 		reloaded.set(false);
 		assert this.getPath() != null;
-		// Maybe add something for the user, that reloads the machine automatically?
 		try {
 			Files.write(this.getPath(), beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
 			registerFile(this.getPath());
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path).showAndWait();
 			LOGGER.error(String.format("Could not save file: %s", path), e);
+			return;
 		}
+		currentProject.reloadCurrentMachine();
 	}
 	
 	private void resetWatching() {
