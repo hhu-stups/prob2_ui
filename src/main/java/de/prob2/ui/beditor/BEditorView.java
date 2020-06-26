@@ -7,7 +7,6 @@ import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
@@ -23,11 +22,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetAllUsedFilenamesCommand;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.animator.domainobjects.MachineFileInformation;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
 import de.prob.statespace.StateSpace;
@@ -219,15 +218,11 @@ public class BEditorView extends BorderPane {
 	}
 	
 	private void updateIncludedMachines() {
-		GetAllUsedFilenamesCommand cmd = new GetAllUsedFilenamesCommand();
-		currentTrace.getStateSpace().execute(cmd);
-		if(cmd.getFiles().isEmpty()) {
-			machineChoice.getItems().setAll(this.getPath());
+		final AbstractModel model = currentTrace.getModel();
+		if (model instanceof ClassicalBModel) {
+			machineChoice.getItems().setAll(((ClassicalBModel)model).getLoadedMachineFiles());
 		} else {
-			machineChoice.getItems().setAll(cmd.getFiles().stream()
-				.map(MachineFileInformation::getPath)
-				.map(Paths::get)
-				.collect(Collectors.toList()));
+			machineChoice.getItems().setAll(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
 		}
 		machineChoice.getSelectionModel().selectFirst();
 	}
