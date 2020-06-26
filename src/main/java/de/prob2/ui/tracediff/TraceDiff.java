@@ -289,7 +289,7 @@ public class TraceDiff extends VBox {
 		if (alert instanceof TraceReplayErrorAlert) {
 			replayed.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
 			if (!listBox.getChildren().contains(persistentBox)) {
-			 	listBox.getChildren().add(persistentBox);
+				listBox.getChildren().add(persistentBox);
 			}
 			if (!buttonBox.getChildren().contains(savePersistent)) {
 				buttonBox.getChildren().add(savePersistent);
