@@ -261,7 +261,7 @@ public class TraceDiff extends VBox {
 
 	private String getRep(PersistentTransition t) {
 		final StringBuilder stringBuilder = new StringBuilder(Transition.prettifyName(t.getOperationName()));
-		boolean isArtificialTransition = Transition.SETUP_CONSTANTS_NAME.equals(t.getOperationName()) || Transition.INITIALISE_MACHINE_NAME.equals(t.getOperationName());
+		boolean isArtificialTransition = Transition.isArtificialTransitionName(t.getOperationName());
 
 		List<String> args = new ArrayList<>();
 		if (t.getParameters()!=null && !t.getParameters().isEmpty()) {
