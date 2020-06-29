@@ -15,6 +15,7 @@
 	<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
 			  accelerator="Alt+Shortcut+S" onAction="#saveProject" />
 	<SeparatorMenuItem />
+	<MenuItem fx:id="extendedStaticAnalysisItem" text="%menu.file.items.extendedStaticAnalysis" onAction="#handleExtendedStaticAnalysis"/>
 	<MenuItem fx:id="viewFormattedCodeItem" text="%menu.file.items.viewFormattedCode" onAction="#handleViewFormattedCode"/>
 	<MenuItem fx:id="reloadMachineItem" text="%menu.file.items.reloadMachine"
 		accelerator="Shortcut+R" onAction="#handleReloadMachine" />

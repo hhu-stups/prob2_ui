@@ -1,12 +1,15 @@
 package de.prob2.ui.menu;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
@@ -18,6 +21,7 @@ import de.prob2.ui.project.ProjectManager;
 
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
@@ -32,6 +36,8 @@ public class FileMenu extends Menu {
 	private MenuItem saveMachineItem;
 	@FXML
 	private MenuItem saveProjectItem;
+	@FXML
+	private MenuItem extendedStaticAnalysisItem;
 	@FXML
 	private MenuItem viewFormattedCodeItem;
 	@FXML
@@ -73,6 +79,7 @@ public class FileMenu extends Menu {
 		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull().or(bEditorView.savedProperty()));
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 		
+		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.existsProperty().not());
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
@@ -102,6 +109,18 @@ public class FileMenu extends Menu {
 	@FXML
 	private void saveProject() {
 		projectManager.saveCurrentProject();
+	}
+
+	@FXML
+	private void handleExtendedStaticAnalysis() {
+		final List<ErrorItem> problems = currentTrace.getStateSpace().performExtendedStaticChecks();
+		if (problems.isEmpty()) {
+			stageManager.makeAlert(Alert.AlertType.INFORMATION, "", "menu.file.items.extendedStaticAnalysis.noProblemsFound").show();
+		} else {
+			final WarningAlert alert = injector.getInstance(WarningAlert.class);
+			alert.getWarnings().setAll(problems);
+			alert.show();
+		}
 	}
 
 	@FXML
