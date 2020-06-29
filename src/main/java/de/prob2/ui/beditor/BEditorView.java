@@ -185,6 +185,7 @@ public class BEditorView extends BorderPane {
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
 			final StateSpace stateSpace = currentTrace.getStateSpace();
 			cbUnicode.setVisible(true);
+			cbUnicode.setManaged(true);
 			if (stateSpace == null) {
 				setHint();
 			} else {
@@ -192,6 +193,7 @@ public class BEditorView extends BorderPane {
 			}
 		} else {
 			cbUnicode.setVisible(false);
+			cbUnicode.setManaged(false);
 			setText(machinePath);
 		}
 	}
