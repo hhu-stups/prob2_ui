@@ -7,6 +7,7 @@ import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
@@ -328,12 +329,21 @@ public class BEditorView extends BorderPane {
 	private void handleOpenExternal() {
 		injector.getInstance(ExternalEditor.class).open(this.getPath());
 	}
-	
+
+	private boolean isCurrentEditorFile(final String filename) {
+		try {
+			return Files.isSameFile(Paths.get(filename), this.getPath());
+		} catch (IOException e) {
+			LOGGER.info("Failed to check if file is identical to editor file", e);
+			return false;
+		}
+	}
+
 	public void highlightErrors(final Collection<ErrorItem> errors) {
 		beditor.getErrors().setAll(errors.stream()
 			.filter(error -> error.getLocations().stream()
 				.map(ErrorItem.Location::getFilename)
-				.anyMatch(this.getPath().toString()::equals))
+				.anyMatch(this::isCurrentEditorFile))
 			.collect(Collectors.toList()));
 	}
 }
