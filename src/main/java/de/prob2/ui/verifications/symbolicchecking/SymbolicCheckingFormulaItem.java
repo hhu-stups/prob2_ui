@@ -59,6 +59,6 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	
 	@Override
 	public int hashCode() {
-		 return Objects.hash(name, code, type);
+		return Objects.hash(this.getName(), this.getCode(), this.getType());
 	}
 }

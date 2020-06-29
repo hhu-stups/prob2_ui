@@ -14,11 +14,11 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
-	protected String name;
-	protected String description;
-	protected String code;
-	protected BooleanProperty selected;
-	protected final transient ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
+	private String name;
+	private String description;
+	private String code;
+	private BooleanProperty selected;
+	private final transient ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
 	
 	public AbstractCheckableItem(String name, String description, String code) {
 		this.name = name;

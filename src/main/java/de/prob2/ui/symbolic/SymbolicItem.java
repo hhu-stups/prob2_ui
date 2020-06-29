@@ -12,7 +12,7 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 
 public abstract class SymbolicItem extends AbstractCheckableItem {
 	
-	protected SymbolicExecutionType type;
+	private SymbolicExecutionType type;
 
 	public SymbolicItem(String name, String code, SymbolicExecutionType type) {
 		super(name, type.getName(), code);
@@ -41,13 +41,13 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 	
 	@Override
 	public String toString() {
-		return String.join(" ", name, code, type.name());
+		return String.join(" ", this.getName(), this.getCode(), this.getType().name());
 	}
 	
 	
 	public void setData(String name, String description, String code, SymbolicExecutionType type) {
 		super.setData(name, description, code);
-		this.type = type;
+		this.setType(type);
 	}
 	
 
