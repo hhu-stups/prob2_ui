@@ -14,7 +14,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
-	protected transient Checked checked;
 	protected String name;
 	protected String description;
 	protected String code;
@@ -22,7 +21,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected final transient ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
 	
 	public AbstractCheckableItem(String name, String description, String code) {
-		this.checked = Checked.NOT_CHECKED;
 		this.name = name;
 		this.description = description;
 		this.code = code;
@@ -31,7 +29,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	
 	protected AbstractCheckableItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
-		this.checked = Checked.NOT_CHECKED;
 		this.name = JsonManager.checkDeserialize(context, object, "name", String.class);
 		this.description = JsonManager.checkDeserialize(context, object, "description", String.class);
 		this.code = JsonManager.checkDeserialize(context, object, "code", String.class);
@@ -46,7 +43,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	}
 		
 	public void reset() {
-		this.checked = Checked.NOT_CHECKED;
 		this.setResultItem(null);
 	}
 	
@@ -99,12 +95,8 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		return resultItem;
 	}
 	
-	public void setChecked(Checked checked) {
-		this.checked = checked;
-	}
-
 	@Override
 	public Checked getChecked() {
-		return checked;
+		return this.getResultItem() == null ? Checked.NOT_CHECKED : this.getResultItem().getChecked();
 	}
 }

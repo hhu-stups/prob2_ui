@@ -39,16 +39,6 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 	}
 	
 	public void handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, State stateid) {
-		Class<?> clazz = result.getClass();
-		if(success.contains(clazz)) {
-			item.setChecked(Checked.SUCCESS);
-		} else if(parseErrors.contains(clazz)) {
-			item.setChecked(Checked.PARSE_ERROR);
-		} else if(error.contains(clazz) || counterExample.contains(clazz)) {
-			item.setChecked(Checked.FAIL);
-		} else {
-			item.setChecked(Checked.INTERRUPTED);
-		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
 
@@ -70,15 +60,14 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 	}
 	
 	public void handlePatternResult(LTLParseListener parseListener, AbstractCheckableItem item) {
-		CheckingResultItem resultItem = null;
+		CheckingResultItem resultItem;
 		if(parseListener.getErrorMarkers().isEmpty()) {
-			item.setChecked(Checked.SUCCESS);
+			resultItem = new LTLCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully", "verifications.result.patternParsedSuccessfully");
 		} else {
 			List<LTLMarker> errorMarkers = parseListener.getErrorMarkers();
 			final String msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
 			resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header",
 					"common.result.message", msg);
-			item.setChecked(Checked.PARSE_ERROR);
 		}
 		item.setResultItem(resultItem);
 	}

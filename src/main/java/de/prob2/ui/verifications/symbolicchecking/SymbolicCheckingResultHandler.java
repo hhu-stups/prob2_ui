@@ -54,16 +54,6 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 	}
 	
 	public void handleFormulaResult(SymbolicItem item, Object result) {
-		Class<?> clazz = result.getClass();
-		if(success.contains(clazz)) {
-			item.setChecked(Checked.SUCCESS);
-		} else if(interrupted.contains(clazz)) {
-			item.setChecked(Checked.INTERRUPTED);
-		} else if(parseErrors.contains(clazz)) {
-			item.setChecked(Checked.PARSE_ERROR);
-		} else if(error.contains(clazz) || counterExample.contains(clazz) || result instanceof Throwable) {
-			item.setChecked(Checked.FAIL);
-		}
 		ArrayList<Trace> traces = new ArrayList<>();
 		CheckingResultItem resultItem = handleFormulaResult(result, currentTrace.getCurrentState(), traces);
 		item.setResultItem(resultItem);
@@ -196,7 +186,6 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String header, String msg, Checked checked, Object... messageParams) {
 		item.setResultItem(new CheckingResultItem(checked, header, msg, messageParams));
-		item.setChecked(checked);
 	}
 	
 	private void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, Checked checked) {

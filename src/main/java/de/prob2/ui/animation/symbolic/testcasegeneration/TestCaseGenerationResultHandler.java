@@ -39,18 +39,12 @@ public class TestCaseGenerationResultHandler extends AbstractResultHandler {
 	
 	private void showCheckingResult(TestCaseGenerationItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
 		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams));
-		handleItem(item, checked);
 	}
 	
 	private void showCheckingResult(TestCaseGenerationItem item, Checked checked, String msgKey) {
 		showCheckingResult(item, checked, msgKey, msgKey);
 	}
 	
-	protected void handleItem(TestCaseGenerationItem item, Checked checked) {
-		item.setChecked(checked);
-	}
-	
-
 	public void handleTestCaseGenerationResult(TestCaseGenerationItem item, Object result, boolean checkAll) {
 		item.getExamples().clear();
 		if(!(result instanceof TestCaseGeneratorResult)) {
