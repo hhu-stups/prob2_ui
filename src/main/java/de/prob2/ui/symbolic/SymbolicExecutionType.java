@@ -13,6 +13,7 @@ public enum SymbolicExecutionType {
 	CHECK_REFINEMENT("Refinement Checking", null),
 	CHECK_STATIC_ASSERTIONS("Static Assertion Checking", null),
 	CHECK_DYNAMIC_ASSERTIONS("Dynamic Assertion Checking", null),
+	CHECK_WELL_DEFINEDNESS("Well-Definedness Checking", null),
 	IC3("IC3", SymbolicModelcheckCommand.Algorithm.IC3), 
 	TINDUCTION("TINDUCTION", SymbolicModelcheckCommand.Algorithm.TINDUCTION), 
 	KINDUCTION("KINDUCTION", SymbolicModelcheckCommand.Algorithm.KINDUCTION), 

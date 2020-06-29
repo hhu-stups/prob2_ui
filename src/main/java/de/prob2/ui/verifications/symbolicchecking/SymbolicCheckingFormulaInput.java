@@ -84,6 +84,9 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 					case CHECK_DYNAMIC_ASSERTIONS:
 						symbolicCheckingFormulaHandler.handleDynamicAssertions(formulaItem, false);
 						break;
+					case CHECK_WELL_DEFINEDNESS:
+						symbolicCheckingFormulaHandler.handleWellDefinedness(formulaItem, false);
+						break;
 					case CHECK_REFINEMENT:
 						symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false);
 						break;

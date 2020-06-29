@@ -1,9 +1,16 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.AbstractCommand;
+import de.prob.animator.command.CheckWellDefinednessCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
@@ -28,11 +35,6 @@ import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
 
 @Singleton
 public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHandler implements ISymbolicResultHandler {
@@ -78,6 +80,8 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 			handleSymbolicChecking((SymbolicCheckingFormulaItem) item, (SymbolicModelcheckCommand) cmd);
 		} else if(item.getType() == SymbolicExecutionType.CHECK_STATIC_ASSERTIONS || item.getType() == SymbolicExecutionType.CHECK_DYNAMIC_ASSERTIONS) {
 			handleAssertionChecking((SymbolicCheckingFormulaItem) item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
+		} else if (item.getType() == SymbolicExecutionType.CHECK_WELL_DEFINEDNESS) {
+			handleWellDefinednessChecking((SymbolicCheckingFormulaItem)item, (CheckWellDefinednessCommand)cmd);
 		} else if(item.getType() == SymbolicExecutionType.CHECK_REFINEMENT) {
 			handleRefinementChecking((SymbolicCheckingFormulaItem) item, (ConstraintBasedRefinementCheckCommand) cmd);
 		} else if(item.getType() == SymbolicExecutionType.FIND_REDUNDANT_INVARIANTS) {
@@ -124,6 +128,14 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		} else {
 			final String header = cmd.isTimeout() ? "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.timeout" : "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found";
 			showCheckingResult(item, header, "common.literal", Checked.FAIL, String.join("\n", result));
+		}
+	}
+	
+	public void handleWellDefinednessChecking(final SymbolicCheckingFormulaItem item, final CheckWellDefinednessCommand cmd) {
+		if (cmd.getDischargedCount().equals(cmd.getTotalCount())) {
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.header", "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", Checked.SUCCESS, cmd.getTotalCount());
+		} else {
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.header", "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", Checked.FAIL, cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount()));
 		}
 	}
 	
