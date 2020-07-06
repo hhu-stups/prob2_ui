@@ -7,7 +7,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.prob.cli.ProBInstance;
+import de.prob.clistarter.ProBInstance;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;

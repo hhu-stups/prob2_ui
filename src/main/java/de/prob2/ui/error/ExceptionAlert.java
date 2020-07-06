@@ -1,15 +1,9 @@
 package de.prob2.ui.error;
 
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
-
-import de.prob.exception.CliError;
+import de.prob.clistarter.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -20,6 +14,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
+
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
+import java.util.ResourceBundle;
 
 public final class ExceptionAlert extends Alert {
 	@FXML private VBox contentVBox;

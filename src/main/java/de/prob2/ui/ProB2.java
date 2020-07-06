@@ -1,22 +1,12 @@
 package de.prob2.ui;
 
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import ch.qos.logback.classic.util.ContextInitializer;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
 import de.prob.Main;
-import de.prob.cli.ProBInstanceProvider;
+import de.prob.clistarter.ProBInstanceProvider;
+import de.prob.clistarter.ProBCliStarter;
+import de.prob.CliConfiguration;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
@@ -30,7 +20,6 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
@@ -42,7 +31,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -51,6 +39,16 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ProB2 extends Application {
 	private Logger logger;
@@ -98,6 +96,8 @@ public class ProB2 extends Application {
 		}
 
 		System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
+
+		ProBCliStarter.startCli();
 	}
 
 	@Override
@@ -106,6 +106,7 @@ public class ProB2 extends Application {
 
 		ProB2Module module = new ProB2Module(this, runtimeOptions);
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+		CliConfiguration.setConfiguration("localhost", 11312);
 		bundle = injector.getInstance(ResourceBundle.class);
 		this.stopActions = injector.getInstance(StopActions.class);
 		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
@@ -231,6 +232,8 @@ public class ProB2 extends Application {
 		if (message != null) {
 			System.err.println(message);
 		}
+		Thread t = new Thread(() -> ProBCliStarter.stopCli());
+		t.start();
 		Platform.exit();
 		System.exit(exitCode);
 		return new IllegalStateException(message);
@@ -320,14 +323,19 @@ public class ProB2 extends Application {
 				event.consume();
 			} else if (result.get().equals(save)) {
 				injector.getInstance(ProjectManager.class).saveCurrentProject();
+				Thread t = new Thread(() -> ProBCliStarter.stopCli());
+				t.start();
 				Platform.exit();
 			} else if (result.get().equals(doNotSave)) {
+				Thread t = new Thread(() -> ProBCliStarter.stopCli());
+				t.start();
 				Platform.exit();
 			} else {
 				throw new AssertionError("Unhandled button: " + result);
 			}
 		} else {
-
+			Thread t = new Thread(() -> ProBCliStarter.stopCli());
+			t.start();
 			Platform.exit();
 		}
 	}

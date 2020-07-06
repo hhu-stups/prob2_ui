@@ -12,7 +12,7 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.ReusableAnimator;
 import de.prob.animator.command.ComposedCommand;
-import de.prob.exception.CliError;
+import de.prob.clistarter.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.ExtractedModel;

@@ -1,13 +1,7 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.ResourceBundle;
-
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
@@ -18,7 +12,7 @@ import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
-import de.prob.exception.CliError;
+import de.prob.clistarter.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.AbstractResultHandler;
@@ -30,6 +24,10 @@ import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.ResourceBundle;
 
 
 @Singleton
