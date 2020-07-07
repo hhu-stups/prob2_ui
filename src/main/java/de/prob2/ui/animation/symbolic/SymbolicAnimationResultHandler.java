@@ -97,26 +97,13 @@ public class SymbolicAnimationResultHandler extends AbstractResultHandler implem
 	
 	private void showCheckingResult(SymbolicAnimationItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
 		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams));
-		handleItem(item, checked);
 	}
 	
 	private void showCheckingResult(SymbolicAnimationItem item, Checked checked, String msgKey) {
 		showCheckingResult(item, checked, msgKey, msgKey);
 	}
 	
-	protected void handleItem(AbstractCheckableItem item, Checked checked) {
-		item.setChecked(checked);
-	}
-	
 	public void handleFormulaResult(SymbolicItem item, Object result) {
-		Class<?> clazz = result.getClass();
-		if(success.contains(clazz)) {
-			handleItem(item, Checked.SUCCESS);
-		} else if(parseErrors.contains(clazz)) {
-			handleItem(item, Checked.PARSE_ERROR);
-		} else {
-			handleItem(item, Checked.INTERRUPTED);
-		}
 		CheckingResultItem resultItem = handleFormulaResult(result);
 		item.setResultItem(resultItem);
 	}

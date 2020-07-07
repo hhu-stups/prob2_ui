@@ -59,14 +59,6 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	
 	@Override
 	public int hashCode() {
-		 return Objects.hash(name, code, type);
+		return Objects.hash(this.getName(), this.getCode(), this.getType());
 	}
-	
-	@Override
-	public void setData(String name, String description, String code, SymbolicExecutionType type) {
-		super.setData(name, description, code);
-		this.type = type;
-	}
-	
-
 }

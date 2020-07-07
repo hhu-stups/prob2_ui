@@ -1,8 +1,5 @@
 package de.prob2.ui.verifications;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public class CheckingResultItem {
 	
 	private Checked checked;
@@ -31,11 +28,5 @@ public class CheckingResultItem {
 	
 	public Object[] getMessageParams() {
 		return messageParams;
-	}
-	
-	public String getMessage() {
-		return String.join("\n", Arrays.asList(messageParams).stream()
-				.map(Object::toString)
-				.collect(Collectors.toList()));
 	}
 }

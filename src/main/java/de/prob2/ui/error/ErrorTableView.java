@@ -95,7 +95,7 @@ public final class ErrorTableView extends TreeTableView<Object> {
 					.collect(Collectors.toCollection(ti::getChildren));
 				ti.setExpanded(true);
 			});
-			this.bEditorViewProvider.get().highlightErrors(this.getErrorItems());
+			this.bEditorViewProvider.get().getErrors().addAll(this.getErrorItems());
 			this.setRoot(root);
 		});
 	}

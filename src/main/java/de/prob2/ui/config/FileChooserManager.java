@@ -27,6 +27,7 @@ import de.prob.scripting.ModelFactory;
 import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
+import de.prob.scripting.ZFuzzFactory;
 import de.prob2.ui.project.ProjectManager;
 
 import javafx.stage.DirectoryChooser;
@@ -51,6 +52,7 @@ public class FileChooserManager {
 		map.put(RulesModelFactory.class, "common.fileChooser.fileTypes.bRules");
 		map.put(XTLFactory.class, "common.fileChooser.fileTypes.xtl");
 		map.put(ZFactory.class, "common.fileChooser.fileTypes.z");
+		map.put(ZFuzzFactory.class, "common.fileChooser.fileTypes.zFuzz");
 		map.put(AlloyFactory.class, "common.fileChooser.fileTypes.alloy");
 		FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(map);
 	}

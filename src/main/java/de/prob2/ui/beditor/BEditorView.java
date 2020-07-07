@@ -13,7 +13,6 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -40,6 +39,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -48,6 +48,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -96,6 +98,7 @@ public class BEditorView extends BorderPane {
 	private final ObjectProperty<Path> path;
 	private final StringProperty lastSavedText;
 	private final BooleanProperty saved;
+	private final ObservableList<ErrorItem> errors;
 	
 	private Thread watchThread;
 	private WatchKey key;
@@ -110,6 +113,7 @@ public class BEditorView extends BorderPane {
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
+		this.errors = FXCollections.observableArrayList();
 		this.watchThread = null;
 		this.key = null;
 		stageManager.loadFXML(this, "beditorView.fxml");
@@ -117,11 +121,15 @@ public class BEditorView extends BorderPane {
 
 	@FXML
 	private void initialize() {
-		// We can't use Bindings.equal here, because beditor.textProperty() is not an ObservableObjectValue.
-		saved.bind(Bindings.createBooleanBinding(
-			() -> Objects.equals(lastSavedText.get(), beditor.getText()),
-			lastSavedText, beditor.textProperty()
-		).or(machineChoice.getSelectionModel().selectedItemProperty().isNull()));
+		// The saved property is updated manually using listeners instead of using bindings,
+		// because RichTextFX invalidates its observable values too often.
+		// For example, the text property is invalidated even if only the formatting changed and not the text itself,
+		// which leads to infinite recursion if the saved property triggers a change in formatting.
+		lastSavedText.addListener(o -> this.updateSaved());
+		beditor.textProperty().addListener(o -> this.updateSaved());
+		path.addListener(o -> this.updateSaved());
+		saved.addListener(o -> this.updateErrors());
+		errors.addListener((InvalidationListener)o -> this.updateErrors());
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
 			if(to == null) {
 				return;
@@ -172,6 +180,22 @@ public class BEditorView extends BorderPane {
 		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
 		
 		helpButton.setHelpContent("mainView.editor", null);
+	}
+	
+	private void updateSaved() {
+		this.saved.set(this.getPath() == null || Objects.equals(this.lastSavedText.get(), this.beditor.getText()));
+	}
+	
+	private void updateErrors() {
+		if (this.savedProperty().get()) {
+			this.beditor.getErrors().setAll(this.getErrors().stream()
+				.filter(error -> error.getLocations().stream()
+					.map(ErrorItem.Location::getFilename)
+					.anyMatch(this::isCurrentEditorFile))
+				.collect(Collectors.toList()));
+		} else {
+			this.beditor.getErrors().clear();
+		}
 	}
 	
 	private void switchMachine(final Path machinePath) {
@@ -341,11 +365,7 @@ public class BEditorView extends BorderPane {
 		}
 	}
 
-	public void highlightErrors(final Collection<ErrorItem> errors) {
-		beditor.getErrors().setAll(errors.stream()
-			.filter(error -> error.getLocations().stream()
-				.map(ErrorItem.Location::getFilename)
-				.anyMatch(this::isCurrentEditorFile))
-			.collect(Collectors.toList()));
+	public ObservableList<ErrorItem> getErrors() {
+		return this.errors;
 	}
 }

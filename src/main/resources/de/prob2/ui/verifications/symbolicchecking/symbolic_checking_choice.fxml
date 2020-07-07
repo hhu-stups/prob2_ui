@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
+<?import de.prob2.ui.symbolic.SymbolicExecutionItem?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaInput?>
-<?import de.prob2.ui.symbolic.SymbolicExecutionItem?>
 <?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.Scene?>
-<?import javafx.geometry.Insets?>
-
 <fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolicchecking.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -32,6 +30,7 @@
 									<SymbolicExecutionItem executionType="CHECK_REFINEMENT" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="CHECK_STATIC_ASSERTIONS" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="CHECK_DYNAMIC_ASSERTIONS" guiType="NONE"/>
+									<SymbolicExecutionItem executionType="CHECK_WELL_DEFINEDNESS" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="IC3" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="KINDUCTION" guiType="NONE"/>

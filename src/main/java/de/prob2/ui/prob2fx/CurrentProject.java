@@ -11,6 +11,7 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationView;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
+import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -150,6 +151,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void startAnimation(Machine m, Preference p) {
+		injector.getInstance(BEditorView.class).getErrors().clear();
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);

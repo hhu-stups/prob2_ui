@@ -129,11 +129,7 @@ public class BEditor extends CodeArea {
 						LOGGER.info("Highlighting failed", t.getFailure());
 						return Optional.empty();
 					}
-				}).subscribe(highlighting -> {
-					// Remove error highlighting if editor text changes
-					this.getErrors().clear();
-					this.applyHighlighting(highlighting);
-				});
+				}).subscribe(this::applyHighlighting);
 		this.getErrors().addListener((ListChangeListener<ErrorItem>) change ->
 				this.applyHighlighting(computeHighlighting(this.getText(), currentProject.getCurrentMachine()))
 		);
@@ -190,8 +186,8 @@ public class BEditor extends CodeArea {
 		StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
 		for (final ErrorItem error : this.getErrors()) {
 			for (final ErrorItem.Location location : error.getLocations()) {
-				final int startIndex = this.errorLocationAbsoluteStart(location);
-				final int endIndex = this.errorLocationAbsoluteEnd(location);
+				final int startIndex = Math.min(this.errorLocationAbsoluteStart(location), this.getLength());
+				final int endIndex = Math.min(this.errorLocationAbsoluteEnd(location), this.getLength());
 				highlightingWithErrors = highlightingWithErrors.overlay(
 						new StyleSpansBuilder<Collection<String>>()
 								.add(Collections.emptyList(), startIndex)

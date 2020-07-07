@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.CheckWellDefinednessCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
@@ -79,6 +80,12 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
+
+	public void handleWellDefinedness(SymbolicCheckingFormulaItem item, boolean checkAll) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		CheckWellDefinednessCommand cmd = new CheckWellDefinednessCommand();
+		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
+	}
 	
 	public void handleSymbolic(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand.Algorithm algorithm, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
@@ -116,6 +123,9 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 				break;
 			case CHECK_DYNAMIC_ASSERTIONS:
 				handleDynamicAssertions(item, checkAll);
+				break;
+			case CHECK_WELL_DEFINEDNESS:
+				handleWellDefinedness(item, checkAll);
 				break;
 			case DEADLOCK:
 				handleDeadlock(item.getCode(), checkAll);

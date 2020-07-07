@@ -135,6 +135,6 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	@Override
 	public int hashCode() {
-		 return Objects.hash(name, code, type);
+		return Objects.hash(this.getName(), this.getCode(), type);
 	}
 }

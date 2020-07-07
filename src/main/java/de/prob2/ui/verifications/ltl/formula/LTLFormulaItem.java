@@ -54,12 +54,13 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 			return false;
 		}
 		LTLFormulaItem otherFormulaItem = (LTLFormulaItem) other;
-		return this.code.equals(otherFormulaItem.getCode()) && this.description.equals(otherFormulaItem.getDescription());
+		return this.getCode().equals(otherFormulaItem.getCode())
+			&& this.getDescription().equals(otherFormulaItem.getDescription());
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(code, description);
+		return Objects.hash(this.getCode(), this.getDescription());
 	}
 
 }

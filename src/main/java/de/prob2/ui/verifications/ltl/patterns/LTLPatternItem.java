@@ -35,7 +35,7 @@ public class LTLPatternItem extends AbstractCheckableItem implements ILTLItem {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name);
+		return Objects.hash(this.getName());
 	}
 		
 }

@@ -1,5 +1,8 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
@@ -103,7 +106,9 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 			this.close();
 			return;
 		}
-		taErrors.setText(resultItem.getMessage());
+		taErrors.setText(Arrays.stream(resultItem.getMessageParams())
+			.map(Object::toString)
+			.collect(Collectors.joining("\n")));
 		markText(resultItem);
 	}
 	
