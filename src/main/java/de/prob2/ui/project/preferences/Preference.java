@@ -1,21 +1,19 @@
 package de.prob2.ui.project.preferences;
 
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.Map;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-
-import de.prob2.ui.json.JsonManager;
-
+import de.prob.json.JsonManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.Map;
 
 public class Preference {
 	public static final Preference DEFAULT = new Preference("default", Collections.emptyMap());

@@ -1,5 +1,25 @@
 package de.prob2.ui.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import de.prob.Main;
+import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
+import de.prob.json.ObjectWithMetadata;
+import de.prob2.ui.MainController;
+import de.prob2.ui.internal.JSONInformationProvider;
+import de.prob2.ui.internal.PerspectiveKind;
+import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
@@ -11,27 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-
-import de.prob.Main;
-import de.prob2.ui.MainController;
-import de.prob2.ui.internal.PerspectiveKind;
-import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.json.JsonManager;
-import de.prob2.ui.json.JsonMetadata;
-import de.prob2.ui.json.JsonMetadataBuilder;
-import de.prob2.ui.json.ObjectWithMetadata;
-import de.prob2.ui.prob2fx.CurrentProject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Singleton
 public final class Config {
 	// This Gson instance is for loadBasicConfig only. Everywhere else, JsonManager should be used.
@@ -40,6 +39,7 @@ public final class Config {
 
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
+	private final Injector injector;
 	private final JsonManager<ConfigData> jsonManager;
 	private final RuntimeOptions runtimeOptions;
 	
@@ -47,7 +47,8 @@ public final class Config {
 	private final List<ConfigListener> listeners;
 
 	@Inject
-	private Config(final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
+	private Config(final Injector injector, final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
+		this.injector = injector;
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(ConfigData.class, "Config", 1) {
 			private static final String GUI_STATE_FIELD = "guiState";
@@ -55,10 +56,10 @@ public final class Config {
 			private static final String PERSPECTIVE_FIELD = "perspective";
 			
 			@Override
-			public JsonMetadataBuilder getDefaultMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider) {
+			public JsonMetadataBuilder getDefaultMetadataBuilder(String proB2KernelVersion, String proBCLIVersion, String modelName) {
 				// The metadata includes all of the usual information, except for the CLI version.
 				// This is because the config is saved while the UI is shut down, and at that point it may no longer be possible to obtain the CLI version, because the shared empty state space has already been shut down.
-				return new JsonMetadataBuilder(versionInfoProvider, currentProjectProvider, this.fileType, this.currentFormatVersion)
+				return new JsonMetadataBuilder(this.fileType, this.currentFormatVersion, proB2KernelVersion, proBCLIVersion, modelName)
 					.withSavedNow()
 					.withCurrentProB2KernelVersion()
 					.withUserCreator();
@@ -97,7 +98,7 @@ public final class Config {
 		}
 
 		this.load();
-		
+		;
 		stopActions.add(this::save);
 	}
 
@@ -166,6 +167,8 @@ public final class Config {
 	}
 
 	public void save() {
+		VersionInfo versionInfo = injector.getInstance(VersionInfo.class);
+		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		if (!this.runtimeOptions.isSaveConfig()) {
 			logger.info("Config saving disabled via runtime options, ignoring config save request");
 			return;
@@ -178,7 +181,7 @@ public final class Config {
 		}
 
 		try {
-			this.jsonManager.writeToFile(LOCATION, configData);
+			this.jsonManager.writeToFile(LOCATION, configData, JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName(currentProject));
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {

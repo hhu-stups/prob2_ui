@@ -1,19 +1,17 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import de.prob2.ui.json.JsonManager;
-
+import de.prob.json.JsonManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
+
+import java.lang.reflect.Type;
 
 public class MagicNodegroup extends MagicComponent {
 	public static final JsonDeserializer<MagicNodegroup> JSON_DESERIALIZER = MagicNodegroup::new;

@@ -1,17 +1,16 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.lang.reflect.Type;
-import java.util.List;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-
-import de.prob2.ui.json.JsonManager;
+import de.prob.json.JsonManager;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 public class LTLData {
 	public static final JsonDeserializer<LTLData> JSON_DESERIALIZER = LTLData::new;

@@ -1,39 +1,39 @@
 package de.prob2.ui.visualisation.magiclayout;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.inject.Inject;
+import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
+import de.prob.json.ObjectWithMetadata;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.JSONInformationProvider;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import javafx.stage.FileChooser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
-
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.inject.Inject;
-
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.json.JsonManager;
-import de.prob2.ui.json.JsonMetadata;
-import de.prob2.ui.json.ObjectWithMetadata;
-import de.prob2.ui.prob2fx.CurrentProject;
-
-import javafx.stage.FileChooser;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MagicLayoutSettingsManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MagicLayoutSettingsManager.class);
 	private static final String MAGIC_FILE_EXTENSION = "prob2magic";
 
 	private final JsonManager<MagicLayoutSettings> jsonManager;
+	private final VersionInfo versionInfo;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	public MagicLayoutSettingsManager(JsonManager<MagicLayoutSettings> jsonManager, CurrentProject currentProject, StageManager stageManager,
-			FileChooserManager fileChooserManager, ResourceBundle bundle) {
+	public MagicLayoutSettingsManager(JsonManager<MagicLayoutSettings> jsonManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager,
+									  FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new JsonManager.Context<MagicLayoutSettings>(MagicLayoutSettings.class, "Magic Layout settings", 1) {
 			@Override
@@ -49,6 +49,7 @@ public class MagicLayoutSettingsManager {
 				return new ObjectWithMetadata<>(oldObject, oldMetadata);
 			}
 		});
+		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -72,7 +73,7 @@ public class MagicLayoutSettingsManager {
 
 		if (path != null) {
 			try {
-				this.jsonManager.writeToFile(path, layoutSettings, this.jsonManager.defaultMetadataBuilder()
+				this.jsonManager.writeToFile(path, layoutSettings, this.jsonManager.defaultMetadataBuilder(JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName(currentProject))
 					.withModelName(layoutSettings.getMachineName())
 					.build());
 			} catch (FileNotFoundException exc) {

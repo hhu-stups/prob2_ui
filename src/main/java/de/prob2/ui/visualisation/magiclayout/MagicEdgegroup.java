@@ -1,16 +1,14 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import de.prob2.ui.json.JsonManager;
-
+import de.prob.json.JsonManager;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+
+import java.lang.reflect.Type;
 
 public class MagicEdgegroup extends MagicComponent {
 	public static final JsonDeserializer<MagicEdgegroup> JSON_DESERIALIZER = MagicEdgegroup::new;

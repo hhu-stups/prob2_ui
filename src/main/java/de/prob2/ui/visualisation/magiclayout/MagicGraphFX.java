@@ -1,23 +1,15 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.inject.Inject;
-
 import de.hhu.stups.prob.translator.BSet;
 import de.hhu.stups.prob.translator.BTuple;
 import de.hhu.stups.prob.translator.BValue;
+import de.hhu.stups.prob.translator.Translator;
 import de.hhu.stups.prob.translator.exceptions.TranslationException;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
-import de.hhu.stups.prob.translator.Translator;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.graph.Edge;
 import de.prob2.ui.visualisation.magiclayout.graph.Graph;
@@ -27,6 +19,13 @@ import de.prob2.ui.visualisation.magiclayout.graph.layout.Layout;
 import de.prob2.ui.visualisation.magiclayout.graph.layout.RandomLayout;
 import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 import javafx.scene.Node;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class MagicGraphFX implements MagicGraphI {
 
@@ -218,6 +217,8 @@ public class MagicGraphFX implements MagicGraphI {
 
 		evalMap.forEach((eval, result) -> {
 			try {
+				System.out.println(result.toString());
+				System.out.println("------------");
 				if (!result.toString().equals("NOT-INITIALISED: ")) {
 					translatedMap.put(eval.toString(), Translator.translate(result.toString()));
 				}

@@ -1,21 +1,20 @@
 package de.prob2.ui.project;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import de.prob.json.JsonManager;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.Preference;
+
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
-import de.prob2.ui.json.JsonManager;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.Preference;
 
 public class Project {
 	public static final JsonDeserializer<Project> JSON_DESERIALIZER = Project::new;

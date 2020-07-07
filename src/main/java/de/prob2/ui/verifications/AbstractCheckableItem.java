@@ -1,17 +1,15 @@
 package de.prob2.ui.verifications;
 
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import de.prob2.ui.json.JsonManager;
-
+import de.prob.json.JsonManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
+import java.lang.reflect.Type;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected transient Checked checked;

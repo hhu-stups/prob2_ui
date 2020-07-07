@@ -1,5 +1,30 @@
 package de.prob2.ui.animation.tracereplay;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.inject.Inject;
+import de.prob.check.tracereplay.ITraceReplayFileHandler;
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.TraceLoaderSaver;
+import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
+import de.prob.json.ObjectWithMetadata;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.JSONInformationProvider;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,65 +37,23 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-
-import de.prob.check.tracereplay.PersistentTrace;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.json.JsonManager;
-import de.prob2.ui.json.JsonMetadata;
-import de.prob2.ui.json.JsonMetadataBuilder;
-import de.prob2.ui.json.ObjectWithMetadata;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
-
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class TraceFileHandler {
+public class TraceFileHandler implements ITraceReplayFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
-	private final JsonManager<PersistentTrace> jsonManager;
+	private final VersionInfo versionInfo;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
+	private final TraceLoaderSaver traceLoaderSaver;
 
 	@Inject
-	public TraceFileHandler(JsonManager<PersistentTrace> jsonManager, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
-		this.jsonManager = jsonManager;
-		jsonManager.initContext(new JsonManager.Context<PersistentTrace>(PersistentTrace.class, "Trace", 1) {
-			@Override
-			public JsonMetadataBuilder getDefaultMetadataBuilder(final Provider<VersionInfo> versionInfoProvider, final Provider<CurrentProject> currentProjectProvider) {
-				return super.getDefaultMetadataBuilder(versionInfoProvider, currentProjectProvider)
-					.withCurrentModelName();
-			}
-			
-			@Override
-			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
-				if (oldMetadata.getFileType() == null) {
-					assert oldMetadata.getFormatVersion() == 0;
-					if (!oldObject.has("transitionList")) {
-						throw new JsonParseException("Not a valid trace file - missing required field transitionList");
-					}
-				}
-				return new ObjectWithMetadata<>(oldObject, oldMetadata);
-			}
-		});
+	public TraceFileHandler(TraceLoaderSaver traceLoaderSaver, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+		this.traceLoaderSaver = traceLoaderSaver;
+		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -78,38 +61,37 @@ public class TraceFileHandler {
 	}
 
 	public PersistentTrace load(Path path) {
-		try {
-			return this.jsonManager.readFromFile(currentProject.getLocation().resolve(path)).getObject();
-		} catch (JsonParseException | IOException e) {
-			LOGGER.warn("Failed to load trace file", e);
-			final String headerBundleKey;
-			final String contentBundleKey;
-			if (e instanceof NoSuchFileException || e instanceof FileNotFoundException) {
-				headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
-				contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
-			} else if (e instanceof JsonParseException) {
-				headerBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header";
-				contentBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content";
-			} else {
-				headerBundleKey = "animation.tracereplay.alerts.traceReplayError.header";
-				contentBundleKey = "animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content";
-			}
-			stageManager.makeAlert(
+		return traceLoaderSaver.load(currentProject.getLocation().resolve(path), this);
+	}
+
+	public void showLoadError(Path path, Exception e) {
+		LOGGER.warn("Failed to load trace file", e);
+		final String headerBundleKey;
+		final String contentBundleKey;
+		if (e instanceof NoSuchFileException || e instanceof FileNotFoundException) {
+			headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
+			contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
+		} else if (e instanceof JsonParseException) {
+			headerBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header";
+			contentBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content";
+		} else {
+			headerBundleKey = "animation.tracereplay.alerts.traceReplayError.header";
+			contentBundleKey = "animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content";
+		}
+		stageManager.makeAlert(
 				Alert.AlertType.ERROR,
 				Arrays.asList(ButtonType.YES, ButtonType.NO),
 				headerBundleKey,
 				contentBundleKey,
 				path
-			).showAndWait().ifPresent(buttonType -> {
-				if (buttonType.equals(ButtonType.YES)) {
-					Machine currentMachine = currentProject.getCurrentMachine();
-					if (currentMachine.getTraceFiles().contains(path)) {
-						currentMachine.removeTraceFile(path);
-					}
+		).showAndWait().ifPresent(buttonType -> {
+			if (buttonType.equals(ButtonType.YES)) {
+				Machine currentMachine = currentProject.getCurrentMachine();
+				if (currentMachine.getTraceFiles().contains(path)) {
+					currentMachine.removeTraceFile(path);
 				}
-			});
-			return null;
-		}
+			}
+		});
 	}
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
@@ -141,7 +123,8 @@ public class TraceFileHandler {
 			for(int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
-				this.jsonManager.writeToFile(traceFilePath, traces.get(i), this.jsonManager.defaultMetadataBuilder()
+				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
+				jsonManager.writeToFile(traceFilePath, traces.get(i), jsonManager.defaultMetadataBuilder(JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName(currentProject))
 					.withCreator(createdBy)
 					.build());
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
@@ -171,10 +154,10 @@ public class TraceFileHandler {
 	}
 
 	public void save(PersistentTrace trace, Path location) {
-		try {
-			this.jsonManager.writeToFile(location, trace);
-		} catch (IOException e) {
-			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
-		}
+		traceLoaderSaver.save(trace, location, this);
+	}
+
+	public void showSaveError(IOException e) {
+		stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
 	}
 }

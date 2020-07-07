@@ -1,15 +1,14 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import java.lang.reflect.Type;
-import java.util.List;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import de.prob.json.JsonManager;
 
-import de.prob2.ui.json.JsonManager;
+import java.lang.reflect.Type;
+import java.util.List;
 
 public class MagicLayoutSettings {
 	public static final JsonDeserializer<MagicLayoutSettings> JSON_DESERIALIZER = MagicLayoutSettings::new;

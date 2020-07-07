@@ -1,25 +1,23 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-
+import de.prob.json.JsonManager;
 import de.prob.statespace.Trace;
-import de.prob2.ui.json.JsonManager;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class TestCaseGenerationItem extends AbstractCheckableItem {
 	public static final String LEVEL = "level";

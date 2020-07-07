@@ -1,20 +1,14 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Objects;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-
 import de.prob.check.ModelCheckingOptions;
-import de.prob2.ui.json.JsonManager;
+import de.prob.json.JsonManager;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -22,6 +16,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Objects;
 
 public class ModelCheckingItem implements IExecutableItem {
 	public static final JsonDeserializer<ModelCheckingItem> JSON_DESERIALIZER = ModelCheckingItem::new;

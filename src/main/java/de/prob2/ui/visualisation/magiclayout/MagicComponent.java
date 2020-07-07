@@ -1,19 +1,17 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import java.lang.reflect.Type;
-import java.util.Objects;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import de.prob2.ui.json.JsonManager;
-
+import de.prob.json.JsonManager;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
+
+import java.lang.reflect.Type;
+import java.util.Objects;
 
 public abstract class MagicComponent {
 	

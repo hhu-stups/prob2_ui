@@ -1,14 +1,13 @@
 package de.prob2.ui.symbolic;
 
 
-import java.lang.reflect.Type;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import de.prob2.ui.json.JsonManager;
+import de.prob.json.JsonManager;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+
+import java.lang.reflect.Type;
 
 public abstract class SymbolicItem extends AbstractCheckableItem {
 	

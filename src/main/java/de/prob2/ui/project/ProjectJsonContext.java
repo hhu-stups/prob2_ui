@@ -1,19 +1,19 @@
 package de.prob2.ui.project;
 
-import java.util.Iterator;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-
+import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
+import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
-import de.prob2.ui.json.JsonManager;
-import de.prob2.ui.json.JsonMetadata;
-import de.prob2.ui.json.ObjectWithMetadata;
+import de.prob2.ui.internal.JSONInformationProvider;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
+
+import java.util.Iterator;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 	ProjectJsonContext() {
