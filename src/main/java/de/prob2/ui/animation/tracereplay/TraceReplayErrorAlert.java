@@ -10,6 +10,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 
@@ -24,6 +26,7 @@ public final class TraceReplayErrorAlert extends Alert {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final String text;
+	private double taHeight;
 	
 	public TraceReplayErrorAlert(final Injector injector, final String contentBundleKey, final Object... contentParams) {
 		super(AlertType.ERROR);
@@ -41,7 +44,8 @@ public final class TraceReplayErrorAlert extends Alert {
 		this.setAlertType(AlertType.ERROR);
 		stageManager.register(this);
 		taError.setText(text);
-		error.wrappingWidthProperty().bind(this.getDialogPane().widthProperty());
+		double padding = this.getDialogPane().getPadding().getRight() + this.getDialogPane().getPadding().getLeft();
+		error.wrappingWidthProperty().bind(this.getDialogPane().widthProperty().subtract(padding));
 	}
 
 	void setErrorMessage(boolean triggeredByErrorItem, boolean tracesAreEqual, int traceSize, int persistentTraceSize, int lineNumberOfTraceFile) {
