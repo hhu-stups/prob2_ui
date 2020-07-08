@@ -44,7 +44,7 @@ public final class TraceReplayErrorAlert extends Alert {
 		error.wrappingWidthProperty().bind(this.getDialogPane().widthProperty());
 	}
 
-	void setErrorMessage(boolean triggeredByErrorItem, boolean tracesAreEqual, int traceSize, int persistentTraceSize) {
+	void setErrorMessage(boolean triggeredByErrorItem, boolean tracesAreEqual, int traceSize, int persistentTraceSize, int lineNumberOfTraceFile) {
 		if (triggeredByErrorItem) {
 			error.setText(text);
 			this.getDialogPane().setExpandableContent(null);
@@ -53,7 +53,7 @@ public final class TraceReplayErrorAlert extends Alert {
 			if (tracesAreEqual) {
 				error.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreEqual"));
 			} else {
-				error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreNotEqual"), traceSize, persistentTraceSize));
+				error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreNotEqual"), traceSize, persistentTraceSize, lineNumberOfTraceFile));
 			}
 		}
 	}

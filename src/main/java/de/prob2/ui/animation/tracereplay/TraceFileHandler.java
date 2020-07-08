@@ -1,15 +1,11 @@
 package de.prob2.ui.animation.tracereplay;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 import de.prob.check.tracereplay.ITraceReplayFileHandler;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
 import de.prob.json.JsonManager;
-import de.prob.json.JsonMetadata;
-import de.prob.json.JsonMetadataBuilder;
-import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
