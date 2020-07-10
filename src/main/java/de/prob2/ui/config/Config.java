@@ -16,7 +16,6 @@ import de.prob2.ui.internal.JSONInformationProvider;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.prob2fx.CurrentProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,7 +167,6 @@ public final class Config {
 
 	public void save() {
 		VersionInfo versionInfo = injector.getInstance(VersionInfo.class);
-		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		if (!this.runtimeOptions.isSaveConfig()) {
 			logger.info("Config saving disabled via runtime options, ignoring config save request");
 			return;
@@ -181,7 +179,7 @@ public final class Config {
 		}
 
 		try {
-			this.jsonManager.writeToFile(LOCATION, configData, JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName(currentProject));
+			this.jsonManager.writeToFile(LOCATION, configData, JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {

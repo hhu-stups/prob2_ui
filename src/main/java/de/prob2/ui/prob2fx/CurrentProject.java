@@ -1,20 +1,15 @@
 package de.prob2.ui.prob2fx;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationView;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
+import de.prob2.ui.internal.JSONInformationProvider;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -25,7 +20,6 @@ import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.verifications.ltl.LTLView;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -41,6 +35,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -80,7 +79,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.location = new SimpleObjectProperty<>(this, "location", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
 		this.newProject = new SimpleBooleanProperty(this, "newProject", false);
-
 
 		this.addListener((observable, from, to) -> {
 			if (to == null) {
@@ -138,6 +136,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private void updateCurrentMachine(final Machine m, final Preference p) {
 		this.currentMachine.set(m);
 		this.currentPreference.set(p);
+		JSONInformationProvider.loadModelName(getCurrentMachine());
 	}
 
 	private void clearProperties() {

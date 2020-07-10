@@ -1,8 +1,10 @@
 package de.prob2.ui.internal;
 
-import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
 
 public class JSONInformationProvider {
+
+    private static String modelName;
 
     public static String getKernelVersion(VersionInfo versionInfo) {
         return versionInfo.getKernelVersion();
@@ -12,10 +14,15 @@ public class JSONInformationProvider {
         return versionInfo.getFormattedCliVersion();
     }
 
-    public static String getModelName(CurrentProject currentProject) {
-        if (currentProject.getCurrentMachine() == null) {
-            throw new IllegalStateException("withCurrentModelName() can only be called while a machine is loaded");
+    public static void loadModelName(Machine machine) {
+        if(machine == null) {
+            modelName = null;
+            return;
         }
-        return currentProject.getCurrentMachine().getName();
+        modelName = machine.getName();
+    }
+
+    public static String getModelName() {
+        return modelName;
     }
 }

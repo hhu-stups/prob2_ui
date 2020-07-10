@@ -73,7 +73,7 @@ public class MagicLayoutSettingsManager {
 
 		if (path != null) {
 			try {
-				this.jsonManager.writeToFile(path, layoutSettings, this.jsonManager.defaultMetadataBuilder(JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName(currentProject))
+				this.jsonManager.writeToFile(path, layoutSettings, this.jsonManager.defaultMetadataBuilder(JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName())
 					.withModelName(layoutSettings.getMachineName())
 					.build());
 			} catch (FileNotFoundException exc) {

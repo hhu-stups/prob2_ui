@@ -407,7 +407,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 				.filter(LTLPatternItem::selected)
 				.collect(Collectors.toList());
 			try {
-				this.jsonManager.writeToFile(path, new LTLData(formulas, patterns), JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName(currentProject));
+				this.jsonManager.writeToFile(path, new LTLData(formulas, patterns), JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
 			} catch (IOException e) {
 				stageManager.makeExceptionAlert(e, "verifications.ltl.ltlView.saveLTL.error").showAndWait();
 			}

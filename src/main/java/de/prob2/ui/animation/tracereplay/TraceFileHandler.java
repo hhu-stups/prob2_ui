@@ -1,15 +1,11 @@
 package de.prob2.ui.animation.tracereplay;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 import de.prob.check.tracereplay.ITraceReplayFileHandler;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
 import de.prob.json.JsonManager;
-import de.prob.json.JsonMetadata;
-import de.prob.json.JsonMetadataBuilder;
-import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
@@ -124,7 +120,7 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
 				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
-				jsonManager.writeToFile(traceFilePath, traces.get(i), jsonManager.defaultMetadataBuilder(JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName(currentProject))
+				jsonManager.writeToFile(traceFilePath, traces.get(i), jsonManager.defaultMetadataBuilder(JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName())
 					.withCreator(createdBy)
 					.build());
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));

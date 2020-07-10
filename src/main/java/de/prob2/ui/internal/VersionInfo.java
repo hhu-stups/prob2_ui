@@ -1,22 +1,20 @@
 package de.prob2.ui.internal;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.be4.classicalb.core.parser.BParser;
 import de.prob.Main;
 import de.prob.animator.command.GetVersionCommand;
 import de.prob.cli.CliVersionNumber;
 import de.prob2.ui.project.MachineLoader;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 @Singleton
 public final class VersionInfo {
@@ -63,7 +61,7 @@ public final class VersionInfo {
 		return Main.getGitSha();
 	}
 	
-	private GetVersionCommand loadCliVersionInfo() {
+	public GetVersionCommand loadCliVersionInfo() {
 		if (this.cliVersionCommand == null) {
 			synchronized (this.lock) {
 				// Computed lazily to avoid excessive communication with the CLI.

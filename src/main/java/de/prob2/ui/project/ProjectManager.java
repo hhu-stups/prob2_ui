@@ -141,7 +141,7 @@ public class ProjectManager {
 
 	private File saveProject(Project project, File location) {
 		try {
-			this.jsonManager.writeToFile(location.toPath(), project, JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName(currentProject));
+			this.jsonManager.writeToFile(location.toPath(), project, JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
 			return null;
