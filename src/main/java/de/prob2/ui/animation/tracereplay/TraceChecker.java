@@ -160,7 +160,7 @@ public class TraceChecker implements ITraceChecker {
 			Platform.runLater(() -> {
 				Alert alert = new Alert(Alert.AlertType.WARNING);
 				alert.initOwner(stageManager.getCurrent());
-				alert.setContentText(String.format(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"), lineNumber(replayTrace), replayTrace.getErrorMessageParams()[0].toString(), replayTrace.getErrorMessageParams()[1].toString()));
+				alert.setContentText(String.format(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"), lineNumber(replayTrace, copyTrace.size()), replayTrace.getErrorMessageParams()[0].toString(), replayTrace.getErrorMessageParams()[1].toString()));
 				alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 				alert.show();
 			});
@@ -171,7 +171,7 @@ public class TraceChecker implements ITraceChecker {
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams());
 				alert.initOwner(stageManager.getCurrent());
 				boolean isEqual = currentTrace.get().getTransitionList().equals(copyTrace.getTransitionList());
-				alert.setErrorMessage(false, isEqual, copyTrace.getTransitionList().size(), persistentTrace.getTransitionList().size());
+				alert.setErrorMessage(false, isEqual, copyTrace.getTransitionList().size(), persistentTrace.getTransitionList().size(), lineNumber(replayTrace, copyTrace.size()));
 				setAlertButtons(isEqual, copyTrace, persistentTrace, alert);
 			});
 		}
@@ -215,16 +215,22 @@ public class TraceChecker implements ITraceChecker {
 		isNewTrace = true;
 	}
 
-	private int lineNumber(ReplayTrace replayTrace) {
-		int lineNumber = 1;
+	private int lineNumber(ReplayTrace replayTrace, int copyTraceLength) {
+		PersistentTransition failedTransition = replayTrace.getPersistentTrace().getTransitionList().get(copyTraceLength);
+		int lineNumber = 0;
+		int operationNumber = 0;
 		try {
 			Scanner scanner = new Scanner(injector.getInstance(CurrentProject.class).getLocation().resolve(replayTrace.getLocation()));
 			while (scanner.hasNext()) {
 				// Error messages should have already been set at this point so there is no possibility of a NPE
-				if(scanner.nextLine().contains(replayTrace.getErrorMessageParams()[0].toString())) {
-					break;
-				}
 				lineNumber++;
+				String nextLine = scanner.nextLine();
+				if (nextLine.contains("name")) {
+					operationNumber++;
+					if (nextLine.contains(failedTransition.getOperationName()) && operationNumber > copyTraceLength) {
+						break;
+					}
+				}
 			}
 		} catch (IOException e) {
 			// Not possible at this position since a persistent trace already exists
