@@ -186,7 +186,7 @@ public class ProB2 extends Application {
 		pluginManager.start();
 
 		injector.getInstance(VersionInfo.class).loadCliVersionInfo();
-		
+
 		final Thread emptyStateSpaceLoader = new Thread(() -> {
 			injector.getInstance(MachineLoader.class).getEmptyStateSpace();
 
