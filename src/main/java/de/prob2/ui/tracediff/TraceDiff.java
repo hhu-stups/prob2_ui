@@ -11,10 +11,8 @@ import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
-import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -23,7 +21,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
@@ -62,7 +59,7 @@ public class TraceDiff extends VBox {
 
 	private ResourceBundle bundle;
 	private CurrentTrace currentTrace;
-	private Alert alert;
+	private TraceReplayErrorAlert alert;
 	private Injector injector;
 	private Map<CheckBox,ListView<String>> checkBoxListViewMap = new HashMap<>();
 
@@ -111,16 +108,17 @@ public class TraceDiff extends VBox {
 			ScrollBar related = getScrollBar(checkBoxListViewMap.get(checkBox));
 			if (related != null) {
 				if (n) {
-					for (CheckBox cb : checkBoxListViewMap.keySet()) {
-						ScrollBar scrollBar = getScrollBar(checkBoxListViewMap.get(cb));
+					for (Map.Entry<CheckBox, ListView<String>> entry : checkBoxListViewMap.entrySet()) {
+						CheckBox cb = entry.getKey();
+						ScrollBar scrollBar = getScrollBar(entry.getValue());
 						if (cb != checkBox && scrollBar != null && cb.isSelected()) {
 							related.valueProperty().bindBidirectional(scrollBar.valueProperty());
 						}
 					}
 				} else {
-					for (CheckBox cb : checkBoxListViewMap.keySet()) {
-						ScrollBar scrollBar = getScrollBar(checkBoxListViewMap.get(cb));
-						if (cb != checkBox && scrollBar != null) {
+					for (Map.Entry<CheckBox, ListView<String>> entry : checkBoxListViewMap.entrySet()) {
+						ScrollBar scrollBar = getScrollBar(entry.getValue());
+						if (entry.getKey() != checkBox && scrollBar != null) {
 							related.valueProperty().unbindBidirectional(scrollBar.valueProperty());
 						}
 					}
@@ -156,7 +154,7 @@ public class TraceDiff extends VBox {
 		}
 	}
 
-	void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
+	final void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
 		List<Transition> rTransitions = replayedOrLost.getTransitionList();
 		List<PersistentTransition> pTransitions;
 		// if triggered by HistoryView: No persistent trace available
@@ -177,15 +175,7 @@ public class TraceDiff extends VBox {
 			currentTrace.set(replayedOrLost);
 			this.getScene().getWindow().hide();
 		});
-		showAlert.setOnAction(e -> {
-			if (alert instanceof TraceReplayErrorAlert) {
-				TraceChecker traceChecker = injector.getInstance(TraceChecker.class);
-				traceChecker.handleAlert(alert, replayedOrLost, persistent, alert.getButtonTypes().get(0));
-			} else {
-				HistoryView historyView = injector.getInstance(HistoryView.class);
-				historyView.handleAlert(alert, replayedOrLost, alert.getButtonTypes().get(0));
-			}
-		});
+		showAlert.setOnAction(e -> alert.handleAlert(replayedOrLost, persistent));
 		savePersistent.setOnAction(e -> injector.getInstance(TraceFileHandler.class).save(persistent, injector.getInstance(CurrentProject.class).getCurrentMachine()));
 		setCurrent.setOnAction(e -> {
 			currentTrace.set(current);
@@ -283,18 +273,9 @@ public class TraceDiff extends VBox {
 		return stringBuilder.toString();
 	}
 
-	void setAlert(Alert alert) {
+	void setAlert(TraceReplayErrorAlert alert) {
 		this.alert = alert;
-		// the alert is either a TraceReplayErrorAlert or triggered by trying to save a trace
-		if (alert instanceof TraceReplayErrorAlert) {
-			replayed.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
-			if (!listBox.getChildren().contains(persistentBox)) {
-				listBox.getChildren().add(persistentBox);
-			}
-			if (!buttonBox.getChildren().contains(savePersistent)) {
-				buttonBox.getChildren().add(savePersistent);
-			}
-		} else {
+		if (alert.getTrigger().equals(TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW)) {
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
 			if (listBox.getChildren().contains(persistentBox)) {
 				persistent.setSelected(false);
@@ -302,6 +283,14 @@ public class TraceDiff extends VBox {
 			}
 			if (buttonBox.getChildren().contains(savePersistent)) {
 				buttonBox.getChildren().remove(savePersistent);
+			}
+		} else {
+			replayed.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
+			if (!listBox.getChildren().contains(persistentBox)) {
+				listBox.getChildren().add(persistentBox);
+			}
+			if (!buttonBox.getChildren().contains(savePersistent)) {
+				buttonBox.getChildren().add(savePersistent);
 			}
 		}
 	}

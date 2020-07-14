@@ -1,6 +1,7 @@
 package de.prob2.ui.history;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -10,6 +11,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.tracediff.TraceDiffStage;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -137,37 +139,11 @@ public final class HistoryView extends VBox {
 					new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1),
 					currentProject.getCurrentMachine());
 			} catch (Exception e) {
-				ResourceBundle bundle = injector.getInstance(ResourceBundle.class);
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.initOwner(injector.getInstance(StageManager.class).getCurrent());
-				ButtonType showDiff = new ButtonType(bundle.getString("history.buttons.saveTrace.error.diff"));
-
-				alert.getButtonTypes().removeAll(ButtonType.OK);
-				alert.getButtonTypes().addAll(showDiff,ButtonType.YES,ButtonType.NO);
-				alert.initStyle(injector.getInstance(StageManager.class).getCurrent().getStyle());
-
-				alert.setHeaderText(bundle.getString("history.buttons.saveTrace.error"));
-				Label message = new Label(bundle.getString("history.buttons.saveTrace.error.msg"));
-				message.setWrapText(true);
-				alert.getDialogPane().setContent(message);
-
-				handleAlert(alert, copyTrace, showDiff);
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "history.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW, Collections.EMPTY_LIST);
+				alert.setCopyTrace(copyTrace);
+				alert.setErrorMessage();
+				alert.handleAlert(copyTrace, null);
 			}
 		}
 	}
-
-	public void handleAlert(Alert alert, Trace copyTrace, ButtonType traceDiffButton) {
-		injector.getInstance(TraceDiffStage.class).close();
-		Optional<ButtonType> type = alert.showAndWait();
-		if (type.get() == ButtonType.YES) {
-			currentTrace.set(copyTrace);
-		} else if (type.get() == traceDiffButton) {
-			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
-			traceDiffStage.setAlert(alert);
-			traceDiffStage.setLists(copyTrace, null, currentTrace.get());
-			traceDiffStage.show();
-			alert.close();
-		}
-	}
-
 }

@@ -16,21 +16,18 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.tracediff.TraceDiffStage;
 import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
@@ -43,7 +40,7 @@ public class TraceChecker implements ITraceChecker {
 	private final StageManager stageManager;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
-	private boolean isNewTrace = false;
+	private boolean isNewTrace;
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
@@ -57,7 +54,7 @@ public class TraceChecker implements ITraceChecker {
 	}
 
 	void check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		this.replayTrace(replayTrace, setCurrentAnimation);
+		replayTrace(replayTrace, setCurrentAnimation);
 	}
 
 	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
@@ -160,7 +157,7 @@ public class TraceChecker implements ITraceChecker {
 			Platform.runLater(() -> {
 				Alert alert = new Alert(Alert.AlertType.WARNING);
 				alert.initOwner(stageManager.getCurrent());
-				alert.setContentText(String.format(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"), lineNumber(replayTrace, copyTrace.size()), replayTrace.getErrorMessageParams()[0].toString(), replayTrace.getErrorMessageParams()[1].toString()));
+				alert.setContentText(String.format(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"), lineNumber(replayTrace, copyTrace.size()), replayTrace.getErrorMessageParams()[0], replayTrace.getErrorMessageParams()[1]));
 				alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 				alert.show();
 			});
@@ -168,37 +165,18 @@ public class TraceChecker implements ITraceChecker {
 		} else {
 			PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 			Platform.runLater(() -> {
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), replayTrace.getErrorMessageParams());
-				alert.initOwner(stageManager.getCurrent());
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, replayTrace.getErrorMessageParams());
 				boolean isEqual = currentTrace.get().getTransitionList().equals(copyTrace.getTransitionList());
-				alert.setErrorMessage(false, isEqual, copyTrace.getTransitionList().size(), persistentTrace.getTransitionList().size(), lineNumber(replayTrace, copyTrace.size()));
-				setAlertButtons(isEqual, copyTrace, persistentTrace, alert);
+
+				alert.setTraceSize(copyTrace.getTransitionList().size());
+				alert.setPersistentTraceSize(persistentTrace.getTransitionList().size());
+				alert.setLineNumber(lineNumber(replayTrace, copyTrace.size()));
+				alert.setCopyTrace(copyTrace);
+				alert.setPersistentTrace(persistentTrace);
+				alert.setErrorMessage(isEqual);
+
+				alert.handleAlert(copyTrace, persistentTrace);
 			});
-		}
-	}
-
-	private void setAlertButtons(boolean isEqual, Trace copyTrace, PersistentTrace persistentTrace, Alert alert) {
-		if (isEqual) {
-			alert.getButtonTypes().addAll(ButtonType.OK);
-			alert.showAndWait();
-		} else {
-			ButtonType traceDiffButton = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
-			alert.getButtonTypes().addAll(traceDiffButton, ButtonType.YES, ButtonType.NO);
-			handleAlert(alert, copyTrace, persistentTrace, traceDiffButton);
-		}
-	}
-
-	public void handleAlert(Alert alert, Trace copyTrace, PersistentTrace persistentTrace, ButtonType traceDiffButton) {
-		injector.getInstance(TraceDiffStage.class).close();
-		Optional<ButtonType> type = alert.showAndWait();
-		if (type.get() == ButtonType.YES) {
-			currentTrace.set(copyTrace);
-		} else if (type.get() == traceDiffButton) {
-			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
-			traceDiffStage.setAlert(alert);
-			traceDiffStage.setLists(copyTrace, persistentTrace, currentTrace.get());
-			traceDiffStage.show();
-			alert.close();
 		}
 	}
 

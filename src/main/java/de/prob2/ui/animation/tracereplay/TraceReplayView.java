@@ -212,9 +212,8 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			final MenuItem showErrorItem = new MenuItem(
 					bundle.getString("animation.tracereplay.view.contextMenu.showError"));
 			showErrorItem.setOnAction(event -> {
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, row.getItem().getErrorMessageBundleKey(), row.getItem().getErrorMessageParams());
-				alert.initOwner(stageManager.getCurrent());
-				alert.setErrorMessage(true, false, 0, 0, 0);
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, row.getItem().getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, row.getItem().getErrorMessageParams());
+				alert.setErrorMessage();
 				alert.show();
 			});
 			showErrorItem.setDisable(true);
