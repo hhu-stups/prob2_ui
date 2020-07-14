@@ -9,7 +9,6 @@ import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
-import de.prob2.ui.internal.JSONInformationProvider;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 

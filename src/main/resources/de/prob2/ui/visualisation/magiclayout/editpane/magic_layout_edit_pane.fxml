@@ -3,9 +3,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.collections.*?>
-<?import java.lang.String?>
-<?import java.lang.Double?>
 
 <fx:root type="VBox" spacing="10"
 	xmlns:fx="http://javafx.com/fxml/1">
