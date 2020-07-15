@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -9,12 +8,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 
 import javafx.fxml.FXML;
@@ -49,16 +46,13 @@ public class TestCaseGenerationInput extends VBox {
 	
 	private final ResourceBundle bundle;
 	
-	private final CurrentTrace currentTrace;
-	
 	private final CurrentProject currentProject;
 	
 	@Inject
 	private TestCaseGenerationInput(final StageManager stageManager, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
-										 final CurrentTrace currentTrace, final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler, final TestCaseGenerationSettingsHandler testCaseGenerationSettingsHandler) {
+			final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler, final TestCaseGenerationSettingsHandler testCaseGenerationSettingsHandler) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
-		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.bundle = bundle;
 		this.testCaseGenerationFormulaHandler = testCaseGenerationFormulaHandler;
@@ -68,17 +62,9 @@ public class TestCaseGenerationInput extends VBox {
 	
 	@FXML
 	public void initialize() {
-		this.update();
-		currentTrace.addListener((observable, from, to) -> update());
 		setCheckListeners();
 	}
 	
-	private void update() {
-		if (currentTrace.get() != null) {
-			operationCoverageInputView.setTable(currentTrace.getStateSpace().getLoadedMachine().getOperationNames());
-		}
-	}
-
 	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationChoosingStage choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractItem(choosingStage);
