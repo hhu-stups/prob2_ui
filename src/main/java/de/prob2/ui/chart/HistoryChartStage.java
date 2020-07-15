@@ -332,14 +332,12 @@ public final class HistoryChartStage extends Stage {
 
 		int elementCounter = 0;
 		if (this.currentTrace.exists()) {
-			final TraceElement startElement = this.startChoiceBox.getValue().getTrace().getCurrent();
+			final int startIndex = this.startChoiceBox.getValue().getIndex();
 
 			TraceElement element = this.currentTrace.get().getCurrent();
-			TraceElement prevElement = element;
 			boolean showErrors = true;
-			while (element != null && prevElement != startElement) {
+			while (element != null && element.getIndex() >= startIndex) {
 				tryEvalFormulas(newDatas, elementCounter, element, showErrors);
-				prevElement = element;
 				element = element.getPrevious();
 				elementCounter++;
 				// Only display errors to the user for the current state (otherwise errors are repeated for every state)
