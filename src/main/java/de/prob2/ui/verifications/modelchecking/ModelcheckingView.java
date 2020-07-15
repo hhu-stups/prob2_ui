@@ -324,7 +324,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 				injector.getInstance(CurrentTrace.class).set(item.getTrace());
 			});
 			showTraceToErrorItem.disableProperty().bind(Bindings.createBooleanBinding(
-					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || row.getItem().getTrace() == null,
+					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || row.getItem().getTraceDescription() == null,
 					row.emptyProperty(), row.itemProperty()));
 			
 			row.contextMenuProperty().bind(

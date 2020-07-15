@@ -189,13 +189,13 @@ public class Modelchecker implements IModelCheckListener {
 		} else {
 			checked = Checked.TIMEOUT;
 		}
-		final Trace trace;
+		final ITraceDescription traceDescription;
 		if (result instanceof ITraceDescription) {
-			trace = ((ITraceDescription) result).getTrace(stateSpace);
+			traceDescription = (ITraceDescription) result;
 		} else {
-			trace = null;
+			traceDescription = null;
 		}
-		final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, checked, result.getMessage(), idToStats.get(jobID), trace);
+		final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, checked, result.getMessage(), idToStats.get(jobID), stateSpace, traceDescription);
 		jobItems.add(jobItem);
 		modelCheckingView.selectItem(currentItem);
 		modelCheckingView.selectJobItem(jobItem);
