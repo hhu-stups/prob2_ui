@@ -169,16 +169,23 @@ public class BEditor extends CodeArea {
 		return ret;
 	}
 
+	private int getClampedAbsolutePosition(final int paragraphIndex, final int columnIndex) {
+		if (paragraphIndex >= this.getParagraphs().size()) {
+			return this.getLength();
+		}
+		return Math.min(this.getAbsolutePosition(paragraphIndex, columnIndex), this.getLength());
+	}
+
 	private int errorLocationAbsoluteStart(final ErrorItem.Location location) {
-		return this.getAbsolutePosition(location.getStartLine() - 1, location.getStartColumn());
+		return this.getClampedAbsolutePosition(location.getStartLine() - 1, location.getStartColumn());
 	}
 
 	private int errorLocationAbsoluteEnd(final ErrorItem.Location location) {
 		if (location.getStartLine() == location.getEndLine()) {
 			final int displayedEndColumn = location.getStartColumn() == location.getEndColumn() ? location.getStartColumn() + 1 : location.getEndColumn();
-			return this.getAbsolutePosition(location.getStartLine() - 1, displayedEndColumn);
+			return this.getClampedAbsolutePosition(location.getStartLine() - 1, displayedEndColumn);
 		} else {
-			return this.getAbsolutePosition(location.getEndLine() - 1, location.getEndColumn());
+			return this.getClampedAbsolutePosition(location.getEndLine() - 1, location.getEndColumn());
 		}
 	}
 
@@ -186,8 +193,8 @@ public class BEditor extends CodeArea {
 		StyleSpans<Collection<String>> highlightingWithErrors = highlighting;
 		for (final ErrorItem error : this.getErrors()) {
 			for (final ErrorItem.Location location : error.getLocations()) {
-				final int startIndex = Math.min(this.errorLocationAbsoluteStart(location), this.getLength());
-				final int endIndex = Math.min(this.errorLocationAbsoluteEnd(location), this.getLength());
+				final int startIndex = this.errorLocationAbsoluteStart(location);
+				final int endIndex = this.errorLocationAbsoluteEnd(location);
 				highlightingWithErrors = highlightingWithErrors.overlay(
 						new StyleSpansBuilder<Collection<String>>()
 								.add(Collections.emptyList(), startIndex)
