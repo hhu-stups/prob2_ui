@@ -56,16 +56,21 @@ public final class HistoryView extends VBox {
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll(Arrays.asList("past", "present", "future"));
-			Trace trace = currentTrace.get();
-			if (!empty && item != null && trace != null) {
-				final int currentIndex = trace.getCurrent().getIndex();
-				if (item.getIndex() < currentIndex) {
-					this.getStyleClass().add("past");
-				} else if (item.getIndex() > currentIndex) {
-					this.getStyleClass().add("future");
-				} else {
-					this.getStyleClass().add("present");
+			if (!empty && item != null) {
+				this.setCursor(Cursor.HAND);
+				final Trace trace = currentTrace.get();
+				if (trace != null) {
+					final int currentIndex = trace.getCurrent().getIndex();
+					if (item.getIndex() < currentIndex) {
+						this.getStyleClass().add("past");
+					} else if (item.getIndex() > currentIndex) {
+						this.getStyleClass().add("future");
+					} else {
+						this.getStyleClass().add("present");
+					}
 				}
+			} else {
+				this.setCursor(Cursor.DEFAULT);
 			}
 		}
 	}
@@ -112,8 +117,6 @@ public final class HistoryView extends VBox {
 		};
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
 		currentTrace.addListener(traceChangeListener);
-
-		historyTableView.setOnMouseMoved(e -> historyTableView.setCursor(Cursor.HAND));
 
 		saveTraceButton.disableProperty()
 				.bind(currentProject.existsProperty().and(currentTrace.existsProperty()).not());
