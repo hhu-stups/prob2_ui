@@ -6,9 +6,9 @@ import de.prob2.ui.verifications.Checked;
 public class ModelCheckingJobItem {
 	private Checked checked;
 
-	private transient ModelCheckStats stats;
+	private ModelCheckStats stats;
 	
-	private transient Trace trace;
+	private Trace trace;
 	
 	private int index;
 	
