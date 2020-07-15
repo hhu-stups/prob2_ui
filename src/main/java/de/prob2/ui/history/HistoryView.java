@@ -46,7 +46,7 @@ public final class HistoryView extends VBox {
 
 			this.setOnMouseClicked(event -> {
 				final Trace trace = currentTrace.get();
-				if (trace != null && this.getItem() != null && MouseButton.PRIMARY.equals(event.getButton())) {
+				if (!this.isEmpty() && trace != null && MouseButton.PRIMARY.equals(event.getButton())) {
 					currentTrace.set(trace.gotoPosition(this.getItem().getIndex()));
 				}
 			});
@@ -56,7 +56,7 @@ public final class HistoryView extends VBox {
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll(Arrays.asList("past", "present", "future"));
-			if (!empty && item != null) {
+			if (!empty) {
 				this.setCursor(Cursor.HAND);
 				final Trace trace = currentTrace.get();
 				if (trace != null) {
