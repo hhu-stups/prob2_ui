@@ -4,53 +4,37 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.Checked;
 
 public class ModelCheckingJobItem {
-	private Checked checked;
-
-	private ModelCheckStats stats;
+	private final int index;
+	private final Checked checked;
+	private final String message;
+	private final ModelCheckStats stats;
+	private final Trace trace;
 	
-	private Trace trace;
-	
-	private int index;
-	
-	private String message;
-	
-	public ModelCheckingJobItem(int index, String message) {
-		this.checked = Checked.NOT_CHECKED;
+	public ModelCheckingJobItem(final int index, final Checked checked, final String message, final ModelCheckStats stats, final Trace trace) {
 		this.index = index;
-		this.message = message;
-		this.trace = null;
-	}
-	
-	public Checked getChecked() {
-		return checked;
-	}
-	
-	public void setChecked(final Checked checked) {
 		this.checked = checked;
-	}
-	
-	public void setStats(ModelCheckStats stats) {
+		this.message = message;
 		this.stats = stats;
-	}
-	
-	public ModelCheckStats getStats() {
-		return stats;
+		this.trace = trace;
 	}
 	
 	public int getIndex() {
 		return index;
 	}
 	
+	public Checked getChecked() {
+		return checked;
+	}
+	
 	public String getMessage() {
 		return message;
 	}
 	
-	public void setTrace(Trace trace) {
-		this.trace = trace;
+	public ModelCheckStats getStats() {
+		return stats;
 	}
 	
 	public Trace getTrace() {
 		return trace;
 	}
-	
 }

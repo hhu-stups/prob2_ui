@@ -181,29 +181,31 @@ public class Modelchecker implements IModelCheckListener {
 		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
 		ModelCheckingItem currentItem = idToItem.get(jobID);
 		List<ModelCheckingJobItem> jobItems = currentItem.getItems();
-		ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, result.getMessage());
+		final Checked checked;
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
-			jobItem.setChecked(Checked.SUCCESS);
+			checked = Checked.SUCCESS;
 		} else if (result instanceof ITraceDescription) {
-			jobItem.setChecked(Checked.FAIL);
+			checked = Checked.FAIL;
 		} else {
-			jobItem.setChecked(Checked.TIMEOUT);
+			checked = Checked.TIMEOUT;
 		}
-		jobItem.setStats(idToStats.get(jobID));
-		jobItems.add(jobItem);
+		final Trace trace;
 		if (result instanceof ITraceDescription) {
-			Trace trace = ((ITraceDescription) result).getTrace(stateSpace);
-			jobItem.setTrace(trace);
+			trace = ((ITraceDescription) result).getTrace(stateSpace);
+		} else {
+			trace = null;
 		}
+		final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, checked, result.getMessage(), idToStats.get(jobID), trace);
+		jobItems.add(jobItem);
 		modelCheckingView.selectItem(currentItem);
 		modelCheckingView.selectJobItem(jobItem);
 		
 		boolean failed = jobItems.stream()
 				.map(ModelCheckingJobItem::getChecked)
-				.anyMatch(checked -> checked == Checked.FAIL);
+				.anyMatch(Checked.FAIL::equals);
 		boolean success = !failed && jobItems.stream()
 				.map(ModelCheckingJobItem::getChecked)
-				.anyMatch(checked -> checked == Checked.SUCCESS);
+				.anyMatch(Checked.SUCCESS::equals);
 		
 		if (success) {
 			currentItem.setChecked(Checked.SUCCESS);
