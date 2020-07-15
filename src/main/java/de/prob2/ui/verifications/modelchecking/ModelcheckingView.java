@@ -323,7 +323,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 			showTraceToErrorItem.setOnAction(e-> {
 				ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
 				injector.getInstance(CurrentTrace.class).set(item.getTrace());
-				injector.getInstance(StatsView.class).update(item.getTrace());
+				injector.getInstance(StatsView.class).update(item.getTrace().getStateSpace());
 			});
 			showTraceToErrorItem.disableProperty().bind(Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || row.getItem().getTrace() == null,

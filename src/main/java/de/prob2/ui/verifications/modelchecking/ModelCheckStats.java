@@ -8,9 +8,7 @@ import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.StateSpaceStats;
-import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -99,10 +97,7 @@ public final class ModelCheckStats extends AnchorPane {
 			});
 		}
 		
-		if (result instanceof ITraceDescription) {
-			Trace trace = ((ITraceDescription) result).getTrace(stateSpace);
-			Platform.runLater(() -> injector.getInstance(StatsView.class).update(trace));
-		}
+		Platform.runLater(() -> injector.getInstance(StatsView.class).update(stateSpace));
 	}
 	
 
