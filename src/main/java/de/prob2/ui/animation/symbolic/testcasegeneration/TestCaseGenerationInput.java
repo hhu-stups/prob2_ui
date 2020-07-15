@@ -75,10 +75,7 @@ public class TestCaseGenerationInput extends VBox {
 	
 	private void update() {
 		if (currentTrace.get() != null) {
-			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
-			if (loadedMachine != null) {
-				operationCoverageInputView.setTable(loadedMachine.getOperationNames());
-			}
+			operationCoverageInputView.setTable(currentTrace.getStateSpace().getLoadedMachine().getOperationNames());
 		}
 	}
 
