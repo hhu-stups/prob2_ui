@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,7 @@ public class OperationCoverageInputView extends VBox {
 		depthField.setText(String.valueOf(item.getMaxDepth()));
 	}
 
-	public void setTable(List<String> operations) {
+	public void setTable(Collection<String> operations) {
 		tvOperations.getItems().clear();
 		tvOperations.getItems().addAll(operations.stream()
 				.map(operation -> new OperationTableItem(operation, true))

@@ -51,8 +51,6 @@ public class TestCaseGenerationInput extends VBox {
 	
 	private final CurrentTrace currentTrace;
 	
-	private ArrayList<String> events;
-	
 	private final CurrentProject currentProject;
 	
 	@Inject
@@ -61,7 +59,6 @@ public class TestCaseGenerationInput extends VBox {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.events = new ArrayList<>();
 		this.injector = injector;
 		this.bundle = bundle;
 		this.testCaseGenerationFormulaHandler = testCaseGenerationFormulaHandler;
@@ -77,14 +74,12 @@ public class TestCaseGenerationInput extends VBox {
 	}
 	
 	private void update() {
-		events.clear();
 		if (currentTrace.get() != null) {
 			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
 			if (loadedMachine != null) {
-				events.addAll(loadedMachine.getOperationNames());
+				operationCoverageInputView.setTable(loadedMachine.getOperationNames());
 			}
 		}
-		operationCoverageInputView.setTable(events);
 	}
 
 	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationChoosingStage choosingStage) {
