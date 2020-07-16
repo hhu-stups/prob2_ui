@@ -179,7 +179,7 @@ public final class Config {
 		}
 
 		try {
-			this.jsonManager.writeToFile(LOCATION, configData, JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
+			this.jsonManager.writeToFile(LOCATION, configData, JSONInformationProvider.getKernelVersion(versionInfo));
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
