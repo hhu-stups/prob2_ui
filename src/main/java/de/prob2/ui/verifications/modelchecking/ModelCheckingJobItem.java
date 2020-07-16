@@ -1,56 +1,58 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import de.prob.statespace.ITraceDescription;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.Checked;
 
 public class ModelCheckingJobItem {
-	private Checked checked;
-
-	private transient ModelCheckStats stats;
+	private final int index;
+	private final Checked checked;
+	private final String message;
+	private final ModelCheckStats stats;
+	private final StateSpace stateSpace;
+	private final ITraceDescription traceDescription;
+	private Trace trace;
 	
-	private transient Trace trace;
-	
-	private int index;
-	
-	private String message;
-	
-	public ModelCheckingJobItem(int index, String message) {
-		this.checked = Checked.NOT_CHECKED;
+	public ModelCheckingJobItem(final int index, final Checked checked, final String message, final ModelCheckStats stats, final StateSpace stateSpace, final ITraceDescription traceDescription) {
 		this.index = index;
-		this.message = message;
-		this.trace = null;
-	}
-	
-	public Checked getChecked() {
-		return checked;
-	}
-	
-	public void setChecked(final Checked checked) {
 		this.checked = checked;
-	}
-	
-	public void setStats(ModelCheckStats stats) {
+		this.message = message;
 		this.stats = stats;
-	}
-	
-	public ModelCheckStats getStats() {
-		return stats;
+		this.stateSpace = stateSpace;
+		this.traceDescription = traceDescription;
+		this.trace = null;
 	}
 	
 	public int getIndex() {
 		return index;
 	}
 	
+	public Checked getChecked() {
+		return checked;
+	}
+	
 	public String getMessage() {
 		return message;
 	}
 	
-	public void setTrace(Trace trace) {
-		this.trace = trace;
+	public ModelCheckStats getStats() {
+		return stats;
+	}
+	
+	public StateSpace getStateSpace() {
+		return stateSpace;
+	}
+	
+	public ITraceDescription getTraceDescription() {
+		return traceDescription;
 	}
 	
 	public Trace getTrace() {
+		if (this.trace == null && this.getTraceDescription() != null) {
+			this.trace = this.getTraceDescription().getTrace(this.getStateSpace());
+		}
+		
 		return trace;
 	}
-	
 }

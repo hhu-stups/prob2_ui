@@ -3,7 +3,6 @@ package de.prob2.ui.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.statespace.LoadedMachine;
-import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.AbstractResultHandler.ItemType;
 import de.prob2.ui.internal.StageManager;

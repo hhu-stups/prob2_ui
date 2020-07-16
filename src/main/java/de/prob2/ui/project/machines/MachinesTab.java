@@ -271,6 +271,7 @@ public class MachinesTab extends Tab {
 			return;
 		}
 		currentProject.addMachine(machine);
+		currentProject.startAnimation(machine, Preference.DEFAULT);
 	}
 
 	@FXML
@@ -297,7 +298,9 @@ public class MachinesTab extends Tab {
 			name = String.format("%s (%d)", n[0], i);
 			i++;
 		}
-		currentProject.addMachine(new Machine(name, "", relative));
+		final Machine machine = new Machine(name, "", relative);
+		currentProject.addMachine(machine);
+		currentProject.startAnimation(machine, Preference.DEFAULT);
 	}
 
 	public void closeMachineView() {

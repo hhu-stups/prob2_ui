@@ -5,8 +5,11 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -60,6 +63,8 @@ public class OperationCoverageInputView extends VBox {
 
 	}
 
+	private final CurrentTrace currentTrace;
+
 	@FXML
 	private TableView<OperationTableItem> tvOperations;
 
@@ -72,8 +77,9 @@ public class OperationCoverageInputView extends VBox {
 	private TextField depthField;
 
 	@Inject
-	private OperationCoverageInputView(final StageManager stageManager) {
+	private OperationCoverageInputView(final StageManager stageManager, final CurrentTrace currentTrace) {
 		super();
+		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "test_case_generation_operation_coverage.fxml");
 	}
 
@@ -81,6 +87,17 @@ public class OperationCoverageInputView extends VBox {
 	private void initialize() {
 		selectedColumn.setCellValueFactory(new OperationSelectedProperty());
 		operationColumn.setCellValueFactory(new PropertyValueFactory<>("operation"));
+		currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.update(to));
+		this.update(currentTrace.getStateSpace());
+	}
+
+	private void update(final StateSpace to) {
+		tvOperations.getItems().clear();
+		if (to != null) {
+			to.getLoadedMachine().getOperationNames().stream()
+				.map(operation -> new OperationTableItem(operation, true))
+				.collect(Collectors.toCollection(tvOperations::getItems));
+		}
 	}
 
 	public List<String> getOperations() {
@@ -100,12 +117,5 @@ public class OperationCoverageInputView extends VBox {
 
 	public void setItem(TestCaseGenerationItem item) {
 		depthField.setText(String.valueOf(item.getMaxDepth()));
-	}
-
-	public void setTable(List<String> operations) {
-		tvOperations.getItems().clear();
-		tvOperations.getItems().addAll(operations.stream()
-				.map(operation -> new OperationTableItem(operation, true))
-				.collect(Collectors.toList()));
 	}
 }

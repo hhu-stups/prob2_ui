@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.StageManager;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -22,11 +23,11 @@ public class TraceDiffStage extends Stage {
 		this.initOwner(injector.getInstance(StageManager.class).getCurrent());
 	}
 
-	public void setLists(Trace replayed, PersistentTrace persistent, Trace current) {
+	public final void setLists(Trace replayed, PersistentTrace persistent, Trace current) {
 		traceDiff.setLists(replayed, persistent, current);
 	}
 
-	public void setAlert(Alert alert) {
+	public void setAlert(TraceReplayErrorAlert alert) {
 		traceDiff.setAlert(alert);
 	}
 }

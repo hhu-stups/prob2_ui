@@ -3,7 +3,6 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Text?>
 
 <fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>

@@ -85,7 +85,7 @@ public abstract class SymbolicExecutor {
 			Thread currentThread = Thread.currentThread();
 			final RuntimeException finalException = exception;
 			Platform.runLater(() -> {
-				injector.getInstance(StatsView.class).update(currentTrace.get());
+				injector.getInstance(StatsView.class).update(stateSpace);
 				if (finalException == null) {
 					resultHandler.handleFormulaResult(currentItem, cmd);
 				} else {
@@ -114,7 +114,7 @@ public abstract class SymbolicExecutor {
 			}
 			final Object finalResult = result;
 			Platform.runLater(() -> {
-				injector.getInstance(StatsView.class).update(currentTrace.get());
+				injector.getInstance(StatsView.class).update(currentTrace.getStateSpace());
 				resultHandler.handleFormulaResult(item, finalResult);
 				updateMachine(currentProject.getCurrentMachine());
 				if(!checkAll) {

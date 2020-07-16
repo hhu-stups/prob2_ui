@@ -9,22 +9,17 @@ import de.prob2.ui.operations.OperationItem;
 
 public class HistoryItem {
 	private final Trace trace;
-	private final OperationItem operationItem;
+	private final int index;
 	
-	public HistoryItem(final Trace trace) {
+	public HistoryItem(final Trace trace, final int index) {
 		this.trace = trace;
-		this.operationItem = trace.canGoBack() ? OperationItem.forTransition(trace.getStateSpace(), trace.getCurrentTransition()) : null;
+		this.index = index;
 	}
 	
 	public static List<HistoryItem> itemsForTrace(final Trace trace) {
 		final List<HistoryItem> items = new ArrayList<>();
-		Trace t = trace.gotoPosition(trace.size()-1);
-		while (true) {
-			items.add(new HistoryItem(t));
-			if (!t.canGoBack()) {
-				break;
-			}
-			t = t.back();
+		for (int i = -1; i <= trace.getHead().getIndex(); i++) {
+			items.add(new HistoryItem(trace, i));
 		}
 		return items;
 	}
@@ -33,15 +28,15 @@ public class HistoryItem {
 		return this.trace;
 	}
 	
-	public OperationItem getOperationItem() {
-		return this.operationItem;
-	}
-	
 	public int getIndex() {
-		return this.getTrace().getCurrent().getIndex();
+		return this.index;
 	}
 	
 	public String toPrettyString() {
-		return this.getOperationItem() == null ? "---root---" : this.getOperationItem().toPrettyString(true);
+		if (this.getIndex() == -1) {
+			return "---root---";
+		} else {
+			return OperationItem.forTransition(this.getTrace().getStateSpace(), this.getTrace().getTransitionList().get(this.getIndex())).toPrettyString(true);
+		}
 	}
 }

@@ -10,7 +10,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
-import de.prob.statespace.Trace;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -98,8 +98,8 @@ public class StatsView extends ScrollPane {
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
 
-		this.currentTrace.addListener((observable, from, to) -> this.update(to));
-		this.update(currentTrace.get());
+		this.currentTrace.addListener((observable, from, to) -> this.update(to == null ? null : to.getStateSpace()));
+		this.update(currentTrace.getStateSpace());
 
 		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
 
@@ -119,7 +119,7 @@ public class StatsView extends ScrollPane {
 		final FontAwesome.Glyph icon;
 		final String text;
 		if (extendedStatsToggle.isSelected()) {
-			this.update(currentTrace.get());
+			this.update(currentTrace.getStateSpace());
 
 			icon = FontAwesome.Glyph.CLOSE;
 			text = bundle.getString("stats.statsView.hideExtendedStats");
@@ -132,15 +132,15 @@ public class StatsView extends ScrollPane {
 		extendedStatsToggle.setTooltip(new Tooltip(text));
 	}
 
-	public void update(Trace trace) {
-		if (trace != null && injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().get()) {
+	public void update(final StateSpace stateSpace) {
+		if (stateSpace != null && injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().get()) {
 			final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
-			trace.getStateSpace().execute(stateSpaceStatsCmd);
+			stateSpace.execute(stateSpaceStatsCmd);
 			updateSimpleStats(stateSpaceStatsCmd.getResult());
 
 			if (extendedStatsToggle.isSelected()) {
 				final ComputeCoverageCommand coverageCmd = new ComputeCoverageCommand();
-				trace.getStateSpace().execute(coverageCmd);
+				stateSpace.execute(coverageCmd);
 				updateExtendedStats(coverageCmd.getResult());
 			}
 		}
