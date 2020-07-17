@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 
-import de.prob.check.tracereplay.ITraceReplayFileHandler;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
 import de.prob.json.JsonManager;
@@ -36,7 +35,7 @@ import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TraceFileHandler implements ITraceReplayFileHandler {
+public class TraceFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
@@ -60,7 +59,12 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 	}
 
 	public PersistentTrace load(Path path) {
-		return traceLoaderSaver.load(currentProject.getLocation().resolve(path), this);
+		try {
+			return traceLoaderSaver.load(currentProject.getLocation().resolve(path));
+		} catch (IOException | JsonParseException e) {
+			this.showLoadError(path, e);
+			return null;
+		}
 	}
 
 	public void showLoadError(Path path, Exception e) {
@@ -156,10 +160,10 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 	}
 
 	public void save(PersistentTrace trace, Path location) {
-		traceLoaderSaver.save(trace, location, this, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
-	}
-
-	public void showSaveError(IOException e) {
-		stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
+		try {
+			traceLoaderSaver.save(trace, location, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
+		}
 	}
 }
