@@ -1,24 +1,5 @@
 package de.prob2.ui.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import de.prob.Main;
-import de.prob.json.JsonManager;
-import de.prob.json.JsonMetadata;
-import de.prob.json.JsonMetadataBuilder;
-import de.prob.json.ObjectWithMetadata;
-import de.prob2.ui.MainController;
-import de.prob2.ui.internal.JSONInformationProvider;
-import de.prob2.ui.internal.PerspectiveKind;
-import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.internal.VersionInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
@@ -29,6 +10,26 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+
+import de.prob.Main;
+import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
+import de.prob.json.ObjectWithMetadata;
+import de.prob2.ui.MainController;
+import de.prob2.ui.internal.JSONInformationProvider;
+import de.prob2.ui.internal.PerspectiveKind;
+import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.VersionInfo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class Config {
@@ -53,15 +54,6 @@ public final class Config {
 			private static final String GUI_STATE_FIELD = "guiState";
 			private static final String PERSPECTIVE_KIND_FIELD = "perspectiveKind";
 			private static final String PERSPECTIVE_FIELD = "perspective";
-			
-			@Override
-			public JsonMetadataBuilder getDefaultMetadataBuilder(String proB2KernelVersion, String proBCLIVersion, String modelName) {
-				// The metadata includes all of the usual information, except for the CLI version.
-				// This is because the config is saved while the UI is shut down, and at that point it may no longer be possible to obtain the CLI version, because the shared empty state space has already been shut down.
-				return new JsonMetadataBuilder(this.fileType, this.currentFormatVersion, proB2KernelVersion, proBCLIVersion, modelName)
-					.withSavedNow()
-					.withUserCreator();
-			}
 			
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
