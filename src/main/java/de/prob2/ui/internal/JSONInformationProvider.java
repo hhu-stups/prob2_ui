@@ -7,7 +7,7 @@ public class JSONInformationProvider {
 	private static String modelName;
 
 	public static String getCliVersion(VersionInfo versionInfo) {
-		return versionInfo.getFormattedCliVersion();
+		return versionInfo.getCliVersion().getShortVersionString();
 	}
 
 	public static void loadModelName(Machine machine) {
