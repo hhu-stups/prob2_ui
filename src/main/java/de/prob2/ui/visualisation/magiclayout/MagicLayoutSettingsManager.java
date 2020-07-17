@@ -75,7 +75,6 @@ public class MagicLayoutSettingsManager {
 			try {
 				final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
 					.withProBCliVersion(JSONInformationProvider.getCliVersion(versionInfo))
-					.withModelName(JSONInformationProvider.getModelName())
 					.withModelName(layoutSettings.getMachineName())
 					.build();
 				this.jsonManager.writeToFile(path, layoutSettings, metadata);
