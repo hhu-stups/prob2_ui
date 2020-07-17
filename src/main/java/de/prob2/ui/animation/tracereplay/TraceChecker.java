@@ -74,7 +74,7 @@ public class TraceChecker implements ITraceChecker {
 			if (setCurrentAnimation) {
 				// set the current trace if no error has occured. Otherwise leave the decision to the user
 				if (replayTrace.getErrorMessageBundleKey() != null) {
-                    showTraceReplayCompleteFailed(trace, replayInformation);
+					showTraceReplayCompleteFailed(trace, replayInformation);
 				} else {
 					currentTrace.set(trace);
 				}
@@ -107,48 +107,48 @@ public class TraceChecker implements ITraceChecker {
 	}
 
 	public void showError(TraceReplay.TraceReplayError errorType, Map<String, Object> replayInformation) {
-        switch(errorType) {
-            case COMMAND: {
-                ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
-                GetOperationByPredicateCommand command = (GetOperationByPredicateCommand) replayInformation.get("command");
-                PersistentTransition persistentTransition = (PersistentTransition) replayInformation.get("persistentTransition");
-                PredicateBuilder predicateBuilder = (PredicateBuilder) replayInformation.get("predicateBuilder");
-                replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage");
-                replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicateBuilder, String.join(", ", command.getErrors()));
-                break;
-            }
-            case NO_OPERATION_POSSIBLE: {
-                ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
-                PersistentTransition persistentTransition = (PersistentTransition) replayInformation.get("persistentTransition");
-                PredicateBuilder predicateBuilder = (PredicateBuilder) replayInformation.get("predicateBuilder");
-                replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage.operationNotPossible");
-                replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicateBuilder);
-                break;
-            }
-            case MISMATCH_OUTPUT: {
-                ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
-                String operationName = (String) replayInformation.get("operationName");
-                String outputParamName = (String) replayInformation.get("outputParamName");
-                String bValue = (String) replayInformation.get("bValue");
-                String paramValueFromTransition = (String) replayInformation.get("paramValue");
-                replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage.mismatchingOutputValues");
-                replayTrace.setErrorMessageParams(operationName, outputParamName, bValue, paramValueFromTransition);
-                break;
-            }
-            case TRACE_REPLAY: {
-                Exception e = (Exception) replayInformation.get("exception");
-                Platform.runLater(
-                        () -> stageManager
-                                .makeExceptionAlert(e,
-                                        "animation.tracereplay.alerts.traceReplayError.header",
-                                        "animation.tracereplay.alerts.traceReplayError.content")
-                                .showAndWait());
-                break;
-            }
-            default:
-                break;
-        }
-    }
+		switch(errorType) {
+			case COMMAND: {
+				ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
+				GetOperationByPredicateCommand command = (GetOperationByPredicateCommand) replayInformation.get("command");
+				PersistentTransition persistentTransition = (PersistentTransition) replayInformation.get("persistentTransition");
+				PredicateBuilder predicateBuilder = (PredicateBuilder) replayInformation.get("predicateBuilder");
+				replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage");
+				replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicateBuilder, String.join(", ", command.getErrors()));
+				break;
+			}
+			case NO_OPERATION_POSSIBLE: {
+				ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
+				PersistentTransition persistentTransition = (PersistentTransition) replayInformation.get("persistentTransition");
+				PredicateBuilder predicateBuilder = (PredicateBuilder) replayInformation.get("predicateBuilder");
+				replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage.operationNotPossible");
+				replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicateBuilder);
+				break;
+			}
+			case MISMATCH_OUTPUT: {
+				ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
+				String operationName = (String) replayInformation.get("operationName");
+				String outputParamName = (String) replayInformation.get("outputParamName");
+				String bValue = (String) replayInformation.get("bValue");
+				String paramValueFromTransition = (String) replayInformation.get("paramValue");
+				replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage.mismatchingOutputValues");
+				replayTrace.setErrorMessageParams(operationName, outputParamName, bValue, paramValueFromTransition);
+				break;
+			}
+			case TRACE_REPLAY: {
+				Exception e = (Exception) replayInformation.get("exception");
+				Platform.runLater(
+						() -> stageManager
+								.makeExceptionAlert(e,
+										"animation.tracereplay.alerts.traceReplayError.header",
+										"animation.tracereplay.alerts.traceReplayError.content")
+								.showAndWait());
+				break;
+			}
+			default:
+				break;
+		}
+	}
 
 	private void showTraceReplayCompleteFailed(Trace trace, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
