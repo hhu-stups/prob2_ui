@@ -60,7 +60,6 @@ public final class Config {
 				// This is because the config is saved while the UI is shut down, and at that point it may no longer be possible to obtain the CLI version, because the shared empty state space has already been shut down.
 				return new JsonMetadataBuilder(this.fileType, this.currentFormatVersion, proB2KernelVersion, proBCLIVersion, modelName)
 					.withSavedNow()
-					.withCurrentProB2KernelVersion()
 					.withUserCreator();
 			}
 			
