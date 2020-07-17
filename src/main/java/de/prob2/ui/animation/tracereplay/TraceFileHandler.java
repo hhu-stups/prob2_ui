@@ -6,6 +6,7 @@ import de.prob.check.tracereplay.ITraceReplayFileHandler;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
 import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
@@ -120,9 +121,13 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
 				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
-				jsonManager.writeToFile(traceFilePath, traces.get(i), jsonManager.defaultMetadataBuilder(JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName())
+				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
+					.withProB2KernelVersion(JSONInformationProvider.getKernelVersion(versionInfo))
+					.withProBCliVersion(JSONInformationProvider.getCliVersion(versionInfo))
+					.withModelName(JSONInformationProvider.getModelName())
 					.withCreator(createdBy)
-					.build());
+					.build();
+				jsonManager.writeToFile(traceFilePath, traces.get(i), metadata);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
 		} catch (IOException e) {

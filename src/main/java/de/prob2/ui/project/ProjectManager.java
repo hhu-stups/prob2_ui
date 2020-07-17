@@ -4,6 +4,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -141,7 +142,10 @@ public class ProjectManager {
 
 	private File saveProject(Project project, File location) {
 		try {
-			this.jsonManager.writeToFile(location.toPath(), project, JSONInformationProvider.getKernelVersion(versionInfo));
+			final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
+				.withProB2KernelVersion(JSONInformationProvider.getKernelVersion(versionInfo))
+				.build();
+			this.jsonManager.writeToFile(location.toPath(), project, metadata);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
 			return null;

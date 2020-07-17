@@ -170,7 +170,10 @@ public final class Config {
 		}
 
 		try {
-			this.jsonManager.writeToFile(LOCATION, configData, JSONInformationProvider.getKernelVersion(versionInfo));
+			final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
+				.withProB2KernelVersion(JSONInformationProvider.getKernelVersion(versionInfo))
+				.build();
+			this.jsonManager.writeToFile(LOCATION, configData, metadata);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
