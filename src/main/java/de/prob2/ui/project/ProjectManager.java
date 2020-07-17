@@ -47,7 +47,6 @@ public class ProjectManager {
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
 
 	private final JsonManager<Project> jsonManager;
-	private final VersionInfo versionInfo;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
@@ -57,10 +56,9 @@ public class ProjectManager {
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(JsonManager<Project> jsonManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
+	public ProjectManager(JsonManager<Project> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new ProjectJsonContext());
-		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -142,10 +140,7 @@ public class ProjectManager {
 
 	private File saveProject(Project project, File location) {
 		try {
-			final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
-				.withProB2KernelVersion(JSONInformationProvider.getKernelVersion(versionInfo))
-				.build();
-			this.jsonManager.writeToFile(location.toPath(), project, metadata);
+			this.jsonManager.writeToFile(location.toPath(), project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
 			return null;

@@ -408,7 +408,6 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 				.collect(Collectors.toList());
 			try {
 				final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
-					.withProB2KernelVersion(JSONInformationProvider.getKernelVersion(versionInfo))
 					.withProBCliVersion(JSONInformationProvider.getCliVersion(versionInfo))
 					.withModelName(JSONInformationProvider.getModelName())
 					.build();

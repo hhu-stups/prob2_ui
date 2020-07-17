@@ -157,7 +157,6 @@ public final class Config {
 	}
 
 	public void save() {
-		VersionInfo versionInfo = injector.getInstance(VersionInfo.class);
 		if (!this.runtimeOptions.isSaveConfig()) {
 			logger.info("Config saving disabled via runtime options, ignoring config save request");
 			return;
@@ -170,10 +169,7 @@ public final class Config {
 		}
 
 		try {
-			final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
-				.withProB2KernelVersion(JSONInformationProvider.getKernelVersion(versionInfo))
-				.build();
-			this.jsonManager.writeToFile(LOCATION, configData, metadata);
+			this.jsonManager.writeToFile(LOCATION, configData);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {

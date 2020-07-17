@@ -122,7 +122,6 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
 				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
 				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
-					.withProB2KernelVersion(JSONInformationProvider.getKernelVersion(versionInfo))
 					.withProBCliVersion(JSONInformationProvider.getCliVersion(versionInfo))
 					.withModelName(JSONInformationProvider.getModelName())
 					.withCreator(createdBy)
