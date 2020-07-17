@@ -1,27 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import com.google.gson.JsonParseException;
-import com.google.inject.Inject;
-import de.prob.check.tracereplay.ITraceReplayFileHandler;
-import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.check.tracereplay.TraceLoaderSaver;
-import de.prob.json.JsonManager;
-import de.prob.json.JsonMetadata;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.JSONInformationProvider;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,6 +11,30 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.google.gson.JsonParseException;
+import com.google.inject.Inject;
+
+import de.prob.check.tracereplay.ITraceReplayFileHandler;
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.TraceLoaderSaver;
+import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TraceFileHandler implements ITraceReplayFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
@@ -122,7 +124,7 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
 				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
 				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
-					.withProBCliVersion(JSONInformationProvider.getCliVersion(versionInfo))
+					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
 					.withModelName(machine.getName())
 					.withCreator(createdBy)
 					.build();
@@ -154,7 +156,7 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 	}
 
 	public void save(PersistentTrace trace, Path location) {
-		traceLoaderSaver.save(trace, location, this, JSONInformationProvider.getCliVersion(versionInfo), currentProject.getCurrentMachine().getName());
+		traceLoaderSaver.save(trace, location, this, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
 	}
 
 	public void showSaveError(IOException e) {

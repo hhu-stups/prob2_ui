@@ -1,24 +1,26 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.inject.Inject;
-import de.prob.json.JsonManager;
-import de.prob.json.JsonMetadata;
-import de.prob.json.ObjectWithMetadata;
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.JSONInformationProvider;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.stage.FileChooser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.inject.Inject;
+
+import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
+import de.prob.json.ObjectWithMetadata;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+
+import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MagicLayoutSettingsManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MagicLayoutSettingsManager.class);
@@ -74,7 +76,7 @@ public class MagicLayoutSettingsManager {
 		if (path != null) {
 			try {
 				final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
-					.withProBCliVersion(JSONInformationProvider.getCliVersion(versionInfo))
+					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
 					.withModelName(layoutSettings.getMachineName())
 					.build();
 				this.jsonManager.writeToFile(path, layoutSettings, metadata);

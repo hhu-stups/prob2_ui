@@ -23,10 +23,8 @@ import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.MainController;
-import de.prob2.ui.internal.JSONInformationProvider;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.internal.VersionInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
