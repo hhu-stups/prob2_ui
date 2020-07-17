@@ -123,7 +123,7 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
 				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
 					.withProBCliVersion(JSONInformationProvider.getCliVersion(versionInfo))
-					.withModelName(JSONInformationProvider.getModelName())
+					.withModelName(machine.getName())
 					.withCreator(createdBy)
 					.build();
 				jsonManager.writeToFile(traceFilePath, traces.get(i), metadata);
@@ -154,7 +154,7 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 	}
 
 	public void save(PersistentTrace trace, Path location) {
-		traceLoaderSaver.save(trace, location, this, JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
+		traceLoaderSaver.save(trace, location, this, JSONInformationProvider.getCliVersion(versionInfo), currentProject.getCurrentMachine().getName());
 	}
 
 	public void showSaveError(IOException e) {
