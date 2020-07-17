@@ -155,7 +155,7 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 	}
 
 	public void save(PersistentTrace trace, Path location) {
-		traceLoaderSaver.save(trace, location, this, JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
+		traceLoaderSaver.save(trace, location, this, JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
 	}
 
 	public void showSaveError(IOException e) {
