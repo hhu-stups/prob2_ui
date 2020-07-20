@@ -117,7 +117,6 @@ public class Modelchecker implements IModelCheckListener {
 			showResult(jobId, result, job.getStateSpace());
 			idToItem.remove(jobId);
 			idToStats.remove(jobId);
-			modelcheckingStage.hide();
 			injector.getInstance(OperationsView.class).update(currentTrace.get());
 			injector.getInstance(StatsView.class).update(job.getStateSpace());
 			lastResult.set(result);
