@@ -1,9 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -42,9 +39,12 @@ public class Modelchecker implements IModelCheckListener {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Modelchecker.class);
 	
-	private final Map<String, IModelCheckJob> jobs;
-	private final Map<String, ModelCheckingItem> idToItem;
-	private final Map<String, ModelCheckStats> idToStats;
+	// These three variables should only be used by the single task running on the executor.
+	// In particular, they should not be used from the JavaFX application thread (listeners, Platform.runLater, etc.).
+	private IModelCheckJob currentJob;
+	private ModelCheckingItem currentItem;
+	private ModelCheckStats currentStats;
+	
 	private final ObjectProperty<Future<?>> currentFuture;
 	private final ExecutorService executor;
 	private final ObjectProperty<IModelCheckingResult> lastResult;
@@ -65,9 +65,9 @@ public class Modelchecker implements IModelCheckListener {
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
 		stopActions.add(this.executor::shutdownNow);
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
-		this.jobs = new HashMap<>();
-		this.idToItem = new HashMap<>();
-		this.idToStats = new HashMap<>();
+		this.currentJob = null;
+		this.currentItem = null;
+		this.currentStats = null;
 	}
 
 	public void checkItem(ModelCheckingItem item, boolean checkAll) {
@@ -86,25 +86,24 @@ public class Modelchecker implements IModelCheckListener {
 	
 	@Override
 	public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		final IModelCheckJob job = jobs.get(jobId);
-		if (job == null) {
-			throw new IllegalStateException("updateStats was called for an unknown (or already finished) job: " + jobId);
-		}
-		idToStats.get(jobId).updateStats(job, timeElapsed, stats);
+		this.currentStats.updateStats(this.currentJob, timeElapsed, stats);
 	}
 	
 	@Override
 	public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		final IModelCheckJob job = jobs.remove(jobId);
-		if (job == null) {
-			throw new IllegalStateException("isFinished was called for an unknown (or already finished) job: " + jobId);
-		}
-		
-		idToStats.get(jobId).isFinished(job, timeElapsed, result);
+		// The current values of these fields are stored in local fields,
+		// so that the Platform.runLater call below can safely use them.
+		// Accessing the fields directly might not work correctly,
+		// because the next checking job might have already started running and overwritten the fields.
+		final IModelCheckJob job = this.currentJob;
+		final ModelCheckingItem item = this.currentItem;
+		final ModelCheckStats modelCheckStats = this.currentStats;
+		this.currentJob = null;
+		this.currentItem = null;
+		this.currentStats = null;
+		modelCheckStats.isFinished(job, timeElapsed, result);
 		Platform.runLater(() -> {
-			showResult(jobId, result, job.getStateSpace());
-			idToItem.remove(jobId);
-			idToStats.remove(jobId);
+			showResult(result, job, item, modelCheckStats);
 			injector.getInstance(OperationsView.class).update(currentTrace.get());
 			injector.getInstance(StatsView.class).update(job.getStateSpace());
 			lastResult.set(result);
@@ -126,15 +125,15 @@ public class Modelchecker implements IModelCheckListener {
 	
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
 		IModelCheckJob job = new ConsistencyChecker(currentTrace.getStateSpace(), item.getOptions(), null, this);
-		idToItem.put(job.getJobId(), item);
-		idToStats.put(job.getJobId(), new ModelCheckStats(stageManager, injector));
+		this.currentJob = job;
+		this.currentItem = item;
+		this.currentStats = new ModelCheckStats(stageManager, injector);
 
-		jobs.put(job.getJobId(), job);
-		ModelCheckStats currentStats = idToStats.get(job.getJobId());
-		currentStats.startJob();
+		this.currentStats.startJob();
 		
 		//This must be executed before executing model checking job
-		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(currentStats));
+		final ModelCheckStats stats = this.currentStats;
+		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(stats));
 		
 		final IModelCheckingResult result;
 		try {
@@ -160,10 +159,9 @@ public class Modelchecker implements IModelCheckListener {
 		currentTrace.getStateSpace().sendInterrupt();
 	}
 	
-	private void showResult(String jobID, IModelCheckingResult result, StateSpace stateSpace) {
+	private void showResult(IModelCheckingResult result, IModelCheckJob job, ModelCheckingItem item, ModelCheckStats stats) {
 		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
-		ModelCheckingItem currentItem = idToItem.get(jobID);
-		List<ModelCheckingJobItem> jobItems = currentItem.getItems();
+		List<ModelCheckingJobItem> jobItems = item.getItems();
 		final Checked checked;
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
 			checked = Checked.SUCCESS;
@@ -178,9 +176,9 @@ public class Modelchecker implements IModelCheckListener {
 		} else {
 			traceDescription = null;
 		}
-		final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, checked, result.getMessage(), idToStats.get(jobID), stateSpace, traceDescription);
+		final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, checked, result.getMessage(), stats, job.getStateSpace(), traceDescription);
 		jobItems.add(jobItem);
-		modelCheckingView.selectItem(currentItem);
+		modelCheckingView.selectItem(item);
 		modelCheckingView.selectJobItem(jobItem);
 		
 		boolean failed = jobItems.stream()
@@ -191,11 +189,11 @@ public class Modelchecker implements IModelCheckListener {
 				.anyMatch(Checked.SUCCESS::equals);
 		
 		if (success) {
-			currentItem.setChecked(Checked.SUCCESS);
+			item.setChecked(Checked.SUCCESS);
 		} else if (failed) {
-			currentItem.setChecked(Checked.FAIL);
+			item.setChecked(Checked.FAIL);
 		} else {
-			currentItem.setChecked(Checked.TIMEOUT);
+			item.setChecked(Checked.TIMEOUT);
 		}
 	}
 }
