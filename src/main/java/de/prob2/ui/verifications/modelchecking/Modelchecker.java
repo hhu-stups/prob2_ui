@@ -39,12 +39,6 @@ public class Modelchecker {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Modelchecker.class);
 	
-	// These three variables should only be used by the single task running on the executor.
-	// In particular, they should not be used from the JavaFX application thread (listeners, Platform.runLater, etc.).
-	private IModelCheckJob currentJob;
-	private ModelCheckingItem currentItem;
-	private ModelCheckStats currentStats;
-	
 	private final ObjectProperty<Future<?>> currentFuture;
 	private final ExecutorService executor;
 	private final ObjectProperty<IModelCheckingResult> lastResult;
@@ -65,9 +59,6 @@ public class Modelchecker {
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
 		stopActions.add(this.executor::shutdownNow);
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
-		this.currentJob = null;
-		this.currentItem = null;
-		this.currentStats = null;
 	}
 
 	public void checkItem(ModelCheckingItem item, boolean checkAll) {
@@ -97,44 +88,32 @@ public class Modelchecker {
 	}
 	
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
+		final StateSpace stateSpace = currentTrace.getStateSpace();
+		final ModelCheckStats modelCheckStats = new ModelCheckStats(stageManager, injector);
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				currentStats.updateStats(currentJob, timeElapsed, stats);
+				modelCheckStats.updateStats(stateSpace, timeElapsed, stats);
 			}
 			
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				// The current values of these fields are stored in local fields,
-				// so that the Platform.runLater call below can safely use them.
-				// Accessing the fields directly might not work correctly,
-				// because the next checking job might have already started running and overwritten the fields.
-				final IModelCheckJob job1 = currentJob;
-				final ModelCheckingItem item1 = currentItem;
-				final ModelCheckStats modelCheckStats = currentStats;
-				currentJob = null;
-				currentItem = null;
-				currentStats = null;
-				modelCheckStats.isFinished(job1, timeElapsed, result);
+				modelCheckStats.isFinished(stateSpace, timeElapsed, result);
 				Platform.runLater(() -> {
-					showResult(result, job1, item1, modelCheckStats);
+					showResult(result, stateSpace, item, modelCheckStats);
 					injector.getInstance(OperationsView.class).update(currentTrace.get());
-					injector.getInstance(StatsView.class).update(job1.getStateSpace());
+					injector.getInstance(StatsView.class).update(stateSpace);
 					lastResult.set(result);
 					injector.getInstance(ModelcheckingView.class).refresh();
 				});
 			}
 		};
-		IModelCheckJob job = new ConsistencyChecker(currentTrace.getStateSpace(), item.getOptions(), null, listener);
-		this.currentJob = job;
-		this.currentItem = item;
-		this.currentStats = new ModelCheckStats(stageManager, injector);
+		IModelCheckJob job = new ConsistencyChecker(stateSpace, item.getOptions(), null, listener);
 
-		this.currentStats.startJob();
+		modelCheckStats.startJob();
 		
 		//This must be executed before executing model checking job
-		final ModelCheckStats stats = this.currentStats;
-		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(stats));
+		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(modelCheckStats));
 		
 		final IModelCheckingResult result;
 		try {
@@ -160,7 +139,7 @@ public class Modelchecker {
 		currentTrace.getStateSpace().sendInterrupt();
 	}
 	
-	private void showResult(IModelCheckingResult result, IModelCheckJob job, ModelCheckingItem item, ModelCheckStats stats) {
+	private void showResult(IModelCheckingResult result, StateSpace stateSpace, ModelCheckingItem item, ModelCheckStats stats) {
 		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
 		List<ModelCheckingJobItem> jobItems = item.getItems();
 		final Checked checked;
@@ -177,7 +156,7 @@ public class Modelchecker {
 		} else {
 			traceDescription = null;
 		}
-		final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, checked, result.getMessage(), stats, job.getStateSpace(), traceDescription);
+		final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, checked, result.getMessage(), stats, stateSpace, traceDescription);
 		jobItems.add(jobItem);
 		modelCheckingView.selectItem(item);
 		modelCheckingView.selectJobItem(jobItem);

@@ -43,8 +43,8 @@ public final class ModelCheckStats extends AnchorPane {
 		statsBox.setVisible(true);
 	}
 
-	public void updateStats(final IModelCheckJob modelChecker, final long timeElapsed, final StateSpaceStats stats) {
-		Objects.requireNonNull(modelChecker, "modelChecker");
+	public void updateStats(final StateSpace stateSpace, final long timeElapsed, final StateSpaceStats stats) {
+		Objects.requireNonNull(stateSpace, "stateSpace");
 		
 		Platform.runLater(() -> elapsedTime.setText(String.format("%.1f",timeElapsed/1000.0) + " s"));
 
@@ -61,7 +61,6 @@ public final class ModelCheckStats extends AnchorPane {
 			});
 		}
 		
-		final StateSpace stateSpace = modelChecker.getStateSpace();
 		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
 		stateSpace.execute(cmd);
 		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
@@ -71,8 +70,8 @@ public final class ModelCheckStats extends AnchorPane {
 		}
 	}
 
-	public void isFinished(final IModelCheckJob job, final long timeElapsed, final IModelCheckingResult result) {
-		Objects.requireNonNull(job, "modelChecker");
+	public void isFinished(final StateSpace stateSpace, final long timeElapsed, final IModelCheckingResult result) {
+		Objects.requireNonNull(stateSpace, "stateSpace");
 		Objects.requireNonNull(result, "result");
 		
 		Platform.runLater(() -> {
@@ -81,7 +80,6 @@ public final class ModelCheckStats extends AnchorPane {
 			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 		});
 		
-		final StateSpace stateSpace = job.getStateSpace();
 		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
 		stateSpace.execute(cmd);
 		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
