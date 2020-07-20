@@ -49,23 +49,23 @@ public class ModelcheckingStage extends Stage {
 	
 	private final CurrentProject currentProject;
 	
-	private final Injector injector;
+	private final Modelchecker modelchecker;
 
 	@Inject
 	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, 
-							final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
+							final CurrentTrace currentTrace, final CurrentProject currentProject, final Modelchecker modelchecker) {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.injector = injector;
+		this.modelchecker = modelchecker;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
 	}
 
 	@FXML
 	private void initialize() {
 		this.initModality(Modality.APPLICATION_MODAL);
-		this.startButton.disableProperty().bind(injector.getInstance(Modelchecker.class).runningProperty());
+		this.startButton.disableProperty().bind(modelchecker.runningProperty());
 		this.selectSearchStrategy.getItems().setAll(SearchStrategy.values());
 		this.selectSearchStrategy.setValue(SearchStrategy.MIXED_BF_DF);
 		this.selectSearchStrategy.setConverter(new StringConverter<SearchStrategy>() {
@@ -87,7 +87,7 @@ public class ModelcheckingStage extends Stage {
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(getOptions());
 			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 				this.hide();
-				injector.getInstance(Modelchecker.class).checkItem(modelcheckingItem, false);
+				modelchecker.checkItem(modelcheckingItem, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
 			} else {
 				stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked").showAndWait();
