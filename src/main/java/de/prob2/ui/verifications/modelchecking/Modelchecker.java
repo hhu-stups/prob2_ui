@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -21,6 +23,7 @@ import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
@@ -28,11 +31,8 @@ import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +41,12 @@ import org.slf4j.LoggerFactory;
 public class Modelchecker implements IModelCheckListener {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Modelchecker.class);
-	private static final AtomicInteger threadCounter = new AtomicInteger(0);
 	
 	private final Map<String, IModelCheckJob> jobs;
 	private final Map<String, ModelCheckingItem> idToItem;
 	private final Map<String, ModelCheckStats> idToStats;
-	private final ListProperty<Thread> currentJobThreads;
+	private final ObjectProperty<Future<?>> currentFuture;
+	private final ExecutorService executor;
 	private final List<IModelCheckJob> currentJobs;
 	private final ObjectProperty<IModelCheckingResult> lastResult;
 	private final ModelcheckingStage modelcheckingStage;
@@ -56,17 +56,17 @@ public class Modelchecker implements IModelCheckListener {
 	private final CurrentTrace currentTrace;
 	
 	private final Injector injector;
-
-	private final Object lock = new Object();
 	
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, 
-			final ModelcheckingStage modelcheckingStage, final Injector injector) {
+			final ModelcheckingStage modelcheckingStage, final StopActions stopActions, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.modelcheckingStage = modelcheckingStage;
 		this.injector = injector;
-		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
+		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
+		stopActions.add(this.executor::shutdownNow);
 		this.currentJobs = new ArrayList<>();
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		this.jobs = new HashMap<>();
@@ -79,19 +79,14 @@ public class Modelchecker implements IModelCheckListener {
 			return;
 		}
 		
-		Thread currentJobThread = new Thread(() -> {
-			synchronized(lock) {
+		this.currentFuture.set(this.executor.submit(() -> {
+			try {
 				updateCurrentValues(item, currentTrace.getStateSpace());
 				startModelchecking(checkAll);
-				currentJobThreads.remove(Thread.currentThread());
+			} finally {
+				Platform.runLater(() -> this.currentFuture.set(null));
 			}
-		}, "Model Check Result Waiter " + threadCounter.getAndIncrement());
-		//Adding a new thread for model checking must be done before the thread is started, but it has to be
-		//synchronized with other threads accessing the list containing all threads
-		synchronized(lock) {
-			currentJobThreads.add(currentJobThread);
-		}
-		currentJobThread.start();
+		}));
 	}
 	
 	private void updateCurrentValues(ModelCheckingItem item, StateSpace stateSpace) {
@@ -135,7 +130,7 @@ public class Modelchecker implements IModelCheckListener {
 	}
 	
 	public BooleanExpression runningProperty() {
-		return this.currentJobThreads.emptyProperty().not();
+		return this.currentFuture.isNotNull();
 	}
 	
 	public boolean isRunning() {
@@ -174,14 +169,12 @@ public class Modelchecker implements IModelCheckListener {
 	}
 
 	public void cancelModelcheck() {
-		List<Thread> removedThreads = new ArrayList<>();
-		for (Thread thread : currentJobThreads) {
-			thread.interrupt();
-			removedThreads.add(thread);
+		final Future<?> future = this.currentFuture.get();
+		if (future != null) {
+			future.cancel(true);
 		}
 		List<IModelCheckJob> removedJobs = new ArrayList<>(currentJobs);
 		currentTrace.getStateSpace().sendInterrupt();
-		currentJobThreads.removeAll(removedThreads);
 		currentJobs.removeAll(removedJobs);
 	}
 	
