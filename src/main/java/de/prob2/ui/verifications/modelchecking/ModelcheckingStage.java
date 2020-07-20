@@ -1,14 +1,17 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.application.Platform;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -17,8 +20,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
-import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -64,6 +65,7 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private void initialize() {
 		this.initModality(Modality.APPLICATION_MODAL);
+		this.startButton.disableProperty().bind(injector.getInstance(Modelchecker.class).runningProperty());
 		this.selectSearchStrategy.getItems().setAll(SearchStrategy.values());
 		this.selectSearchStrategy.setValue(SearchStrategy.MIXED_BF_DF);
 		this.selectSearchStrategy.setConverter(new StringConverter<SearchStrategy>() {
@@ -118,9 +120,4 @@ public class ModelcheckingStage extends Stage {
 	private void cancel() {
 		this.hide();
 	}
-
-	public void setDisableStart(final boolean disableStart) {
-		Platform.runLater(() -> this.startButton.setDisable(disableStart));
-	}
-	
 }

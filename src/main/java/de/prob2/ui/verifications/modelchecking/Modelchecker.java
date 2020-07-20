@@ -49,7 +49,6 @@ public class Modelchecker implements IModelCheckListener {
 	private final ExecutorService executor;
 	private final List<IModelCheckJob> currentJobs;
 	private final ObjectProperty<IModelCheckingResult> lastResult;
-	private final ModelcheckingStage modelcheckingStage;
 
 	private final StageManager stageManager;
 	
@@ -59,10 +58,9 @@ public class Modelchecker implements IModelCheckListener {
 	
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace, 
-			final ModelcheckingStage modelcheckingStage, final StopActions stopActions, final Injector injector) {
+			final StopActions stopActions, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
-		this.modelcheckingStage = modelcheckingStage;
 		this.injector = injector;
 		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
@@ -137,7 +135,6 @@ public class Modelchecker implements IModelCheckListener {
 	}
 	
 	private void startModelchecking(boolean checkAll) {
-		modelcheckingStage.setDisableStart(true);
 		int size = currentJobs.size();
 		IModelCheckJob job = currentJobs.get(size - 1);
 
@@ -155,8 +152,6 @@ public class Modelchecker implements IModelCheckListener {
 			LOGGER.error("Exception while running model check job", e);
 			Platform.runLater(() -> stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
 			return;
-		} finally {
-			modelcheckingStage.setDisableStart(false);
 		}
 		
 		if(!checkAll && result instanceof ITraceDescription) {
