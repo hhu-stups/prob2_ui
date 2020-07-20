@@ -91,7 +91,7 @@ public class Modelchecker implements IModelCheckListener {
 	}
 	
 	private void updateCurrentValues(ModelCheckingItem item, StateSpace stateSpace) {
-		IModelCheckJob job = new ConsistencyChecker(stateSpace, item.getOptions(), null, this);
+		IModelCheckJob job = "-".equals(item.getNodesLimit()) ? new ConsistencyChecker(stateSpace, item.getOptions(), null, this) : new ConsistencyChecker(stateSpace, Integer.parseInt(item.getNodesLimit()), item.getOptions(), null, this);
 		idToItem.put(job.getJobId(), item);
 		idToStats.put(job.getJobId(), new ModelCheckStats(stageManager, injector));
 		currentJobs.add(job);

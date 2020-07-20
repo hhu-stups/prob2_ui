@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-
 <fx:root type="Stage" fx:id="mcheckStage"
 		 title="%verifications.modelchecking.modelcheckingStage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
@@ -14,18 +20,33 @@
 					AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 					AnchorPane.bottomAnchor="0.0">
 					<AnchorPane>
-						<HBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0"
-							alignment="CENTER_LEFT">
-							<Label text="%verifications.modelchecking.modelcheckingStage.searchStrategy"
-								textAlignment="LEFT" />
-							<HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-								<ChoiceBox fx:id="selectSearchStrategy">
-									<tooltip>
-										<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.searchStrategy" />
-									</tooltip>
-								</ChoiceBox>
+						<VBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">
+							<HBox alignment="CENTER_LEFT" spacing="5.0">
+								<Label text="%verifications.modelchecking.modelcheckingStage.searchStrategy"/>
+								<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+									<ChoiceBox fx:id="selectSearchStrategy">
+										<tooltip>
+											<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.searchStrategy" />
+										</tooltip>
+									</ChoiceBox>
+								</HBox>
 							</HBox>
-						</HBox>
+							<HBox alignment="CENTER_LEFT" spacing="5.0">
+								<Label text="%verifications.modelchecking.modelcheckingStage.nodesLimit"/>
+								<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" spacing="10.0">
+									<CheckBox fx:id="chooseNodesLimit" prefWidth="50.0" prefHeight="50.0">
+										<tooltip>
+											<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.chooseNodesLimit" />
+										</tooltip>
+									</CheckBox>
+									<Spinner fx:id="nodesLimit" editable="true">
+										<tooltip>
+											<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.nodesLimit" />
+										</tooltip>
+									</Spinner>
+								</HBox>
+							</HBox>
+						</VBox>
 					</AnchorPane>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS"
 						alignment="CENTER_LEFT">

@@ -14,6 +14,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -23,6 +25,11 @@ import java.util.ResourceBundle;
 @FXMLInjected
 @Singleton
 public class ModelcheckingStage extends Stage {
+
+	private static final int INITIAL_NODES_LIMIT = 500000;
+
+	private static final int INITIAL_NODES_STEP = 1000;
+
 	@FXML
 	private Button startButton;
 	@FXML
@@ -39,6 +46,10 @@ public class ModelcheckingStage extends Stage {
 	private CheckBox findGoal;
 	@FXML
 	private CheckBox stopAtFullCoverage;
+	@FXML
+	private CheckBox chooseNodesLimit;
+	@FXML
+	private Spinner<Integer> nodesLimit;
 	
 	private final ResourceBundle bundle;
 	
@@ -77,12 +88,14 @@ public class ModelcheckingStage extends Stage {
 				throw new UnsupportedOperationException("Conversion from String to SearchStrategy not supported");
 			}
 		});
+		this.nodesLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_NODES_LIMIT, INITIAL_NODES_STEP));
+		this.nodesLimit.visibleProperty().bind(chooseNodesLimit.selectedProperty());
 	}
 
 	@FXML
 	private void startModelCheck() {
 		if (currentTrace.exists()) {
-			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(getOptions());
+			ModelCheckingItem modelcheckingItem = chooseNodesLimit.isSelected() ? new ModelCheckingItem(String.valueOf(nodesLimit.getValue()), getOptions()) : new ModelCheckingItem(getOptions());
 			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 				this.hide();
 				injector.getInstance(Modelchecker.class).checkItem(modelcheckingItem, false);

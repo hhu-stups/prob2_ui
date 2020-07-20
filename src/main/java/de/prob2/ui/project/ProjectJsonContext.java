@@ -16,7 +16,7 @@ import java.util.Iterator;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 	ProjectJsonContext() {
-		super(Project.class, "Project", 2);
+		super(Project.class, "Project", 3);
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
@@ -219,6 +219,17 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			}
 		});
 	}
+
+	private static void updateV2Project(final JsonObject project) {
+		project.getAsJsonArray("machines").forEach(machineElement -> {
+			final JsonObject machine = machineElement.getAsJsonObject();
+			machine.getAsJsonArray("modelcheckingItems").forEach(modelCheckingItemElement -> {
+				if (!modelCheckingItemElement.getAsJsonObject().has("nodesLimit")) {
+					modelCheckingItemElement.getAsJsonObject().addProperty("nodesLimit", "-");
+				}
+			});
+		});
+	}
 	
 	@Override
 	public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -227,6 +238,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		}
 		if (oldMetadata.getFormatVersion() <= 1) {
 			updateV1Project(oldObject);
+		}
+		if (oldMetadata.getFormatVersion() <= 2) {
+			updateV2Project(oldObject);
 		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}

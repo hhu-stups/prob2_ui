@@ -26,6 +26,8 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private transient Checked checked;
 
+	private String nodesLimit;
+
 	private final ObjectProperty<ModelCheckingOptions> options;
 	
 	private BooleanProperty shouldExecute;
@@ -35,6 +37,15 @@ public class ModelCheckingItem implements IExecutableItem {
 	public ModelCheckingItem(ModelCheckingOptions options) {
 		Objects.requireNonNull(options);
 		this.checked = Checked.NOT_CHECKED;
+		this.nodesLimit = "-";
+		this.options = new SimpleObjectProperty<>(this, "options", options);
+		this.shouldExecute = new SimpleBooleanProperty(true);
+	}
+
+	public ModelCheckingItem(String nodesLimit, ModelCheckingOptions options) {
+		Objects.requireNonNull(options);
+		this.checked = Checked.NOT_CHECKED;
+		this.nodesLimit = nodesLimit;
 		this.options = new SimpleObjectProperty<>(this, "options", options);
 		this.shouldExecute = new SimpleBooleanProperty(true);
 	}
@@ -42,6 +53,7 @@ public class ModelCheckingItem implements IExecutableItem {
 	private ModelCheckingItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
 		this.checked = Checked.NOT_CHECKED;
+		this.nodesLimit = JsonManager.checkDeserialize(context, object, "nodesLimit", String.class);
 		this.options = JsonManager.checkDeserialize(context, object, "options", new TypeToken<ObjectProperty<ModelCheckingOptions>>() {}.getType());
 		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
 	}
@@ -54,7 +66,11 @@ public class ModelCheckingItem implements IExecutableItem {
 	public void setChecked(final Checked checked) {
 		this.checked = checked;
 	}
-	
+
+	public String getNodesLimit() {
+		return nodesLimit;
+	}
+
 	public ObjectProperty<ModelCheckingOptions> optionsProperty() {
 		return this.options;
 	}
@@ -102,16 +118,19 @@ public class ModelCheckingItem implements IExecutableItem {
 			return false;
 		}
 		ModelCheckingItem other = (ModelCheckingItem) obj;
-		return this.getOptions().equals(other.getOptions());
+		return this.getNodesLimit().equals(other.nodesLimit) && this.getOptions().equals(other.getOptions());
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getOptions());
+		return Objects.hash(this.nodesLimit, this.getOptions());
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("%s(%s)", this.getClass().getSimpleName(), this.getOptions());
+		if("-".equals(nodesLimit)) {
+			return String.format("%s(%s)", this.getClass().getSimpleName(), this.getOptions());
+		}
+		return String.format("%s(%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getOptions());
 	}
 }
