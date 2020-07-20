@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class Modelchecker implements IModelCheckListener {
+public class Modelchecker {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Modelchecker.class);
 	
@@ -84,33 +84,6 @@ public class Modelchecker implements IModelCheckListener {
 		}));
 	}
 	
-	@Override
-	public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		this.currentStats.updateStats(this.currentJob, timeElapsed, stats);
-	}
-	
-	@Override
-	public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-		// The current values of these fields are stored in local fields,
-		// so that the Platform.runLater call below can safely use them.
-		// Accessing the fields directly might not work correctly,
-		// because the next checking job might have already started running and overwritten the fields.
-		final IModelCheckJob job = this.currentJob;
-		final ModelCheckingItem item = this.currentItem;
-		final ModelCheckStats modelCheckStats = this.currentStats;
-		this.currentJob = null;
-		this.currentItem = null;
-		this.currentStats = null;
-		modelCheckStats.isFinished(job, timeElapsed, result);
-		Platform.runLater(() -> {
-			showResult(result, job, item, modelCheckStats);
-			injector.getInstance(OperationsView.class).update(currentTrace.get());
-			injector.getInstance(StatsView.class).update(job.getStateSpace());
-			lastResult.set(result);
-			injector.getInstance(ModelcheckingView.class).refresh();
-		});
-	}
-	
 	public ObjectProperty<IModelCheckingResult> resultProperty() {
 		return lastResult;
 	}
@@ -124,7 +97,35 @@ public class Modelchecker implements IModelCheckListener {
 	}
 	
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
-		IModelCheckJob job = new ConsistencyChecker(currentTrace.getStateSpace(), item.getOptions(), null, this);
+		final IModelCheckListener listener = new IModelCheckListener() {
+			@Override
+			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
+				currentStats.updateStats(currentJob, timeElapsed, stats);
+			}
+			
+			@Override
+			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
+				// The current values of these fields are stored in local fields,
+				// so that the Platform.runLater call below can safely use them.
+				// Accessing the fields directly might not work correctly,
+				// because the next checking job might have already started running and overwritten the fields.
+				final IModelCheckJob job1 = currentJob;
+				final ModelCheckingItem item1 = currentItem;
+				final ModelCheckStats modelCheckStats = currentStats;
+				currentJob = null;
+				currentItem = null;
+				currentStats = null;
+				modelCheckStats.isFinished(job1, timeElapsed, result);
+				Platform.runLater(() -> {
+					showResult(result, job1, item1, modelCheckStats);
+					injector.getInstance(OperationsView.class).update(currentTrace.get());
+					injector.getInstance(StatsView.class).update(job1.getStateSpace());
+					lastResult.set(result);
+					injector.getInstance(ModelcheckingView.class).refresh();
+				});
+			}
+		};
+		IModelCheckJob job = new ConsistencyChecker(currentTrace.getStateSpace(), item.getOptions(), null, listener);
 		this.currentJob = job;
 		this.currentItem = item;
 		this.currentStats = new ModelCheckStats(stageManager, injector);
