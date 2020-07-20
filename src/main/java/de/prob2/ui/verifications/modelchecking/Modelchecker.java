@@ -79,19 +79,11 @@ public class Modelchecker implements IModelCheckListener {
 		
 		this.currentFuture.set(this.executor.submit(() -> {
 			try {
-				updateCurrentValues(item, currentTrace.getStateSpace());
-				startModelchecking(checkAll);
+				startModelchecking(item, checkAll);
 			} finally {
 				Platform.runLater(() -> this.currentFuture.set(null));
 			}
 		}));
-	}
-	
-	private void updateCurrentValues(ModelCheckingItem item, StateSpace stateSpace) {
-		IModelCheckJob job = new ConsistencyChecker(stateSpace, item.getOptions(), null, this);
-		idToItem.put(job.getJobId(), item);
-		idToStats.put(job.getJobId(), new ModelCheckStats(stageManager, injector));
-		currentJobs.add(job);
 	}
 	
 	@Override
@@ -134,7 +126,11 @@ public class Modelchecker implements IModelCheckListener {
 		return this.runningProperty().get();
 	}
 	
-	private void startModelchecking(boolean checkAll) {
+	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
+		IModelCheckJob job1 = new ConsistencyChecker(currentTrace.getStateSpace(), item.getOptions(), null, this);
+		idToItem.put(job1.getJobId(), item);
+		idToStats.put(job1.getJobId(), new ModelCheckStats(stageManager, injector));
+		currentJobs.add(job1);
 		int size = currentJobs.size();
 		IModelCheckJob job = currentJobs.get(size - 1);
 
