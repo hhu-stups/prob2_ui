@@ -236,7 +236,7 @@ public final class OperationsView extends VBox {
 		});
 		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> opsListView.setDisable(to)));
 
-		injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable,from,to) -> opsListView.setDisable(!to));
+		injector.getInstance(Modelchecker.class).runningProperty().addListener((observable,from,to) -> opsListView.setDisable(to));
 		injector.getInstance(LTLFormulaChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
 		injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
 		injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
