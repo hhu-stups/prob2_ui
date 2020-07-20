@@ -47,7 +47,6 @@ public class Modelchecker implements IModelCheckListener {
 	private final Map<String, ModelCheckStats> idToStats;
 	private final ObjectProperty<Future<?>> currentFuture;
 	private final ExecutorService executor;
-	private final List<IModelCheckJob> currentJobs;
 	private final ObjectProperty<IModelCheckingResult> lastResult;
 
 	private final StageManager stageManager;
@@ -65,7 +64,6 @@ public class Modelchecker implements IModelCheckListener {
 		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
 		stopActions.add(this.executor::shutdownNow);
-		this.currentJobs = new ArrayList<>();
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		this.jobs = new HashMap<>();
 		this.idToItem = new HashMap<>();
@@ -127,12 +125,9 @@ public class Modelchecker implements IModelCheckListener {
 	}
 	
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
-		IModelCheckJob job1 = new ConsistencyChecker(currentTrace.getStateSpace(), item.getOptions(), null, this);
-		idToItem.put(job1.getJobId(), item);
-		idToStats.put(job1.getJobId(), new ModelCheckStats(stageManager, injector));
-		currentJobs.add(job1);
-		int size = currentJobs.size();
-		IModelCheckJob job = currentJobs.get(size - 1);
+		IModelCheckJob job = new ConsistencyChecker(currentTrace.getStateSpace(), item.getOptions(), null, this);
+		idToItem.put(job.getJobId(), item);
+		idToStats.put(job.getJobId(), new ModelCheckStats(stageManager, injector));
 
 		jobs.put(job.getJobId(), job);
 		ModelCheckStats currentStats = idToStats.get(job.getJobId());
@@ -155,7 +150,6 @@ public class Modelchecker implements IModelCheckListener {
 			Trace trace = ((ITraceDescription) result).getTrace(s);
 			injector.getInstance(CurrentTrace.class).set(trace);
 		}
-		currentJobs.remove(job);
 	}
 
 	public void cancelModelcheck() {
@@ -163,9 +157,7 @@ public class Modelchecker implements IModelCheckListener {
 		if (future != null) {
 			future.cancel(true);
 		}
-		List<IModelCheckJob> removedJobs = new ArrayList<>(currentJobs);
 		currentTrace.getStateSpace().sendInterrupt();
-		currentJobs.removeAll(removedJobs);
 	}
 	
 	private void showResult(String jobID, IModelCheckingResult result, StateSpace stateSpace) {
