@@ -80,11 +80,6 @@ public final class VersionInfo {
 		return this.loadCliVersionInfo().getVersion();
 	}
 	
-	public String getFormattedCliVersion() {
-		final CliVersionNumber cvn = this.getCliVersion();
-		return String.format("%s.%s.%s-%s", cvn.major, cvn.minor, cvn.service, cvn.qualifier);
-	}
-	
 	public String getCliLastChangedDate() {
 		return this.loadCliVersionInfo().getLastchangeddate();
 	}

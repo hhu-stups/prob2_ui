@@ -146,7 +146,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	private void setBindings() {
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(addModelCheckButton.disableProperty(), currentTrace.existsProperty().not());
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentTrace.existsProperty().not());
-		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
+		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		strategyColumn.setCellValueFactory(features -> Bindings.createStringBinding(() ->
@@ -229,9 +229,9 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty().or(checker.runningProperty()));
 			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.currentJobThreadsProperty().emptyProperty().not()));
+				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.runningProperty()));
 			}
 		});
 		
@@ -289,7 +289,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
 					checkItem.disableProperty().bind(disableCheckProperty
-							.or(checker.currentJobThreadsProperty().emptyProperty().not())
+							.or(checker.runningProperty())
 							.or(to.selectedProperty().not()));
 				}
 			});

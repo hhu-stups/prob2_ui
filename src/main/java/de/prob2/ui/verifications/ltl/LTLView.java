@@ -1,10 +1,17 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
@@ -12,7 +19,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.JSONInformationProvider;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -33,6 +39,7 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
+
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -48,14 +55,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -407,7 +409,11 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 				.filter(LTLPatternItem::selected)
 				.collect(Collectors.toList());
 			try {
-				this.jsonManager.writeToFile(path, new LTLData(formulas, patterns), JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
+				final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
+					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+					.withModelName(machine.getName())
+					.build();
+				this.jsonManager.writeToFile(path, new LTLData(formulas, patterns), metadata);
 			} catch (IOException e) {
 				stageManager.makeExceptionAlert(e, "verifications.ltl.ltlView.saveLTL.error").showAndWait();
 			}

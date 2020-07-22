@@ -1,14 +1,12 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -59,22 +57,23 @@ public class ModelcheckingStage extends Stage {
 	
 	private final CurrentProject currentProject;
 	
-	private final Injector injector;
+	private final Modelchecker modelchecker;
 
 	@Inject
 	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, 
-							final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
+							final CurrentTrace currentTrace, final CurrentProject currentProject, final Modelchecker modelchecker) {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.injector = injector;
+		this.modelchecker = modelchecker;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
 	}
 
 	@FXML
 	private void initialize() {
 		this.initModality(Modality.APPLICATION_MODAL);
+		this.startButton.disableProperty().bind(modelchecker.runningProperty());
 		this.selectSearchStrategy.getItems().setAll(SearchStrategy.values());
 		this.selectSearchStrategy.setValue(SearchStrategy.MIXED_BF_DF);
 		this.selectSearchStrategy.setConverter(new StringConverter<SearchStrategy>() {
@@ -98,7 +97,7 @@ public class ModelcheckingStage extends Stage {
 			ModelCheckingItem modelcheckingItem = chooseNodesLimit.isSelected() ? new ModelCheckingItem(String.valueOf(nodesLimit.getValue()), getOptions()) : new ModelCheckingItem(getOptions());
 			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 				this.hide();
-				injector.getInstance(Modelchecker.class).checkItem(modelcheckingItem, false);
+				modelchecker.checkItem(modelcheckingItem, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
 			} else {
 				stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked").showAndWait();
@@ -131,9 +130,4 @@ public class ModelcheckingStage extends Stage {
 	private void cancel() {
 		this.hide();
 	}
-
-	public void setDisableStart(final boolean disableStart) {
-		Platform.runLater(() -> this.startButton.setDisable(disableStart));
-	}
-	
 }

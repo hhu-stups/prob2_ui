@@ -71,6 +71,10 @@ public class ModelCheckingItem implements IExecutableItem {
 		return nodesLimit;
 	}
 
+	public void setNodesLimit(String nodesLimit) {
+		this.nodesLimit = nodesLimit;
+	}
+
 	public ObjectProperty<ModelCheckingOptions> optionsProperty() {
 		return this.options;
 	}

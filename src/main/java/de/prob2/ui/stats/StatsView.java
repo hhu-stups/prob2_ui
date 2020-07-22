@@ -133,7 +133,7 @@ public class StatsView extends ScrollPane {
 	}
 
 	public void update(final StateSpace stateSpace) {
-		if (stateSpace != null && injector.getInstance(Modelchecker.class).currentJobThreadsProperty().emptyProperty().get()) {
+		if (stateSpace != null && !injector.getInstance(Modelchecker.class).isRunning()) {
 			final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
 			stateSpace.execute(stateSpaceStatsCmd);
 			updateSimpleStats(stateSpaceStatsCmd.getResult());

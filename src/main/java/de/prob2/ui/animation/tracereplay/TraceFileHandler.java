@@ -1,26 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import com.google.gson.JsonParseException;
-import com.google.inject.Inject;
-import de.prob.check.tracereplay.ITraceReplayFileHandler;
-import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.check.tracereplay.TraceLoaderSaver;
-import de.prob.json.JsonManager;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.JSONInformationProvider;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +12,30 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TraceFileHandler implements ITraceReplayFileHandler {
+import com.google.gson.JsonParseException;
+import com.google.inject.Inject;
+
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.TraceLoaderSaver;
+import de.prob.json.JsonManager;
+import de.prob.json.JsonMetadata;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TraceFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
@@ -57,7 +59,12 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 	}
 
 	public PersistentTrace load(Path path) {
-		return traceLoaderSaver.load(currentProject.getLocation().resolve(path), this);
+		try {
+			return traceLoaderSaver.load(currentProject.getLocation().resolve(path));
+		} catch (IOException | JsonParseException e) {
+			this.showLoadError(path, e);
+			return null;
+		}
 	}
 
 	public void showLoadError(Path path, Exception e) {
@@ -120,9 +127,12 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
 				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
-				jsonManager.writeToFile(traceFilePath, traces.get(i), jsonManager.defaultMetadataBuilder(JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName())
+				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
+					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+					.withModelName(machine.getName())
 					.withCreator(createdBy)
-					.build());
+					.build();
+				jsonManager.writeToFile(traceFilePath, traces.get(i), metadata);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
 		} catch (IOException e) {
@@ -150,10 +160,10 @@ public class TraceFileHandler implements ITraceReplayFileHandler {
 	}
 
 	public void save(PersistentTrace trace, Path location) {
-		traceLoaderSaver.save(trace, location, this, JSONInformationProvider.getKernelVersion(versionInfo), JSONInformationProvider.getCliVersion(versionInfo), JSONInformationProvider.getModelName());
-	}
-
-	public void showSaveError(IOException e) {
-		stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
+		try {
+			traceLoaderSaver.save(trace, location, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
+		}
 	}
 }

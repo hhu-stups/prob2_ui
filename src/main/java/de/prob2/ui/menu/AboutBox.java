@@ -61,7 +61,7 @@ public final class AboutBox extends Stage {
 		String cliLastChangedDate;
 		String cliPrologInfo;
 		try {
-			cliVersion = this.versionInfo.getFormattedCliVersion();
+			cliVersion = this.versionInfo.getCliVersion().getShortVersionString();
 			cliRevision = this.versionInfo.getCliVersion().revision;
 			cliLastChangedDate = this.versionInfo.getCliLastChangedDate();
 			cliPrologInfo = this.versionInfo.getCliPrologInfo();
