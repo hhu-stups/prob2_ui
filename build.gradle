@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 plugins {
@@ -118,6 +120,10 @@ tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 }
 
+configurations {
+	javafxAllPlatforms
+}
+
 configurations.all {
 	resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
 }
@@ -150,6 +156,12 @@ if (JavaVersion.current().java11Compatible) {
 			"javafx.swing",
 			"javafx.web",
 		]
+	}
+	
+	["win", "mac", "linux"].each {platform ->
+		javafx.modules.each {module ->
+			dependencies.javafxAllPlatforms(group: "org.openjfx", name: module.replace("javafx.", "javafx-"), version: javafx.version, classifier: platform)
+		}
 	}
 }
 
@@ -196,6 +208,20 @@ jar {
 			"Add-Opens": opens.join(" "),
 		])
 	}
+}
+
+task multiPlatformShadowJar(type: ShadowJar) {
+	manifest {
+		inheritFrom(jar.manifest)
+		attributes(["Main-Class": mainClassName])
+	}
+	
+	archiveClassifier = "multi"
+	from(sourceSets.main.output)
+	configurations = [
+		project.configurations.runtimeClasspath,
+		project.configurations.javafxAllPlatforms,
+	]
 }
 
 macAppBundle {

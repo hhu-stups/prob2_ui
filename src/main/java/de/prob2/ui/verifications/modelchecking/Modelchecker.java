@@ -18,7 +18,6 @@ import de.prob.check.ModelCheckOk;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.operations.OperationsView;
@@ -87,6 +86,24 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
+	private static ModelCheckingJobItem makeJobItem(final int index, final IModelCheckingResult result, final ModelCheckStats stats, final StateSpace stateSpace) {
+		final Checked checked;
+		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
+			checked = Checked.SUCCESS;
+		} else if (result instanceof ITraceDescription) {
+			checked = Checked.FAIL;
+		} else {
+			checked = Checked.TIMEOUT;
+		}
+		final ITraceDescription traceDescription;
+		if (result instanceof ITraceDescription) {
+			traceDescription = (ITraceDescription)result;
+		} else {
+			traceDescription = null;
+		}
+		return new ModelCheckingJobItem(index, checked, result.getMessage(), stats, stateSpace, traceDescription);
+	}
+
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final ModelCheckStats modelCheckStats = new ModelCheckStats(stageManager, injector);
@@ -99,8 +116,12 @@ public class Modelchecker {
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
 				modelCheckStats.isFinished(stateSpace, timeElapsed, result);
+				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, modelCheckStats, stateSpace);
+				if (!checkAll && jobItem.getTraceDescription() != null) {
+					currentTrace.set(jobItem.getTrace());
+				}
 				Platform.runLater(() -> {
-					showResult(result, stateSpace, item, modelCheckStats);
+					showResult(item, jobItem);
 					injector.getInstance(OperationsView.class).update(currentTrace.get());
 					injector.getInstance(StatsView.class).update(stateSpace);
 					lastResult.set(result);
@@ -108,7 +129,6 @@ public class Modelchecker {
 				});
 			}
 		};
-
 		IModelCheckJob job = "-".equals(item.getNodesLimit()) ? new ConsistencyChecker(stateSpace, item.getOptions(), null, listener) : new ConsistencyChecker(stateSpace, Integer.parseInt(item.getNodesLimit()), item.getOptions(), null, listener);
 
 		modelCheckStats.startJob();
@@ -116,19 +136,11 @@ public class Modelchecker {
 		//This must be executed before executing model checking job
 		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(modelCheckStats));
 
-		final IModelCheckingResult result;
 		try {
-			result = job.call();
+			job.call();
 		} catch (Exception e) {
 			LOGGER.error("Exception while running model check job", e);
 			Platform.runLater(() -> stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
-			return;
-		}
-
-		if(!checkAll && result instanceof ITraceDescription) {
-			StateSpace s = job.getStateSpace();
-			Trace trace = ((ITraceDescription) result).getTrace(s);
-			injector.getInstance(CurrentTrace.class).set(trace);
 		}
 	}
 
@@ -140,24 +152,9 @@ public class Modelchecker {
 		currentTrace.getStateSpace().sendInterrupt();
 	}
 
-	private void showResult(IModelCheckingResult result, StateSpace stateSpace, ModelCheckingItem item, ModelCheckStats stats) {
+	private void showResult(ModelCheckingItem item, ModelCheckingJobItem jobItem) {
 		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
 		List<ModelCheckingJobItem> jobItems = item.getItems();
-		final Checked checked;
-		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
-			checked = Checked.SUCCESS;
-		} else if (result instanceof ITraceDescription) {
-			checked = Checked.FAIL;
-		} else {
-			checked = Checked.TIMEOUT;
-		}
-		final ITraceDescription traceDescription;
-		if (result instanceof ITraceDescription) {
-			traceDescription = (ITraceDescription) result;
-		} else {
-			traceDescription = null;
-		}
-		final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItems.size() + 1, checked, result.getMessage(), stats, stateSpace, traceDescription);
 		jobItems.add(jobItem);
 		modelCheckingView.selectItem(item);
 		modelCheckingView.selectJobItem(jobItem);
@@ -176,5 +173,7 @@ public class Modelchecker {
 		} else {
 			item.setChecked(Checked.TIMEOUT);
 		}
+
+		modelCheckingView.refresh();
 	}
 }
