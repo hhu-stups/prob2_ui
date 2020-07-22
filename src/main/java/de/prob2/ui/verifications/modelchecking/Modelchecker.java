@@ -1,14 +1,8 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
@@ -24,14 +18,17 @@ import de.prob2.ui.operations.OperationsView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
-
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Singleton
 public class Modelchecker {
@@ -129,7 +126,7 @@ public class Modelchecker {
 				});
 			}
 		};
-		IModelCheckJob job = "-".equals(item.getNodesLimit()) ? new ConsistencyChecker(stateSpace, item.getOptions(), null, listener) : new ConsistencyChecker(stateSpace, Integer.parseInt(item.getNodesLimit()), item.getOptions(), null, listener);
+		IModelCheckJob job = buildModelCheckJob(stateSpace, item, listener);
 
 		modelCheckStats.startJob();
 
@@ -142,6 +139,14 @@ public class Modelchecker {
 			LOGGER.error("Exception while running model check job", e);
 			Platform.runLater(() -> stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
 		}
+	}
+
+	private IModelCheckJob buildModelCheckJob(StateSpace stateSpace, ModelCheckingItem item, IModelCheckListener listener) {
+		ConsistencyChecker checker = new ConsistencyChecker(stateSpace, item.getOptions(), null, listener);
+		if (!"-".equals(item.getNodesLimit())) {
+			checker.setNodesLimit(Integer.parseInt(item.getNodesLimit()));
+		}
+		return checker;
 	}
 
 	public void cancelModelcheck() {
