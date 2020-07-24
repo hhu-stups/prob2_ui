@@ -66,8 +66,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@Inject
 	public ExpressionTableView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace, 
-			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector, final FileChooserManager fileChooserManager) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle, injector);
+			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+		super(stageManager, preferences, currentTrace, currentProject, bundle);
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");

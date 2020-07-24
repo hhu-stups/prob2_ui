@@ -37,7 +37,6 @@ public class Modelchecker {
 
 	private final ObjectProperty<Future<?>> currentFuture;
 	private final ExecutorService executor;
-	private final ObjectProperty<IModelCheckingResult> lastResult;
 
 	private final StageManager stageManager;
 
@@ -54,7 +53,6 @@ public class Modelchecker {
 		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
 		stopActions.add(this.executor::shutdownNow);
-		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 	}
 
 	public void checkItem(ModelCheckingItem item, boolean checkAll) {
@@ -69,10 +67,6 @@ public class Modelchecker {
 				Platform.runLater(() -> this.currentFuture.set(null));
 			}
 		}));
-	}
-
-	public ObjectProperty<IModelCheckingResult> resultProperty() {
-		return lastResult;
 	}
 
 	public BooleanExpression runningProperty() {
@@ -119,7 +113,6 @@ public class Modelchecker {
 				}
 				Platform.runLater(() -> {
 					showResult(item, jobItem);
-					lastResult.set(result);
 					injector.getInstance(ModelcheckingView.class).refresh();
 				});
 			}
