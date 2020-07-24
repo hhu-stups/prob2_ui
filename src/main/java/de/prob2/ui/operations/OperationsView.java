@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -203,6 +204,7 @@ public final class OperationsView extends VBox {
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final BackgroundUpdater updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
+	private final AtomicBoolean needsUpdateAfterBusy;
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
@@ -219,6 +221,7 @@ public final class OperationsView extends VBox {
 		this.config = config;
 		this.updater = new BackgroundUpdater("OperationsView Updater");
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
+		this.needsUpdateAfterBusy = new AtomicBoolean(false);
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
 
@@ -257,6 +260,11 @@ public final class OperationsView extends VBox {
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
 		currentTrace.addStatesCalculatedListener(newOps -> update(currentTrace.get()));
+		currentTrace.animatorBusyProperty().addListener((o, from, to) -> {
+			if (!to && this.needsUpdateAfterBusy.getAndSet(false)) {
+				update(currentTrace.get());
+			}
+		});
 
 		showDisabledOps.addListener((o, from, to) -> {
 			((BindableGlyph)disabledOpsToggle.getGraphic()).setIcon(to ? FontAwesome.Glyph.EYE : FontAwesome.Glyph.EYE_SLASH);
@@ -332,6 +340,11 @@ public final class OperationsView extends VBox {
 	private void update(final Trace trace) {
 		if (trace == null) {
 			opsListView.getItems().clear();
+		} else if (currentTrace.isAnimatorBusy()) {
+			// If the animator is currently busy,
+			// delay updating the operations view until it is no longer busy,
+			// to avoid hangs or constant reloading when long sequences of commands are executing.
+			this.needsUpdateAfterBusy.set(true);
 		} else {
 			this.updater.execute(() -> this.updateBG(trace));
 		}
