@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.animator.command.ComputeStateSpaceStatsCommand;
 import de.prob.check.StateSpaceStats;
+import de.prob.statespace.IStatesCalculatedListener;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
@@ -75,6 +76,7 @@ public class StatsView extends ScrollPane {
 	private final FontSize fontSize;
 	private final Injector injector;
 	
+	private IStatesCalculatedListener statesCalculatedListener;
 	private final SimpleObjectProperty<StateSpaceStats> lastResult;
 
 	@Inject
@@ -83,6 +85,7 @@ public class StatsView extends ScrollPane {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
+		this.statesCalculatedListener = null;
 		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		this.injector = injector;
 		stageManager.loadFXML(this, "stats_view.fxml");
@@ -98,7 +101,17 @@ public class StatsView extends ScrollPane {
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
 
-		this.currentTrace.addListener((observable, from, to) -> this.update(to == null ? null : to.getStateSpace()));
+		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
+			if (from != null && this.statesCalculatedListener != null) {
+				from.removeStatesCalculatedListener(this.statesCalculatedListener);
+				this.statesCalculatedListener = null;
+			}
+			if (to != null) {
+				this.statesCalculatedListener = newTransitions -> this.update(to);
+				to.addStatesCalculatedListener(this.statesCalculatedListener);
+			}
+			this.update(to);
+		});
 		this.update(currentTrace.getStateSpace());
 
 		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
@@ -132,7 +145,7 @@ public class StatsView extends ScrollPane {
 		extendedStatsToggle.setTooltip(new Tooltip(text));
 	}
 
-	public void update(final StateSpace stateSpace) {
+	private void update(final StateSpace stateSpace) {
 		if (stateSpace != null && !injector.getInstance(Modelchecker.class).isRunning()) {
 			final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
 			stateSpace.execute(stateSpaceStatsCmd);

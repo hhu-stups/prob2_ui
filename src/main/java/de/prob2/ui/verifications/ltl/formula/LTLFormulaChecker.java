@@ -162,7 +162,6 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 				//errorMarkers.add(new LTLMarker("error", res.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), error.getMessage()));
 				errorMarkers.add(new LTLMarker("error", 0, 0, res.getMessage().length(), res.getMessage()));
 			}
-			injector.getInstance(StatsView.class).update(currentTrace.getStateSpace());
 			return res;
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);

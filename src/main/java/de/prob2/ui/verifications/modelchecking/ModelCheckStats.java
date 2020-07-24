@@ -93,8 +93,6 @@ public final class ModelCheckStats extends AnchorPane {
 				totalTransitions.setText(String.valueOf(numTrans));
 			});
 		}
-		
-		Platform.runLater(() -> injector.getInstance(StatsView.class).update(stateSpace));
 	}
 	
 

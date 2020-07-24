@@ -120,7 +120,6 @@ public class Modelchecker {
 				Platform.runLater(() -> {
 					showResult(item, jobItem);
 					injector.getInstance(OperationsView.class).update(currentTrace.get());
-					injector.getInstance(StatsView.class).update(stateSpace);
 					lastResult.set(result);
 					injector.getInstance(ModelcheckingView.class).refresh();
 				});
