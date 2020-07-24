@@ -256,6 +256,7 @@ public final class OperationsView extends VBox {
 
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
+		currentTrace.addStatesCalculatedListener(newOps -> update(currentTrace.get()));
 
 		showDisabledOps.addListener((o, from, to) -> {
 			((BindableGlyph)disabledOpsToggle.getGraphic()).setIcon(to ? FontAwesome.Glyph.EYE : FontAwesome.Glyph.EYE_SLASH);
@@ -328,7 +329,7 @@ public final class OperationsView extends VBox {
 		}
 	}
 
-	public void update(final Trace trace) {
+	private void update(final Trace trace) {
 		if (trace == null) {
 			opsListView.getItems().clear();
 		} else {
