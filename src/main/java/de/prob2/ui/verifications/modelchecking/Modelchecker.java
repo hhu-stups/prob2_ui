@@ -111,10 +111,7 @@ public class Modelchecker {
 				if (!checkAll && jobItem.getTraceDescription() != null) {
 					currentTrace.set(jobItem.getTrace());
 				}
-				Platform.runLater(() -> {
-					showResult(item, jobItem);
-					injector.getInstance(ModelcheckingView.class).refresh();
-				});
+				Platform.runLater(() -> showResult(item, jobItem));
 			}
 		};
 		IModelCheckJob job = buildModelCheckJob(stateSpace, item, listener);
