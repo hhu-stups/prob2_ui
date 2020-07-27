@@ -35,15 +35,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private final transient ListProperty<ModelCheckingJobItem> items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 
-	public ModelCheckingItem(ModelCheckingOptions options) {
-		Objects.requireNonNull(options);
-		this.nodesLimit = "-";
-		this.options = new SimpleObjectProperty<>(this, "options", options);
-		this.shouldExecute = new SimpleBooleanProperty(true);
-		
-		this.initListeners();
-	}
-
 	public ModelCheckingItem(String nodesLimit, ModelCheckingOptions options) {
 		Objects.requireNonNull(options);
 		this.nodesLimit = nodesLimit;
@@ -158,9 +149,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	@Override
 	public String toString() {
-		if("-".equals(nodesLimit)) {
-			return String.format("%s(%s)", this.getClass().getSimpleName(), this.getOptions());
-		}
 		return String.format("%s(%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getOptions());
 	}
 }
