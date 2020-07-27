@@ -17,11 +17,11 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -38,9 +38,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 @Singleton
 public class StatsView extends ScrollPane {
 	@FXML
-	private Label totalTransitions;
-	@FXML
-	private Label processedStates;
+	private SimpleStatsView simpleStatsView;
 	@FXML
 	private GridPane stateStats;
 	@FXML
@@ -68,8 +66,6 @@ public class StatsView extends ScrollPane {
 	private final CurrentTrace currentTrace;
 	private final FontSize fontSize;
 	private final Injector injector;
-	
-	private final SimpleObjectProperty<StateSpaceStats> lastResult;
 
 	@Inject
 	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace,
@@ -77,7 +73,6 @@ public class StatsView extends ScrollPane {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
-		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		this.injector = injector;
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
@@ -146,22 +141,12 @@ public class StatsView extends ScrollPane {
 				showStats(result.getOps(), transStats);
 			}
 		} else {
-			Platform.runLater(() -> lastResult.set(null));
+			updateSimpleStats(null);
 		}
 	}
 
 	public void updateSimpleStats(StateSpaceStats result) {
-		Platform.runLater(() -> {
-			lastResult.set(result);
-
-			String processedStatesDescription = String.format("%d/%d", result.getNrProcessedNodes(), result.getNrTotalNodes());
-			if (result.getNrTotalNodes() != 0) {
-				final int percentProcessedNodes = 100 * result.getNrProcessedNodes() / result.getNrTotalNodes();
-				processedStatesDescription += " (" + percentProcessedNodes + "%)";
-			}
-			processedStates.setText(processedStatesDescription);
-			totalTransitions.setText(Integer.toString(result.getNrTotalTransitions()));
-		});
+		Platform.runLater(() -> simpleStatsView.setStats(result));
 	}
 
 	private static void showStats(List<String> packedStats, GridPane grid) {
@@ -193,7 +178,7 @@ public class StatsView extends ScrollPane {
 	}
 
 	public ReadOnlyObjectProperty<StateSpaceStats> lastResultProperty() {
-		return this.lastResult;
+		return this.simpleStatsView.statsProperty();
 	}
 
 	public StateSpaceStats getLastResult() {
