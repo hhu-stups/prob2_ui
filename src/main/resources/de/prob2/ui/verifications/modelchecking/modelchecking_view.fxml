@@ -131,7 +131,7 @@
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
 			</placeholder>
 		</TableView>
-		<VBox fx:id="statsBox" minHeight="${fontSize.fontSize * 8}" spacing="3.0" visible="false">
+		<VBox fx:id="statsBox" spacing="3.0" visible="false">
 			<padding>
 				<Insets topRightBottomLeft="10.0" />
 			</padding>
