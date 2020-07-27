@@ -40,6 +40,8 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.nodesLimit = "-";
 		this.options = new SimpleObjectProperty<>(this, "options", options);
 		this.shouldExecute = new SimpleBooleanProperty(true);
+		
+		this.initListeners();
 	}
 
 	public ModelCheckingItem(String nodesLimit, ModelCheckingOptions options) {
@@ -48,6 +50,8 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.nodesLimit = nodesLimit;
 		this.options = new SimpleObjectProperty<>(this, "options", options);
 		this.shouldExecute = new SimpleBooleanProperty(true);
+		
+		this.initListeners();
 	}
 	
 	private ModelCheckingItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
@@ -56,6 +60,31 @@ public class ModelCheckingItem implements IExecutableItem {
 		this.nodesLimit = JsonManager.checkDeserialize(context, object, "nodesLimit", String.class);
 		this.options = JsonManager.checkDeserialize(context, object, "options", new TypeToken<ObjectProperty<ModelCheckingOptions>>() {}.getType());
 		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
+		
+		this.initListeners();
+	}
+	
+	private void initListeners() {
+		this.itemsProperty().addListener((o, from, to) -> {
+			if (to.isEmpty()) {
+				this.setChecked(Checked.NOT_CHECKED);
+			} else {
+				final boolean failed = to.stream()
+					.map(ModelCheckingJobItem::getChecked)
+					.anyMatch(Checked.FAIL::equals);
+				final boolean success = !failed && to.stream()
+					.map(ModelCheckingJobItem::getChecked)
+					.anyMatch(Checked.SUCCESS::equals);
+				
+				if (success) {
+					this.setChecked(Checked.SUCCESS);
+				} else if (failed) {
+					this.setChecked(Checked.FAIL);
+				} else {
+					this.setChecked(Checked.TIMEOUT);
+				}
+			}
+		});
 	}
 	
 	@Override
@@ -102,7 +131,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	public void reset() {
 		this.itemsProperty().clear();
-		this.setChecked(Checked.NOT_CHECKED);
 	}
 	
 	public ListProperty<ModelCheckingJobItem> itemsProperty() {

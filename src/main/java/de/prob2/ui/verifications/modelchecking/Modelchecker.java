@@ -152,21 +152,6 @@ public class Modelchecker {
 		modelCheckingView.selectItem(item);
 		modelCheckingView.selectJobItem(jobItem);
 
-		boolean failed = jobItems.stream()
-				.map(ModelCheckingJobItem::getChecked)
-				.anyMatch(Checked.FAIL::equals);
-		boolean success = !failed && jobItems.stream()
-				.map(ModelCheckingJobItem::getChecked)
-				.anyMatch(Checked.SUCCESS::equals);
-
-		if (success) {
-			item.setChecked(Checked.SUCCESS);
-		} else if (failed) {
-			item.setChecked(Checked.FAIL);
-		} else {
-			item.setChecked(Checked.TIMEOUT);
-		}
-
 		modelCheckingView.refresh();
 	}
 }
