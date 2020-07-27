@@ -151,7 +151,5 @@ public class Modelchecker {
 		jobItems.add(jobItem);
 		modelCheckingView.selectItem(item);
 		modelCheckingView.selectJobItem(jobItem);
-
-		modelCheckingView.refresh();
 	}
 }
