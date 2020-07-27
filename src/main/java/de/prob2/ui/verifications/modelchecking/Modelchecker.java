@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.check.ConsistencyChecker;
@@ -48,15 +49,18 @@ public class Modelchecker {
 
 	private final CurrentTrace currentTrace;
 
+	private final Provider<ModelCheckStats> modelCheckStatsProvider;
+
 	private final StatsView statsView;
 
 	private final Injector injector;
 
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace,
-						 final StopActions stopActions, final StatsView statsView, final Injector injector) {
+						 final StopActions stopActions, final Provider<ModelCheckStats> modelCheckStatsProvider, final StatsView statsView, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.modelCheckStatsProvider = modelCheckStatsProvider;
 		this.statsView = statsView;
 		this.injector = injector;
 		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
@@ -106,7 +110,7 @@ public class Modelchecker {
 
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		final ModelCheckStats modelCheckStats = new ModelCheckStats(stageManager);
+		final ModelCheckStats modelCheckStats = modelCheckStatsProvider.get();
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {

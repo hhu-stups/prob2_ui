@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import com.google.inject.Inject;
+
 import de.prob.check.StateSpaceStats;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.sharedviews.SimpleStatsView;
@@ -12,8 +14,9 @@ import javafx.scene.layout.VBox;
 public final class ModelCheckStats extends VBox {
 	@FXML private Label elapsedTime;
 	@FXML private SimpleStatsView simpleStatsView;
-	
-	public ModelCheckStats(final StageManager stageManager) {
+
+	@Inject
+	private ModelCheckStats(final StageManager stageManager) {
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
