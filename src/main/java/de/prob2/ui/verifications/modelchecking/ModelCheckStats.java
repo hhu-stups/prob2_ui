@@ -20,10 +20,6 @@ public final class ModelCheckStats extends VBox {
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
-	void startJob() {
-		this.setVisible(true);
-	}
-
 	public void updateStats(final StateSpace stateSpace, final long timeElapsed, final StateSpaceStats stats) {
 		Objects.requireNonNull(stateSpace, "stateSpace");
 

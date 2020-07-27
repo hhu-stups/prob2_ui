@@ -105,7 +105,6 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	
-	private final StageManager stageManager;
 	private final Injector injector;
 	private final ResourceBundle bundle;
 	private final Modelchecker checker;
@@ -117,7 +116,6 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 			final ResourceBundle bundle, final Modelchecker checker) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.stageManager = stageManager;
 		this.injector = injector;
 		this.bundle = bundle;
 		this.checker = checker;
@@ -381,7 +379,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	}
 
 	public void resetView() {
-		showStats(new ModelCheckStats(stageManager));
+		statsPane.getChildren().clear();
 	}
 	
 	public void selectItem(ModelCheckingItem item) {

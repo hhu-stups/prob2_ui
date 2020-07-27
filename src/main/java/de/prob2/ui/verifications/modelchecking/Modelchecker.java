@@ -135,8 +135,6 @@ public class Modelchecker {
 		};
 		IModelCheckJob job = buildModelCheckJob(stateSpace, item, listener);
 
-		modelCheckStats.startJob();
-
 		//This must be executed before executing model checking job
 		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(modelCheckStats));
 
