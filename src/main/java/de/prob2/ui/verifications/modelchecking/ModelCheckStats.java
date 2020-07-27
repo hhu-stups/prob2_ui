@@ -55,7 +55,6 @@ public final class ModelCheckStats extends AnchorPane {
 				totalStates.setText(String.valueOf(nrTotalNodes));
 				totalTransitions.setText(String.valueOf(nrTotalTransitions));
 				injector.getInstance(StatsView.class).updateSimpleStats(stats);
-				injector.getInstance(ModelcheckingView.class).refresh();
 			});
 		}
 		
@@ -76,7 +75,6 @@ public final class ModelCheckStats extends AnchorPane {
 			elapsedTime.setText(String.format("%.3f",timeElapsed/1000.0) + " s");
 			Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
-			injector.getInstance(ModelcheckingView.class).refresh();
 		});
 		
 		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();

@@ -384,11 +384,6 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		showStats(new ModelCheckStats(stageManager, injector));
 	}
 	
-	public void refresh() {
-		tvItems.refresh();
-		tvChecks.refresh();
-	}
-	
 	public void selectItem(ModelCheckingItem item) {
 		tvItems.getSelectionModel().select(item);
 	}
