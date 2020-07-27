@@ -381,7 +381,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	}
 
 	public void resetView() {
-		showStats(new ModelCheckStats(stageManager, injector));
+		showStats(new ModelCheckStats(stageManager));
 	}
 	
 	public void selectItem(ModelCheckingItem item) {

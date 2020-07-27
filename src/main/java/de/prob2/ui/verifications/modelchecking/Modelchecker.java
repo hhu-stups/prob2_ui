@@ -23,6 +23,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
@@ -47,13 +48,16 @@ public class Modelchecker {
 
 	private final CurrentTrace currentTrace;
 
+	private final StatsView statsView;
+
 	private final Injector injector;
 
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace,
-						 final StopActions stopActions, final Injector injector) {
+						 final StopActions stopActions, final StatsView statsView, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.statsView = statsView;
 		this.injector = injector;
 		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
@@ -102,16 +106,22 @@ public class Modelchecker {
 
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		final ModelCheckStats modelCheckStats = new ModelCheckStats(stageManager, injector);
+		final ModelCheckStats modelCheckStats = new ModelCheckStats(stageManager);
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
 				modelCheckStats.updateStats(stateSpace, timeElapsed, stats);
+				if (stats != null) {
+					statsView.updateSimpleStats(stats);
+				}
 			}
 
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
 				modelCheckStats.updateStats(stateSpace, timeElapsed, stats);
+				if (stats != null) {
+					statsView.updateSimpleStats(stats);
+				}
 				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, modelCheckStats, stateSpace);
 				if (!checkAll && jobItem.getTraceDescription() != null) {
 					currentTrace.set(jobItem.getTrace());

@@ -134,7 +134,7 @@ public class StatsView extends ScrollPane {
 	private void update(final StateSpace stateSpace) {
 		if (stateSpace != null) {
 			// During model checking, simple stats are automatically calculated and returned by probcli on every model checking step.
-			// ModelCheckStats reports these automatically calculated stats to StatsView, so there is no need to calculate them again here.
+			// Modelchecker reports these automatically calculated stats to StatsView, so there is no need to calculate them again here.
 			// The same does *not* apply to extended stats though, which always need to be calculated explicitly.
 			if (!injector.getInstance(Modelchecker.class).isRunning()) {
 				final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();

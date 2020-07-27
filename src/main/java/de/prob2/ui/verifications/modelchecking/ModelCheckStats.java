@@ -2,19 +2,15 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.util.Objects;
 
-import com.google.inject.Injector;
-
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-
 
 public final class ModelCheckStats extends AnchorPane {
 	
@@ -24,11 +20,7 @@ public final class ModelCheckStats extends AnchorPane {
 	@FXML private Label totalStates;
 	@FXML private Label totalTransitions;
 	
-	private final Injector injector;
-	
-	
-	public ModelCheckStats(final StageManager stageManager, final Injector injector) {
-		this.injector = injector;
+	public ModelCheckStats(final StageManager stageManager) {
 		stageManager.loadFXML(this, "modelchecking_stats.fxml");
 	}
 
@@ -50,7 +42,6 @@ public final class ModelCheckStats extends AnchorPane {
 				processedStates.setText(nrProcessedNodes + " (" + percent + " %)");
 				totalStates.setText(String.valueOf(nrTotalNodes));
 				totalTransitions.setText(String.valueOf(nrTotalTransitions));
-				injector.getInstance(StatsView.class).updateSimpleStats(stats);
 			});
 		}
 	}
