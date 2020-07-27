@@ -1,8 +1,12 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -13,6 +17,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.BooleanCell;
+import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.CheckingType;
@@ -20,6 +25,7 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.MachineStatusHandler;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -28,6 +34,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
@@ -36,19 +43,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
 public final class ModelcheckingView extends ScrollPane implements ISelectableCheckingView {
-	
-	@FXML
-	private AnchorPane statsPane;
-
 	@FXML
 	private Button addModelCheckButton;
 	@FXML
@@ -104,7 +104,13 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	private TableColumn<ModelCheckingJobItem, String> messageColumn;
 
 	@FXML
-	private ModelCheckStats modelCheckStats;
+	private VBox statsBox;
+
+	@FXML
+	private Label elapsedTime;
+
+	@FXML
+	private SimpleStatsView simpleStatsView;
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
@@ -375,12 +381,15 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	}
 
 	public void showStats(final long timeElapsed, final StateSpaceStats stats) {
-		modelCheckStats.updateStats(timeElapsed, stats);
-		modelCheckStats.setVisible(true);
+		elapsedTime.setText(String.format("%.1f", timeElapsed / 1000.0) + " s");
+		if (stats != null) {
+			simpleStatsView.setStats(stats);
+		}
+		statsBox.setVisible(true);
 	}
 
 	public void resetView() {
-		modelCheckStats.setVisible(false);
+		statsBox.setVisible(false);
 	}
 	
 	public void selectItem(ModelCheckingItem item) {
