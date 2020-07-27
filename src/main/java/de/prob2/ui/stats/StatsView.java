@@ -20,10 +20,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.NumberBinding;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -198,15 +196,12 @@ public class StatsView extends ScrollPane {
 			}
 		});
 	}
-	
-	public NumberBinding getProcessedStates() {
-		return Bindings.createIntegerBinding(
-				() -> lastResult.get() == null ? 0 : lastResult.get().getNrProcessedNodes(), lastResult);
+
+	public ReadOnlyObjectProperty<StateSpaceStats> lastResultProperty() {
+		return this.lastResult;
 	}
 
-	public ObservableIntegerValue getStatesNumber() {
-		return Bindings.createIntegerBinding(
-				() -> lastResult.get() == null ? 0 : lastResult.get().getNrTotalNodes(), lastResult);
+	public StateSpaceStats getLastResult() {
+		return this.lastResultProperty().get();
 	}
-	
 }

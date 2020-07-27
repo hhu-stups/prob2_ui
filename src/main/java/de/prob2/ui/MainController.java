@@ -81,10 +81,16 @@ public class MainController extends BorderPane {
 		this.historyTP.textProperty()
 				.bind(Bindings.format(this.resourceBundle.getString("common.views.historyWithState"), currentHistoryValue, historySize));
 
-		final ObservableIntegerValue currentStatesNumber = statsView.getStatesNumber();
-		final ObservableValue<Number> currentProcessedStates = statsView.getProcessedStates();
-		this.statsTP.textProperty()
-				.bind(Bindings.format(this.resourceBundle.getString("common.views.statsWithState"), currentProcessedStates, currentStatesNumber));
+		statsView.lastResultProperty().addListener((o, from, to) -> {
+			if (to == null) {
+				this.statsTP.setText(this.resourceBundle.getString("common.views.stats"));
+			} else {
+				this.statsTP.setText(String.format(
+					this.resourceBundle.getString("common.views.statsWithState"),
+					to.getNrProcessedNodes(), to.getNrTotalNodes()
+				));
+			}
+		});
 		
 		Platform.runLater(() -> injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
 			if (to != null) {
