@@ -106,7 +106,7 @@ public class Modelchecker {
 
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				modelCheckStats.isFinished(stateSpace, timeElapsed, result);
+				modelCheckStats.isFinished(stateSpace, timeElapsed);
 				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, modelCheckStats, stateSpace);
 				if (!checkAll && jobItem.getTraceDescription() != null) {
 					currentTrace.set(jobItem.getTrace());
