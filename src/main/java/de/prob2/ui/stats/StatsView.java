@@ -149,6 +149,8 @@ public class StatsView extends ScrollPane {
 				showStats(result.getNodes(), stateStats);
 				showStats(result.getOps(), transStats);
 			}
+		} else {
+			Platform.runLater(() -> lastResult.set(null));
 		}
 	}
 
