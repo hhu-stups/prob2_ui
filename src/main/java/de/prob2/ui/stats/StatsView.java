@@ -40,11 +40,7 @@ public class StatsView extends ScrollPane {
 	@FXML
 	private Label totalTransitions;
 	@FXML
-	private Label totalStates;
-	@FXML
 	private Label processedStates;
-	@FXML
-	private Label percentageProcessed;
 	@FXML
 	private GridPane stateStats;
 	@FXML
@@ -158,16 +154,13 @@ public class StatsView extends ScrollPane {
 		Platform.runLater(() -> {
 			lastResult.set(result);
 
-			int nrTotalNodes = result.getNrTotalNodes();
-			int nrTotalTransitions = result.getNrTotalTransitions();
-			int nrProcessedNodes = result.getNrProcessedNodes();
-
-			totalStates.setText(Integer.toString(nrTotalNodes));
-			totalTransitions.setText(Integer.toString(nrTotalTransitions));
-			processedStates.setText(Integer.toString(nrProcessedNodes));
-			if (nrTotalNodes != 0) {
-				percentageProcessed.setText("(" + Integer.toString(100 * nrProcessedNodes / nrTotalNodes) + "%)");
+			String processedStatesDescription = String.format("%d/%d", result.getNrProcessedNodes(), result.getNrTotalNodes());
+			if (result.getNrTotalNodes() != 0) {
+				final int percentProcessedNodes = 100 * result.getNrProcessedNodes() / result.getNrTotalNodes();
+				processedStatesDescription += " (" + percentProcessedNodes + "%)";
 			}
+			processedStates.setText(processedStatesDescription);
+			totalTransitions.setText(Integer.toString(result.getNrTotalTransitions()));
 		});
 	}
 
