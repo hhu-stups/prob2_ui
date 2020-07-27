@@ -67,31 +67,4 @@ public final class ModelCheckStats extends AnchorPane {
 			Platform.runLater(() -> injector.getInstance(StatsView.class).updateExtendedStats(coverage));
 		}
 	}
-
-	public void isFinished(final StateSpace stateSpace, final long timeElapsed) {
-		Objects.requireNonNull(stateSpace, "stateSpace");
-		
-		Platform.runLater(() -> {
-			elapsedTime.setText(String.format("%.3f",timeElapsed/1000.0) + " s");
-			Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
-		});
-		
-		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
-		stateSpace.execute(cmd);
-		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
-		
-		if (coverage != null) {
-			Number numNodes = coverage.getTotalNumberOfNodes();
-			Number numTrans = coverage.getTotalNumberOfTransitions();
-
-			Platform.runLater(() -> {
-				injector.getInstance(StatsView.class).updateExtendedStats(coverage);
-				totalStates.setText(String.valueOf(numNodes));
-				totalTransitions.setText(String.valueOf(numTrans));
-			});
-		}
-	}
-	
-
 }

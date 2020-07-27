@@ -1,8 +1,14 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
@@ -14,21 +20,20 @@ import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.MachineStatusHandler;
+
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Singleton
 public class Modelchecker {
@@ -106,12 +111,16 @@ public class Modelchecker {
 
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				modelCheckStats.isFinished(stateSpace, timeElapsed);
+				modelCheckStats.updateStats(stateSpace, timeElapsed, stats);
 				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, modelCheckStats, stateSpace);
 				if (!checkAll && jobItem.getTraceDescription() != null) {
 					currentTrace.set(jobItem.getTrace());
 				}
-				Platform.runLater(() -> showResult(item, jobItem));
+				Platform.runLater(() -> {
+					Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+					injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
+					showResult(item, jobItem);
+				});
 			}
 		};
 		IModelCheckJob job = buildModelCheckJob(stateSpace, item, listener);
