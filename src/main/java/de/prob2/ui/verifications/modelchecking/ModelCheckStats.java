@@ -4,15 +4,10 @@ import java.util.Objects;
 
 import com.google.inject.Injector;
 
-import de.prob.animator.command.ComputeCoverageCommand;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.MachineStatusHandler;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -57,14 +52,6 @@ public final class ModelCheckStats extends AnchorPane {
 				totalTransitions.setText(String.valueOf(nrTotalTransitions));
 				injector.getInstance(StatsView.class).updateSimpleStats(stats);
 			});
-		}
-		
-		final ComputeCoverageCommand cmd = new ComputeCoverageCommand();
-		stateSpace.execute(cmd);
-		final ComputeCoverageCommand.ComputeCoverageResult coverage = cmd.getResult();
-
-		if (coverage != null) {
-			Platform.runLater(() -> injector.getInstance(StatsView.class).updateExtendedStats(coverage));
 		}
 	}
 }

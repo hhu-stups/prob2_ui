@@ -134,15 +134,22 @@ public class StatsView extends ScrollPane {
 	}
 
 	private void update(final StateSpace stateSpace) {
-		if (stateSpace != null && !injector.getInstance(Modelchecker.class).isRunning()) {
-			final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
-			stateSpace.execute(stateSpaceStatsCmd);
-			updateSimpleStats(stateSpaceStatsCmd.getResult());
+		if (stateSpace != null) {
+			// During model checking, simple stats are automatically calculated and returned by probcli on every model checking step.
+			// ModelCheckStats reports these automatically calculated stats to StatsView, so there is no need to calculate them again here.
+			// The same does *not* apply to extended stats though, which always need to be calculated explicitly.
+			if (!injector.getInstance(Modelchecker.class).isRunning()) {
+				final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
+				stateSpace.execute(stateSpaceStatsCmd);
+				updateSimpleStats(stateSpaceStatsCmd.getResult());
+			}
 
 			if (extendedStatsToggle.isSelected()) {
 				final ComputeCoverageCommand coverageCmd = new ComputeCoverageCommand();
 				stateSpace.execute(coverageCmd);
-				updateExtendedStats(coverageCmd.getResult());
+				final ComputeCoverageCommand.ComputeCoverageResult result = coverageCmd.getResult();
+				showStats(result.getNodes(), stateStats);
+				showStats(result.getOps(), transStats);
 			}
 		}
 	}
@@ -162,11 +169,6 @@ public class StatsView extends ScrollPane {
 				percentageProcessed.setText("(" + Integer.toString(100 * nrProcessedNodes / nrTotalNodes) + "%)");
 			}
 		});
-	}
-
-	public void updateExtendedStats(ComputeCoverageCommand.ComputeCoverageResult result) {
-		showStats(result.getNodes(), stateStats);
-		showStats(result.getOps(), transStats);
 	}
 
 	private static void showStats(List<String> packedStats, GridPane grid) {
