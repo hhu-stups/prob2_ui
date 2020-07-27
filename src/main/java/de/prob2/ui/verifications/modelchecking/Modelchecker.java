@@ -110,7 +110,7 @@ public class Modelchecker {
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				modelCheckStats.updateStats(stateSpace, timeElapsed, stats);
+				modelCheckStats.updateStats(timeElapsed, stats);
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
@@ -118,7 +118,7 @@ public class Modelchecker {
 
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				modelCheckStats.updateStats(stateSpace, timeElapsed, stats);
+				modelCheckStats.updateStats(timeElapsed, stats);
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
