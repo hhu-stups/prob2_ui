@@ -10,12 +10,9 @@ import de.prob2.ui.sharedviews.SimpleStatsView;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 
-public final class ModelCheckStats extends AnchorPane {
-	
-	@FXML private VBox statsBox;
+public final class ModelCheckStats extends VBox {
 	@FXML private Label elapsedTime;
 	@FXML private SimpleStatsView simpleStatsView;
 	
@@ -24,7 +21,7 @@ public final class ModelCheckStats extends AnchorPane {
 	}
 
 	void startJob() {
-		statsBox.setVisible(true);
+		this.setVisible(true);
 	}
 
 	public void updateStats(final StateSpace stateSpace, final long timeElapsed, final StateSpaceStats stats) {
