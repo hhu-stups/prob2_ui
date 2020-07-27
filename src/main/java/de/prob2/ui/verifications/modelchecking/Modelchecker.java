@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.check.ConsistencyChecker;
@@ -49,18 +48,15 @@ public class Modelchecker {
 
 	private final CurrentTrace currentTrace;
 
-	private final Provider<ModelCheckStats> modelCheckStatsProvider;
-
 	private final StatsView statsView;
 
 	private final Injector injector;
 
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace,
-						 final StopActions stopActions, final Provider<ModelCheckStats> modelCheckStatsProvider, final StatsView statsView, final Injector injector) {
+						 final StopActions stopActions, final StatsView statsView, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
-		this.modelCheckStatsProvider = modelCheckStatsProvider;
 		this.statsView = statsView;
 		this.injector = injector;
 		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
@@ -90,7 +86,7 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
-	private static ModelCheckingJobItem makeJobItem(final int index, final IModelCheckingResult result, final ModelCheckStats stats, final StateSpace stateSpace) {
+	private static ModelCheckingJobItem makeJobItem(final int index, final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final StateSpace stateSpace) {
 		final Checked checked;
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
 			checked = Checked.SUCCESS;
@@ -105,16 +101,16 @@ public class Modelchecker {
 		} else {
 			traceDescription = null;
 		}
-		return new ModelCheckingJobItem(index, checked, result.getMessage(), stats, stateSpace, traceDescription);
+		return new ModelCheckingJobItem(index, checked, result.getMessage(), timeElapsed, stats, stateSpace, traceDescription);
 	}
 
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		final ModelCheckStats modelCheckStats = modelCheckStatsProvider.get();
+		final ModelcheckingView modelcheckingView = injector.getInstance(ModelcheckingView.class);
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				modelCheckStats.updateStats(timeElapsed, stats);
+				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats));
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
@@ -122,11 +118,11 @@ public class Modelchecker {
 
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				modelCheckStats.updateStats(timeElapsed, stats);
+				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats));
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
-				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, modelCheckStats, stateSpace);
+				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, timeElapsed, stats, stateSpace);
 				if (!checkAll && jobItem.getTraceDescription() != null) {
 					currentTrace.set(jobItem.getTrace());
 				}
@@ -138,9 +134,6 @@ public class Modelchecker {
 			}
 		};
 		IModelCheckJob job = buildModelCheckJob(stateSpace, item, listener);
-
-		//This must be executed before executing model checking job
-		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(modelCheckStats));
 
 		try {
 			job.call();

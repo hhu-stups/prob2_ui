@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.check.ModelCheckingOptions;
+import de.prob.check.StateSpaceStats;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -101,6 +102,9 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 
 	@FXML
 	private TableColumn<ModelCheckingJobItem, String> messageColumn;
+
+	@FXML
+	private ModelCheckStats modelCheckStats;
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
@@ -205,7 +209,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		tvChecks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) ->
 			Platform.runLater(() -> {
 				if(to != null && to.getStats() != null) {
-					showStats(to.getStats());
+					showStats(to.getTimeElapsed(), to.getStats());
 				} else {
 					resetView();
 				}
@@ -370,16 +374,13 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		checker.cancelModelcheck();
 	}
 
-	public void showStats(ModelCheckStats stats) {
-		statsPane.getChildren().setAll(stats);
-		AnchorPane.setTopAnchor(stats, 0.0);
-		AnchorPane.setRightAnchor(stats, 0.0);
-		AnchorPane.setBottomAnchor(stats, 0.0);
-		AnchorPane.setLeftAnchor(stats, 0.0);
+	public void showStats(final long timeElapsed, final StateSpaceStats stats) {
+		modelCheckStats.updateStats(timeElapsed, stats);
+		modelCheckStats.setVisible(true);
 	}
 
 	public void resetView() {
-		statsPane.getChildren().clear();
+		modelCheckStats.setVisible(false);
 	}
 	
 	public void selectItem(ModelCheckingItem item) {

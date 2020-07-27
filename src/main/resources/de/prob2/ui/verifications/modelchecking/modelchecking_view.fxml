@@ -5,6 +5,7 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
+<?import de.prob2.ui.verifications.modelchecking.ModelCheckStats?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -135,6 +136,7 @@
 			<VBox.margin>
 				<Insets top="5.0" />
 			</VBox.margin>
+			<ModelCheckStats fx:id="modelCheckStats" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" />
 		</AnchorPane>
 	</VBox>
 </fx:root>
