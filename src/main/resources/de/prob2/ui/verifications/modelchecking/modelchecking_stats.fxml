@@ -10,19 +10,13 @@
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
-	<VBox spacing="0.0" AnchorPane.bottomAnchor="0.0"
-		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-		AnchorPane.topAnchor="0.0">
-		<AnchorPane>
-			<VBox fx:id="statsBox" spacing="13.0" visible="false"
-				AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
-				AnchorPane.topAnchor="5.0" AnchorPane.bottomAnchor="5.0">
-				<HBox prefHeight="12.0" spacing="7.0">
-					<Label text="%verifications.modelchecking.modelcheckingStats.elapsedTime" styleClass="bold" />
-					<Label fx:id="elapsedTime" />
-				</HBox>
-				<SimpleStatsView fx:id="simpleStatsView" />
-			</VBox>
-		</AnchorPane>
+	<VBox fx:id="statsBox" spacing="13.0" visible="false"
+		AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
+		AnchorPane.topAnchor="5.0" AnchorPane.bottomAnchor="5.0">
+		<HBox prefHeight="12.0" spacing="7.0">
+			<Label text="%verifications.modelchecking.modelcheckingStats.elapsedTime" styleClass="bold" />
+			<Label fx:id="elapsedTime" />
+		</HBox>
+		<SimpleStatsView fx:id="simpleStatsView" />
 	</VBox>
 </fx:root>
