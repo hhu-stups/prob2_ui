@@ -12,6 +12,7 @@ import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -24,7 +25,7 @@ import java.util.Objects;
 public class ModelCheckingItem implements IExecutableItem {
 	public static final JsonDeserializer<ModelCheckingItem> JSON_DESERIALIZER = ModelCheckingItem::new;
 	
-	private transient Checked checked;
+	private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
 	private String nodesLimit;
 
@@ -34,37 +35,54 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private final transient ListProperty<ModelCheckingJobItem> items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 
-	public ModelCheckingItem(ModelCheckingOptions options) {
-		Objects.requireNonNull(options);
-		this.checked = Checked.NOT_CHECKED;
-		this.nodesLimit = "-";
-		this.options = new SimpleObjectProperty<>(this, "options", options);
-		this.shouldExecute = new SimpleBooleanProperty(true);
-	}
-
 	public ModelCheckingItem(String nodesLimit, ModelCheckingOptions options) {
 		Objects.requireNonNull(options);
-		this.checked = Checked.NOT_CHECKED;
 		this.nodesLimit = nodesLimit;
 		this.options = new SimpleObjectProperty<>(this, "options", options);
 		this.shouldExecute = new SimpleBooleanProperty(true);
+		
+		this.initListeners();
 	}
 	
 	private ModelCheckingItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
-		this.checked = Checked.NOT_CHECKED;
 		this.nodesLimit = JsonManager.checkDeserialize(context, object, "nodesLimit", String.class);
 		this.options = JsonManager.checkDeserialize(context, object, "options", new TypeToken<ObjectProperty<ModelCheckingOptions>>() {}.getType());
 		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
+		
+		this.initListeners();
+	}
+	
+	private void initListeners() {
+		this.itemsProperty().addListener((o, from, to) -> {
+			if (to.isEmpty()) {
+				this.checked.set(Checked.NOT_CHECKED);
+			} else {
+				final boolean failed = to.stream()
+					.map(ModelCheckingJobItem::getChecked)
+					.anyMatch(Checked.FAIL::equals);
+				final boolean success = !failed && to.stream()
+					.map(ModelCheckingJobItem::getChecked)
+					.anyMatch(Checked.SUCCESS::equals);
+				
+				if (success) {
+					this.checked.set(Checked.SUCCESS);
+				} else if (failed) {
+					this.checked.set(Checked.FAIL);
+				} else {
+					this.checked.set(Checked.TIMEOUT);
+				}
+			}
+		});
+	}
+	
+	public ReadOnlyObjectProperty<Checked> checkedProperty() {
+		return this.checked;
 	}
 	
 	@Override
 	public Checked getChecked() {
-		return checked;
-	}
-	
-	public void setChecked(final Checked checked) {
-		this.checked = checked;
+		return this.checkedProperty().get();
 	}
 
 	public String getNodesLimit() {
@@ -102,7 +120,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	public void reset() {
 		this.itemsProperty().clear();
-		this.setChecked(Checked.NOT_CHECKED);
 	}
 	
 	public ListProperty<ModelCheckingJobItem> itemsProperty() {
@@ -132,9 +149,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	@Override
 	public String toString() {
-		if("-".equals(nodesLimit)) {
-			return String.format("%s(%s)", this.getClass().getSimpleName(), this.getOptions());
-		}
 		return String.format("%s(%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getOptions());
 	}
 }

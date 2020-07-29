@@ -111,8 +111,8 @@ public class DotView extends DynamicCommandStage {
 
 	@Inject
 	public DotView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector, final FileChooserManager fileChooserManager) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle, injector);
+			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+		super(stageManager, preferences, currentTrace, currentProject, bundle);
 		
 		this.fileChooserManager = fileChooserManager;
 		

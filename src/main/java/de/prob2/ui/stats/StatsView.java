@@ -17,13 +17,11 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.NumberBinding;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableIntegerValue;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -40,13 +38,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 @Singleton
 public class StatsView extends ScrollPane {
 	@FXML
-	private Label totalTransitions;
-	@FXML
-	private Label totalStates;
-	@FXML
-	private Label processedStates;
-	@FXML
-	private Label percentageProcessed;
+	private SimpleStatsView simpleStatsView;
 	@FXML
 	private GridPane stateStats;
 	@FXML
@@ -74,8 +66,6 @@ public class StatsView extends ScrollPane {
 	private final CurrentTrace currentTrace;
 	private final FontSize fontSize;
 	private final Injector injector;
-	
-	private final SimpleObjectProperty<StateSpaceStats> lastResult;
 
 	@Inject
 	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace,
@@ -83,7 +73,6 @@ public class StatsView extends ScrollPane {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
-		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 		this.injector = injector;
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
@@ -98,7 +87,8 @@ public class StatsView extends ScrollPane {
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
 
-		this.currentTrace.addListener((observable, from, to) -> this.update(to == null ? null : to.getStateSpace()));
+		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.update(to));
+		this.currentTrace.addStatesCalculatedListener(newTransitions -> this.update(this.currentTrace.getStateSpace()));
 		this.update(currentTrace.getStateSpace());
 
 		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
@@ -132,40 +122,31 @@ public class StatsView extends ScrollPane {
 		extendedStatsToggle.setTooltip(new Tooltip(text));
 	}
 
-	public void update(final StateSpace stateSpace) {
-		if (stateSpace != null && !injector.getInstance(Modelchecker.class).isRunning()) {
-			final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
-			stateSpace.execute(stateSpaceStatsCmd);
-			updateSimpleStats(stateSpaceStatsCmd.getResult());
+	private void update(final StateSpace stateSpace) {
+		if (stateSpace != null) {
+			// During model checking, simple stats are automatically calculated and returned by probcli on every model checking step.
+			// Modelchecker reports these automatically calculated stats to StatsView, so there is no need to calculate them again here.
+			// The same does *not* apply to extended stats though, which always need to be calculated explicitly.
+			if (!injector.getInstance(Modelchecker.class).isRunning()) {
+				final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
+				stateSpace.execute(stateSpaceStatsCmd);
+				updateSimpleStats(stateSpaceStatsCmd.getResult());
+			}
 
 			if (extendedStatsToggle.isSelected()) {
 				final ComputeCoverageCommand coverageCmd = new ComputeCoverageCommand();
 				stateSpace.execute(coverageCmd);
-				updateExtendedStats(coverageCmd.getResult());
+				final ComputeCoverageCommand.ComputeCoverageResult result = coverageCmd.getResult();
+				showStats(result.getNodes(), stateStats);
+				showStats(result.getOps(), transStats);
 			}
+		} else {
+			updateSimpleStats(null);
 		}
 	}
 
 	public void updateSimpleStats(StateSpaceStats result) {
-		Platform.runLater(() -> {
-			lastResult.set(result);
-
-			int nrTotalNodes = result.getNrTotalNodes();
-			int nrTotalTransitions = result.getNrTotalTransitions();
-			int nrProcessedNodes = result.getNrProcessedNodes();
-
-			totalStates.setText(Integer.toString(nrTotalNodes));
-			totalTransitions.setText(Integer.toString(nrTotalTransitions));
-			processedStates.setText(Integer.toString(nrProcessedNodes));
-			if (nrTotalNodes != 0) {
-				percentageProcessed.setText("(" + Integer.toString(100 * nrProcessedNodes / nrTotalNodes) + "%)");
-			}
-		});
-	}
-
-	public void updateExtendedStats(ComputeCoverageCommand.ComputeCoverageResult result) {
-		showStats(result.getNodes(), stateStats);
-		showStats(result.getOps(), transStats);
+		Platform.runLater(() -> simpleStatsView.setStats(result));
 	}
 
 	private static void showStats(List<String> packedStats, GridPane grid) {
@@ -195,15 +176,12 @@ public class StatsView extends ScrollPane {
 			}
 		});
 	}
-	
-	public NumberBinding getProcessedStates() {
-		return Bindings.createIntegerBinding(
-				() -> lastResult.get() == null ? 0 : lastResult.get().getNrProcessedNodes(), lastResult);
+
+	public ReadOnlyObjectProperty<StateSpaceStats> lastResultProperty() {
+		return this.simpleStatsView.statsProperty();
 	}
 
-	public ObservableIntegerValue getStatesNumber() {
-		return Bindings.createIntegerBinding(
-				() -> lastResult.get() == null ? 0 : lastResult.get().getNrTotalNodes(), lastResult);
+	public StateSpaceStats getLastResult() {
+		return this.lastResultProperty().get();
 	}
-	
 }

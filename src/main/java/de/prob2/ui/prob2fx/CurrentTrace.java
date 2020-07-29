@@ -1,5 +1,7 @@
 package de.prob2.ui.prob2fx;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -9,6 +11,7 @@ import com.google.inject.Singleton;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.AnimationSelector;
 import de.prob.statespace.IAnimationChangeListener;
+import de.prob.statespace.IStatesCalculatedListener;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -148,6 +151,8 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final ReadOnlyObjectProperty<Trace> back;
 	private final ReadOnlyObjectProperty<Trace> forward;
 
+	private final Collection<IStatesCalculatedListener> statesCalculatedListeners;
+
 	@Inject
 	private CurrentTrace(final AnimationSelector animationSelector, final StageManager stageManager) {
 		super();
@@ -168,6 +173,16 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 
 		this.back = new ROObjProp<>("back", Trace::back, null);
 		this.forward = new ROObjProp<>("forward", Trace::forward, null);
+
+		this.statesCalculatedListeners = new ArrayList<>();
+		this.stateSpaceProperty().addListener((o, from, to) -> {
+			if (from != null) {
+				this.statesCalculatedListeners.forEach(from::removeStatesCalculatedListener);
+			}
+			if (to != null) {
+				this.statesCalculatedListeners.forEach(to::addStatesCalculatedListener);
+			}
+		});
 	}
 
 	@Override
@@ -379,5 +394,33 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 */
 	public Trace forward() {
 		return this.forwardProperty().get();
+	}
+
+	/**
+	 * Add an {@link IStatesCalculatedListener} to the current state space.
+	 * If the current state space changes, the listener is removed from the old state space and added to the new one.
+	 * 
+	 * @param listener the {@link IStatesCalculatedListener} to add
+	 */
+	public void addStatesCalculatedListener(final IStatesCalculatedListener listener) {
+		this.statesCalculatedListeners.add(listener);
+		final StateSpace currentStateSpace = this.getStateSpace();
+		if (currentStateSpace != null) {
+			currentStateSpace.addStatesCalculatedListener(listener);
+		}
+	}
+
+	/**
+	 * Remove an {@link IStatesCalculatedListener} from the current state space.
+	 * The listener will also no longer be automatically added to new state spaces.
+	 *
+	 * @param listener the {@link IStatesCalculatedListener} to remove
+	 */
+	public void removeStatesCalculatedListener(final IStatesCalculatedListener listener) {
+		this.statesCalculatedListeners.remove(listener);
+		final StateSpace currentStateSpace = this.getStateSpace();
+		if (currentStateSpace != null) {
+			currentStateSpace.removeStatesCalculatedListener(listener);
+		}
 	}
 }

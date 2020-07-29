@@ -2,8 +2,6 @@ package de.prob2.ui.dynamic;
 
 import java.util.ResourceBundle;
 
-import com.google.inject.Injector;
-
 import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.exception.CliError;
@@ -11,8 +9,8 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.modelchecking.Modelchecker;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -96,18 +94,14 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	protected final ObjectProperty<Thread> currentThread;
 	
-	protected final Injector injector;
-	
 	protected DynamicCommandStage(final StageManager stageManager, final DynamicPreferencesStage preferences,
-			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, 
-			final Injector injector) {
+			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle) {
 		this.preferences = preferences;
 		this.preferences.initOwner(this);
 		this.preferences.initModality(Modality.WINDOW_MODAL);
 		this.preferences.setToRefresh(this);
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;		
-		this.injector = injector;
+		this.currentProject = currentProject;
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
@@ -158,10 +152,8 @@ public abstract class DynamicCommandStage extends Stage {
 		});
 		lvChoice.disableProperty().bind(currentThread.isNotNull().or(currentTrace.stateSpaceProperty().isNull()));
 
-		currentTrace.currentStateProperty().addListener((observable, from, to) -> refresh());
 		currentTrace.addListener((observable, from, to) -> refresh());
-		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> refresh());
-		injector.getInstance(Modelchecker.class).resultProperty().addListener((observable, from, to) -> refresh());
+		currentTrace.addStatesCalculatedListener(newOps -> Platform.runLater(this::refresh));
 
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			fillCommands();

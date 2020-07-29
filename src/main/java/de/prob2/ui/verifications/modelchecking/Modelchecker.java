@@ -1,8 +1,14 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
@@ -14,21 +20,21 @@ import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.operations.OperationsView;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.MachineStatusHandler;
+
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Singleton
 public class Modelchecker {
@@ -37,24 +43,25 @@ public class Modelchecker {
 
 	private final ObjectProperty<Future<?>> currentFuture;
 	private final ExecutorService executor;
-	private final ObjectProperty<IModelCheckingResult> lastResult;
 
 	private final StageManager stageManager;
 
 	private final CurrentTrace currentTrace;
 
+	private final StatsView statsView;
+
 	private final Injector injector;
 
 	@Inject
 	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace,
-						 final StopActions stopActions, final Injector injector) {
+						 final StopActions stopActions, final StatsView statsView, final Injector injector) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.statsView = statsView;
 		this.injector = injector;
 		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
 		stopActions.add(this.executor::shutdownNow);
-		this.lastResult = new SimpleObjectProperty<>(this, "lastResult", null);
 	}
 
 	public void checkItem(ModelCheckingItem item, boolean checkAll) {
@@ -71,10 +78,6 @@ public class Modelchecker {
 		}));
 	}
 
-	public ObjectProperty<IModelCheckingResult> resultProperty() {
-		return lastResult;
-	}
-
 	public BooleanExpression runningProperty() {
 		return this.currentFuture.isNotNull();
 	}
@@ -83,7 +86,7 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
-	private static ModelCheckingJobItem makeJobItem(final int index, final IModelCheckingResult result, final ModelCheckStats stats, final StateSpace stateSpace) {
+	private static ModelCheckingJobItem makeJobItem(final int index, final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final StateSpace stateSpace) {
 		final Checked checked;
 		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
 			checked = Checked.SUCCESS;
@@ -98,40 +101,39 @@ public class Modelchecker {
 		} else {
 			traceDescription = null;
 		}
-		return new ModelCheckingJobItem(index, checked, result.getMessage(), stats, stateSpace, traceDescription);
+		return new ModelCheckingJobItem(index, checked, result.getMessage(), timeElapsed, stats, stateSpace, traceDescription);
 	}
 
 	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		final ModelCheckStats modelCheckStats = new ModelCheckStats(stageManager, injector);
+		final ModelcheckingView modelcheckingView = injector.getInstance(ModelcheckingView.class);
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				modelCheckStats.updateStats(stateSpace, timeElapsed, stats);
+				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats));
+				if (stats != null) {
+					statsView.updateSimpleStats(stats);
+				}
 			}
 
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				modelCheckStats.isFinished(stateSpace, timeElapsed, result);
-				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, modelCheckStats, stateSpace);
+				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats));
+				if (stats != null) {
+					statsView.updateSimpleStats(stats);
+				}
+				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, timeElapsed, stats, stateSpace);
 				if (!checkAll && jobItem.getTraceDescription() != null) {
 					currentTrace.set(jobItem.getTrace());
 				}
 				Platform.runLater(() -> {
+					Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+					injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 					showResult(item, jobItem);
-					injector.getInstance(OperationsView.class).update(currentTrace.get());
-					injector.getInstance(StatsView.class).update(stateSpace);
-					lastResult.set(result);
-					injector.getInstance(ModelcheckingView.class).refresh();
 				});
 			}
 		};
 		IModelCheckJob job = buildModelCheckJob(stateSpace, item, listener);
-
-		modelCheckStats.startJob();
-
-		//This must be executed before executing model checking job
-		Platform.runLater(() -> injector.getInstance(ModelcheckingView.class).showStats(modelCheckStats));
 
 		try {
 			job.call();
@@ -163,22 +165,5 @@ public class Modelchecker {
 		jobItems.add(jobItem);
 		modelCheckingView.selectItem(item);
 		modelCheckingView.selectJobItem(jobItem);
-
-		boolean failed = jobItems.stream()
-				.map(ModelCheckingJobItem::getChecked)
-				.anyMatch(Checked.FAIL::equals);
-		boolean success = !failed && jobItems.stream()
-				.map(ModelCheckingJobItem::getChecked)
-				.anyMatch(Checked.SUCCESS::equals);
-
-		if (success) {
-			item.setChecked(Checked.SUCCESS);
-		} else if (failed) {
-			item.setChecked(Checked.FAIL);
-		} else {
-			item.setChecked(Checked.TIMEOUT);
-		}
-
-		modelCheckingView.refresh();
 	}
 }
