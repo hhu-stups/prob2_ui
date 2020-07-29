@@ -217,8 +217,6 @@ public class MagicGraphFX implements MagicGraphI {
 
 		evalMap.forEach((eval, result) -> {
 			try {
-				System.out.println(result.toString());
-				System.out.println("------------");
 				if (!result.toString().equals("NOT-INITIALISED: ")) {
 					translatedMap.put(eval.toString(), Translator.translate(result.toString()));
 				}
