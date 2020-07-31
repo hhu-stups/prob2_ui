@@ -1,19 +1,13 @@
 package de.prob2.ui.project;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.ReusableAnimator;
 import de.prob.animator.command.ComposedCommand;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
+import de.prob.model.eventb.translate.EventBFileNotFoundException;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.ExtractedModel;
 import de.prob.scripting.ModelFactory;
@@ -28,14 +22,18 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
-
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.scene.control.Alert.AlertType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 @Singleton
 public class MachineLoader {
@@ -137,6 +135,19 @@ public class MachineLoader {
 		final Thread machineLoader = new Thread(() -> {
 			try {
 				this.load(machine, pref);
+			} catch (EventBFileNotFoundException e) {
+				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
+				if(!e.refreshProject()) {
+					Platform.runLater(() -> stageManager
+							.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
+									"project.machineLoader.alerts.fileNotFound.content", e.getPath())
+							.showAndWait());
+				} else {
+					Platform.runLater(() -> stageManager
+							.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
+									"project.machineLoader.alerts.eventBFileNotFound.content", e.getPath())
+							.showAndWait());
+				}
 			} catch (FileNotFoundException e) {
 				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
 				Platform.runLater(() -> stageManager
