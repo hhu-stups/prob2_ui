@@ -8,7 +8,6 @@ import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
@@ -25,16 +24,13 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	@FXML
 	private Button applyButton;
-
-	private final CurrentTrace currentTrace;
 	
 	@Inject
 	public LTLFormulaStage(
-		final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final FontSize fontSize,
+		final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize,
 		final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage
 	) {
 		super(currentProject, fontSize, formulaChecker, resultHandler, builtinsStage);
-		this.currentTrace = currentTrace;
 		stageManager.loadFXML(this, "ltlformula_stage.fxml");
 	}
 
