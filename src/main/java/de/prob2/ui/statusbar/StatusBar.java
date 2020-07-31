@@ -74,7 +74,6 @@ public class StatusBar extends HBox {
 	private void initialize() {
 		final InvalidationListener updateListener = o -> this.update();
 		this.currentTrace.addListener(updateListener);
-		this.currentProject.addListener((observable, from, to) -> this.update());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (from != null) {
 				from.modelcheckingStatusProperty().removeListener(updateListener);
