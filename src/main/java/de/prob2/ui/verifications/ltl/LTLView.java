@@ -27,11 +27,9 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -248,7 +246,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	}
 
 	private void setBindings() {
-		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.LTL, injector, this));
+		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(this));
 		formulaStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
@@ -270,8 +268,6 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		formulaSelectAll.setOnAction(e -> {
 			for(IExecutableItem item : tvFormula.getItems()) {
 				item.setSelected(formulaSelectAll.isSelected());
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 				tvFormula.refresh();
 			}
 		});
@@ -327,7 +323,6 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		Machine machine = currentProject.getCurrentMachine();
 		LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 		machine.removeLTLFormula(item);
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
 	}
 	
 	@FXML

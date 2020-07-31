@@ -13,7 +13,7 @@ public final class MachineStatusHandler {
 	@Inject
 	private MachineStatusHandler() {}
 	
-	public void updateMachineStatus(Machine machine, CheckingType type) {
+	public static void updateMachineStatus(Machine machine, CheckingType type) {
 		List<? extends IExecutableItem> items = getItems(machine, type);
 		refreshMachineStatus(machine, type, combineCheckingStatus(items));
 	}
@@ -34,7 +34,7 @@ public final class MachineStatusHandler {
 		return anyEnabled ? Machine.CheckingStatus.SUCCESSFUL : Machine.CheckingStatus.NONE;
 	}
 	
-	private void refreshMachineStatus(Machine machine, CheckingType type, Machine.CheckingStatus status) {
+	private static void refreshMachineStatus(Machine machine, CheckingType type, Machine.CheckingStatus status) {
 		switch(type) {
 			case LTL:
 				machine.setLtlStatus(status);
@@ -50,7 +50,7 @@ public final class MachineStatusHandler {
 		}
 	}
 	
-	private List<? extends IExecutableItem> getItems(Machine machine, CheckingType type) {
+	private static List<? extends IExecutableItem> getItems(Machine machine, CheckingType type) {
 		switch(type) {
 			case LTL:
 				return machine.getLTLFormulas();

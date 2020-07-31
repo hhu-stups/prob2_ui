@@ -14,11 +14,14 @@ import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
+import de.prob2.ui.verifications.CheckingType;
+import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -30,6 +33,7 @@ import javafx.beans.property.SimpleSetProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
 
 import java.lang.reflect.Type;
@@ -75,6 +79,8 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
+		
+		this.initListeners();
 	}
 	
 	private Machine(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
@@ -92,6 +98,70 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = JsonManager.checkDeserialize(context, object, "testCases", new TypeToken<ListProperty<TestCaseGenerationItem>>() {}.getType());
 		this.traces = JsonManager.checkDeserialize(context, object, "traces", new TypeToken<SetProperty<Path>>() {}.getType());
 		this.modelcheckingItems = JsonManager.checkDeserialize(context, object, "modelcheckingItems", new TypeToken<ListProperty<ModelCheckingItem>>() {}.getType());
+		
+		this.initListeners();
+	}
+	
+	private void initListeners() {
+		final InvalidationListener updateLtlListener = o -> Platform.runLater(() -> MachineStatusHandler.updateMachineStatus(this, CheckingType.LTL));
+		this.ltlFormulasProperty().addListener((ListChangeListener<LTLFormulaItem>)change -> {
+			while (change.next()) {
+				change.getRemoved().forEach(item -> {
+					item.selectedProperty().removeListener(updateLtlListener);
+					item.resultItemProperty().removeListener(updateLtlListener);
+				});
+				change.getAddedSubList().forEach(item -> {
+					item.selectedProperty().addListener(updateLtlListener);
+					item.resultItemProperty().addListener(updateLtlListener);
+				});
+			}
+			updateLtlListener.invalidated(null);
+		});
+		this.getLTLFormulas().forEach(item -> {
+			item.selectedProperty().addListener(updateLtlListener);
+			item.resultItemProperty().addListener(updateLtlListener);
+		});
+		updateLtlListener.invalidated(null);
+		
+		final InvalidationListener updateSymbolicCheckingListener = o -> Platform.runLater(() -> MachineStatusHandler.updateMachineStatus(this, CheckingType.SYMBOLIC_CHECKING));
+		this.symbolicCheckingFormulasProperty().addListener((ListChangeListener<SymbolicCheckingFormulaItem>)change -> {
+			while (change.next()) {
+				change.getRemoved().forEach(item -> {
+					item.selectedProperty().removeListener(updateSymbolicCheckingListener);
+					item.resultItemProperty().removeListener(updateSymbolicCheckingListener);
+				});
+				change.getAddedSubList().forEach(item -> {
+					item.selectedProperty().addListener(updateSymbolicCheckingListener);
+					item.resultItemProperty().addListener(updateSymbolicCheckingListener);
+				});
+			}
+			updateSymbolicCheckingListener.invalidated(null);
+		});
+		this.getSymbolicCheckingFormulas().forEach(item -> {
+			item.selectedProperty().addListener(updateSymbolicCheckingListener);
+			item.resultItemProperty().addListener(updateSymbolicCheckingListener);
+		});
+		updateSymbolicCheckingListener.invalidated(null);
+		
+		final InvalidationListener updateModelcheckingListener = o -> Platform.runLater(() -> MachineStatusHandler.updateMachineStatus(this, CheckingType.MODELCHECKING));
+		this.modelcheckingItemsProperty().addListener((ListChangeListener<ModelCheckingItem>)change -> {
+			while (change.next()) {
+				change.getRemoved().forEach(item -> {
+					item.selectedProperty().removeListener(updateModelcheckingListener);
+					item.checkedProperty().removeListener(updateModelcheckingListener);
+				});
+				change.getAddedSubList().forEach(item -> {
+					item.selectedProperty().addListener(updateModelcheckingListener);
+					item.checkedProperty().addListener(updateModelcheckingListener);
+				});
+			}
+			updateModelcheckingListener.invalidated(null);
+		});
+		this.getModelcheckingItems().forEach(item -> {
+			item.selectedProperty().addListener(updateModelcheckingListener);
+			item.checkedProperty().addListener(updateModelcheckingListener);
+		});
+		updateModelcheckingListener.invalidated(null);
 	}
 	
 	public BooleanProperty changedProperty() {

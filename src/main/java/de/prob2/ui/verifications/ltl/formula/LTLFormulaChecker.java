@@ -22,8 +22,6 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.ILTLItemHandler;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
@@ -90,10 +88,7 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		List<LTLMarker> errorMarkers = new ArrayList<>();
 		Object result = getResult(parser, errorMarkers, item);
 		resultHandler.handleFormulaResult(item, errorMarkers, result, stateid);
-		Platform.runLater(() -> {
-			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-			injector.getInstance(LTLView.class).refresh();
-		});
+		Platform.runLater(() -> injector.getInstance(LTLView.class).refresh());
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {

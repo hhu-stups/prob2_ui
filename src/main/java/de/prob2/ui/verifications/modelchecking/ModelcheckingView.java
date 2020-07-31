@@ -20,11 +20,9 @@ import de.prob2.ui.sharedviews.BooleanCell;
 import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-import de.prob2.ui.verifications.MachineStatusHandler;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -173,7 +171,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		goalsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_GOAL, false));
 		stopAtFullCoverageColumn.setCellFactory(col -> new BooleanCell<>());
 		stopAtFullCoverageColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.STOP_AT_FULL_COVERAGE, false));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.MODELCHECKING, injector, this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(this));
 		
 		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -192,8 +190,6 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		selectAll.setOnAction(e -> {
 			for(IExecutableItem item : tvItems.getItems()) {
 				item.setSelected(selectAll.isSelected());
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 				tvItems.refresh();
 			}
 		});
@@ -362,7 +358,6 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		} else {
 			tvItems.getSelectionModel().selectFirst();
 		}
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
 	}
 	
 	@FXML

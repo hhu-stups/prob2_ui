@@ -20,7 +20,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
@@ -161,7 +160,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 	}
 
 	private void initTableColumns() {
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.REPLAY, this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(this));
 
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {

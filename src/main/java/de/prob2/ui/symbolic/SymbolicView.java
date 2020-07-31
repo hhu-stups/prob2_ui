@@ -17,7 +17,6 @@ import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
 import javafx.beans.binding.Bindings;
@@ -44,10 +43,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 			
 			MenuItem checkItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.check"));
 			checkItem.setDisable(true);
-			checkItem.setOnAction(e-> {
-				formulaHandler.handleItem(row.getItem(), false);
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), getSymbolicType());
-			});
+			checkItem.setOnAction(e -> formulaHandler.handleItem(row.getItem(), false));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
@@ -161,7 +157,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(getSymbolicType(), injector, this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(this));
 
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
@@ -175,8 +171,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 		selectAll.setOnAction(e-> {
 			for(IExecutableItem item : tvFormula.getItems()) {
 				item.setSelected(selectAll.isSelected());
-				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, getSymbolicType());
 				tvFormula.refresh();
 			}
 		});
@@ -186,7 +180,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 			T item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
 				formulaHandler.handleItem(item, false);
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(currentProject.getCurrentMachine(), getSymbolicType());
 			}
 		});
 
@@ -202,7 +195,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
 		formulaHandler.handleMachine(machine);
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, getSymbolicType());
 		refresh();
 	}
 	

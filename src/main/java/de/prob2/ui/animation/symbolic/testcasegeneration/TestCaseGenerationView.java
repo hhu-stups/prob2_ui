@@ -20,7 +20,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
@@ -210,7 +209,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(CheckingType.TEST_CASE_GENERATION, injector, this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(this));
 
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {

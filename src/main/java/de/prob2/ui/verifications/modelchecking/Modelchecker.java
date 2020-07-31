@@ -22,13 +22,9 @@ import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.MachineStatusHandler;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -134,11 +130,7 @@ public class Modelchecker {
 				if (!checkAll && jobItem.getTraceDescription() != null) {
 					currentTrace.set(jobItem.getTrace());
 				}
-				Platform.runLater(() -> {
-					showResult(item, jobItem);
-					Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
-					injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
-				});
+				Platform.runLater(() -> showResult(item, jobItem));
 			}
 		};
 		IModelCheckJob job = buildModelCheckJob(stateSpace, item, listener);

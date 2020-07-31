@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -17,15 +16,12 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicView;
 
-import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.MachineStatusHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
@@ -105,7 +101,6 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	@Override
 	protected void removeFormula(Machine machine, SymbolicCheckingFormulaItem item) {
 		machine.removeSymbolicCheckingFormula(item);
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.SYMBOLIC_CHECKING);
 	}
 	
 	@Override
