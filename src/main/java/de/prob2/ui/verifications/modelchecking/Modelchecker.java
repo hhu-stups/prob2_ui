@@ -1,9 +1,11 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -30,8 +32,9 @@ import de.prob2.ui.verifications.MachineStatusHandler;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SetProperty;
+import javafx.beans.property.SimpleSetProperty;
+import javafx.collections.FXCollections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +44,7 @@ public class Modelchecker {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Modelchecker.class);
 
-	private final ObjectProperty<Future<?>> currentFuture;
+	private final SetProperty<Future<Void>> currentTasks;
 	private final ExecutorService executor;
 
 	private final StageManager stageManager;
@@ -59,7 +62,7 @@ public class Modelchecker {
 		this.currentTrace = currentTrace;
 		this.statsView = statsView;
 		this.injector = injector;
-		this.currentFuture = new SimpleObjectProperty<>(this, "currentFuture", null);
+		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new HashSet<>()));
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
 		stopActions.add(this.executor::shutdownNow);
 	}
@@ -69,17 +72,22 @@ public class Modelchecker {
 			return;
 		}
 
-		this.currentFuture.set(this.executor.submit(() -> {
-			try {
-				startModelchecking(item, checkAll);
-			} finally {
-				Platform.runLater(() -> this.currentFuture.set(null));
+		final FutureTask<Void> task = new FutureTask<Void>(() -> {
+			startModelchecking(item, checkAll);
+			return null;
+		}) {
+			@Override
+			protected void done() {
+				super.done();
+				currentTasks.remove(this);
 			}
-		}));
+		};
+		this.currentTasks.add(task);
+		this.executor.submit(task);
 	}
 
 	public BooleanExpression runningProperty() {
-		return this.currentFuture.isNotNull();
+		return this.currentTasks.emptyProperty().not();
 	}
 
 	public boolean isRunning() {
@@ -152,10 +160,7 @@ public class Modelchecker {
 	}
 
 	public void cancelModelcheck() {
-		final Future<?> future = this.currentFuture.get();
-		if (future != null) {
-			future.cancel(true);
-		}
+		this.currentTasks.forEach(task -> task.cancel(true));
 		currentTrace.getStateSpace().sendInterrupt();
 	}
 
