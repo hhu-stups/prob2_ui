@@ -46,7 +46,6 @@ public class Machine implements DescriptionView.Describable {
 	
 	private final transient ObjectProperty<CheckingStatus> ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", CheckingStatus.UNKNOWN);
 	private final transient ObjectProperty<CheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", CheckingStatus.UNKNOWN);
-	private final transient ObjectProperty<CheckingStatus> symbolicAnimationStatus = new SimpleObjectProperty<>(this, "symbolicAnimationStatus", CheckingStatus.UNKNOWN);
 	private final transient ObjectProperty<CheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);
 	private final StringProperty name;
 	private final StringProperty description;
@@ -157,18 +156,6 @@ public class Machine implements DescriptionView.Describable {
 
 	public void setSymbolicCheckingStatus(final CheckingStatus status) {
 		this.symbolicCheckingStatusProperty().set(status);
-	}
-
-	public ObjectProperty<CheckingStatus> symbolicAnimationStatusProperty() {
-		return this.symbolicAnimationStatus;
-	}
-
-	public CheckingStatus getSymbolicAnimationStatus() {
-		return this.symbolicAnimationStatusProperty().get();
-	}
-
-	public void setSymbolicAnimationStatus(final CheckingStatus status) {
-		this.symbolicAnimationStatusProperty().set(status);
 	}
 	
 	public ObjectProperty<CheckingStatus> modelcheckingStatusProperty() {
