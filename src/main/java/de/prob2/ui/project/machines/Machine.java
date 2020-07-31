@@ -32,6 +32,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyListProperty;
 import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -120,66 +121,32 @@ public class Machine implements DescriptionView.Describable {
 		return anyEnabled ? Machine.CheckingStatus.SUCCESSFUL : Machine.CheckingStatus.NONE;
 	}
 	
+	private static void addCheckingStatusListener(final ReadOnlyListProperty<? extends IExecutableItem> items, final ObjectProperty<Machine.CheckingStatus> statusProperty) {
+		final InvalidationListener updateListener = o -> Platform.runLater(() -> statusProperty.set(combineCheckingStatus(items)));
+		items.addListener((ListChangeListener<IExecutableItem>)change -> {
+			while (change.next()) {
+				change.getRemoved().forEach(item -> {
+					item.selectedProperty().removeListener(updateListener);
+					item.checkedProperty().removeListener(updateListener);
+				});
+				change.getAddedSubList().forEach(item -> {
+					item.selectedProperty().addListener(updateListener);
+					item.checkedProperty().addListener(updateListener);
+				});
+			}
+			updateListener.invalidated(null);
+		});
+		items.forEach(item -> {
+			item.selectedProperty().addListener(updateListener);
+			item.checkedProperty().addListener(updateListener);
+		});
+		updateListener.invalidated(null);
+	}
+	
 	private void initListeners() {
-		final InvalidationListener updateLtlListener = o -> Platform.runLater(() -> setLtlStatus(combineCheckingStatus(getLTLFormulas())));
-		this.ltlFormulasProperty().addListener((ListChangeListener<LTLFormulaItem>)change -> {
-			while (change.next()) {
-				change.getRemoved().forEach(item -> {
-					item.selectedProperty().removeListener(updateLtlListener);
-					item.resultItemProperty().removeListener(updateLtlListener);
-				});
-				change.getAddedSubList().forEach(item -> {
-					item.selectedProperty().addListener(updateLtlListener);
-					item.resultItemProperty().addListener(updateLtlListener);
-				});
-			}
-			updateLtlListener.invalidated(null);
-		});
-		this.getLTLFormulas().forEach(item -> {
-			item.selectedProperty().addListener(updateLtlListener);
-			item.resultItemProperty().addListener(updateLtlListener);
-		});
-		updateLtlListener.invalidated(null);
-		
-		final InvalidationListener updateSymbolicCheckingListener = o -> Platform.runLater(() -> setSymbolicCheckingStatus(combineCheckingStatus(getSymbolicCheckingFormulas())));
-		this.symbolicCheckingFormulasProperty().addListener((ListChangeListener<SymbolicCheckingFormulaItem>)change -> {
-			while (change.next()) {
-				change.getRemoved().forEach(item -> {
-					item.selectedProperty().removeListener(updateSymbolicCheckingListener);
-					item.resultItemProperty().removeListener(updateSymbolicCheckingListener);
-				});
-				change.getAddedSubList().forEach(item -> {
-					item.selectedProperty().addListener(updateSymbolicCheckingListener);
-					item.resultItemProperty().addListener(updateSymbolicCheckingListener);
-				});
-			}
-			updateSymbolicCheckingListener.invalidated(null);
-		});
-		this.getSymbolicCheckingFormulas().forEach(item -> {
-			item.selectedProperty().addListener(updateSymbolicCheckingListener);
-			item.resultItemProperty().addListener(updateSymbolicCheckingListener);
-		});
-		updateSymbolicCheckingListener.invalidated(null);
-		
-		final InvalidationListener updateModelcheckingListener = o -> Platform.runLater(() -> setModelcheckingStatus(combineCheckingStatus(getModelcheckingItems())));
-		this.modelcheckingItemsProperty().addListener((ListChangeListener<ModelCheckingItem>)change -> {
-			while (change.next()) {
-				change.getRemoved().forEach(item -> {
-					item.selectedProperty().removeListener(updateModelcheckingListener);
-					item.checkedProperty().removeListener(updateModelcheckingListener);
-				});
-				change.getAddedSubList().forEach(item -> {
-					item.selectedProperty().addListener(updateModelcheckingListener);
-					item.checkedProperty().addListener(updateModelcheckingListener);
-				});
-			}
-			updateModelcheckingListener.invalidated(null);
-		});
-		this.getModelcheckingItems().forEach(item -> {
-			item.selectedProperty().addListener(updateModelcheckingListener);
-			item.checkedProperty().addListener(updateModelcheckingListener);
-		});
-		updateModelcheckingListener.invalidated(null);
+		addCheckingStatusListener(this.ltlFormulasProperty(), this.ltlStatusProperty());
+		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolicCheckingStatusProperty());
+		addCheckingStatusListener(this.modelcheckingItemsProperty(), this.modelcheckingStatusProperty());
 	}
 	
 	public BooleanProperty changedProperty() {

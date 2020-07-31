@@ -46,7 +46,8 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		});
 	}
 
-	public ObjectProperty<Checked> statusProperty() {
+	@Override
+	public ObjectProperty<Checked> checkedProperty() {
 		return status;
 	}
 

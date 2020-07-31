@@ -185,7 +185,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 			final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
 			statusIcon.getStyleClass().add("status-icon");
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
-			trace.statusProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
+			trace.checkedProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
 			updateStatusIcon(statusIcon, trace.getChecked());
 
 			final ProgressIndicator replayProgress = new ProgressBar();
@@ -242,7 +242,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 				showErrorItem.disableProperty().unbind();
 				if (to != null) {
 					injector.getInstance(DisablePropertyController.class).addDisableProperty(replayTraceItem.disableProperty(), row.getItem().selectedProperty().not());
-					showErrorItem.disableProperty().bind(to.statusProperty().isNotEqualTo(Checked.FAIL));
+					showErrorItem.disableProperty().bind(to.checkedProperty().isNotEqualTo(Checked.FAIL));
 					row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 				}
 			});

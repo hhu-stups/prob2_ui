@@ -76,6 +76,7 @@ public class ModelCheckingItem implements IExecutableItem {
 		});
 	}
 	
+	@Override
 	public ReadOnlyObjectProperty<Checked> checkedProperty() {
 		return this.checked;
 	}
