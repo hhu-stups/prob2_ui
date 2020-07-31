@@ -1,7 +1,14 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.domainobjects.LTL;
@@ -15,9 +22,6 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.MachineStatusHandler;
 import de.prob2.ui.verifications.ltl.ILTLItemHandler;
@@ -25,17 +29,14 @@ import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLView;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -64,20 +65,12 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 	}
 	
 	public void checkMachine(Machine machine) {
-		final ArrayList<Boolean> failed = new ArrayList<>();
-		failed.add(false);
 		for (LTLFormulaItem item : machine.getLTLFormulas()) {
 			this.checkFormula(item, machine);
-			if(item.getChecked() == Checked.FAIL) {
-				failed.set(0, true);
-				machine.setLtlStatus(Machine.CheckingStatus.FAILED);
-			}
 			if(Thread.currentThread().isInterrupted()) {
 				return;
 			}
 		}
-		Platform.runLater(() -> injector.getInstance(StatusBar.class).setLtlStatus(failed.get(0) ? StatusBar.CheckingStatus.ERROR : StatusBar.CheckingStatus.SUCCESSFUL));
-	
 	}
 	
 	public void checkMachine() {
