@@ -1075,6 +1075,9 @@
 .machine-table-view .status-icon.failed {
 	-fx-text-fill: red;
 }
+.machine-table-view .status-icon.none {
+	-fx-text-fill: gray;
+}
 
 /* =================== STATES VIEW =================== */
 

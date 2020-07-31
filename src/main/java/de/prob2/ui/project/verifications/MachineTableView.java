@@ -34,7 +34,7 @@ public class MachineTableView extends TableView<Machine> {
 			super.updateItem(item, empty);
 			
 			final BindableGlyph graphic = (BindableGlyph) this.getGraphic();
-			graphic.getStyleClass().removeAll("unknown", "successful", "failed");
+			graphic.getStyleClass().removeAll("unknown", "successful", "failed", "none");
 			if (empty || item == null) {
 				graphic.setVisible(false);
 			} else {
@@ -55,6 +55,11 @@ public class MachineTableView extends TableView<Machine> {
 					case FAILED:
 						styleClass = "failed";
 						icon = FontAwesome.Glyph.REMOVE;
+						break;
+					
+					case NONE:
+						styleClass = "none";
+						icon = FontAwesome.Glyph.BAN;
 						break;
 					
 					default:

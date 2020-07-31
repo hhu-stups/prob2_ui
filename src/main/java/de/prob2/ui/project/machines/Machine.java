@@ -39,7 +39,7 @@ import java.util.Objects;
 
 public class Machine implements DescriptionView.Describable {
 	public enum CheckingStatus {
-		UNKNOWN, SUCCESSFUL, FAILED
+		UNKNOWN, SUCCESSFUL, FAILED, NONE
 	}
 	
 	public static final JsonDeserializer<Machine> JSON_DESERIALIZER = Machine::new;

@@ -15,10 +15,12 @@ public final class MachineStatusHandler {
 	
 	public void updateMachineStatus(Machine machine, CheckingType type) {
 		List<? extends IExecutableItem> items = getItems(machine, type);
+		boolean anyEnabled = false;
 		for(IExecutableItem item : items) {
 			if(!item.selected()) {
 				continue;
 			}
+			anyEnabled = true;
 			if(item.getChecked() == Checked.FAIL) {
 				refreshMachineStatus(machine, type, Machine.CheckingStatus.FAILED);
 				return;
@@ -27,7 +29,7 @@ public final class MachineStatusHandler {
 				return;
 			}
 		}
-		refreshMachineStatus(machine, type, Machine.CheckingStatus.SUCCESSFUL);
+		refreshMachineStatus(machine, type, anyEnabled ? Machine.CheckingStatus.SUCCESSFUL : Machine.CheckingStatus.NONE);
 	}
 	
 	private void refreshMachineStatus(Machine machine, CheckingType type, Machine.CheckingStatus status) {
