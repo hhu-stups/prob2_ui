@@ -22,6 +22,9 @@ public final class MachineStatusHandler {
 			if(item.getChecked() == Checked.FAIL) {
 				refreshMachineStatus(machine, type, Machine.CheckingStatus.FAILED);
 				return;
+			} else if (item.getChecked() != Checked.SUCCESS) {
+				refreshMachineStatus(machine, type, Machine.CheckingStatus.UNKNOWN);
+				return;
 			}
 		}
 		refreshMachineStatus(machine, type, Machine.CheckingStatus.SUCCESSFUL);
