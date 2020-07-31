@@ -135,9 +135,9 @@ public class Modelchecker {
 					currentTrace.set(jobItem.getTrace());
 				}
 				Platform.runLater(() -> {
+					showResult(item, jobItem);
 					Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
 					injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.MODELCHECKING);
-					showResult(item, jobItem);
 				});
 			}
 		};
