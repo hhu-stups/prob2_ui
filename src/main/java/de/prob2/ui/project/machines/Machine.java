@@ -1,11 +1,17 @@
 package de.prob2.ui.project.machines;
 
+import java.lang.reflect.Type;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
+
 import com.google.common.io.Files;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+
 import de.prob.json.JsonManager;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
@@ -14,12 +20,13 @@ import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
-import de.prob2.ui.verifications.CheckingType;
-import de.prob2.ui.verifications.MachineStatusHandler;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
@@ -35,11 +42,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
-
-import java.lang.reflect.Type;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
 
 public class Machine implements DescriptionView.Describable {
 	public enum CheckingStatus {
@@ -102,8 +104,24 @@ public class Machine implements DescriptionView.Describable {
 		this.initListeners();
 	}
 	
+	private static Machine.CheckingStatus combineCheckingStatus(final List<? extends IExecutableItem> items) {
+		boolean anyEnabled = false;
+		for(IExecutableItem item : items) {
+			if(!item.selected()) {
+				continue;
+			}
+			anyEnabled = true;
+			if(item.getChecked() == Checked.FAIL) {
+				return Machine.CheckingStatus.FAILED;
+			} else if (item.getChecked() != Checked.SUCCESS) {
+				return Machine.CheckingStatus.UNKNOWN;
+			}
+		}
+		return anyEnabled ? Machine.CheckingStatus.SUCCESSFUL : Machine.CheckingStatus.NONE;
+	}
+	
 	private void initListeners() {
-		final InvalidationListener updateLtlListener = o -> Platform.runLater(() -> MachineStatusHandler.updateMachineStatus(this, CheckingType.LTL));
+		final InvalidationListener updateLtlListener = o -> Platform.runLater(() -> setLtlStatus(combineCheckingStatus(getLTLFormulas())));
 		this.ltlFormulasProperty().addListener((ListChangeListener<LTLFormulaItem>)change -> {
 			while (change.next()) {
 				change.getRemoved().forEach(item -> {
@@ -123,7 +141,7 @@ public class Machine implements DescriptionView.Describable {
 		});
 		updateLtlListener.invalidated(null);
 		
-		final InvalidationListener updateSymbolicCheckingListener = o -> Platform.runLater(() -> MachineStatusHandler.updateMachineStatus(this, CheckingType.SYMBOLIC_CHECKING));
+		final InvalidationListener updateSymbolicCheckingListener = o -> Platform.runLater(() -> setSymbolicCheckingStatus(combineCheckingStatus(getSymbolicCheckingFormulas())));
 		this.symbolicCheckingFormulasProperty().addListener((ListChangeListener<SymbolicCheckingFormulaItem>)change -> {
 			while (change.next()) {
 				change.getRemoved().forEach(item -> {
@@ -143,7 +161,7 @@ public class Machine implements DescriptionView.Describable {
 		});
 		updateSymbolicCheckingListener.invalidated(null);
 		
-		final InvalidationListener updateModelcheckingListener = o -> Platform.runLater(() -> MachineStatusHandler.updateMachineStatus(this, CheckingType.MODELCHECKING));
+		final InvalidationListener updateModelcheckingListener = o -> Platform.runLater(() -> setModelcheckingStatus(combineCheckingStatus(getModelcheckingItems())));
 		this.modelcheckingItemsProperty().addListener((ListChangeListener<ModelCheckingItem>)change -> {
 			while (change.next()) {
 				change.getRemoved().forEach(item -> {
