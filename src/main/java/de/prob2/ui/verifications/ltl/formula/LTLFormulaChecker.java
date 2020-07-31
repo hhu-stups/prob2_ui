@@ -74,10 +74,6 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 					break;
 				}
 			}
-			Platform.runLater(() -> {
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-				injector.getInstance(LTLView.class).refresh();
-			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);
@@ -94,16 +90,16 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		List<LTLMarker> errorMarkers = new ArrayList<>();
 		Object result = getResult(parser, errorMarkers, item);
 		resultHandler.handleFormulaResult(item, errorMarkers, result, stateid);
+		Platform.runLater(() -> {
+			injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+			injector.getInstance(LTLView.class).refresh();
+		});
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {
 		Machine machine = currentProject.getCurrentMachine();
 		Thread checkingThread = new Thread(() -> {
 			checkFormula(item, machine);
-			Platform.runLater(() -> {
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-				injector.getInstance(LTLView.class).refresh();
-			});
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}
@@ -117,11 +113,7 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		Machine machine = currentProject.getCurrentMachine();
 		Thread checkingThread = new Thread(() -> {
 			checkFormula(item, machine);
-			Platform.runLater(() -> {
-				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-				injector.getInstance(LTLView.class).refresh();
-				formulaStage.showErrors(item.getResultItem());
-			});
+			Platform.runLater(() -> formulaStage.showErrors(item.getResultItem()));
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}
