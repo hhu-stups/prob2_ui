@@ -12,8 +12,10 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
@@ -45,10 +47,6 @@ public class StatusBar extends HBox {
 		}
 	}
 	
-	public enum CheckingStatus {
-		ERROR, SUCCESSFUL
-	}
-	
 	@FXML private Label statusLabel;
 	
 	private final ResourceBundle resourceBundle;
@@ -56,9 +54,6 @@ public class StatusBar extends HBox {
 	private final CurrentProject currentProject;
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
-	private final ObjectProperty<StatusBar.CheckingStatus> ltlStatus;
-	private final ObjectProperty<StatusBar.CheckingStatus> symbolicCheckingStatus;
-	private final ObjectProperty<StatusBar.CheckingStatus> modelcheckingStatus;
 	private BooleanExpression updating;
 	
 	@Inject
@@ -70,9 +65,6 @@ public class StatusBar extends HBox {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
-		this.ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", StatusBar.CheckingStatus.SUCCESSFUL);
-		this.symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", StatusBar.CheckingStatus.SUCCESSFUL);
-		this.modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", StatusBar.CheckingStatus.SUCCESSFUL);
 		this.updating = Bindings.createBooleanBinding(() -> false);
 		
 		stageManager.loadFXML(this, "status_bar.fxml");
@@ -80,16 +72,21 @@ public class StatusBar extends HBox {
 	
 	@FXML
 	private void initialize() {
-		this.currentTrace.addListener((observable, from, to) -> this.update());
-		this.currentProject.addListener((observable, from, to) -> {
-			reset();
-			this.update();
+		final InvalidationListener updateListener = o -> this.update();
+		this.currentTrace.addListener(updateListener);
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if (from != null) {
+				from.modelcheckingStatusProperty().removeListener(updateListener);
+				from.ltlStatusProperty().removeListener(updateListener);
+				from.symbolicCheckingStatusProperty().removeListener(updateListener);
+			}
+			if (to != null) {
+				to.modelcheckingStatusProperty().addListener(updateListener);
+				to.ltlStatusProperty().addListener(updateListener);
+				to.symbolicCheckingStatusProperty().addListener(updateListener);
+			}
 		});
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
-		this.loadingStatusProperty().addListener((observable, from, to) -> this.update());
-		this.ltlStatusProperty().addListener((observable, from, to) -> this.update());
-		this.symbolicCheckingStatusProperty().addListener((observable, from, to) -> this.update());
-		this.modelcheckingStatusProperty().addListener((observable, from, to) -> this.update());
+		this.loadingStatusProperty().addListener(updateListener);
 		// this.updating doesn't have a listener; instead each individual expression has a listener added in addUpdatingExpression.
 	}
 	
@@ -105,42 +102,6 @@ public class StatusBar extends HBox {
 		this.loadingStatusProperty().set(loadingStatus);
 	}
 	
-	public ObjectProperty<StatusBar.CheckingStatus> ltlStatusProperty() {
-		return this.ltlStatus;
-	}
-	
-	public StatusBar.CheckingStatus getLtlStatus() {
-		return this.ltlStatusProperty().get();
-	}
-		
-	public void setLtlStatus(final StatusBar.CheckingStatus ltlStatus) {
-		this.ltlStatusProperty().set(ltlStatus);
-	}
-
-	public ObjectProperty<StatusBar.CheckingStatus> symbolicCheckingStatusProperty() {
-		return this.symbolicCheckingStatus;
-	}
-
-	public StatusBar.CheckingStatus getSymbolicCheckingStatus() {
-		return this.symbolicCheckingStatusProperty().get();
-	}
-
-	public void setSymbolicCheckingStatus(final StatusBar.CheckingStatus symbolicCheckingStatus) {
-		this.symbolicCheckingStatusProperty().set(symbolicCheckingStatus);
-	}
-
-	public ObjectProperty<StatusBar.CheckingStatus> modelcheckingStatusProperty() {
-		return this.modelcheckingStatus;
-	}
-	
-	public StatusBar.CheckingStatus getModelcheckingStatus() {
-		return this.modelcheckingStatusProperty().get();
-	}
-	
-	public void setModelcheckingStatus(final StatusBar.CheckingStatus modelcheckingStatus) {
-		this.modelcheckingStatus.set(modelcheckingStatus);
-	}
-	
 	public void addUpdatingExpression(final BooleanExpression expr) {
 		this.updating = this.updating.or(expr);
 		expr.addListener(o -> Platform.runLater(this::update));
@@ -152,9 +113,10 @@ public class StatusBar extends HBox {
 		if (this.updating.get()) {
 			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
 		} else {
+			final Machine machine = this.currentProject.getCurrentMachine();
 			final Trace trace = this.currentTrace.get();
-			if (trace != null) {
-				final List<String> errorMessages = getErrorMessages(trace);
+			if (machine != null && trace != null) {
+				final List<String> errorMessages = getErrorMessages(machine, trace);
 				if (errorMessages.isEmpty()) {
 					statusLabel.getStyleClass().add("noErrors");
 					statusLabel.setText(resourceBundle.getString("statusbar.noErrors"));
@@ -168,7 +130,7 @@ public class StatusBar extends HBox {
 		}
 	}
 
-	private List<String> getErrorMessages(final Trace trace) {
+	private List<String> getErrorMessages(final Machine machine, final Trace trace) {
 		final List<String> errorMessages = new ArrayList<>();
 		if (!trace.getCurrentState().isInvariantOk()) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.invariantNotOK"));
@@ -176,25 +138,17 @@ public class StatusBar extends HBox {
 		if (!trace.getCurrentState().getStateErrors().isEmpty()) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
 		}
-		if (this.getLtlStatus() == StatusBar.CheckingStatus.ERROR) {
+		if (machine.getLtlStatus() == Machine.CheckingStatus.FAILED) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
 		}
 
-		if (this.getSymbolicCheckingStatus() == StatusBar.CheckingStatus.ERROR) {
+		if (machine.getSymbolicCheckingStatus() == Machine.CheckingStatus.FAILED) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.symbolic.checking.error"));
 		}
 
-		if (this.getModelcheckingStatus() == StatusBar.CheckingStatus.ERROR) {
+		if (machine.getModelcheckingStatus() == Machine.CheckingStatus.FAILED) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
 		}
 		return errorMessages;
 	}
-
-	public void reset() {
-		setModelcheckingStatus(CheckingStatus.SUCCESSFUL);
-		setLtlStatus(CheckingStatus.SUCCESSFUL);
-		setSymbolicCheckingStatus(CheckingStatus.SUCCESSFUL);
-		setLoadingStatus(LoadingStatus.NOT_LOADING);
-	}
-	
 }
