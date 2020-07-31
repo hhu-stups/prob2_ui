@@ -73,8 +73,10 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 					break;
 				}
 			}
-			Platform.runLater(() -> injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL));
-			Platform.runLater(() -> injector.getInstance(LTLView.class).refresh());
+			Platform.runLater(() -> {
+				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				injector.getInstance(LTLView.class).refresh();
+			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "LTL Checking Thread");
 		currentJobThreads.add(checkingThread);
