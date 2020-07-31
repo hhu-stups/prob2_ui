@@ -210,8 +210,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					checkItem.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty().not()
-							.or(to.selectedProperty().not()));
+					checkItem.disableProperty().bind(checker.runningProperty().or(to.selectedProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
 				}
@@ -280,7 +279,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 		formulaSelectedColumn.setGraphic(formulaSelectAll);
 
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(addMenuButton.disableProperty(), currentTrace.existsProperty().not());
-		cancelButton.disableProperty().bind(checker.currentJobThreadsProperty().emptyProperty());
+		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentTrace.existsProperty().not());
 		saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
@@ -385,8 +384,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	
 	@FXML
 	public void cancel() {
-		checker.currentJobThreadsProperty().forEach(Thread::interrupt);
-		currentTrace.getStateSpace().sendInterrupt();
+		checker.cancel();
 	}
 	
 	private void parseMachine(Machine machine) {

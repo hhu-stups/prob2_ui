@@ -31,6 +31,7 @@ import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.LTLView;
 
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -177,8 +178,16 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		return parseListener;
 	}
 	
-	public ListProperty<Thread> currentJobThreadsProperty() {
-		return currentJobThreads;
+	public void cancel() {
+		currentJobThreads.forEach(Thread::interrupt);
+		currentTrace.getStateSpace().sendInterrupt();
 	}
-		
+	
+	public BooleanExpression runningProperty() {
+		return currentJobThreads.emptyProperty().not();
+	}
+	
+	public boolean isRunning() {
+		return this.runningProperty().get();
+	}
 }

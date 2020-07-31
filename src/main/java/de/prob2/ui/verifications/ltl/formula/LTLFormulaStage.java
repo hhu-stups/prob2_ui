@@ -42,7 +42,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	public void initialize() {
 		super.initialize();
 		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
-		applyButton.disableProperty().bind(formulaChecker.currentJobThreadsProperty().emptyProperty().not());
+		applyButton.disableProperty().bind(formulaChecker.runningProperty());
 	}
 
 	@FXML
@@ -89,8 +89,8 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	@FXML
 	private void cancel() {
-		if(((LTLFormulaChecker) ltlItemHandler).currentJobThreadsProperty().emptyProperty().not().get()) {
-			currentTrace.getStateSpace().sendInterrupt();
+		if(((LTLFormulaChecker) ltlItemHandler).isRunning()) {
+			((LTLFormulaChecker) ltlItemHandler).cancel();
 		}
 		this.close();
 	}
