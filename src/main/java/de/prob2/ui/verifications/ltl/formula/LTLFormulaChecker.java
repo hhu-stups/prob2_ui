@@ -84,11 +84,6 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		checkingThread.start();
 	}
 	
-	public void updateMachine(Machine machine) {
-		injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
-		injector.getInstance(LTLView.class).refresh();
-	}
-	
 	public void checkFormula(LTLFormulaItem item, Machine machine) {
 		if(!item.selected()) {
 			return;
@@ -106,8 +101,8 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		Thread checkingThread = new Thread(() -> {
 			checkFormula(item, machine);
 			Platform.runLater(() -> {
-				updateMachine(machine);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				injector.getInstance(LTLView.class).refresh();
 			});
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
@@ -123,8 +118,8 @@ public class LTLFormulaChecker implements ILTLItemHandler {
 		Thread checkingThread = new Thread(() -> {
 			checkFormula(item, machine);
 			Platform.runLater(() -> {
-				updateMachine(machine);
 				injector.getInstance(MachineStatusHandler.class).updateMachineStatus(machine, CheckingType.LTL);
+				injector.getInstance(LTLView.class).refresh();
 				formulaStage.showErrors(item.getResultItem());
 			});
 			if(item.getCounterExample() != null) {
