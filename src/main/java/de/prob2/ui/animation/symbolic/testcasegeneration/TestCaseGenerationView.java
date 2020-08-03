@@ -210,16 +210,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
-
-		selectAll.setSelected(true);
-		selectAll.setOnAction(e-> {
-			for(IExecutableItem item : tvTestCases.getItems()) {
-				item.setSelected(selectAll.isSelected());
-				tvTestCases.refresh();
-			}
-		});
-
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvTestCases,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvTestCases.setOnMouseClicked(e-> {
 			TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();

@@ -181,22 +181,13 @@ public final class ModelcheckingView extends ScrollPane {
 		goalsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_GOAL, false));
 		stopAtFullCoverageColumn.setCellFactory(col -> new BooleanCell<>());
 		stopAtFullCoverageColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.STOP_AT_FULL_COVERAGE, false));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvItems, selectAll));
+		shouldExecuteColumn.setGraphic(selectAll);
 		
 		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
 		messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
-
-		selectAll.setSelected(true);
-		selectAll.setOnAction(e -> {
-			for(IExecutableItem item : tvItems.getItems()) {
-				item.setSelected(selectAll.isSelected());
-				tvItems.refresh();
-			}
-		});
-
-		shouldExecuteColumn.setGraphic(selectAll);
 
 		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		tvChecks.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));

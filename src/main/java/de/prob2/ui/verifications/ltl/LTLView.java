@@ -247,7 +247,8 @@ public class LTLView extends AnchorPane {
 	}
 
 	private void setBindings() {
-		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(formulaSelectAll));
+		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula, formulaSelectAll));
+		formulaSelectedColumn.setGraphic(formulaSelectAll);
 		formulaStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
@@ -256,16 +257,6 @@ public class LTLView extends AnchorPane {
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-
-		formulaSelectAll.setSelected(true);
-		formulaSelectAll.setOnAction(e -> {
-			for(IExecutableItem item : tvFormula.getItems()) {
-				item.setSelected(formulaSelectAll.isSelected());
-				tvFormula.refresh();
-			}
-		});
-
-		formulaSelectedColumn.setGraphic(formulaSelectAll);
 
 		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());

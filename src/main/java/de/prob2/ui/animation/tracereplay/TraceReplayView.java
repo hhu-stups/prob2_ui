@@ -166,15 +166,7 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	private void initTableColumns() {
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
-
-		selectAll.setSelected(true);
-		selectAll.setOnAction(e -> {
-			for (ReplayTrace item : traceTableView.getItems()) {
-				item.setSelected(selectAll.isSelected());
-				traceTableView.refresh();
-			}
-		});
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(traceTableView, selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 
 		statusColumn.setCellValueFactory(features -> {
