@@ -25,7 +25,6 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -183,7 +182,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		});
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				generateButton.disableProperty().bind(testCasesProperty(currentProject.getCurrentMachine()).emptyProperty().or(testCaseGenerator.currentJobThreadsProperty().emptyProperty().not()).or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+				generateButton.disableProperty().bind(currentProject.getCurrentMachine().testCasesProperty().emptyProperty().or(testCaseGenerator.currentJobThreadsProperty().emptyProperty().not()).or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 			} else {
 				generateButton.disableProperty().unbind();
 				generateButton.setDisable(true);
@@ -193,7 +192,7 @@ public class TestCaseGenerationView extends ScrollPane {
 	
 	public void bindMachine(Machine machine) {
 		tvTestCases.itemsProperty().unbind();
-		tvTestCases.itemsProperty().bind(testCasesProperty(machine));
+		tvTestCases.itemsProperty().bind(machine.testCasesProperty());
 		tvTestCases.refresh();
 	}
 	
@@ -216,7 +215,7 @@ public class TestCaseGenerationView extends ScrollPane {
 				generateButton.disableProperty().unbind();
 				generateButton.setDisable(true);
 			} else {
-				generateButton.disableProperty().bind(testCasesProperty(currentProject.getCurrentMachine()).emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+				generateButton.disableProperty().bind(currentProject.getCurrentMachine().testCasesProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 			}
 		});
 		selectAll.setOnAction(e-> {
@@ -235,11 +234,6 @@ public class TestCaseGenerationView extends ScrollPane {
 		});
 		tvTestCases.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 	}
-
-	public ListProperty<TestCaseGenerationItem> testCasesProperty(Machine machine) {
-		return machine.testCasesProperty();
-	}
-
 	
 	@FXML
 	public void addTestCase() {
