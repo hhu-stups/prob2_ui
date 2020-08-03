@@ -14,7 +14,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
@@ -32,7 +31,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
-public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane implements ISelectableCheckingView {
+public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	
 	public abstract class SymbolicCellFactory {
 
@@ -155,7 +154,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
 
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
@@ -209,15 +208,4 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 	}
 
 	protected abstract void openItem(T item);
-
-	@Override
-	public void updateSelectViews() {
-		boolean anySelected = false;
-		for(T item : formulasProperty(currentProject.getCurrentMachine()).get()) {
-			if(item.selected()) {
-				anySelected = true;
-			}
-		}
-		selectAll.setSelected(anySelected);
-	}
 }

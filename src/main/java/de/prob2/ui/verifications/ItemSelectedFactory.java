@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
@@ -7,10 +8,14 @@ import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
 public class ItemSelectedFactory implements Callback<TableColumn.CellDataFeatures<IExecutableItem, CheckBox>, ObservableValue<CheckBox>> {
-	private final ISelectableCheckingView view;
+	private final BooleanProperty selectAllProperty;
 	
-	public ItemSelectedFactory(final ISelectableCheckingView view) {
-		this.view = view;
+	public ItemSelectedFactory(final BooleanProperty selectAllProperty) {
+		this.selectAllProperty = selectAllProperty;
+	}
+	
+	public ItemSelectedFactory(final CheckBox selectAll) {
+		this(selectAll.selectedProperty());
 	}
 	
 	@Override
@@ -20,7 +25,7 @@ public class ItemSelectedFactory implements Callback<TableColumn.CellDataFeature
 		checkBox.selectedProperty().setValue(item.selected());
 		checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			item.setSelected(newValue);
-			view.updateSelectViews();
+			this.selectAllProperty.set(param.getTableView().getItems().stream().anyMatch(IExecutableItem::selected));
 		});
 		return new SimpleObjectProperty<>(checkBox);
 	}

@@ -21,7 +21,6 @@ import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.application.Platform;
@@ -46,7 +45,7 @@ import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
-public final class ModelcheckingView extends ScrollPane implements ISelectableCheckingView {
+public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	private Button addModelCheckButton;
 	@FXML
@@ -171,7 +170,7 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 		goalsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_GOAL, false));
 		stopAtFullCoverageColumn.setCellFactory(col -> new BooleanCell<>());
 		stopAtFullCoverageColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.STOP_AT_FULL_COVERAGE, false));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
 		
 		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -393,15 +392,5 @@ public final class ModelcheckingView extends ScrollPane implements ISelectableCh
 	
 	public void selectJobItem(ModelCheckingJobItem item) {
 		tvChecks.getSelectionModel().select(item);
-	}
-
-	public void updateSelectViews() {
-		boolean anySelected = false;
-		for(ModelCheckingItem item : currentProject.getCurrentMachine().getModelcheckingItems()) {
-			if(item.selected()) {
-				anySelected = true;
-			}
-		}
-		selectAll.setSelected(anySelected);
 	}
 }

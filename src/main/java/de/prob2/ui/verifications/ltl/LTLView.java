@@ -28,7 +28,6 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
@@ -59,7 +58,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class LTLView extends AnchorPane implements ISelectableCheckingView {
+public class LTLView extends AnchorPane {
 	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
 	
 	private static final String LTL_FILE_EXTENSION = "prob2ltl";
@@ -246,7 +245,7 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 	}
 
 	private void setBindings() {
-		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(this));
+		formulaSelectedColumn.setCellValueFactory(new ItemSelectedFactory(formulaSelectAll));
 		formulaStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
@@ -441,16 +440,6 @@ public class LTLView extends AnchorPane implements ISelectableCheckingView {
 					patternParser.parsePattern(pattern, machine);
 					patternParser.addPattern(pattern, machine);
 				});
-	}
-
-	public void updateSelectViews() {
-		boolean anySelected = false;
-		for(LTLFormulaItem item : currentProject.getCurrentMachine().getLTLFormulas()) {
-			if(item.selected()) {
-				anySelected = true;
-			}
-		}
-		formulaSelectAll.setSelected(anySelected);
 	}
 
 	public void refresh() {

@@ -21,7 +21,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
@@ -43,7 +42,7 @@ import javafx.util.Callback;
  
 @FXMLInjected
 @Singleton
-public class TestCaseGenerationView extends ScrollPane implements ISelectableCheckingView {
+public class TestCaseGenerationView extends ScrollPane {
 	
 	@FXML
 	private HelpButton helpButton;
@@ -209,7 +208,7 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
 
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
@@ -275,16 +274,4 @@ public class TestCaseGenerationView extends ScrollPane implements ISelectableChe
 	public void cancel() {
 		testCaseGenerator.interrupt();
 	}
-
-	@Override
-	public void updateSelectViews() {
-		boolean anySelected = false;
-		for(TestCaseGenerationItem item : testCasesProperty(currentProject.getCurrentMachine()).get()) {
-			if(item.selected()) {
-				anySelected = true;
-			}
-		}
-		selectAll.setSelected(anySelected);
-	}
-		
 }

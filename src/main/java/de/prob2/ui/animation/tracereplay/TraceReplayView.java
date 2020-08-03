@@ -21,7 +21,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
@@ -52,7 +51,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
-public class TraceReplayView extends ScrollPane implements ISelectableCheckingView {
+public class TraceReplayView extends ScrollPane {
 	@FXML
 	private TableView<ReplayTrace> traceTableView;
 	@FXML
@@ -160,7 +159,7 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 	}
 
 	private void initTableColumns() {
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(this));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
 
 		selectAll.setSelected(true);
 		selectAll.selectedProperty().addListener((observable, from, to) -> {
@@ -298,16 +297,6 @@ public class TraceReplayView extends ScrollPane implements ISelectableCheckingVi
 
 	private void removeFromTraceTableView(Path tracePath) {
 		traceTableView.getItems().removeIf(trace -> trace.getLocation().equals(tracePath));
-	}
-
-	public void updateSelectViews() {
-		boolean anySelected = false;
-		for(ReplayTrace item : traceTableView.getItems()) {
-			if(item.selected()) {
-				anySelected = true;
-			}
-		}
-		selectAll.setSelected(anySelected);
 	}
 
 	public void closeDescription() {
