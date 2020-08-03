@@ -199,6 +199,7 @@ public final class OperationsView extends VBox {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final ResourceBundle bundle;
+	private final DisablePropertyController disablePropertyController;
 	private final StageManager stageManager;
 	private final Config config;
 	private final Comparator<CharSequence> alphanumericComparator;
@@ -217,6 +218,7 @@ public final class OperationsView extends VBox {
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
 		this.bundle = bundle;
+		this.disablePropertyController = disablePropertyController;
 		this.stageManager = stageManager;
 		this.config = config;
 		this.updater = new BackgroundUpdater("OperationsView Updater");
@@ -239,17 +241,11 @@ public final class OperationsView extends VBox {
 				executeOperationIfPossible(opsListView.getSelectionModel().getSelectedItem());
 			}
 		});
-		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> opsListView.setDisable(to)));
-
-		injector.getInstance(Modelchecker.class).runningProperty().addListener((observable,from,to) -> opsListView.setDisable(to));
-		injector.getInstance(LTLFormulaChecker.class).runningProperty().addListener((observable, from, to) -> opsListView.setDisable(to));
-		injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
-		injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
-		injector.getInstance(TestCaseGenerator.class).currentJobThreadsProperty().emptyProperty().addListener((observable, from, to) -> opsListView.setDisable(!to));
+		opsListView.disableProperty().bind(disablePropertyController.disableProperty());
 
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 
-		randomButton.disableProperty().bind(Bindings.or(currentTrace.existsProperty().not(), randomExecutionThread.isNotNull()));
+		randomButton.disableProperty().bind(currentTrace.existsProperty().not().or(randomExecutionThread.isNotNull()).or(disablePropertyController.disableProperty()));
 		randomButton.visibleProperty().bind(randomExecutionThread.isNull());
 		cancelButton.visibleProperty().bind(randomExecutionThread.isNotNull());
 
