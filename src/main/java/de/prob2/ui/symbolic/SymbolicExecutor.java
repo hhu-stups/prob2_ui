@@ -3,24 +3,24 @@ package de.prob2.ui.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Injector;
 
 import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.statespace.StateSpace;
-
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingResultHandler;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class SymbolicExecutor {
 	
@@ -47,6 +47,7 @@ public abstract class SymbolicExecutor {
 		this.injector = injector;
 		this.currentJobs = new ArrayList<>();
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+		injector.getInstance(DisablePropertyController.class).addDisableExpression(this.currentJobThreadsProperty().emptyProperty().not());
 	}
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicExecutionType type, boolean checkAll) {

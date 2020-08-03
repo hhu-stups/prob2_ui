@@ -15,6 +15,7 @@ import de.prob.statespace.IStatesCalculatedListener;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
@@ -154,7 +155,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final Collection<IStatesCalculatedListener> statesCalculatedListeners;
 
 	@Inject
-	private CurrentTrace(final AnimationSelector animationSelector, final StageManager stageManager) {
+	private CurrentTrace(final AnimationSelector animationSelector, final StageManager stageManager, final DisablePropertyController disablePropertyController) {
 		super();
 		this.animationSelector = animationSelector;
 		this.stageManager = stageManager;
@@ -183,6 +184,8 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 				this.statesCalculatedListeners.forEach(to::addStatesCalculatedListener);
 			}
 		});
+
+		disablePropertyController.addDisableExpression(this.animatorBusyProperty());
 	}
 
 	@Override

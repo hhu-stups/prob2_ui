@@ -1,17 +1,12 @@
 package de.prob2.ui.internal;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.animation.symbolic.SymbolicAnimationChecker;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerator;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
-import de.prob2.ui.operations.OperationsView;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
-
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 /**
  * This class provides a property that signals when probcli is busy,
@@ -19,21 +14,30 @@ import javafx.beans.binding.BooleanExpression;
  */
 @Singleton
 public class DisablePropertyController {
-
-	private final BooleanExpression disableProperty;
+	private final BooleanProperty disable;
+	private BooleanExpression disableExpression;
 
 	@Inject
-	public DisablePropertyController(final Injector injector) {
-		this.disableProperty = injector.getInstance(TraceChecker.class).currentJobThreadsProperty().emptyProperty().not()
-				.or(injector.getInstance(SymbolicAnimationChecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(TestCaseGenerator.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(SymbolicFormulaChecker.class).currentJobThreadsProperty().emptyProperty().not())
-				.or(injector.getInstance(OperationsView.class).randomExecutionThreadProperty().isNotNull())
-				.or(injector.getInstance(OperationsView.class).runningProperty())
-				.or(injector.getInstance(CurrentTrace.class).animatorBusyProperty());
+	private DisablePropertyController() {
+		this.disable = new SimpleBooleanProperty(this, "disable", false);
+		this.disableExpression = Bindings.createBooleanBinding(() -> false);
+		this.disable.bind(disableExpression);
+	}
+	
+	/**
+	 * Add an expression to {@link #disableProperty()}.
+	 * When any of the expressions added via this method are {@code true},
+	 * {@link #disableProperty()} also becomes true,
+	 * indicating that probcli is busy.
+	 * 
+	 * @param expr an expression that should cause {@link #disableProperty()} to become true
+	 */
+	public void addDisableExpression(final BooleanExpression expr) {
+		this.disableExpression = this.disableExpression.or(expr);
+		this.disable.bind(this.disableExpression);
 	}
 
 	public BooleanExpression disableProperty() {
-		return this.disableProperty;
+		return this.disable;
 	}
 }

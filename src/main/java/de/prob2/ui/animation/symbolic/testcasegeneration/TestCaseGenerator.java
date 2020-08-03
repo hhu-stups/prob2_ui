@@ -1,20 +1,25 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 
 @Singleton
 public class TestCaseGenerator {
@@ -32,12 +37,13 @@ public class TestCaseGenerator {
 	private final ListProperty<Thread> currentJobThreads;
 
 	@Inject
-	public TestCaseGenerator(final CurrentTrace currentTrace, final CurrentProject currentProject, final TestCaseGenerationResultHandler resultHandler, final Injector injector) {
+	public TestCaseGenerator(final CurrentTrace currentTrace, final CurrentProject currentProject, final TestCaseGenerationResultHandler resultHandler, final DisablePropertyController disablePropertyController, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
 		this.injector = injector;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+		disablePropertyController.addDisableExpression(this.currentJobThreadsProperty().emptyProperty().not());
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator, boolean checkAll) {

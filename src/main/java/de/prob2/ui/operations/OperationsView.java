@@ -27,6 +27,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.BackgroundUpdater;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -42,7 +43,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -208,7 +208,7 @@ public final class OperationsView extends VBox {
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar,
+						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar, final DisablePropertyController disablePropertyController,
 						   final StopActions stopActions, final Config config) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
@@ -224,6 +224,8 @@ public final class OperationsView extends VBox {
 		this.needsUpdateAfterBusy = new AtomicBoolean(false);
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
+		disablePropertyController.addDisableExpression(this.updater.runningProperty());
+		disablePropertyController.addDisableExpression(this.randomExecutionThread.isNotNull());
 
 		stageManager.loadFXML(this, "operations_view.fxml");
 	}
@@ -570,13 +572,5 @@ public final class OperationsView extends VBox {
 
 	private void setShowUnambiguous(final boolean showUnambiguous) {
 		this.showUnambiguous.set(showUnambiguous);
-	}
-	
-	public ObjectProperty<Thread> randomExecutionThreadProperty() {
-		return randomExecutionThread;
-	}
-	
-	public ReadOnlyBooleanProperty runningProperty() {
-		return this.updater.runningProperty();
 	}
 }

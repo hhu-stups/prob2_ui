@@ -1,9 +1,17 @@
 package de.prob2.ui.animation.tracereplay;
 
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Scanner;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.check.tracereplay.ITraceChecker;
 import de.prob.check.tracereplay.PersistentTrace;
@@ -12,24 +20,19 @@ import de.prob.check.tracereplay.TraceReplay;
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
+
 import javafx.application.Platform;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.Region;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Scanner;
 
 @FXMLInjected
 @Singleton
@@ -43,10 +46,11 @@ public class TraceChecker implements ITraceChecker {
 	private boolean isNewTrace;
 
 	@Inject
-	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
+	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
+		disablePropertyController.addDisableExpression(this.currentJobThreadsProperty().emptyProperty().not());
 	}
 
 	void checkAll(List<ReplayTrace> replayTraces) {
