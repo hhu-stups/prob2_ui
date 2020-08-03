@@ -13,11 +13,9 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ISelectableCheckingView;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -222,13 +220,4 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane im
 		}
 		selectAll.setSelected(anySelected);
 	}
-
-	private CheckingType getSymbolicType() {
-		if(clazz == SymbolicCheckingFormulaItem.class) {
-			return CheckingType.SYMBOLIC_CHECKING;
-		} else {
-			return CheckingType.SYMBOLIC_ANIMATION;
-		}
-	}
-	
 }
