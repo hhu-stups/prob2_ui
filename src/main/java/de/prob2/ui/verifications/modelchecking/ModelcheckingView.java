@@ -149,8 +149,8 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 	
 	private void setBindings() {
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(addModelCheckButton.disableProperty(), currentTrace.existsProperty().not());
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentTrace.existsProperty().not());
+		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -183,7 +183,7 @@ public final class ModelcheckingView extends ScrollPane {
 				checkMachineButton.disableProperty().unbind();
 				checkMachineButton.setDisable(true);
 			} else {
-				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty());
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 			}
 		});
 		selectAll.setOnAction(e -> {
@@ -195,8 +195,8 @@ public final class ModelcheckingView extends ScrollPane {
 
 		shouldExecuteColumn.setGraphic(selectAll);
 
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvItems.disableProperty(), currentTrace.existsProperty().not());
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvChecks.disableProperty(), currentTrace.existsProperty().not());
+		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		tvChecks.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 
 
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {

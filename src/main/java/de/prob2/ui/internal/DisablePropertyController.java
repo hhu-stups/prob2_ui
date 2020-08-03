@@ -12,11 +12,10 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicFormulaChecker;
 
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.BooleanProperty;
 
 /**
- * This class binds the disable property of a GUI element to the default disable property,
- * when probcli is working.
+ * This class provides a property that signals when probcli is busy,
+ * which is used to disable UI elements that would hang when used while probcli is busy.
  */
 @Singleton
 public class DisablePropertyController {
@@ -34,12 +33,7 @@ public class DisablePropertyController {
 				.or(injector.getInstance(CurrentTrace.class).animatorBusyProperty());
 	}
 
-	public void addDisableProperty(final BooleanProperty guiDisableProperty) {
-		guiDisableProperty.bind(disableProperty);
+	public BooleanExpression disableProperty() {
+		return this.disableProperty;
 	}
-
-	public void addDisableProperty(final BooleanProperty guiDisableProperty, BooleanExpression otherBindings) {
-		guiDisableProperty.bind(otherBindings.or(disableProperty));
-	}
-
 }

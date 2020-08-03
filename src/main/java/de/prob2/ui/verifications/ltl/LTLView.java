@@ -261,7 +261,7 @@ public class LTLView extends AnchorPane {
 				checkMachineButton.disableProperty().unbind();
 				checkMachineButton.setDisable(true);
 			} else {
-				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 			}
 		});
 		formulaSelectAll.setOnAction(e -> {
@@ -273,14 +273,14 @@ public class LTLView extends AnchorPane {
 
 		formulaSelectedColumn.setGraphic(formulaSelectAll);
 
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(addMenuButton.disableProperty(), currentTrace.existsProperty().not());
+		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentTrace.existsProperty().not());
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue) {
-				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
+				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 				saveLTLButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
 			} else {
 				checkMachineButton.disableProperty().unbind();
@@ -289,7 +289,7 @@ public class LTLView extends AnchorPane {
 			}
 		});
 
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(tvFormula.disableProperty(), currentTrace.existsProperty().not());
+		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 	}
 	
 	public void bindMachine(Machine machine) {
@@ -304,7 +304,7 @@ public class LTLView extends AnchorPane {
 			formula.setResultItem(null);
 		}
 		if(currentTrace.existsProperty().get()) {
-			injector.getInstance(DisablePropertyController.class).addDisableProperty(checkMachineButton.disableProperty(), machine.ltlFormulasProperty().emptyProperty());
+			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		}
 		parseMachine(machine);
 	}

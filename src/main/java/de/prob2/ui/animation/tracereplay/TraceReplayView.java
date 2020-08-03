@@ -152,7 +152,7 @@ public class TraceReplayView extends ScrollPane {
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkButton.disableProperty(), currentTrace.stateSpaceProperty().isNull().or(to.tracesProperty().emptyProperty()));
+				checkButton.disableProperty().bind(currentTrace.stateSpaceProperty().isNull().or(to.tracesProperty().emptyProperty()).or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 			}
 		});
 		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
@@ -167,7 +167,7 @@ public class TraceReplayView extends ScrollPane {
 				checkButton.disableProperty().unbind();
 				checkButton.setDisable(true);
 			} else {
-				injector.getInstance(DisablePropertyController.class).addDisableProperty(checkButton.disableProperty(), currentProject.getCurrentMachine().tracesProperty().emptyProperty());
+				checkButton.disableProperty().bind(currentProject.getCurrentMachine().tracesProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 			}
 		});
 		selectAll.setOnAction(e -> {
@@ -240,7 +240,7 @@ public class TraceReplayView extends ScrollPane {
 			row.itemProperty().addListener((observable, from, to) -> {
 				showErrorItem.disableProperty().unbind();
 				if (to != null) {
-					injector.getInstance(DisablePropertyController.class).addDisableProperty(replayTraceItem.disableProperty(), row.getItem().selectedProperty().not());
+					replayTraceItem.disableProperty().bind(row.getItem().selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 					showErrorItem.disableProperty().bind(to.checkedProperty().isNotEqualTo(Checked.FAIL));
 					row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 				}

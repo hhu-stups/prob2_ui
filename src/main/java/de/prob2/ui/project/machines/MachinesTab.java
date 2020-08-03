@@ -226,7 +226,7 @@ public class MachinesTab extends Tab {
 				startMachine(machinesList.getSelectionModel().getSelectedItem());
 			}
 		});
-		injector.getInstance(DisablePropertyController.class).addDisableProperty(machinesList.disableProperty());
+		machinesList.disableProperty().bind(injector.getInstance(DisablePropertyController.class).disableProperty());
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof DescriptionView && !to.contains((Machine) ((DescriptionView) node).getDescribable())) {
