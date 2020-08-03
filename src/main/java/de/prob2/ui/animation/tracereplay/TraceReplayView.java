@@ -24,6 +24,8 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -150,11 +152,16 @@ public class TraceReplayView extends ScrollPane {
 
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+		final BooleanProperty noTraces = new SimpleBooleanProperty();
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			if (to != null) {
-				checkButton.disableProperty().bind(currentTrace.stateSpaceProperty().isNull().or(to.tracesProperty().emptyProperty()).or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+				noTraces.bind(to.tracesProperty().emptyProperty());
+			} else {
+				noTraces.unbind();
+				noTraces.set(true);
 			}
 		});
+		checkButton.disableProperty().bind(currentTrace.existsProperty().not().or(noTraces.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
 	}
 
@@ -162,14 +169,6 @@ public class TraceReplayView extends ScrollPane {
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
 
 		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			if(!to) {
-				checkButton.disableProperty().unbind();
-				checkButton.setDisable(true);
-			} else {
-				checkButton.disableProperty().bind(currentProject.getCurrentMachine().tracesProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-			}
-		});
 		selectAll.setOnAction(e -> {
 			for (ReplayTrace item : traceTableView.getItems()) {
 				item.setSelected(selectAll.isSelected());

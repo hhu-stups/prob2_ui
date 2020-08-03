@@ -26,6 +26,8 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -150,7 +152,16 @@ public final class ModelcheckingView extends ScrollPane {
 	
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		final BooleanProperty noModelcheckingItems = new SimpleBooleanProperty();
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				noModelcheckingItems.bind(to.modelcheckingItemsProperty().emptyProperty());
+			} else {
+				noModelcheckingItems.unbind();
+				noModelcheckingItems.set(true);
+			}
+		});
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(noModelcheckingItems.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -178,14 +189,6 @@ public final class ModelcheckingView extends ScrollPane {
 		messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
 
 		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			if(!to) {
-				checkMachineButton.disableProperty().unbind();
-				checkMachineButton.setDisable(true);
-			} else {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-			}
-		});
 		selectAll.setOnAction(e -> {
 			for(IExecutableItem item : tvItems.getItems()) {
 				item.setSelected(selectAll.isSelected());
@@ -227,14 +230,6 @@ public final class ModelcheckingView extends ScrollPane {
 				tvItems.itemsProperty().unbind();
 				tvChecks.getItems().clear();
 				tvChecks.itemsProperty().unbind();
-			}
-		});
-		
-		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().modelcheckingItemsProperty().emptyProperty().or(checker.runningProperty()));
-			} else {
-				checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(checker.runningProperty()));
 			}
 		});
 		

@@ -25,6 +25,8 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -180,14 +182,6 @@ public class TestCaseGenerationView extends ScrollPane {
 				tvTestCases.itemsProperty().unbind();
 			}
 		});
-		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue) {
-				generateButton.disableProperty().bind(currentProject.getCurrentMachine().testCasesProperty().emptyProperty().or(testCaseGenerator.currentJobThreadsProperty().emptyProperty().not()).or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-			} else {
-				generateButton.disableProperty().unbind();
-				generateButton.setDisable(true);
-			}
-		});
 	}
 	
 	public void bindMachine(Machine machine) {
@@ -200,7 +194,16 @@ public class TestCaseGenerationView extends ScrollPane {
 		final BooleanBinding partOfDisableBinding = currentTrace.existsProperty().not()
 				.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()));
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		generateButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		final BooleanProperty noTestCases = new SimpleBooleanProperty();
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				noTestCases.bind(to.testCasesProperty().emptyProperty());
+			} else {
+				noTestCases.unbind();
+				noTestCases.set(true);
+			}
+		});
+		generateButton.disableProperty().bind(partOfDisableBinding.or(noTestCases.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		cancelButton.disableProperty().bind(testCaseGenerator.currentJobThreadsProperty().emptyProperty());
 		tvTestCases.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -210,14 +213,6 @@ public class TestCaseGenerationView extends ScrollPane {
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
 
 		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			if(!to) {
-				generateButton.disableProperty().unbind();
-				generateButton.setDisable(true);
-			} else {
-				generateButton.disableProperty().bind(currentProject.getCurrentMachine().testCasesProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-			}
-		});
 		selectAll.setOnAction(e-> {
 			for(IExecutableItem item : tvTestCases.getItems()) {
 				item.setSelected(selectAll.isSelected());

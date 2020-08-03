@@ -38,6 +38,8 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -256,14 +258,6 @@ public class LTLView extends AnchorPane {
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		formulaSelectAll.setSelected(true);
-		formulaSelectAll.selectedProperty().addListener((observable, from, to) -> {
-			if(!to) {
-				checkMachineButton.disableProperty().unbind();
-				checkMachineButton.setDisable(true);
-			} else {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-			}
-		});
 		formulaSelectAll.setOnAction(e -> {
 			for(IExecutableItem item : tvFormula.getItems()) {
 				item.setSelected(formulaSelectAll.isSelected());
@@ -275,19 +269,18 @@ public class LTLView extends AnchorPane {
 
 		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
-		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
-		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue) {
-				checkMachineButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-				saveLTLButton.disableProperty().bind(currentProject.getCurrentMachine().ltlFormulasProperty().emptyProperty());
+		final BooleanProperty noLtlFormulas = new SimpleBooleanProperty();
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				noLtlFormulas.bind(to.ltlFormulasProperty().emptyProperty());
 			} else {
-				checkMachineButton.disableProperty().unbind();
-				checkMachineButton.setDisable(true);
-				saveLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
+				noLtlFormulas.unbind();
+				noLtlFormulas.set(true);
 			}
 		});
+		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(noLtlFormulas.or(formulaSelectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
+		saveLTLButton.disableProperty().bind(noLtlFormulas.or(currentTrace.existsProperty().not().or(formulaSelectAll.selectedProperty().not())));
+		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
 
 		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 	}
@@ -302,9 +295,6 @@ public class LTLView extends AnchorPane {
 		for(LTLFormulaItem formula : machine.getLTLFormulas()) {
 			formula.setCounterExample(null);
 			formula.setResultItem(null);
-		}
-		if(currentTrace.existsProperty().get()) {
-			checkMachineButton.disableProperty().bind(machine.ltlFormulasProperty().emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		}
 		parseMachine(machine);
 	}

@@ -18,7 +18,9 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -123,14 +125,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 				tvFormula.itemsProperty().unbind();
 			}
 		});
-		currentTrace.existsProperty().addListener((observable, oldValue, newValue) -> {
-			if(newValue) {
-				checkMachineButton.disableProperty().bind(formulasProperty(currentProject.getCurrentMachine()).emptyProperty().or(executor.currentJobThreadsProperty().emptyProperty().not()).or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-			} else {
-				checkMachineButton.disableProperty().unbind();
-				checkMachineButton.setDisable(true);
-			}
-		});
 	}
 	
 	public void bindMachine(Machine machine) {
@@ -147,7 +141,16 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		final BooleanBinding partOfDisableBinding = currentTrace.existsProperty().not()
 				.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()));
 		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		checkMachineButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		final BooleanProperty noFormulas = new SimpleBooleanProperty();
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				noFormulas.bind(formulasProperty(to).emptyProperty());
+			} else {
+				noFormulas.unbind();
+				noFormulas.set(true);
+			}
+		});
+		checkMachineButton.disableProperty().bind(partOfDisableBinding.or(noFormulas.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		cancelButton.disableProperty().bind(executor.currentJobThreadsProperty().emptyProperty());
 		tvFormula.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -157,14 +160,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(selectAll));
 
 		selectAll.setSelected(true);
-		selectAll.selectedProperty().addListener((observable, from, to) -> {
-			if(!to) {
-				checkMachineButton.disableProperty().unbind();
-				checkMachineButton.setDisable(true);
-			} else {
-				checkMachineButton.disableProperty().bind(formulasProperty(currentProject.getCurrentMachine()).emptyProperty().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-			}
-		});
 		selectAll.setOnAction(e-> {
 			for(IExecutableItem item : tvFormula.getItems()) {
 				item.setSelected(selectAll.isSelected());
