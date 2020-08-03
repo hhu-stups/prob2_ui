@@ -64,8 +64,8 @@ public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
 
-    @FXML
-    private TableColumn<ModelCheckingItem, String> nodesLimitColumn;
+	@FXML
+	private TableColumn<ModelCheckingItem, String> nodesLimitColumn;
 	
 	@FXML
 	private TableColumn<ModelCheckingItem, Boolean> deadlockColumn;
@@ -157,7 +157,7 @@ public final class ModelcheckingView extends ScrollPane {
 		strategyColumn.setCellValueFactory(features -> Bindings.createStringBinding(() ->
 			bundle.getString(SearchStrategy.fromOptions(features.getValue().getOptions()).getName())
 		));
-        nodesLimitColumn.setCellValueFactory(new PropertyValueFactory<>("nodesLimit"));
+		nodesLimitColumn.setCellValueFactory(new PropertyValueFactory<>("nodesLimit"));
 		deadlockColumn.setCellFactory(col -> new BooleanCell<>());
 		deadlockColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_DEADLOCKS, false));
 		invariantsViolationsColumn.setCellFactory(col -> new BooleanCell<>());
