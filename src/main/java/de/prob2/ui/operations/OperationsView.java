@@ -334,7 +334,7 @@ public final class OperationsView extends VBox {
 				currentTrace.set(trace.forward());
 				return;
 			}
-			currentTrace.set(trace.add(item.getTransition().getId()));
+			currentTrace.set(trace.add(item.getTransition()));
 		}
 	}
 
