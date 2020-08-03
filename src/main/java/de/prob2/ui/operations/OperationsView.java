@@ -323,17 +323,18 @@ public final class OperationsView extends VBox {
 	}
 
 	private void executeOperationIfPossible(final OperationItem item) {
+		final Trace trace = currentTrace.get();
 		if (
 			item != null
 			&& item.getStatus() == OperationItem.Status.ENABLED
-			&& item.getTransition().getSource().equals(currentTrace.getCurrentState())
+			&& item.getTransition().getSource().equals(trace.getCurrentState())
 		) {
-			Trace forward = currentTrace.forward();
+			Trace forward = trace.forward();
 			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
-				currentTrace.set(currentTrace.forward());
+				currentTrace.set(trace.forward());
 				return;
 			}
-			currentTrace.set(currentTrace.get().add(item.getTransition().getId()));
+			currentTrace.set(trace.add(item.getTransition().getId()));
 		}
 	}
 
