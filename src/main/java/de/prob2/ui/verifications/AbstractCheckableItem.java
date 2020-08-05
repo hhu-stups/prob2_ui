@@ -8,7 +8,6 @@ import com.google.gson.JsonObject;
 
 import de.prob.json.JsonManager;
 
-import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;

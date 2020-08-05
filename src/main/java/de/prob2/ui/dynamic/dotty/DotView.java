@@ -1,7 +1,6 @@
 package de.prob2.ui.dynamic.dotty;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.ComposedCommand;
