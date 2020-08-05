@@ -178,8 +178,6 @@ public class TraceChecker implements ITraceChecker {
 				alert.setCopyTrace(copyTrace);
 				alert.setPersistentTrace(persistentTrace);
 				alert.setErrorMessage(isEqual);
-
-				alert.handleAlert(copyTrace, persistentTrace);
 			});
 		}
 	}

@@ -107,7 +107,7 @@ public final class TraceReplayErrorAlert extends Alert {
 					error.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreEqual"));
 					this.getButtonTypes().clear();
 					this.getButtonTypes().addAll(ButtonType.OK);
-					this.showAndWait();
+					this.show();
 				} else {
 					error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreNotEqual"), traceSize, persistentTraceSize, lineNumber));
 					handleAlert(copyTrace, persistentTrace);
@@ -116,6 +116,7 @@ public final class TraceReplayErrorAlert extends Alert {
 			case TRIGGER_TRACE_REPLAY_VIEW:
 				error.setText(text);
 				this.getDialogPane().setExpandableContent(null);
+				this.show();
 				break;
 			default:
 				// Trigger has not been added yet.
@@ -126,16 +127,17 @@ public final class TraceReplayErrorAlert extends Alert {
 		return trigger;
 	}
 
-	public void handleAlert(Trace copyTrace, PersistentTrace persistentTrace) {
-		// FIXME: you have to push the button twice to see the trace diff
+	public void showAlertAgain() {
+		handleAlert(copyTrace, persistentTrace);
+	}
+
+	private void handleAlert(Trace copyTrace, PersistentTrace persistentTrace) {
 		injector.getInstance(TraceDiffStage.class).close();
-		this.copyTrace = copyTrace;
 		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 		Optional<ButtonType> type = this.showAndWait();
 		if (type.get() == ButtonType.YES) {
 			currentTrace.set(copyTrace);
 		} else if (type.get() == showTraceDiff) {
-			this.close();
 			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
 			traceDiffStage.setAlert(this);
 			traceDiffStage.setLists(copyTrace, persistentTrace, currentTrace.get());

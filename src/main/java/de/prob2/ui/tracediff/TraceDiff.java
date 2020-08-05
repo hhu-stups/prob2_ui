@@ -175,7 +175,7 @@ public class TraceDiff extends VBox {
 			currentTrace.set(replayedOrLost);
 			this.getScene().getWindow().hide();
 		});
-		showAlert.setOnAction(e -> alert.handleAlert(replayedOrLost, persistent));
+		showAlert.setOnAction(e -> alert.showAlertAgain());
 		savePersistent.setOnAction(e -> injector.getInstance(TraceFileHandler.class).save(persistent, injector.getInstance(CurrentProject.class).getCurrentMachine()));
 		setCurrent.setOnAction(e -> {
 			currentTrace.set(current);

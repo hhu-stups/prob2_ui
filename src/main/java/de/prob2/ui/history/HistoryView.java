@@ -145,7 +145,6 @@ public final class HistoryView extends VBox {
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "history.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW, Collections.EMPTY_LIST);
 				alert.setCopyTrace(copyTrace);
 				alert.setErrorMessage();
-				alert.handleAlert(copyTrace, null);
 			}
 		}
 	}
