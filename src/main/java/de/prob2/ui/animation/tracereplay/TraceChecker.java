@@ -76,7 +76,7 @@ public class TraceChecker implements ITraceChecker {
 		Thread replayThread = new Thread(() -> {
 			Trace trace = TraceReplay.replayTrace(persistentTrace, stateSpace, setCurrentAnimation, replayInformation, this);
 			if (setCurrentAnimation) {
-				// set the current trace if no error has occured. Otherwise leave the decision to the user
+				// set the current trace if no error has occurred. Otherwise leave the decision to the user
 				if (replayTrace.getErrorMessageBundleKey() != null) {
 					showTraceReplayCompleteFailed(trace, replayInformation);
 				} else {
