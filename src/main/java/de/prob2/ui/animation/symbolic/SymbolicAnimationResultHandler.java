@@ -1,9 +1,6 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.ResourceBundle;
-
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -36,21 +33,10 @@ public class SymbolicAnimationResultHandler extends AbstractResultHandler implem
 
 	private final CurrentTrace currentTrace;
 	
-	protected ArrayList<Class<?>> success;
-	protected ArrayList<Class<?>> parseErrors;
-	protected ArrayList<Class<?>> interrupted;
-
-	
 	@Inject
 	public SymbolicAnimationResultHandler(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
 		super(stageManager, bundle);
 		this.currentTrace = currentTrace;
-		this.success = new ArrayList<>();
-		this.parseErrors = new ArrayList<>();
-		this.interrupted = new ArrayList<>();
-		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.parseErrors.addAll(Arrays.asList(ProBError.class, CliError.class, CheckError.class, EvaluationException.class));
-		this.interrupted.addAll(Arrays.asList(NoTraceFoundException.class, NotYetFinished.class, CheckInterrupted.class));
 	}
 	
 	public void handleFindValidState(SymbolicAnimationItem item, FindStateCommand cmd, StateSpace stateSpace) {
@@ -109,13 +95,13 @@ public class SymbolicAnimationResultHandler extends AbstractResultHandler implem
 	
 	public CheckingResultItem handleFormulaResult(Object result) {
 		CheckingResultItem resultItem = null;
-		if(success.contains(result.getClass())) {
+		if(result instanceof ModelCheckOk) {
 			resultItem = new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.result.succeeded.header",
 					"animation.symbolic.result.succeeded.message");
-		} else if(parseErrors.contains(result.getClass())) {
+		} else if(result instanceof ProBError || result instanceof CliError || result instanceof CheckError || result instanceof EvaluationException) {
 			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
 					"common.result.message", result);
-		} else if(interrupted.contains(result.getClass())) {
+		} else if(result instanceof NoTraceFoundException || result instanceof NotYetFinished || result instanceof CheckInterrupted) {
 			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
 					"common.result.message", ((IModelCheckingResult) result).getMessage());
 		}
