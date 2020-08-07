@@ -135,7 +135,6 @@ public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent("verification", "Model");
-		hideStats();
 		setBindings();
 		setListeners();
 		setContextMenus();
@@ -223,12 +222,6 @@ public final class ModelcheckingView extends ScrollPane {
 				tvChecks.itemsProperty().unbind();
 			}
 		});
-		
-		currentProject.addListener((observable, from, to) -> {
-			if(to != from) {
-				this.hideStats();
-			}
-		});
 	}
 	
 	public void bindMachine(Machine machine) {
@@ -236,7 +229,6 @@ public final class ModelcheckingView extends ScrollPane {
 		tvChecks.getItems().clear();
 		tvChecks.itemsProperty().unbind();
 		tvItems.itemsProperty().bind(machine.modelcheckingItemsProperty());
-		hideStats();
 	}
 	
 	private void tvItemsClicked(MouseEvent e) {
