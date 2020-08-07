@@ -277,12 +277,8 @@ public class LTLView extends AnchorPane {
 	}
 	
 	public void bindMachine(Machine machine) {
-		tvFormula.itemsProperty().unbind();
 		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
-		tvPattern.itemsProperty().unbind();
 		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
-		tvFormula.refresh();
-		tvPattern.refresh();
 		for(LTLFormulaItem formula : machine.getLTLFormulas()) {
 			formula.setCounterExample(null);
 			formula.setResultItem(null);

@@ -184,9 +184,7 @@ public class TestCaseGenerationView extends ScrollPane {
 	}
 	
 	public void bindMachine(Machine machine) {
-		tvTestCases.itemsProperty().unbind();
 		tvTestCases.itemsProperty().bind(machine.testCasesProperty());
-		tvTestCases.refresh();
 	}
 	
 	private void setBindings() {

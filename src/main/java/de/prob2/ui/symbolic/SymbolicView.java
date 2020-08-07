@@ -127,9 +127,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	}
 	
 	public void bindMachine(Machine machine) {
-		tvFormula.itemsProperty().unbind();
 		tvFormula.itemsProperty().bind(formulasProperty(machine));
-		tvFormula.refresh();
 	}
 	
 	protected abstract ListProperty<T> formulasProperty(Machine machine);
