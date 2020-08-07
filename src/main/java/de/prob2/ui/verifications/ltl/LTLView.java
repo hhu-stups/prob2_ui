@@ -279,7 +279,6 @@ public class LTLView extends AnchorPane {
 	public void bindMachine(Machine machine) {
 		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
 		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
-		patternParser.parseMachine(machine);
 	}
 		
 	@FXML
