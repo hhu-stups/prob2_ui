@@ -22,7 +22,6 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.ltl.ILTLItemHandler;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
@@ -39,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class LTLFormulaChecker implements ILTLItemHandler {
+public class LTLFormulaChecker {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLFormulaChecker.class);
 				

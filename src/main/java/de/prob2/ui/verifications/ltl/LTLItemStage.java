@@ -40,8 +40,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 
 	protected final FontSize fontSize;
 	
-	protected final ILTLItemHandler ltlItemHandler;
-	
 	protected final LTLResultHandler resultHandler;
 	
 	protected final LTLBuiltinsStage builtinsStage;
@@ -50,11 +48,10 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected WebEngine engine;
 
-	public LTLItemStage(final CurrentProject currentProject, final FontSize fontSize, final ILTLItemHandler ltlItemHandler, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
+	public LTLItemStage(final CurrentProject currentProject, final FontSize fontSize, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
 		super();
 		this.currentProject = currentProject;
 		this.fontSize = fontSize;
-		this.ltlItemHandler = ltlItemHandler;
 		this.resultHandler = resultHandler;
 		this.builtinsStage = builtinsStage;
 		this.initModality(Modality.APPLICATION_MODAL);

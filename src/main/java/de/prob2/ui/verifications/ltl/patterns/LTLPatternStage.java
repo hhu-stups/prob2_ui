@@ -18,11 +18,13 @@ import netscape.javascript.JSObject;
 import java.util.stream.Collectors;
 
 public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
-		
+	private final LTLPatternParser patternParser;
+	
 	@Inject
 	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize,
 			final LTLPatternParser patternParser, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
-		super(currentProject, fontSize, patternParser, resultHandler, builtinsStage);
+		super(currentProject, fontSize, resultHandler, builtinsStage);
+		this.patternParser = patternParser;
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}
 	
@@ -40,7 +42,6 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	
 	@Override
 	protected void addItem(Machine machine, LTLPatternItem item) {
-		LTLPatternParser patternParser = (LTLPatternParser) ltlItemHandler;
 		patternParser.parsePattern(item, machine);
 		if(!machine.getLTLPatterns().contains(item)) {
 			patternParser.addPattern(item, machine);
@@ -54,7 +55,6 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	
 	@Override
 	protected void changeItem(LTLPatternItem item, LTLPatternItem result) {
-		LTLPatternParser patternParser = (LTLPatternParser) ltlItemHandler;
 		Machine machine = currentProject.getCurrentMachine();
 		patternParser.removePattern(item, machine);
 		patternParser.parsePattern(result, machine);

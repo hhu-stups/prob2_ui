@@ -25,19 +25,21 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	@FXML
 	private Button applyButton;
 	
+	private final LTLFormulaChecker formulaChecker;
+	
 	@Inject
 	public LTLFormulaStage(
 		final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize,
 		final LTLFormulaChecker formulaChecker, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage
 	) {
-		super(currentProject, fontSize, formulaChecker, resultHandler, builtinsStage);
+		super(currentProject, fontSize, resultHandler, builtinsStage);
+		this.formulaChecker = formulaChecker;
 		stageManager.loadFXML(this, "ltlformula_stage.fxml");
 	}
 
 	@FXML
 	public void initialize() {
 		super.initialize();
-		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		applyButton.disableProperty().bind(formulaChecker.runningProperty());
 	}
 
@@ -54,7 +56,6 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	
 	@Override
 	protected void addItem(Machine machine, LTLFormulaItem item) {
-		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
@@ -66,7 +67,6 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	
 	@Override
 	protected void changeItem(LTLFormulaItem item, LTLFormulaItem result) {
-		LTLFormulaChecker formulaChecker = (LTLFormulaChecker) ltlItemHandler;
 		Machine machine = currentProject.getCurrentMachine();
 		if(!machine.getLTLFormulas().stream()
 				.filter(formula -> !formula.equals(item))
@@ -85,8 +85,8 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	@FXML
 	private void cancel() {
-		if(((LTLFormulaChecker) ltlItemHandler).isRunning()) {
-			((LTLFormulaChecker) ltlItemHandler).cancel();
+		if(formulaChecker.isRunning()) {
+			formulaChecker.cancel();
 		}
 		this.close();
 	}
