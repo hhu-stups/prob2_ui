@@ -128,8 +128,7 @@ public class TestCaseGenerationView extends ScrollPane {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					showExamples(to, showStateItem);
-					checkItem.disableProperty().bind(testCaseGenerator.currentJobThreadsProperty().emptyProperty().not()
-							.or(to.selectedProperty().not()));
+					checkItem.disableProperty().bind(testCaseGenerator.runningProperty().or(to.selectedProperty().not()));
 					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
 					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
@@ -204,7 +203,7 @@ public class TestCaseGenerationView extends ScrollPane {
 			}
 		});
 		generateButton.disableProperty().bind(partOfDisableBinding.or(noTestCases.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
-		cancelButton.disableProperty().bind(testCaseGenerator.currentJobThreadsProperty().emptyProperty());
+		cancelButton.disableProperty().bind(testCaseGenerator.runningProperty().not());
 		tvTestCases.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));

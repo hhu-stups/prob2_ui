@@ -14,6 +14,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -43,7 +44,7 @@ public class TestCaseGenerator {
 		this.resultHandler = resultHandler;
 		this.injector = injector;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
-		disablePropertyController.addDisableExpression(this.currentJobThreadsProperty().emptyProperty().not());
+		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator, boolean checkAll) {
@@ -90,9 +91,11 @@ public class TestCaseGenerator {
 		return item;
 	}
 
-	public ListProperty<Thread> currentJobThreadsProperty() {
-		return currentJobThreads;
+	public BooleanExpression runningProperty() {
+		return currentJobThreads.emptyProperty().not();
 	}
 
-	
+	public boolean isRunning() {
+		return this.runningProperty().get();
+	}
 }
