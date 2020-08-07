@@ -259,7 +259,7 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	@FXML
-	public synchronized void cancel() {
+	public void cancel() {
 		traceChecker.cancelReplay();
 	}
 
