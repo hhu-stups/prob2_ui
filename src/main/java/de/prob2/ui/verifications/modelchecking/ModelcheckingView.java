@@ -216,16 +216,12 @@ public final class ModelcheckingView extends ScrollPane {
 	private void setListeners() {
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
-				bindMachine(newValue);
+				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
 			} else {
 				tvItems.getItems().clear();
 				tvItems.itemsProperty().unbind();
 			}
 		});
-	}
-	
-	public void bindMachine(Machine machine) {
-		tvItems.itemsProperty().bind(machine.modelcheckingItemsProperty());
 	}
 	
 	private void tvItemsClicked(MouseEvent e) {

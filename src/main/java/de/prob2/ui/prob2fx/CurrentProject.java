@@ -156,7 +156,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		m.resetStatus();
 		injector.getInstance(LTLView.class).bindMachine(m);
 		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
-		injector.getInstance(ModelcheckingView.class).bindMachine(m);
 		injector.getInstance(TestCaseGenerationView.class).bindMachine(m);
 		injector.getInstance(TraceReplayView.class).refresh();
 	}
