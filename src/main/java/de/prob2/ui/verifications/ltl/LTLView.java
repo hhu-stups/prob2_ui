@@ -161,7 +161,8 @@ public class LTLView extends AnchorPane {
 				if(from != null) {
 					from.clearPatternManager();
 				}
-				bindMachine(to);
+				tvFormula.itemsProperty().bind(to.ltlFormulasProperty());
+				tvPattern.itemsProperty().bind(to.ltlPatternsProperty());
 			} else {
 				tvFormula.getItems().clear();
 				tvFormula.itemsProperty().unbind();
@@ -276,11 +277,6 @@ public class LTLView extends AnchorPane {
 		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 	}
 	
-	public void bindMachine(Machine machine) {
-		tvFormula.itemsProperty().bind(machine.ltlFormulasProperty());
-		tvPattern.itemsProperty().bind(machine.ltlPatternsProperty());
-	}
-		
 	@FXML
 	public void addFormula() {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
