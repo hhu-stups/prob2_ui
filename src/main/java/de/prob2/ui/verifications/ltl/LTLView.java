@@ -308,10 +308,6 @@ public class LTLView extends AnchorPane {
 		patternParser.removePattern(item, machine);
 	}
 	
-	public void checkFormula(LTLFormulaItem item, Machine machine) {
-		checker.checkFormula(item, machine);
-	}
-			
 	private void showCurrentItemDialog(LTLFormulaItem item) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
 		loadLTLStage(formulaStage, item);
