@@ -193,7 +193,7 @@ public final class ModelcheckingView extends ScrollPane {
 
 
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to != null && (from == null || !from.getNodesLimit().equals(to.getNodesLimit()) || !from.getOptions().recheckExisting(false).equals(to.getOptions().recheckExisting(false)))) {
+			if (to != null) {
 				tvChecks.itemsProperty().unbind();
 				tvChecks.itemsProperty().bind(to.itemsProperty());
 				tvChecks.getSelectionModel().selectFirst();
