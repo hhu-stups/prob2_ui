@@ -27,8 +27,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -277,12 +275,8 @@ public class TraceReplayView extends ScrollPane {
 	}
 	
 	public void refresh() {
-		ObservableList<ReplayTrace> traces = FXCollections.observableArrayList(traceTableView.getItems());
-		traceTableView.getItems().clear();
 		traceChecker.cancelReplay();
-		traces.forEach(trace -> trace.setChecked(Checked.NOT_CHECKED));
-		traceTableView.setItems(traces);
-		traceTableView.refresh();
+		traceTableView.getItems().forEach(trace -> trace.setChecked(Checked.NOT_CHECKED));
 	}
 
 	private void removeFromTraceTableView(Path tracePath) {
