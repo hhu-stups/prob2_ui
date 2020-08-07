@@ -9,7 +9,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationView;
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
@@ -153,7 +152,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		injector.getInstance(LTLPatternParser.class).parseMachine(m);
-		injector.getInstance(TestCaseGenerationView.class).bindMachine(m);
 		injector.getInstance(TraceReplayView.class).refresh();
 	}
 

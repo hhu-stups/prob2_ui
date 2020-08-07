@@ -175,16 +175,12 @@ public class TestCaseGenerationView extends ScrollPane {
 		tvTestCases.setRowFactory(new TestCaseGenerationCellFactory());
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
-				bindMachine(newValue);
+				tvTestCases.itemsProperty().bind(newValue.testCasesProperty());
 			} else {
 				tvTestCases.getItems().clear();
 				tvTestCases.itemsProperty().unbind();
 			}
 		});
-	}
-	
-	public void bindMachine(Machine machine) {
-		tvTestCases.itemsProperty().bind(machine.testCasesProperty());
 	}
 	
 	private void setBindings() {
