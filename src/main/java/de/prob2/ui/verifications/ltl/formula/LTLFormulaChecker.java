@@ -17,7 +17,6 @@ import de.prob.check.LTLChecker;
 import de.prob.check.LTLError;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
-import de.prob.statespace.State;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -81,12 +80,11 @@ public class LTLFormulaChecker {
 		if(!item.selected()) {
 			return;
 		}
-		State stateid = currentTrace.getCurrentState();
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
 		List<LTLMarker> errorMarkers = new ArrayList<>();
 		Object result = getResult(parser, errorMarkers, item);
-		resultHandler.handleFormulaResult(item, errorMarkers, result, stateid);
+		resultHandler.handleFormulaResult(item, errorMarkers, result, currentTrace.getStateSpace());
 		Platform.runLater(() -> injector.getInstance(LTLView.class).refresh());
 	}
 	

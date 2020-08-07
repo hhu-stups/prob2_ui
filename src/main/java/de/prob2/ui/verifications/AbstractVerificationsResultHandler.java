@@ -1,11 +1,8 @@
 package de.prob2.ui.verifications;
 
-import java.util.List;
 import java.util.ResourceBundle;
 
 import de.prob.check.IModelCheckingResult;
-import de.prob.statespace.State;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 
@@ -25,12 +22,11 @@ public abstract class AbstractVerificationsResultHandler extends AbstractResultH
 	
 	protected abstract boolean isParseError(final Object result);
 	
-	public CheckingResultItem handleFormulaResult(Object result, State stateid, List<Trace> traces) {
+	public CheckingResultItem handleFormulaResult(Object result) {
 		if(isSuccess(result)) {
 			return new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header",
 				"verifications.result.succeeded.message", bundle.getString(type.getKey()));
 		} else if(isCounterExample(result)) {
-			traces.addAll(handleCounterExample(result, stateid));
 			return new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header",
 				"verifications.result.counterExampleFound.message", bundle.getString(type.getKey()));
 		} else if(isParseError(result)) {
@@ -48,7 +44,4 @@ public abstract class AbstractVerificationsResultHandler extends AbstractResultH
 			return null;
 		}
 	}
-	
-	protected abstract List<Trace> handleCounterExample(Object result, State stateid);
-	
 }

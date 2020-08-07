@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -12,8 +11,8 @@ import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
-import de.prob.statespace.State;
-import de.prob.statespace.Trace;
+import de.prob.statespace.ITraceDescription;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
@@ -51,12 +50,11 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		return result instanceof Throwable || result instanceof LTLError;
 	}
 	
-	public void handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, State stateid) {
-		ArrayList<Trace> traces = new ArrayList<>();
-		CheckingResultItem resultItem = handleFormulaResult(result, stateid, traces);
+	public void handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, StateSpace stateSpace) {
+		CheckingResultItem resultItem = handleFormulaResult(result);
 
-		if(!traces.isEmpty()) {
-			item.setCounterExample(traces.get(0));
+		if (result instanceof ITraceDescription) {
+			item.setCounterExample(((ITraceDescription)result).getTrace(stateSpace));
 		} else {
 			item.setCounterExample(null);
 		}
@@ -83,12 +81,5 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 					"common.result.message", msg);
 		}
 		item.setResultItem(resultItem);
-	}
-
-	@Override
-	protected List<Trace> handleCounterExample(Object result, State stateid) {
-		ArrayList<Trace> counterExamples = new ArrayList<>();
-		counterExamples.add(((LTLCounterExample) result).getTrace(stateid.getStateSpace()));
-		return counterExamples;
 	}
 }

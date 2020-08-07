@@ -1,7 +1,7 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -15,7 +15,6 @@ import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.command.SymbolicModelcheckCommand;
-import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
@@ -23,7 +22,7 @@ import de.prob.check.CheckInterrupted;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.check.RefinementCheckCounterExample;
-import de.prob.statespace.State;
+import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
@@ -69,13 +68,22 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 	}
 	
 	public void handleFormulaResult(SymbolicItem item, Object result) {
-		ArrayList<Trace> traces = new ArrayList<>();
-		CheckingResultItem resultItem = handleFormulaResult(result, currentTrace.getCurrentState(), traces);
-		item.setResultItem(resultItem);
-		((SymbolicCheckingFormulaItem) item).getCounterExamples().clear();
-		for(Trace trace: traces) {
-			((SymbolicCheckingFormulaItem) item).getCounterExamples().add(trace);
+		item.setResultItem(handleFormulaResult(result));
+		
+		final List<Trace> counterExamples;
+		if (result instanceof CBCInvariantViolationFound) {
+			counterExamples = new ArrayList<>();
+			final CBCInvariantViolationFound violation = (CBCInvariantViolationFound)result;
+			final int size = violation.getCounterexamples().size();
+			for (int i = 0; i < size; i++) {
+				counterExamples.add(violation.getTrace(i, currentTrace.getStateSpace()));
+			}
+		} else if (result instanceof ITraceDescription) {
+			counterExamples = Collections.singletonList(((ITraceDescription)result).getTrace(currentTrace.getStateSpace()));
+		} else {
+			counterExamples = Collections.emptyList();
 		}
+		((SymbolicCheckingFormulaItem)item).getCounterExamples().setAll(counterExamples);
 	}
 	
 	public void handleFormulaResult(SymbolicItem item, AbstractCommand cmd) {
@@ -92,38 +100,6 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		} else if(item.getType() == SymbolicExecutionType.FIND_REDUNDANT_INVARIANTS) {
 			handleFindRedundantInvariants((SymbolicCheckingFormulaItem) item, (GetRedundantInvariantsCommand) cmd);
 		}
-	}
-
-	@Override
-	protected List<Trace> handleCounterExample(Object result, State stateid) {
-		if(result instanceof CBCInvariantViolationFound) {
-			return handleInvariantCounterExamples(result, stateid);
-		} else if(result instanceof CBCDeadlockFound) {
-			return handleDeadlockCounterExample(result, stateid);
-		}
-		return handleRefinementCounterExample(result, stateid);
-	}
-	
-	private List<Trace> handleInvariantCounterExamples(Object result, State stateid) {
-		ArrayList<Trace> counterExamples = new ArrayList<>();
-		CBCInvariantViolationFound violation = (CBCInvariantViolationFound) result;
-		int size = violation.getCounterexamples().size();
-		for(int i = 0; i < size; i++) {
-			counterExamples.add(violation.getTrace(i, stateid.getStateSpace()));
-		}
-		return counterExamples;
-	}
-	
-	private List<Trace> handleDeadlockCounterExample(Object result, State stateid) {
-		ArrayList<Trace> counterExamples = new ArrayList<>();
-		counterExamples.add(((CBCDeadlockFound) result).getTrace(stateid.getStateSpace()));
-		return counterExamples;
-	}
-	
-	private List<Trace> handleRefinementCounterExample(Object result, State stateid) {
-		ArrayList<Trace> counterExamples = new ArrayList<>();
-		counterExamples.add(((RefinementCheckCounterExample) result).getTrace(stateid.getStateSpace()));
-		return counterExamples;
 	}
 	
 	public void handleFindRedundantInvariants(SymbolicCheckingFormulaItem item, GetRedundantInvariantsCommand cmd) {
