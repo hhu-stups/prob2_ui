@@ -29,6 +29,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -198,7 +199,9 @@ public final class ModelcheckingView extends ScrollPane {
 				tvChecks.getSelectionModel().selectFirst();
 			} else {
 				tvChecks.itemsProperty().unbind();
-				tvChecks.getItems().clear();
+				// Because of the previous binding, the tvChecks items list is the same object as the job items list of one of the ModelcheckingItems.
+				// This means that we can't just clear tvChecks.getItems(), because that would also clear the ModelcheckingItem's job items, which resets the item's status.
+				tvChecks.setItems(FXCollections.observableArrayList());
 			}
 		});
 		
