@@ -283,7 +283,7 @@ public class LTLView extends AnchorPane {
 			formula.setCounterExample(null);
 			formula.setResultItem(null);
 		}
-		parseMachine(machine);
+		patternParser.parseMachine(machine);
 	}
 		
 	@FXML
@@ -358,10 +358,6 @@ public class LTLView extends AnchorPane {
 		checker.cancel();
 	}
 	
-	private void parseMachine(Machine machine) {
-		patternParser.parseMachine(machine);
-	}
-
 	@FXML
 	private void saveLTL() {
 		Machine machine = currentProject.getCurrentMachine();
