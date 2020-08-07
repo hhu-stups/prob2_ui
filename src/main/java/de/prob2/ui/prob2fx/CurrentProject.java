@@ -106,12 +106,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				}
 			}
 		});
-		this.currentMachineProperty().addListener((observable, from, to) -> {
-			if(to != null) {
-				to.resetStatus();
-			}
-			injector.getInstance(MachineTableView.class).refresh();
-		});
+		this.currentMachineProperty().addListener((observable, from, to) -> injector.getInstance(MachineTableView.class).refresh());
 
 		config.addListener(new ConfigListener() {
 			@Override
