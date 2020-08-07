@@ -42,11 +42,6 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 	}
 	
 	@Override
-	protected boolean isError(final Object result) {
-		return false;
-	}
-	
-	@Override
 	protected boolean isInterrupted(final Object result) {
 		return result instanceof LTLNotYetFinished;
 	}

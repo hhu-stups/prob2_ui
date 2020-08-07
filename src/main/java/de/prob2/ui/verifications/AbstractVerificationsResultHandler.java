@@ -21,8 +21,6 @@ public abstract class AbstractVerificationsResultHandler extends AbstractResultH
 	
 	protected abstract boolean isCounterExample(final Object result);
 	
-	protected abstract boolean isError(final Object result);
-	
 	protected abstract boolean isInterrupted(final Object result);
 	
 	protected abstract boolean isParseError(final Object result);
@@ -35,9 +33,6 @@ public abstract class AbstractVerificationsResultHandler extends AbstractResultH
 			traces.addAll(handleCounterExample(result, stateid));
 			return new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header",
 				"verifications.result.counterExampleFound.message", bundle.getString(type.getKey()));
-		} else if(isError(result)) {
-			return new CheckingResultItem(Checked.FAIL, "common.result.error.header",
-				"common.result.message", ((IModelCheckingResult) result).getMessage());
 		} else if(isParseError(result)) {
 			if(result instanceof Throwable) {
 				return new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
