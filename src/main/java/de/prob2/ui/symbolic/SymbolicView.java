@@ -46,8 +46,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					checkItem.disableProperty().bind(executor.currentJobThreadsProperty().emptyProperty().not()
-							.or(to.selectedProperty().not()));
+					checkItem.disableProperty().bind(executor.runningProperty().or(to.selectedProperty().not()));
 				}
 			});
 			
@@ -151,7 +150,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 			}
 		});
 		checkMachineButton.disableProperty().bind(partOfDisableBinding.or(noFormulas.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
-		cancelButton.disableProperty().bind(executor.currentJobThreadsProperty().emptyProperty());
+		cancelButton.disableProperty().bind(executor.runningProperty().not());
 		tvFormula.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));

@@ -15,6 +15,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingResultHandler;
 
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -47,7 +48,7 @@ public abstract class SymbolicExecutor {
 		this.injector = injector;
 		this.currentJobs = new ArrayList<>();
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
-		injector.getInstance(DisablePropertyController.class).addDisableExpression(this.currentJobThreadsProperty().emptyProperty().not());
+		injector.getInstance(DisablePropertyController.class).addDisableExpression(this.runningProperty());
 	}
 	
 	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicExecutionType type, boolean checkAll) {
@@ -69,8 +70,12 @@ public abstract class SymbolicExecutor {
 		currentJobs.removeAll(removedJobs);
 	}
 	
-	public ListProperty<Thread> currentJobThreadsProperty() {
-		return currentJobThreads;
+	public BooleanExpression runningProperty() {
+		return currentJobThreads.emptyProperty().not();
+	}
+	
+	public boolean isRunning() {
+		return this.runningProperty().get();
 	}
 	
 	public void checkItem(SymbolicItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
