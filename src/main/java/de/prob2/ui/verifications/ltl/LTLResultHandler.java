@@ -1,13 +1,17 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.be4.ltl.core.parser.LtlParseException;
+
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
-import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
@@ -17,13 +21,6 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.formula.LTLParseError;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @Singleton
 public class LTLResultHandler extends AbstractVerificationsResultHandler {
@@ -32,10 +29,31 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 	public LTLResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
 		super(stageManager, bundle);	
 		this.type = CheckingType.LTL;
-		this.success.addAll(Arrays.asList(LTLOk.class));
-		this.counterExample.addAll(Arrays.asList(LTLCounterExample.class));
-		this.interrupted.addAll(Arrays.asList(LTLNotYetFinished.class));
-		this.parseErrors.addAll(Arrays.asList(LTLParseError.class, LtlParseException.class, ProBError.class, LTLError.class));
+	}
+	
+	@Override
+	protected boolean isSuccess(final Object result) {
+		return result instanceof LTLOk;
+	}
+	
+	@Override
+	protected boolean isCounterExample(final Object result) {
+		return result instanceof LTLCounterExample;
+	}
+	
+	@Override
+	protected boolean isError(final Object result) {
+		return false;
+	}
+	
+	@Override
+	protected boolean isInterrupted(final Object result) {
+		return result instanceof LTLNotYetFinished;
+	}
+	
+	@Override
+	protected boolean isParseError(final Object result) {
+		return result instanceof Throwable || result instanceof LTLError;
 	}
 	
 	public void handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, State stateid) {

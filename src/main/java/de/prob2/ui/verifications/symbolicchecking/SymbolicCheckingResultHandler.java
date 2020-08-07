@@ -46,11 +46,31 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		super(stageManager, bundle);
 		this.currentTrace = currentTrace;
 		this.type = CheckingType.SYMBOLIC_CHECKING;
-		this.success.addAll(Arrays.asList(ModelCheckOk.class));
-		this.counterExample.addAll(Arrays.asList(CBCInvariantViolationFound.class, CBCDeadlockFound.class,
-												RefinementCheckCounterExample.class));
-		this.interrupted.addAll(Arrays.asList(NotYetFinished.class, CheckInterrupted.class, CommandInterruptedException.class));
-		this.parseErrors.addAll(Arrays.asList(CheckError.class, EvaluationException.class));
+	}
+	
+	@Override
+	protected boolean isSuccess(final Object result) {
+		return result instanceof ModelCheckOk;
+	}
+	
+	@Override
+	protected boolean isCounterExample(final Object result) {
+		return result instanceof CBCInvariantViolationFound || result instanceof CBCDeadlockFound || result instanceof RefinementCheckCounterExample;
+	}
+	
+	@Override
+	protected boolean isError(final Object result) {
+		return false;
+	}
+	
+	@Override
+	protected boolean isInterrupted(final Object result) {
+		return result instanceof NotYetFinished || result instanceof CheckInterrupted || result instanceof CommandInterruptedException;
+	}
+	
+	@Override
+	protected boolean isParseError(final Object result) {
+		return !this.isInterrupted(result) && (result instanceof Throwable || result instanceof CheckError);
 	}
 	
 	public void handleFormulaResult(SymbolicItem item, Object result) {
