@@ -151,7 +151,7 @@ public class TraceReplayView extends ScrollPane {
 		});
 
 		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
-		cancelButton.disableProperty().bind(traceChecker.currentJobThreadsProperty().emptyProperty());
+		cancelButton.disableProperty().bind(traceChecker.runningProperty().not());
 		final BooleanProperty noTraces = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			if (to != null) {

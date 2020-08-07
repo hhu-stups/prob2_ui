@@ -28,6 +28,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -50,7 +51,7 @@ public class TraceChecker implements ITraceChecker {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
-		disablePropertyController.addDisableExpression(this.currentJobThreadsProperty().emptyProperty().not());
+		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
 	void checkAll(List<ReplayTrace> replayTraces) {
@@ -187,8 +188,12 @@ public class TraceChecker implements ITraceChecker {
 		currentJobThreads.clear();
 	}
 
-	public ListProperty<Thread> currentJobThreadsProperty() {
-		return currentJobThreads;
+	public BooleanExpression runningProperty() {
+		return currentJobThreads.emptyProperty().not();
+	}
+
+	public boolean isRunning() {
+		return this.runningProperty().get();
 	}
 
 	void isNewTrace() {
