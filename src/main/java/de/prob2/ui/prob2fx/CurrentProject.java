@@ -136,7 +136,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private void updateCurrentMachine(final Machine m, final Preference p) {
 		this.currentMachine.set(m);
 		this.currentPreference.set(p);
-		getCurrentMachine();
 	}
 
 	private void clearProperties() {
