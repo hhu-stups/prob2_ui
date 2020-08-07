@@ -406,7 +406,6 @@ public class LTLView extends AnchorPane {
 				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {
 					machine.addLTLPattern(pattern);
-					patternParser.parsePattern(pattern, machine);
 					patternParser.addPattern(pattern, machine);
 				});
 	}

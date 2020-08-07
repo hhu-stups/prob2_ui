@@ -116,10 +116,7 @@ public class LTLPatternParser implements ILTLItemHandler {
 	}
 	
 	public void parseMachine(Machine machine) {
-		machine.getLTLPatterns().forEach(item-> {
-			this.parsePattern(item, machine);
-			this.addPattern(item, machine);
-		});
+		machine.getLTLPatterns().forEach(item -> this.addPattern(item, machine));
 	}
 	
 }
