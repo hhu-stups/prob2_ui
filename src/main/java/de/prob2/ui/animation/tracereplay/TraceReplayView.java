@@ -274,7 +274,7 @@ public class TraceReplayView extends ScrollPane {
 		}
 	}
 	
-	public void refresh() {
+	public void reset() {
 		traceChecker.cancelReplay();
 		traceTableView.getItems().forEach(trace -> trace.setChecked(Checked.NOT_CHECKED));
 	}

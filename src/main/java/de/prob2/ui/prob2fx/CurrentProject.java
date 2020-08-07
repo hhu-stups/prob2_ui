@@ -152,7 +152,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		injector.getInstance(LTLPatternParser.class).parseMachine(m);
-		injector.getInstance(TraceReplayView.class).refresh();
+		injector.getInstance(TraceReplayView.class).reset();
 	}
 
 	public void reloadCurrentMachine() {
