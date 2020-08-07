@@ -225,7 +225,6 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 	
 	public void bindMachine(Machine machine) {
-		machine.getModelcheckingItems().forEach(item -> item.getItems().clear());
 		tvChecks.getItems().clear();
 		tvChecks.itemsProperty().unbind();
 		tvItems.itemsProperty().bind(machine.modelcheckingItemsProperty());
