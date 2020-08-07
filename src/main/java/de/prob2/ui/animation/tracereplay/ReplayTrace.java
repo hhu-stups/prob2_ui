@@ -4,24 +4,21 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import com.google.inject.Injector;
+
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(ReplayTrace.class);
-
 	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
 	private final Path location;
