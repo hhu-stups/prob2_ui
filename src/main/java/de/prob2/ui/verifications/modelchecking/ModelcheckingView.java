@@ -194,9 +194,11 @@ public final class ModelcheckingView extends ScrollPane {
 
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				tvChecks.itemsProperty().unbind();
 				tvChecks.itemsProperty().bind(to.itemsProperty());
 				tvChecks.getSelectionModel().selectFirst();
+			} else {
+				tvChecks.itemsProperty().unbind();
+				tvChecks.getItems().clear();
 			}
 		});
 		
@@ -218,15 +220,11 @@ public final class ModelcheckingView extends ScrollPane {
 			} else {
 				tvItems.getItems().clear();
 				tvItems.itemsProperty().unbind();
-				tvChecks.getItems().clear();
-				tvChecks.itemsProperty().unbind();
 			}
 		});
 	}
 	
 	public void bindMachine(Machine machine) {
-		tvChecks.getItems().clear();
-		tvChecks.itemsProperty().unbind();
 		tvItems.itemsProperty().bind(machine.modelcheckingItemsProperty());
 	}
 	
@@ -326,11 +324,6 @@ public final class ModelcheckingView extends ScrollPane {
 		Machine machine = currentProject.getCurrentMachine();
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		machine.removeModelcheckingItem(item);
-		if(tvItems.getItems().isEmpty()) {
-			tvChecks.getItems().clear();
-		} else {
-			tvItems.getSelectionModel().selectFirst();
-		}
 	}
 	
 	@FXML
