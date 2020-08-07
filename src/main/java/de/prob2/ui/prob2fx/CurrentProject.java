@@ -22,7 +22,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -154,7 +153,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		injector.getInstance(LTLPatternParser.class).parseMachine(m);
-		injector.getInstance(SymbolicCheckingView.class).bindMachine(m);
 		injector.getInstance(TestCaseGenerationView.class).bindMachine(m);
 		injector.getInstance(TraceReplayView.class).refresh();
 	}

@@ -118,16 +118,12 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		setContextMenu();
 		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
-				bindMachine(newValue);
+				tvFormula.itemsProperty().bind(formulasProperty(newValue));
 			} else {
 				tvFormula.getItems().clear();
 				tvFormula.itemsProperty().unbind();
 			}
 		});
-	}
-	
-	public void bindMachine(Machine machine) {
-		tvFormula.itemsProperty().bind(formulasProperty(machine));
 	}
 	
 	protected abstract ListProperty<T> formulasProperty(Machine machine);
