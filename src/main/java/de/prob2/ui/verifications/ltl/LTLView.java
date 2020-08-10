@@ -395,9 +395,4 @@ public class LTLView extends AnchorPane {
 					patternParser.addPattern(pattern, machine);
 				});
 	}
-
-	public void refresh() {
-		tvFormula.refresh();	
-	}
-
 }
