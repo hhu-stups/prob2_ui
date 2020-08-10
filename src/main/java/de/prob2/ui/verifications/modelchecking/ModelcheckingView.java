@@ -276,7 +276,7 @@ public final class ModelcheckingView extends ScrollPane {
 			});
 			BooleanBinding disableSearchForNewErrorsProperty = Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || row.getItem().getItems().isEmpty() || 
-					!row.getItem().getItems().stream().filter(item -> item.getChecked() == Checked.SUCCESS).collect(Collectors.toList()).isEmpty(), 
+					row.getItem().getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS),
 					row.emptyProperty(), row.itemProperty());
 			searchForNewErrorsItem.disableProperty().bind(disableSearchForNewErrorsProperty);
 			
