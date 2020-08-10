@@ -145,8 +145,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private Callback<TableColumn.CellDataFeatures<ModelCheckingItem, Boolean>, ObservableValue<Boolean>> makeOptionValueFactory(final ModelCheckingOptions.Options option, boolean negated) {
 		return features -> {
 			BooleanBinding binding = Bindings.createBooleanBinding(
-					() -> features.getValue().getOptions().getPrologOptions().contains(option),
-					features.getValue().optionsProperty());
+					() -> features.getValue().getOptions().getPrologOptions().contains(option));
 			return negated ? binding.not() : binding;
 		};
 	}

@@ -27,9 +27,9 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
-	private String nodesLimit;
+	private final String nodesLimit;
 
-	private final ObjectProperty<ModelCheckingOptions> options;
+	private final ModelCheckingOptions options;
 	
 	private BooleanProperty shouldExecute;
 	
@@ -38,7 +38,7 @@ public class ModelCheckingItem implements IExecutableItem {
 	public ModelCheckingItem(String nodesLimit, ModelCheckingOptions options) {
 		Objects.requireNonNull(options);
 		this.nodesLimit = nodesLimit;
-		this.options = new SimpleObjectProperty<>(this, "options", options);
+		this.options = options;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		
 		this.initListeners();
@@ -47,7 +47,7 @@ public class ModelCheckingItem implements IExecutableItem {
 	private ModelCheckingItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
 		this.nodesLimit = JsonManager.checkDeserialize(context, object, "nodesLimit", String.class);
-		this.options = JsonManager.checkDeserialize(context, object, "options", new TypeToken<ObjectProperty<ModelCheckingOptions>>() {}.getType());
+		this.options = JsonManager.checkDeserialize(context, object, "options", ModelCheckingOptions.class);
 		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
 		
 		this.initListeners();
@@ -90,20 +90,8 @@ public class ModelCheckingItem implements IExecutableItem {
 		return nodesLimit;
 	}
 
-	public void setNodesLimit(String nodesLimit) {
-		this.nodesLimit = nodesLimit;
-	}
-
-	public ObjectProperty<ModelCheckingOptions> optionsProperty() {
-		return this.options;
-	}
-
 	public ModelCheckingOptions getOptions() {
-		return this.optionsProperty().get();
-	}
-	
-	public void setOptions(final ModelCheckingOptions options) {
-		this.optionsProperty().set(options);
+		return this.options;
 	}
 	
 	public void setSelected(boolean selected) {
