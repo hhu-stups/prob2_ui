@@ -20,14 +20,9 @@ import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class LTLPatternParser {
-	
-	private static final Logger logger = LoggerFactory.getLogger(LTLPatternParser.class);
-	
 	private final LTLResultHandler resultHandler;
 		
 	@Inject
@@ -36,7 +31,6 @@ public class LTLPatternParser {
 	}
 		
 	public void parsePattern(LTLPatternItem item, Machine machine) {
-		logger.trace("Parse ltl pattern");
 		Pattern pattern = itemToPattern(item);
 		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
 		item.setName(pattern.getName());
