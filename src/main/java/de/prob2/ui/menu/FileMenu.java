@@ -80,9 +80,7 @@ public class FileMenu extends Menu {
 		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull().or(bEditorView.savedProperty()));
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 
-		BooleanBinding isBBinding = Bindings.createBooleanBinding(() -> currentTrace.modelProperty().isNotNull().get() && currentTrace.modelProperty().get().getFormalismType() == FormalismType.B, currentTrace.modelProperty());
-
-		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.existsProperty().not().or(isBBinding.not()));
+		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B));
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));

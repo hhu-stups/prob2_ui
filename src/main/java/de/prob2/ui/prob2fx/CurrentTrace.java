@@ -144,7 +144,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 
 	private final CurrentState currentState;
 	private final ROObjProp<StateSpace> stateSpace;
-	private final ROObjProp<AbstractModel> model;
+	private final CurrentModel model;
 
 	private final ReadOnlyBooleanProperty canGoBack;
 	private final ReadOnlyBooleanProperty canGoForward;
@@ -167,7 +167,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 
 		this.currentState = new CurrentState(this);
 		this.stateSpace = new ROObjProp<>("stateSpace", Trace::getStateSpace, null);
-		this.model = new ROObjProp<>("model", Trace::getModel, null);
+		this.model = new CurrentModel(this);
 
 		this.canGoBack = new ROBoolProp("canGoBack", Trace::canGoBack, false);
 		this.canGoForward = new ROBoolProp("canGoForward", Trace::canGoForward, false);
@@ -304,7 +304,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 *
 	 * @return a read-only property holding the current {@link Trace}'s {@link AbstractModel}
 	 */
-	public ReadOnlyObjectProperty<AbstractModel> modelProperty() {
+	public CurrentModel modelProperty() {
 		return this.model;
 	}
 
