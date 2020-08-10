@@ -212,11 +212,11 @@ public class TestCaseGenerationView extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvTestCases.setOnMouseClicked(e-> {
 			TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
+			if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
 				itemHandler.handleItem(item, false);
 			}
 		});
-		tvTestCases.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		tvTestCases.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 	}
 	
 	@FXML

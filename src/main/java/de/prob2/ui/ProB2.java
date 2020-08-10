@@ -1,10 +1,23 @@
 package de.prob2.ui;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import ch.qos.logback.classic.util.ContextInitializer;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
 import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
+import de.prob.statespace.Trace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
@@ -19,6 +32,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
@@ -30,6 +44,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -38,16 +53,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ProB2 extends Application {
 	private Logger logger;
@@ -203,8 +208,9 @@ public class ProB2 extends Application {
 
 		if (currentProject.getCurrentMachine() != null) {
 			title.append(currentProject.getCurrentMachine());
-			if (currentTrace.exists()) {
-				final File modelFile = currentTrace.getModel().getModelFile();
+			final Trace trace = currentTrace.get();
+			if (trace != null) {
+				final File modelFile = trace.getModel().getModelFile();
 				if (modelFile != null) {
 					title.append(" (");
 					title.append(modelFile.getName());

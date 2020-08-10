@@ -153,7 +153,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvFormula.setOnMouseClicked(e-> {
 			T item = tvFormula.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
+			if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
 				formulaHandler.handleItem(item, false);
 			}
 		});

@@ -93,7 +93,7 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void startModelCheck() {
-		if (currentTrace.exists()) {
+		if (currentTrace.get() != null) {
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-", getOptions());
 			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 				this.hide();

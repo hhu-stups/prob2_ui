@@ -81,7 +81,7 @@ public class FileMenu extends Menu {
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
 
 		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B));
-		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
+		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.isNull());
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
 	}

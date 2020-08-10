@@ -239,7 +239,7 @@ public final class OperationsView extends VBox {
 
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 
-		randomButton.disableProperty().bind(currentTrace.existsProperty().not().or(randomExecutionThread.isNotNull()).or(disablePropertyController.disableProperty()));
+		randomButton.disableProperty().bind(currentTrace.isNull().or(randomExecutionThread.isNotNull()).or(disablePropertyController.disableProperty()));
 		randomButton.visibleProperty().bind(randomExecutionThread.isNull());
 		cancelButton.visibleProperty().bind(randomExecutionThread.isNotNull());
 

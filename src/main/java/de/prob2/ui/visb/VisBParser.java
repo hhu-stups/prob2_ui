@@ -80,7 +80,10 @@ public class VisBParser {
 		// final IEvalElement formula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND); // use parser associated with the current model
 		final IEvalElement formula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
 		//Take the current trace
-		final Trace trace = currentTrace.exists() ? currentTrace.get() : new Trace(machineLoader.getEmptyStateSpace());
+		Trace trace = currentTrace.get();
+		if (trace == null) {
+			trace = new Trace(machineLoader.getEmptyStateSpace());
+		}
 		//Evaluate the formula on the current trace
 		return trace.evalCurrent(formula);
 	}

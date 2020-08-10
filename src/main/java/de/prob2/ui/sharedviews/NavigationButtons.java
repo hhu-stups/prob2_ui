@@ -2,6 +2,7 @@ package de.prob2.ui.sharedviews;
 
 import com.google.inject.Inject;
 
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -38,29 +39,33 @@ public final class NavigationButtons extends HBox {
 
 	@FXML
 	private void handleBackButton() {
-		if (currentTrace.exists()) {
-			currentTrace.set(currentTrace.back());
+		final Trace trace = currentTrace.get();
+		if (trace != null) {
+			currentTrace.set(trace.back());
 		}
 	}
 
 	@FXML
 	private void handleFastBackButton() {
-		if (currentTrace.exists()) {
-			currentTrace.set(currentTrace.get().gotoPosition(-1));
+		final Trace trace = currentTrace.get();
+		if (trace != null) {
+			currentTrace.set(trace.gotoPosition(-1));
 		}
 	}
 
 	@FXML
 	private void handleForwardButton() {
-		if (currentTrace.exists()) {
-			currentTrace.set(currentTrace.forward());
+		final Trace trace = currentTrace.get();
+		if (trace != null) {
+			currentTrace.set(trace.forward());
 		}
 	}
 
 	@FXML
 	private void handleFastForwardButton() {
-		if (currentTrace.exists()) {
-			currentTrace.set(currentTrace.get().gotoPosition(currentTrace.get().size()-1));
+		final Trace trace = currentTrace.get();
+		if (trace != null) {
+			currentTrace.set(trace.gotoPosition(trace.size()-1));
 		}
 	}
 }
