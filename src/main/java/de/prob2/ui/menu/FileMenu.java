@@ -1,12 +1,9 @@
 package de.prob2.ui.menu;
 
-import java.nio.file.Path;
-import java.util.List;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.statespace.FormalismType;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.WarningAlert;
@@ -18,13 +15,17 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
-
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
+
+import java.nio.file.Path;
+import java.util.List;
 
 @FXMLInjected
 public class FileMenu extends Menu {
@@ -78,8 +79,10 @@ public class FileMenu extends Menu {
 
 		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull().or(bEditorView.savedProperty()));
 		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
-		
-		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.existsProperty().not());
+
+		BooleanBinding isBBinding = Bindings.createBooleanBinding(() -> currentTrace.modelProperty().isNotNull().get() && currentTrace.modelProperty().get().getFormalismType() == FormalismType.B, currentTrace.modelProperty());
+
+		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.existsProperty().not().or(isBBinding.not()));
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.existsProperty().not());
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
