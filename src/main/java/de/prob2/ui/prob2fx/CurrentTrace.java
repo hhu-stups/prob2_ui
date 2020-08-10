@@ -224,7 +224,10 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 * (i. e. is not null).
 	 * 
 	 * @return a boolean property indicating whether a current trace exists
+	 * 
+	 * @deprecated Use {@link #isNotNull()} instead.
 	 */
+	@Deprecated
 	public BooleanBinding existsProperty() {
 		return this.isNotNull();
 	}
@@ -233,7 +236,10 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 * Return whether a current trace exists (i. e. is not null).
 	 * 
 	 * @return whether a current trace exists
+	 * 
+	 * @deprecated Use a {@code != null} check instead.
 	 */
+	@Deprecated
 	public boolean exists() {
 		return this.get() != null;
 	}
