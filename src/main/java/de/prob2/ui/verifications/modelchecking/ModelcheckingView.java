@@ -232,16 +232,13 @@ public final class ModelcheckingView extends ScrollPane {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
 			if(item.getItems().isEmpty()) {
-				item.setOptions(item.getOptions().recheckExisting(true));
+				checker.checkItem(item, true, false);
 			} else if (item.getItems()
 					.stream()
 					.filter(job -> job.getChecked() == Checked.SUCCESS)
 					.collect(Collectors.toList()).isEmpty()) {
-				item.setOptions(item.getOptions().recheckExisting(false));
-			} else {
-				return;
+				checker.checkItem(item, false, false);
 			}
-			checker.checkItem(item, false);
 		}
 	}
 	
@@ -253,8 +250,7 @@ public final class ModelcheckingView extends ScrollPane {
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				item.setOptions(item.getOptions().recheckExisting(true));
-				checker.checkItem(item, false);
+				checker.checkItem(item, true, false);
 			});
 			
 			row.itemProperty().addListener((o, from, to) -> {
@@ -271,8 +267,7 @@ public final class ModelcheckingView extends ScrollPane {
 			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
 			searchForNewErrorsItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				item.setOptions(item.getOptions().recheckExisting(false));
-				checker.checkItem(item, false);
+				checker.checkItem(item, false, false);
 			});
 			
 			row.itemProperty().addListener((o, from, to) -> {
@@ -336,10 +331,7 @@ public final class ModelcheckingView extends ScrollPane {
 	public void checkMachine() {
 		currentProject.currentMachineProperty().get().getModelcheckingItems().stream()
 			.filter(item -> item.getItems().isEmpty())
-			.forEach(item -> {
-				item.setOptions(item.getOptions().recheckExisting(true));
-				checker.checkItem(item, true);
-			});
+			.forEach(item -> checker.checkItem(item, true, true));
 	}
 	
 	@FXML

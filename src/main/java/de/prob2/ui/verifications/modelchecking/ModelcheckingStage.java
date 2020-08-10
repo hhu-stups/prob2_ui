@@ -97,7 +97,7 @@ public class ModelcheckingStage extends Stage {
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-", getOptions());
 			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
 				this.hide();
-				modelchecker.checkItem(modelcheckingItem, false);
+				modelchecker.checkItem(modelcheckingItem, true, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
 			} else {
 				stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked").showAndWait();
