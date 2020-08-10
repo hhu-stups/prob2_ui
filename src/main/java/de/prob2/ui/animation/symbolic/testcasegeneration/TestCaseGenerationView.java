@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -23,6 +22,7 @@ import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -39,7 +39,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
-
  
 @FXMLInjected
 @Singleton
@@ -124,10 +123,17 @@ public class TestCaseGenerationView extends ScrollPane {
 			});
 
 			row.itemProperty().addListener((observable, from, to) -> {
+				final InvalidationListener updateExamplesListener = o -> showExamples(to, showStateItem);
+
+				if (from != null) {
+					from.examplesProperty().removeListener(updateExamplesListener);
+				}
+
 				if(to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
-					showExamples(to, showStateItem);
+					to.examplesProperty().addListener(updateExamplesListener);
+					updateExamplesListener.invalidated(null);
 					checkItem.disableProperty().bind(testCaseGenerator.runningProperty().or(to.selectedProperty().not()));
 					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
 					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
@@ -240,7 +246,6 @@ public class TestCaseGenerationView extends ScrollPane {
 	public void generate() {
 		Machine machine = currentProject.getCurrentMachine();
 		itemHandler.handleMachine(machine);
-		refresh();
 	}
 	
 	@FXML
