@@ -177,7 +177,6 @@ public class LTLView extends AnchorPane {
 			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.exists()) {
 				checker.checkFormula(item);
-				tvFormula.refresh();
 			}
 		});
 	}
@@ -205,7 +204,6 @@ public class LTLView extends AnchorPane {
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				checker.checkFormula(row.getItem());
-				tvFormula.refresh();
 			});
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -283,7 +281,6 @@ public class LTLView extends AnchorPane {
 		loadLTLStage(formulaStage, null);
 		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.ADD, null));
 		formulaStage.showAndWait();
-		tvFormula.refresh();
 	}
 	
 	private void removeFormula() {
@@ -314,7 +311,6 @@ public class LTLView extends AnchorPane {
 		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		formulaStage.showAndWait();
 		formulaStage.clear();
-		tvFormula.refresh();
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
@@ -337,7 +333,6 @@ public class LTLView extends AnchorPane {
 	@FXML
 	public void checkMachine() {
 		checker.checkMachine();
-		refresh();
 	}
 	
 	@FXML
