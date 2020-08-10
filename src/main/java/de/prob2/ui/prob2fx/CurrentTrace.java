@@ -19,6 +19,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;
@@ -139,7 +140,6 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final AnimationSelector animationSelector;
 	private final StageManager stageManager;
 	
-	private final ReadOnlyBooleanProperty exists;
 	private final BooleanProperty animatorBusy;
 
 	private final CurrentState currentState;
@@ -161,8 +161,6 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		this.stageManager = stageManager;
 		this.animationSelector.registerAnimationChangeListener(new AnimationChangeListener());
 		
-		this.exists = new ROBoolProp("exists", trace -> true, false);
-
 		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
 
 		this.currentState = new CurrentState(this);
@@ -227,8 +225,8 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 * 
 	 * @return a boolean property indicating whether a current trace exists
 	 */
-	public ReadOnlyBooleanProperty existsProperty() {
-		return this.exists;
+	public BooleanBinding existsProperty() {
+		return this.isNotNull();
 	}
 
 	/**
@@ -237,7 +235,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 * @return whether a current trace exists
 	 */
 	public boolean exists() {
-		return this.existsProperty().get();
+		return this.get() != null;
 	}
 
 	/**
