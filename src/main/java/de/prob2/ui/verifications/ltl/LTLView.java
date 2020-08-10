@@ -311,6 +311,7 @@ public class LTLView extends AnchorPane {
 		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		formulaStage.showAndWait();
 		formulaStage.clear();
+		tvFormula.refresh();
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
