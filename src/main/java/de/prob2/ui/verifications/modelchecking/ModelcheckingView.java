@@ -26,6 +26,7 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -256,15 +257,14 @@ public final class ModelcheckingView extends ScrollPane {
 				checker.checkItem(item, false);
 			});
 			
-			BooleanBinding disableCheckProperty = Bindings.createBooleanBinding(
-					() -> row.isEmpty() || row.getItem() == null || !row.getItem().getItems().isEmpty(), row.emptyProperty(), row.itemProperty());
-			checkItem.disableProperty().bind(disableCheckProperty);
-			
-			row.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					checkItem.disableProperty().bind(disableCheckProperty
-							.or(checker.runningProperty())
-							.or(to.selectedProperty().not()));
+			row.itemProperty().addListener((o, from, to) -> {
+				if (to != null) {
+					checkItem.disableProperty().bind(to.itemsProperty().emptyProperty().not()
+						.or(checker.runningProperty())
+						.or(to.selectedProperty().not()));
+				} else {
+					checkItem.disableProperty().unbind();
+					checkItem.setDisable(true);
 				}
 			});
 			
@@ -274,11 +274,18 @@ public final class ModelcheckingView extends ScrollPane {
 				item.setOptions(item.getOptions().recheckExisting(false));
 				checker.checkItem(item, false);
 			});
-			BooleanBinding disableSearchForNewErrorsProperty = Bindings.createBooleanBinding(
-					() -> row.isEmpty() || row.getItem() == null || row.getItem().getItems().isEmpty() || 
-					row.getItem().getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS),
-					row.emptyProperty(), row.itemProperty());
-			searchForNewErrorsItem.disableProperty().bind(disableSearchForNewErrorsProperty);
+			
+			row.itemProperty().addListener((o, from, to) -> {
+				if (to != null) {
+					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().isEmpty() || to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
+					searchForNewErrorsItem.disableProperty().bind(anySucceeded
+						.or(checker.runningProperty())
+						.or(to.selectedProperty().not()));
+				} else {
+					searchForNewErrorsItem.disableProperty().unbind();
+					searchForNewErrorsItem.setDisable(true);
+				}
+			});
 			
 			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeItem());
