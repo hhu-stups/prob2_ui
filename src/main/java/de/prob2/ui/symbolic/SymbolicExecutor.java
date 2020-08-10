@@ -31,8 +31,6 @@ public abstract class SymbolicExecutor {
 	
 	protected final CurrentProject currentProject;
 	
-	protected final Injector injector;
-
 	protected final ISymbolicResultHandler resultHandler;
 
 	protected final List<IModelCheckJob> currentJobs;
@@ -45,7 +43,6 @@ public abstract class SymbolicExecutor {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
-		this.injector = injector;
 		this.currentJobs = new ArrayList<>();
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		injector.getInstance(DisablePropertyController.class).addDisableExpression(this.runningProperty());
@@ -96,7 +93,6 @@ public abstract class SymbolicExecutor {
 				} else {
 					resultHandler.handleFormulaResult(currentItem, finalException);
 				}
-				updateMachine(currentProject.getCurrentMachine());
 				if(!checkAll) {
 					updateTrace(currentItem);
 				}
@@ -120,7 +116,6 @@ public abstract class SymbolicExecutor {
 			final Object finalResult = result;
 			Platform.runLater(() -> {
 				resultHandler.handleFormulaResult(item, finalResult);
-				updateMachine(currentProject.getCurrentMachine());
 				if(!checkAll) {
 					updateTrace(item);
 				}
@@ -133,8 +128,6 @@ public abstract class SymbolicExecutor {
 	}
 	
 	protected abstract void updateTrace(SymbolicItem item);
-	
-	protected abstract void updateMachine(Machine machine);
 	
 	protected SymbolicItem getItemIfAlreadyExists(SymbolicItem item) {
 		List<? extends SymbolicItem> formulas = getItems();

@@ -171,7 +171,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
 		formulaHandler.handleMachine(machine);
-		refresh();
 	}
 	
 	protected void removeFormula() {
