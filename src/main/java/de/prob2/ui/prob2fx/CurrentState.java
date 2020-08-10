@@ -1,6 +1,8 @@
 package de.prob2.ui.prob2fx;
 
 import de.prob.statespace.State;
+import de.prob.statespace.Trace;
+
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.property.ReadOnlyObjectPropertyBase;
@@ -63,7 +65,8 @@ public final class CurrentState extends ReadOnlyObjectPropertyBase<State> {
 	
 	@Override
 	public State get() {
-		return this.currentTrace.exists() ? this.currentTrace.get().getCurrentState() : null;
+		final Trace trace = this.currentTrace.get();
+		return trace != null ? trace.getCurrentState() : null;
 	}
 	
 	/**
