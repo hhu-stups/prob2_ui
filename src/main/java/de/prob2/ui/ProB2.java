@@ -29,6 +29,7 @@ import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
@@ -221,8 +222,9 @@ public class ProB2 extends Application {
 			title.append(" - ");
 		}
 
-		if (currentProject.exists()) {
-			title.append(currentProject.getName());
+		final Project project = currentProject.get();
+		if (project != null) {
+			title.append(project.getName());
 			title.append(" - ");
 		}
 

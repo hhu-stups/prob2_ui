@@ -74,7 +74,7 @@ public class VisBController {
 	 * Whenever a new machine is loaded, this method cleans out the visualisation, meaning it resets all current changes.
 	 */
 	private void startVisualisation(){
-		if(currentProject.exists() && currentProject.getCurrentMachine() != null) {
+		if(currentProject.getCurrentMachine() != null) {
 			currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 				//This prepares VisB for the new Visualisation
 				this.visBVisualisation = new VisBVisualisation();

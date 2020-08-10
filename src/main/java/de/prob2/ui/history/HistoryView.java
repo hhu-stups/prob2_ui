@@ -113,7 +113,7 @@ public final class HistoryView extends VBox {
 		currentTrace.addListener(traceChangeListener);
 
 		saveTraceButton.disableProperty()
-				.bind(currentProject.existsProperty().and(currentTrace.isNotNull()).not());
+				.bind(currentProject.isNotNull().and(currentTrace.isNotNull()).not());
 	}
 
 	public NumberBinding getCurrentHistoryPositionProperty() {

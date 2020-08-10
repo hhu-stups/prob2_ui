@@ -58,7 +58,7 @@ public final class ProjectView extends StackPane {
 
 	@FXML
 	public void initialize() {
-		projectTabPane.visibleProperty().bind(currentProject.existsProperty());
+		projectTabPane.visibleProperty().bind(currentProject.isNotNull());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		recentProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		openProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());

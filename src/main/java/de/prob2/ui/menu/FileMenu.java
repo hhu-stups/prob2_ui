@@ -78,7 +78,7 @@ public class FileMenu extends Menu {
 		this.recentProjectsMenu.getItems().setAll(this.projectManager.getRecentProjectItems());
 
 		this.saveMachineItem.disableProperty().bind(bEditorView.pathProperty().isNull().or(bEditorView.savedProperty()));
-		this.saveProjectItem.disableProperty().bind(currentProject.existsProperty().not());
+		this.saveProjectItem.disableProperty().bind(currentProject.isNull());
 
 		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B));
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.isNull());

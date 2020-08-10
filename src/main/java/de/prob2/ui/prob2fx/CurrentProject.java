@@ -321,7 +321,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public boolean confirmReplacingProject() {
-		if (this.exists() && !this.isSaved()) {
+		if (this.get() != null && !this.isSaved()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
 					"prob2fx.currentProject.alerts.confirmReplacingProject.header",
 					"prob2fx.currentProject.alerts.confirmReplacingProject.content");
