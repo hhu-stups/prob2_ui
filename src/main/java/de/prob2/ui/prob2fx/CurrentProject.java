@@ -19,10 +19,10 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.project.verifications.MachineTableView;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -227,12 +227,20 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.setNewProject(newProject);
 	}
 
-	public ReadOnlyBooleanProperty existsProperty() {
-		return this.exists;
+	/**
+	 * @deprecated Use {@link #isNotNull()} instead.
+	 */
+	@Deprecated
+	public BooleanBinding existsProperty() {
+		return this.isNotNull();
 	}
 
+	/**
+	 * @deprecated Use a {@code != null} check instead.
+	 */
+	@Deprecated
 	public boolean exists() {
-		return this.existsProperty().get();
+		return this.get() != null;
 	}
 
 	public StringProperty nameProperty() {
