@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -65,7 +64,7 @@ public class TestCaseGenerationInput extends VBox {
 		setCheckListeners();
 	}
 	
-	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationChoosingStage choosingStage) {
+	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationChoosingStage choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
 		int maxDepth = Integer.parseInt(testCaseGenerationSettingsHandler.extractDepth(choosingStage, mcdcInputView, operationCoverageInputView));
@@ -81,7 +80,6 @@ public class TestCaseGenerationInput extends VBox {
 		if(!currentMachine.getTestCases().contains(newItem)) {
 			if(valid) {
 				currentMachine.getTestCases().set(currentMachine.getTestCases().indexOf(item), newItem);
-				view.refresh();
 			}
 			return true;
 		}
@@ -181,10 +179,10 @@ public class TestCaseGenerationInput extends VBox {
 		injector.getInstance(TestCaseGenerationChoosingStage.class).close();
 	}
 	
-	public void changeItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
+	public void changeItem(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
 		btAdd.setText(bundle.getString("testcase.input.buttons.change"));
 		btCheck.setText(bundle.getString("testcase.input.buttons.changeAndGenerate"));
-		setChangeListeners(item, view, resultHandler, stage);
+		setChangeListeners(item, resultHandler, stage);
 		stage.select(item);
 		if(stage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
 			mcdcInputView.setItem(item);
@@ -194,9 +192,9 @@ public class TestCaseGenerationInput extends VBox {
 		stage.show();
 	}
 	
-	private void setChangeListeners(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
+	private void setChangeListeners(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
 		btAdd.setOnAction(e -> {
-			if(updateItem(item, view, stage)) {
+			if(updateItem(item, stage)) {
 				addItem(false);
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
@@ -205,7 +203,7 @@ public class TestCaseGenerationInput extends VBox {
 		});
 		
 		btCheck.setOnAction(e-> {
-			if(updateItem(item, view, stage)) {
+			if(updateItem(item, stage)) {
 				checkItem();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
