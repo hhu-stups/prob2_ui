@@ -323,7 +323,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private void removeItem() {
 		Machine machine = currentProject.getCurrentMachine();
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-		machine.removeModelcheckingItem(item);
+		machine.getModelcheckingItems().remove(item);
 	}
 	
 	@FXML

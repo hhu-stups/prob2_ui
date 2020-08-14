@@ -45,7 +45,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(!currentMachine.getSymbolicAnimationFormulas().contains(formula)) {
-				currentMachine.addSymbolicAnimationFormula(formula);
+				currentMachine.getSymbolicAnimationFormulas().add(formula);
 			}
 		}
 	}

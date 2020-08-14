@@ -228,7 +228,7 @@ public class TestCaseGenerationView extends ScrollPane {
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
 		TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
-		machine.removeTestCase(item);
+		machine.getTestCases().remove(item);
 	}
 
 	private void openItem(TestCaseGenerationItem item) {

@@ -100,7 +100,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	
 	@Override
 	protected void removeFormula(Machine machine, SymbolicCheckingFormulaItem item) {
-		machine.removeSymbolicCheckingFormula(item);
+		machine.getSymbolicCheckingFormulas().remove(item);
 	}
 	
 	@Override

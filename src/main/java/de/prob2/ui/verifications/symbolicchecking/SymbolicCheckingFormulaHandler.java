@@ -51,7 +51,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(!currentMachine.getSymbolicCheckingFormulas().contains(formula)) {
-				currentMachine.addSymbolicCheckingFormula(formula);
+				currentMachine.getSymbolicCheckingFormulas().add(formula);
 			}
 		}
 	}

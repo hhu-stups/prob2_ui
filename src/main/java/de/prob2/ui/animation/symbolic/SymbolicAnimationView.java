@@ -100,7 +100,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
 	@Override
 	protected void removeFormula(Machine machine, SymbolicAnimationItem item) {
-		machine.removeSymbolicAnimationFormula(item);
+		machine.getSymbolicAnimationFormulas().remove(item);
 	}
 	
 	@Override

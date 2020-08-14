@@ -49,7 +49,7 @@ public class TestCaseGenerationItemHandler {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(!currentMachine.getTestCases().contains(item)) {
-				currentMachine.addTestCase(item);
+				currentMachine.getTestCases().add(item);
 			}
 		}
 	}

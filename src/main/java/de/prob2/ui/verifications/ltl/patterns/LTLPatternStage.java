@@ -43,7 +43,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	private void addItem(Machine machine, LTLPatternItem item) {
 		if(!machine.getLTLPatterns().contains(item)) {
 			patternParser.addPattern(item, machine);
-			machine.addLTLPattern(item);
+			machine.getLTLPatterns().add(item);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {

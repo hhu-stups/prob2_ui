@@ -286,7 +286,7 @@ public class LTLView extends AnchorPane {
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
 		LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-		machine.removeLTLFormula(item);
+		machine.getLTLFormulas().remove(item);
 	}
 	
 	@FXML
@@ -300,7 +300,7 @@ public class LTLView extends AnchorPane {
 	private void removePattern() {
 		Machine machine = currentProject.getCurrentMachine();
 		LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
-		machine.removeLTLPattern(item);
+		machine.getLTLPatterns().remove(item);
 		patternParser.removePattern(item, machine);
 	}
 	
@@ -385,11 +385,11 @@ public class LTLView extends AnchorPane {
 		}
 		data.getFormulas().stream()
 				.filter(formula -> !machine.getLTLFormulas().contains(formula))
-				.forEach(machine::addLTLFormula);
+				.forEach(machine.getLTLFormulas()::add);
 		data.getPatterns().stream()
 				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {
-					machine.addLTLPattern(pattern);
+					machine.getLTLPatterns().add(pattern);
 					patternParser.addPattern(pattern, machine);
 				});
 	}

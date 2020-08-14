@@ -265,28 +265,12 @@ public class Machine implements DescriptionView.Describable {
 		return ltlFormulasProperty().get();
 	}
 	
-	public void addLTLFormula(LTLFormulaItem formula) {
-		ltlFormulas.add(formula);
-	}
-	
-	public void removeLTLFormula(LTLFormulaItem formula) {
-		ltlFormulas.remove(formula);
-	}
-	
 	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
 		return ltlPatterns;
 	}
 	
 	public List<LTLPatternItem> getLTLPatterns() {
 		return ltlPatternsProperty().get();
-	}
-	
-	public void addLTLPattern(LTLPatternItem pattern) {
-		ltlPatterns.add(pattern);
-	}
-	
-	public void removeLTLPattern(LTLPatternItem pattern) {
-		ltlPatterns.remove(pattern);
 	}
 	
 	public ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulasProperty() {
@@ -297,14 +281,6 @@ public class Machine implements DescriptionView.Describable {
 		return symbolicCheckingFormulas.get();
 	}
 	
-	public void addSymbolicCheckingFormula(SymbolicCheckingFormulaItem formula) {
-		symbolicCheckingFormulas.add(formula);
-	}
-	
-	public void removeSymbolicCheckingFormula(SymbolicCheckingFormulaItem formula) {
-		symbolicCheckingFormulas.remove(formula);
-	}
-	
 	public ListProperty<SymbolicAnimationItem> symbolicAnimationFormulasProperty() {
 		return symbolicAnimationFormulas;
 	}
@@ -313,28 +289,12 @@ public class Machine implements DescriptionView.Describable {
 		return symbolicAnimationFormulas.get();
 	}
 	
-	public void addSymbolicAnimationFormula(SymbolicAnimationItem formula) {
-		symbolicAnimationFormulas.add(formula);
-	}
-	
-	public void removeSymbolicAnimationFormula(SymbolicAnimationItem formula) {
-		symbolicAnimationFormulas.remove(formula);
-	}
-	
 	public ListProperty<TestCaseGenerationItem> testCasesProperty() {
 		return testCases;
 	}
 	
 	public List<TestCaseGenerationItem> getTestCases() {
 		return testCases.get();
-	}
-	
-	public void addTestCase(TestCaseGenerationItem item) {
-		testCases.add(item);
-	}
-	
-	public void removeTestCase(TestCaseGenerationItem item) {
-		testCases.remove(item);
 	}
 	
 	public ObservableSet<Path> getTraceFiles() {
@@ -358,14 +318,6 @@ public class Machine implements DescriptionView.Describable {
 	
 	public List<ModelCheckingItem> getModelcheckingItems() {
 		return modelcheckingItems.get();
-	}
-	
-	public void addModelcheckingItem(ModelCheckingItem item) {
-		modelcheckingItems.add(item);
-	}
-	
-	public void removeModelcheckingItem(ModelCheckingItem item) {
-		modelcheckingItems.remove(item);
 	}
 	
 	public SetProperty<Path> tracesProperty() {
