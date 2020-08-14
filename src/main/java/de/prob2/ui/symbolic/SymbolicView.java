@@ -162,10 +162,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	
 	protected abstract void setContextMenu();
 	
-	public void refresh() {
-		tvFormula.refresh();
-	}
-
 	@FXML
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
