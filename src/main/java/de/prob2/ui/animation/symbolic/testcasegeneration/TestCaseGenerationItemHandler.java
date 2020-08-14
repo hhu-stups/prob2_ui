@@ -35,11 +35,6 @@ public class TestCaseGenerationItemHandler {
 		this.testCaseGeneratorCreator = testCaseGeneratorCreator;
 	}
 
-	public void addItem(String name, TestCaseGenerationType type, boolean checking) {
-		TestCaseGenerationItem item = new TestCaseGenerationItem(name, type);
-		addItem(item,checking);
-	}
-
 	public void addItem(int depth, int level, boolean checking) {
 		TestCaseGenerationItem item = new TestCaseGenerationItem(depth, level);
 		addItem(item,checking);

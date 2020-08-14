@@ -35,12 +35,6 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	private TestCaseGenerationType type;
 	
-
-	public TestCaseGenerationItem(String name, TestCaseGenerationType type) {
-		super(name, type.getName(), "");
-		this.type = type;
-		this.additionalInformation = new HashMap<>();
-	}
 	
 	public TestCaseGenerationItem(int maxDepth, int level) {
 		super(getMcdcName(maxDepth, level), TestCaseGenerationType.MCDC.getName(), "");
