@@ -15,9 +15,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
-	private String name;
-	private String description;
-	private String code;
+	private final String name;
+	private final String description;
+	private final String code;
 	private BooleanProperty selected;
 	private final transient ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
 	private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
@@ -68,18 +68,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 
 	public String getDescription() {
 		return description;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
-	public void setCode(String code) {
-		this.code = code;
 	}
 	
 	public String getCode() {
