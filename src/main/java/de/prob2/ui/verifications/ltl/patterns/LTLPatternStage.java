@@ -32,7 +32,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	private void applyPattern() {
 		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
 		String code = editor.call("getValue").toString();
-		LTLPatternItem item = new LTLPatternItem(code, taDescription.getText());
+		LTLPatternItem item = patternParser.parsePattern(taDescription.getText(), code, currentProject.getCurrentMachine());
 		if(handleItem.getHandleType() == HandleType.ADD) {
 			addItem(currentProject.getCurrentMachine(), item);
 		} else {
@@ -41,7 +41,6 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	}
 	
 	private void addItem(Machine machine, LTLPatternItem item) {
-		patternParser.parsePattern(item, machine);
 		if(!machine.getLTLPatterns().contains(item)) {
 			patternParser.addPattern(item, machine);
 			machine.addLTLPattern(item);
@@ -55,7 +54,6 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	private void changeItem(LTLPatternItem item, LTLPatternItem result) {
 		Machine machine = currentProject.getCurrentMachine();
 		patternParser.removePattern(item, machine);
-		patternParser.parsePattern(result, machine);
 		if(!machine.getLTLPatterns().stream()
 				.filter(pattern -> !pattern.equals(item))
 				.collect(Collectors.toList())

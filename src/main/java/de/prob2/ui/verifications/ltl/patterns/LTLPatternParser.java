@@ -29,17 +29,18 @@ public class LTLPatternParser {
 	private LTLPatternParser(final LTLResultHandler resultHandler) {
 		this.resultHandler = resultHandler;
 	}
-		
-	public void parsePattern(LTLPatternItem item, Machine machine) {
-		Pattern pattern = itemToPattern(item);
-		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
-		item.setName(pattern.getName());
+	
+	public LTLPatternItem parsePattern(final String description, final String code, final Machine machine) {
+		final Pattern pattern = makePattern(description, code);
+		final LTLParseListener parseListener = checkDefinition(pattern, machine);
+		final LTLPatternItem item = new LTLPatternItem(pattern.getName(), pattern.getDescription(), pattern.getCode());
+		resultHandler.handlePatternResult(parseListener, item);
+		return item;
 	}
 	
 	public void addPattern(LTLPatternItem item, Machine machine) {
 		Pattern pattern = itemToPattern(item);
 		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
-		item.setName(pattern.getName());
 		machine.getPatternManager().getPatterns().add(pattern);
 	}
 	
@@ -100,12 +101,16 @@ public class LTLPatternParser {
 		}
 	}
 	
-	private Pattern itemToPattern(LTLPatternItem item) {
-		Pattern pattern = new Pattern();
+	private static Pattern makePattern(final String description, final String code) {
+		final Pattern pattern = new Pattern();
 		pattern.setBuiltin(false);
-		pattern.setDescription(item.getDescription());
-		pattern.setCode(item.getCode());
+		pattern.setDescription(description);
+		pattern.setCode(code);
 		return pattern;
+	}
+	
+	private Pattern itemToPattern(LTLPatternItem item) {
+		return makePattern(item.getDescription(), item.getCode());
 	}
 	
 	public void parseMachine(Machine machine) {
