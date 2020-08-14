@@ -72,12 +72,10 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 				.filter(formula -> !formula.equals(item))
 				.collect(Collectors.toList())
 				.contains(result)) {
-			item.setData(result.getName(), result.getDescription(), result.getCode());
-			item.setCounterExample(null);
-			item.setResultItem(null);
+			machine.getLTLFormulas().set(machine.getLTLFormulas().indexOf(item), result);
 			currentProject.setSaved(false);
-			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
-			formulaChecker.checkFormula(item, this);
+			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, result));
+			formulaChecker.checkFormula(result, this);
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}

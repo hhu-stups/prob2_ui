@@ -45,13 +45,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.resultItemProperty().addListener((o, from, to) -> this.checked.set(to == null ? Checked.NOT_CHECKED : to.getChecked()));
 	}
 	
-	public void setData(String name, String description, String code) {
-		reset();
-		setName(name);
-		setDescription(description);
-		setCode(code);
-	}
-		
 	public void reset() {
 		this.setResultItem(null);
 	}

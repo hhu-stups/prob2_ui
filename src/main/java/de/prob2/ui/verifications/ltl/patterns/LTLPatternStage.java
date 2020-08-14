@@ -62,10 +62,10 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 				.filter(pattern -> !pattern.equals(item))
 				.collect(Collectors.toList())
 				.contains(result)) {
-			item.setData(result.getName(), result.getDescription(), result.getCode());
-			patternParser.addPattern(item, machine);
+			machine.getLTLPatterns().set(machine.getLTLPatterns().indexOf(item), result);
+			patternParser.addPattern(result, machine);
 			currentProject.setSaved(false);
-			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
+			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, result));
 			showErrors((LTLCheckingResultItem) result.getResultItem());
 		} else {
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
