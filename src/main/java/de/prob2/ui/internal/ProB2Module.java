@@ -122,6 +122,8 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(LTLData.class, LTLData.JSON_DESERIALIZER)
 			.registerTypeAdapter(SymbolicCheckingFormulaItem.class, SymbolicCheckingFormulaItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(SymbolicAnimationItem.class, SymbolicAnimationItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(TestCaseGenerationItem.McdcInformation.class, TestCaseGenerationItem.McdcInformation.JSON_DESERIALIZER)
+			.registerTypeAdapter(TestCaseGenerationItem.CoveredOperationsInformation.class, TestCaseGenerationItem.CoveredOperationsInformation.JSON_DESERIALIZER)
 			.registerTypeAdapter(TestCaseGenerationItem.class, TestCaseGenerationItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(ModelCheckingItem.class, ModelCheckingItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(Machine.class, Machine.JSON_DESERIALIZER)

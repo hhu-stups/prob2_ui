@@ -1,18 +1,18 @@
 package de.prob2.ui.project;
 
+import java.util.Iterator;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
-
-import java.util.Iterator;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 	ProjectJsonContext() {
@@ -51,24 +51,24 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		final JsonObject additionalInformation = testCaseItem.getAsJsonObject("additionalInformation");
 		final String type = testCaseItem.get("type").getAsString();
 		final String code = testCaseItem.get("code").getAsString();
-		// Old UI versions did not have the additionalInformation map
+		// Old UI versions did not have the additionalInformation field
 		// and instead stored additional information in the code string.
-		// The additionalInformation map may also have been deleted
+		// The additionalInformation field may also have been deleted
 		// when test case generation was separated from symbolic animation
 		// (see moveV0TestCaseSymbolicAnimationItems for details).
-		// In either of these cases, the additionalInformation map will be missing/empty,
+		// In either of these cases, additionalInformation will be missing/empty,
 		// and its contents need to be extracted from the code string.
 		final String[] splitOnSlash = code.replace(" ", "").split("/");
 		final String[] splitFirstOnColon = splitOnSlash[0].split(":");
 		if (TestCaseGenerationType.MCDC.name().equals(type)) {
-			if (!additionalInformation.has(TestCaseGenerationItem.LEVEL)) {
+			if (!additionalInformation.has("level")) {
 				if (!"MCDC".equals(splitFirstOnColon[0])) {
 					throw new JsonParseException("First part of MCDC item code string does not contain level: " + splitOnSlash[0]);
 				}
-				additionalInformation.addProperty(TestCaseGenerationItem.LEVEL, Integer.parseInt(splitFirstOnColon[1]));
+				additionalInformation.addProperty("level", Integer.parseInt(splitFirstOnColon[1]));
 			}
 		} else if (TestCaseGenerationType.COVERED_OPERATIONS.name().equals(type)) {
-			if (!additionalInformation.has(TestCaseGenerationItem.OPERATIONS)) {
+			if (!additionalInformation.has("operations")) {
 				if (!"OPERATION".equals(splitFirstOnColon[0])) {
 					throw new JsonParseException("First part of covered operations item code string does not contain operations: " + splitOnSlash[0]);
 				}
@@ -77,7 +77,7 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 				for (final String operationName : operationNames) {
 					operationNamesJsonArray.add(operationName);
 				}
-				additionalInformation.add(TestCaseGenerationItem.OPERATIONS, operationNamesJsonArray);
+				additionalInformation.add("operations", operationNamesJsonArray);
 			}
 		}
 		if (!testCaseItem.has("maxDepth")) {
@@ -127,9 +127,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 				testCases.add(symbolicAnimationFormula);
 				// Update/fix the type, as determined above.
 				symbolicAnimationFormula.addProperty("type", testCaseGenerationType.name());
-				// In symbolic animation items, the maxDepth value was stored in the additionalInformation map.
+				// In symbolic animation items, the maxDepth value was stored in additionalInformation.
 				// In test case items, it is stored as a regular field.
-				// If the additionalInformation map is missing,
+				// If additionalInformation is missing,
 				// the maxDepth value needs to be extracted from the code field instead.
 				// That case is handled in updateV0TestCaseItem.
 				final JsonElement additionalInformationElement = symbolicAnimationFormula.get("additionalInformation");
