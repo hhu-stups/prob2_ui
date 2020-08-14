@@ -76,22 +76,14 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.getUncoveredOperations().clear();
 	}
 	
-	public Object getAdditionalInformation(String key) {
-		return additionalInformation.get(key);
-	}
-
-	public void putAdditionalInformation(String key, Object value) {
-		additionalInformation.put(key, value);
-	}
-	
 	public int getMcdcLevel() {
 		//An element in the values set of additionalInformation can be from any type. GSON casts an integer to double when saving the project file.
-		return (int)Double.parseDouble(this.getAdditionalInformation(LEVEL).toString());
+		return (int)Double.parseDouble(this.additionalInformation.get(LEVEL).toString());
 	}
 	
 	public List<String> getCoverageOperations() {
 		@SuppressWarnings("unchecked")
-		final List<String> operations = (List<String>)this.getAdditionalInformation(OPERATIONS);
+		final List<String> operations = (List<String>)this.additionalInformation.get(OPERATIONS);
 		return operations;
 	}
 	
