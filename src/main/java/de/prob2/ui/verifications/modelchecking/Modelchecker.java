@@ -15,7 +15,6 @@ import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
-import de.prob.check.LTLOk;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
@@ -92,7 +91,7 @@ public class Modelchecker {
 
 	private static ModelCheckingJobItem makeJobItem(final int index, final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final StateSpace stateSpace) {
 		final Checked checked;
-		if (result instanceof ModelCheckOk || result instanceof LTLOk) {
+		if (result instanceof ModelCheckOk) {
 			checked = Checked.SUCCESS;
 		} else if (result instanceof ITraceDescription) {
 			checked = Checked.FAIL;
