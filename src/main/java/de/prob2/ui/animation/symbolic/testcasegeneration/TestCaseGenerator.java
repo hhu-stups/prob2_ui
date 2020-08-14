@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
@@ -31,18 +30,15 @@ public class TestCaseGenerator {
 	
 	private final CurrentProject currentProject;
 	
-	private final Injector injector;
-
 	private final TestCaseGenerationResultHandler resultHandler;
 	
 	private final ListProperty<Thread> currentJobThreads;
 
 	@Inject
-	public TestCaseGenerator(final CurrentTrace currentTrace, final CurrentProject currentProject, final TestCaseGenerationResultHandler resultHandler, final DisablePropertyController disablePropertyController, final Injector injector) {
+	public TestCaseGenerator(final CurrentTrace currentTrace, final CurrentProject currentProject, final TestCaseGenerationResultHandler resultHandler, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
-		this.injector = injector;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
@@ -60,7 +56,6 @@ public class TestCaseGenerator {
 			final Object finalResult = result;
 			Platform.runLater(() -> {
 				resultHandler.handleTestCaseGenerationResult(currentItem, finalResult, checkAll);
-				updateMachine();
 			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "Test Case Generation Thread");
@@ -76,10 +71,6 @@ public class TestCaseGenerator {
 		}
 		currentTrace.getStateSpace().sendInterrupt();
 		currentJobThreads.removeAll(removedThreads);
-	}
-	
-	public void updateMachine() {
-		injector.getInstance(TestCaseGenerationView.class).refresh();
 	}
 	
 	private TestCaseGenerationItem getItemIfAlreadyExists(TestCaseGenerationItem item) {

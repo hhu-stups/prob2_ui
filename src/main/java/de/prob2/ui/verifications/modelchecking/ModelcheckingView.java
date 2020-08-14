@@ -26,6 +26,7 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -144,14 +145,13 @@ public final class ModelcheckingView extends ScrollPane {
 	private Callback<TableColumn.CellDataFeatures<ModelCheckingItem, Boolean>, ObservableValue<Boolean>> makeOptionValueFactory(final ModelCheckingOptions.Options option, boolean negated) {
 		return features -> {
 			BooleanBinding binding = Bindings.createBooleanBinding(
-					() -> features.getValue().getOptions().getPrologOptions().contains(option),
-					features.getValue().optionsProperty());
+					() -> features.getValue().getOptions().getPrologOptions().contains(option));
 			return negated ? binding.not() : binding;
 		};
 	}
 	
 	private void setBindings() {
-		addModelCheckButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noModelcheckingItems = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			if (to != null) {
@@ -161,7 +161,7 @@ public final class ModelcheckingView extends ScrollPane {
 				noModelcheckingItems.set(true);
 			}
 		});
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(noModelcheckingItems.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
+		checkMachineButton.disableProperty().bind(currentTrace.isNull().or(noModelcheckingItems.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -189,8 +189,8 @@ public final class ModelcheckingView extends ScrollPane {
 		indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
 		messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
 
-		tvItems.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		tvChecks.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		tvItems.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		tvChecks.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 
 
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
@@ -231,16 +231,13 @@ public final class ModelcheckingView extends ScrollPane {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
 			if(item.getItems().isEmpty()) {
-				item.setOptions(item.getOptions().recheckExisting(true));
+				checker.checkItem(item, true, false);
 			} else if (item.getItems()
 					.stream()
 					.filter(job -> job.getChecked() == Checked.SUCCESS)
 					.collect(Collectors.toList()).isEmpty()) {
-				item.setOptions(item.getOptions().recheckExisting(false));
-			} else {
-				return;
+				checker.checkItem(item, false, false);
 			}
-			checker.checkItem(item, false);
 		}
 	}
 	
@@ -252,33 +249,37 @@ public final class ModelcheckingView extends ScrollPane {
 			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				item.setOptions(item.getOptions().recheckExisting(true));
-				checker.checkItem(item, false);
+				checker.checkItem(item, true, false);
 			});
 			
-			BooleanBinding disableCheckProperty = Bindings.createBooleanBinding(
-					() -> row.isEmpty() || row.getItem() == null || !row.getItem().getItems().isEmpty(), row.emptyProperty(), row.itemProperty());
-			checkItem.disableProperty().bind(disableCheckProperty);
-			
-			row.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					checkItem.disableProperty().bind(disableCheckProperty
-							.or(checker.runningProperty())
-							.or(to.selectedProperty().not()));
+			row.itemProperty().addListener((o, from, to) -> {
+				if (to != null) {
+					checkItem.disableProperty().bind(to.itemsProperty().emptyProperty().not()
+						.or(checker.runningProperty())
+						.or(to.selectedProperty().not()));
+				} else {
+					checkItem.disableProperty().unbind();
+					checkItem.setDisable(true);
 				}
 			});
 			
 			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
 			searchForNewErrorsItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				item.setOptions(item.getOptions().recheckExisting(false));
-				checker.checkItem(item, false);
+				checker.checkItem(item, false, false);
 			});
-			BooleanBinding disableSearchForNewErrorsProperty = Bindings.createBooleanBinding(
-					() -> row.isEmpty() || row.getItem() == null || row.getItem().getItems().isEmpty() || 
-					!row.getItem().getItems().stream().filter(item -> item.getChecked() == Checked.SUCCESS).collect(Collectors.toList()).isEmpty(), 
-					row.emptyProperty(), row.itemProperty());
-			searchForNewErrorsItem.disableProperty().bind(disableSearchForNewErrorsProperty);
+			
+			row.itemProperty().addListener((o, from, to) -> {
+				if (to != null) {
+					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().isEmpty() || to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
+					searchForNewErrorsItem.disableProperty().bind(anySucceeded
+						.or(checker.runningProperty())
+						.or(to.selectedProperty().not()));
+				} else {
+					searchForNewErrorsItem.disableProperty().unbind();
+					searchForNewErrorsItem.setDisable(true);
+				}
+			});
 			
 			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeItem());
@@ -329,10 +330,7 @@ public final class ModelcheckingView extends ScrollPane {
 	public void checkMachine() {
 		currentProject.currentMachineProperty().get().getModelcheckingItems().stream()
 			.filter(item -> item.getItems().isEmpty())
-			.forEach(item -> {
-				item.setOptions(item.getOptions().recheckExisting(true));
-				checker.checkItem(item, true);
-			});
+			.forEach(item -> checker.checkItem(item, true, true));
 	}
 	
 	@FXML

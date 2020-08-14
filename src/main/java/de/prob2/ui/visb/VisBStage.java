@@ -262,7 +262,7 @@ public class VisBStage extends Stage {
 	 */
 	private void loadVisBFile() {
 		clear();
-		if(!currentProject.exists() || currentProject.getCurrentMachine() == null){
+		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
 			alert(new VisBException(),  "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
 			return;

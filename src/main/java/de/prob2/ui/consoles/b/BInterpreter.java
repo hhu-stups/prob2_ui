@@ -120,7 +120,10 @@ public class BInterpreter implements Executable {
 		if(source.replace(" ", "").isEmpty()) {
 			return new ConsoleExecResult("","", ConsoleExecResultType.PASSED);
 		}
-		final Trace trace = currentTrace.exists() ? currentTrace.get() : this.getDefaultTrace();
+		Trace trace = currentTrace.get();
+		if (trace == null) {
+			trace = this.getDefaultTrace();
+		}
 		final IEvalElement formula;
 		try {
 			formula = trace.getModel().parseFormula(source, FormulaExpand.EXPAND);

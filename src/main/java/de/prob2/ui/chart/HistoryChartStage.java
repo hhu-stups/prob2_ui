@@ -13,6 +13,7 @@ import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
+import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryItem;
@@ -307,9 +308,10 @@ public final class HistoryChartStage extends Stage {
 			return;
 		}
 		
-		if (this.currentTrace.exists()) {
+		final Trace trace = currentTrace.get();
+		if (trace != null) {
 			final HistoryItem startItem = this.startChoiceBox.getValue();
-			final List<HistoryItem> items = HistoryItem.itemsForTrace(currentTrace.get());
+			final List<HistoryItem> items = HistoryItem.itemsForTrace(trace);
 			this.startChoiceBox.getItems().setAll(items);
 			this.startChoiceBox.setValue(startItem == null ? items.get(items.size()-1) : startItem);
 		} else {
@@ -331,10 +333,11 @@ public final class HistoryChartStage extends Stage {
 		}
 
 		int elementCounter = 0;
-		if (this.currentTrace.exists()) {
+		final Trace trace = this.currentTrace.get();
+		if (trace != null) {
 			final int startIndex = this.startChoiceBox.getValue().getIndex();
 
-			TraceElement element = this.currentTrace.get().getCurrent();
+			TraceElement element = trace.getCurrent();
 			boolean showErrors = true;
 			while (element != null && element.getIndex() >= startIndex) {
 				tryEvalFormulas(newDatas, elementCounter, element, showErrors);

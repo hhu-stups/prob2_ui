@@ -19,6 +19,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;
@@ -139,12 +140,11 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	private final AnimationSelector animationSelector;
 	private final StageManager stageManager;
 	
-	private final ReadOnlyBooleanProperty exists;
 	private final BooleanProperty animatorBusy;
 
 	private final CurrentState currentState;
 	private final ROObjProp<StateSpace> stateSpace;
-	private final ROObjProp<AbstractModel> model;
+	private final CurrentModel model;
 
 	private final ReadOnlyBooleanProperty canGoBack;
 	private final ReadOnlyBooleanProperty canGoForward;
@@ -161,13 +161,11 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		this.stageManager = stageManager;
 		this.animationSelector.registerAnimationChangeListener(new AnimationChangeListener());
 		
-		this.exists = new ROBoolProp("exists", trace -> true, false);
-
 		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
 
 		this.currentState = new CurrentState(this);
 		this.stateSpace = new ROObjProp<>("stateSpace", Trace::getStateSpace, null);
-		this.model = new ROObjProp<>("model", Trace::getModel, null);
+		this.model = new CurrentModel(this);
 
 		this.canGoBack = new ROBoolProp("canGoBack", Trace::canGoBack, false);
 		this.canGoForward = new ROBoolProp("canGoForward", Trace::canGoForward, false);
@@ -226,18 +224,24 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 * (i. e. is not null).
 	 * 
 	 * @return a boolean property indicating whether a current trace exists
+	 * 
+	 * @deprecated Use {@link #isNotNull()} instead.
 	 */
-	public ReadOnlyBooleanProperty existsProperty() {
-		return this.exists;
+	@Deprecated
+	public BooleanBinding existsProperty() {
+		return this.isNotNull();
 	}
 
 	/**
 	 * Return whether a current trace exists (i. e. is not null).
 	 * 
 	 * @return whether a current trace exists
+	 * 
+	 * @deprecated Use a {@code != null} check instead.
 	 */
+	@Deprecated
 	public boolean exists() {
-		return this.existsProperty().get();
+		return this.get() != null;
 	}
 
 	/**
@@ -304,7 +308,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 *
 	 * @return a read-only property holding the current {@link Trace}'s {@link AbstractModel}
 	 */
-	public ReadOnlyObjectProperty<AbstractModel> modelProperty() {
+	public CurrentModel modelProperty() {
 		return this.model;
 	}
 

@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.ClassicalBParser;
@@ -24,7 +23,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
-import de.prob2.ui.verifications.ltl.LTLView;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -49,16 +47,13 @@ public class LTLFormulaChecker {
 	
 	private final LTLResultHandler resultHandler;
 	
-	private final Injector injector;
-	
 	@Inject
 	private LTLFormulaChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final LTLResultHandler resultHandler, final Injector injector) {
+			final LTLResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
-		this.injector = injector;
 	}
 	
 	public void checkMachine() {
@@ -85,7 +80,6 @@ public class LTLFormulaChecker {
 		List<LTLMarker> errorMarkers = new ArrayList<>();
 		Object result = getResult(parser, errorMarkers, item);
 		resultHandler.handleFormulaResult(item, errorMarkers, result, currentTrace.getStateSpace());
-		Platform.runLater(() -> injector.getInstance(LTLView.class).refresh());
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {

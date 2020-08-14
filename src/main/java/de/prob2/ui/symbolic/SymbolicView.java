@@ -131,8 +131,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	protected abstract void removeFormula(Machine machine, T item);
 	
 	protected void setBindings() {
-		final BooleanBinding partOfDisableBinding = currentTrace.existsProperty().not()
-				.or(Bindings.createBooleanBinding(() -> currentTrace.getModel() == null || currentTrace.getModel().getFormalismType() != FormalismType.B, currentTrace.modelProperty()));
+		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noFormulas = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
@@ -154,7 +153,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvFormula.setOnMouseClicked(e-> {
 			T item = tvFormula.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && item != null && currentTrace.exists()) {
+			if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
 				formulaHandler.handleItem(item, false);
 			}
 		});
@@ -171,7 +170,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
 		formulaHandler.handleMachine(machine);
-		refresh();
 	}
 	
 	protected void removeFormula() {

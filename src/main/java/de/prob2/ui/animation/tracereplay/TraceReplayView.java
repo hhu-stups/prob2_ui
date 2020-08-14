@@ -159,7 +159,7 @@ public class TraceReplayView extends ScrollPane {
 				noTraces.set(true);
 			}
 		});
-		checkButton.disableProperty().bind(currentTrace.existsProperty().not().or(noTraces.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
+		checkButton.disableProperty().bind(currentTrace.isNull().or(noTraces.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
 	}
 

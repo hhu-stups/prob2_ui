@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutor;
 import de.prob2.ui.symbolic.SymbolicItem;
 
@@ -21,10 +20,6 @@ public class SymbolicFormulaChecker extends SymbolicExecutor {
 	public SymbolicFormulaChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
 							final SymbolicCheckingResultHandler resultHandler, final Injector injector) {
 		super(currentTrace, currentProject, resultHandler, injector);
-	}
-	
-	public void updateMachine(Machine machine) {
-		injector.getInstance(SymbolicCheckingView.class).refresh();
 	}
 	
 	@Override

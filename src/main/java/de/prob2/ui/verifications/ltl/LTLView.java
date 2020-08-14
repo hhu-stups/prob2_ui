@@ -175,9 +175,8 @@ public class LTLView extends AnchorPane {
 	private void setOnItemClicked() {
 		tvFormula.setOnMouseClicked(e-> {
 			LTLFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.exists()) {
+			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
 				checker.checkFormula(item);
-				tvFormula.refresh();
 			}
 		});
 	}
@@ -205,7 +204,6 @@ public class LTLView extends AnchorPane {
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				checker.checkFormula(row.getItem());
-				tvFormula.refresh();
 			});
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -259,7 +257,7 @@ public class LTLView extends AnchorPane {
 		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-		addMenuButton.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		addMenuButton.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		final BooleanProperty noLtlFormulas = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
@@ -270,11 +268,11 @@ public class LTLView extends AnchorPane {
 				noLtlFormulas.set(true);
 			}
 		});
-		checkMachineButton.disableProperty().bind(currentTrace.existsProperty().not().or(noLtlFormulas.or(formulaSelectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
-		saveLTLButton.disableProperty().bind(noLtlFormulas.or(currentTrace.existsProperty().not().or(formulaSelectAll.selectedProperty().not())));
-		loadLTLButton.disableProperty().bind(currentTrace.existsProperty().not());
+		checkMachineButton.disableProperty().bind(currentTrace.isNull().or(noLtlFormulas.or(formulaSelectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
+		saveLTLButton.disableProperty().bind(noLtlFormulas.or(currentTrace.isNull().or(formulaSelectAll.selectedProperty().not())));
+		loadLTLButton.disableProperty().bind(currentTrace.isNull());
 
-		tvFormula.disableProperty().bind(currentTrace.existsProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		tvFormula.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 	}
 	
 	@FXML
@@ -283,7 +281,6 @@ public class LTLView extends AnchorPane {
 		loadLTLStage(formulaStage, null);
 		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.ADD, null));
 		formulaStage.showAndWait();
-		tvFormula.refresh();
 	}
 	
 	private void removeFormula() {
@@ -337,7 +334,6 @@ public class LTLView extends AnchorPane {
 	@FXML
 	public void checkMachine() {
 		checker.checkMachine();
-		refresh();
 	}
 	
 	@FXML
@@ -400,9 +396,4 @@ public class LTLView extends AnchorPane {
 					patternParser.addPattern(pattern, machine);
 				});
 	}
-
-	public void refresh() {
-		tvFormula.refresh();	
-	}
-
 }

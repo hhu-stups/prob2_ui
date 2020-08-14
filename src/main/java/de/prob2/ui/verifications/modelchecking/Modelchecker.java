@@ -63,13 +63,13 @@ public class Modelchecker {
 		stopActions.add(this.executor::shutdownNow);
 	}
 
-	public void checkItem(ModelCheckingItem item, boolean checkAll) {
+	public void checkItem(ModelCheckingItem item, boolean recheckExisting, boolean checkAll) {
 		if(!item.selected()) {
 			return;
 		}
 
 		final FutureTask<Void> task = new FutureTask<Void>(() -> {
-			startModelchecking(item, checkAll);
+			startModelchecking(item, recheckExisting, checkAll);
 			return null;
 		}) {
 			@Override
@@ -108,7 +108,7 @@ public class Modelchecker {
 		return new ModelCheckingJobItem(index, checked, result.getMessage(), timeElapsed, stats, stateSpace, traceDescription);
 	}
 
-	private void startModelchecking(ModelCheckingItem item, boolean checkAll) {
+	private void startModelchecking(ModelCheckingItem item, boolean recheckExisting, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final ModelcheckingView modelcheckingView = injector.getInstance(ModelcheckingView.class);
 		final IModelCheckListener listener = new IModelCheckListener() {
@@ -133,7 +133,7 @@ public class Modelchecker {
 				Platform.runLater(() -> showResult(item, jobItem));
 			}
 		};
-		IModelCheckJob job = buildModelCheckJob(stateSpace, item, listener);
+		IModelCheckJob job = buildModelCheckJob(stateSpace, item, recheckExisting, listener);
 
 		try {
 			job.call();
@@ -143,8 +143,8 @@ public class Modelchecker {
 		}
 	}
 
-	private IModelCheckJob buildModelCheckJob(StateSpace stateSpace, ModelCheckingItem item, IModelCheckListener listener) {
-		ConsistencyChecker checker = new ConsistencyChecker(stateSpace, item.getOptions(), null, listener);
+	private IModelCheckJob buildModelCheckJob(StateSpace stateSpace, ModelCheckingItem item, boolean recheckExisting, IModelCheckListener listener) {
+		ConsistencyChecker checker = new ConsistencyChecker(stateSpace, item.getOptions().recheckExisting(recheckExisting), null, listener);
 		if (!"-".equals(item.getNodesLimit())) {
 			checker.setNodesLimit(Integer.parseInt(item.getNodesLimit()));
 		}
