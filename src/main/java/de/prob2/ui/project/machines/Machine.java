@@ -70,9 +70,7 @@ public class Machine implements DescriptionView.Describable {
 
 	public Machine(String name, String description, Path location) {
 		this.name = new SimpleStringProperty(this, "name", name);
-		this.nameProperty().addListener(o -> this.setChanged(true));
 		this.description = new SimpleStringProperty(this, "description", description);
-		this.descriptionProperty().addListener(o -> this.setChanged(true));
 		this.location = location;
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
@@ -89,9 +87,7 @@ public class Machine implements DescriptionView.Describable {
 	private Machine(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
 		this.name = JsonManager.checkDeserialize(context, object, "name", StringProperty.class);
-		this.nameProperty().addListener(o -> this.setChanged(true));
 		this.description = JsonManager.checkDeserialize(context, object, "description", StringProperty.class);
-		this.descriptionProperty().addListener(o -> this.setChanged(true));
 		this.location = JsonManager.checkDeserialize(context, object, "location", Path.class);
 		this.lastUsedPreferenceName = JsonManager.checkDeserialize(context, object, "lastUsedPreferenceName", StringProperty.class);
 		this.ltlFormulas = JsonManager.checkDeserialize(context, object, "ltlFormulas", new TypeToken<ListProperty<LTLFormulaItem>>() {}.getType());
@@ -144,6 +140,9 @@ public class Machine implements DescriptionView.Describable {
 	}
 	
 	private void initListeners() {
+		this.nameProperty().addListener(o -> this.setChanged(true));
+		this.descriptionProperty().addListener(o -> this.setChanged(true));
+		
 		addCheckingStatusListener(this.ltlFormulasProperty(), this.ltlStatusProperty());
 		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolicCheckingStatusProperty());
 		addCheckingStatusListener(this.modelcheckingItemsProperty(), this.modelcheckingStatusProperty());
