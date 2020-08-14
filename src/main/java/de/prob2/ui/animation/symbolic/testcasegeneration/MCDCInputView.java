@@ -38,8 +38,7 @@ public class MCDCInputView extends VBox {
 	}
 
 	public void setItem(TestCaseGenerationItem item) {
-		//An element in the values set of additionalInformation can be from any type. GSON casts an integer to double when saving the project file.
-		levelField.setText(String.valueOf((int) Double.parseDouble(item.getAdditionalInformation(TestCaseGenerationItem.LEVEL).toString())));
+		levelField.setText(String.valueOf(item.getMcdcLevel()));
 		depthField.setText(String.valueOf(item.getMaxDepth()));
 	}
 
