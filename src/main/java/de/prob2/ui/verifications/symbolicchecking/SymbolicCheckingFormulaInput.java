@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -17,11 +16,9 @@ import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
-import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.symbolic.SymbolicView;
 
 import javafx.fxml.FXML;
-
 
 @FXMLInjected
 @Singleton
@@ -43,13 +40,12 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 	protected boolean updateFormula(SymbolicCheckingFormulaItem item, SymbolicView<SymbolicCheckingFormulaItem> view, SymbolicChoosingStage<SymbolicCheckingFormulaItem> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractFormula(choosingStage);
-		SymbolicItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
+		final SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
 		if(choosingStage.getExecutionType() == SymbolicExecutionType.CHECK_ALL_OPERATIONS || (choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null)) {
 			return true;
 		}
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
-			SymbolicExecutionType type = choosingStage.getExecutionType();
-			item.setData(formula, type.getName(), formula, type);
+			currentMachine.getSymbolicCheckingFormulas().set(currentMachine.getSymbolicCheckingFormulas().indexOf(item), newItem);
 			view.refresh();
 			return true;
 		}

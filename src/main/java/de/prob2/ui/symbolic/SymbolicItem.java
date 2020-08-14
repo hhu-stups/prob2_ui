@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
 
 public abstract class SymbolicItem extends AbstractCheckableItem {
 	
-	private SymbolicExecutionType type;
+	private final SymbolicExecutionType type;
 
 	public SymbolicItem(String name, String code, SymbolicExecutionType type) {
 		super(name, type.getName(), code);
@@ -30,10 +30,6 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 		this.type = JsonManager.checkDeserialize(context, object, "type", SymbolicExecutionType.class);
 	}
 	
-	public void setType(SymbolicExecutionType type) {
-		this.type = type;
-	}
-	
 	public SymbolicExecutionType getType() {
 		return type;
 	}
@@ -42,12 +38,4 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 	public String toString() {
 		return String.join(" ", this.getName(), this.getCode(), this.getType().name());
 	}
-	
-	
-	public void setData(String name, String description, String code, SymbolicExecutionType type) {
-		super.setData(name, description, code);
-		this.setType(type);
-	}
-	
-
 }
