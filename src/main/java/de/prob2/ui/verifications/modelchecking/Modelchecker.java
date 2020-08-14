@@ -15,7 +15,6 @@ import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
-import de.prob.check.ModelCheckOk;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
@@ -23,7 +22,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -89,24 +87,6 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
-	private static ModelCheckingJobItem makeJobItem(final int index, final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final StateSpace stateSpace) {
-		final Checked checked;
-		if (result instanceof ModelCheckOk) {
-			checked = Checked.SUCCESS;
-		} else if (result instanceof ITraceDescription) {
-			checked = Checked.FAIL;
-		} else {
-			checked = Checked.TIMEOUT;
-		}
-		final ITraceDescription traceDescription;
-		if (result instanceof ITraceDescription) {
-			traceDescription = (ITraceDescription)result;
-		} else {
-			traceDescription = null;
-		}
-		return new ModelCheckingJobItem(index, checked, result.getMessage(), timeElapsed, stats, stateSpace, traceDescription);
-	}
-
 	private void startModelchecking(ModelCheckingItem item, boolean recheckExisting, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final ModelcheckingView modelcheckingView = injector.getInstance(ModelcheckingView.class);
@@ -125,8 +105,8 @@ public class Modelchecker {
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
-				final ModelCheckingJobItem jobItem = makeJobItem(item.getItems().size() + 1, result, timeElapsed, stats, stateSpace);
-				if (!checkAll && jobItem.getTraceDescription() != null) {
+				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(item.getItems().size() + 1, result, timeElapsed, stats, stateSpace);
+				if (!checkAll && jobItem.getResult() instanceof ITraceDescription) {
 					currentTrace.set(jobItem.getTrace());
 				}
 				Platform.runLater(() -> showResult(item, jobItem));

@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
+import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -301,7 +302,7 @@ public final class ModelcheckingView extends ScrollPane {
 				injector.getInstance(CurrentTrace.class).set(item.getTrace());
 			});
 			showTraceToErrorItem.disableProperty().bind(Bindings.createBooleanBinding(
-					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || row.getItem().getTraceDescription() == null,
+					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription),
 					row.emptyProperty(), row.itemProperty()));
 			
 			row.contextMenuProperty().bind(

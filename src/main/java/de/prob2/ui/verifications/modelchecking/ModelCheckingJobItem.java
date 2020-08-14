@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import de.prob.check.IModelCheckingResult;
+import de.prob.check.ModelCheckOk;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
@@ -8,22 +10,28 @@ import de.prob2.ui.verifications.Checked;
 
 public class ModelCheckingJobItem {
 	private final int index;
+	private final IModelCheckingResult result;
 	private final Checked checked;
-	private final String message;
 	private final long timeElapsed;
 	private final StateSpaceStats stats;
 	private final StateSpace stateSpace;
-	private final ITraceDescription traceDescription;
 	private Trace trace;
 	
-	public ModelCheckingJobItem(final int index, final Checked checked, final String message, final long timeElapsed, final StateSpaceStats stats, final StateSpace stateSpace, final ITraceDescription traceDescription) {
+	public ModelCheckingJobItem(final int index, final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final StateSpace stateSpace) {
 		this.index = index;
-		this.checked = checked;
-		this.message = message;
+		this.result = result;
+		
+		if (result instanceof ModelCheckOk) {
+			this.checked = Checked.SUCCESS;
+		} else if (result instanceof ITraceDescription) {
+			this.checked = Checked.FAIL;
+		} else {
+			this.checked = Checked.TIMEOUT;
+		}
+		
 		this.timeElapsed = timeElapsed;
 		this.stats = stats;
 		this.stateSpace = stateSpace;
-		this.traceDescription = traceDescription;
 		this.trace = null;
 	}
 	
@@ -31,12 +39,16 @@ public class ModelCheckingJobItem {
 		return index;
 	}
 	
+	public IModelCheckingResult getResult() {
+		return result;
+	}
+	
 	public Checked getChecked() {
 		return checked;
 	}
 	
 	public String getMessage() {
-		return message;
+		return this.getResult().getMessage();
 	}
 	
 	public long getTimeElapsed() {
@@ -51,13 +63,9 @@ public class ModelCheckingJobItem {
 		return stateSpace;
 	}
 	
-	public ITraceDescription getTraceDescription() {
-		return traceDescription;
-	}
-	
 	public Trace getTrace() {
-		if (this.trace == null && this.getTraceDescription() != null) {
-			this.trace = this.getTraceDescription().getTrace(this.getStateSpace());
+		if (this.trace == null && this.getResult() instanceof ITraceDescription) {
+			this.trace = ((ITraceDescription)this.getResult()).getTrace(this.getStateSpace());
 		}
 		
 		return trace;
