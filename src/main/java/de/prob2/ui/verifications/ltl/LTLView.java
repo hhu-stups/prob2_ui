@@ -295,7 +295,6 @@ public class LTLView extends AnchorPane {
 		loadLTLStage(patternStage, null);
 		patternStage.setHandleItem(new LTLHandleItem<>(LTLHandleItem.HandleType.ADD, null));
 		patternStage.showAndWait();
-		tvPattern.refresh();
 	}
 	
 	private void removePattern() {
@@ -311,7 +310,6 @@ public class LTLView extends AnchorPane {
 		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		formulaStage.showAndWait();
 		formulaStage.clear();
-		tvFormula.refresh();
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
@@ -320,7 +318,6 @@ public class LTLView extends AnchorPane {
 		patternStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		patternStage.showAndWait();
 		patternStage.clear();
-		tvPattern.refresh();
 	}
 
 	private void loadLTLStage(LTLItemStage<?> stage, AbstractCheckableItem item) {
