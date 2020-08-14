@@ -66,15 +66,15 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	public static final JsonDeserializer<TestCaseGenerationItem> JSON_DESERIALIZER = TestCaseGenerationItem::new;
 	
-	private int maxDepth;
+	private final int maxDepth;
 	
 	private final transient ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 	private final transient ObservableList<TraceInformationItem> traceInformation = FXCollections.observableArrayList();
 	private final transient ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList();
 	
-	private AdditionalInformation additionalInformation;
+	private final AdditionalInformation additionalInformation;
 	
-	private TestCaseGenerationType type;
+	private final TestCaseGenerationType type;
 	
 	
 	public TestCaseGenerationItem(int maxDepth, int level) {
@@ -151,20 +151,6 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	public ObservableList<TraceInformationItem> getUncoveredOperations() {
 		return this.uncoveredOperations;
-	}
-	
-	public void setData(final int maxDepth, final int level) {
-		this.setData(getMcdcName(maxDepth, level), TestCaseGenerationType.MCDC.getName(), "");
-		this.type = TestCaseGenerationType.MCDC;
-		this.maxDepth = maxDepth;
-		this.additionalInformation = new McdcInformation(level);
-	}
-	
-	public void setData(final int maxDepth, final List<String> operations) {
-		this.setData(getCoveredOperationsName(maxDepth, operations), TestCaseGenerationType.COVERED_OPERATIONS.getName(), "");
-		this.type = TestCaseGenerationType.COVERED_OPERATIONS;
-		this.maxDepth = maxDepth;
-		this.additionalInformation = new CoveredOperationsInformation(operations);
 	}
 	
 	@Override

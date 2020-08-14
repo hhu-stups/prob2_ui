@@ -80,13 +80,7 @@ public class TestCaseGenerationInput extends VBox {
 		}
 		if(!currentMachine.getTestCases().contains(newItem)) {
 			if(valid) {
-				if (type == TestCaseGenerationType.MCDC) {
-					item.setData(maxDepth, Integer.parseInt(mcdcInputView.getLevel()));
-				} else if (type == TestCaseGenerationType.COVERED_OPERATIONS) {
-					item.setData(maxDepth, operationCoverageInputView.getOperations());
-				} else {
-					throw new AssertionError("Unhandled type: " + type);
-				}
+				currentMachine.getTestCases().set(currentMachine.getTestCases().indexOf(item), newItem);
 				view.refresh();
 			}
 			return true;
