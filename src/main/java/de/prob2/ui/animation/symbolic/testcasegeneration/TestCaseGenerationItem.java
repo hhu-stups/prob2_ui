@@ -42,14 +42,8 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.additionalInformation = new HashMap<>();
 	}
 	
-	public TestCaseGenerationItem(String name, TestCaseGenerationType type, Map<String, Object> additionalInformation) {
-		super(name, type.getName(), "");
-		this.type = type;
-		this.additionalInformation = additionalInformation;
-	}
-	
 	public TestCaseGenerationItem(int maxDepth, int level) {
-		super("MCDC:" + level + "/" + "DEPTH:" + maxDepth, TestCaseGenerationType.MCDC.getName(), "");
+		super(getMcdcName(maxDepth, level), TestCaseGenerationType.MCDC.getName(), "");
 		this.type = TestCaseGenerationType.MCDC;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new HashMap<>();
@@ -57,7 +51,7 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	}
 
 	public TestCaseGenerationItem(int maxDepth, List<String> operations) {
-		super("OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + maxDepth, TestCaseGenerationType.COVERED_OPERATIONS.getName(), "");
+		super(getCoveredOperationsName(maxDepth, operations), TestCaseGenerationType.COVERED_OPERATIONS.getName(), "");
 		this.type = TestCaseGenerationType.COVERED_OPERATIONS;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new HashMap<>();
@@ -70,6 +64,14 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.maxDepth = JsonManager.checkDeserialize(context, object, "maxDepth", int.class);
 		this.additionalInformation = JsonManager.checkDeserialize(context, object, "additionalInformation", new TypeToken<Map<String, Object>>() {}.getType());
 		this.type = JsonManager.checkDeserialize(context, object, "type", TestCaseGenerationType.class);
+	}
+	
+	private static String getMcdcName(final int maxDepth, final int level) {
+		return "MCDC:" + level + "/" + "DEPTH:" + maxDepth;
+	}
+	
+	private static String getCoveredOperationsName(final int maxDepth, final List<String> operations) {
+		return "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + maxDepth;
 	}
 	
 	@Override
@@ -123,11 +125,20 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		return this.uncoveredOperations;
 	}
 	
-	public void setData(String name, String description, String code, TestCaseGenerationType type, int maxDepth, Map<String, Object> additionalInformation) {
-		super.setData(name, description, code);
-		this.type = type;
+	public void setData(final int maxDepth, final int level) {
+		this.setData(getMcdcName(maxDepth, level), TestCaseGenerationType.MCDC.getName(), "");
+		this.type = TestCaseGenerationType.MCDC;
 		this.maxDepth = maxDepth;
-		this.additionalInformation = additionalInformation;
+		this.additionalInformation.clear();
+		this.additionalInformation.put(LEVEL, level);
+	}
+	
+	public void setData(final int maxDepth, final List<String> operations) {
+		this.setData(getCoveredOperationsName(maxDepth, operations), TestCaseGenerationType.COVERED_OPERATIONS.getName(), "");
+		this.type = TestCaseGenerationType.COVERED_OPERATIONS;
+		this.maxDepth = maxDepth;
+		this.additionalInformation.clear();
+		this.additionalInformation.put(OPERATIONS, operations);
 	}
 	
 	@Override

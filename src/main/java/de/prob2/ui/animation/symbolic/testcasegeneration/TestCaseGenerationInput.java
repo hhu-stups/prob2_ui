@@ -67,15 +67,26 @@ public class TestCaseGenerationInput extends VBox {
 	
 	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationChoosingStage choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		String formula = extractItem(choosingStage);
 		TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
 		int maxDepth = Integer.parseInt(testCaseGenerationSettingsHandler.extractDepth(choosingStage, mcdcInputView, operationCoverageInputView));
-		Map<String, Object> additionalInformation = testCaseGenerationSettingsHandler.extractAdditionalInformation(choosingStage, mcdcInputView, operationCoverageInputView);
 		boolean valid = testCaseGenerationSettingsHandler.isValid(choosingStage, mcdcInputView, operationCoverageInputView);
-		TestCaseGenerationItem newItem = new TestCaseGenerationItem(formula, type, additionalInformation);
+		TestCaseGenerationItem newItem;
+		if (type == TestCaseGenerationType.MCDC) {
+			newItem = new TestCaseGenerationItem(maxDepth, Integer.parseInt(mcdcInputView.getLevel()));
+		} else if (type == TestCaseGenerationType.COVERED_OPERATIONS) {
+			newItem = new TestCaseGenerationItem(maxDepth, operationCoverageInputView.getOperations());
+		} else {
+			throw new AssertionError("Unhandled type: " + type);
+		}
 		if(!currentMachine.getTestCases().contains(newItem)) {
 			if(valid) {
-				item.setData(formula, type.getName(), "", type, maxDepth, additionalInformation);
+				if (type == TestCaseGenerationType.MCDC) {
+					item.setData(maxDepth, Integer.parseInt(mcdcInputView.getLevel()));
+				} else if (type == TestCaseGenerationType.COVERED_OPERATIONS) {
+					item.setData(maxDepth, operationCoverageInputView.getOperations());
+				} else {
+					throw new AssertionError("Unhandled type: " + type);
+				}
 				view.refresh();
 			}
 			return true;
@@ -174,22 +185,6 @@ public class TestCaseGenerationInput extends VBox {
 				break;
 		}
 		injector.getInstance(TestCaseGenerationChoosingStage.class).close();
-	}
-	
-	private String extractItem(TestCaseGenerationChoosingStage choosingStage) {
-		String formula;
-		if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
-			String level = mcdcInputView.getLevel();
-			String depth = mcdcInputView.getDepth();
-			formula = "MCDC:" + level + "/" + "DEPTH:" + depth;
-		} else if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS) {
-			List<String> operations = operationCoverageInputView.getOperations();
-			String depth = operationCoverageInputView.getDepth();
-			formula = "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + depth;
-		} else {
-			formula = choosingStage.getTestCaseGenerationType().getName();
-		}
-		return formula;
 	}
 	
 	public void changeItem(TestCaseGenerationItem item, TestCaseGenerationView view, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
