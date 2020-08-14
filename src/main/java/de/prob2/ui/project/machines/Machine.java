@@ -140,8 +140,17 @@ public class Machine implements DescriptionView.Describable {
 	}
 	
 	private void initListeners() {
-		this.nameProperty().addListener(o -> this.setChanged(true));
-		this.descriptionProperty().addListener(o -> this.setChanged(true));
+		final InvalidationListener changedListener = o -> this.setChanged(true);
+		this.nameProperty().addListener(changedListener);
+		this.descriptionProperty().addListener(changedListener);
+		this.lastUsedPreferenceNameProperty().addListener(changedListener);
+		this.ltlFormulasProperty().addListener(changedListener);
+		this.ltlPatternsProperty().addListener(changedListener);
+		this.symbolicCheckingFormulasProperty().addListener(changedListener);
+		this.symbolicAnimationFormulasProperty().addListener(changedListener);
+		this.testCasesProperty().addListener(changedListener);
+		this.tracesProperty().addListener(changedListener);
+		this.modelcheckingItemsProperty().addListener(changedListener);
 		
 		addCheckingStatusListener(this.ltlFormulasProperty(), this.ltlStatusProperty());
 		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolicCheckingStatusProperty());
@@ -258,12 +267,10 @@ public class Machine implements DescriptionView.Describable {
 	
 	public void addLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.add(formula);
-		this.setChanged(true);
 	}
 	
 	public void removeLTLFormula(LTLFormulaItem formula) {
 		ltlFormulas.remove(formula);
-		this.setChanged(true);
 	}
 	
 	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
@@ -276,12 +283,10 @@ public class Machine implements DescriptionView.Describable {
 	
 	public void addLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.add(pattern);
-		this.setChanged(true);
 	}
 	
 	public void removeLTLPattern(LTLPatternItem pattern) {
 		ltlPatterns.remove(pattern);
-		this.setChanged(true);
 	}
 	
 	public ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulasProperty() {
@@ -294,12 +299,10 @@ public class Machine implements DescriptionView.Describable {
 	
 	public void addSymbolicCheckingFormula(SymbolicCheckingFormulaItem formula) {
 		symbolicCheckingFormulas.add(formula);
-		this.setChanged(true);
 	}
 	
 	public void removeSymbolicCheckingFormula(SymbolicCheckingFormulaItem formula) {
 		symbolicCheckingFormulas.remove(formula);
-		this.setChanged(true);
 	}
 	
 	public ListProperty<SymbolicAnimationItem> symbolicAnimationFormulasProperty() {
@@ -312,12 +315,10 @@ public class Machine implements DescriptionView.Describable {
 	
 	public void addSymbolicAnimationFormula(SymbolicAnimationItem formula) {
 		symbolicAnimationFormulas.add(formula);
-		this.setChanged(true);
 	}
 	
 	public void removeSymbolicAnimationFormula(SymbolicAnimationItem formula) {
 		symbolicAnimationFormulas.remove(formula);
-		this.setChanged(true);
 	}
 	
 	public ListProperty<TestCaseGenerationItem> testCasesProperty() {
@@ -330,12 +331,10 @@ public class Machine implements DescriptionView.Describable {
 	
 	public void addTestCase(TestCaseGenerationItem item) {
 		testCases.add(item);
-		this.setChanged(true);
 	}
 	
 	public void removeTestCase(TestCaseGenerationItem item) {
 		testCases.remove(item);
-		this.setChanged(true);
 	}
 	
 	public ObservableSet<Path> getTraceFiles() {
@@ -347,12 +346,10 @@ public class Machine implements DescriptionView.Describable {
 		//we must remove the traceFile first in order to trigger the SetChangeListener!
 		this.traces.remove(traceFile);
 		this.traces.add(traceFile);
-		this.setChanged(true);
 	}
 	
 	public void removeTraceFile(Path traceFile) {
 		this.traces.remove(traceFile);
-		this.setChanged(true);
 	}
 
 	public ListProperty<ModelCheckingItem> modelcheckingItemsProperty() {
@@ -365,12 +362,10 @@ public class Machine implements DescriptionView.Describable {
 	
 	public void addModelcheckingItem(ModelCheckingItem item) {
 		modelcheckingItems.add(item);
-		Platform.runLater(() -> this.setChanged(true));
 	}
 	
 	public void removeModelcheckingItem(ModelCheckingItem item) {
 		modelcheckingItems.remove(item);
-		Platform.runLater(() -> this.setChanged(true));
 	}
 	
 	public SetProperty<Path> tracesProperty() {
