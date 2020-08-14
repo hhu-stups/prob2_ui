@@ -15,7 +15,6 @@ import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
-import de.prob2.ui.symbolic.SymbolicView;
 
 import javafx.fxml.FXML;
 
@@ -35,14 +34,13 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 	}
 
 	@Override
-	protected boolean updateFormula(SymbolicAnimationItem item, SymbolicView<SymbolicAnimationItem> view, SymbolicChoosingStage<SymbolicAnimationItem> choosingStage) {
+	protected boolean updateFormula(SymbolicAnimationItem item, SymbolicChoosingStage<SymbolicAnimationItem> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractFormula(choosingStage);
 
 		SymbolicAnimationItem newItem = new SymbolicAnimationItem(formula, choosingStage.getExecutionType());
 		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
 			currentMachine.getSymbolicAnimationFormulas().set(currentMachine.getSymbolicAnimationFormulas().indexOf(item), newItem);
-			view.refresh();
 			return true;
 		}
 		return false;

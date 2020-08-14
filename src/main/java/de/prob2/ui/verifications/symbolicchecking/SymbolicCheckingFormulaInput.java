@@ -16,7 +16,6 @@ import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
 import de.prob2.ui.symbolic.SymbolicGUIType;
-import de.prob2.ui.symbolic.SymbolicView;
 
 import javafx.fxml.FXML;
 
@@ -37,7 +36,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 	}
 
 	@Override
-	protected boolean updateFormula(SymbolicCheckingFormulaItem item, SymbolicView<SymbolicCheckingFormulaItem> view, SymbolicChoosingStage<SymbolicCheckingFormulaItem> choosingStage) {
+	protected boolean updateFormula(SymbolicCheckingFormulaItem item, SymbolicChoosingStage<SymbolicCheckingFormulaItem> choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		String formula = extractFormula(choosingStage);
 		final SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, choosingStage.getExecutionType());
@@ -46,7 +45,6 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		}
 		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
 			currentMachine.getSymbolicCheckingFormulas().set(currentMachine.getSymbolicCheckingFormulas().indexOf(item), newItem);
-			view.refresh();
 			return true;
 		}
 		return false;
