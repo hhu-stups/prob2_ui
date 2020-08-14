@@ -7,11 +7,9 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
-
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -92,10 +90,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	public void setHandleItem(LTLHandleItem<T> handleItem) {
 		this.handleItem = handleItem;
 	}
-	
-	protected abstract void addItem(Machine machine, T item);
-	
-	protected abstract void changeItem(T item, T result);
 	
 	public void showErrors(CheckingResultItem resultItem) {
 		//resultItem can be null when LTL model checking is interrupted

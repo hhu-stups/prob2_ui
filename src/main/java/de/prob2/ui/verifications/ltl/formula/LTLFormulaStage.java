@@ -54,8 +54,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		}
 	}
 	
-	@Override
-	protected void addItem(Machine machine, LTLFormulaItem item) {
+	private void addItem(Machine machine, LTLFormulaItem item) {
 		if(!machine.getLTLFormulas().contains(item)) {
 			machine.addLTLFormula(item);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
@@ -65,8 +64,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		}
 	}
 	
-	@Override
-	protected void changeItem(LTLFormulaItem item, LTLFormulaItem result) {
+	private void changeItem(LTLFormulaItem item, LTLFormulaItem result) {
 		Machine machine = currentProject.getCurrentMachine();
 		if(!machine.getLTLFormulas().stream()
 				.filter(formula -> !formula.equals(item))

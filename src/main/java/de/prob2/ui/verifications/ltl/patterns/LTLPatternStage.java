@@ -40,8 +40,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		}
 	}
 	
-	@Override
-	protected void addItem(Machine machine, LTLPatternItem item) {
+	private void addItem(Machine machine, LTLPatternItem item) {
 		patternParser.parsePattern(item, machine);
 		if(!machine.getLTLPatterns().contains(item)) {
 			patternParser.addPattern(item, machine);
@@ -53,8 +52,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		}
 	}
 	
-	@Override
-	protected void changeItem(LTLPatternItem item, LTLPatternItem result) {
+	private void changeItem(LTLPatternItem item, LTLPatternItem result) {
 		Machine machine = currentProject.getCurrentMachine();
 		patternParser.removePattern(item, machine);
 		patternParser.parsePattern(result, machine);
