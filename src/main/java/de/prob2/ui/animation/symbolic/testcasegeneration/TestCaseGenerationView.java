@@ -92,7 +92,7 @@ public class TestCaseGenerationView extends ScrollPane {
 			
 			MenuItem checkItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.generate"));
 			checkItem.setDisable(true);
-			checkItem.setOnAction(e-> itemHandler.handleItem(row.getItem(), false));
+			checkItem.setOnAction(e-> itemHandler.handleItem(row.getItem()));
 
 			MenuItem removeItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> removeFormula());
@@ -213,7 +213,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		tvTestCases.setOnMouseClicked(e-> {
 			TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
-				itemHandler.handleItem(item, false);
+				itemHandler.handleItem(item);
 			}
 		});
 		tvTestCases.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));

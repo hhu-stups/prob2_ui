@@ -43,7 +43,7 @@ public class TestCaseGenerator {
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
-	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator, boolean checkAll) {
+	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator) {
 		final TestCaseGenerationItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			Object result;
@@ -55,7 +55,7 @@ public class TestCaseGenerator {
 			}
 			final Object finalResult = result;
 			Platform.runLater(() -> {
-				resultHandler.handleTestCaseGenerationResult(currentItem, finalResult, checkAll);
+				resultHandler.handleTestCaseGenerationResult(currentItem, finalResult);
 			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "Test Case Generation Thread");

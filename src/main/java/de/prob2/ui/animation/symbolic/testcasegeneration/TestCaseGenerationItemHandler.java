@@ -54,28 +54,28 @@ public class TestCaseGenerationItemHandler {
 		}
 	}
 
-	public void generateTestCases(TestCaseGenerationItem item, boolean checkAll) {
+	public void generateTestCases(TestCaseGenerationItem item) {
 		AbstractModel model = currentTrace.getModel();
 		if(!(model instanceof ClassicalBModel)) {
 			return;
 		}
 		ClassicalBModel bModel = (ClassicalBModel) model;
 		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = testCaseGeneratorCreator.getTestCaseGenerator(bModel, item);
-		testCaseGenerator.generateTestCases(item, cbTestCaseGenerator, checkAll);
+		testCaseGenerator.generateTestCases(item, cbTestCaseGenerator);
 	}
 
 
-	public void handleItem(TestCaseGenerationItem item, boolean checkAll) {
+	public void handleItem(TestCaseGenerationItem item) {
 		if(!item.selected()) {
 			return;
 		}
 		TestCaseGenerationType type = item.getType();
 		switch(type) {
 			case MCDC:
-				generateTestCases(item, checkAll);
+				generateTestCases(item);
 				break;
 			case COVERED_OPERATIONS:
-				generateTestCases(item, checkAll);
+				generateTestCases(item);
 				break;
 			default:
 				break;
@@ -83,7 +83,7 @@ public class TestCaseGenerationItemHandler {
 	}
 	
 	public void handleMachine(Machine machine) {
-		machine.getTestCases().forEach(item -> handleItem(item, true));
+		machine.getTestCases().forEach(this::handleItem);
 	}
 	
 }

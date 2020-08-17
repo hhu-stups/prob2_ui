@@ -45,7 +45,7 @@ public class TestCaseGenerationResultHandler extends AbstractResultHandler {
 		showCheckingResult(item, checked, msgKey, msgKey);
 	}
 	
-	public void handleTestCaseGenerationResult(TestCaseGenerationItem item, Object result, boolean checkAll) {
+	public void handleTestCaseGenerationResult(TestCaseGenerationItem item, Object result) {
 		item.getExamples().clear();
 		if(!(result instanceof TestCaseGeneratorResult)) {
 			showCheckingResult(item, Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound");
