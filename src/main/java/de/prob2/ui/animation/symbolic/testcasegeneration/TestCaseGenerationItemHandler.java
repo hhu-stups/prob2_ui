@@ -48,7 +48,7 @@ public class TestCaseGenerationItemHandler {
 	public void addItem(TestCaseGenerationItem item, boolean checking) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
-			if(!currentMachine.getTestCases().contains(item)) {
+			if(currentMachine.getTestCases().stream().noneMatch(item::settingsEqual)) {
 				currentMachine.getTestCases().add(item);
 			}
 		}

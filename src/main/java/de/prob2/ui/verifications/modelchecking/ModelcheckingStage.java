@@ -95,7 +95,7 @@ public class ModelcheckingStage extends Stage {
 	private void startModelCheck() {
 		if (currentTrace.get() != null) {
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-", getOptions());
-			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
+			if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);

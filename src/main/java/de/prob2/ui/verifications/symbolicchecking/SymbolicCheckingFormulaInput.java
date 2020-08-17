@@ -43,7 +43,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		if(choosingStage.getExecutionType() == SymbolicExecutionType.CHECK_ALL_OPERATIONS || (choosingStage.getExecutionType() == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null)) {
 			return true;
 		}
-		if(!currentMachine.getSymbolicCheckingFormulas().contains(newItem)) {
+		if(currentMachine.getSymbolicCheckingFormulas().stream().noneMatch(newItem::settingsEqual)) {
 			currentMachine.getSymbolicCheckingFormulas().set(currentMachine.getSymbolicCheckingFormulas().indexOf(item), newItem);
 			return true;
 		}

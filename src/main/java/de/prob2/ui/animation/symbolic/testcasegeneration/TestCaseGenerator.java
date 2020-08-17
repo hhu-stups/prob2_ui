@@ -74,12 +74,11 @@ public class TestCaseGenerator {
 	}
 	
 	private TestCaseGenerationItem getItemIfAlreadyExists(TestCaseGenerationItem item) {
-		List<TestCaseGenerationItem> formulas = currentProject.getCurrentMachine().getTestCases();
-		int index = formulas.indexOf(item);
-		if(index > -1) {
-			item = formulas.get(index);
-		}
-		return item;
+		return currentProject.getCurrentMachine().getTestCases()
+			.stream()
+			.filter(item::settingsEqual)
+			.findAny()
+			.orElse(item);
 	}
 
 	public BooleanExpression runningProperty() {

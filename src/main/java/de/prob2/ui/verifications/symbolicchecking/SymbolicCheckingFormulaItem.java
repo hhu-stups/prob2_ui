@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 import java.lang.reflect.Type;
-import java.util.Objects;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -41,24 +40,5 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	public void reset() {
 		super.reset();
 		this.counterExamples.clear();
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!(obj instanceof SymbolicCheckingFormulaItem)) {
-			return false;
-		}
-		SymbolicCheckingFormulaItem otherItem = (SymbolicCheckingFormulaItem) obj;
-		return otherItem.getName().equals(this.getName()) &&
-				otherItem.getCode().equals(this.getCode()) &&
-				otherItem.getType().equals(this.getType());
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.getName(), this.getCode(), this.getType());
 	}
 }

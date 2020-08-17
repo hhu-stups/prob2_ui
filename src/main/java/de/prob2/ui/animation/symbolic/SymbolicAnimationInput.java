@@ -39,7 +39,7 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 		String formula = extractFormula(choosingStage);
 
 		SymbolicAnimationItem newItem = new SymbolicAnimationItem(formula, choosingStage.getExecutionType());
-		if(!currentMachine.getSymbolicAnimationFormulas().contains(newItem)) {
+		if(currentMachine.getSymbolicAnimationFormulas().stream().noneMatch(newItem::settingsEqual)) {
 			currentMachine.getSymbolicAnimationFormulas().set(currentMachine.getSymbolicAnimationFormulas().indexOf(item), newItem);
 			return true;
 		}

@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.symbolic;
 
 import java.lang.reflect.Type;
-import java.util.Objects;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -43,24 +42,4 @@ public class SymbolicAnimationItem extends SymbolicItem {
 	public ListProperty<Trace> examplesProperty() {
 		return examples;
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!(obj instanceof SymbolicAnimationItem)) {
-			return false;
-		}
-		SymbolicAnimationItem otherItem = (SymbolicAnimationItem) obj;
-		return otherItem.getName().equals(this.getName()) &&
-				otherItem.getCode().equals(this.getCode()) &&
-				otherItem.getType().equals(this.getType());
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.getName(), this.getCode(), this.getType());
-	}
-
 }

@@ -50,7 +50,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	public void addFormula(SymbolicCheckingFormulaItem formula, boolean checking) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
-			if(!currentMachine.getSymbolicCheckingFormulas().contains(formula)) {
+			if(currentMachine.getSymbolicCheckingFormulas().stream().noneMatch(formula::settingsEqual)) {
 				currentMachine.getSymbolicCheckingFormulas().add(formula);
 			}
 		}

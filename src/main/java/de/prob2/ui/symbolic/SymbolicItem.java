@@ -34,6 +34,12 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 		return type;
 	}
 	
+	public boolean settingsEqual(final SymbolicItem other) {
+		return this.getName().equals(other.getName())
+			&& this.getCode().equals(other.getCode())
+			&& this.getType().equals(other.getType());
+	}
+	
 	@Override
 	public String toString() {
 		return String.join(" ", this.getName(), this.getCode(), this.getType().name());
