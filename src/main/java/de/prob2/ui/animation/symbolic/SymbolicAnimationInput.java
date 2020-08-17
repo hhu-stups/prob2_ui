@@ -50,7 +50,7 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 	public void checkFormula() {
 		SymbolicExecutionType animationType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
 		SymbolicAnimationItem formulaItem = null;
-		addFormula(true);
+		addFormula();
 		switch (animationType) {
 			case SEQUENCE:
 				formulaItem = new SymbolicAnimationItem(tfFormula.getText(), SymbolicExecutionType.SEQUENCE);
@@ -68,19 +68,19 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 	}
 
 	@Override
-	protected void addFormula(boolean checking) {
+	protected void addFormula() {
 		SymbolicExecutionType checkingType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
 		SymbolicGUIType guiType = injector.getInstance(SymbolicAnimationChoosingStage.class).getGUIType();
 		switch(guiType) {
 			case TEXT_FIELD:
-				symbolicAnimationItemHandler.addFormula(tfFormula.getText(), checkingType, checking);
+				symbolicAnimationItemHandler.addFormula(tfFormula.getText(), checkingType);
 				break;
 			case PREDICATE:
 				final String predicate = predicateBuilderView.getPredicate();
-				symbolicAnimationItemHandler.addFormula(predicate, checkingType, checking);
+				symbolicAnimationItemHandler.addFormula(predicate, checkingType);
 				break;
 			case NONE:
-				symbolicAnimationItemHandler.addFormula(checkingType.name(), checkingType, checking);
+				symbolicAnimationItemHandler.addFormula(checkingType.name(), checkingType);
 				break;
 			default:
 				break;

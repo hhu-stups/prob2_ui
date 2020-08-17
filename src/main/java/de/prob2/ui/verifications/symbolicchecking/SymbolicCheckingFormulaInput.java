@@ -57,7 +57,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 			return;
 		}
 		SymbolicCheckingFormulaItem formulaItem = null;
-		addFormula(true);
+		addFormula();
 		switch(checkingType) {
 			case INVARIANT:
 				String selectedEvent = cbOperations.getSelectionModel().getSelectedItem();
@@ -99,7 +99,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 	}
 
 	@Override
-	protected void addFormula(boolean checking) {
+	protected void addFormula() {
 		SymbolicExecutionType checkingType = injector.getInstance(SymbolicCheckingChoosingStage.class).getExecutionType();
 		if(checkingType == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
 			return;
@@ -109,25 +109,25 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 			case CHOICE_BOX:
 				if (checkingType == SymbolicExecutionType.INVARIANT) {
 					String item = cbOperations.getSelectionModel().getSelectedItem();
-					symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicExecutionType.INVARIANT, checking);
+					symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicExecutionType.INVARIANT);
 					break;
 				} else {
 					throw new AssertionError("Unhandled checking type: " + checkingType);
 				}
 			case TEXT_FIELD:
-				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType, checking);
+				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType);
 				break;
 			case PREDICATE:
 				final String predicate = predicateBuilderView.getPredicate();
-				symbolicCheckingFormulaHandler.addFormula(predicate, predicate, checkingType, checking);
+				symbolicCheckingFormulaHandler.addFormula(predicate, predicate, checkingType);
 				break;
 			case NONE:
 				if(checkingType == SymbolicExecutionType.CHECK_ALL_OPERATIONS) {
 					for(String event : events) {
-						symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicExecutionType.INVARIANT, checking);
+						symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicExecutionType.INVARIANT);
 					}
 				} else {
-					symbolicCheckingFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType, checking);
+					symbolicCheckingFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType);
 				}
 				break;
 			default:

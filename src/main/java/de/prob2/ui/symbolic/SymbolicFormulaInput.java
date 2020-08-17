@@ -84,7 +84,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 	}
 	
 	protected void setCheckListeners() {
-		btAdd.setOnAction(e -> addFormula(false));
+		btAdd.setOnAction(e -> addFormula());
 		btCheck.setOnAction(e -> checkFormula());
 	}
 	
@@ -155,7 +155,7 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 	protected void setChangeListeners(T item, AbstractResultHandler resultHandler, SymbolicChoosingStage<T> stage) {
 		btAdd.setOnAction(e -> {
 			if(updateFormula(item, stage)) {
-				addFormula(false);
+				addFormula();
 			} else {
 				resultHandler.showAlreadyExists(ItemType.CONFIGURATION);
 			}
@@ -174,6 +174,6 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 
 	public abstract void checkFormula();
 
-	protected abstract void addFormula(boolean checking);
+	protected abstract void addFormula();
 	
 }

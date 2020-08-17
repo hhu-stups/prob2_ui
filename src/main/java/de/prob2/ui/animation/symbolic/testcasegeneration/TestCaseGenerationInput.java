@@ -87,7 +87,7 @@ public class TestCaseGenerationInput extends VBox {
 	}
 	
 	private void setCheckListeners() {
-		btAdd.setOnAction(e -> addItem(false));
+		btAdd.setOnAction(e -> addItem());
 		btCheck.setOnAction(e -> checkItem());
 	}
 	
@@ -117,7 +117,7 @@ public class TestCaseGenerationInput extends VBox {
 	public void checkItem() {
 		TestCaseGenerationType testCaseGenerationType = injector.getInstance(TestCaseGenerationChoosingStage.class).getTestCaseGenerationType();
 		TestCaseGenerationItem item = null;
-		addItem(true);
+		addItem();
 		switch (testCaseGenerationType) {
 			case MCDC: {
 				if(!testCaseGenerationSettingsHandler.checkMCDCSettings(mcdcInputView.getLevel(), mcdcInputView.getDepth())) {
@@ -141,7 +141,7 @@ public class TestCaseGenerationInput extends VBox {
 		injector.getInstance(TestCaseGenerationChoosingStage.class).close();
 	}
 
-	public void addItem(boolean checking) {
+	public void addItem() {
 		TestCaseGenerationType type = injector.getInstance(TestCaseGenerationChoosingStage.class).getTestCaseGenerationType();
 		switch(type) {
 			case MCDC: {
@@ -152,7 +152,7 @@ public class TestCaseGenerationInput extends VBox {
 							.showAndWait();
 					return;
 				}
-				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()), checking);
+				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()));
 				break;
 			}
 			case COVERED_OPERATIONS: {
@@ -170,7 +170,7 @@ public class TestCaseGenerationInput extends VBox {
 							.showAndWait();
 					return;
 				}
-				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(operationCoverageInputView.getDepth()), operations, checking);
+				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(operationCoverageInputView.getDepth()), operations);
 				break;
 			}
 			default:
@@ -195,7 +195,7 @@ public class TestCaseGenerationInput extends VBox {
 	private void setChangeListeners(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
 		btAdd.setOnAction(e -> {
 			if(updateItem(item, stage)) {
-				addItem(false);
+				addItem();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}

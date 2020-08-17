@@ -36,12 +36,12 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		this.symbolicChecker = symbolicChecker;
 	}
 
-	public void addFormula(String name, SymbolicExecutionType type, boolean checking) {
+	public void addFormula(String name, SymbolicExecutionType type) {
 		SymbolicAnimationItem formula = new SymbolicAnimationItem(name, type);
-		addFormula(formula,checking);
+		addFormula(formula);
 	}
 
-	public void addFormula(SymbolicAnimationItem formula, boolean checking) {
+	public void addFormula(SymbolicAnimationItem formula) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(currentMachine.getSymbolicAnimationFormulas().stream().noneMatch(formula::settingsEqual)) {

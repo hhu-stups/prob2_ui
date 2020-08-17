@@ -42,12 +42,12 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		this.symbolicChecker = symbolicChecker;
 	}
 	
-	public void addFormula(String name, String code, SymbolicExecutionType type, boolean checking) {
+	public void addFormula(String name, String code, SymbolicExecutionType type) {
 		SymbolicCheckingFormulaItem formula = new SymbolicCheckingFormulaItem(name, code, type);
-		addFormula(formula,checking);
+		addFormula(formula);
 	}
 	
-	public void addFormula(SymbolicCheckingFormulaItem formula, boolean checking) {
+	public void addFormula(SymbolicCheckingFormulaItem formula) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(currentMachine.getSymbolicCheckingFormulas().stream().noneMatch(formula::settingsEqual)) {

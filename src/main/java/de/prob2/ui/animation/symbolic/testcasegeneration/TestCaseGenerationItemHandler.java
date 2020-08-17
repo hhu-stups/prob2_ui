@@ -35,17 +35,17 @@ public class TestCaseGenerationItemHandler {
 		this.testCaseGeneratorCreator = testCaseGeneratorCreator;
 	}
 
-	public void addItem(int depth, int level, boolean checking) {
+	public void addItem(int depth, int level) {
 		TestCaseGenerationItem item = new TestCaseGenerationItem(depth, level);
-		addItem(item,checking);
+		addItem(item);
 	}
 
-	public void addItem(int depth, List<String> operations, boolean checking) {
+	public void addItem(int depth, List<String> operations) {
 		TestCaseGenerationItem item = new TestCaseGenerationItem(depth, operations);
-		addItem(item,checking);
+		addItem(item);
 	}
 
-	public void addItem(TestCaseGenerationItem item, boolean checking) {
+	public void addItem(TestCaseGenerationItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
 			if(currentMachine.getTestCases().stream().noneMatch(item::settingsEqual)) {
