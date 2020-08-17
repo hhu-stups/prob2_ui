@@ -40,6 +40,8 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.scene.control.MenuBar;
+
 
 import netscape.javascript.JSObject;
 
@@ -60,6 +62,8 @@ public class VisBStage extends Stage {
 	private boolean connectorSet = false;
 	private FileChooserManager fileChooserManager;
 
+	@FXML
+	private MenuBar visbMenuBar;
 	@FXML
 	private Button button_loadVis;
 	@FXML
@@ -100,12 +104,12 @@ public class VisBStage extends Stage {
 	@Inject
 	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		super();
-		stageManager.loadFXML(this, "vis_plugin_stage.fxml");
 		this.injector = injector;
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.fileChooserManager = fileChooserManager;
+		this.stageManager.loadFXML(this, "vis_plugin_stage.fxml");
 	}
 
 	/**
@@ -113,6 +117,7 @@ public class VisBStage extends Stage {
 	 */
 	@FXML
 	public void initialize(){
+		this.stageManager.setMacMenuBar(this, visbMenuBar);
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
 		this.button_loadVis.setOnAction(e -> loadVisBFile());
 		this.fileMenu_visB.setOnAction(e -> loadVisBFile());
