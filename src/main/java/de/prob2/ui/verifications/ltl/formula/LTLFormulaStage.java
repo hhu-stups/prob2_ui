@@ -55,7 +55,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	}
 	
 	private void addItem(Machine machine, LTLFormulaItem item) {
-		if(!machine.getLTLFormulas().contains(item)) {
+		if(machine.getLTLFormulas().stream().noneMatch(item::settingsEqual)) {
 			machine.getLTLFormulas().add(item);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
@@ -66,10 +66,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	
 	private void changeItem(LTLFormulaItem item, LTLFormulaItem result) {
 		Machine machine = currentProject.getCurrentMachine();
-		if(!machine.getLTLFormulas().stream()
-				.filter(formula -> !formula.equals(item))
-				.collect(Collectors.toList())
-				.contains(result)) {
+		if(machine.getLTLFormulas().stream().noneMatch(existing -> !item.settingsEqual(existing) && result.settingsEqual(existing))) {
 			machine.getLTLFormulas().set(machine.getLTLFormulas().indexOf(item), result);
 			currentProject.setSaved(false);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, result));

@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.ltl.formula;
 
 import java.lang.reflect.Type;
-import java.util.Objects;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -45,22 +44,8 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 		return counterExample;
 	}
 	
-	@Override
-	public boolean equals(Object other) {
-		if (other == this) {
-			return true;
-		}
-		if (!(other instanceof LTLFormulaItem)) {
-			return false;
-		}
-		LTLFormulaItem otherFormulaItem = (LTLFormulaItem) other;
-		return this.getCode().equals(otherFormulaItem.getCode())
-			&& this.getDescription().equals(otherFormulaItem.getDescription());
+	public boolean settingsEqual(final LTLFormulaItem other) {
+		return this.getCode().equals(other.getCode())
+			&& this.getDescription().equals(other.getDescription());
 	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.getCode(), this.getDescription());
-	}
-
 }

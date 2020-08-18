@@ -2,6 +2,7 @@ package de.prob2.ui.symbolic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.inject.Injector;
 
@@ -130,12 +131,13 @@ public abstract class SymbolicExecutor {
 	protected abstract void updateTrace(SymbolicItem item);
 	
 	protected SymbolicItem getItemIfAlreadyExists(SymbolicItem item) {
-		List<? extends SymbolicItem> formulas = getItems();
-		int index = formulas.indexOf(item);
-		if(index > -1) {
-			item = formulas.get(index);
-		}
-		return item;
+		final Optional<? extends SymbolicItem> existing = getItems()
+			.stream()
+			.filter(item::settingsEqual)
+			.findAny();
+		// Cannot use existing.orElse(item) here,
+		// because of generic type problems with "? extends SymbolicItem".
+		return existing.isPresent() ? existing.get() : item;
 	}
 	
 	private List<? extends SymbolicItem> getItems() {

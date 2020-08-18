@@ -107,7 +107,7 @@ public class ModelcheckingStage extends Stage {
 		    String nLimit = chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-";
 		    String tLimit = chooseTimeLimit.isSelected() ? String.valueOf(timeLimit.getValue()) : "-";
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(nLimit, tLimit, getOptions());
-			if(!currentProject.getCurrentMachine().getModelcheckingItems().contains(modelcheckingItem)) {
+			if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);

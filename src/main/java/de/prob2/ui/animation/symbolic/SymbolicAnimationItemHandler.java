@@ -44,7 +44,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 	public void addFormula(SymbolicAnimationItem formula, boolean checking) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
-			if(!currentMachine.getSymbolicAnimationFormulas().contains(formula)) {
+			if(currentMachine.getSymbolicAnimationFormulas().stream().noneMatch(formula::settingsEqual)) {
 				currentMachine.getSymbolicAnimationFormulas().add(formula);
 			}
 		}

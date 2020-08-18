@@ -41,7 +41,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	}
 	
 	private void addItem(Machine machine, LTLPatternItem item) {
-		if(!machine.getLTLPatterns().contains(item)) {
+		if(machine.getLTLPatterns().stream().noneMatch(item::settingsEqual)) {
 			patternParser.addPattern(item, machine);
 			machine.getLTLPatterns().add(item);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
@@ -54,10 +54,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	private void changeItem(LTLPatternItem item, LTLPatternItem result) {
 		Machine machine = currentProject.getCurrentMachine();
 		patternParser.removePattern(item, machine);
-		if(!machine.getLTLPatterns().stream()
-				.filter(pattern -> !pattern.equals(item))
-				.collect(Collectors.toList())
-				.contains(result)) {
+		if(machine.getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(item) && existing.settingsEqual(result))) {
 			machine.getLTLPatterns().set(machine.getLTLPatterns().indexOf(item), result);
 			patternParser.addPattern(result, machine);
 			currentProject.setSaved(false);

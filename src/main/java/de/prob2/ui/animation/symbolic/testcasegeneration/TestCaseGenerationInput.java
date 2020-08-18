@@ -77,7 +77,7 @@ public class TestCaseGenerationInput extends VBox {
 		} else {
 			throw new AssertionError("Unhandled type: " + type);
 		}
-		if(!currentMachine.getTestCases().contains(newItem)) {
+		if(currentMachine.getTestCases().stream().noneMatch(newItem::settingsEqual)) {
 			if(valid) {
 				currentMachine.getTestCases().set(currentMachine.getTestCases().indexOf(item), newItem);
 			}

@@ -125,22 +125,10 @@ public class ModelCheckingItem implements IExecutableItem {
 	public List<ModelCheckingJobItem> getItems() {
 		return items.get();
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj == this) {
-			return true;
-		}
-		if(!(obj instanceof ModelCheckingItem)) {
-			return false;
-		}
-		ModelCheckingItem other = (ModelCheckingItem) obj;
-		return this.getNodesLimit().equals(other.nodesLimit) && this.getTimeLimit().equals(other.timeLimit) && this.getOptions().equals(other.getOptions());
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.nodesLimit, this.getOptions());
+
+	public boolean settingsEqual(final ModelCheckingItem other) {
+		return this.getNodesLimit().equals(other.nodesLimit) && this.getNodesLimit().equals(other.getNodesLimit())
+			&& this.getOptions().equals(other.getOptions());
 	}
 	
 	@Override
