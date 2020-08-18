@@ -46,6 +46,21 @@
 									</Spinner>
 								</HBox>
 							</HBox>
+							<HBox alignment="CENTER_LEFT" spacing="5.0">
+								<Label text="%verifications.modelchecking.modelcheckingStage.timeLimit"/>
+								<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" spacing="10.0">
+									<CheckBox fx:id="chooseTimeLimit" prefWidth="50.0" prefHeight="50.0">
+										<tooltip>
+											<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.chooseTimeLimit" />
+										</tooltip>
+									</CheckBox>
+									<Spinner fx:id="timeLimit" editable="true">
+										<tooltip>
+											<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.timeLimit" />
+										</tooltip>
+									</Spinner>
+								</HBox>
+							</HBox>
 						</VBox>
 					</AnchorPane>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS"

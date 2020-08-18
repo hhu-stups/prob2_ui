@@ -4,7 +4,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.json.JsonManager;
 import de.prob2.ui.verifications.Checked;
@@ -29,15 +28,18 @@ public class ModelCheckingItem implements IExecutableItem {
 
 	private final String nodesLimit;
 
+	private final String timeLimit;
+
 	private final ModelCheckingOptions options;
 	
 	private BooleanProperty shouldExecute;
 	
 	private final transient ListProperty<ModelCheckingJobItem> items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 
-	public ModelCheckingItem(String nodesLimit, ModelCheckingOptions options) {
+	public ModelCheckingItem(String nodesLimit, String timeLimit, ModelCheckingOptions options) {
 		Objects.requireNonNull(options);
 		this.nodesLimit = nodesLimit;
+		this.timeLimit = timeLimit;
 		this.options = options;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		
@@ -47,6 +49,7 @@ public class ModelCheckingItem implements IExecutableItem {
 	private ModelCheckingItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
 		final JsonObject object = json.getAsJsonObject();
 		this.nodesLimit = JsonManager.checkDeserialize(context, object, "nodesLimit", String.class);
+		this.timeLimit = JsonManager.checkDeserialize(context, object, "timeLimit", String.class);
 		this.options = JsonManager.checkDeserialize(context, object, "options", ModelCheckingOptions.class);
 		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
 		
@@ -90,6 +93,10 @@ public class ModelCheckingItem implements IExecutableItem {
 		return nodesLimit;
 	}
 
+	public String getTimeLimit() {
+		return timeLimit;
+	}
+
 	public ModelCheckingOptions getOptions() {
 		return this.options;
 	}
@@ -128,7 +135,7 @@ public class ModelCheckingItem implements IExecutableItem {
 			return false;
 		}
 		ModelCheckingItem other = (ModelCheckingItem) obj;
-		return this.getNodesLimit().equals(other.nodesLimit) && this.getOptions().equals(other.getOptions());
+		return this.getNodesLimit().equals(other.nodesLimit) && this.getTimeLimit().equals(other.timeLimit) && this.getOptions().equals(other.getOptions());
 	}
 	
 	@Override

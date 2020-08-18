@@ -1,12 +1,8 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
@@ -23,7 +19,6 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -48,6 +43,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 @FXMLInjected
 @Singleton
 public final class ModelcheckingView extends ScrollPane {
@@ -71,6 +69,9 @@ public final class ModelcheckingView extends ScrollPane {
 
 	@FXML
 	private TableColumn<ModelCheckingItem, String> nodesLimitColumn;
+
+	@FXML
+	private TableColumn<ModelCheckingItem, String> timeLimitColumn;
 	
 	@FXML
 	private TableColumn<ModelCheckingItem, Boolean> deadlockColumn;
@@ -170,6 +171,7 @@ public final class ModelcheckingView extends ScrollPane {
 			bundle.getString(SearchStrategy.fromOptions(features.getValue().getOptions()).getName())
 		));
 		nodesLimitColumn.setCellValueFactory(new PropertyValueFactory<>("nodesLimit"));
+		timeLimitColumn.setCellValueFactory(new PropertyValueFactory<>("timeLimit"));
 		deadlockColumn.setCellFactory(col -> new BooleanCell<>());
 		deadlockColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_DEADLOCKS, false));
 		invariantsViolationsColumn.setCellFactory(col -> new BooleanCell<>());

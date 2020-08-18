@@ -1,16 +1,8 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
@@ -22,15 +14,20 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
-
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 @Singleton
 public class Modelchecker {
@@ -125,7 +122,10 @@ public class Modelchecker {
 	private IModelCheckJob buildModelCheckJob(StateSpace stateSpace, ModelCheckingItem item, boolean recheckExisting, IModelCheckListener listener) {
 		ConsistencyChecker checker = new ConsistencyChecker(stateSpace, item.getOptions().recheckExisting(recheckExisting), null, listener);
 		if (!"-".equals(item.getNodesLimit())) {
-			checker.setNodesLimit(Integer.parseInt(item.getNodesLimit()));
+			checker.getLimitConfiguration().setNodesLimit(Integer.parseInt(item.getNodesLimit()));
+		}
+		if (!"-".equals(item.getTimeLimit())) {
+			checker.getLimitConfiguration().setTimeLimit(Integer.parseInt(item.getTimeLimit()));
 		}
 		return checker;
 	}
