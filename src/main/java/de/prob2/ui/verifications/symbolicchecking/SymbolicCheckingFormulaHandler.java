@@ -56,11 +56,11 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		}
 	}
 	
-	public void handleInvariant(String eventName, boolean checkAll) {
+	public void handleInvariant(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		ArrayList<String> event = new ArrayList<>();
-		event.add(eventName);
+		event.add(item.getCode());
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
-		symbolicChecker.executeCheckingItem(checker, eventName, SymbolicExecutionType.INVARIANT, checkAll);
+		symbolicChecker.checkItem(checker, item, checkAll);
 	}
 		
 	public void handleRefinement(SymbolicCheckingFormulaItem item, boolean checkAll) {
@@ -94,10 +94,10 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		
 	}
 	
-	public void handleDeadlock(String code, boolean checkAll) {
-		IEvalElement constraint = new EventB(code, FormulaExpand.EXPAND); 
+	public void handleDeadlock(SymbolicCheckingFormulaItem item, boolean checkAll) {
+		IEvalElement constraint = new EventB(item.getCode(), FormulaExpand.EXPAND); 
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		symbolicChecker.executeCheckingItem(checker, code, SymbolicExecutionType.DEADLOCK, checkAll);
+		symbolicChecker.checkItem(checker, item, checkAll);
 	}
 	
 	public void findRedundantInvariants(SymbolicCheckingFormulaItem item, boolean checkAll) {
@@ -113,7 +113,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		SymbolicExecutionType type = item.getType();
 		switch(type) {
 			case INVARIANT:
-				handleInvariant(item.getCode(), checkAll);
+				handleInvariant(item, checkAll);
 				break;
 			case CHECK_REFINEMENT:
 				handleRefinement(item, checkAll);
@@ -128,7 +128,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 				handleWellDefinedness(item, checkAll);
 				break;
 			case DEADLOCK:
-				handleDeadlock(item.getCode(), checkAll);
+				handleDeadlock(item, checkAll);
 				break;
 			case FIND_REDUNDANT_INVARIANTS:
 				findRedundantInvariants(item, checkAll);

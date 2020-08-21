@@ -49,13 +49,6 @@ public abstract class SymbolicExecutor {
 		injector.getInstance(DisablePropertyController.class).addDisableExpression(this.runningProperty());
 	}
 	
-	public void executeCheckingItem(IModelCheckJob checker, String code, SymbolicExecutionType type, boolean checkAll) {
-		getItems().stream()
-			.filter(current -> current.getCode().equals(code) && current.getType().equals(type))
-			.findFirst()
-			.ifPresent(item -> checkItem(checker, item, checkAll));
-	}
-
 	public void interrupt() {
 		List<Thread> removedThreads = new ArrayList<>();
 		for (Thread thread : currentJobThreads) {
@@ -105,6 +98,7 @@ public abstract class SymbolicExecutor {
 	}
 	
 	public void checkItem(IModelCheckJob checker, SymbolicItem item, boolean checkAll) {
+		final SymbolicItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			currentJobs.add(checker);
 			Object result;
@@ -116,9 +110,9 @@ public abstract class SymbolicExecutor {
 			}
 			final Object finalResult = result;
 			Platform.runLater(() -> {
-				resultHandler.handleFormulaResult(item, finalResult);
+				resultHandler.handleFormulaResult(currentItem, finalResult);
 				if(!checkAll) {
-					updateTrace(item);
+					updateTrace(currentItem);
 				}
 			});
 			currentJobs.remove(checker);

@@ -61,13 +61,19 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		switch(checkingType) {
 			case INVARIANT:
 				String selectedEvent = cbOperations.getSelectionModel().getSelectedItem();
-				symbolicCheckingFormulaHandler.handleInvariant(selectedEvent, false);
+				formulaItem = new SymbolicCheckingFormulaItem(selectedEvent, selectedEvent, SymbolicExecutionType.INVARIANT);
+				symbolicCheckingFormulaHandler.handleInvariant(formulaItem, false);
 				break;
 			case CHECK_ALL_OPERATIONS:
-				events.forEach(event -> symbolicCheckingFormulaHandler.handleInvariant(event, true));
+				for (final String event : events) {
+					final SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem(event, event, SymbolicExecutionType.INVARIANT);
+					symbolicCheckingFormulaHandler.handleInvariant(item, true);
+				}
 				break;
 			case DEADLOCK:
-				symbolicCheckingFormulaHandler.handleDeadlock(predicateBuilderView.getPredicate(), false);
+				final String predicate = predicateBuilderView.getPredicate();
+				formulaItem = new SymbolicCheckingFormulaItem(predicate, predicate, SymbolicExecutionType.DEADLOCK);
+				symbolicCheckingFormulaHandler.handleDeadlock(formulaItem, false);
 				break;
 			default:
 				formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
