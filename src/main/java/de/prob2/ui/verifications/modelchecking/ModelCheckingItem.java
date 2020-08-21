@@ -127,7 +127,8 @@ public class ModelCheckingItem implements IExecutableItem {
 	}
 
 	public boolean settingsEqual(final ModelCheckingItem other) {
-		return this.getNodesLimit().equals(other.nodesLimit) && this.getNodesLimit().equals(other.getNodesLimit())
+		return this.getNodesLimit().equals(other.getNodesLimit())
+			&& this.getTimeLimit().equals(other.getTimeLimit())
 			&& this.getOptions().equals(other.getOptions());
 	}
 	
