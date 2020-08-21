@@ -28,7 +28,7 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 	@Inject
 	private SymbolicAnimationInput(final StageManager stageManager, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
 										 final CurrentTrace currentTrace, final SymbolicAnimationItemHandler symbolicAnimationItemHandler) {
-		super(stageManager, currentProject, injector, bundle, currentTrace);
+		super(currentProject, injector, bundle, currentTrace);
 		this.symbolicAnimationItemHandler = symbolicAnimationItemHandler;
 		stageManager.loadFXML(this, "symbolic_animation_formula_input.fxml");
 	}

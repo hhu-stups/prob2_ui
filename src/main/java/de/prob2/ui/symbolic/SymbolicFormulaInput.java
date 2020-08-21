@@ -1,24 +1,25 @@
 package de.prob2.ui.symbolic;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.AbstractResultHandler.ItemType;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
 
 public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox {
 	
@@ -39,8 +40,6 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 	@FXML
 	protected PredicateBuilderView predicateBuilderView;
 
-	protected final StageManager stageManager;
-
 	protected final Injector injector;
 	
 	protected final ResourceBundle bundle;
@@ -50,10 +49,9 @@ public abstract class SymbolicFormulaInput<T extends SymbolicItem> extends VBox 
 	protected ArrayList<String> events;
 	
 	@Inject
-	public SymbolicFormulaInput(final StageManager stageManager, final CurrentProject currentProject,
+	public SymbolicFormulaInput(final CurrentProject currentProject,
 								final Injector injector, final ResourceBundle bundle,
 								final CurrentTrace currentTrace) {
-		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.events = new ArrayList<>();

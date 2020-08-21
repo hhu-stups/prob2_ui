@@ -30,7 +30,7 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 										final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler,
 										final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
 										final CurrentTrace currentTrace) {
-		super(stageManager, currentProject, injector, bundle, currentTrace);
+		super(currentProject, injector, bundle, currentTrace);
 		this.symbolicCheckingFormulaHandler = symbolicCheckingFormulaHandler;
 		stageManager.loadFXML(this, "symbolic_checking_formula_input.fxml");
 	}
