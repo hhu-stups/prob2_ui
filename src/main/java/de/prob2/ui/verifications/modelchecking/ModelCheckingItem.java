@@ -134,6 +134,6 @@ public class ModelCheckingItem implements IExecutableItem {
 	
 	@Override
 	public String toString() {
-		return String.format("%s(%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getOptions());
+		return String.format("%s(%s,%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getTimeLimit(), this.getOptions());
 	}
 }
