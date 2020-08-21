@@ -56,12 +56,11 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		if(checkingType == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
 			return;
 		}
-		SymbolicCheckingFormulaItem formulaItem = null;
+		final String formula = extractFormula(injector.getInstance(SymbolicCheckingChoosingStage.class));
+		final SymbolicCheckingFormulaItem formulaItem = new SymbolicCheckingFormulaItem(formula, formula, checkingType);
 		addFormula();
 		switch(checkingType) {
 			case INVARIANT:
-				String selectedEvent = cbOperations.getSelectionModel().getSelectedItem();
-				formulaItem = new SymbolicCheckingFormulaItem(selectedEvent, selectedEvent, SymbolicExecutionType.INVARIANT);
 				symbolicCheckingFormulaHandler.handleInvariant(formulaItem, false);
 				break;
 			case CHECK_ALL_OPERATIONS:
@@ -71,12 +70,9 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 				}
 				break;
 			case DEADLOCK:
-				final String predicate = predicateBuilderView.getPredicate();
-				formulaItem = new SymbolicCheckingFormulaItem(predicate, predicate, SymbolicExecutionType.DEADLOCK);
 				symbolicCheckingFormulaHandler.handleDeadlock(formulaItem, false);
 				break;
 			default:
-				formulaItem = new SymbolicCheckingFormulaItem(checkingType.name(), checkingType.name(), checkingType);
 				switch(checkingType) {
 					case CHECK_STATIC_ASSERTIONS:
 						symbolicCheckingFormulaHandler.handleStaticAssertions(formulaItem, false);
@@ -110,34 +106,14 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		if(checkingType == SymbolicExecutionType.INVARIANT && cbOperations.getSelectionModel().getSelectedItem() == null) {
 			return;
 		}
-		SymbolicGUIType guiType = injector.getInstance(SymbolicCheckingChoosingStage.class).getGUIType();
-		switch(guiType) {
-			case CHOICE_BOX:
-				if (checkingType == SymbolicExecutionType.INVARIANT) {
-					String item = cbOperations.getSelectionModel().getSelectedItem();
-					symbolicCheckingFormulaHandler.addFormula(item, item, SymbolicExecutionType.INVARIANT);
-					break;
-				} else {
-					throw new AssertionError("Unhandled checking type: " + checkingType);
-				}
-			case TEXT_FIELD:
-				symbolicCheckingFormulaHandler.addFormula(tfFormula.getText(), tfFormula.getText(), checkingType);
-				break;
-			case PREDICATE:
-				final String predicate = predicateBuilderView.getPredicate();
-				symbolicCheckingFormulaHandler.addFormula(predicate, predicate, checkingType);
-				break;
-			case NONE:
-				if(checkingType == SymbolicExecutionType.CHECK_ALL_OPERATIONS) {
-					for(String event : events) {
-						symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicExecutionType.INVARIANT);
-					}
-				} else {
-					symbolicCheckingFormulaHandler.addFormula(checkingType.name(), checkingType.name(), checkingType);
-				}
-				break;
-			default:
-				throw new AssertionError("Unhandled GUI type: " + guiType);
+		final String formula = extractFormula(injector.getInstance(SymbolicCheckingChoosingStage.class));
+		final SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem(formula, formula, checkingType);
+		if(checkingType == SymbolicExecutionType.CHECK_ALL_OPERATIONS) {
+			for(String event : events) {
+				symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicExecutionType.INVARIANT);
+			}
+		} else {
+			symbolicCheckingFormulaHandler.addFormula(item);
 		}
 		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 	}

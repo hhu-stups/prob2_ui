@@ -49,16 +49,14 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 	@Override
 	public void checkFormula() {
 		SymbolicExecutionType animationType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
-		SymbolicAnimationItem formulaItem = null;
+		final String formula = extractFormula(injector.getInstance(SymbolicAnimationChoosingStage.class));
+		final SymbolicAnimationItem formulaItem = new SymbolicAnimationItem(formula, animationType);
 		addFormula();
 		switch (animationType) {
 			case SEQUENCE:
-				formulaItem = new SymbolicAnimationItem(tfFormula.getText(), SymbolicExecutionType.SEQUENCE);
 				symbolicAnimationItemHandler.handleSequence(formulaItem, false);
 				break;
 			case FIND_VALID_STATE:
-				formulaItem = new SymbolicAnimationItem(predicateBuilderView.getPredicate(),
-						SymbolicExecutionType.FIND_VALID_STATE);
 				symbolicAnimationItemHandler.findValidState(formulaItem, false);
 				break;
 			default:
@@ -70,21 +68,9 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 	@Override
 	protected void addFormula() {
 		SymbolicExecutionType checkingType = injector.getInstance(SymbolicAnimationChoosingStage.class).getExecutionType();
-		SymbolicGUIType guiType = injector.getInstance(SymbolicAnimationChoosingStage.class).getGUIType();
-		switch(guiType) {
-			case TEXT_FIELD:
-				symbolicAnimationItemHandler.addFormula(tfFormula.getText(), checkingType);
-				break;
-			case PREDICATE:
-				final String predicate = predicateBuilderView.getPredicate();
-				symbolicAnimationItemHandler.addFormula(predicate, checkingType);
-				break;
-			case NONE:
-				symbolicAnimationItemHandler.addFormula(checkingType.name(), checkingType);
-				break;
-			default:
-				break;
-		}
+		final String formula = extractFormula(injector.getInstance(SymbolicAnimationChoosingStage.class));
+		final SymbolicAnimationItem formulaItem = new SymbolicAnimationItem(formula, checkingType);
+		symbolicAnimationItemHandler.addFormula(formulaItem);
 		injector.getInstance(SymbolicAnimationChoosingStage.class).close();
 	}
 		
