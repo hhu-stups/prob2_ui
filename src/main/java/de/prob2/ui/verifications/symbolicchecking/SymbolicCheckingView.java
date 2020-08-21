@@ -16,6 +16,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicView;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
@@ -50,10 +51,17 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
+				final InvalidationListener updateCounterExamplesListener = o -> showCounterExamples(to, showCounterExampleItem);
+
+				if (from != null) {
+					from.counterExamplesProperty().removeListener(updateCounterExamplesListener);
+				}
+
 				if(to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showCounterExampleItem.disableProperty().bind(to.counterExamplesProperty().emptyProperty());
-					showCounterExamples(to, showCounterExampleItem);
+					to.counterExamplesProperty().addListener(updateCounterExamplesListener);
+					updateCounterExamplesListener.invalidated(null);
 				}
 			});
 			
