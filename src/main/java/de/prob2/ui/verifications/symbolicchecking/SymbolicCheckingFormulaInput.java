@@ -72,30 +72,27 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 			case DEADLOCK:
 				symbolicCheckingFormulaHandler.handleDeadlock(formulaItem, false);
 				break;
+			case CHECK_STATIC_ASSERTIONS:
+				symbolicCheckingFormulaHandler.handleStaticAssertions(formulaItem, false);
+				break;
+			case CHECK_DYNAMIC_ASSERTIONS:
+				symbolicCheckingFormulaHandler.handleDynamicAssertions(formulaItem, false);
+				break;
+			case CHECK_WELL_DEFINEDNESS:
+				symbolicCheckingFormulaHandler.handleWellDefinedness(formulaItem, false);
+				break;
+			case CHECK_REFINEMENT:
+				symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false);
+				break;
+			case FIND_REDUNDANT_INVARIANTS:
+				symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false);
+				break;
 			default:
-				switch(checkingType) {
-					case CHECK_STATIC_ASSERTIONS:
-						symbolicCheckingFormulaHandler.handleStaticAssertions(formulaItem, false);
-						break;
-					case CHECK_DYNAMIC_ASSERTIONS:
-						symbolicCheckingFormulaHandler.handleDynamicAssertions(formulaItem, false);
-						break;
-					case CHECK_WELL_DEFINEDNESS:
-						symbolicCheckingFormulaHandler.handleWellDefinedness(formulaItem, false);
-						break;
-					case CHECK_REFINEMENT:
-						symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false);
-						break;
-					case FIND_REDUNDANT_INVARIANTS:
-						symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false);
-						break;
-					default:
-						SymbolicModelcheckCommand.Algorithm algorithm = checkingType.getAlgorithm();
-						if(algorithm != null) {
-							symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, algorithm, false);
-						}
-						break;
+				SymbolicModelcheckCommand.Algorithm algorithm = checkingType.getAlgorithm();
+				if(algorithm != null) {
+					symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, algorithm, false);
 				}
+				break;
 		}
 		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 	}
