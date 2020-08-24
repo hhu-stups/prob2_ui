@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -15,7 +14,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
-import de.prob2.ui.symbolic.SymbolicGUIType;
 
 import javafx.fxml.FXML;
 
@@ -59,40 +57,13 @@ public class SymbolicCheckingFormulaInput extends SymbolicFormulaInput<SymbolicC
 		final String formula = extractFormula(injector.getInstance(SymbolicCheckingChoosingStage.class));
 		final SymbolicCheckingFormulaItem formulaItem = new SymbolicCheckingFormulaItem(formula, formula, checkingType);
 		addFormula();
-		switch(checkingType) {
-			case INVARIANT:
-				symbolicCheckingFormulaHandler.handleInvariant(formulaItem, false);
-				break;
-			case CHECK_ALL_OPERATIONS:
-				for (final String event : events) {
-					final SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem(event, event, SymbolicExecutionType.INVARIANT);
-					symbolicCheckingFormulaHandler.handleInvariant(item, true);
-				}
-				break;
-			case DEADLOCK:
-				symbolicCheckingFormulaHandler.handleDeadlock(formulaItem, false);
-				break;
-			case CHECK_STATIC_ASSERTIONS:
-				symbolicCheckingFormulaHandler.handleStaticAssertions(formulaItem, false);
-				break;
-			case CHECK_DYNAMIC_ASSERTIONS:
-				symbolicCheckingFormulaHandler.handleDynamicAssertions(formulaItem, false);
-				break;
-			case CHECK_WELL_DEFINEDNESS:
-				symbolicCheckingFormulaHandler.handleWellDefinedness(formulaItem, false);
-				break;
-			case CHECK_REFINEMENT:
-				symbolicCheckingFormulaHandler.handleRefinement(formulaItem, false);
-				break;
-			case FIND_REDUNDANT_INVARIANTS:
-				symbolicCheckingFormulaHandler.findRedundantInvariants(formulaItem, false);
-				break;
-			default:
-				SymbolicModelcheckCommand.Algorithm algorithm = checkingType.getAlgorithm();
-				if(algorithm != null) {
-					symbolicCheckingFormulaHandler.handleSymbolic(formulaItem, algorithm, false);
-				}
-				break;
+		if (checkingType == SymbolicExecutionType.CHECK_ALL_OPERATIONS) {
+			for (final String event : events) {
+				final SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem(event, event, SymbolicExecutionType.INVARIANT);
+				symbolicCheckingFormulaHandler.handleInvariant(item, true);
+			}
+		} else {
+			symbolicCheckingFormulaHandler.handleItem(formulaItem, false);
 		}
 		injector.getInstance(SymbolicCheckingChoosingStage.class).close();
 	}

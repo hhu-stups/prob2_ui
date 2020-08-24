@@ -14,7 +14,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaInput;
-import de.prob2.ui.symbolic.SymbolicGUIType;
 
 import javafx.fxml.FXML;
 
@@ -52,16 +51,7 @@ public class SymbolicAnimationInput extends SymbolicFormulaInput<SymbolicAnimati
 		final String formula = extractFormula(injector.getInstance(SymbolicAnimationChoosingStage.class));
 		final SymbolicAnimationItem formulaItem = new SymbolicAnimationItem(formula, animationType);
 		addFormula();
-		switch (animationType) {
-			case SEQUENCE:
-				symbolicAnimationItemHandler.handleSequence(formulaItem, false);
-				break;
-			case FIND_VALID_STATE:
-				symbolicAnimationItemHandler.findValidState(formulaItem, false);
-				break;
-			default:
-				break;
-		}
+		symbolicAnimationItemHandler.handleItem(formulaItem, false);
 		injector.getInstance(SymbolicAnimationChoosingStage.class).close();
 	}
 
