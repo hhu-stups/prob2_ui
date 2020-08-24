@@ -77,7 +77,7 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 		final SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem(formula, formula, checkingType);
 		if(checkingType == SymbolicExecutionType.CHECK_ALL_OPERATIONS) {
 			for(String event : events) {
-				symbolicCheckingFormulaHandler.addFormula(event, event, SymbolicExecutionType.INVARIANT);
+				symbolicCheckingFormulaHandler.addFormula(new SymbolicCheckingFormulaItem(event, event, SymbolicExecutionType.INVARIANT));
 			}
 		} else {
 			symbolicCheckingFormulaHandler.addFormula(item);
