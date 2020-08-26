@@ -11,6 +11,7 @@ import de.prob.cli.ProBInstance;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -60,12 +61,12 @@ public class PrologOutput extends TextFlow {
 			FontWeight weight = FontWeight.NORMAL;
 			FontPosture posture = FontPosture.REGULAR;
 			String message = s;
-			while(message.charAt(0) == 27) {
+			while(!message.isEmpty() && message.charAt(0) == 27) {
 				// ANSI escape code found. Warning: If ANSI escape code is not ending with m some parts of messages might be lost!
 				// Warning: If codes are not set at beginning of message, e.g. for changing attributes midmessage, chaos might ensue ;)
-				int indexOfANSIEscapeCodeEnd = s.indexOf('m');
-				String str = message.substring(1, indexOfANSIEscapeCodeEnd);
+				int indexOfANSIEscapeCodeEnd = s.indexOf("m");
 				if (indexOfANSIEscapeCodeEnd != -1) {
+					String str = message.substring(1, indexOfANSIEscapeCodeEnd);
 					// Setting supported font color and attributes for output
 					switch (str) {
 						case "[0":
@@ -173,6 +174,9 @@ public class PrologOutput extends TextFlow {
 		PrologOutputAppender prologOutputAppender = new PrologOutputAppender(this);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
+		//Consume zoom events as it leads to a NullPointerException (seems to be a bug in JavaFX)
+		this.setOnZoom(Event::consume);
+
 		Thread thread = new Thread(() -> {
 			PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 			encoder.setContext(context);
@@ -190,4 +194,5 @@ public class PrologOutput extends TextFlow {
 		});
 		thread.start();
 	}
+
 }
