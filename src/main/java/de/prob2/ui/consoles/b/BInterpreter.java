@@ -97,13 +97,9 @@ public class BInterpreter implements Executable {
 				sb.append(s);
 			}
 		} else if (result instanceof EnumerationWarning) {
-		    sb.append("UNKNOWN (");
 			sb.append(bundle.getString("consoles.b.interpreter.result.enumerationWarning"));
-		    sb.append(")");
 		} else if (result instanceof ComputationNotCompletedResult) {
-		    sb.append("UNKNOWN (");
 			sb.append(bundle.getString("consoles.b.interpreter.result.computationNotCompleted"));
-		    sb.append(")");
 			final String reason = ((ComputationNotCompletedResult)result).getReason();
 			if (!reason.isEmpty()) {
 				sb.append('\n');
