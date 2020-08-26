@@ -174,9 +174,6 @@ public class PrologOutput extends TextFlow {
 		PrologOutputAppender prologOutputAppender = new PrologOutputAppender(this);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-		//Consume zoom events as it leads to a NullPointerException (seems to be a bug in JavaFX)
-		this.setOnZoom(Event::consume);
-
 		Thread thread = new Thread(() -> {
 			PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 			encoder.setContext(context);
