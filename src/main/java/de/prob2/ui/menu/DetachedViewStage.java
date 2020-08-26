@@ -24,12 +24,14 @@ final class DetachedViewStage extends Stage {
 		
 		this.setScene(new Scene(new StackPane(detachedView)));
 		final String persistenceID = DetachViewStageController.PERSISTENCE_ID_PREFIX + this.getDetachedView().getClass().getName();
+		this.setMinWidth(detachedView.minWidth(-1));
+		this.setMinHeight(detachedView.minHeight(-1));
 		stageManager.register(this, persistenceID);
 		this.titleProperty().bind(sourceTitledPane.textProperty());
 		
 		// Default bounds, replaced by saved ones from the config when show() is called
-		this.setWidth(200);
-		this.setHeight(100);
+		this.setWidth(this.getMinWidth());
+		this.setHeight(this.getMinHeight());
 		this.setX((Screen.getPrimary().getVisualBounds().getWidth()-this.getWidth())/2);
 		this.setY((Screen.getPrimary().getVisualBounds().getHeight()-this.getHeight())/2);
 		

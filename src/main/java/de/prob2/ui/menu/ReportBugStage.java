@@ -16,6 +16,8 @@ public class ReportBugStage extends Stage {
 		webView.getEngine().load(script);
 		this.setTitle(bundle.getString("menu.reportBug.stage.title"));
 		this.setScene(new Scene(webView));
+		this.setMinWidth(640);
+		this.setMinHeight(480);
 		stageManager.register(this, this.getClass().getName());
 	}
 }

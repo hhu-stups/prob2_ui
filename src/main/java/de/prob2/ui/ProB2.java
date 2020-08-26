@@ -146,6 +146,8 @@ public class ProB2 extends Application {
 		Scene mainScene = new Scene(root);
 		primaryStage.setScene(mainScene);
 		primaryStage.sizeToScene();
+		primaryStage.setMinWidth(1100);
+		primaryStage.setMinHeight(480);
 
 		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 

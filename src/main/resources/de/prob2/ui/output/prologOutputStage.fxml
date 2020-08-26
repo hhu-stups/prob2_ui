@@ -5,7 +5,7 @@
 <?import de.prob2.ui.output.PrologOutput?>
 
 <?import javafx.scene.control.ScrollPane?>
-<fx:root type="Stage" title="%menu.advanced.items.prologoutput.title" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" title="%menu.advanced.items.prologoutput.title" minWidth="320" minHeight="240" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<ScrollPane>
