@@ -11,7 +11,6 @@ import de.prob.cli.ProBInstance;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
-import javafx.event.Event;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
