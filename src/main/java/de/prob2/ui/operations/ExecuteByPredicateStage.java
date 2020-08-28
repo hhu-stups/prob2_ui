@@ -1,32 +1,37 @@
 package de.prob2.ui.operations;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
-
+import com.google.inject.Injector;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.classicalb.Operation;
+import de.prob.model.representation.Guard;
+import de.prob.model.representation.ModelElementList;
 import de.prob.statespace.Transition;
+import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 public final class ExecuteByPredicateStage extends Stage {
@@ -46,19 +51,26 @@ public final class ExecuteByPredicateStage extends Stage {
 	
 	@FXML 
 	private Button executeButton;
-	
+
 	@FXML
-	private Label warningLabel;
-	
+	private Button visualizeButton;
+
+	@FXML
+	private HBox executeFailedBox;
+
+	private final Injector injector;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
 	private final ObjectProperty<OperationItem> item;
+
+	private String lastFailedPredicate;
 	
 	@Inject
-	private ExecuteByPredicateStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
+	private ExecuteByPredicateStage(final Injector injector, final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
 		super();
-		
+
+		this.injector = injector;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
@@ -120,11 +132,50 @@ public final class ExecuteByPredicateStage extends Stage {
 			);
 		} catch (IllegalArgumentException | ProBError | EvaluationException e) {
 			LOGGER.info("Execute by predicate failed", e);
-			warningLabel.setText(String.format(bundle.getString("operations.executeByPredicate.alerts.failedToExecuteOperation.content")));
+			lastFailedPredicate = this.predicateBuilderView.getPredicate();
+			executeFailedBox.setVisible(true);
+			String opName = this.getItem().getName();
+			if("$initialise_machine".equals(opName) || "$setup_constants".equals(opName)) {
+				visualizeButton.setDisable(true);
+			}
 			return;
 		}
 		assert transitions.size() == 1;
 		this.currentTrace.set(this.currentTrace.get().add(transitions.get(0)));
 		this.hide();
 	}
+
+	@FXML
+	public void visualizePredicate() {
+		try {
+			DotView formulaStage = injector.getInstance(DotView.class);
+			formulaStage.visualizeFormula(buildVisualizationPredicate());
+			this.close();
+			formulaStage.show();
+		} catch (EvaluationException | ProBError e) {
+			LOGGER.error("Could not visualize formula", e);
+			stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content").showAndWait();
+		}
+	}
+
+	private String buildVisualizationPredicate() {
+		List<String> parameterNames = this.getItem().getParameterNames();
+		Operation operation = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getOperation(this.getItem().getName());
+		ModelElementList<Guard> guards = operation.getChildrenOfType(Guard.class);
+		StringBuilder predicate = new StringBuilder();
+		if(!parameterNames.isEmpty()) {
+			predicate.append("#(");
+			predicate.append(String.join(", ", parameterNames));
+			predicate.append(").");
+		}
+		predicate.append("(");
+		if(!guards.isEmpty()) {
+			predicate.append(guards.stream().map(guard -> "(" + guard.toString() + ")").collect(Collectors.joining(" & ")));
+			predicate.append(" & ");
+		}
+		predicate.append(lastFailedPredicate);
+		predicate.append(")");
+		return predicate.toString();
+	}
+
 }

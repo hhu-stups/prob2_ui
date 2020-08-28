@@ -4,11 +4,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" width="600" height="800" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
+<fx:root type="Stage" width="800" height="1080" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
 	<scene>
 		<Scene>
 			<StackPane>
@@ -20,7 +21,10 @@
 					<Label fx:id="paramsLabel" text="%operations.executeByPredicate.parameters"/>
 					<PredicateBuilderView fx:id="predicateBuilderView" VBox.vgrow="always"/>
 					<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute"/>
-					<Label fx:id="warningLabel" styleClass="warning"/>
+					<HBox alignment="TOP_CENTER" fx:id="executeFailedBox" visible="false" spacing="5.0">
+						<Label fx:id="warningLabel" styleClass="warning" text="%operations.executeByPredicate.alerts.failedToExecuteOperation.content"/>
+						<Button fx:id="visualizeButton" alignment="CENTER_RIGHT" styleClass="button-blue" text="%operations.executeByPredicate.visualize" onAction="#visualizePredicate"/>
+					</HBox>
 				</VBox>
 			</StackPane>
 		</Scene>
