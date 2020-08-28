@@ -100,6 +100,9 @@ public final class StageManager {
 	 * @param fxmlUrl the URL of the FXML file to load
 	 */
 	public void loadFXML(final Object controller, final URL fxmlUrl) {
+		Objects.requireNonNull(controller, "controller");
+		Objects.requireNonNull(fxmlUrl, "fxmlUrl");
+		
 		final FXMLLoader loader = injector.getInstance(FXMLLoader.class);
 		loader.setLocation(fxmlUrl);
 		loader.setRoot(controller);
@@ -135,7 +138,11 @@ public final class StageManager {
 	 * @param fxmlResource the resource name of the FXML file to load
 	 */
 	public void loadFXML(final Object controller, final String fxmlResource) {
-		this.loadFXML(controller, controller.getClass().getResource(fxmlResource));
+		final URL fxmlUrl = controller.getClass().getResource(fxmlResource);
+		if (fxmlUrl == null) {
+			throw new IllegalArgumentException("Resource not found: " + fxmlResource);
+		}
+		this.loadFXML(controller, fxmlUrl);
 	}
 
 	/**
