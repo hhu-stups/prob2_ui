@@ -4,8 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
+import de.prob.model.classicalb.ClassicalBConstant;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.classicalb.Operation;
+import de.prob.model.classicalb.Property;
 import de.prob.model.representation.Guard;
 import de.prob.model.representation.ModelElementList;
 import de.prob.statespace.Transition;
@@ -135,7 +137,7 @@ public final class ExecuteByPredicateStage extends Stage {
 			lastFailedPredicate = this.predicateBuilderView.getPredicate();
 			executeFailedBox.setVisible(true);
 			String opName = this.getItem().getName();
-			if("$initialise_machine".equals(opName) || "$setup_constants".equals(opName)) {
+			if("$initialise_machine".equals(opName)) {
 				visualizeButton.setDisable(true);
 			}
 			return;
@@ -158,23 +160,61 @@ public final class ExecuteByPredicateStage extends Stage {
 		}
 	}
 
-	private String buildVisualizationPredicate() {
-		List<String> parameterNames = this.getItem().getParameterNames();
-		Operation operation = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getOperation(this.getItem().getName());
-		ModelElementList<Guard> guards = operation.getChildrenOfType(Guard.class);
+	private String buildInnerPredicate() {
 		StringBuilder predicate = new StringBuilder();
-		if(!parameterNames.isEmpty()) {
-			predicate.append("#(");
-			predicate.append(String.join(", ", parameterNames));
-			predicate.append(").");
-		}
 		predicate.append("(");
-		if(!guards.isEmpty()) {
-			predicate.append(guards.stream().map(guard -> "(" + guard.toString() + ")").collect(Collectors.joining(" & ")));
-			predicate.append(" & ");
+
+		String opName = this.getItem().getName();
+		switch (opName) {
+			case "$setup_constants":
+				ModelElementList<Property> properties = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getProperties();
+				if(!properties.isEmpty()) {
+					predicate.append(properties.stream().map(prop -> "(" + prop.toString() + ")").collect(Collectors.joining(" & ")));
+					predicate.append(" & ");
+				}
+				break;
+			default:
+				Operation operation = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getOperation(opName);
+				ModelElementList<Guard> guards = operation.getChildrenOfType(Guard.class);
+				if(!guards.isEmpty()) {
+					predicate.append(guards.stream().map(guard -> "(" + guard.toString() + ")").collect(Collectors.joining(" & ")));
+					predicate.append(" & ");
+				}
+				break;
 		}
 		predicate.append(lastFailedPredicate);
 		predicate.append(")");
+		return predicate.toString();
+	}
+
+	private String buildFreeVariables() {
+		String opName = this.getItem().getName();
+		StringBuilder variables = new StringBuilder();
+		switch (opName) {
+			case "$setup_constants":
+				ModelElementList<ClassicalBConstant> constants = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getConstants();
+				if(!constants.isEmpty()) {
+					variables.append("#(");
+					variables.append(constants.stream().map(ClassicalBConstant::getName).collect(Collectors.joining(", ")));
+					variables.append(").");
+				}
+				break;
+			default:
+				List<String> parameterNames = this.getItem().getParameterNames();
+				if(!parameterNames.isEmpty()) {
+					variables.append("#(");
+					variables.append(String.join(", ", parameterNames));
+					variables.append(").");
+				}
+				break;
+		}
+		return variables.toString();
+	}
+
+	private String buildVisualizationPredicate() {
+		StringBuilder predicate = new StringBuilder();
+		predicate.append(buildFreeVariables());
+		predicate.append(buildInnerPredicate());
 		return predicate.toString();
 	}
 
