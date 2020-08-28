@@ -74,18 +74,6 @@ public class StatusBar extends HBox {
 	private void initialize() {
 		final InvalidationListener updateListener = o -> this.update();
 		this.currentTrace.addListener(updateListener);
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if (from != null) {
-				from.modelcheckingStatusProperty().removeListener(updateListener);
-				from.ltlStatusProperty().removeListener(updateListener);
-				from.symbolicCheckingStatusProperty().removeListener(updateListener);
-			}
-			if (to != null) {
-				to.modelcheckingStatusProperty().addListener(updateListener);
-				to.ltlStatusProperty().addListener(updateListener);
-				to.symbolicCheckingStatusProperty().addListener(updateListener);
-			}
-		});
 		this.loadingStatusProperty().addListener(updateListener);
 		// this.updating doesn't have a listener; instead each individual expression has a listener added in addUpdatingExpression.
 	}
@@ -137,17 +125,6 @@ public class StatusBar extends HBox {
 		}
 		if (!trace.getCurrentState().getStateErrors().isEmpty()) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
-		}
-		if (machine.getLtlStatus() == Machine.CheckingStatus.FAILED) {
-			errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
-		}
-
-		if (machine.getSymbolicCheckingStatus() == Machine.CheckingStatus.FAILED) {
-			errorMessages.add(resourceBundle.getString("statusbar.errors.symbolic.checking.error"));
-		}
-
-		if (machine.getModelcheckingStatus() == Machine.CheckingStatus.FAILED) {
-			errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
 		}
 		return errorMessages;
 	}
