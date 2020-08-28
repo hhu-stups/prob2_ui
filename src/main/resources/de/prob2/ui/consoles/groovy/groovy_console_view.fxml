@@ -6,7 +6,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<fx:root type="Stage" title="%consoles.groovy.stage.title" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" title="%consoles.groovy.stage.title" minWidth="320" minHeight="240" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>

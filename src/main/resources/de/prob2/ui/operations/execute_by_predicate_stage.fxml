@@ -9,7 +9,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" width="800" height="1080" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
+
+<fx:root type="Stage" minWidth="600" minHeight="800" width="800" height="1080" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
 	<scene>
 		<Scene>
 			<StackPane>

@@ -26,13 +26,10 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -82,8 +79,6 @@ public final class StageManager {
 	private final Map<Stage, Void> registered;
 	private MenuBar globalMacMenuBar;
 	private Stage mainStage;
-	private final DoubleProperty stageSceneWidthDifference;
-	private final DoubleProperty stageSceneHeightDifference;
 
 	@Inject
 	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final ResourceBundle bundle) {
@@ -95,8 +90,6 @@ public final class StageManager {
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
 		this.globalMacMenuBar = null;
-		this.stageSceneWidthDifference = new SimpleDoubleProperty(this, "stageSceneWidthDifference", 0.0);
-		this.stageSceneHeightDifference = new SimpleDoubleProperty(this, "stageSceneHeightDifference", 0.0);
 	}
 
 	/**
@@ -198,27 +191,6 @@ public final class StageManager {
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
 
-		// If possible, make the stage respect the minimum size of its content.
-		// For some reason, this is not the default behavior in JavaFX.
-		stage.widthProperty().addListener((o, from, to) -> {
-			final double minWidth;
-			if (stage.getScene() == null || stage.getScene().getRoot() == null) {
-				minWidth = 0.0;
-			} else {
-				minWidth = stage.getScene().getRoot().minWidth(-1);
-			}
-			stage.setMinWidth(minWidth + this.stageSceneWidthDifference.get());
-		});
-		stage.heightProperty().addListener((o, from, to) -> {
-			final double minHeight;
-			if (stage.getScene() == null || stage.getScene().getRoot() == null) {
-				minHeight = 0.0;
-			} else {
-				minHeight = stage.getScene().getRoot().minHeight(-1);
-			}
-			stage.setMinHeight(minHeight + this.stageSceneHeightDifference.get());
-		});
-
 		stage.focusedProperty().addListener(e -> {
 			final String stageId = getPersistenceID(stage);
 			if (stageId != null) {
@@ -274,44 +246,6 @@ public final class StageManager {
 	 */
 	public void registerMainStage(Stage stage, String persistenceID) {
 		this.mainStage = stage;
-		stage.setOnShown(event -> {
-			// Calculate difference between stage and scene sizes.
-			// This information is needed to automatically set the minimum sizes of stages.
-			// See the listener in StageManager.register for details.
-			// The size difference can only be calculated properly once the stage is on screen and properly sized, but there is no good way to determine when that has happened.
-			// (Putting the code in onShown is not enough - on Linux for example, the stage/scene do not have their final size when onShown is called.)
-			// So instead we have to rely on some guessing. We assume that the stage/scene have been properly sized when all of the following are true:
-			// * the stage is shown
-			// * the stage and scene width and height are greater than 100 (during the initial sizing the stage/scene can be very small)
-			// * the width/height difference is at least 0 and less than 100 (this catches cases where one size has changed, but the other size hasn't yet been updated to match)
-			final InvalidationListener widthDiffListener = o -> {
-				final double stageWidth = stage.getWidth();
-				final double sceneWidth = stage.getScene().getWidth();
-				LOGGER.trace("Main stage width is now {}", stageWidth);
-				LOGGER.trace("Main scene width is now {}", sceneWidth);
-				final double widthDiff = stageWidth - sceneWidth;
-				if (stageWidth > 100.0 && sceneWidth > 100.0 && widthDiff >= 0.0 && widthDiff < 100.0) {
-					LOGGER.trace("Stage/scene width difference is now {}", widthDiff);
-					this.stageSceneWidthDifference.set(widthDiff);
-				}
-			};
-			final InvalidationListener heightDiffListener = o -> {
-				final double stageHeight = stage.getHeight();
-				final double sceneHeight = stage.getScene().getHeight();
-				LOGGER.trace("Main stage height is now {}", stageHeight);
-				LOGGER.trace("Main scene height is now {}", sceneHeight);
-				final double heightDiff = stageHeight - sceneHeight;
-				if (stageHeight > 100.0 && sceneHeight > 100.0 && heightDiff >= 0.0 && heightDiff < 100.0) {
-					LOGGER.trace("Stage/scene height difference is now {}", heightDiff);
-					this.stageSceneHeightDifference.set(heightDiff);
-				}
-			};
-			stage.widthProperty().addListener(widthDiffListener);
-			stage.heightProperty().addListener(heightDiffListener);
-			stage.getScene().widthProperty().addListener(widthDiffListener);
-			stage.getScene().heightProperty().addListener(heightDiffListener);
-			stage.setOnShown(null);
-		});
 		this.register(stage, persistenceID);
 	}
 

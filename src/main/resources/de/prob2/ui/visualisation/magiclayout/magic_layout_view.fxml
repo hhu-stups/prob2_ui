@@ -25,7 +25,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1"
-	title="%visualisation.magicLayout.view.title">
+	title="%visualisation.magicLayout.view.title" minWidth="640" minHeight="480">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>

@@ -16,7 +16,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" title="%preferences.stage.title"
-		 minHeight="160.0" minWidth="320.0" onCloseRequest="#handleClose"
+		 minHeight="480.0" minWidth="640.0" onCloseRequest="#handleClose"
 		 xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">

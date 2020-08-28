@@ -16,6 +16,8 @@ public class HelpSystemStage extends Stage {
 	private HelpSystemStage(final StageManager stageManager, ResourceBundle bundle, final HelpSystem help) {
 		this.setTitle(bundle.getString("helpsystem.stage.title"));
 		this.setScene(new Scene(help));
+		this.setMinWidth(640);
+		this.setMinHeight(480);
 		stageManager.register(this, this.getClass().getName());
 	}
 }
