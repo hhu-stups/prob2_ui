@@ -70,6 +70,9 @@
 .button-blue > .label {
 	-fx-text-fill: -prob-white;
 }
+.button-invisible {
+	-fx-padding: 0;
+}
 
 .icon-basic {
 	-fx-text-fill: -prob-lightgrey;
