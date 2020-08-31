@@ -1,19 +1,9 @@
 package de.prob2.ui.dynamic.table;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.GetAllTableCommands;
+import de.prob.animator.command.GetShortestTraceCommand;
 import de.prob.animator.command.GetTableForVisualizationCommand;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -29,7 +19,6 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -38,12 +27,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage {
@@ -150,6 +151,37 @@ public class ExpressionTableView extends DynamicCommandStage {
 			tableView.getColumns().add(column);
 		}
 		tableView.setItems(buildData(data.getRows()));
+		tableView.setRowFactory(table -> {
+			final TableRow<ObservableList<String>> row = new TableRow<>();
+			List<MenuItem> contextMenuItems = new ArrayList<>();
+
+			if(header.contains("Source")) {
+				MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
+				showSourceItem.setOnAction(e -> {
+					//TODO: Implement show source
+				});
+				contextMenuItems.add(showSourceItem);
+			}
+
+			if(header.contains("State ID")) {
+				MenuItem jumpToStateItem = new MenuItem(bundle.getString("dynamic.tableview.jumpToState"));
+				jumpToStateItem.setOnAction(e -> {
+					int indexOfStateID = header.indexOf("State ID");
+					String stateID = row.getItem().get(indexOfStateID);
+					GetShortestTraceCommand cmd = new GetShortestTraceCommand(currentTrace.getStateSpace(), stateID);
+					currentTrace.getStateSpace().execute(cmd);
+					currentTrace.set(cmd.getTrace(currentTrace.getStateSpace()));
+				});
+				contextMenuItems.add(jumpToStateItem);
+			}
+
+			if (!contextMenuItems.isEmpty()) {
+				ContextMenu contextMenu = new ContextMenu();
+				contextMenu.getItems().addAll(contextMenuItems);
+				row.setContextMenu(contextMenu);
+			}
+			return row;
+		});
 		pane.setContent(tableView);
 		taErrors.clear();
 	}
