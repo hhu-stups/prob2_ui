@@ -52,6 +52,10 @@ public class ExpressionTableView extends DynamicCommandStage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 	
 	private static final Pattern NEEDS_CSV_QUOTE_PATTERN = Pattern.compile("[,\"\n\r]");
+
+	private static final String SOURCE_COLUMN_NAME = "Source";
+
+	private static final String STATE_ID_COLUMN_NAME = "State ID";
 	
 	@FXML
 	private Button saveButton;
@@ -155,7 +159,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 			final TableRow<ObservableList<String>> row = new TableRow<>();
 			List<MenuItem> contextMenuItems = new ArrayList<>();
 
-			if(header.contains("Source")) {
+			if(header.contains(SOURCE_COLUMN_NAME)) {
 				MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
 				showSourceItem.setOnAction(e -> {
 					//TODO: Implement show source
@@ -163,10 +167,10 @@ public class ExpressionTableView extends DynamicCommandStage {
 				contextMenuItems.add(showSourceItem);
 			}
 
-			if(header.contains("State ID")) {
+			if(header.contains(STATE_ID_COLUMN_NAME)) {
 				MenuItem jumpToStateItem = new MenuItem(bundle.getString("dynamic.tableview.jumpToState"));
 				jumpToStateItem.setOnAction(e -> {
-					int indexOfStateID = header.indexOf("State ID");
+					int indexOfStateID = header.indexOf(STATE_ID_COLUMN_NAME);
 					String stateID = row.getItem().get(indexOfStateID);
 					GetShortestTraceCommand cmd = new GetShortestTraceCommand(currentTrace.getStateSpace(), stateID);
 					currentTrace.getStateSpace().execute(cmd);
