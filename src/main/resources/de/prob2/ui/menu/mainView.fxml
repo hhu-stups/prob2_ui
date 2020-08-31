@@ -3,7 +3,6 @@
 <?import de.prob2.ui.beditor.BEditorView?>
 <?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.sharedviews.BetterTabPane?>
-<?import de.prob2.ui.states.StateErrorsView?>
 <?import de.prob2.ui.states.StatesView?>
 <?import de.prob2.ui.visualisation.VisualisationView?>
 <?import javafx.scene.control.SplitPane?>
@@ -17,9 +16,6 @@
 			<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
 				<Tab fx:id="statesTab" id="states" text="%menu.mainView.tabs.states">
 					<StatesView/>
-				</Tab>
-				<Tab fx:id="statesErrorTab" id="statesError" text="%menu.mainView.tabs.stateErrors">
-					<StateErrorsView/>
 				</Tab>
 				<Tab fx:id="visualisationTab" id="visualisation" text="%menu.mainView.tabs.visualisation">
 					<VisualisationView/>

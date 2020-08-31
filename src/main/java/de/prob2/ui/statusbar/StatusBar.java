@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -48,22 +50,25 @@ public class StatusBar extends HBox {
 	}
 	
 	@FXML private Label statusLabel;
+	@FXML private BindableGlyph infoIcon;
 	
 	private final ResourceBundle resourceBundle;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
+	private final Provider<ErrorStatusStage> errorStatusStageProvider;
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private BooleanExpression updating;
 	
 	@Inject
 	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final CurrentProject currentProject,
-					final StageManager stageManager) {
+			final Provider<ErrorStatusStage> errorStatusStageProvider, final StageManager stageManager) {
 		super();
 		
 		this.resourceBundle = resourceBundle;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.errorStatusStageProvider = errorStatusStageProvider;
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.updating = Bindings.createBooleanBinding(() -> false);
 		
@@ -74,20 +79,13 @@ public class StatusBar extends HBox {
 	private void initialize() {
 		final InvalidationListener updateListener = o -> this.update();
 		this.currentTrace.addListener(updateListener);
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if (from != null) {
-				from.modelcheckingStatusProperty().removeListener(updateListener);
-				from.ltlStatusProperty().removeListener(updateListener);
-				from.symbolicCheckingStatusProperty().removeListener(updateListener);
-			}
-			if (to != null) {
-				to.modelcheckingStatusProperty().addListener(updateListener);
-				to.ltlStatusProperty().addListener(updateListener);
-				to.symbolicCheckingStatusProperty().addListener(updateListener);
-			}
-		});
 		this.loadingStatusProperty().addListener(updateListener);
 		// this.updating doesn't have a listener; instead each individual expression has a listener added in addUpdatingExpression.
+	}
+	
+	@FXML
+	private void showErrorStatusStage() {
+		this.errorStatusStageProvider.get().show();
 	}
 	
 	public ObjectProperty<StatusBar.LoadingStatus> loadingStatusProperty() {
@@ -110,6 +108,7 @@ public class StatusBar extends HBox {
 	
 	private void update() {
 		statusLabel.getStyleClass().removeAll("noErrors", "someErrors");
+		infoIcon.setVisible(false);
 		if (this.updating.get()) {
 			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
 		} else {
@@ -124,6 +123,7 @@ public class StatusBar extends HBox {
 					statusLabel.getStyleClass().add("someErrors");
 					statusLabel.setText(String.format(resourceBundle.getString("statusbar.someErrors"), String.join(", ", errorMessages)));
 				}
+				infoIcon.setVisible(true);
 			} else {
 				statusLabel.setText(this.resourceBundle.getString(this.getLoadingStatus().getMessageKey()));
 			}
@@ -137,17 +137,6 @@ public class StatusBar extends HBox {
 		}
 		if (!trace.getCurrentState().getStateErrors().isEmpty()) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
-		}
-		if (machine.getLtlStatus() == Machine.CheckingStatus.FAILED) {
-			errorMessages.add(resourceBundle.getString("statusbar.errors.ltlError"));
-		}
-
-		if (machine.getSymbolicCheckingStatus() == Machine.CheckingStatus.FAILED) {
-			errorMessages.add(resourceBundle.getString("statusbar.errors.symbolic.checking.error"));
-		}
-
-		if (machine.getModelcheckingStatus() == Machine.CheckingStatus.FAILED) {
-			errorMessages.add(resourceBundle.getString("statusbar.errors.modelcheckError"));
 		}
 		return errorMessages;
 	}

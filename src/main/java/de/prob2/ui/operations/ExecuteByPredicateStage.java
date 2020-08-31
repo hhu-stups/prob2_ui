@@ -136,6 +136,10 @@ public final class ExecuteByPredicateStage extends Stage {
 			LOGGER.info("Execute by predicate failed", e);
 			lastFailedPredicate = this.predicateBuilderView.getPredicate();
 			executeFailedBox.setVisible(true);
+			String opName = this.getItem().getName();
+			if(Transition.INITIALISE_MACHINE_NAME.equals(opName)) {
+				visualizeButton.setDisable(true);
+			}
 			return;
 		}
 		assert transitions.size() == 1;
@@ -162,7 +166,7 @@ public final class ExecuteByPredicateStage extends Stage {
 
 		String opName = this.getItem().getName();
 		switch (opName) {
-			case "$setup_constants":
+			case Transition.SETUP_CONSTANTS_NAME:
 				ModelElementList<Property> properties = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getProperties();
 				if(!properties.isEmpty()) {
 					predicate.append(properties.stream().map(prop -> "(" + prop.toString() + ")").collect(Collectors.joining(" & ")));
@@ -191,7 +195,7 @@ public final class ExecuteByPredicateStage extends Stage {
 		String opName = this.getItem().getName();
 		StringBuilder freeVariables = new StringBuilder();
 		switch (opName) {
-			case "$setup_constants":
+			case Transition.SETUP_CONSTANTS_NAME:
 				ModelElementList<ClassicalBConstant> constants = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getConstants();
 				if(!constants.isEmpty()) {
 					freeVariables.append("#(");
