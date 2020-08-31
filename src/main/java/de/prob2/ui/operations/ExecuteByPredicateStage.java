@@ -173,7 +173,7 @@ public final class ExecuteByPredicateStage extends Stage {
 					predicate.append(" & ");
 				}
 				break;
-			case "$initialise_machine":
+			case Transition.INITIALISE_MACHINE_NAME:
 				// TODO: Implement visualization with before/after predicate
 				break;
 			default:
@@ -203,7 +203,7 @@ public final class ExecuteByPredicateStage extends Stage {
 					freeVariables.append(").");
 				}
 				break;
-			case "$initialise_machine":
+			case Transition.INITIALISE_MACHINE_NAME:
 				// TODO: Implement visualization with before/after predicate
 				break;
 			default:
