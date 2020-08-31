@@ -33,6 +33,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -111,6 +112,9 @@ public final class ModelcheckingView extends ScrollPane {
 
 	@FXML
 	private Label elapsedTime;
+
+	@FXML
+	private ProgressBar progressBar;
 
 	@FXML
 	private SimpleStatsView simpleStatsView;
@@ -344,9 +348,16 @@ public final class ModelcheckingView extends ScrollPane {
 	public void showStats(final long timeElapsed, final StateSpaceStats stats) {
 		elapsedTime.setText(String.format("%.1f", timeElapsed / 1000.0) + " s");
 		if (stats != null) {
+			progressBar.setProgress(calculateProgress(stats));
 			simpleStatsView.setStats(stats);
 		}
 		statsBox.setVisible(true);
+	}
+
+	private double calculateProgress(StateSpaceStats stats) {
+		int distinctStates = stats.getNrTotalNodes() - 1;
+		int processedStates = stats.getNrProcessedNodes() - 1;
+		return 1.0 * Math.pow(((processedStates + 0.0)/distinctStates), 6);
 	}
 
 	public void hideStats() {
