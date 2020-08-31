@@ -136,10 +136,6 @@ public final class ExecuteByPredicateStage extends Stage {
 			LOGGER.info("Execute by predicate failed", e);
 			lastFailedPredicate = this.predicateBuilderView.getPredicate();
 			executeFailedBox.setVisible(true);
-			String opName = this.getItem().getName();
-			if("$initialise_machine".equals(opName)) {
-				visualizeButton.setDisable(true);
-			}
 			return;
 		}
 		assert transitions.size() == 1;
@@ -173,7 +169,11 @@ public final class ExecuteByPredicateStage extends Stage {
 					predicate.append(" & ");
 				}
 				break;
+			case "$initialise_machine":
+				// TODO: Implement visualization with before/after predicate
+				break;
 			default:
+				// TODO: Implement visualization with before/after predicate
 				Operation operation = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getOperation(opName);
 				ModelElementList<Guard> guards = operation.getChildrenOfType(Guard.class);
 				if(!guards.isEmpty()) {
@@ -189,26 +189,30 @@ public final class ExecuteByPredicateStage extends Stage {
 
 	private String buildFreeVariables() {
 		String opName = this.getItem().getName();
-		StringBuilder variables = new StringBuilder();
+		StringBuilder freeVariables = new StringBuilder();
 		switch (opName) {
 			case "$setup_constants":
 				ModelElementList<ClassicalBConstant> constants = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getConstants();
 				if(!constants.isEmpty()) {
-					variables.append("#(");
-					variables.append(constants.stream().map(ClassicalBConstant::getName).collect(Collectors.joining(", ")));
-					variables.append(").");
+					freeVariables.append("#(");
+					freeVariables.append(constants.stream().map(ClassicalBConstant::getName).collect(Collectors.joining(", ")));
+					freeVariables.append(").");
 				}
 				break;
+			case "$initialise_machine":
+				// TODO: Implement visualization with before/after predicate
+				break;
 			default:
+				// TODO: Implement visualization with before/after predicate -> also add some variables
 				List<String> parameterNames = this.getItem().getParameterNames();
 				if(!parameterNames.isEmpty()) {
-					variables.append("#(");
-					variables.append(String.join(", ", parameterNames));
-					variables.append(").");
+					freeVariables.append("#(");
+					freeVariables.append(String.join(", ", parameterNames));
+					freeVariables.append(").");
 				}
 				break;
 		}
-		return variables.toString();
+		return freeVariables.toString();
 	}
 
 	private String buildVisualizationPredicate() {
