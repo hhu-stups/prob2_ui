@@ -99,8 +99,6 @@ public class ProB2 extends Application {
 				Locale.setDefault(localeOverride);
 			}
 		}
-
-		System.setProperty("prob.stdlib", Main.getProBDirectory() + File.separator + "stdlib");
 	}
 
 	@Override
