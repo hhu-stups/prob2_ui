@@ -37,7 +37,6 @@ public final class Config {
 
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
-	private final Injector injector;
 	private final JsonManager<ConfigData> jsonManager;
 	private final RuntimeOptions runtimeOptions;
 	
@@ -45,8 +44,7 @@ public final class Config {
 	private final List<ConfigListener> listeners;
 
 	@Inject
-	private Config(final Injector injector, final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
-		this.injector = injector;
+	private Config(final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(ConfigData.class, "Config", 1) {
 			private static final String GUI_STATE_FIELD = "guiState";
