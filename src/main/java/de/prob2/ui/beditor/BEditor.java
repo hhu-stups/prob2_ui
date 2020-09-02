@@ -1,5 +1,33 @@
 package de.prob2.ui.beditor;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.scripting.ClassicalBFactory;
+import de.prob.scripting.EventBFactory;
+import de.prob.scripting.ModelFactory;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.geometry.Bounds;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.stage.Popup;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.event.MouseOverTextEvent;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,36 +41,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import com.google.inject.Inject;
-
-import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.scripting.ClassicalBFactory;
-import de.prob.scripting.EventBFactory;
-import de.prob.scripting.ModelFactory;
-import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import javafx.geometry.Bounds;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.stage.Popup;
-
-import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.LineNumberFactory;
-import org.fxmisc.richtext.event.MouseOverTextEvent;
-import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Singleton
 @FXMLInjected
 public class BEditor extends CodeArea {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);

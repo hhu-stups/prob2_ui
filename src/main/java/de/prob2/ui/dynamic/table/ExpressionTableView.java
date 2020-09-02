@@ -1,6 +1,7 @@
 package de.prob2.ui.dynamic.table;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.command.GetAllTableCommands;
 import de.prob.animator.command.GetShortestTraceCommand;
@@ -12,11 +13,14 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob2.ui.ProB2;
+import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -97,6 +101,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@FXML
 	private HelpButton helpButton;
+
+	private final Injector injector;
 	
 	private final FileChooserManager fileChooserManager;
 	
@@ -104,9 +110,10 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	
 	@Inject
-	public ExpressionTableView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace, 
-			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+	public ExpressionTableView(final Injector injector, final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
+							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		super(stageManager, preferences, currentTrace, currentProject, bundle);
+		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");
@@ -193,32 +200,51 @@ public class ExpressionTableView extends DynamicCommandStage {
 		tableView.setRowFactory(table -> {
 			final ValueItemRow row = new ValueItemRow(header);
 			List<MenuItem> contextMenuItems = new ArrayList<>();
+			row.itemProperty().addListener((observable, from, to) -> {
 
-			if (header.contains(SOURCE_COLUMN_NAME)) {
-				MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
-				showSourceItem.setOnAction(e -> {
-					//TODO: Implement show source
-				});
-				contextMenuItems.add(showSourceItem);
-			}
+				if (header.contains(SOURCE_COLUMN_NAME)) {
+					MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
+					showSourceItem.setOnAction(e -> {
+						if(to != null) {
+							int indexOfSource = header.indexOf(SOURCE_COLUMN_NAME);
+							String source = to.get(indexOfSource);
+							source = source.replaceAll(" at line ", "");
+							String[] sourceSplitted = source.split(" \\- ");
+							String[] start = sourceSplitted[0].split(":");
+							injector.getInstance(ProB2.class).toFront();
+							injector.getInstance(MainView.class).switchTabPane("beditorTab");
+							BEditor bEditor = injector.getInstance(BEditor.class);
+							bEditor.requestFocus();
+							bEditor.moveTo(Integer.parseInt(start[0]) - 1, Integer.parseInt(start[1]));
+							bEditor.requestFollowCaret();
+						}
+					});
+					contextMenuItems.add(showSourceItem);
+				}
 
-			if (header.contains(STATE_ID_COLUMN_NAME)) {
-				MenuItem jumpToStateItem = new MenuItem(bundle.getString("dynamic.tableview.jumpToState"));
-				jumpToStateItem.setOnAction(e -> {
+				if (header.contains(STATE_ID_COLUMN_NAME)) {
+					MenuItem jumpToStateItem = new MenuItem(bundle.getString("dynamic.tableview.jumpToState"));
 					int indexOfStateID = header.indexOf(STATE_ID_COLUMN_NAME);
-					String stateID = row.getItem().get(indexOfStateID);
-					GetShortestTraceCommand cmd = new GetShortestTraceCommand(currentTrace.getStateSpace(), stateID);
-					currentTrace.getStateSpace().execute(cmd);
-					currentTrace.set(cmd.getTrace(currentTrace.getStateSpace()));
-				});
-				contextMenuItems.add(jumpToStateItem);
-			}
+					if(to != null) {
+						String stateID = to.get(indexOfStateID);
+						jumpToStateItem.setOnAction(e -> {
+							GetShortestTraceCommand cmd = new GetShortestTraceCommand(currentTrace.getStateSpace(), stateID);
+							currentTrace.getStateSpace().execute(cmd);
+							currentTrace.set(cmd.getTrace(currentTrace.getStateSpace()));
+						});
+						if ("none".equals(stateID)) {
+							jumpToStateItem.setDisable(true);
+						}
+					}
+					contextMenuItems.add(jumpToStateItem);
+				}
 
-			if (!contextMenuItems.isEmpty()) {
-				ContextMenu contextMenu = new ContextMenu();
-				contextMenu.getItems().addAll(contextMenuItems);
-				row.setContextMenu(contextMenu);
-			}
+				if (!contextMenuItems.isEmpty() && to != null) {
+					ContextMenu contextMenu = new ContextMenu();
+					contextMenu.getItems().addAll(contextMenuItems);
+					row.setContextMenu(contextMenu);
+				}
+			});
 			return row;
 		});
 		pane.setContent(tableView);
