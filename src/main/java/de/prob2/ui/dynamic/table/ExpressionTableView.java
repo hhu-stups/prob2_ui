@@ -48,6 +48,39 @@ import java.util.stream.Collectors;
 
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage {
+
+    private static final class ValueItemRow extends TableRow<ObservableList<String>> {
+
+        private final List<String> header;
+
+        private ValueItemRow(final List<String> header) {
+            super();
+            this.header = header;
+            getStyleClass().add("expression-table-view-row");
+        }
+
+        @Override
+        protected void updateItem(final ObservableList<String> item, final boolean empty) {
+            super.updateItem(item, empty);
+            this.getStyleClass().removeAll("true-val", "false-val");
+            if(item != null && !empty) {
+                if (header.contains(VALUE_COLUMN_NAME)) {
+                    int indexOfValue = header.indexOf(VALUE_COLUMN_NAME);
+                    String value = item.get(indexOfValue);
+                    switch (value) {
+                        case "TRUE":
+                            getStyleClass().add("true-val");
+                            break;
+                        case "FALSE":
+                            getStyleClass().add("false-val");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    }
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 	
@@ -56,6 +89,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 	private static final String SOURCE_COLUMN_NAME = "Source";
 
 	private static final String STATE_ID_COLUMN_NAME = "State ID";
+
+	private static final String VALUE_COLUMN_NAME = "VALUE";
 	
 	@FXML
 	private Button saveButton;
@@ -156,10 +191,10 @@ public class ExpressionTableView extends DynamicCommandStage {
 		}
 		tableView.setItems(buildData(data.getRows()));
 		tableView.setRowFactory(table -> {
-			final TableRow<ObservableList<String>> row = new TableRow<>();
+			final ValueItemRow row = new ValueItemRow(header);
 			List<MenuItem> contextMenuItems = new ArrayList<>();
 
-			if(header.contains(SOURCE_COLUMN_NAME)) {
+			if (header.contains(SOURCE_COLUMN_NAME)) {
 				MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
 				showSourceItem.setOnAction(e -> {
 					//TODO: Implement show source
@@ -167,7 +202,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 				contextMenuItems.add(showSourceItem);
 			}
 
-			if(header.contains(STATE_ID_COLUMN_NAME)) {
+			if (header.contains(STATE_ID_COLUMN_NAME)) {
 				MenuItem jumpToStateItem = new MenuItem(bundle.getString("dynamic.tableview.jumpToState"));
 				jumpToStateItem.setOnAction(e -> {
 					int indexOfStateID = header.indexOf(STATE_ID_COLUMN_NAME);
