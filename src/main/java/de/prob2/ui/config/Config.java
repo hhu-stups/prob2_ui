@@ -2,20 +2,15 @@ package de.prob2.ui.config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.Main;
@@ -31,9 +26,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class Config {
-	// This Gson instance is for loadBasicConfig only. Everywhere else, JsonManager should be used.
-	private static final Gson BASIC_GSON = new GsonBuilder().create();
-	private static final Path LOCATION = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
+	static final Path LOCATION = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
 
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
@@ -86,37 +79,6 @@ public final class Config {
 		this.load();
 		;
 		stopActions.add(this::save);
-	}
-
-	/**
-	 * Load basic settings from the config file. This method is static so it can be called before all of {@link Config}'s dependencies are available.
-	 *
-	 * @return basic settings from the config file
-	 */
-	private static BasicConfigData loadBasicConfig() {
-		try (final Reader reader = Files.newBufferedReader(LOCATION)) {
-			final BasicConfigData data = BASIC_GSON.fromJson(reader, BasicConfigData.class);
-			if (data == null) {
-				// Config file is empty, use defaults instead.
-				return new BasicConfigData();
-			}
-			return data;
-		} catch (FileNotFoundException | NoSuchFileException exc) {
-			logger.info("Config file not found while loading basic config, loading default settings", exc);
-			return new BasicConfigData();
-		} catch (IOException exc) {
-			logger.warn("Failed to open config file while loading basic config", exc);
-			return new BasicConfigData();
-		}
-	}
-
-	/**
-	 * Get the locale override from the config file. This method is static so it can be called before all of {@link Config}'s dependencies are available.
-	 *
-	 * @return the locale override
-	 */
-	public static Locale getLocaleOverride() {
-		return loadBasicConfig().localeOverride;
 	}
 
 	public void addListener(final ConfigListener listener) {

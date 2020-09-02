@@ -1,11 +1,24 @@
 package de.prob2.ui;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import ch.qos.logback.classic.util.ContextInitializer;
+
+import com.google.gson.GsonBuilder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
 import de.prob.cli.ProBInstanceProvider;
 import de.prob.statespace.Trace;
-import de.prob2.ui.config.Config;
+import de.prob2.ui.config.BasicConfig;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
@@ -20,6 +33,7 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
@@ -31,6 +45,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -39,16 +54,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ProB2 extends Application {
 	private Logger logger;
@@ -89,7 +94,8 @@ public class ProB2 extends Application {
 		
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
 		if (runtimeOptions.isLoadConfig()) {
-			final Locale localeOverride = Config.getLocaleOverride();
+			final BasicConfig basicConfig = new BasicConfig(new GsonBuilder().create());
+			final Locale localeOverride = basicConfig.getLocaleOverride();
 			if (localeOverride != null) {
 				Locale.setDefault(localeOverride);
 			}
