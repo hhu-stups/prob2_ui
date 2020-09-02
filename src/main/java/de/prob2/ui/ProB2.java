@@ -336,8 +336,4 @@ public class ProB2 extends Application {
 			Platform.exit();
 		}
 	}
-
-	public void toFront() {
-		this.primaryStage.toFront();
-	}
 }

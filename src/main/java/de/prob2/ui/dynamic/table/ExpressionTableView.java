@@ -211,7 +211,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 							source = source.replaceAll(" at line ", "");
 							String[] sourceSplitted = source.split(" \\- ");
 							String[] start = sourceSplitted[0].split(":");
-							injector.getInstance(ProB2.class).toFront();
+							stageManager.getMainStage().toFront();
 							injector.getInstance(MainView.class).switchTabPane("beditorTab");
 							BEditor bEditor = injector.getInstance(BEditor.class);
 							bEditor.requestFocus();
