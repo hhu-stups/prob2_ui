@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="200.0" maxWidth="Infinity"
+<fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="400.0" maxWidth="Infinity"
 	maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
