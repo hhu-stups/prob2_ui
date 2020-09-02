@@ -26,6 +26,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob.unicode.UnicodeTranslator;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -193,9 +194,10 @@ public final class StatesView extends StackPane {
 				if(core != null) {
 					String code = core.getCode();
 					List<String> coreConjuncts = Arrays.stream(code.split("&"))
-							.map(str -> str.replace(" ", ""))
+							.map(UnicodeTranslator::toUnicode)
+							.map(str -> str.replaceAll(" ", ""))
 							.collect(Collectors.toList());
-					if (coreConjuncts.contains(to.getLabel().replace(" ", ""))) {
+					if (coreConjuncts.contains(UnicodeTranslator.toUnicode(to.getLabel()).replaceAll(" ", ""))) {
 						row.getStyleClass().add("unsatCore");
 						return;
 					}
