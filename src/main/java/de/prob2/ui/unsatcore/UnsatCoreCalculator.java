@@ -1,12 +1,7 @@
 package de.prob2.ui.unsatcore;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.UnsatRegularCoreCommand;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.animator.domainobjects.IEvalElement;
@@ -14,10 +9,14 @@ import de.prob.animator.domainobjects.Join;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.classicalb.Property;
 import de.prob.model.representation.AbstractFormulaElement;
+import de.prob.unicode.UnicodeTranslator;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Singleton
 public class UnsatCoreCalculator {
@@ -50,7 +49,7 @@ public class UnsatCoreCalculator {
 		currentTrace.getStateSpace().execute(unsatCoreCmd);
 		IBEvalElement core = unsatCoreCmd.getCore();
 		this.unsatCore.set(core);
-		this.unsatCoreStage.setUnsatCore(core.getCode());
+		this.unsatCoreStage.setUnsatCore(UnicodeTranslator.toUnicode(core.getCode()));
 		this.unsatCoreStage.show();
 		
 	}

@@ -1,23 +1,16 @@
 package de.prob2.ui.states;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
+import de.be4.classicalb.core.parser.node.AConjunctPredicate;
+import de.be4.classicalb.core.parser.node.APredicateParseUnit;
+import de.be4.classicalb.core.parser.node.PPredicate;
+import de.be4.classicalb.core.parser.node.Start;
+import de.be4.classicalb.core.parser.util.PrettyPrinter;
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
+import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.FormulaExpand;
@@ -41,7 +34,6 @@ import de.prob2.ui.persistence.TableUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 import de.prob2.ui.unsatcore.UnsatCoreCalculator;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -63,9 +55,20 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -101,6 +104,8 @@ public final class StatesView extends StackPane {
 	private final Map<State, Map<BVisual2Formula, ExpandedFormula>> formulaValueCache;
 	private List<Double> columnWidthsToRestore;
 
+	private List<String> properties;
+
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
 					   final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config, final UnsatCoreCalculator unsatCoreCalculator) {
@@ -116,6 +121,7 @@ public final class StatesView extends StackPane {
 		this.expandedFormulas = new HashSet<>();
 		this.visibleFormulas = new HashSet<>();
 		this.formulaValueCache = new HashMap<>();
+		this.properties = new ArrayList<>();
 		this.unsatCoreCalculator = unsatCoreCalculator;
 
 		stageManager.loadFXML(this, "states_view.fxml");
@@ -183,6 +189,24 @@ public final class StatesView extends StackPane {
 		}
 	}
 
+	private List<String> extractCoreConjuncts(PPredicate predicate) {
+		List<String> conjuncts = new ArrayList<>();
+
+		if(predicate instanceof AConjunctPredicate) {
+			PPredicate left = ((AConjunctPredicate) predicate).getLeft();
+			PPredicate right = ((AConjunctPredicate) predicate).getRight();
+			List<String> leftConjuncts = extractCoreConjuncts(left);
+			List<String> rightConjuncts = extractCoreConjuncts(right);
+			conjuncts.addAll(leftConjuncts);
+			conjuncts.addAll(rightConjuncts);
+		} else {
+			PrettyPrinter pp = new PrettyPrinter();
+			predicate.apply(pp);
+			conjuncts.add(pp.getPrettyPrint());
+		}
+		return conjuncts;
+	}
+
 	private TreeTableRow<StateItem> initTableRow() {
 		final TreeTableRow<StateItem> row = new TreeTableRow<>();
 
@@ -192,12 +216,26 @@ public final class StatesView extends StackPane {
 			if (to != null) {
 				IBEvalElement core = unsatCoreCalculator.unsatCoreProperty().get();
 				if(core != null) {
-					String code = core.getCode();
-					List<String> coreConjuncts = Arrays.stream(code.split("&"))
+					List<String> coreConjuncts = extractCoreConjuncts(((APredicateParseUnit) ((Start) core.getAst()).getPParseUnit()).getPredicate())
+							.stream()
 							.map(UnicodeTranslator::toUnicode)
 							.map(str -> str.replaceAll(" ", ""))
 							.collect(Collectors.toList());
-					if (coreConjuncts.contains(UnicodeTranslator.toUnicode(to.getLabel()).replaceAll(" ", ""))) {
+
+					if("PROPERTIES".equals(to.getLabel())) {
+						properties = to.getSubformulas().stream().map(BVisual2Formula::getId).collect(Collectors.toList());
+					}
+
+					if(!properties.contains(to.getFormula().getId())) {
+						return;
+					}
+
+					ClassicalB bObject = new ClassicalB(to.getLabel(), FormulaExpand.EXPAND);
+					PrettyPrinter pp = new PrettyPrinter();
+					bObject.getAst().apply(pp);
+
+
+					if (coreConjuncts.contains(UnicodeTranslator.toUnicode(pp.getPrettyPrint()).replaceAll(" ", ""))) {
 						row.getStyleClass().add("unsatCore");
 						return;
 					}
