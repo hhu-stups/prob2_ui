@@ -9,8 +9,8 @@ import com.google.inject.Singleton;
 
 import de.prob.Main;
 
-public final class ConfigFilePathModule extends AbstractModule {
-	public ConfigFilePathModule() {
+public final class DataPathsModule extends AbstractModule {
+	public DataPathsModule() {
 		super();
 	}
 	
@@ -19,5 +19,12 @@ public final class ConfigFilePathModule extends AbstractModule {
 	@ConfigFile
 	private static Path getConfigFilePath() {
 		return Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
+	}
+	
+	@Provides
+	@Singleton
+	@DefaultPluginDirectory
+	private static Path getDefaultPluginsDirectoryPath() {
+		return Paths.get(Main.getProBDirectory(), "prob2ui", "plugins");
 	}
 }

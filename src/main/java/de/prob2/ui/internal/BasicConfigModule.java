@@ -12,7 +12,7 @@ public final class BasicConfigModule extends AbstractModule {
 	
 	@Override
 	protected void configure() {
-		install(new ConfigFilePathModule());
+		install(new DataPathsModule());
 	}
 	
 	@Provides
