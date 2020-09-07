@@ -58,7 +58,6 @@ task copyDependencies(type: Copy) {
 }
 
 
-
 task jpackage(type: Exec) {
 	dependsOn 'clean'
 	dependsOn 'copyDependencies'
@@ -76,7 +75,7 @@ task jpackage(type: Exec) {
 	commandLine "jpackage", '--icon', "${iconPath}",
 			"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
 			'--main-jar', "prob2-ui-${project.version}-all.jar",
-			'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020"
+			'--app-version', "${appVersion}", '--copyright', "\"Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020\""
 }
 
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
