@@ -90,6 +90,7 @@ public final class Config {
 		if (this.runtimeOptions.isLoadConfig()) {
 			try {
 				configData = this.jsonManager.readFromFile(this.configFilePath).getObject();
+				logger.info("Config successfully loaded from {}", this.configFilePath);
 				if (configData == null) {
 					// Config file is empty, use default config.
 					configData = new ConfigData();
@@ -132,5 +133,6 @@ public final class Config {
 		} catch (IOException exc) {
 			logger.warn("Failed to save config file", exc);
 		}
+		logger.info("Config successfully saved to {}", this.configFilePath);
 	}
 }
