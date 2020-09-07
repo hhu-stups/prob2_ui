@@ -8,30 +8,21 @@ import ch.qos.logback.core.OutputStreamAppender;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.cli.ProBInstance;
-import javafx.animation.Animation;
-import javafx.animation.FadeTransition;
 import javafx.application.Platform;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
-import javafx.util.Duration;
+import org.fxmisc.richtext.InlineCssTextArea;
 import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 
 @Singleton
-public class PrologOutput extends TextFlow {
+public class PrologOutput extends InlineCssTextArea {
 
 	private static class PrologOutputAppender extends OutputStream {
 		StringBuilder sb;
-		TextFlow textFlow;
-		private PrologOutputAppender(TextFlow textFlow) {
+		InlineCssTextArea textArea;
+		private PrologOutputAppender(InlineCssTextArea styleClassedTextArea) {
 			this.sb = new StringBuilder();
-			this.textFlow = textFlow;
+			this.textArea = styleClassedTextArea;
 		}
 
 		@Override
@@ -41,24 +32,23 @@ public class PrologOutput extends TextFlow {
 				//This avoids the UI from hanging up.
 				sb.append((char) b);
 				if(b == 10) {
-					Text output = handleOutput(sb.toString());
-					this.textFlow.getChildren().add(output);
+					String[] messageAndStyle = handleOutput(sb.toString());
+					textArea.replaceText(textArea.getLength(), textArea.getLength(), messageAndStyle[0]);
+					textArea.setStyle(textArea.getLength()-messageAndStyle[0].length(), textArea.getLength(), messageAndStyle[1]);
 					this.sb = new StringBuilder();
 				}
 			});
 		}
 
-		private Text handleOutput(String s) {
-			Text output = new Text();
+		private String[] handleOutput(String s) {
 			// default settings
-			Paint fontColor = Color.BLACK;
+			String fontColor = "black";
 			boolean underline = false;
-			boolean blinking = false;
-			double blinkingTime = 1;
-			boolean visible = true;
 			boolean strikethrough = false;
-			FontWeight weight = FontWeight.NORMAL;
-			FontPosture posture = FontPosture.REGULAR;
+			String visibility = "visible";
+			String weight = "NORMAL";
+			String posture = "NORMAL";
+
 			String message = s;
 			while(!message.isEmpty() && message.charAt(0) == 27) {
 				// ANSI escape code found. Warning: If ANSI escape code is not ending with m some parts of messages might be lost!
@@ -70,77 +60,67 @@ public class PrologOutput extends TextFlow {
 					switch (str) {
 						case "[0":
 							// Reset code. Return to default values.
-							fontColor = Color.BLACK;
+							fontColor = "black";
 							underline = false;
-							blinking = false;
-							blinkingTime = 1;
-							visible = true;
 							strikethrough = false;
-							weight = FontWeight.NORMAL;
-							posture = FontPosture.REGULAR;
+							visibility = "visible";
+							weight = "NORMAL";
+							posture = "NORMAL";
 							break;
 						case "[1":
-							weight = FontWeight.BOLD;
+							weight = "BOLD";
 							break;
 						case "[3":
-							posture = FontPosture.ITALIC;
+							posture = "ITALIC";
 							break;
 						case "[4":
 							underline = true;
 							break;
-						case "[5":
-							blinking = true;
-							blinkingTime = 1;
-							break;
-						case "[6":
-							blinking = true;
-							blinkingTime = 0.5;
-							break;
 						case "[8":
-							visible = false;
+							visibility = "hidden";
 							break;
 						case "[9":
 							strikethrough = true;
 							break;
 						case "[22":
-							fontColor = Color.BLACK;
-							weight = FontWeight.NORMAL;
+							fontColor = "black";
+							weight = "NORMAL";
 							break;
 						case "[23":
-							posture = FontPosture.REGULAR;
+							posture = "NORMAL";
 							break;
 						case "[24":
 							underline = false;
 							break;
 						case "[25":
-							blinking = false;
+							//blinking = false;
 							break;
 						case "[28":
-							visible = true;
+							visibility = "visible";
 							break;
 						case "[29":
 							strikethrough = false;
 							break;
 						case "[31":
-							fontColor = Color.RED;
+							fontColor = "red";
 							break;
 						case "[32":
-							fontColor = Color.GREEN;
+							fontColor = "green";
 							break;
 						case "[33":
-							fontColor = Color.YELLOW;
+							fontColor = "yellow";
 							break;
 						case "[34":
-							fontColor = Color.BLUE;
+							fontColor = "blue";
 							break;
 						case "[35":
-							fontColor = Color.MAGENTA;
+							fontColor = "magenta";
 							break;
 						case "[36":
-							fontColor = Color.CYAN;
+							fontColor = "cyan";
 							break;
 						case "[37":
-							fontColor = Color.WHITE;
+							fontColor = "white";
 							break;
 						default:
 							// Code not supported (yet?). Do nothing.
@@ -150,26 +130,21 @@ public class PrologOutput extends TextFlow {
 				message = message.substring(indexOfANSIEscapeCodeEnd + 1);
 			}
 
-			output.setFont(Font.font(output.getFont().getFamily(), weight, posture, output.getFont().getSize()));
-			output.setText(message);
-			output.setFill(fontColor);
-			output.setUnderline(underline);
-			if (blinking) {
-				FadeTransition fadeTransition = new FadeTransition(Duration.seconds(blinkingTime), output);
-				fadeTransition.setToValue(0);
-				fadeTransition.setFromValue(1);
-				fadeTransition.setCycleCount(Animation.INDEFINITE);
-				fadeTransition.play();
-			}
-			output.setVisible(visible);
-			output.setStrikethrough(strikethrough);
+			String style = 	"-fx-fill: " + fontColor + "; " +
+							"-fx-underline: " + underline + "; " +
+							"visiblility: " + visibility + "; " +
+							"-fx-strikethrough: " + strikethrough + "; " +
+							"-fx-font-weight: " + weight + "; " +
+							"-fx-font-style: " + posture;
 
-			return output;
+			return new String[] {message, style};
 		}
 	}
 
 	@Inject
 	public PrologOutput() {
+		this.setPrefWidth(Double.MAX_VALUE);
+		this.setWrapText(true);
 		PrologOutputAppender prologOutputAppender = new PrologOutputAppender(this);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
