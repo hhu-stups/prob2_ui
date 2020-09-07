@@ -1,6 +1,9 @@
 package de.prob2.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +17,15 @@ import ch.qos.logback.classic.util.ContextInitializer;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 
+import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.BasicConfig;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.BasicConfigModule;
+import de.prob2.ui.internal.ConfigFile;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -56,6 +62,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProB2 extends Application {
+	private static final Path OLD_CONFIG_FILE_PATH = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
+
 	private Logger logger;
 
 	private RuntimeOptions runtimeOptions;
@@ -85,6 +93,15 @@ public class ProB2 extends Application {
 		}
 	}
 
+	private void migrateOldConfigFileIfNeeded(final Injector basicConfigInjector) throws IOException {
+		final Path newConfigFilePath = basicConfigInjector.getInstance(Key.get(Path.class, ConfigFile.class));
+		if (!Files.exists(newConfigFilePath) && Files.exists(OLD_CONFIG_FILE_PATH)) {
+			logger.info("Found old config file at {} - migrating to {}", OLD_CONFIG_FILE_PATH, newConfigFilePath);
+			Files.createDirectories(newConfigFilePath.getParent());
+			Files.copy(OLD_CONFIG_FILE_PATH, newConfigFilePath);
+		}
+	}
+
 	@Override
 	public void init() {
 		if (!System.getProperties().containsKey(ContextInitializer.CONFIG_FILE_PROPERTY)) {
@@ -95,6 +112,11 @@ public class ProB2 extends Application {
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
 		if (runtimeOptions.isLoadConfig()) {
 			final Injector basicConfigInjector = Guice.createInjector(new BasicConfigModule());
+			try {
+				this.migrateOldConfigFileIfNeeded(basicConfigInjector);
+			} catch (IOException e) {
+				logger.error("Failed to migrate old config - ignoring", e);
+			}
 			final BasicConfig basicConfig = basicConfigInjector.getInstance(BasicConfig.class);
 			final Locale localeOverride = basicConfig.getLocaleOverride();
 			if (localeOverride != null) {

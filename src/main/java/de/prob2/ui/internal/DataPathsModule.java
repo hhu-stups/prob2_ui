@@ -7,24 +7,34 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
-import de.prob.Main;
+import net.harawata.appdirs.AppDirs;
+import net.harawata.appdirs.AppDirsFactory;
 
 public final class DataPathsModule extends AbstractModule {
+	private static final String APPDIRS_APP_NAME = "prob2-ui";
+	private static final String APPDIRS_APP_AUTHOR = "STUPS";
+	
 	public DataPathsModule() {
 		super();
 	}
 	
 	@Provides
 	@Singleton
+	private static AppDirs getAppDirs() {
+		return AppDirsFactory.getInstance();
+	}
+	
+	@Provides
+	@Singleton
 	@ConfigFile
-	private static Path getConfigFilePath() {
-		return Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
+	private static Path getConfigFilePath(final AppDirs appDirs) {
+		return Paths.get(appDirs.getUserConfigDir(APPDIRS_APP_NAME, null, APPDIRS_APP_AUTHOR), "config.json");
 	}
 	
 	@Provides
 	@Singleton
 	@DefaultPluginDirectory
-	private static Path getDefaultPluginsDirectoryPath() {
-		return Paths.get(Main.getProBDirectory(), "prob2ui", "plugins");
+	private static Path getDefaultPluginsDirectoryPath(final AppDirs appDirs) {
+		return Paths.get(appDirs.getUserDataDir(APPDIRS_APP_NAME, null, APPDIRS_APP_AUTHOR), "plugins");
 	}
 }

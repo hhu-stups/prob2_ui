@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +26,7 @@ import com.github.zafarkhaja.semver.Version;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.Main;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -63,6 +68,7 @@ public class ProBPluginManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginManager.class);
 
+	private static final Path OLD_DEFAULT_PLUGIN_DIRECTORY = Paths.get(Main.getProBDirectory(), "prob2ui", "plugins");
 	private static final String VERSION = "0.1.0";
 
 	private final ProBPluginHelper proBPluginHelper;
@@ -360,6 +366,34 @@ public class ProBPluginManager {
 	 * methods to handle the plugin directory
 	 */
 
+	private Path migrateOldPluginDirectoryIfNeeded(final Path pluginDirectoryInConfig) throws IOException {
+		if (!Files.exists(defaultPluginDirectory)) {
+			if (Files.exists(OLD_DEFAULT_PLUGIN_DIRECTORY)) {
+				LOGGER.info("Found old plugin directory at {} - migrating to {}", OLD_DEFAULT_PLUGIN_DIRECTORY, defaultPluginDirectory);
+				Files.createDirectories(defaultPluginDirectory);
+				// Copy old plugin directory (recursively) to new location
+				Files.walkFileTree(OLD_DEFAULT_PLUGIN_DIRECTORY, new SimpleFileVisitor<Path>() {
+					@Override
+					public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+						Files.createDirectories(defaultPluginDirectory.resolve(OLD_DEFAULT_PLUGIN_DIRECTORY.relativize(dir)));
+						return FileVisitResult.CONTINUE;
+					}
+					
+					@Override
+					public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+						Files.copy(file, defaultPluginDirectory.resolve(OLD_DEFAULT_PLUGIN_DIRECTORY.relativize(file)));
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			}
+			if (OLD_DEFAULT_PLUGIN_DIRECTORY.equals(pluginDirectoryInConfig)) {
+				LOGGER.info("Plugin directory in config was set to old default plugin directory ({}) - replacing with new default plugin directory ({})", OLD_DEFAULT_PLUGIN_DIRECTORY, defaultPluginDirectory);
+				return defaultPluginDirectory;
+			}
+		}
+		return pluginDirectoryInConfig;
+	}
+
 	private void createPluginDirectory() throws IOException {
 		Files.createDirectories(getPluginDirectory());
 	}
@@ -374,7 +408,15 @@ public class ProBPluginManager {
 	/**
 	 * Do not call this method.
 	 */
-	public void setPluginDirectory(Path path) {
+	public void setPluginDirectory(final Path pathInConfig) {
+		Path path = pathInConfig;
+		if (this.pluginDirectory == null) {
+			try {
+				path = this.migrateOldPluginDirectoryIfNeeded(pathInConfig);
+			} catch (IOException e) {
+				LOGGER.error("Failed to migrate old plugin directory - ignoring", e);
+			}
+		}
 		if (path != null) {
 			this.pluginDirectory = path;
 		}
