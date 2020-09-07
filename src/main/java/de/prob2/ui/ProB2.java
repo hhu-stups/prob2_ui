@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import ch.qos.logback.classic.util.ContextInitializer;
 
-import com.google.gson.GsonBuilder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -20,6 +19,7 @@ import de.prob.cli.ProBInstanceProvider;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.BasicConfig;
 import de.prob2.ui.config.RuntimeOptions;
+import de.prob2.ui.internal.BasicConfigModule;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -94,7 +94,8 @@ public class ProB2 extends Application {
 		
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
 		if (runtimeOptions.isLoadConfig()) {
-			final BasicConfig basicConfig = new BasicConfig(new GsonBuilder().create());
+			final Injector basicConfigInjector = Guice.createInjector(new BasicConfigModule());
+			final BasicConfig basicConfig = basicConfigInjector.getInstance(BasicConfig.class);
 			final Locale localeOverride = basicConfig.getLocaleOverride();
 			if (localeOverride != null) {
 				Locale.setDefault(localeOverride);
