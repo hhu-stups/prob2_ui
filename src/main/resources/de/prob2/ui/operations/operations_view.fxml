@@ -98,6 +98,10 @@
 			</StackPane>
 		</HBox>
 	</VBox>
-	<ListView fx:id="opsListView" VBox.vgrow="always" />
-	<Label fx:id="warningLabel" styleClass="warning"/>
+	<ListView fx:id="opsListView" VBox.vgrow="ALWAYS"/>
+	<VBox>
+		<Label fx:id="warningLabel" styleClass="warning"/>
+		<Button fx:id="btComputeUnsatCore" styleClass="button-blue" onAction="#computeUnsatCore" visible="false" managed="false" text="%operations.operationsView.computeUnsatCore"/>
+	</VBox>
+
 </fx:root>

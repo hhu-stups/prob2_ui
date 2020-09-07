@@ -1,20 +1,8 @@
 package de.prob2.ui.operations;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
@@ -31,15 +19,18 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.states.StatesView;
 import de.prob2.ui.statusbar.StatusBar;
-
+import de.prob2.ui.unsatcore.UnsatCoreCalculator;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -57,12 +48,21 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
-
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import se.sawano.java.text.AlphanumericComparator;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -185,6 +185,8 @@ public final class OperationsView extends VBox {
 	private HelpButton helpButton;
 	@FXML
 	private Button cancelButton;
+	@FXML
+	private Button btComputeUnsatCore;
 
 	private final List<OperationItem> events = new ArrayList<>();
 	private final BooleanProperty showDisabledOps;
@@ -196,6 +198,7 @@ public final class OperationsView extends VBox {
 	private final DisablePropertyController disablePropertyController;
 	private final StageManager stageManager;
 	private final Config config;
+	private final UnsatCoreCalculator unsatCoreCalculator;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final BackgroundUpdater updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
@@ -204,7 +207,7 @@ public final class OperationsView extends VBox {
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
 						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar, final DisablePropertyController disablePropertyController,
-						   final StopActions stopActions, final Config config) {
+						   final StopActions stopActions, final Config config, final UnsatCoreCalculator unsatCoreCalculator) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
@@ -218,6 +221,7 @@ public final class OperationsView extends VBox {
 		this.updater = new BackgroundUpdater("OperationsView Updater");
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		this.needsUpdateAfterBusy = new AtomicBoolean(false);
+		this.unsatCoreCalculator = unsatCoreCalculator;
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		disablePropertyController.addDisableExpression(this.updater.runningProperty());
@@ -248,6 +252,22 @@ public final class OperationsView extends VBox {
 				((StringProperty) observable).set(from);
 			}
 		});
+
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
+			boolean showUnsatCoreButton = false;
+			if (to != null) {
+				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
+				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) ||
+						operations.stream().map(Transition::getName).collect(Collectors.toList()).contains(Transition.PARTIAL_SETUP_CONSTANTS_NAME)) {
+					showUnsatCoreButton = true;
+				}
+			}
+			btComputeUnsatCore.setVisible(showUnsatCoreButton);
+			btComputeUnsatCore.setManaged(showUnsatCoreButton);
+			//opsListView is always visible. In the case that partial setup constants can be executed, the button for showing unsat core is still visible.
+		};
+		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
+		this.currentTrace.addListener(traceChangeListener);
 
 		this.update(currentTrace.get());
 		currentTrace.addListener((observable, from, to) -> update(to));
@@ -562,5 +582,16 @@ public final class OperationsView extends VBox {
 
 	private void setShowUnambiguous(final boolean showUnambiguous) {
 		this.showUnambiguous.set(showUnambiguous);
+	}
+
+	@FXML
+	private void computeUnsatCore() {
+		unsatCoreCalculator.calculate();
+		btComputeUnsatCore.setVisible(false);
+		btComputeUnsatCore.setManaged(false);
+		injector.getInstance(MainView.class).switchTabPane("states");
+		StatesView statesView = injector.getInstance(StatesView.class);
+		statesView.refresh();
+		statesView.expandProperties();
 	}
 }

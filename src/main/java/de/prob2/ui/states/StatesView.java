@@ -18,7 +18,6 @@ import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 import de.prob.unicode.UnicodeTranslator;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -39,7 +38,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
@@ -59,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,8 +76,6 @@ public final class StatesView extends StackPane {
 	private TextField filterState;
 	@FXML
 	private HelpButton helpButton;
-	@FXML
-	private Button btComputeUnsatCore;
 
 	@FXML
 	private TreeTableView<StateItem> tv;
@@ -106,6 +101,8 @@ public final class StatesView extends StackPane {
 
 	private List<String> properties;
 
+	private TreeItem<StateItem> propertiesItem;
+
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
 					   final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config, final UnsatCoreCalculator unsatCoreCalculator) {
@@ -114,6 +111,7 @@ public final class StatesView extends StackPane {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.config = config;
+		this.unsatCoreCalculator = unsatCoreCalculator;
 
 		this.updater = new BackgroundUpdater("StatesView Updater");
 		stopActions.add(this.updater::shutdownNow);
@@ -122,7 +120,6 @@ public final class StatesView extends StackPane {
 		this.visibleFormulas = new HashSet<>();
 		this.formulaValueCache = new HashMap<>();
 		this.properties = new ArrayList<>();
-		this.unsatCoreCalculator = unsatCoreCalculator;
 
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
@@ -145,19 +142,7 @@ public final class StatesView extends StackPane {
 
 		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> this.tv.setDisable(to)));
 
-		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-			this.updateRootAsync(from, to, this.filterState.getText());
-			boolean showUnsatCoreButton = false;
-			if (to != null) {
-				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
-				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) || 
-						operations.stream().map(Transition::getName).collect(Collectors.toList()).contains(Transition.PARTIAL_SETUP_CONSTANTS_NAME)) {
-					showUnsatCoreButton = true;
-				}
-			}
-			btComputeUnsatCore.setVisible(showUnsatCoreButton);
-			btComputeUnsatCore.setManaged(showUnsatCoreButton);
-		};
+		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> this.updateRootAsync(from, to, this.filterState.getText());
 		traceChangeListener.changed(this.currentTrace, null, currentTrace.get());
 		this.currentTrace.addListener(traceChangeListener);
 
@@ -222,7 +207,7 @@ public final class StatesView extends StackPane {
 							.map(str -> str.replaceAll(" ", ""))
 							.collect(Collectors.toList());
 
-					if("PROPERTIES".equals(to.getLabel())) {
+					if("PROPERTIES".equals(to.getLabel()) || "axioms".equals(to.getLabel())) {
 						properties = to.getSubformulas().stream().map(BVisual2Formula::getId).collect(Collectors.toList());
 					}
 
@@ -375,6 +360,10 @@ public final class StatesView extends StackPane {
 		final List<TreeItem<StateItem>> children = subformulas.stream()
 			.map(f -> new TreeItem<>(new StateItem(f, currentState, previousState, this::evaluateFormulaWithCaching)))
 			.collect(Collectors.toList());
+
+		if(treeItem.getValue() != null && ("PROPERTIES".equals(treeItem.getValue().getLabel()) || "axioms".equals(treeItem.getValue().getLabel()))) {
+			propertiesItem = treeItem;
+		}
 
 		// The tree items for the children of treeItem's children are generated once treeItem is expanded.
 		// This needs to be an anonymous class instead of a lambda,
@@ -535,13 +524,13 @@ public final class StatesView extends StackPane {
 		stage.setValue(item);
 		stage.show();
 	}
-	
-	@FXML
-	private void computeUnsatCore() {
-		unsatCoreCalculator.calculate();
-		btComputeUnsatCore.setVisible(false);
-		btComputeUnsatCore.setManaged(false);
+
+	public void refresh() {
 		tv.refresh();
+	}
+
+	public void expandProperties() {
+		propertiesItem.setExpanded(true);
 	}
 
 }
