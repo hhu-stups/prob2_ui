@@ -89,11 +89,11 @@ public class ProBPluginManager {
 		this.proBPluginHelper = proBPluginHelper;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.pluginManager = new ProBJarPluginManager();
-		createPluginDirectory();
 		this.fileChooserManager = fileChooserManager;
 		// Do not convert this to a method reference! Otherwise it won't work correctly if the plugin manager changes.
 		stopActions.add(() -> this.getPluginManager().stopPlugins());
+		// Adding the config listener immediately calls loadConfig,
+		// which will create the plugin directory and initialize the plugin manager.
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
@@ -377,6 +377,15 @@ public class ProBPluginManager {
 	public void setPluginDirectory(Path path) {
 		if (path != null) {
 			this.pluginDirectory = path;
+		}
+		if (path != null || pluginManager == null) {
+			// If the path was changed or the plugin manager hasn't been initialized yet,
+			// create the plugin directory (if necessary) and (re)initialize the plugin manager.
+			try {
+				createPluginDirectory();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
 			//initialize with the new PluginDirectory
 			pluginManager = new ProBJarPluginManager();
 		}
