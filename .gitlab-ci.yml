@@ -41,7 +41,9 @@ test:jdk-8:
 test:jdk-14:
   extends: .test
   image: openjdk:14-jdk-slim
-  script: ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar
+  script:
+    - ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar
+    - ./gradlew jpackage
 
 distributions:
   stage: deploy
