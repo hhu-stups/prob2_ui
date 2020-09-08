@@ -217,15 +217,20 @@ jar {
 task multiPlatformShadowJar(type: ShadowJar) {
 	manifest {
 		inheritFrom(jar.manifest)
-		attributes(["Main-Class": mainClassName])
+		attributes([
+			"Main-Class": mainClassName,
+			"Multi-Release": "true",
+		])
 	}
 	
 	archiveClassifier = "multi"
 	from(sourceSets.main.output)
 	configurations = [
 		project.configurations.runtimeClasspath,
-		project.configurations.javafxAllPlatforms,
 	]
+	into("META-INF/versions/11") {
+		from(project.configurations.javafxAllPlatforms.collect {zipTree(it)})
+	}
 }
 
 macAppBundle {
