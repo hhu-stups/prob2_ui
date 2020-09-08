@@ -145,24 +145,27 @@ dependencies {
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 }
 
+final javafxVersion = "11.0.2"
+final javafxModules = [
+	"javafx.base",
+	"javafx.controls",
+	"javafx.fxml",
+	"javafx.graphics",
+	"javafx.swing",
+	"javafx.web",
+]
+
 if (JavaVersion.current().java11Compatible) {
 	apply plugin: "org.openjfx.javafxplugin"
 	javafx {
-		version = "11.0.2"
-		modules = [
-			"javafx.base",
-			"javafx.controls",
-			"javafx.fxml",
-			"javafx.graphics",
-			"javafx.swing",
-			"javafx.web",
-		]
+		version = javafxVersion
+		modules = javafxModules
 	}
-	
-	["win", "mac", "linux"].each {platform ->
-		javafx.modules.each {module ->
-			dependencies.javafxAllPlatforms(group: "org.openjfx", name: module.replace("javafx.", "javafx-"), version: javafx.version, classifier: platform)
-		}
+}
+
+["win", "mac", "linux"].each {platform ->
+	javafxModules.each {module ->
+		dependencies.javafxAllPlatforms(group: "org.openjfx", name: module.replace("javafx.", "javafx-"), version: javafxVersion, classifier: platform)
 	}
 }
 
