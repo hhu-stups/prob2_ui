@@ -43,7 +43,7 @@ test:jdk-14:
   image: openjdk:14-jdk-slim
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
-    - ./gradlew ${GRADLE_OPTIONS} jpackage
+    - ./gradlew ${GRADLE_OPTIONS} --debug jpackage
 
 distributions:
   stage: deploy
