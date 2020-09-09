@@ -20,9 +20,9 @@ public class PrologOutput extends InlineCssTextArea {
 	private static class PrologOutputAppender extends OutputStream {
 		StringBuilder sb;
 		InlineCssTextArea textArea;
-		private PrologOutputAppender(InlineCssTextArea styleClassedTextArea) {
+		private PrologOutputAppender(InlineCssTextArea inlineCssTextArea) {
 			this.sb = new StringBuilder();
-			this.textArea = styleClassedTextArea;
+			this.textArea = inlineCssTextArea;
 		}
 
 		@Override
@@ -33,8 +33,8 @@ public class PrologOutput extends InlineCssTextArea {
 				sb.append((char) b);
 				if(b == 10) {
 					String[] messageAndStyle = handleOutput(sb.toString());
-					textArea.replaceText(textArea.getLength(), textArea.getLength(), messageAndStyle[0]);
-					textArea.setStyle(textArea.getLength()-messageAndStyle[0].length(), textArea.getLength(), messageAndStyle[1]);
+					textArea.appendText(messageAndStyle[0]);
+					textArea.setStyle(Math.max(textArea.getLength()-messageAndStyle[0].length(), 0), textArea.getLength(), messageAndStyle[1]);
 					this.sb = new StringBuilder();
 				}
 			});
@@ -145,6 +145,7 @@ public class PrologOutput extends InlineCssTextArea {
 	public PrologOutput() {
 		this.setPrefWidth(Double.MAX_VALUE);
 		this.setWrapText(true);
+		this.setEditable(false);
 		PrologOutputAppender prologOutputAppender = new PrologOutputAppender(this);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
