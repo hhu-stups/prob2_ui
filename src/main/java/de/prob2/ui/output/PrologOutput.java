@@ -92,9 +92,6 @@ public class PrologOutput extends InlineCssTextArea {
 						case "[24":
 							underline = false;
 							break;
-						case "[25":
-							//blinking = false;
-							break;
 						case "[28":
 							visibility = "visible";
 							break;
