@@ -20,6 +20,7 @@ variables:
     paths:
       - build/distributions
       - build/libs
+      - ./
 
 test:jdk-8:
   extends: .test
