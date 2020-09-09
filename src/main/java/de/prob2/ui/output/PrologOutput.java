@@ -18,8 +18,8 @@ import java.io.OutputStream;
 public class PrologOutput extends InlineCssTextArea {
 
 	private static class PrologOutputAppender extends OutputStream {
-		StringBuilder sb;
-		InlineCssTextArea textArea;
+		private StringBuilder sb;
+		private InlineCssTextArea textArea;
 		private PrologOutputAppender(InlineCssTextArea inlineCssTextArea) {
 			this.sb = new StringBuilder();
 			this.textArea = inlineCssTextArea;
@@ -48,12 +48,13 @@ public class PrologOutput extends InlineCssTextArea {
 			String visibility = "visible";
 			String weight = "NORMAL";
 			String posture = "NORMAL";
+			String backgroundColor = "white";
 
 			String message = s;
 			while(!message.isEmpty() && message.charAt(0) == 27) {
 				// ANSI escape code found. Warning: If ANSI escape code is not ending with m some parts of messages might be lost!
 				// Warning: If codes are not set at beginning of message, e.g. for changing attributes midmessage, chaos might ensue ;)
-				int indexOfANSIEscapeCodeEnd = s.indexOf("m");
+				int indexOfANSIEscapeCodeEnd = s.indexOf('m');
 				if (indexOfANSIEscapeCodeEnd != -1) {
 					String str = message.substring(1, indexOfANSIEscapeCodeEnd);
 					// Setting supported font color and attributes for output
@@ -66,6 +67,7 @@ public class PrologOutput extends InlineCssTextArea {
 							visibility = "visible";
 							weight = "NORMAL";
 							posture = "NORMAL";
+							backgroundColor = "white";
 							break;
 						case "[1":
 							weight = "BOLD";
@@ -98,6 +100,9 @@ public class PrologOutput extends InlineCssTextArea {
 						case "[29":
 							strikethrough = false;
 							break;
+						case "[30":
+							fontColor = "black";
+							break;
 						case "[31":
 							fontColor = "red";
 							break;
@@ -119,6 +124,30 @@ public class PrologOutput extends InlineCssTextArea {
 						case "[37":
 							fontColor = "white";
 							break;
+						case "[40":
+							backgroundColor = "black";
+							break;
+						case "[41":
+							backgroundColor = "red";
+							break;
+						case "[42":
+							backgroundColor = "green";
+							break;
+						case "[43":
+							backgroundColor = "yellow";
+							break;
+						case "[44":
+							backgroundColor = "blue";
+							break;
+						case "[45":
+							backgroundColor = "magenta";
+							break;
+						case "[46":
+							backgroundColor = "cyan";
+							break;
+						case "[47":
+							backgroundColor = "white";
+							break;
 						default:
 							// Code not supported (yet?). Do nothing.
 							break;
@@ -129,10 +158,11 @@ public class PrologOutput extends InlineCssTextArea {
 
 			String style = 	"-fx-fill: " + fontColor + "; " +
 							"-fx-underline: " + underline + "; " +
-							"visiblility: " + visibility + "; " +
+							"visibility: " + visibility + "; " +
 							"-fx-strikethrough: " + strikethrough + "; " +
 							"-fx-font-weight: " + weight + "; " +
-							"-fx-font-style: " + posture;
+							"-fx-font-style: " + posture + "; " +
+							"-rtfx-background-color: " + backgroundColor;
 
 			return new String[] {message, style};
 		}
