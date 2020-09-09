@@ -49,13 +49,6 @@ mainClassName = "de.prob2.ui.Main"
 def appName = 'ProB2-UI'
 def appVersion = '1.0.1'
 
-task copyDependencies(type: Copy) {
-	dependsOn 'build'
-
-	from configurations.runtime
-	into "build/libs"
-}
-
 def JAVA_HOME = Jvm.current().getJavaHome()
 
 task jpackage(type: Exec) {
