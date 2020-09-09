@@ -47,7 +47,7 @@ test:jdk-14:
     - apt-get install --assume-yes build-essential fakeroot
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
-    - ./gradlew ${GRADLE_OPTIONS} --debug jpackage
+    - ./gradlew ${GRADLE_OPTIONS} jpackage
 
 distributions:
   stage: deploy
