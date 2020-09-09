@@ -63,6 +63,7 @@ public class ProB2Module extends AbstractModule {
 	@Override
 	protected void configure() {
 		install(new MainModule());
+		install(new DataPathsModule());
 
 		// General stuff
 		final Locale locale = Locale.getDefault();

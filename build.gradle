@@ -1,5 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 plugins {
@@ -136,6 +134,7 @@ dependencies {
 	implementation group: "commons-cli", name: "commons-cli", version: "1.4"
 	implementation group: "de.codecentric.centerdevice", name: "centerdevice-nsmenufx", version: "2.1.7"
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel", version: "4.0.0-SNAPSHOT"
+	implementation group: "net.harawata", name: "appdirs", version: "1.2.0"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "8.40.16"
 	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.3"
 	implementation group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
@@ -144,24 +143,27 @@ dependencies {
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 }
 
+final javafxVersion = "11.0.2"
+final javafxModules = [
+	"javafx.base",
+	"javafx.controls",
+	"javafx.fxml",
+	"javafx.graphics",
+	"javafx.swing",
+	"javafx.web",
+]
+
 if (JavaVersion.current().java11Compatible) {
 	apply plugin: "org.openjfx.javafxplugin"
 	javafx {
-		version = "11.0.2"
-		modules = [
-			"javafx.base",
-			"javafx.controls",
-			"javafx.fxml",
-			"javafx.graphics",
-			"javafx.swing",
-			"javafx.web",
-		]
+		version = javafxVersion
+		modules = javafxModules
 	}
-	
-	["win", "mac", "linux"].each {platform ->
-		javafx.modules.each {module ->
-			dependencies.javafxAllPlatforms(group: "org.openjfx", name: module.replace("javafx.", "javafx-"), version: javafx.version, classifier: platform)
-		}
+}
+
+["win", "mac", "linux"].each {platform ->
+	javafxModules.each {module ->
+		dependencies.javafxAllPlatforms(group: "org.openjfx", name: module.replace("javafx.", "javafx-"), version: javafxVersion, classifier: platform)
 	}
 }
 
@@ -210,18 +212,21 @@ jar {
 	}
 }
 
-task multiPlatformShadowJar(type: ShadowJar) {
+shadowJar {
 	manifest {
-		inheritFrom(jar.manifest)
-		attributes(["Main-Class": mainClassName])
+		attributes([
+			"Multi-Release": "true",
+		])
 	}
 	
-	archiveClassifier = "multi"
-	from(sourceSets.main.output)
-	configurations = [
-		project.configurations.runtimeClasspath,
-		project.configurations.javafxAllPlatforms,
-	]
+	// Java 11 and newer normally don't have JavaFX preinstalled,
+	// so include OpenJFX 11 for these Java versions so they can run the jar.
+	// We don't bundle OpenJFX for older Java versions,
+	// because they usually have JavaFX preinstalled,
+	// and there are no easily usable standalone versions of OpenJFX < 11 that we could use anyway.
+	into("META-INF/versions/11") {
+		from(project.configurations.javafxAllPlatforms.collect {zipTree(it)})
+	}
 }
 
 macAppBundle {

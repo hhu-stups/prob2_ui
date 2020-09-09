@@ -5,9 +5,14 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.util.Locale;
 
 import com.google.gson.Gson;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import de.prob2.ui.internal.ConfigFile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +22,18 @@ import org.slf4j.LoggerFactory;
  * This is needed to read certain config settings before the injector has been set up,
  * for example the locale override.
  */
+@Singleton
 public final class BasicConfig {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BasicConfig.class);
 	
+	private final Path configFilePath;
 	private final Gson gson;
 	
-	public BasicConfig(final Gson gson) {
+	@Inject
+	private BasicConfig(final @ConfigFile Path configFilePath, final Gson gson) {
 		super();
 		
+		this.configFilePath = configFilePath;
 		this.gson = gson;
 	}
 	
@@ -34,7 +43,7 @@ public final class BasicConfig {
 	 * @return basic settings from the config file
 	 */
 	private BasicConfigData load() {
-		try (final Reader reader = Files.newBufferedReader(Config.LOCATION)) {
+		try (final Reader reader = Files.newBufferedReader(this.configFilePath)) {
 			final BasicConfigData data = gson.fromJson(reader, BasicConfigData.class);
 			if (data == null) {
 				// Config file is empty, use defaults instead.

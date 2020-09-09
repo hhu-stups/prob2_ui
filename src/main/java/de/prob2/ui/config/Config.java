@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,11 +12,11 @@ import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.Main;
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.MainController;
+import de.prob2.ui.internal.ConfigFile;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StopActions;
 
@@ -26,10 +25,9 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class Config {
-	static final Path LOCATION = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
-
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
+	private final Path configFilePath;
 	private final JsonManager<ConfigData> jsonManager;
 	private final RuntimeOptions runtimeOptions;
 	
@@ -37,7 +35,8 @@ public final class Config {
 	private final List<ConfigListener> listeners;
 
 	@Inject
-	private Config(final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
+	private Config(final @ConfigFile Path configFilePath, final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
+		this.configFilePath = configFilePath;
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(ConfigData.class, "Config", 1) {
 			private static final String GUI_STATE_FIELD = "guiState";
@@ -71,9 +70,9 @@ public final class Config {
 		this.listeners = new ArrayList<>();
 
 		try {
-			Files.createDirectories(LOCATION.getParent());
+			Files.createDirectories(this.configFilePath.getParent());
 		} catch (IOException e) {
-			logger.warn("Failed to create the parent directory for the config file {}", LOCATION, e);
+			logger.warn("Failed to create the parent directory for the config file {}", this.configFilePath, e);
 		}
 
 		this.load();
@@ -90,7 +89,8 @@ public final class Config {
 		ConfigData configData;
 		if (this.runtimeOptions.isLoadConfig()) {
 			try {
-				configData = this.jsonManager.readFromFile(LOCATION).getObject();
+				configData = this.jsonManager.readFromFile(this.configFilePath).getObject();
+				logger.info("Config successfully loaded from {}", this.configFilePath);
 				if (configData == null) {
 					// Config file is empty, use default config.
 					configData = new ConfigData();
@@ -127,11 +127,12 @@ public final class Config {
 		}
 
 		try {
-			this.jsonManager.writeToFile(LOCATION, configData);
+			this.jsonManager.writeToFile(this.configFilePath, configData);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
 			logger.warn("Failed to save config file", exc);
 		}
+		logger.info("Config successfully saved to {}", this.configFilePath);
 	}
 }
