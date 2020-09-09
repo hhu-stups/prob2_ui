@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.modelchecking;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob.animator.command.GetStatisticsCommand;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
@@ -44,6 +45,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
+import java.math.BigInteger;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -118,6 +120,9 @@ public final class ModelcheckingView extends ScrollPane {
 
 	@FXML
 	private SimpleStatsView simpleStatsView;
+
+	@FXML
+	private Label memoryUsage;
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
@@ -346,12 +351,15 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	public void showStats(final long timeElapsed, final StateSpaceStats stats) {
+		GetStatisticsCommand cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
+		currentTrace.getStateSpace().execute(cmd);
 		elapsedTime.setText(String.format("%.1f", timeElapsed / 1000.0) + " s");
 		if (stats != null) {
 			progressBar.setProgress(calculateProgress(stats));
 			simpleStatsView.setStats(stats);
 		}
 		statsBox.setVisible(true);
+		memoryUsage.setText(String.format("%d MB", cmd.getResult().divide(new BigInteger("1000000")).intValue()));
 	}
 
 	private double calculateProgress(StateSpaceStats stats) {
