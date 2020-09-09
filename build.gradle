@@ -60,7 +60,7 @@ def JAVA_HOME = Jvm.current().getJavaHome()
 
 task jpackage(type: Exec) {
 	dependsOn 'clean'
-	dependsOn 'copyDependencies'
+	dependsOn 'shadowJar'
 
 	def iconPath;
 
