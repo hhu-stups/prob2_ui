@@ -43,7 +43,7 @@ test:jdk-14:
   image: openjdk:14-jdk-slim
   before_script:
     - *default_before_script
-    - apt-get install --assume-yes fakeroot
+    - apt-get install --assume-yes build-essential fakeroot
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
     - ./gradlew ${GRADLE_OPTIONS} --debug jpackage
