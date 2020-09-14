@@ -40,6 +40,8 @@ public final class ErrorStatusStage extends Stage {
 	@FXML
 	private Label invariantOkLabel;
 	@FXML
+	private Label otherStateErrorsLabel;
+	@FXML
 	private ListView<StateError> errorsList;
 	@FXML
 	private TextArea descriptionTextArea;
@@ -71,6 +73,8 @@ public final class ErrorStatusStage extends Stage {
 		this.currentTrace.addListener((o, from, to) -> {
 			this.invariantOkLabel.getStyleClass().removeAll("error", "no-error");
 			this.invariantOkLabel.setText(null);
+			this.otherStateErrorsLabel.getStyleClass().removeAll("error", "no-error");
+			this.otherStateErrorsLabel.setText(null);
 			
 			if (to == null) {
 				this.errorsList.getItems().clear();
@@ -83,6 +87,13 @@ public final class ErrorStatusStage extends Stage {
 					this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotOk"));
 				}
 				
+				if (to.getCurrentState().getStateErrors().isEmpty()) {
+					this.otherStateErrorsLabel.getStyleClass().add("no-error");
+					this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.noOtherStateErrors"));
+				} else {
+					this.otherStateErrorsLabel.getStyleClass().add("error");
+					this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.otherStateErrors"));
+				}
 				this.errorsList.getItems().setAll(to.getCurrentState().getStateErrors());
 			}
 		});
