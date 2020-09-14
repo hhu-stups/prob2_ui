@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
@@ -41,6 +42,8 @@ public final class ErrorStatusStage extends Stage {
 	private Label invariantOkLabel;
 	@FXML
 	private Label otherStateErrorsLabel;
+	@FXML
+	private SplitPane otherStateErrorsPane;
 	@FXML
 	private ListView<StateError> errorsList;
 	@FXML
@@ -90,9 +93,13 @@ public final class ErrorStatusStage extends Stage {
 				if (to.getCurrentState().getStateErrors().isEmpty()) {
 					this.otherStateErrorsLabel.getStyleClass().add("no-error");
 					this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.noOtherStateErrors"));
+					this.otherStateErrorsPane.setVisible(false);
+					this.otherStateErrorsPane.setManaged(false);
 				} else {
 					this.otherStateErrorsLabel.getStyleClass().add("error");
 					this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.otherStateErrors"));
+					this.otherStateErrorsPane.setVisible(true);
+					this.otherStateErrorsPane.setManaged(true);
 				}
 				this.errorsList.getItems().setAll(to.getCurrentState().getStateErrors());
 			}
