@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.stage.Stage?>
-<?import javafx.scene.Scene?>
 <?import de.prob2.ui.output.PrologOutput?>
-
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <fx:root type="Stage" title="%menu.advanced.items.prologoutput.title" minWidth="320" minHeight="240" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<PrologOutput/>
+			<StackPane>
+				<VirtualizedScrollPane minWidth="200.0" minHeight="200.0" prefWidth="800.0" prefHeight="600.0">
+					<content>
+						<PrologOutput/>
+					</content>
+				</VirtualizedScrollPane>
+			</StackPane>
 		</Scene>
 	</scene>
 </fx:root>
