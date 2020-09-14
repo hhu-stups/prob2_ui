@@ -1,5 +1,7 @@
 package de.prob2.ui.statusbar;
 
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -9,6 +11,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
@@ -35,16 +38,20 @@ public final class ErrorStatusStage extends Stage {
 	}
 	
 	@FXML
+	private Label invariantOkLabel;
+	@FXML
 	private ListView<StateError> errorsList;
 	@FXML
 	private TextArea descriptionTextArea;
 	
+	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
 	
 	@Inject
-	private ErrorStatusStage(final StageManager stageManager, final CurrentTrace currentTrace) {
+	private ErrorStatusStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
 		super();
 		
+		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		
 		stageManager.loadFXML(this, "error_status_stage.fxml", this.getClass().getName());
@@ -62,9 +69,20 @@ public final class ErrorStatusStage extends Stage {
 		});
 		
 		this.currentTrace.addListener((o, from, to) -> {
+			this.invariantOkLabel.getStyleClass().removeAll("error", "no-error");
+			this.invariantOkLabel.setText(null);
+			
 			if (to == null) {
 				this.errorsList.getItems().clear();
 			} else {
+				if (to.getCurrentState().isInvariantOk()) {
+					this.invariantOkLabel.getStyleClass().add("no-error");
+					this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantOk"));
+				} else {
+					this.invariantOkLabel.getStyleClass().add("error");
+					this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotOk"));
+				}
+				
 				this.errorsList.getItems().setAll(to.getCurrentState().getStateErrors());
 			}
 		});

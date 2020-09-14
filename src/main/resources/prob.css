@@ -1151,6 +1151,18 @@
 	-fx-text-fill: white;
 }
 
+/* Error Status Stage */
+
+.error-status-label.no-error {
+	-fx-background-color: lightgreen;
+	-fx-text-fill: black;
+}
+
+.error-status-label.error {
+	-fx-background-color: red;
+	-fx-text-fill: white;
+}
+
 /* ==================== Expression Table View Value =================== */
 
 
