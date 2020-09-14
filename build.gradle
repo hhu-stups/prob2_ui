@@ -131,7 +131,7 @@ dependencies {
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel", version: "4.0.0-SNAPSHOT"
 	implementation group: "net.harawata", name: "appdirs", version: "1.2.0"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "8.40.16"
-	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.3"
+	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.5"
 	implementation group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
 	implementation group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.2"
 	implementation group: "org.pf4j", name: "pf4j", version: "2.6.0"
