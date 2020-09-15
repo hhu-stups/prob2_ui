@@ -266,9 +266,9 @@ public class TraceDiff extends VBox {
 			stringBuilder.append(')');
 		}
 
-		if (t.getOuputParameters() != null && !t.getOuputParameters().isEmpty()) {
+		if (t.getOutputParameters() != null && !t.getOutputParameters().isEmpty()) {
 			stringBuilder.append(" → ");
-			stringBuilder.append(String.join(", ", t.getOuputParameters().values()));
+			stringBuilder.append(String.join(", ", t.getOutputParameters().values()));
 		}
 		return stringBuilder.toString();
 	}
