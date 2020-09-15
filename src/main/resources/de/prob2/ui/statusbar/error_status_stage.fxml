@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" title="%statusbar.errorStatusStage.title" minWidth="320" minHeight="240" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
-			<StackPane>
-				<!-- SplitPane is not actually a Pane, so to make the Mac menu bar work we wrap it in a StackPane. -->
-				<SplitPane>
-					<ListView fx:id="errorsList">
-						<placeholder>
-							<Label text="%statusbar.errorStatusStage.noErrors"/>
-						</placeholder>
-					</ListView>
+			<VBox>
+				<VBox spacing="5">
+					<padding>
+						<Insets topRightBottomLeft="5"/>
+					</padding>
+					<Label fx:id="invariantOkLabel" styleClass="error-status-label"/>
+					<Label fx:id="otherStateErrorsLabel" styleClass="error-status-label"/>
+				</VBox>
+				<SplitPane fx:id="otherStateErrorsPane">
+					<ListView fx:id="errorsList"/>
 					<TextArea fx:id="descriptionTextArea" editable="false" wrapText="true"/>
 				</SplitPane>
-			</StackPane>
+			</VBox>
 		</Scene>
 	</scene>
 </fx:root>
