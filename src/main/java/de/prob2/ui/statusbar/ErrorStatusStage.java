@@ -16,6 +16,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 @FXMLInjected
@@ -38,6 +39,10 @@ public final class ErrorStatusStage extends Stage {
 		}
 	}
 	
+	@FXML
+	private Label placeholderLabel;
+	@FXML
+	private VBox errorsBox;
 	@FXML
 	private Label invariantOkLabel;
 	@FXML
@@ -81,6 +86,8 @@ public final class ErrorStatusStage extends Stage {
 			
 			if (to == null) {
 				this.errorsList.getItems().clear();
+				this.placeholderLabel.setVisible(true);
+				this.errorsBox.setVisible(false);
 			} else {
 				if (to.getCurrentState().isInvariantOk()) {
 					this.invariantOkLabel.getStyleClass().add("no-error");
@@ -102,6 +109,8 @@ public final class ErrorStatusStage extends Stage {
 					this.otherStateErrorsPane.setManaged(true);
 				}
 				this.errorsList.getItems().setAll(to.getCurrentState().getStateErrors());
+				this.placeholderLabel.setVisible(false);
+				this.errorsBox.setVisible(true);
 			}
 		});
 	}
