@@ -13,7 +13,6 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-import de.prob2.ui.ProB2;
 import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
@@ -312,6 +311,11 @@ public class ExpressionTableView extends DynamicCommandStage {
 		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
 		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
 		preferences.show();
+	}
+
+	public void selectCommand(String command) {
+		DynamicCommandItem commandItem = lvChoice.getItems().stream().filter(item -> item.getCommand().equals(command)).collect(Collectors.toList()).get(0);
+		lvChoice.getSelectionModel().select(commandItem);
 	}
 	
 }

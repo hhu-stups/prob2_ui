@@ -1,7 +1,5 @@
 package de.prob2.ui.dynamic;
 
-import java.util.ResourceBundle;
-
 import de.prob.animator.command.AbstractGetDynamicCommands;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.exception.CliError;
@@ -9,7 +7,6 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -25,9 +22,11 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public abstract class DynamicCommandStage extends Stage {
 	private static final class DynamicCommandItemCell extends ListCell<DynamicCommandItem> {

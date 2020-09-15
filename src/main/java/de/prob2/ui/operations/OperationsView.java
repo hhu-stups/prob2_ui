@@ -11,6 +11,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
+import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -19,11 +20,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.states.StatesView;
 import de.prob2.ui.statusbar.StatusBar;
-import de.prob2.ui.unsatcore.UnsatCoreCalculator;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -198,7 +196,6 @@ public final class OperationsView extends VBox {
 	private final DisablePropertyController disablePropertyController;
 	private final StageManager stageManager;
 	private final Config config;
-	private final UnsatCoreCalculator unsatCoreCalculator;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final BackgroundUpdater updater;
 	private final ObjectProperty<Thread> randomExecutionThread;
@@ -207,7 +204,7 @@ public final class OperationsView extends VBox {
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
 						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar, final DisablePropertyController disablePropertyController,
-						   final StopActions stopActions, final Config config, final UnsatCoreCalculator unsatCoreCalculator) {
+						   final StopActions stopActions, final Config config) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
@@ -221,7 +218,6 @@ public final class OperationsView extends VBox {
 		this.updater = new BackgroundUpdater("OperationsView Updater");
 		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		this.needsUpdateAfterBusy = new AtomicBoolean(false);
-		this.unsatCoreCalculator = unsatCoreCalculator;
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		disablePropertyController.addDisableExpression(this.updater.runningProperty());
@@ -586,12 +582,10 @@ public final class OperationsView extends VBox {
 
 	@FXML
 	private void computeUnsatCore() {
-		unsatCoreCalculator.calculate();
 		btComputeUnsatCore.setVisible(false);
 		btComputeUnsatCore.setManaged(false);
-		injector.getInstance(MainView.class).switchTabPane("states");
-		StatesView statesView = injector.getInstance(StatesView.class);
-		statesView.refresh();
-		statesView.expandProperties();
+		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+		expressionTableView.selectCommand("unsat_core_properties");
+		expressionTableView.show();
 	}
 }
