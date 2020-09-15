@@ -184,7 +184,6 @@ public class ExpressionTableView extends DynamicCommandStage {
 	private void fillTable(TableData data) {
 		List<String> header = data.getHeader();
 		TableView<ObservableList<String>> tableView = new TableView<>();
-		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
 			final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
