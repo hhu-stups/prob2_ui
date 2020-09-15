@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public abstract class DynamicCommandStage extends Stage {
 	private static final class DynamicCommandItemCell extends ListCell<DynamicCommandItem> {

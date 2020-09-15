@@ -153,10 +153,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
 				if(currentTrace.get() == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(() -> {
-						reset();
-						statusBar.setText("");
-					});
+					Platform.runLater(this::reset);
 					currentThread.set(null);
 					return;
 				}
@@ -169,7 +166,6 @@ public class ExpressionTableView extends DynamicCommandStage {
 				Platform.runLater(() -> {
 					reset();
 					currentTable.set(cmd.getTable());
-					statusBar.setText("");
 				});
 				currentThread.set(null);
 			} catch (ProBError | EvaluationException e) {
@@ -203,21 +199,30 @@ public class ExpressionTableView extends DynamicCommandStage {
 
 				if (header.contains(SOURCE_COLUMN_NAME)) {
 					MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
-					showSourceItem.setOnAction(e -> {
-						if(to != null) {
-							int indexOfSource = header.indexOf(SOURCE_COLUMN_NAME);
-							String source = to.get(indexOfSource);
-							source = source.replaceAll(" at line ", "");
-							String[] sourceSplitted = source.split(" \\- ");
-							String[] start = sourceSplitted[0].split(":");
-							stageManager.getMainStage().toFront();
-							injector.getInstance(MainView.class).switchTabPane("beditorTab");
-							BEditor bEditor = injector.getInstance(BEditor.class);
-							bEditor.requestFocus();
-							bEditor.moveTo(Integer.parseInt(start[0]) - 1, Integer.parseInt(start[1]));
-							bEditor.requestFollowCaret();
+					int indexOfSource = header.indexOf(SOURCE_COLUMN_NAME);
+					if(to != null) {
+						String source = to.get(indexOfSource);
+						String[] sourceSplitted = source.replaceAll(" at line ", "").split(" \\- ");
+						String[] start = sourceSplitted[0].split(":");
+						try {
+							int line = Integer.parseInt(start[0]) - 1;
+							int column = Integer.parseInt(start[1]);
+							showSourceItem.setOnAction(e -> {
+								stageManager.getMainStage().toFront();
+								injector.getInstance(MainView.class).switchTabPane("beditorTab");
+								BEditor bEditor = injector.getInstance(BEditor.class);
+								bEditor.requestFocus();
+								bEditor.moveTo(line, column);
+								bEditor.requestFollowCaret();
+							});
+						} catch (NumberFormatException e) {
+							LOGGER.error("Source information cannot be extracted", e);
+							showSourceItem.setDisable(true);
+							statusBar.setText(bundle.getString("dynamic.tableview.jumpToState.notPossible"));
+							statusBar.setLabelStyle("warning");
 						}
-					});
+					}
+
 					contextMenuItems.add(showSourceItem);
 				}
 
@@ -304,6 +309,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 		currentTable.set(null);
 		clearTable();
 		statusBar.setText("");
+		statusBar.removeLabelStyle("warning");
 	}
 	
 	@FXML

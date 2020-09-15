@@ -23,4 +23,12 @@ public class DynamicCommandStatusBar extends HBox {
 	public void setText(String text) {
 		statusLabel.setText(text);
 	}
+
+	public void setLabelStyle(String style) {
+		statusLabel.getStyleClass().add(style);
+	}
+
+	public void removeLabelStyle(String... style) {
+		statusLabel.getStyleClass().removeAll(style);
+	}
 }

@@ -587,5 +587,6 @@ public final class OperationsView extends VBox {
 		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
 		expressionTableView.selectCommand("unsat_core_properties");
 		expressionTableView.show();
+		expressionTableView.toFront();
 	}
 }
