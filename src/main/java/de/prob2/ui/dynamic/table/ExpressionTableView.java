@@ -86,6 +86,8 @@ public class ExpressionTableView extends DynamicCommandStage {
     }
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
+
+	private static final double TABLE_DEFAULT_WIDTH = 800.0;
 	
 	private static final Pattern NEEDS_CSV_QUOTE_PATTERN = Pattern.compile("[,\"\n\r]");
 
@@ -184,11 +186,13 @@ public class ExpressionTableView extends DynamicCommandStage {
 	private void fillTable(TableData data) {
 		List<String> header = data.getHeader();
 		TableView<ObservableList<String>> tableView = new TableView<>();
+		tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
 			final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
 			column.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().get(j)));
 			tableView.getColumns().add(column);
+			column.setPrefWidth(TABLE_DEFAULT_WIDTH/header.size());
 		}
 		tableView.setItems(buildData(data.getRows()));
 		tableView.setRowFactory(table -> {
