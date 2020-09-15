@@ -1141,31 +1141,19 @@
 	-fx-background-color: lightgray;
 }
 
-.statusbar .statusLabel.noErrors {
+.status-label.no-error {
 	-fx-background-color: lightgreen;
 	-fx-text-fill: black;
 }
 
-.statusbar .statusLabel.someErrors {
+.status-label.error {
 	-fx-background-color: red;
 	-fx-text-fill: white;
 }
 
-.statusbar .statusLabel.warning {
+.status-label.warning {
 	-fx-background-color: gold;
 	-fx-text-fill: black;
-}
-
-/* Error Status Stage */
-
-.error-status-label.no-error {
-	-fx-background-color: lightgreen;
-	-fx-text-fill: black;
-}
-
-.error-status-label.error {
-	-fx-background-color: red;
-	-fx-text-fill: white;
 }
 
 /* ==================== Expression Table View Value =================== */

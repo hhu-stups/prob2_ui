@@ -107,7 +107,7 @@ public class StatusBar extends HBox {
 	}
 	
 	private void update() {
-		statusLabel.getStyleClass().removeAll("noErrors", "someErrors");
+		statusLabel.getStyleClass().removeAll("no-error", "error");
 		infoIcon.setVisible(false);
 		if (this.updating.get()) {
 			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
@@ -117,10 +117,10 @@ public class StatusBar extends HBox {
 			if (machine != null && trace != null) {
 				final List<String> errorMessages = getErrorMessages(machine, trace);
 				if (errorMessages.isEmpty()) {
-					statusLabel.getStyleClass().add("noErrors");
+					statusLabel.getStyleClass().add("no-error");
 					statusLabel.setText(resourceBundle.getString("statusbar.noErrors"));
 				} else {
-					statusLabel.getStyleClass().add("someErrors");
+					statusLabel.getStyleClass().add("error");
 					statusLabel.setText(String.format(resourceBundle.getString("statusbar.someErrors"), String.join(", ", errorMessages)));
 				}
 				infoIcon.setVisible(true);

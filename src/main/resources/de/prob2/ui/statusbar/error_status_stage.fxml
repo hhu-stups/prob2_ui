@@ -16,8 +16,8 @@
 					<padding>
 						<Insets topRightBottomLeft="5"/>
 					</padding>
-					<Label fx:id="invariantOkLabel" styleClass="error-status-label"/>
-					<Label fx:id="otherStateErrorsLabel" styleClass="error-status-label"/>
+					<Label fx:id="invariantOkLabel" styleClass="status-label"/>
+					<Label fx:id="otherStateErrorsLabel" styleClass="status-label"/>
 				</VBox>
 				<SplitPane fx:id="otherStateErrorsPane">
 					<ListView fx:id="errorsList"/>
