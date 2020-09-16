@@ -204,6 +204,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 			final ValueItemRow row = new ValueItemRow(header);
 			List<MenuItem> contextMenuItems = new ArrayList<>();
 			row.itemProperty().addListener((observable, from, to) -> {
+				row.setContextMenu(null);
 				if (header.contains(SOURCE_COLUMN_NAME)) {
 					handleSource(header, to, contextMenuItems);
 				}
