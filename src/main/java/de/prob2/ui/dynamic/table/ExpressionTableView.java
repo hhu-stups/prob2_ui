@@ -14,6 +14,7 @@ import de.prob.animator.domainobjects.TableData;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.beditor.BEditor;
+import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
@@ -39,9 +40,11 @@ import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,38 +55,38 @@ import java.util.stream.Collectors;
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage {
 
-    private static final class ValueItemRow extends TableRow<ObservableList<String>> {
+	private static final class ValueItemRow extends TableRow<ObservableList<String>> {
 
-        private final List<String> header;
+		private final List<String> header;
 
-        private ValueItemRow(final List<String> header) {
-            super();
-            this.header = header;
-            getStyleClass().add("expression-table-view-row");
-        }
+		private ValueItemRow(final List<String> header) {
+			super();
+			this.header = header;
+			getStyleClass().add("expression-table-view-row");
+		}
 
-        @Override
-        protected void updateItem(final ObservableList<String> item, final boolean empty) {
-            super.updateItem(item, empty);
-            this.getStyleClass().removeAll("true-val", "false-val");
-            if(item != null && !empty) {
-                if (header.contains(VALUE_COLUMN_NAME)) {
-                    int indexOfValue = header.indexOf(VALUE_COLUMN_NAME);
-                    String value = item.get(indexOfValue);
-                    switch (value) {
-                        case "TRUE":
-                            getStyleClass().add("true-val");
-                            break;
-                        case "FALSE":
-                            getStyleClass().add("false-val");
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-    }
+		@Override
+		protected void updateItem(final ObservableList<String> item, final boolean empty) {
+			super.updateItem(item, empty);
+			this.getStyleClass().removeAll("true-val", "false-val");
+			if(item != null && !empty) {
+				if (header.contains(VALUE_COLUMN_NAME)) {
+					int indexOfValue = header.indexOf(VALUE_COLUMN_NAME);
+					String value = item.get(indexOfValue);
+					switch (value) {
+						case "TRUE":
+							getStyleClass().add("true-val");
+							break;
+						case "FALSE":
+							getStyleClass().add("false-val");
+							break;
+						default:
+							break;
+					}
+				}
+			}
+		}
+	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 
@@ -199,53 +202,12 @@ public class ExpressionTableView extends DynamicCommandStage {
 			final ValueItemRow row = new ValueItemRow(header);
 			List<MenuItem> contextMenuItems = new ArrayList<>();
 			row.itemProperty().addListener((observable, from, to) -> {
-
 				if (header.contains(SOURCE_COLUMN_NAME)) {
-					MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
-					int indexOfSource = header.indexOf(SOURCE_COLUMN_NAME);
-					if(to != null) {
-						String source = to.get(indexOfSource);
-						String[] sourceSplitted = source.replaceAll(" at line ", "").split(" \\- ");
-						String[] start = sourceSplitted[0].split(":");
-						try {
-							int line = Integer.parseInt(start[0]) - 1;
-							int column = Integer.parseInt(start[1]);
-							showSourceItem.setOnAction(e -> {
-								stageManager.getMainStage().toFront();
-								injector.getInstance(MainView.class).switchTabPane("beditorTab");
-								BEditor bEditor = injector.getInstance(BEditor.class);
-								bEditor.requestFocus();
-								bEditor.moveTo(line, column);
-								bEditor.requestFollowCaret();
-							});
-						} catch (NumberFormatException e) {
-							LOGGER.error("Source information cannot be extracted", e);
-							showSourceItem.setDisable(true);
-							statusBar.setText(bundle.getString("dynamic.tableview.jumpToState.notPossible"));
-							statusBar.setLabelStyle("warning");
-						}
-					}
-
-					contextMenuItems.add(showSourceItem);
+					handleSource(header, to, contextMenuItems);
 				}
-
 				if (header.contains(STATE_ID_COLUMN_NAME)) {
-					MenuItem jumpToStateItem = new MenuItem(bundle.getString("dynamic.tableview.jumpToState"));
-					int indexOfStateID = header.indexOf(STATE_ID_COLUMN_NAME);
-					if(to != null) {
-						String stateID = to.get(indexOfStateID);
-						jumpToStateItem.setOnAction(e -> {
-							GetShortestTraceCommand cmd = new GetShortestTraceCommand(currentTrace.getStateSpace(), stateID);
-							currentTrace.getStateSpace().execute(cmd);
-							currentTrace.set(cmd.getTrace(currentTrace.getStateSpace()));
-						});
-						if ("none".equals(stateID)) {
-							jumpToStateItem.setDisable(true);
-						}
-					}
-					contextMenuItems.add(jumpToStateItem);
+					handleStateID(header, to, contextMenuItems);
 				}
-
 				if (!contextMenuItems.isEmpty() && to != null) {
 					ContextMenu contextMenu = new ContextMenu();
 					contextMenu.getItems().addAll(contextMenuItems);
@@ -256,6 +218,74 @@ public class ExpressionTableView extends DynamicCommandStage {
 		});
 		pane.setContent(tableView);
 		taErrors.clear();
+	}
+
+	private void handleSource(List<String> header, List<String> item, List<MenuItem> contextMenuItems) {
+		MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
+		int indexOfSource = header.indexOf(SOURCE_COLUMN_NAME);
+		if(item != null) {
+			String source = item.get(indexOfSource);
+			String[] start;
+			List<Integer> line = new ArrayList<>();
+			List<Integer> column = new ArrayList<>();
+			List<Path> path = new ArrayList<>();
+			if(source.startsWith(" at line ")) {
+				String[] sourceSplitted = source.replaceFirst(" at line ", "").split(" \\- ");
+				start = sourceSplitted[0].split(":");
+				line.add(Integer.parseInt(start[0]) - 1);
+				column.add(Integer.parseInt(start[1]));
+				path.add(currentTrace.getModel().getModelFile().toPath());
+			} else if(source.startsWith("Line: ")) {
+				source = source.replaceFirst("Line: ", "");
+				int nextWhiteSpaceIndex = source.indexOf(" ");
+				line.add(Integer.parseInt(source.substring(0, nextWhiteSpaceIndex)) - 1);
+				source = source.substring(nextWhiteSpaceIndex + 1);
+				source = source.replaceFirst("Column: ", "");
+				nextWhiteSpaceIndex = source.indexOf(" ");
+				column.add(Integer.parseInt(source.substring(0, nextWhiteSpaceIndex)));
+				int fileIndex = source.indexOf("file: ");
+				String pathAsString = source.substring(fileIndex + 6);
+				path.add(Paths.get(new File(pathAsString).toURI()));
+			} else {
+				showSourceItem.setDisable(true);
+				statusBar.setText(bundle.getString("dynamic.tableview.jumpToState.notPossible"));
+				statusBar.setLabelStyle("warning");
+			}
+
+			showSourceItem.setOnAction(e -> {
+				if(!line.isEmpty() && !column.isEmpty() && !path.isEmpty()) {
+					stageManager.getMainStage().toFront();
+					injector.getInstance(MainView.class).switchTabPane("beditorTab");
+
+					BEditorView bEditorView = injector.getInstance(BEditorView.class);
+					bEditorView.selectMachine(path.get(0));
+
+					BEditor bEditor = injector.getInstance(BEditor.class);
+					bEditor.requestFocus();
+					bEditor.moveTo(line.get(0), column.get(0));
+					bEditor.requestFollowCaret();
+				}
+			});
+		}
+
+		contextMenuItems.add(showSourceItem);
+	}
+
+	private void handleStateID(List<String> header, List<String> item, List<MenuItem> contextMenuItems) {
+		MenuItem jumpToStateItem = new MenuItem(bundle.getString("dynamic.tableview.jumpToState"));
+		int indexOfStateID = header.indexOf(STATE_ID_COLUMN_NAME);
+		if(item != null) {
+			String stateID = item.get(indexOfStateID);
+			jumpToStateItem.setOnAction(e -> {
+				GetShortestTraceCommand cmd = new GetShortestTraceCommand(currentTrace.getStateSpace(), stateID);
+				currentTrace.getStateSpace().execute(cmd);
+				currentTrace.set(cmd.getTrace(currentTrace.getStateSpace()));
+			});
+			if ("none".equals(stateID)) {
+				jumpToStateItem.setDisable(true);
+			}
+		}
+		contextMenuItems.add(jumpToStateItem);
 	}
 	
 	private void clearTable() {
