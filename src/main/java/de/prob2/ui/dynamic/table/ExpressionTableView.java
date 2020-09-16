@@ -196,6 +196,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 			column.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().get(j)));
 			tableView.getColumns().add(column);
 			column.setPrefWidth(TABLE_DEFAULT_WIDTH/header.size());
+			column.getStyleClass().add("expression-table-view-column");
+			column.getStyleClass().add("alignment");
 		}
 		tableView.setItems(buildData(data.getRows()));
 		tableView.setRowFactory(table -> {

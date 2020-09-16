@@ -1166,3 +1166,7 @@
 .expression-table-view-row.false-val {
     -fx-background-color: pink;
 }
+
+.expression-table-view-column.alignment {
+	-fx-alignment: CENTER;
+}
