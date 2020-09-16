@@ -1,22 +1,20 @@
 package de.prob2.ui.history;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -30,6 +28,9 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @FXMLInjected
 @Singleton
@@ -112,8 +113,10 @@ public final class HistoryView extends VBox {
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
 		currentTrace.addListener(traceChangeListener);
 
+		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
+
 		saveTraceButton.disableProperty()
-				.bind(currentProject.isNotNull().and(currentTrace.isNotNull()).not());
+				.bind(partOfDisableBinding.or(currentProject.isNotNull().and(currentTrace.isNotNull()).not()));
 	}
 
 	public NumberBinding getCurrentHistoryPositionProperty() {

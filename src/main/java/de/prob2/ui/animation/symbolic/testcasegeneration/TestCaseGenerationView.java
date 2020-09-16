@@ -1,13 +1,7 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.List;
-import java.util.ResourceBundle;
-
-import javax.inject.Inject;
-
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -21,7 +15,6 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -39,6 +32,10 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.ResourceBundle;
  
 @FXMLInjected
 @Singleton
@@ -203,7 +200,6 @@ public class TestCaseGenerationView extends ScrollPane {
 		});
 		generateButton.disableProperty().bind(partOfDisableBinding.or(noTestCases.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		cancelButton.disableProperty().bind(testCaseGenerator.runningProperty().not());
-		tvTestCases.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -216,7 +212,7 @@ public class TestCaseGenerationView extends ScrollPane {
 				itemHandler.handleItem(item);
 			}
 		});
-		tvTestCases.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		tvTestCases.disableProperty().bind(partOfDisableBinding.or(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty())));
 	}
 	
 	@FXML

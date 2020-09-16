@@ -1,12 +1,9 @@
 package de.prob2.ui.animation.tracereplay;
 
-import java.nio.file.Path;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
+import de.prob.statespace.FormalismType;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -22,8 +19,8 @@ import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -46,8 +43,10 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
-
 import org.controlsfx.glyphfont.FontAwesome;
+
+import java.nio.file.Path;
+import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -148,7 +147,9 @@ public class TraceReplayView extends ScrollPane {
 			}
 		});
 
-		loadTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
+
+		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
 		cancelButton.disableProperty().bind(traceChecker.runningProperty().not());
 		final BooleanProperty noTraces = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
@@ -159,8 +160,9 @@ public class TraceReplayView extends ScrollPane {
 				noTraces.set(true);
 			}
 		});
-		checkButton.disableProperty().bind(currentTrace.isNull().or(noTraces.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
-		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
+
+		checkButton.disableProperty().bind(partOfDisableBinding.or(currentTrace.isNull().or(noTraces.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
+		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
 	private void initTableColumns() {
