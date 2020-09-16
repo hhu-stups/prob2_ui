@@ -1,9 +1,13 @@
 package de.prob2.ui.project;
 
+import java.util.Iterator;
+
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
@@ -11,11 +15,9 @@ import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 
-import java.util.Iterator;
-
 class ProjectJsonContext extends JsonManager.Context<Project> {
-	ProjectJsonContext() {
-		super(Project.class, "Project", 4);
+	ProjectJsonContext(final Gson gson) {
+		super(gson, Project.class, "Project", 4);
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
