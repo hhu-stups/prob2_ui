@@ -3,15 +3,7 @@ package de.prob2.ui.internal;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
@@ -297,6 +289,8 @@ public final class StageManager {
 	 */
 	public Alert makeAlert(final Alert.AlertType alertType, final List<ButtonType> buttons,
 			final String headerBundleKey, final String contentBundleKey, final Object... contentParams) {
+		LOGGER.info(bundle.getString(contentBundleKey));
+		LOGGER.info(Arrays.toString(contentParams));
 		final Alert alert = new Alert(alertType, String.format(bundle.getString(contentBundleKey), contentParams),
 				buttons.toArray(new ButtonType[buttons.size()]));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
@@ -306,6 +300,7 @@ public final class StageManager {
 		}
 		return alert;
 	}
+
 	
 	/**
 	 * Create and initialize a new alert with the default buttons provided by
