@@ -48,12 +48,23 @@ test:jdk-14-linux:
     - ./gradlew ${GRADLE_OPTIONS} check
     - ./gradlew ${GRADLE_OPTIONS} jpackage
 
-test:jdk-14-windows:
-  extends: .test
-  image: openjdk:14-jdk-windowsservercore
+tests:jdk-14-macos:
+  extends: .tests
+  script:
+    - ./gradlew ${GRADLE_OPTIONS} check
+    - ./gradlew ${GRADLE_OPTIONS} jpackage
+  tags:
+    - macos
+
+tests:jdk-14-windows64:
+  extends: .tests
+  before_script: []
   script:
     - gradlew ${GRADLE_OPTIONS} check
     - gradlew ${GRADLE_OPTIONS} jpackage
+  tags:
+    - prob
+    - win64
 
 distributions:
   stage: deploy
