@@ -1,15 +1,20 @@
+stages:
+  - test
+  - deploy
+
+cache:
+  paths:
+    - .gradle/caches
+    - .gradle/native
+    - .gradle/wrapper
+
 variables:
   DEBIAN_FRONTEND: noninteractive
   GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
 
 .test-linux:
   stage: test
-  cache:
-    paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
-  before_script: &default_before_script
+  before_script:
     - apt-get update
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
@@ -23,12 +28,7 @@ variables:
 
 .test-mac:
   stage: test
-  cache:
-    paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
-  before_script: &default_before_script
+  before_script:
     # git is installed by default
     # pandoc is needed to build the ProB 2 UI docs.
     - brew install pandoc
@@ -41,11 +41,6 @@ variables:
 
 .test-windows:
   stage: test
-  cache:
-    paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
   artifacts:
     expire_in: 1 week
     paths:
@@ -100,8 +95,6 @@ tests:jdk-14-windows64:
 distributions:
   stage: deploy
   image: debian:stable-slim
-  cache:
-    paths: []
   before_script:
     - apt-get update
     - apt-get install --assume-yes lftp
