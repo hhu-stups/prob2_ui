@@ -51,7 +51,6 @@ test:jdk-8-linux:
   extends: .test-linux
   image: openjdk:8-jdk-slim
   before_script:
-    - *default_before_script
     # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
     - apt-get install --assume-yes curl perl rsync
     # Install OpenJFX 8.
@@ -68,7 +67,6 @@ test:jdk-14-linux:
   extends: .test-linux
   image: openjdk:14-jdk-slim
   before_script:
-    - *default_before_script
     - apt-get install --assume-yes build-essential fakeroot
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
