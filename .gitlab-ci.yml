@@ -49,9 +49,10 @@ variables:
       - build/libs
 
 .test-windows:
-  stage: test
+  # stage: test
+  # TODO: Activate stage: test
   before_script: &default_before_script_windows
-    # install pandoc and git
+    # TODO: install pandoc and git
   cache:
     paths:
       - .gradle/caches
@@ -102,9 +103,11 @@ tests:jdk-14-macos:
 
 tests:jdk-14-windows64:
   extends: .test-windows
+  # TODO: Install Java 14 in before_script
   script:
-    # Include createHelp task, install pandoc
-    - [gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
+    # TODO: Include createHelp task, install pandoc
+    # TODO: only first task is selected
+    - [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
   tags:
     - prob
     - win64
