@@ -3,18 +3,20 @@ package de.prob2.ui.menu;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.plugin.ProBPluginManager;
-//import de.prob2.ui.visb.VisBStage;
 import de.prob2.ui.visualisation.fx.VisualisationController;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
