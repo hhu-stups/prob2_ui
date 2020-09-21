@@ -34,7 +34,7 @@ variables:
     - brew install pandoc
     - curl --location -o "openjdk-14.0.2_linux-x64_bin.tar.gz" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz"
     - tar -xzf openjdk-14.0.2_linux-x64_bin.tar.gz
-    - mv jdk-14.0.2 /Library/Java/JavaVirtualMachines/
+    - sudo mv jdk-14.0.2 /Library/Java/JavaVirtualMachines/
     - export GRADLE_USER_HOME="${PWD}/.gradle"
   artifacts:
     expire_in: 1 week
@@ -91,7 +91,6 @@ tests:jdk-14-macos:
 
 tests:jdk-14-windows64:
   extends: .test-windows
-  before_script: [default_before_script_windows]
   script:
     - gradlew %GRADLE_OPTIONS% check
     - gradlew %GRADLE_OPTIONS% jpackage
