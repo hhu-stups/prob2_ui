@@ -50,7 +50,7 @@ test:jdk-14-linux:
 
 test:jdk-14-windows:
   extends: .test
-  image: openjdk:14-jdk-nanoserver-1809
+  image: openjdk:14-jdk-windowsservercore
   script:
     - gradlew ${GRADLE_OPTIONS} check
     - gradlew ${GRADLE_OPTIONS} jpackage
