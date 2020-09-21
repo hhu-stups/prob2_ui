@@ -29,13 +29,24 @@ variables:
       - .gradle/native
       - .gradle/wrapper
   before_script: &default_before_script
-    - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    - brew install apt-get
-    - apt-get update
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
-    - apt-get install --assume-yes git pandoc
+    - brew install git
+    - brew install pandoc
     - export GRADLE_USER_HOME="${PWD}/.gradle"
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - build/distributions
+      - build/libs
+
+.test-windows:
+  stage: test
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
   artifacts:
     expire_in: 1 week
     paths:
@@ -78,7 +89,7 @@ tests:jdk-14-macos:
     - macos
 
 tests:jdk-14-windows64:
-  extends: .test
+  extends: .test-windows
   before_script: []
   script:
     - gradlew ${GRADLE_OPTIONS} check
