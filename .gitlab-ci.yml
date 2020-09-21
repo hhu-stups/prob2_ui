@@ -92,8 +92,8 @@ tests:jdk-14-windows64:
   extends: .test-windows
   before_script: []
   script:
-    - gradlew ${GRADLE_OPTIONS} check
-    - gradlew ${GRADLE_OPTIONS} jpackage
+    - gradlew %GRADLE_OPTIONS% check
+    - gradlew %GRADLE_OPTIONS% jpackage
   tags:
     - prob
     - win64
