@@ -49,7 +49,7 @@ test:jdk-14-linux:
     - ./gradlew ${GRADLE_OPTIONS} jpackage
 
 tests:jdk-14-macos:
-  extends: .tests
+  extends: .test
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
     - ./gradlew ${GRADLE_OPTIONS} jpackage
@@ -57,7 +57,7 @@ tests:jdk-14-macos:
     - macos
 
 tests:jdk-14-windows64:
-  extends: .tests
+  extends: .test
   before_script: []
   script:
     - gradlew ${GRADLE_OPTIONS} check
