@@ -32,8 +32,8 @@ variables:
     # git is installed by default
     # pandoc is needed to build the ProB 2 UI docs.
     - brew install pandoc
-    - brew tap AdoptOpenJDK/openjdk
-    - sudo brew cask install adoptopenjdk14
+    - curl --location o "openjdk-14.0.2_linux-x64_bin.tar.gz" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz"
+    - sudo mv openjdk-14.0.2_linux-x64_bin.tar.gz /Library/Java/JavaVirtualMachines/
     - export GRADLE_USER_HOME="${PWD}/.gradle"
   artifacts:
     expire_in: 1 week
