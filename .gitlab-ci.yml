@@ -2,12 +2,6 @@ stages:
   - test
   - deploy
 
-cache:
-  paths:
-    - .gradle/caches
-    - .gradle/native
-    - .gradle/wrapper
-
 variables:
   DEBIAN_FRONTEND: noninteractive
   GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
@@ -20,6 +14,11 @@ variables:
     # pandoc is needed to build the ProB 2 UI docs.
     - apt-get install --assume-yes git pandoc
     - export GRADLE_USER_HOME="${PWD}/.gradle"
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
   artifacts:
     expire_in: 1 week
     paths:
@@ -38,6 +37,11 @@ variables:
     - tar -xzf openjdk-14.0.2_osx-x64_bin.tar.gz
     - export JAVA_HOME=jdk-14.0.2.jdk/Contents/Home
     - export GRADLE_USER_HOME="${PWD}/.gradle"
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
   artifacts:
     expire_in: 1 week
     paths:
@@ -48,6 +52,11 @@ variables:
   stage: test
   before_script: &default_before_script_windows
     # install pandoc and git
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
   artifacts:
     expire_in: 1 week
     paths:
