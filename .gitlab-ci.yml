@@ -33,10 +33,10 @@ variables:
     # pandoc is needed to build the ProB 2 UI docs.
     - brew install pandoc
     - brew install perl
-    - curl --location -o "openjdk-14.0.2_linux-x64_bin.tar.gz" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_osx-x64_bin.tar.gz"
-    - shasum --algorithm 256 --quiet --check - <<< "386a96eeef63bf94b450809d69ceaa1c9e32a97230e0a120c1b41786b743ae84  openjdk-14.0.2_linux-x64_bin.tar.gz"
-    - tar -xzf openjdk-14.0.2_linux-x64_bin.tar.gz
-    - export JAVA_HOME=jdk-14.0.2
+    - curl --location -o "openjdk-14.0.2_osx-x64_bin.tar.gz" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_osx-x64_bin.tar.gz"
+    - shasum --algorithm 256 --quiet --check - <<< "386a96eeef63bf94b450809d69ceaa1c9e32a97230e0a120c1b41786b743ae84  openjdk-14.0.2_osx-x64_bin.tar.gz"
+    - tar -xzf openjdk-14.0.2_osx-x64_bin.tar.gz
+    - export JAVA_HOME="${PWD}/jdk-14.0.2.jdk"
     - export GRADLE_USER_HOME="${PWD}/.gradle"
   artifacts:
     expire_in: 1 week
