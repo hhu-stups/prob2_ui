@@ -54,14 +54,14 @@ variables:
     # install pandoc and git
   cache:
     paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
+      - .gradle\caches
+      - .gradle\native
+      - .gradle\wrapper
   artifacts:
     expire_in: 1 week
     paths:
-      - build/distributions
-      - build/libs
+      - build\distributions
+      - build\libs
 
 test:jdk-8-linux:
   extends: .test-linux
