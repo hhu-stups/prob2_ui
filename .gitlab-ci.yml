@@ -89,7 +89,7 @@ tests:jdk-14-macos:
 
 tests:jdk-14-windows64:
   extends: .test-windows
-  before_script: [*default_before_script_windows]
+  before_script: [default_before_script_windows]
   script:
     - gradlew %GRADLE_OPTIONS% check
     - gradlew %GRADLE_OPTIONS% jpackage
