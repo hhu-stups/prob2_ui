@@ -9,7 +9,7 @@
 	<MenuItem fx:id="tableVisualization" text="%menu.visualisation.items.table" onAction="#openTableVisualisation"/>
 	<MenuItem text="%menu.visualisation.items.magicLayout" onAction="#openMagicLayout"/>
 	<SeparatorMenuItem />
-	<MenuItem text="%menu.advanced.items.visb" onAction="#openVisB"/>
+	<MenuItem text="%menu.visualisation.items.visb" onAction="#openVisB"/>
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.visualisation.items.showHistoryChart"
 			  onAction="#handleHistoryChart" />
