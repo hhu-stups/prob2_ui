@@ -33,7 +33,7 @@ variables:
     # pandoc is needed to build the ProB 2 UI docs.
     - brew install pandoc
     - brew tap AdoptOpenJDK/openjdk
-    - brew cask install adoptopenjdk14
+    - brew install adoptopenjdk14
     - export GRADLE_USER_HOME="${PWD}/.gradle"
   artifacts:
     expire_in: 1 week
