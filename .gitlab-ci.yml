@@ -14,7 +14,7 @@ variables:
 
 .test-linux:
   stage: test
-  before_script:
+  before_script: &default_before_script_linux
     - apt-get update
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
@@ -28,7 +28,7 @@ variables:
 
 .test-mac:
   stage: test
-  before_script:
+  before_script: &default_before_script_mac
     # git is installed by default
     # pandoc is needed to build the ProB 2 UI docs.
     - brew install pandoc
@@ -41,6 +41,7 @@ variables:
 
 .test-windows:
   stage: test
+  before_script: &default_before_script_windows
   artifacts:
     expire_in: 1 week
     paths:
@@ -51,6 +52,7 @@ test:jdk-8-linux:
   extends: .test-linux
   image: openjdk:8-jdk-slim
   before_script:
+    - *default_before_script_linux
     # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
     - apt-get install --assume-yes curl perl rsync
     # Install OpenJFX 8.
@@ -67,6 +69,7 @@ test:jdk-14-linux:
   extends: .test-linux
   image: openjdk:14-jdk-slim
   before_script:
+    - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
@@ -74,6 +77,8 @@ test:jdk-14-linux:
 
 tests:jdk-14-macos:
   extends: .test-mac
+  before_script:
+    - *default_before_script_mac
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
     - ./gradlew ${GRADLE_OPTIONS} jpackage
@@ -82,7 +87,7 @@ tests:jdk-14-macos:
 
 tests:jdk-14-windows64:
   extends: .test-windows
-  before_script: []
+  before_script: [default_before_script_windows]
   script:
     - gradlew %GRADLE_OPTIONS% check
     - gradlew %GRADLE_OPTIONS% jpackage
