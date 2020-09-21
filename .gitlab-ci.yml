@@ -104,8 +104,7 @@ tests:jdk-14-windows64:
   extends: .test-windows
   script:
     # Include createHelp task, install pandoc
-    - gradlew %GRADLE_OPTIONS% check --exclude-task createHelp
-    - gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp
+    - [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
   tags:
     - prob
     - win64
