@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,10 +36,10 @@ public final class Config {
 	private final List<ConfigListener> listeners;
 
 	@Inject
-	private Config(final @ConfigFile Path configFilePath, final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
+	private Config(final @ConfigFile Path configFilePath, final Gson gson, final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
 		this.configFilePath = configFilePath;
 		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(ConfigData.class, "Config", 1) {
+		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(gson, ConfigData.class, "Config", 1) {
 			private static final String GUI_STATE_FIELD = "guiState";
 			private static final String PERSPECTIVE_KIND_FIELD = "perspectiveKind";
 			private static final String PERSPECTIVE_FIELD = "perspective";

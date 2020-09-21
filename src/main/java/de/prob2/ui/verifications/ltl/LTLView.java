@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
@@ -120,6 +121,7 @@ public class LTLView extends AnchorPane {
 					final LTLFormulaChecker checker, final LTLPatternParser patternParser,
 					final LTLResultHandler resultHandler,
 					final FileChooserManager fileChooserManager,
+					final Gson gson,
 					final JsonManager<LTLData> jsonManager) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
@@ -132,7 +134,7 @@ public class LTLView extends AnchorPane {
 		this.resultHandler = resultHandler;
 		this.fileChooserManager = fileChooserManager;
 		this.jsonManager = jsonManager;
-		jsonManager.initContext(new JsonManager.Context<LTLData>(LTLData.class, "LTL", 1) {
+		jsonManager.initContext(new JsonManager.Context<LTLData>(gson, LTLData.class, "LTL", 1) {
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
 				if (oldMetadata.getFileType() == null) {

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
@@ -34,10 +35,10 @@ public class MagicLayoutSettingsManager {
 	private final ResourceBundle bundle;
 
 	@Inject
-	public MagicLayoutSettingsManager(JsonManager<MagicLayoutSettings> jsonManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager,
+	public MagicLayoutSettingsManager(Gson gson, JsonManager<MagicLayoutSettings> jsonManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager,
 									  FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new JsonManager.Context<MagicLayoutSettings>(MagicLayoutSettings.class, "Magic Layout settings", 1) {
+		this.jsonManager.initContext(new JsonManager.Context<MagicLayoutSettings>(gson, MagicLayoutSettings.class, "Magic Layout settings", 1) {
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
 				if (oldMetadata.getFileType() == null) {
