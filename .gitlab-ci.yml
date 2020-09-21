@@ -87,7 +87,7 @@ tests:jdk-14-macos:
 
 tests:jdk-14-windows64:
   extends: .test-windows
-  before_script: [default_before_script_windows]
+  before_script: [*default_before_script_windows]
   script:
     - gradlew %GRADLE_OPTIONS% check
     - gradlew %GRADLE_OPTIONS% jpackage
@@ -101,6 +101,6 @@ distributions:
   before_script:
     - apt-get update
     - apt-get install --assume-yes lftp
-  variables: 
+  variables:
     DEPLOY_REMOTE_BASEDIR: stupshome/stups
   script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set sftp:auto-confirm yes; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/; mput -e build/distributions/*-mac.zip build/distributions/*.deb build/libs/*-all.jar; exit"
