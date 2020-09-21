@@ -48,21 +48,21 @@ variables:
       - build/distributions
       - build/libs
 
-.test-windows:
+#.test-windows:
   # stage: test
   # TODO: Activate stage: test
-  before_script: &default_before_script_windows
+#  before_script: &default_before_script_windows
     # TODO: install pandoc and git
-  cache:
-    paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - build/distributions
-      - build/libs
+#  cache:
+#    paths:
+#      - .gradle/caches
+#      - .gradle/native
+#      - .gradle/wrapper
+#  artifacts:
+#    expire_in: 1 week
+#    paths:
+#      - build/distributions
+#      - build/libs
 
 test:jdk-8-linux:
   extends: .test-linux
@@ -101,16 +101,16 @@ tests:jdk-14-macos:
   tags:
     - macos
 
-tests:jdk-14-windows64:
-  extends: .test-windows
+#tests:jdk-14-windows64:
+#  extends: .test-windows
   # TODO: Install Java 14 in before_script
-  script:
+#  script:
     # TODO: Include createHelp task, install pandoc
     # TODO: only first task is selected
-    - [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
-  tags:
-    - prob
-    - win64
+#    - [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
+#  tags:
+#    - prob
+#    - win64
 
 distributions:
   stage: deploy
