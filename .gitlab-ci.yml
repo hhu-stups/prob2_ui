@@ -38,7 +38,7 @@ test:jdk-8:
     - rm -r "libopenjfx-java.deb" "libopenjfx-java"
   script: ./gradlew ${GRADLE_OPTIONS} check shadowJar createAppZip
 
-test:jdk-14:
+test:jdk-14-linux:
   extends: .test
   image: openjdk:14-jdk-slim
   before_script:
@@ -47,6 +47,13 @@ test:jdk-14:
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
     - ./gradlew ${GRADLE_OPTIONS} jpackage
+
+test:jdk-14-windows:
+  extends: .test
+  image: openjdk:14-jdk-nanoserver-1809
+  script:
+    - gradlew ${GRADLE_OPTIONS} check
+    - gradlew ${GRADLE_OPTIONS} jpackage
 
 distributions:
   stage: deploy
