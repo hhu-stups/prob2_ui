@@ -29,9 +29,8 @@ variables:
       - .gradle/native
       - .gradle/wrapper
   before_script: &default_before_script
-    # git is needed to read the current commit hash.
+    # git is installed by default
     # pandoc is needed to build the ProB 2 UI docs.
-    - brew install git
     - brew install pandoc
     - export GRADLE_USER_HOME="${PWD}/.gradle"
   artifacts:
