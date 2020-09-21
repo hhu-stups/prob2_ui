@@ -32,6 +32,7 @@ variables:
     # git is installed by default
     # pandoc is needed to build the ProB 2 UI docs.
     - brew install pandoc
+    - brew install java14
     - export GRADLE_USER_HOME="${PWD}/.gradle"
   artifacts:
     expire_in: 1 week
@@ -42,6 +43,7 @@ variables:
 .test-windows:
   stage: test
   before_script: &default_before_script_windows
+    # install pandoc and git
   artifacts:
     expire_in: 1 week
     paths:
