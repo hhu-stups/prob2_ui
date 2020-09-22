@@ -1,5 +1,7 @@
 package de.prob2.ui.visualisation.fx;
 
+import de.hhu.stups.prob.translator.BBoolean;
+import de.hhu.stups.prob.translator.BNumber;
 import de.prob2.ui.visualisation.fx.listener.EventListener;
 import de.prob2.ui.visualisation.fx.listener.FormulaListener;
 
@@ -36,5 +38,19 @@ public abstract class Visualisation {
 
 	protected final void registerEventListener(EventListener listener) {
 		controller.registerEventListener(listener);
+	}
+
+	protected final Integer translateToInt(Object intObj) {
+		if (intObj instanceof BNumber) {
+			return ((BNumber) intObj).intValue();
+		}
+		return null;
+	}
+
+	protected final Boolean translateToBool(Object boolObj) {
+		if (boolObj instanceof BBoolean) {
+			return ((BBoolean) boolObj).booleanValue();
+		}
+		return null;
 	}
 }
