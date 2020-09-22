@@ -330,7 +330,7 @@ public class VisualisationController {
 				} catch (Exception e) {
 					Alert alert = stageManager.makeExceptionAlert(e,
 							"visualisation.fx.controller.alerts.formulaListenerException.content",
-							String.join(" ", formulas));
+							"common.literal", String.join(" ", formulas));
 					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +
@@ -347,7 +347,7 @@ public class VisualisationController {
 					eventListenerMap.get(lastEvent).eventExcecuted();
 				} catch (Exception e) {
 					Alert alert = stageManager.makeExceptionAlert(e, 
-							"visualisation.fx.controller.alerts.formulaEventListenerException.content", lastEvent);
+							"visualisation.fx.controller.alerts.formulaEventListenerException.content", "common.literal", lastEvent);
 					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					LOGGER.warn("Exception while calling the event listener for the event \"{}\".", lastEvent, e);
