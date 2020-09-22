@@ -197,7 +197,10 @@ public class VisBController {
 	}
 
 	void reloadVisualisation(){
-		if(visBVisualisation == null) return;
+		if(!visBVisualisation.isReady()){
+			updateInfo("visb.infoboy.empty.reload");
+			return;
+		}
 		VisBVisualisation currentVisualisation = this.visBVisualisation;
 		closeCurrentVisualisation();
 		this.visBVisualisation = currentVisualisation;
