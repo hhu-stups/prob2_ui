@@ -90,7 +90,7 @@ public class ProBPluginManager {
 	 * @param bundle {@link ResourceBundle} used in the prob2-ui application
 	 */
 	@Inject
-	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, @DefaultPluginDirectory final Path defaultPluginDirectory, final VersionInfo versionInfo, final StopActions stopActions, final Config config) throws IOException {
+	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, @DefaultPluginDirectory final Path defaultPluginDirectory, final VersionInfo versionInfo, final StopActions stopActions, final Config config) {
 		this.proBPluginHelper = proBPluginHelper;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
