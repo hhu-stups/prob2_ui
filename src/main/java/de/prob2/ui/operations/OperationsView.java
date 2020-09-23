@@ -305,8 +305,10 @@ public final class OperationsView extends VBox {
 					throw new IllegalStateException("Unhandled sort mode: " + to);
 			}
 			((BindableGlyph)sortButton.getGraphic()).setIcon(icon);
-			
-			doSort(currentTrace.get().getStateSpace().getLoadedMachine());
+
+			if(currentTrace.get() != null) {
+				doSort(currentTrace.get().getStateSpace().getLoadedMachine());
+			}
 			opsListView.getItems().setAll(applyFilter(searchBar.getText()));
 		});
 
