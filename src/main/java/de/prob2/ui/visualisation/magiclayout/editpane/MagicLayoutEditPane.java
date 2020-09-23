@@ -17,6 +17,7 @@ import de.prob2.ui.visualisation.magiclayout.MagicLineWidth;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
@@ -214,9 +215,11 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 				List<ButtonType> buttons = new ArrayList<>();
 				buttons.add(ButtonType.YES);
 				buttons.add(ButtonType.NO);
-				Optional<ButtonType> result = stageManager.makeAlert(AlertType.CONFIRMATION, buttons, "",
+				final Alert alert = stageManager.makeAlert(AlertType.CONFIRMATION, buttons, "",
 						"visualisation.magicLayout.editPane.alerts.confirmDeleteComponent.content",
-						cell.getItem().getName()).showAndWait();
+						cell.getItem().getName());
+				alert.initOwner(this.getScene().getWindow());
+				final Optional<ButtonType> result = alert.showAndWait();
 				if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 					listView.getItems().remove(cell.getItem());
 				}

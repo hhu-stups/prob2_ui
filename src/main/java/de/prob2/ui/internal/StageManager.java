@@ -278,6 +278,13 @@ public final class StageManager {
 	 * @param dialog the dialog to register
 	 */
 	public void register(final Dialog<?> dialog) {
+		// Consider all dialogs as owned by the main stage by default.
+		// Callers of register, makeAlert, etc. should replace this with a more accurate owner if possible,
+		// so that dialogs created by non-main windows or detached views are owned by the correct window.
+		// The owner of a dialog influences for example what screen the dialog appears on.
+		// If no owner is set, the dialog appears on the user's primary screen,
+		// which may be a different screen than the one with the window that created the dialog.
+		dialog.initOwner(this.getMainStage());
 		dialog.getDialogPane().getStylesheets().add(STYLESHEET);
 	}
 

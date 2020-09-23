@@ -10,6 +10,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -101,10 +102,11 @@ public class ProjectTab extends Tab {
 			if (keyEvent.getCode().equals(KeyCode.ENTER)) {
 				String name = projectNameTextField.getText();
 				if(name.replace(" ", "").length() == 0) {
-					stageManager.makeAlert(AlertType.WARNING, 
+					final Alert alert = stageManager.makeAlert(AlertType.WARNING, 
 							"project.projectTab.alerts.emptyNameWarning.header",
-							"project.projectTab.alerts.emptyNameWarning.content")
-							.showAndWait();
+							"project.projectTab.alerts.emptyNameWarning.content");
+					alert.initOwner(this.getContent().getScene().getWindow());
+					alert.showAndWait();
 					return;
 				}
 				currentProject.changeName(name);

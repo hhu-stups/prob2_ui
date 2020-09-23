@@ -29,6 +29,7 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -288,7 +289,9 @@ public class VisBStage extends Stage {
 	 * This method throws an ProB2-UI ExceptionAlert
 	 */
 	private void alert(Throwable ex, String header, String body, Object... params){
-		this.stageManager.makeExceptionAlert(ex, header, body, params).showAndWait();
+		final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
+		alert.initOwner(this);
+		alert.showAndWait();
 	}
 
 	private void exportImage() {

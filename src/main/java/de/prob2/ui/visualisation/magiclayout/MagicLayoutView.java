@@ -19,10 +19,13 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.editpane.MagicLayoutEditEdges;
 import de.prob2.ui.visualisation.magiclayout.editpane.MagicLayoutEditNodes;
+
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.MenuBar;
@@ -226,8 +229,10 @@ public class MagicLayoutView extends Stage {
 		try {
 			ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
 		} catch (IOException e) {
-			stageManager.makeExceptionAlert(e,
+			final Alert alert = stageManager.makeExceptionAlert(e,
 					"visualisation.magicLayout.view.alerts.couldNotSaveGraphAsImage.content");
+			alert.initOwner(this);
+			alert.show();
 		}
 
 		// try to open image with external viewer
@@ -238,7 +243,11 @@ public class MagicLayoutView extends Stage {
 			try {
 				Desktop.getDesktop().open(finalFile);
 			} catch (IOException e) {
-				stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotOpenImage.content");
+				Platform.runLater(() -> {
+					final Alert alert = stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotOpenImage.content");
+					alert.initOwner(this);
+					alert.show();
+				});
 			}
 		}, "Magic Layout Image Opener").start();
 		

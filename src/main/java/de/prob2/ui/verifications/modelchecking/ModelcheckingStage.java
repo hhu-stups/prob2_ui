@@ -112,13 +112,16 @@ public class ModelcheckingStage extends Stage {
 				modelchecker.checkItem(modelcheckingItem, true, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
 			} else {
-				stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked").showAndWait();
+				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked");
+				alert.initOwner(this);
+				alert.showAndWait();
 				this.hide();
 			}
 		} else {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "",
-					"verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content")
-					.showAndWait();
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "",
+					"verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content");
+			alert.initOwner(this);
+			alert.showAndWait();
 			this.hide();
 		}
 	}

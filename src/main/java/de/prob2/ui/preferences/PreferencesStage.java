@@ -27,6 +27,7 @@ import de.prob2.ui.project.ProjectManager;
 import javafx.beans.InvalidationListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -216,7 +217,9 @@ public final class PreferencesStage extends Stage {
 			this.globalProBPrefs.apply();
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content").show();
+			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content");
+			alert.initOwner(this);
+			alert.show();
 		}
 		
 		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();

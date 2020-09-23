@@ -140,6 +140,7 @@ public final class HistoryView extends VBox {
 					currentProject.getCurrentMachine());
 			} catch (Exception e) {
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "history.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW, Collections.EMPTY_LIST);
+				alert.initOwner(this.getScene().getWindow());
 				alert.setCopyTrace(copyTrace);
 				alert.setErrorMessage();
 			}

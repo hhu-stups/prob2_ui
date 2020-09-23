@@ -135,7 +135,7 @@ public class VisualisationView extends AnchorPane {
 		});
 
 		if (!notFoundImages.isEmpty()) {
-			this.stageManager.makeAlert(
+			final Alert alert = this.stageManager.makeAlert(
 				Alert.AlertType.WARNING,
 				"visualisation.stateVisualisationView.alerts.imagesNotFound.header",
 				"visualisation.stateVisualisationView.alerts.imagesNotFound.content",
@@ -143,7 +143,9 @@ public class VisualisationView extends AnchorPane {
 				machineDirectory,
 				projectDirectory,
 				proBDirectory
-			).show();
+			);
+			alert.initOwner(this.getScene().getWindow());
+			alert.show();
 		}
 
 		return machineImages;
