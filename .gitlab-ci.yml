@@ -54,12 +54,14 @@ variables:
   before_script: &default_before_script_windows
     - curl --location -o "openjdk-14.0.2_windows-x64_bin.zip" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_windows-x64_bin.zip"
     - curl --location -o "wix311-binaries.zip" "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
+    - curl --location -o "pandoc-2.10.1.zip" "https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
     - tar -xzf openjdk-14.0.2_windows-x64_bin.zip
     - tar -xzf wix311-binaries.zip
+    - tar -xzf "pandoc-2.10.1.zip"
+    - doskey pandoc=pandoc-2.10.1\\pandoc.exe
     - SET JAVA_HOME=jdk-14.0.2
     - SET GRADLE_USER_HOME=%cd%\.gradle
     - SET PATH=%PATH%;%cd%\wix311-binaries
-     #TODO: install pandoc and git
   cache:
     paths:
       - .gradle/caches
@@ -113,10 +115,8 @@ tests:jdk-14-windows64:
   before_script:
     - *default_before_script_windows
   script:
-    # TODO: Include createHelp task, install pandoc
-    # TODO: only first task is selected
-    # TODO: [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
-    - [gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
+    # TODO: only first task is selected [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
+    - [gradlew %GRADLE_OPTIONS% jpackage]
   tags:
     - prob
     - win64
