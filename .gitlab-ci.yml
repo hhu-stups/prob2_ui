@@ -51,11 +51,12 @@ variables:
   stage: test
   before_script: &default_before_script_windows
     - curl --location -o "openjdk-14.0.2_windows-x64_bin.zip" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_windows-x64_bin.zip"
-    - curl --location -o "wix311.exe" "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe"
+    - curl --location -o "wix311-binaries.zip" "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
     - tar -xzf openjdk-14.0.2_windows-x64_bin.zip
+    - tar -xzf wix311-binaries.zip
     - SET JAVA_HOME=jdk-14.0.2
     - SET GRADLE_USER_HOME=%cd%\.gradle
-    - SET PATH=%PATH%;%cd%\wix311.exe
+    - SET PATH=%PATH%;%cd%\wix311-binaries
      #TODO: install pandoc and git
   cache:
     paths:
