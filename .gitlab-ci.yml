@@ -58,7 +58,7 @@ variables:
     - tar -xzf openjdk-14.0.2_windows-x64_bin.zip
     - tar -xzf wix311-binaries.zip
     - tar -xzf pandoc-2.10.1.zip
-    - doskey pandoc=pandoc-2.10.1\pandoc
+    - cp pandoc-2.10.1\pandoc.exe %cd%
     - SET JAVA_HOME=jdk-14.0.2
     - SET GRADLE_USER_HOME=%cd%\.gradle
     - SET PATH=%PATH%;%cd%\wix311-binaries
