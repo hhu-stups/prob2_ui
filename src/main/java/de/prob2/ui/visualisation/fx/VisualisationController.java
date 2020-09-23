@@ -364,7 +364,9 @@ public class VisualisationController {
 		Node visualisationContent = visualisationTab.getContent();
 		setZeroAnchor(visualisationContent);
 		Scene visualisationScene = new Scene(new AnchorPane(visualisationContent));
-		visualizationStage = stageManager.makeStage(visualisationScene, null);
+		visualizationStage = new Stage();
+		visualizationStage.setScene(visualisationScene);
+		stageManager.register(visualizationStage, null);
 		visualizationStage.setResizable(true);
 		visualizationStage.setTitle(visualisation.get().getName());
 		visualizationStage.setOnCloseRequest(event -> {

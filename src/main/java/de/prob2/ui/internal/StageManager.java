@@ -257,22 +257,6 @@ public final class StageManager {
 	}
 
 	/**
-	 * Create a new stage with the given {@link Scene} as its scene,
-	 * initialize it, and register it with the UI persistence mechanism.
-	 *
-	 * @param scene the new stage's scene
-	 * @param persistenceID a string identifying the stage for UI persistence,
-	 * or {@code null} if the stage should not be persisted
-	 * @return a new stage with the given scene
-	 */
-	public Stage makeStage(final Scene scene, final String persistenceID) {
-		final Stage stage = new Stage();
-		stage.setScene(scene);
-		this.register(stage, persistenceID);
-		return stage;
-	}
-
-	/**
 	 * Initialize the given dialog.
 	 *
 	 * @param dialog the dialog to register
