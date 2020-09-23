@@ -57,18 +57,23 @@ task jpackage(type: Exec) {
 
 	def iconPath;
 
-	if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-		iconPath = 'src/main/deploy/package/macosx/prob2-ui.icns'
-	} else if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-		iconPath = 'src/main/deploy/package/windows/prob2-ui.ico'
+	if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+		iconPath = 'src\\main\\deploy\\package\\windows\\prob2-ui.ico'
+		commandLine "${JAVA_HOME}\\bin\\jpackage", '--icon', "${iconPath}", "--dest", "build\\distributions",
+				"--name", "${appName}", '--input', 'build\\libs', '--main-class', "${mainClassName}",
+				'--main-jar', "prob2-ui-${project.version}-all.jar",
+				'--app-version', "${appVersion}", '--copyright', "\"Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020\""
 	} else {
-		iconPath = 'src/main/deploy/package/linux/prob2-ui.png'
+		if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+			iconPath = 'src/main/deploy/package/macosx/prob2-ui.icns'
+		} else { // Linux
+			iconPath = 'src/main/deploy/package/linux/prob2-ui.png'
+		}
+		commandLine "${JAVA_HOME}/bin/jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
+				"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
+				'--main-jar', "prob2-ui-${project.version}-all.jar",
+				'--app-version', "${appVersion}", '--copyright', "\"Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020\""
 	}
-
-	commandLine "${JAVA_HOME}/bin/jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
-			"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
-			'--main-jar', "prob2-ui-${project.version}-all.jar",
-			'--app-version', "${appVersion}", '--copyright', "\"Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020\""
 }
 
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
