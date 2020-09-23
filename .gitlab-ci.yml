@@ -31,7 +31,6 @@ variables:
     # git is installed by default
     # pandoc is needed to build the ProB 2 UI docs.
     - brew install pandoc
-    - brew install perl
     - curl --location -o "openjdk-14.0.2_osx-x64_bin.tar.gz" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_osx-x64_bin.tar.gz"
     - shasum --algorithm 256 --quiet --check - <<< "386a96eeef63bf94b450809d69ceaa1c9e32a97230e0a120c1b41786b743ae84  openjdk-14.0.2_osx-x64_bin.tar.gz"
     - tar -xzf openjdk-14.0.2_osx-x64_bin.tar.gz
@@ -48,21 +47,24 @@ variables:
       - build/distributions
       - build/libs
 
-#.test-windows:
-  # stage: test
-  # TODO: Activate stage: test
-#  before_script: &default_before_script_windows
-    # TODO: install pandoc and git
-#  cache:
-#    paths:
-#      - .gradle/caches
-#      - .gradle/native
-#      - .gradle/wrapper
-#  artifacts:
-#    expire_in: 1 week
-#    paths:
-#      - build/distributions
-#      - build/libs
+.test-windows:
+   stage: test
+  before_script: &default_before_script_windows
+    - curl --location -o "openjdk-14.0.2_windows-x64_bin.zip" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_windows-x64_bin.zip"
+    - unzip openjdk-14.0.2_windows-x64_bin.zip
+    - export JAVA_HOME=jdk-14.0.2
+    - export GRADLE_USER_HOME=%PWD%\\.gradle"
+     #TODO: install pandoc and git
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - build/distributions
+      - build/libs
 
 test:jdk-8-linux:
   extends: .test-linux
@@ -101,16 +103,18 @@ tests:jdk-14-macos:
   tags:
     - macos
 
-#tests:jdk-14-windows64:
-#  extends: .test-windows
-  # TODO: Install Java 14 in before_script
-#  script:
+tests:jdk-14-windows64:
+  extends: .test-windows
+  before_script:
+    - *default_before_script_windows
+  script:
     # TODO: Include createHelp task, install pandoc
     # TODO: only first task is selected
-#    - [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
-#  tags:
-#    - prob
-#    - win64
+    # TODO: [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
+    - [gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
+  tags:
+    - prob
+    - win64
 
 distributions:
   stage: deploy
