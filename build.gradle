@@ -58,7 +58,7 @@ task jpackage(type: Exec) {
 	def iconPath;
 
 	if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-		iconPath = 'src/main/deploy/package/windows/prob2-ui.ico'
+		iconPath = 'src\\main\\deploy\\package\\windows\\prob2-ui.ico'
 		commandLine "${JAVA_HOME}\\bin\\jpackage", '--icon', "${iconPath}", "--dest", "build\\distributions",
 				"--name", "${appName}", '--input', 'build\\libs', '--main-class', "${mainClassName}",
 				'--main-jar', "prob2-ui-${project.version}-all.jar",
