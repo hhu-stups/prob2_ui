@@ -166,7 +166,11 @@ public class VisBStage extends Stage {
 					"<script>\n" +
 					"function changeAttribute(id, attribute, value){\n" +
 					"  $(document).ready(function(){\n" +
+					// Provide debugging if the VisB SVG file contains such a text span:
+					//"    $(\"#visb_debug_messages\").text(\"changeAttribute(\" + id + \",\" + attribute + \",\" + value +\")\");\n" +
 					"    $(id).attr(attribute, value);\n" +
+					// Provide debugging message if an SVG object id cannot be found:
+					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"Unknown SVG id: \" + id + \" for changeAttribute with value \"+ value);}\n" +
 					"  });\n" +
 					"};" +
 					"</script>\n" +
