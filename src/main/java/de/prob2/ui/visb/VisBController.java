@@ -110,7 +110,7 @@ public class VisBController {
 					return;
 				}
 				//LOGGER.debug("Running script: "+svgChanges);
-				updateInfo("visb.infobox.visualisation.updated");
+				updateInfo("visb.infobox.visualisation.updated.nr",countLines(svgChanges));
 			}
 		} else{
 			if(!visBVisualisation.isReady()) {
@@ -138,6 +138,11 @@ public class VisBController {
 	 */
 	private void alert(Throwable ex, String header, String message, Object... params){
 		this.stageManager.makeExceptionAlert(ex, header, message).showAndWait();
+	}
+
+	private static int countLines(String str) {
+	   String[] lines = str.split("\r\n|\r|\n");
+	   return  lines.length;
 	}
 
 	/**
