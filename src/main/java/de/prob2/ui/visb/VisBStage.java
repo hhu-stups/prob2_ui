@@ -90,6 +90,10 @@ public class VisBStage extends Stage {
 	@FXML
 	private MenuItem viewMenu_zoomOut;
 	@FXML
+	private MenuItem viewMenu_zoomFontsIn;
+	@FXML
+	private MenuItem viewMenu_zoomFontsOut;
+	@FXML
 	private MenuItem helpMenu_userManual;
 	@FXML
 	private Label information;
@@ -128,6 +132,9 @@ public class VisBStage extends Stage {
 		this.editMenu_close.setOnAction(e -> injector.getInstance(VisBController.class).closeCurrentVisualisation());
 		this.viewMenu_zoomIn.setOnAction(e -> webView.setZoom(webView.getZoom()*1.2));
 		this.viewMenu_zoomOut.setOnAction(e -> webView.setZoom(webView.getZoom()/1.2));
+		// zoom fonts in/out (but only of those that are not given a fixed size):
+		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
+		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
 		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
 		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
