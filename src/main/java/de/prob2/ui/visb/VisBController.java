@@ -196,7 +196,7 @@ public class VisBController {
 		String svgFile;
 		svgFile = this.injector.getInstance(VisBFileHandler.class).fileToString(file);
 		if(svgFile != null && !svgFile.isEmpty()) {
-			this.injector.getInstance(VisBStage.class).initialiseWebView(svgFile);
+			this.injector.getInstance(VisBStage.class).initialiseWebView(file, svgFile);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
@@ -278,7 +278,6 @@ public class VisBController {
 			startVisualisation();
 			updateVisualisationIfPossible();
 			//LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
-			updateInfo("visb.infobox.visualisation.updated");
 		}
 	}
 
@@ -291,6 +290,8 @@ public class VisBController {
 			LOGGER.debug("Reloading visualisation...");
 			//Updates visualisation, only if current state is initialised and visualisation items are not empty
 			updateVisualisation();
+		} else {
+			updateInfo("visb.infobox.visualisation.updated.nr",0);
 		}
 	}
 

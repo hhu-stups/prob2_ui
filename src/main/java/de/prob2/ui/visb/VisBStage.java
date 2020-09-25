@@ -153,7 +153,7 @@ public class VisBStage extends Stage {
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgFile the image/ svg, that should to be loaded into the context of the WebView
 	 */
-	void initialiseWebView(String svgFile) {
+	void initialiseWebView(File file, String svgFile) {
 		if (svgFile != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
@@ -184,7 +184,7 @@ public class VisBStage extends Stage {
 					"</body>\n" +
 					"</html>";
 			this.webView.getEngine().loadContent(htmlFile);
-			LOGGER.debug("HTML was loaded into WebView");
+			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();
 		}
 	}
