@@ -10,6 +10,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -67,7 +68,9 @@ public final class AboutBox extends Stage {
 			cliPrologInfo = this.versionInfo.getCliPrologInfo();
 		} catch (RuntimeException e) {
 			LOGGER.error("Failed to start ProB CLI to get version number", e);
-			stageManager.makeExceptionAlert(e, "menu.aboutBox.cliStartFailed.message").show();
+			final Alert alert = stageManager.makeExceptionAlert(e, "menu.aboutBox.cliStartFailed.message");
+			alert.initOwner(this);
+			alert.show();
 			cliVersion = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
 			cliRevision = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
 			cliLastChangedDate = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");

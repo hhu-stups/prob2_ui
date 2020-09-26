@@ -43,6 +43,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
@@ -362,7 +363,9 @@ public class LTLView extends AnchorPane {
 					.build();
 				this.jsonManager.writeToFile(path, new LTLData(formulas, patterns), metadata);
 			} catch (IOException e) {
-				stageManager.makeExceptionAlert(e, "verifications.ltl.ltlView.saveLTL.error").showAndWait();
+				final Alert alert = stageManager.makeExceptionAlert(e, "verifications.ltl.ltlView.saveLTL.error");
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
 			}
 		}
 	}

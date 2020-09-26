@@ -1,31 +1,83 @@
+stages:
+  - test
+  - deploy
+
 variables:
   DEBIAN_FRONTEND: noninteractive
   GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
 
-.test:
+.test-linux:
   stage: test
-  cache:
-    paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
-  before_script: &default_before_script
+  before_script: &default_before_script_linux
     - apt-get update
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
     - apt-get install --assume-yes git pandoc
     - export GRADLE_USER_HOME="${PWD}/.gradle"
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
   artifacts:
     expire_in: 1 week
     paths:
       - build/distributions
       - build/libs
 
-test:jdk-8:
-  extends: .test
+.test-mac:
+  stage: test
+  before_script: &default_before_script_mac
+    # git is installed by default
+    # pandoc is needed to build the ProB 2 UI docs.
+    - curl --location -o "pandoc-2.10.1-macOS.zip" "https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-macOS.zip"
+    - curl --location -o "openjdk-14.0.2_osx-x64_bin.tar.gz" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_osx-x64_bin.tar.gz"
+    - shasum --algorithm 256 --quiet --check - <<< "386a96eeef63bf94b450809d69ceaa1c9e32a97230e0a120c1b41786b743ae84  openjdk-14.0.2_osx-x64_bin.tar.gz"
+    - tar -xzf openjdk-14.0.2_osx-x64_bin.tar.gz
+    - tar -xzf pandoc-2.10.1-macOS.zip
+    - alias pandoc='.pandoc-2.10.1/bin/pandoc'
+    - export JAVA_HOME=jdk-14.0.2.jdk/Contents/Home
+    - export GRADLE_USER_HOME="${PWD}/.gradle"
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - build/distributions
+      - build/libs
+
+.test-windows:
+  stage: test
+  before_script: &default_before_script_windows
+    - curl --location -o "openjdk-14.0.2_windows-x64_bin.zip" "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_windows-x64_bin.zip"
+    - curl --location -o "wix311-binaries.zip" "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
+    - curl --location -o "pandoc-2.10.1.zip" "https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
+    - tar -xzf openjdk-14.0.2_windows-x64_bin.zip
+    - tar -xzf wix311-binaries.zip
+    - tar -xzf pandoc-2.10.1.zip
+    - cp pandoc-2.10.1\pandoc.exe %cd%
+    - SET JAVA_HOME=jdk-14.0.2
+    - SET GRADLE_USER_HOME=%cd%\.gradle
+    - SET PATH=%PATH%;%cd%\wix311-binaries
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - build/distributions
+      - build/libs
+
+test:jdk-8-linux:
+  extends: .test-linux
   image: openjdk:8-jdk-slim
   before_script:
-    - *default_before_script
+    - *default_before_script_linux
     # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
     - apt-get install --assume-yes curl perl rsync
     # Install OpenJFX 8.
@@ -38,24 +90,43 @@ test:jdk-8:
     - rm -r "libopenjfx-java.deb" "libopenjfx-java"
   script: ./gradlew ${GRADLE_OPTIONS} check shadowJar createAppZip
 
-test:jdk-14:
-  extends: .test
+test:jdk-14-linux:
+  extends: .test-linux
   image: openjdk:14-jdk-slim
   before_script:
-    - *default_before_script
+    - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
     - ./gradlew ${GRADLE_OPTIONS} jpackage
 
+tests:jdk-14-macos:
+  extends: .test-mac
+  before_script:
+    - *default_before_script_mac
+  script:
+    - ./gradlew ${GRADLE_OPTIONS} check
+    - ./gradlew ${GRADLE_OPTIONS} jpackage
+  tags:
+    - macos
+
+tests:jdk-14-windows64:
+  extends: .test-windows
+  before_script:
+    - *default_before_script_windows
+  script:
+    # TODO: only first task is selected [gradlew %GRADLE_OPTIONS% check --exclude-task createHelp, gradlew %GRADLE_OPTIONS% jpackage --exclude-task createHelp]
+    - [gradlew %GRADLE_OPTIONS% jpackage]
+  tags:
+    - prob
+    - win64
+
 distributions:
   stage: deploy
   image: debian:stable-slim
-  cache:
-    paths: []
   before_script:
     - apt-get update
     - apt-get install --assume-yes lftp
-  variables: 
+  variables:
     DEPLOY_REMOTE_BASEDIR: stupshome/stups
-  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set sftp:auto-confirm yes; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/; mput -e build/distributions/*-mac.zip build/distributions/*.deb build/libs/*-all.jar; exit"
+  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set sftp:auto-confirm yes; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/; mput -e build/distributions/*-mac.zip build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe build/libs/*-all.jar; exit"

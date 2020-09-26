@@ -10,7 +10,9 @@ import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.visb.VisBStage;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutView;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -56,6 +58,13 @@ public class VisualisationMenu extends Menu {
 		MagicLayoutView magicLayout = injector.getInstance(MagicLayoutView.class);
 		magicLayout.show();
 		magicLayout.toFront();
+	}
+	
+	@FXML
+	void openVisB(){
+		final Stage visBStage = injector.getInstance(VisBStage.class);
+		visBStage.show();
+		visBStage.toFront();
 	}
 
 	@FXML

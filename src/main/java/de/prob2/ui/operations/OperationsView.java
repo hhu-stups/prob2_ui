@@ -305,8 +305,10 @@ public final class OperationsView extends VBox {
 					throw new IllegalStateException("Unhandled sort mode: " + to);
 			}
 			((BindableGlyph)sortButton.getGraphic()).setIcon(icon);
-			
-			doSort(currentTrace.get().getStateSpace().getLoadedMachine());
+
+			if(currentTrace.get() != null) {
+				doSort(currentTrace.get().getStateSpace().getLoadedMachine());
+			}
 			opsListView.getItems().setAll(applyFilter(searchBar.getText()));
 		});
 
@@ -517,10 +519,11 @@ public final class OperationsView extends VBox {
 				operationCount = Integer.parseInt(randomInput);
 			} catch (NumberFormatException e) {
 				LOGGER.error("Invalid input for executing random number of events",e);
-				stageManager.makeAlert(Alert.AlertType.WARNING,
+				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
 					"operations.operationsView.alerts.invalidNumberOfOparations.header",
-					"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput)
-					.showAndWait();
+					"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput);
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
 				return;
 			}
 		} else if (event.getSource().equals(oneRandomEvent)) {
@@ -582,8 +585,6 @@ public final class OperationsView extends VBox {
 
 	@FXML
 	private void computeUnsatCore() {
-		btComputeUnsatCore.setVisible(false);
-		btComputeUnsatCore.setManaged(false);
 		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
 		expressionTableView.selectCommand("unsat_core_properties");
 		expressionTableView.show();

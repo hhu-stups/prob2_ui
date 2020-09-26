@@ -29,6 +29,7 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -89,6 +90,10 @@ public class VisBStage extends Stage {
 	@FXML
 	private MenuItem viewMenu_zoomOut;
 	@FXML
+	private MenuItem viewMenu_zoomFontsIn;
+	@FXML
+	private MenuItem viewMenu_zoomFontsOut;
+	@FXML
 	private MenuItem helpMenu_userManual;
 	@FXML
 	private Label information;
@@ -127,6 +132,9 @@ public class VisBStage extends Stage {
 		this.editMenu_close.setOnAction(e -> injector.getInstance(VisBController.class).closeCurrentVisualisation());
 		this.viewMenu_zoomIn.setOnAction(e -> webView.setZoom(webView.getZoom()*1.2));
 		this.viewMenu_zoomOut.setOnAction(e -> webView.setZoom(webView.getZoom()/1.2));
+		// zoom fonts in/out (but only of those that are not given a fixed size):
+		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
+		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
 		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
 		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
@@ -145,7 +153,7 @@ public class VisBStage extends Stage {
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgFile the image/ svg, that should to be loaded into the context of the WebView
 	 */
-	void initialiseWebView(String svgFile) {
+	void initialiseWebView(File file, String svgFile) {
 		if (svgFile != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
@@ -158,7 +166,11 @@ public class VisBStage extends Stage {
 					"<script>\n" +
 					"function changeAttribute(id, attribute, value){\n" +
 					"  $(document).ready(function(){\n" +
+					// Provide debugging if the VisB SVG file contains such a text span:
+					//"    $(\"#visb_debug_messages\").text(\"changeAttribute(\" + id + \",\" + attribute + \",\" + value +\")\");\n" +
 					"    $(id).attr(attribute, value);\n" +
+					// Provide debugging message if an SVG object id cannot be found:
+					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"Unknown SVG id: \" + id + \" for changeAttribute with value \"+ value);}\n" +
 					"  });\n" +
 					"};" +
 					"</script>\n" +
@@ -172,7 +184,7 @@ public class VisBStage extends Stage {
 					"</body>\n" +
 					"</html>";
 			this.webView.getEngine().loadContent(htmlFile);
-			LOGGER.debug("HTML was loaded into WebView");
+			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();
 		}
 	}
@@ -288,7 +300,9 @@ public class VisBStage extends Stage {
 	 * This method throws an ProB2-UI ExceptionAlert
 	 */
 	private void alert(Throwable ex, String header, String body, Object... params){
-		this.stageManager.makeExceptionAlert(ex, header, body, params).showAndWait();
+		final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
+		alert.initOwner(this);
+		alert.showAndWait();
 	}
 
 	private void exportImage() {

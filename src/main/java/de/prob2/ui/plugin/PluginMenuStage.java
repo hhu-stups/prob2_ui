@@ -170,7 +170,9 @@ public class PluginMenuStage extends Stage {
 					proBPluginManager.writeInactivePlugins();
 				} catch (final IOException e) {
 					LOGGER.error("Failed to write list of inactive plugins", e);
-					stageManager.makeExceptionAlert(e, "plugin.alerts.couldNotWriteInactive.content").show();
+					final Alert alert = stageManager.makeExceptionAlert(e, "plugin.alerts.couldNotWriteInactive.content");
+					alert.initOwner(this);
+					alert.show();
 				}
 			});
 			return booleanProp;

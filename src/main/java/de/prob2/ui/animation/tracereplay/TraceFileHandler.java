@@ -68,25 +68,28 @@ public class TraceFileHandler {
 		LOGGER.warn("Failed to load trace file", e);
 		final String headerBundleKey;
 		final String contentBundleKey;
-		List<String> additionalInfo = new ArrayList<>();
-		additionalInfo.add(path.toString());
+		List<Object> messageContent = new ArrayList<>();
 		if (e instanceof NoSuchFileException || e instanceof FileNotFoundException) {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
+			messageContent.add(path);
 		} else if (e instanceof JsonParseException) {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content";
-			additionalInfo.add(e.getMessage());
+			messageContent.add(path);
+			messageContent.add(e.getMessage());
 		} else {
 			headerBundleKey = "animation.tracereplay.alerts.traceReplayError.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content";
+			messageContent.add(path);
 		}
+		LOGGER.info(String.valueOf(messageContent.size()));
 		stageManager.makeAlert(
 				Alert.AlertType.ERROR,
 				Arrays.asList(ButtonType.YES, ButtonType.NO),
 				headerBundleKey,
 				contentBundleKey,
-				additionalInfo.toArray()
+				messageContent.toArray()
 		).showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();

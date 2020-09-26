@@ -111,18 +111,21 @@ public class MachinesTab extends Tab {
 		
 		@FXML
 		private void handleEditConfiguration() {
-			injector.getInstance(EditMachinesDialog.class).editAndShow(this.machineProperty.get()).ifPresent(result -> showMachineView(this.machineProperty.get()));
+			final EditMachinesDialog editDialog = injector.getInstance(EditMachinesDialog.class);
+			editDialog.initOwner(MachinesTab.this.getTabPane().getScene().getWindow());
+			editDialog.editAndShow(this.machineProperty.get()).ifPresent(result -> showMachineView(this.machineProperty.get()));
 		}
 		
 		@FXML
 		private void handleRemove() {
-			stageManager.makeAlert(Alert.AlertType.CONFIRMATION, "",
-					"project.machines.machinesTab.alerts.removeMachineConfirmation.content", this.machineProperty.get().getName())
-					.showAndWait().ifPresent(buttonType -> {
-						if (buttonType.equals(ButtonType.OK)) {
-							currentProject.removeMachine(this.machineProperty.get());
-						}
-					});
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, "",
+					"project.machines.machinesTab.alerts.removeMachineConfirmation.content", this.machineProperty.get().getName());
+			alert.initOwner(MachinesTab.this.getContent().getScene().getWindow());
+			alert.showAndWait().ifPresent(buttonType -> {
+				if (buttonType.equals(ButtonType.OK)) {
+					currentProject.removeMachine(this.machineProperty.get());
+				}
+			});
 		}
 		
 		@FXML
@@ -178,6 +181,7 @@ public class MachinesTab extends Tab {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
 					"common.alerts.unsavedMachineChanges.header",
 					"common.alerts.unsavedMachineChanges.content");
+			alert.initOwner(MachinesTab.this.getContent().getScene().getWindow());
 			Optional<ButtonType> result = alert.showAndWait();
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		}
@@ -259,7 +263,9 @@ public class MachinesTab extends Tab {
 		} catch (IllegalArgumentException e) {
 			LOGGER.info("User tried to create a machine with an invalid extension", e);
 			final String extension = com.google.common.io.Files.getFileExtension(relative.getFileName().toString());
-			stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.machines.machinesTab.alerts.invalidMachineExtension.content", extension).show();
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.machines.machinesTab.alerts.invalidMachineExtension.content", extension);
+			alert.initOwner(this.getContent().getScene().getWindow());
+			alert.show();
 			return;
 		}
 		
@@ -267,7 +273,9 @@ public class MachinesTab extends Tab {
 			Files.write(selected, Arrays.asList("MACHINE " + machineName, "END"));
 		} catch (IOException e) {
 			LOGGER.error("Could not create machine file", e);
-			stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
+			final Alert alert = stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
+			alert.initOwner(this.getContent().getScene().getWindow());
+			alert.show();
 			return;
 		}
 		currentProject.addMachine(machine);
@@ -283,9 +291,10 @@ public class MachinesTab extends Tab {
 
 		final Path relative = currentProject.getLocation().relativize(selected);
 		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "project.machines.machinesTab.alerts.machineAlreadyExists.header",
-					"project.machines.machinesTab.alerts.machineAlreadyExists.content", relative)
-					.showAndWait();
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "project.machines.machinesTab.alerts.machineAlreadyExists.header",
+					"project.machines.machinesTab.alerts.machineAlreadyExists.content", relative);
+			alert.initOwner(this.getContent().getScene().getWindow());
+			alert.showAndWait();
 			return;
 		}
 		final Set<String> machineNamesSet = currentProject.getMachines().stream()

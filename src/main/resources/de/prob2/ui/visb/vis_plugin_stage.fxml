@@ -15,6 +15,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.image.ImageView?>
@@ -40,6 +41,9 @@
                         <Menu mnemonicParsing="false" text="%visb.menu.view">
                             <MenuItem fx:id="viewMenu_zoomIn" accelerator="Shortcut+i" mnemonicParsing="false" text="%visb.menu.view.zoom.in" />
                             <MenuItem fx:id="viewMenu_zoomOut" accelerator="Shortcut+o" mnemonicParsing="false" text="%visb.menu.view.zoom.out" />
+	                         <SeparatorMenuItem />
+                            <MenuItem fx:id="viewMenu_zoomFontsIn" mnemonicParsing="false" text="%visb.menu.view.zoom_fonts.in" />
+                            <MenuItem fx:id="viewMenu_zoomFontsOut" mnemonicParsing="false" text="%visb.menu.view.zoom_fonts.out" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="%visb.menu.help">
                             <MenuItem fx:id="helpMenu_userManual" mnemonicParsing="false" text="%visb.menu.help.user.manual" />

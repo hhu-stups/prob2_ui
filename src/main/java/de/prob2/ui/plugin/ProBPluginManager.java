@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import com.github.zafarkhaja.semver.Version;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -36,6 +35,7 @@ import de.prob2.ui.internal.DefaultPluginDirectory;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.VersionInfo;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -69,13 +69,13 @@ public class ProBPluginManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginManager.class);
 
 	private static final Path OLD_DEFAULT_PLUGIN_DIRECTORY = Paths.get(Main.getProBDirectory(), "prob2ui", "plugins");
-	private static final String VERSION = "0.1.0";
 
 	private final ProBPluginHelper proBPluginHelper;
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
 	private final Path defaultPluginDirectory;
+	private final VersionInfo versionInfo;
 
 	private List<String> inactivePluginIds;
 	private Path pluginDirectory;
@@ -90,12 +90,13 @@ public class ProBPluginManager {
 	 * @param bundle {@link ResourceBundle} used in the prob2-ui application
 	 */
 	@Inject
-	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, @DefaultPluginDirectory final Path defaultPluginDirectory, final StopActions stopActions, final Config config) throws IOException {
+	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, @DefaultPluginDirectory final Path defaultPluginDirectory, final VersionInfo versionInfo, final StopActions stopActions, final Config config) {
 		this.proBPluginHelper = proBPluginHelper;
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
 		this.defaultPluginDirectory = defaultPluginDirectory;
+		this.versionInfo = versionInfo;
 		// Do not convert this to a method reference! Otherwise it won't work correctly if the plugin manager changes.
 		stopActions.add(() -> this.getPluginManager().stopPlugins());
 		// Adding the config listener immediately calls loadConfig,
@@ -262,7 +263,6 @@ public class ProBPluginManager {
 				Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, Arrays.asList(ButtonType.YES, ButtonType.NO), "",
 						"plugin.alerts.confirmOverwriteExistingFile.content", destination.getFileName(),
 						((ProBPlugin) wrapper.getPlugin()).getName(), wrapper.getDescriptor().getVersion());
-				alert.initOwner(stageManager.getCurrent());
 				Optional<ButtonType> result = alert.showAndWait();
 				if (result.isPresent() && result.get() == ButtonType.YES) {
 					//if he wants to overwrite, delete the plugin
@@ -458,7 +458,7 @@ public class ProBPluginManager {
 	public class ProBJarPluginManager extends DefaultPluginManager {
 
 		private ProBJarPluginManager(){
-			setSystemVersion(Version.valueOf(VERSION).toString());
+			setSystemVersion(versionInfo.getUIVersion());
 			setExactVersionAllowed(true);
 		}
 

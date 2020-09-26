@@ -83,6 +83,7 @@ public class PreferencesTab extends Tab {
 		final MenuItem editMenuItem = new MenuItem(bundle.getString("project.preferences.preferencesTab.contextMenu.items.edit"));
 		editMenuItem.setOnAction(event -> {
 			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
+			prefDialog.initOwner(this.getTabPane().getScene().getWindow());
 			Preference pref = cell.getItem();
 			final String oldName = pref.getName();
 			prefDialog.setPreference(pref);
@@ -131,7 +132,9 @@ public class PreferencesTab extends Tab {
 
 	@FXML
 	void addPreference() {
-		injector.getInstance(PreferencesDialog.class).showAndWait().ifPresent(currentProject::addPreference);
+		final PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
+		prefDialog.initOwner(this.getTabPane().getScene().getWindow());
+		prefDialog.showAndWait().ifPresent(currentProject::addPreference);
 	}
 
 	public void showPreferenceView(Preference pref) {
