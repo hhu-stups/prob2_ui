@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,12 +68,15 @@ public class TraceFileHandler {
 		LOGGER.warn("Failed to load trace file", e);
 		final String headerBundleKey;
 		final String contentBundleKey;
+		List<String> additionalInfo = new ArrayList<>();
+		additionalInfo.add(path.toString());
 		if (e instanceof NoSuchFileException || e instanceof FileNotFoundException) {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
 		} else if (e instanceof JsonParseException) {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content";
+			additionalInfo.add(e.getMessage());
 		} else {
 			headerBundleKey = "animation.tracereplay.alerts.traceReplayError.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content";
@@ -86,7 +86,7 @@ public class TraceFileHandler {
 				Arrays.asList(ButtonType.YES, ButtonType.NO),
 				headerBundleKey,
 				contentBundleKey,
-				path
+				additionalInfo.toArray()
 		).showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();
