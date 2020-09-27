@@ -170,7 +170,7 @@ public class VisBStage extends Stage {
 					//"    $(\"#visb_debug_messages\").text(\"changeAttribute(\" + id + \",\" + attribute + \",\" + value +\")\");\n" +
 					"    $(id).attr(attribute, value);\n" +
 					// Provide debugging message if an SVG object id cannot be found:
-					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"Unknown SVG id: \" + id + \" for changeAttribute with value \"+ value);}\n" +
+					"    if(!$(id).length) {var now = new Date(); var old2 = $(\"#visb_debug_messages2\").text(); $(\"#visb_debug_messages3\").text(old2); var old = $(\"#visb_debug_messages\").text(); $(\"#visb_debug_messages2\").text(old); $(\"#visb_debug_messages\").text(\"Unknown SVG id: \" + id + \" for value \"+ value + \" at \" + now.getHours() + \":\" + now.getMinutes() + \" \" + now.getSeconds());}\n" +
 					"  });\n" +
 					"};" +
 					"</script>\n" +

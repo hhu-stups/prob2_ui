@@ -105,6 +105,8 @@ public class VisBController {
 				try {
 					injector.getInstance(VisBStage.class).runScript(
 					   "$(\"#visb_debug_messages\").text(\"ok\");\n"  // reset VisB debug text (if it exists)
+					   + "$(\"#visb_debug_messages2\").text(\"\");\n"
+					   + "$(\"#visb_debug_messages3\").text(\"\");\n"
 					    + svgChanges);
 				} catch (JSException e){
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
