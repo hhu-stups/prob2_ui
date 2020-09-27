@@ -43,6 +43,9 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.scene.control.MenuBar;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 
 import netscape.javascript.JSObject;
 
@@ -256,13 +259,35 @@ public class VisBStage extends Stage {
 	 */
 	void runScript(String jQuery) {
 		if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
-			this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-				if (newState == Worker.State.SUCCEEDED) {
-					this.webView.getEngine().executeScript(jQuery);
-				}
-			});
+		   // execute JQuery script once page fully loaded
+		   // https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
+			webView.getEngine().getLoadWorker().stateProperty().addListener(
+					  new ChangeListener<Worker.State>() {
+						@Override
+						public void changed(
+									ObservableValue<? extends Worker.State> observable,
+									Worker.State oldValue, Worker.State newValue) {
+						  switch (newValue) {
+							case SUCCEEDED:
+							case FAILED:
+							case CANCELLED:
+							  webView
+								.getEngine()
+								.getLoadWorker()
+								.stateProperty()
+								.removeListener(this);
+						  }
+						  if (newValue != Worker.State.SUCCEEDED) {
+							return;
+						  }
+						  webView.getEngine().executeScript(jQuery);
+						  //LOGGER.debug("runScript: "+jQuery+"\n-----");
+						}
+					  } );
+				    LOGGER.debug("registered runScript as Listener");
 		} else {
 			this.webView.getEngine().executeScript(jQuery);
+			//LOGGER.debug("runScript directly: "+jQuery+"\n-----");
 		}
 	}
 
