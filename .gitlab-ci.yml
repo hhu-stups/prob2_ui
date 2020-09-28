@@ -4,7 +4,7 @@ stages:
 
 variables:
   DEBIAN_FRONTEND: noninteractive
-  GRADLE_OPTIONS: --info --stacktrace --warning-mode=all
+  GRADLE_OPTIONS: --no-daemon --info --stacktrace --warning-mode=all
 
 .test-linux:
   stage: test

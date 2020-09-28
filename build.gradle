@@ -3,6 +3,7 @@ import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 plugins {
 	id "com.github.johnrengelman.shadow" version "5.2.0"
+	id "com.google.osdetector" version "1.6.2"
 	id "edu.sc.seis.macAppBundle" version "2.3.0"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
 	id "org.openjfx.javafxplugin" version "0.0.8" apply false
@@ -52,19 +53,18 @@ def appVersion = '1.0.1'
 def JAVA_HOME = Jvm.current().getJavaHome()
 
 task jpackage(type: Exec) {
-	dependsOn 'clean'
 	dependsOn 'shadowJar'
 
 	def iconPath;
 
-	if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+	if (osdetector.os == "windows") {
 		iconPath = 'src\\main\\deploy\\package\\windows\\prob2-ui.ico'
 		commandLine "${JAVA_HOME}\\bin\\jpackage", '--icon', "${iconPath}", "--dest", "build\\distributions",
 				"--name", "${appName}", '--input', 'build\\libs', '--main-class', "${mainClassName}",
 				'--main-jar', "prob2-ui-${project.version}-all.jar", '--win-dir-chooser', '--win-menu', '--win-shortcut', '--win-menu-group', "ProB2-UI", '--win-upgrade-uuid', "9e004b84-41c5-4c95-8aca-32ac44063ef9",
 				'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen"
 	} else {
-		if(org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+		if (osdetector.os == "osx") {
 			iconPath = 'src/main/deploy/package/macosx/prob2-ui.icns'
 			commandLine "${JAVA_HOME}/bin/jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
 					"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
