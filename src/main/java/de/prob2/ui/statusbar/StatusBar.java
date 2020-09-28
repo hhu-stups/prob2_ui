@@ -12,9 +12,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -54,20 +52,18 @@ public class StatusBar extends HBox {
 	
 	private final ResourceBundle resourceBundle;
 	private final CurrentTrace currentTrace;
-	private final CurrentProject currentProject;
 	private final Provider<ErrorStatusStage> errorStatusStageProvider;
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private BooleanExpression updating;
 	
 	@Inject
-	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace, final CurrentProject currentProject,
+	private StatusBar(final ResourceBundle resourceBundle, final CurrentTrace currentTrace,
 			final Provider<ErrorStatusStage> errorStatusStageProvider, final StageManager stageManager) {
 		super();
 		
 		this.resourceBundle = resourceBundle;
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.errorStatusStageProvider = errorStatusStageProvider;
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.updating = Bindings.createBooleanBinding(() -> false);
@@ -112,10 +108,9 @@ public class StatusBar extends HBox {
 		if (this.updating.get()) {
 			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
 		} else {
-			final Machine machine = this.currentProject.getCurrentMachine();
 			final Trace trace = this.currentTrace.get();
-			if (machine != null && trace != null) {
-				final List<String> errorMessages = getErrorMessages(machine, trace);
+			if (trace != null) {
+				final List<String> errorMessages = getErrorMessages(trace);
 				if (errorMessages.isEmpty()) {
 					final List<String> warningMessages = getWarningMessages(trace);
 					if (warningMessages.isEmpty()) {
@@ -136,7 +131,7 @@ public class StatusBar extends HBox {
 		}
 	}
 
-	private List<String> getErrorMessages(final Machine machine, final Trace trace) {
+	private List<String> getErrorMessages(final Trace trace) {
 		final List<String> errorMessages = new ArrayList<>();
 		if (!trace.getCurrentState().isInvariantOk()) {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.invariantNotOK"));
