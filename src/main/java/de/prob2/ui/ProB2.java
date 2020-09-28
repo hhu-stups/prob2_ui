@@ -46,7 +46,6 @@ import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
@@ -197,7 +196,7 @@ public class ProB2 extends Application {
 			}
 
 			if (foundMachine == null) {
-				stageManager.makeAlert(AlertType.ERROR, "common.alerts.noMachine.header",
+				stageManager.makeAlert(Alert.AlertType.ERROR, "common.alerts.noMachine.header",
 						"common.alerts.noMachine.content", runtimeOptions.getMachine(), currentProject.getName())
 						.show();
 			} else if (foundPreference == null) {
@@ -341,7 +340,7 @@ public class ProB2 extends Application {
 			buttons.add(save);
 			buttons.add(ButtonType.CANCEL);
 			buttons.add(doNotSave);
-			Alert alert = stageManager.makeAlert(AlertType.CONFIRMATION, buttons,
+			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons,
 					"common.alerts.unsavedProjectChanges.header", "common.alerts.unsavedProjectChanges.content",
 					currentProject.getName());
 			Optional<ButtonType> result = alert.showAndWait();
