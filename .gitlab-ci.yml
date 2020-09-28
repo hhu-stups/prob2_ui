@@ -115,7 +115,7 @@ tests:jdk-14-windows64:
   before_script:
     - *default_before_script_windows
   script:
-    - gradlew %GRADLE_OPTIONS% check & gradlew %GRADLE_OPTIONS% jpackage
+    - [gradlew %GRADLE_OPTIONS% check & gradlew %GRADLE_OPTIONS% jpackage]
   tags:
     - prob
     - win64
