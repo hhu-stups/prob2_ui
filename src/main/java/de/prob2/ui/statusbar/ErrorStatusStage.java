@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.StateError;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -78,40 +79,45 @@ public final class ErrorStatusStage extends Stage {
 			}
 		});
 		
-		this.currentTrace.addListener((o, from, to) -> {
-			this.invariantOkLabel.getStyleClass().removeAll("error", "no-error");
-			this.invariantOkLabel.setText(null);
-			this.otherStateErrorsLabel.getStyleClass().removeAll("error", "no-error");
-			this.otherStateErrorsLabel.setText(null);
-			
-			if (to == null) {
-				this.errorsList.getItems().clear();
-				this.placeholderLabel.setVisible(true);
-				this.errorsBox.setVisible(false);
+		this.currentTrace.addListener((o, from, to) -> this.update(to));
+		this.update(currentTrace.get());
+	}
+	
+	private void update(final Trace to) {
+		this.invariantOkLabel.getStyleClass().removeAll("error", "no-error");
+		this.invariantOkLabel.setText(null);
+		this.otherStateErrorsLabel.getStyleClass().removeAll("error", "no-error");
+		this.otherStateErrorsLabel.setText(null);
+		
+		if (to == null) {
+			this.errorsList.getItems().clear();
+			this.placeholderLabel.setVisible(true);
+			this.errorsBox.setVisible(false);
+		} else {
+			if (!to.getCurrentState().isInitialised()) {
+				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotInitialised"));
+			} else if (to.getCurrentState().isInvariantOk()) {
+				this.invariantOkLabel.getStyleClass().add("no-error");
+				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantOk"));
 			} else {
-				if (to.getCurrentState().isInvariantOk()) {
-					this.invariantOkLabel.getStyleClass().add("no-error");
-					this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantOk"));
-				} else {
-					this.invariantOkLabel.getStyleClass().add("error");
-					this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotOk"));
-				}
-				
-				if (to.getCurrentState().getStateErrors().isEmpty()) {
-					this.otherStateErrorsLabel.getStyleClass().add("no-error");
-					this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.noOtherStateErrors"));
-					this.otherStateErrorsPane.setVisible(false);
-					this.otherStateErrorsPane.setManaged(false);
-				} else {
-					this.otherStateErrorsLabel.getStyleClass().add("error");
-					this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.otherStateErrors"));
-					this.otherStateErrorsPane.setVisible(true);
-					this.otherStateErrorsPane.setManaged(true);
-				}
-				this.errorsList.getItems().setAll(to.getCurrentState().getStateErrors());
-				this.placeholderLabel.setVisible(false);
-				this.errorsBox.setVisible(true);
+				this.invariantOkLabel.getStyleClass().add("error");
+				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotOk"));
 			}
-		});
+			
+			if (to.getCurrentState().getStateErrors().isEmpty()) {
+				this.otherStateErrorsLabel.getStyleClass().add("no-error");
+				this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.noOtherStateErrors"));
+				this.otherStateErrorsPane.setVisible(false);
+				this.otherStateErrorsPane.setManaged(false);
+			} else {
+				this.otherStateErrorsLabel.getStyleClass().add("error");
+				this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.otherStateErrors"));
+				this.otherStateErrorsPane.setVisible(true);
+				this.otherStateErrorsPane.setManaged(true);
+			}
+			this.errorsList.getItems().setAll(to.getCurrentState().getStateErrors());
+			this.placeholderLabel.setVisible(false);
+			this.errorsBox.setVisible(true);
+		}
 	}
 }
