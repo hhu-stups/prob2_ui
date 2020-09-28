@@ -107,7 +107,7 @@ public class StatusBar extends HBox {
 	}
 	
 	private void update() {
-		statusLabel.getStyleClass().removeAll("no-error", "error");
+		statusLabel.getStyleClass().removeAll("no-error", "warning", "error");
 		infoIcon.setVisible(false);
 		if (this.updating.get()) {
 			statusLabel.setText(resourceBundle.getString("statusbar.updatingViews"));
@@ -117,8 +117,14 @@ public class StatusBar extends HBox {
 			if (machine != null && trace != null) {
 				final List<String> errorMessages = getErrorMessages(machine, trace);
 				if (errorMessages.isEmpty()) {
-					statusLabel.getStyleClass().add("no-error");
-					statusLabel.setText(resourceBundle.getString("statusbar.noErrors"));
+					final List<String> warningMessages = getWarningMessages(trace);
+					if (warningMessages.isEmpty()) {
+						statusLabel.getStyleClass().add("no-error");
+						statusLabel.setText(resourceBundle.getString("statusbar.noErrors"));
+					} else {
+						statusLabel.getStyleClass().add("warning");
+						statusLabel.setText(String.format(resourceBundle.getString("statusbar.warnings"), String.join(", ", warningMessages)));
+					}
 				} else {
 					statusLabel.getStyleClass().add("error");
 					statusLabel.setText(String.format(resourceBundle.getString("statusbar.someErrors"), String.join(", ", errorMessages)));
@@ -139,5 +145,13 @@ public class StatusBar extends HBox {
 			errorMessages.add(resourceBundle.getString("statusbar.errors.stateErrors"));
 		}
 		return errorMessages;
+	}
+
+	private List<String> getWarningMessages(final Trace trace) {
+		final List<String> warningMessages = new ArrayList<>();
+		if (trace.getCurrentState().getOutTransitions().isEmpty()) {
+			warningMessages.add(resourceBundle.getString("statusbar.warnings.deadlock"));
+		}
+		return warningMessages;
 	}
 }
