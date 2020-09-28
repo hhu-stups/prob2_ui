@@ -20,7 +20,6 @@ import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
@@ -125,7 +124,7 @@ public final class DetachViewStageController extends Stage {
 			final TitledPane tp = it.next();
 			if (checkBoxMap.get(tp.getContent().getClass()).isSelected()) {
 				it.remove();
-				Platform.runLater(() -> transferToNewWindow(tp, accordion));
+				transferToNewWindow(tp, accordion);
 			}
 		}
 		if (accordion.getPanes().isEmpty()) {
