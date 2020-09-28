@@ -94,7 +94,9 @@ public final class ErrorStatusStage extends Stage {
 			this.placeholderLabel.setVisible(true);
 			this.errorsBox.setVisible(false);
 		} else {
-			if (to.getCurrentState().isInvariantOk()) {
+			if (!to.getCurrentState().isInitialised()) {
+				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotInitialised"));
+			} else if (to.getCurrentState().isInvariantOk()) {
 				this.invariantOkLabel.getStyleClass().add("no-error");
 				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantOk"));
 			} else {
