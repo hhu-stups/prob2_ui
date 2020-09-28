@@ -305,6 +305,7 @@ public class VisBController {
 			StringBuilder onClickEventQuery = new StringBuilder();
 			for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
 				String queryPart = "$(document).ready(function(){\n" +
+				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").click(function(){\n" +
 						"    visBConnector.click(this.id);\n" +
 						"  });\n" +

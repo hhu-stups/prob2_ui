@@ -169,13 +169,16 @@ public class VisBStage extends Stage {
 					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
 					"<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n" +
 					"<script>\n" +
+					"function checkSvgId(id,ctxt){\n" +
+					"    if(!$(id).length) {alert(\"Unknown SVG id: \" + id + \" for \" + ctxt);}\n" +
+					"};" +
 					"function changeAttribute(id, attribute, value){\n" +
 					"  $(document).ready(function(){\n" +
 					// Provide debugging if the VisB SVG file contains such a text span:
 					//"    $(\"#visb_debug_messages\").text(\"changeAttribute(\" + id + \",\" + attribute + \",\" + value +\")\");\n" +
 					"    $(id).attr(attribute, value);\n" +
-					// Provide debugging message if an SVG object id cannot be found:
-					"    if(!$(id).length) {alert(\"Unknown SVG id: \" + id + \" for attr \"+ attribute + \" and value \" +  value);}\n" +
+					// Provide warning alert if an SVG object id cannot be found:
+					"    checkSvgId(id,attribute);\n" +
 					"  });\n" +
 					"};" +
 					"</script>\n" +
