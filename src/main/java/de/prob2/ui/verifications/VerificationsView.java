@@ -32,18 +32,17 @@ public class VerificationsView extends AnchorPane {
 	
 	@FXML
 	private void initialize() {
-		final TabPersistenceHandler tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentVerificationTab != null) {
-					tabPersistenceHandler.setCurrentTab(configData.currentVerificationTab);
+					TabPersistenceHandler.setCurrentTab(tabPane, configData.currentVerificationTab);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentVerificationTab = tabPersistenceHandler.getCurrentTab();
+				configData.currentVerificationTab = TabPersistenceHandler.getCurrentTab(tabPane);
 			}
 		});
 	}

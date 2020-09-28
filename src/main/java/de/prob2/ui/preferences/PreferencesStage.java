@@ -163,18 +163,17 @@ public final class PreferencesStage extends Stage {
 		applyButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		resetButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-		final TabPersistenceHandler tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentPreference != null) {
-					tabPersistenceHandler.setCurrentTab(configData.currentPreference);
+					TabPersistenceHandler.setCurrentTab(tabPane, configData.currentPreference);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentPreference = tabPersistenceHandler.getCurrentTab();
+				configData.currentPreference = TabPersistenceHandler.getCurrentTab(tabPane);
 			}
 		});
 	}

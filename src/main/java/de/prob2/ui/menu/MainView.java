@@ -40,20 +40,19 @@ public class MainView extends StackPane {
 
 	@FXML
 	private void initialize() {
-		final TabPersistenceHandler tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 		consolePane.expandedProperty().addListener((observable, from, to) -> splitPane.setDividerPositions(to ? 0.5 : 0.8));
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentMainTab != null) {
-					tabPersistenceHandler.setCurrentTab(configData.currentMainTab);
+					TabPersistenceHandler.setCurrentTab(tabPane, configData.currentMainTab);
 					consolePane.setExpanded(configData.bConsoleExpanded);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentMainTab = tabPersistenceHandler.getCurrentTab();
+				configData.currentMainTab = TabPersistenceHandler.getCurrentTab(tabPane);
 				configData.bConsoleExpanded = consolePane.isExpanded();
 			}
 		});
