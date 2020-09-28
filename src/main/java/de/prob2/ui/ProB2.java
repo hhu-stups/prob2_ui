@@ -29,7 +29,6 @@ import de.prob2.ui.internal.ConfigFile;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -214,8 +213,6 @@ public class ProB2 extends Application {
 
 		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
 		pluginManager.start();
-
-		injector.getInstance(VersionInfo.class).loadCliVersionInfo();
 
 		final Thread emptyStateSpaceLoader = new Thread(() -> {
 			injector.getInstance(MachineLoader.class).getEmptyStateSpace();

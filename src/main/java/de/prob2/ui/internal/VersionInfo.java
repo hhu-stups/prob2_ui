@@ -61,7 +61,7 @@ public final class VersionInfo {
 		return Main.getGitSha();
 	}
 	
-	public GetVersionCommand loadCliVersionInfo() {
+	private GetVersionCommand loadCliVersionInfo() {
 		if (this.cliVersionCommand == null) {
 			synchronized (this.lock) {
 				// Computed lazily to avoid excessive communication with the CLI.
