@@ -9,7 +9,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.persistence.TabPersistenceHandler;
+import de.prob2.ui.persistence.PersistenceUtils;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TabPane;
@@ -36,13 +36,13 @@ public class VerificationsView extends AnchorPane {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentVerificationTab != null) {
-					TabPersistenceHandler.setCurrentTab(tabPane, configData.currentVerificationTab);
+					PersistenceUtils.setCurrentTab(tabPane, configData.currentVerificationTab);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentVerificationTab = TabPersistenceHandler.getCurrentTab(tabPane);
+				configData.currentVerificationTab = PersistenceUtils.getCurrentTab(tabPane);
 			}
 		});
 	}

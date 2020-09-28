@@ -20,7 +20,7 @@ import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.persistence.TableUtils;
+import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
 import javafx.application.Platform;
@@ -133,13 +133,13 @@ public final class StatesView extends StackPane {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.statesViewColumnsWidth != null) {
-					TableUtils.setAbsoluteColumnWidths(tv, tv.getColumns(), configData.statesViewColumnsWidth);
+					PersistenceUtils.setAbsoluteColumnWidths(tv, tv.getColumns(), configData.statesViewColumnsWidth);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.statesViewColumnsWidth = TableUtils.getAbsoluteColumnWidths(tv.getColumns());
+				configData.statesViewColumnsWidth = PersistenceUtils.getAbsoluteColumnWidths(tv.getColumns());
 			}
 		});
 

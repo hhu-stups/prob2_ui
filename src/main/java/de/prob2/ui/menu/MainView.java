@@ -8,7 +8,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.persistence.TabPersistenceHandler;
+import de.prob2.ui.persistence.PersistenceUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -45,14 +45,14 @@ public class MainView extends StackPane {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentMainTab != null) {
-					TabPersistenceHandler.setCurrentTab(tabPane, configData.currentMainTab);
+					PersistenceUtils.setCurrentTab(tabPane, configData.currentMainTab);
 					consolePane.setExpanded(configData.bConsoleExpanded);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentMainTab = TabPersistenceHandler.getCurrentTab(tabPane);
+				configData.currentMainTab = PersistenceUtils.getCurrentTab(tabPane);
 				configData.bConsoleExpanded = consolePane.isExpanded();
 			}
 		});

@@ -18,7 +18,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.persistence.TabPersistenceHandler;
+import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
@@ -167,13 +167,13 @@ public final class PreferencesStage extends Stage {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentPreference != null) {
-					TabPersistenceHandler.setCurrentTab(tabPane, configData.currentPreference);
+					PersistenceUtils.setCurrentTab(tabPane, configData.currentPreference);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentPreference = TabPersistenceHandler.getCurrentTab(tabPane);
+				configData.currentPreference = PersistenceUtils.getCurrentTab(tabPane);
 			}
 		});
 	}
