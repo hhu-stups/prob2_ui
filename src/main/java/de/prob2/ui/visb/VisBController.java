@@ -104,9 +104,7 @@ public class VisBController {
 			} else {
 				try {
 					injector.getInstance(VisBStage.class).runScript(
-					   "$(\"#visb_debug_messages\").text(\"ok\");\n"  // reset VisB debug text (if it exists)
-					   + "$(\"#visb_debug_messages2\").text(\"\");\n"
-					   + "$(\"#visb_debug_messages3\").text(\"\");\n"
+					   "$(\"#visb_debug_messages\").text(\"updated\");\n"  // reset VisB debug text (if it exists)
 					    + svgChanges);
 				} catch (JSException e){
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
@@ -310,6 +308,10 @@ public class VisBController {
 						"  $(\"#" + visBEvent.getId() + "\").click(function(){\n" +
 						"    visBConnector.click(this.id);\n" +
 						"  });\n" +
+						// attach a hover function to put event into visb_debug_messages text field
+						"  $(\"#" + visBEvent.getId() + "\").hover(function(){\n" +
+						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + "\");},function(){\n" +
+						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
 						"});";
 				onClickEventQuery.append(queryPart);
 			}

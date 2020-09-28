@@ -170,7 +170,8 @@ public class VisBStage extends Stage {
 					"<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n" +
 					"<script>\n" +
 					"function checkSvgId(id,ctxt){\n" +
-					"    if(!$(id).length) {alert(\"Unknown SVG id: \" + id + \" for \" + ctxt);}\n" +
+					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"unknown: \"+id);\n" +
+					"                       alert(\"Unknown SVG id: \" + id + \" for \" + ctxt);}\n" +
 					"};" +
 					"function changeAttribute(id, attribute, value){\n" +
 					"  $(document).ready(function(){\n" +
@@ -195,6 +196,7 @@ public class VisBStage extends Stage {
 			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+			//this.webView.getEngine().setOnError(event -> showJavascriptAlert(event));
             // engine.setConfirmHandler(message -> showConfirm(message));
 		}
 
