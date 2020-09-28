@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javafx.collections.ObservableList;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
@@ -39,14 +39,15 @@ public final class PersistenceUtils {
 		}
 	}
 	
-	public static List<Double> getAbsoluteColumnWidths(List<? extends TableColumnBase<?, ?>> columns) {
+	public static List<Double> getAbsoluteColumnWidths(final TreeTableView<?> tableView) {
 		// noinspection Convert2MethodRef // Using a method reference causes a raw type warning.
-		return columns.stream()
+		return tableView.getColumns().stream()
 			.map(c -> c.getWidth())
 			.collect(Collectors.toList());
 	}
 	
-	public static <S> void setAbsoluteColumnWidths(TreeTableView<S> tableView, List<TreeTableColumn<S, ?>> columns, List<Double> widths) {
+	public static <S> void setAbsoluteColumnWidths(TreeTableView<S> tableView, List<Double> widths) {
+		final ObservableList<TreeTableColumn<S, ?>> columns = tableView.getColumns();
 		for (int i = 0; i < columns.size(); i++) {
 			tableView.resizeColumn(columns.get(i), widths.get(i) - columns.get(i).getWidth());
 		}

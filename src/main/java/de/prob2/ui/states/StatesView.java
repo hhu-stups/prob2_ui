@@ -133,13 +133,13 @@ public final class StatesView extends StackPane {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.statesViewColumnsWidth != null) {
-					PersistenceUtils.setAbsoluteColumnWidths(tv, tv.getColumns(), configData.statesViewColumnsWidth);
+					PersistenceUtils.setAbsoluteColumnWidths(tv, configData.statesViewColumnsWidth);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.statesViewColumnsWidth = PersistenceUtils.getAbsoluteColumnWidths(tv.getColumns());
+				configData.statesViewColumnsWidth = PersistenceUtils.getAbsoluteColumnWidths(tv);
 			}
 		});
 
