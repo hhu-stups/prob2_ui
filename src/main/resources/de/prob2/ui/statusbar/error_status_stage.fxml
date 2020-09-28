@@ -20,6 +20,7 @@
 							<Insets topRightBottomLeft="5"/>
 						</padding>
 						<Label fx:id="invariantOkLabel" styleClass="status-label"/>
+						<Label fx:id="deadlockLabel" styleClass="status-label"/>
 						<Label fx:id="otherStateErrorsLabel" styleClass="status-label"/>
 					</VBox>
 					<SplitPane fx:id="otherStateErrorsPane">

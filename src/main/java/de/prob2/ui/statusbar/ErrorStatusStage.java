@@ -47,6 +47,8 @@ public final class ErrorStatusStage extends Stage {
 	@FXML
 	private Label invariantOkLabel;
 	@FXML
+	private Label deadlockLabel;
+	@FXML
 	private Label otherStateErrorsLabel;
 	@FXML
 	private SplitPane otherStateErrorsPane;
@@ -84,10 +86,10 @@ public final class ErrorStatusStage extends Stage {
 	}
 	
 	private void update(final Trace to) {
-		this.invariantOkLabel.getStyleClass().removeAll("error", "no-error");
-		this.invariantOkLabel.setText(null);
-		this.otherStateErrorsLabel.getStyleClass().removeAll("error", "no-error");
-		this.otherStateErrorsLabel.setText(null);
+		for (final Label label : new Label[] {this.invariantOkLabel, this.deadlockLabel, this.otherStateErrorsLabel}) {
+			label.getStyleClass().removeAll("error", "warning", "no-error");
+			label.setText(null);
+		}
 		
 		if (to == null) {
 			this.errorsList.getItems().clear();
@@ -102,6 +104,14 @@ public final class ErrorStatusStage extends Stage {
 			} else {
 				this.invariantOkLabel.getStyleClass().add("error");
 				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotOk"));
+			}
+			
+			if (to.getCurrentState().getOutTransitions().isEmpty()) {
+				this.deadlockLabel.getStyleClass().add("warning");
+				this.deadlockLabel.setText(this.bundle.getString("statusbar.errorStatusStage.deadlocked"));
+			} else {
+				this.deadlockLabel.getStyleClass().add("no-error");
+				this.deadlockLabel.setText(this.bundle.getString("statusbar.errorStatusStage.notDeadlocked"));
 			}
 			
 			if (to.getCurrentState().getStateErrors().isEmpty()) {
