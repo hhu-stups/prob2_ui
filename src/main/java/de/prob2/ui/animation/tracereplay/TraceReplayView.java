@@ -202,6 +202,7 @@ public class TraceReplayView extends ScrollPane {
 					bundle.getString("animation.tracereplay.view.contextMenu.showError"));
 			showErrorItem.setOnAction(event -> {
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, row.getItem().getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, row.getItem().getErrorMessageParams());
+				alert.initOwner(this.getScene().getWindow());
 				alert.setErrorMessage();
 			});
 			showErrorItem.setDisable(true);

@@ -22,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextArea;
@@ -132,7 +133,9 @@ public final class ViewCodeStage extends Stage {
 			out.write(this.getCode());
 		} catch (IOException e) {
 			LOGGER.error("Failed to save value to file", e);
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", selected).showAndWait();
+			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", selected);
+			alert.initOwner(this);
+			alert.showAndWait();
 		}
 	}
 }

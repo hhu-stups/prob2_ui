@@ -19,6 +19,7 @@ import de.prob2.ui.sharedviews.PredicateBuilderView;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -156,7 +157,9 @@ public final class ExecuteByPredicateStage extends Stage {
 			formulaStage.show();
 		} catch (EvaluationException | ProBError e) {
 			LOGGER.error("Could not visualize formula", e);
-			stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content").showAndWait();
+			final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
+			alert.initOwner(this);
+			alert.showAndWait();
 		}
 	}
 

@@ -257,27 +257,18 @@ public final class StageManager {
 	}
 
 	/**
-	 * Create a new stage with the given {@link Scene} as its scene,
-	 * initialize it, and register it with the UI persistence mechanism.
-	 *
-	 * @param scene the new stage's scene
-	 * @param persistenceID a string identifying the stage for UI persistence,
-	 * or {@code null} if the stage should not be persisted
-	 * @return a new stage with the given scene
-	 */
-	public Stage makeStage(final Scene scene, final String persistenceID) {
-		final Stage stage = new Stage();
-		stage.setScene(scene);
-		this.register(stage, persistenceID);
-		return stage;
-	}
-
-	/**
 	 * Initialize the given dialog.
 	 *
 	 * @param dialog the dialog to register
 	 */
 	public void register(final Dialog<?> dialog) {
+		// Consider all dialogs as owned by the main stage by default.
+		// Callers of register, makeAlert, etc. should replace this with a more accurate owner if possible,
+		// so that dialogs created by non-main windows or detached views are owned by the correct window.
+		// The owner of a dialog influences for example what screen the dialog appears on.
+		// If no owner is set, the dialog appears on the user's primary screen,
+		// which may be a different screen than the one with the window that created the dialog.
+		dialog.initOwner(this.getMainStage());
 		dialog.getDialogPane().getStylesheets().add(STYLESHEET);
 	}
 

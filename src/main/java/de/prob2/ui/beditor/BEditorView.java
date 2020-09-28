@@ -314,9 +314,13 @@ public class BEditorView extends BorderPane {
 		} catch (IOException | UncheckedIOException e) {
 			LOGGER.error(String.format("Could not read file: %s", path), e);
 			if (e.getCause() instanceof MalformedInputException) {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "beditor.encodingError.header", "beditor.encodingError.content", path, e).show();
+				final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "beditor.encodingError.header", "beditor.encodingError.content", path, e);
+				alert.initOwner(this.getScene().getWindow());
+				alert.show();
 			} else {
-				stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path).show();
+				final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path);
+				alert.initOwner(this.getScene().getWindow());
+				alert.show();
 			}
 			return;
 		}
@@ -332,7 +336,9 @@ public class BEditorView extends BorderPane {
 			Files.write(this.getPath(), beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
 			registerFile(this.getPath());
 		} catch (IOException e) {
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path).showAndWait();
+			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
+			alert.initOwner(this.getScene().getWindow());
+			alert.showAndWait();
 			LOGGER.error(String.format("Could not save file: %s", path), e);
 			return;
 		}

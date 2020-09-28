@@ -28,6 +28,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
@@ -195,7 +196,9 @@ public final class StatesView extends StackPane {
 				formulaStage.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
-				stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content").showAndWait();
+				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
 			}
 		});
 
@@ -209,8 +212,9 @@ public final class StatesView extends StackPane {
 				expressionTableView.show();
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
-				stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content")
-						.showAndWait();
+				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
 			}
 		});
 

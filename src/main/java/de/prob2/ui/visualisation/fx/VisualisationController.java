@@ -114,7 +114,6 @@ public class VisualisationController {
 							"visualisation.fx.controller.alerts.visualisationStopped.header",
 							"visualisation.fx.controller.alerts.visualisationStopped.content", visualisation.getName(),
 							oldMachine.getName());
-					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					stopVisualisation();
 				} else if (!newMachine.equals(oldMachine)) {
@@ -126,7 +125,6 @@ public class VisualisationController {
 								"visualisation.fx.controller.alerts.visualisationStopped.header",
 								"visualisation.fx.controller.alerts.visualisationStopped.notSupportedByMachine.content",
 								newMachine.getName(), visualisation.getName());
-						alert.initOwner(stageManager.getCurrent());
 						alert.show();
 						stopVisualisation();
 					}
@@ -155,7 +153,6 @@ public class VisualisationController {
 			Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "",
 					"visualisation.fx.controller.alerts.replaceCurrentVisualisation.content",
 					visualisation.get().getName());
-			alert.initOwner(stageManager.getCurrent());
 			Optional<ButtonType> alertResult = alert.showAndWait();
 			if (alertResult.isPresent() && alertResult.get() == ButtonType.YES) {
 				stopVisualisation();
@@ -228,7 +225,6 @@ public class VisualisationController {
 			Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION, "",
 					"visualisation.fx.controller.alerts.visualisationUnsuitable.content", 
 					loadedVisualisation.getName(), currentMachine.get().getName());
-			alert.initOwner(stageManager.getCurrent());
 			alert.show();
 			visualisationLoader.closeClassloader();
 			return;
@@ -263,7 +259,6 @@ public class VisualisationController {
 			} catch (Exception e) {
 				LOGGER.debug("Could not stop visualisation!");
 				Alert alert = stageManager.makeExceptionAlert(e, "visualisation.fx.controller.alerts.visualisationCouldNotBeStopped.content", visualisation.get().getName());
-				alert.initOwner(stageManager.getCurrent());
 				alert.show();
 			}
 			visualisationLoader.closeClassloader();
@@ -281,7 +276,6 @@ public class VisualisationController {
 			setVisualisationContent(visualisation.initialize());
 		} catch (Exception e) {
 			Alert alert = stageManager.makeExceptionAlert(e, "visualisation.fx.controller.alerts.visualisationCouldNotBeInitialised.content", visualisation.getName());
-			alert.initOwner(stageManager.getCurrent());
 			alert.show();
 			LOGGER.warn("Exception during the initialisation of the visualisation \"{}\"", visualisation.getName(), e);
 			stopVisualisation();
@@ -299,7 +293,6 @@ public class VisualisationController {
 				LOGGER.warn("Could not parse formula \"{}\" and stopped update of visualisation.", parseEx.getFormula(), parseEx);
 				Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "",
 						"visualisation.fx.controller.alerts.formulaCouldNotBeParsed.content", parseEx.getFormula());
-				alert.initOwner(stageManager.getCurrent());
 				alert.show();
 				return;
 			}
@@ -331,7 +324,6 @@ public class VisualisationController {
 					Alert alert = stageManager.makeExceptionAlert(e,
 							"visualisation.fx.controller.alerts.formulaListenerException.content",
 							"common.literal", String.join(" ", formulas));
-					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +
 							String.join(" ", formulas), e);
@@ -348,7 +340,6 @@ public class VisualisationController {
 				} catch (Exception e) {
 					Alert alert = stageManager.makeExceptionAlert(e, 
 							"visualisation.fx.controller.alerts.formulaEventListenerException.content", "common.literal", lastEvent);
-					alert.initOwner(stageManager.getCurrent());
 					alert.show();
 					LOGGER.warn("Exception while calling the event listener for the event \"{}\".", lastEvent, e);
 				}
@@ -373,7 +364,9 @@ public class VisualisationController {
 		Node visualisationContent = visualisationTab.getContent();
 		setZeroAnchor(visualisationContent);
 		Scene visualisationScene = new Scene(new AnchorPane(visualisationContent));
-		visualizationStage = stageManager.makeStage(visualisationScene, null);
+		visualizationStage = new Stage();
+		visualizationStage.setScene(visualisationScene);
+		stageManager.register(visualizationStage, null);
 		visualizationStage.setResizable(true);
 		visualizationStage.setTitle(visualisation.get().getName());
 		visualizationStage.setOnCloseRequest(event -> {

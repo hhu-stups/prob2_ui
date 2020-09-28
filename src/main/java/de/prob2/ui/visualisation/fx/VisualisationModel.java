@@ -270,7 +270,6 @@ public class VisualisationModel {
 			return null;
 		} catch (EvaluationException | VisualisationParseException evalException) {
 			Alert alert = stageManager.makeExceptionAlert(evalException, "visualisation.fx.model.alerts.evaluationException.content", formula);
-			alert.initOwner(stageManager.getCurrent());
 			alert.show();
 			LOGGER.warn("EvaluationException while evaluating the formula \"" + formula +"\".", evalException);
 			return null;

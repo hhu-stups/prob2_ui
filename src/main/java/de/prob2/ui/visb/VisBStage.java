@@ -29,6 +29,7 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -41,6 +42,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.scene.control.MenuBar;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 
 import netscape.javascript.JSObject;
@@ -89,6 +93,10 @@ public class VisBStage extends Stage {
 	@FXML
 	private MenuItem viewMenu_zoomOut;
 	@FXML
+	private MenuItem viewMenu_zoomFontsIn;
+	@FXML
+	private MenuItem viewMenu_zoomFontsOut;
+	@FXML
 	private MenuItem helpMenu_userManual;
 	@FXML
 	private Label information;
@@ -127,6 +135,9 @@ public class VisBStage extends Stage {
 		this.editMenu_close.setOnAction(e -> injector.getInstance(VisBController.class).closeCurrentVisualisation());
 		this.viewMenu_zoomIn.setOnAction(e -> webView.setZoom(webView.getZoom()*1.2));
 		this.viewMenu_zoomOut.setOnAction(e -> webView.setZoom(webView.getZoom()/1.2));
+		// zoom fonts in/out (but only of those that are not given a fixed size):
+		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
+		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
 		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
 		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
@@ -145,7 +156,7 @@ public class VisBStage extends Stage {
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgFile the image/ svg, that should to be loaded into the context of the WebView
 	 */
-	void initialiseWebView(String svgFile) {
+	void initialiseWebView(File file, String svgFile) {
 		if (svgFile != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
@@ -158,7 +169,11 @@ public class VisBStage extends Stage {
 					"<script>\n" +
 					"function changeAttribute(id, attribute, value){\n" +
 					"  $(document).ready(function(){\n" +
+					// Provide debugging if the VisB SVG file contains such a text span:
+					//"    $(\"#visb_debug_messages\").text(\"changeAttribute(\" + id + \",\" + attribute + \",\" + value +\")\");\n" +
 					"    $(id).attr(attribute, value);\n" +
+					// Provide debugging message if an SVG object id cannot be found:
+					"    if(!$(id).length) {var now = new Date(); var old2 = $(\"#visb_debug_messages2\").text(); $(\"#visb_debug_messages3\").text(old2); var old = $(\"#visb_debug_messages\").text(); $(\"#visb_debug_messages2\").text(old); $(\"#visb_debug_messages\").text(\"Unknown SVG id: \" + id + \" for value \"+ value + \" at \" + now.getHours() + \":\" + now.getMinutes() + \" \" + now.getSeconds());}\n" +
 					"  });\n" +
 					"};" +
 					"</script>\n" +
@@ -172,7 +187,7 @@ public class VisBStage extends Stage {
 					"</body>\n" +
 					"</html>";
 			this.webView.getEngine().loadContent(htmlFile);
-			LOGGER.debug("HTML was loaded into WebView");
+			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();
 		}
 	}
@@ -244,13 +259,35 @@ public class VisBStage extends Stage {
 	 */
 	void runScript(String jQuery) {
 		if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
-			this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-				if (newState == Worker.State.SUCCEEDED) {
-					this.webView.getEngine().executeScript(jQuery);
-				}
-			});
+		   // execute JQuery script once page fully loaded
+		   // https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
+			webView.getEngine().getLoadWorker().stateProperty().addListener(
+					  new ChangeListener<Worker.State>() {
+						@Override
+						public void changed(
+									ObservableValue<? extends Worker.State> observable,
+									Worker.State oldValue, Worker.State newValue) {
+						  switch (newValue) {
+							case SUCCEEDED:
+							case FAILED:
+							case CANCELLED:
+							  webView
+								.getEngine()
+								.getLoadWorker()
+								.stateProperty()
+								.removeListener(this);
+						  }
+						  if (newValue != Worker.State.SUCCEEDED) {
+							return;
+						  }
+						  webView.getEngine().executeScript(jQuery);
+						  //LOGGER.debug("runScript: "+jQuery+"\n-----");
+						}
+					  } );
+				    LOGGER.debug("registered runScript as Listener");
 		} else {
 			this.webView.getEngine().executeScript(jQuery);
+			//LOGGER.debug("runScript directly: "+jQuery+"\n-----");
 		}
 	}
 
@@ -288,7 +325,9 @@ public class VisBStage extends Stage {
 	 * This method throws an ProB2-UI ExceptionAlert
 	 */
 	private void alert(Throwable ex, String header, String body, Object... params){
-		this.stageManager.makeExceptionAlert(ex, header, body, params).showAndWait();
+		final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
+		alert.initOwner(this);
+		alert.showAndWait();
 	}
 
 	private void exportImage() {

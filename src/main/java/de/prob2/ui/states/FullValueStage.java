@@ -23,6 +23,7 @@ import difflib.DiffUtils;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tab;
@@ -252,7 +253,9 @@ public class FullValueStage extends Stage {
 			out.write(value);
 		} catch (IOException e) {
 			LOGGER.error("Failed to save value to file", e);
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", selected).showAndWait();
+			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", selected);
+			alert.initOwner(this);
+			alert.showAndWait();
 		}
 	}
 }

@@ -519,10 +519,11 @@ public final class OperationsView extends VBox {
 				operationCount = Integer.parseInt(randomInput);
 			} catch (NumberFormatException e) {
 				LOGGER.error("Invalid input for executing random number of events",e);
-				stageManager.makeAlert(Alert.AlertType.WARNING,
+				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
 					"operations.operationsView.alerts.invalidNumberOfOparations.header",
-					"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput)
-					.showAndWait();
+					"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput);
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
 				return;
 			}
 		} else if (event.getSource().equals(oneRandomEvent)) {

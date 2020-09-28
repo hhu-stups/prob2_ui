@@ -263,7 +263,6 @@ public class ProBPluginManager {
 				Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, Arrays.asList(ButtonType.YES, ButtonType.NO), "",
 						"plugin.alerts.confirmOverwriteExistingFile.content", destination.getFileName(),
 						((ProBPlugin) wrapper.getPlugin()).getName(), wrapper.getDescriptor().getVersion());
-				alert.initOwner(stageManager.getCurrent());
 				Optional<ButtonType> result = alert.showAndWait();
 				if (result.isPresent() && result.get() == ButtonType.YES) {
 					//if he wants to overwrite, delete the plugin

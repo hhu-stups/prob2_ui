@@ -146,10 +146,11 @@ public class TestCaseGenerationInput extends VBox {
 		switch(type) {
 			case MCDC: {
 				if(!testCaseGenerationSettingsHandler.checkMCDCSettings(mcdcInputView.getLevel(), mcdcInputView.getDepth())) {
-					stageManager.makeAlert(Alert.AlertType.ERROR,
+					final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
 							"animation.alerts.testcasegeneration.invalid",
-							"animation.alerts.testcasegeneration.mcdc.invalid")
-							.showAndWait();
+							"animation.alerts.testcasegeneration.mcdc.invalid");
+					alert.initOwner(this.getScene().getWindow());
+					alert.showAndWait();
 					return;
 				}
 				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()));
@@ -158,16 +159,19 @@ public class TestCaseGenerationInput extends VBox {
 			case COVERED_OPERATIONS: {
 				List<String> operations = operationCoverageInputView.getOperations();
 				if(operations.isEmpty()) {
-					stageManager.makeAlert(Alert.AlertType.ERROR,
+					final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
 							"animation.alerts.testcasegeneration.operations.header",
-							"animation.alerts.testcasegeneration.operations.content").showAndWait();
+							"animation.alerts.testcasegeneration.operations.content");
+					alert.initOwner(this.getScene().getWindow());
+					alert.showAndWait();
 					return;
 				}
 				if(!testCaseGenerationSettingsHandler.checkInteger(operationCoverageInputView.getDepth())) {
-					stageManager.makeAlert(Alert.AlertType.ERROR,
+					final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
 							"animation.alerts.testcasegeneration.invalid",
-							"animation.alerts.testcasegeneration.coveredoperations.invalid")
-							.showAndWait();
+							"animation.alerts.testcasegeneration.coveredoperations.invalid");
+					alert.initOwner(this.getScene().getWindow());
+					alert.showAndWait();
 					return;
 				}
 				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(operationCoverageInputView.getDepth()), operations);

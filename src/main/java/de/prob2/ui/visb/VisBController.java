@@ -103,14 +103,18 @@ public class VisBController {
 				updateInfo("visb.infobox.no.change");
 			} else {
 				try {
-					injector.getInstance(VisBStage.class).runScript(svgChanges);
+					injector.getInstance(VisBStage.class).runScript(
+					   "$(\"#visb_debug_messages\").text(\"ok\");\n"  // reset VisB debug text (if it exists)
+					   + "$(\"#visb_debug_messages2\").text(\"\");\n"
+					   + "$(\"#visb_debug_messages3\").text(\"\");\n"
+					    + svgChanges);
 				} catch (JSException e){
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 					updateInfo("visb.infobox.visualisation.error");
 					return;
 				}
 				//LOGGER.debug("Running script: "+svgChanges);
-				updateInfo("visb.infobox.visualisation.updated");
+				updateInfo("visb.infobox.visualisation.updated.nr",countLines(svgChanges));
 			}
 		} else{
 			if(!visBVisualisation.isReady()) {
@@ -138,6 +142,11 @@ public class VisBController {
 	 */
 	private void alert(Throwable ex, String header, String message, Object... params){
 		this.stageManager.makeExceptionAlert(ex, header, message).showAndWait();
+	}
+
+	private static int countLines(String str) {
+	   String[] lines = str.split("\r\n|\r|\n");
+	   return  lines.length;
 	}
 
 	/**
@@ -189,7 +198,7 @@ public class VisBController {
 		String svgFile;
 		svgFile = this.injector.getInstance(VisBFileHandler.class).fileToString(file);
 		if(svgFile != null && !svgFile.isEmpty()) {
-			this.injector.getInstance(VisBStage.class).initialiseWebView(svgFile);
+			this.injector.getInstance(VisBStage.class).initialiseWebView(file, svgFile);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
@@ -271,7 +280,6 @@ public class VisBController {
 			startVisualisation();
 			updateVisualisationIfPossible();
 			//LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
-			updateInfo("visb.infobox.visualisation.updated");
 		}
 	}
 
@@ -284,6 +292,8 @@ public class VisBController {
 			LOGGER.debug("Reloading visualisation...");
 			//Updates visualisation, only if current state is initialised and visualisation items are not empty
 			updateVisualisation();
+		} else {
+			updateInfo("visb.infobox.visualisation.updated.nr",0);
 		}
 	}
 

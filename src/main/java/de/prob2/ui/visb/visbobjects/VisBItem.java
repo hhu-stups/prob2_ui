@@ -35,6 +35,6 @@ public class VisBItem {
 	}
 	@Override
 	public String toString(){
-		return "ID: "+this.id+"\nATTRIBUTE: "+this.attribute+"\nVALUE: "+this.value+"\n";
+		return "{ID: " + this.id +", ATTRIBUTE: "+this.attribute+", VALUE: "+this.value+"} ";
 	}
 }

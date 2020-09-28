@@ -24,13 +24,13 @@ import java.util.ResourceBundle;
 @Singleton
 public class ModelcheckingStage extends Stage {
 
-    private static final int INITIAL_NODES_LIMIT = 500000;
+	private static final int INITIAL_NODES_LIMIT = 500000;
 
-    private static final int INITIAL_NODES_STEP = 1000;
+	private static final int INITIAL_NODES_STEP = 1000;
 
-    private static final int INITIAL_TIME_LIMIT = 1;
+	private static final int INITIAL_TIME_LIMIT = 1;
 
-    private static final int INITIAL_TIME_STEP = 1;
+	private static final int INITIAL_TIME_STEP = 1;
 
 	@FXML
 	private Button startButton;
@@ -48,14 +48,14 @@ public class ModelcheckingStage extends Stage {
 	private CheckBox findGoal;
 	@FXML
 	private CheckBox stopAtFullCoverage;
-    @FXML
-    private CheckBox chooseNodesLimit;
-    @FXML
-    private CheckBox chooseTimeLimit;
-    @FXML
-    private Spinner<Integer> nodesLimit;
-    @FXML
-    private Spinner<Integer> timeLimit;
+	@FXML
+	private CheckBox chooseNodesLimit;
+	@FXML
+	private CheckBox chooseTimeLimit;
+	@FXML
+	private Spinner<Integer> nodesLimit;
+	@FXML
+	private Spinner<Integer> timeLimit;
 	
 	private final ResourceBundle bundle;
 	
@@ -95,30 +95,33 @@ public class ModelcheckingStage extends Stage {
 				throw new UnsupportedOperationException("Conversion from String to SearchStrategy not supported");
 			}
 		});
-        this.nodesLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_NODES_LIMIT, INITIAL_NODES_STEP));
-        this.nodesLimit.visibleProperty().bind(chooseNodesLimit.selectedProperty());
-        this.timeLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_TIME_LIMIT, INITIAL_TIME_STEP));
-        this.timeLimit.visibleProperty().bind(chooseTimeLimit.selectedProperty());
+		this.nodesLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_NODES_LIMIT, INITIAL_NODES_STEP));
+		this.nodesLimit.visibleProperty().bind(chooseNodesLimit.selectedProperty());
+		this.timeLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_TIME_LIMIT, INITIAL_TIME_STEP));
+		this.timeLimit.visibleProperty().bind(chooseTimeLimit.selectedProperty());
 	}
 
 	@FXML
 	private void startModelCheck() {
 		if (currentTrace.get() != null) {
-		    String nLimit = chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-";
-		    String tLimit = chooseTimeLimit.isSelected() ? String.valueOf(timeLimit.getValue()) : "-";
+			String nLimit = chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-";
+			String tLimit = chooseTimeLimit.isSelected() ? String.valueOf(timeLimit.getValue()) : "-";
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(nLimit, tLimit, getOptions());
 			if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
 			} else {
-				stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked").showAndWait();
+				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked");
+				alert.initOwner(this);
+				alert.showAndWait();
 				this.hide();
 			}
 		} else {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "",
-					"verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content")
-					.showAndWait();
+			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "",
+					"verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content");
+			alert.initOwner(this);
+			alert.showAndWait();
 			this.hide();
 		}
 	}
