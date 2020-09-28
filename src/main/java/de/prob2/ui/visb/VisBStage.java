@@ -42,6 +42,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.scene.control.MenuBar;
+import javafx.event.EventHandler;
+import javafx.scene.web.WebEvent;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -173,7 +175,7 @@ public class VisBStage extends Stage {
 					//"    $(\"#visb_debug_messages\").text(\"changeAttribute(\" + id + \",\" + attribute + \",\" + value +\")\");\n" +
 					"    $(id).attr(attribute, value);\n" +
 					// Provide debugging message if an SVG object id cannot be found:
-					"    if(!$(id).length) {var now = new Date(); var old2 = $(\"#visb_debug_messages2\").text(); $(\"#visb_debug_messages3\").text(old2); var old = $(\"#visb_debug_messages\").text(); $(\"#visb_debug_messages2\").text(old); $(\"#visb_debug_messages\").text(\"Unknown SVG id: \" + id + \" for value \"+ value + \" at \" + now.getHours() + \":\" + now.getMinutes() + \" \" + now.getSeconds());}\n" +
+					"    if(!$(id).length) {alert(\"Unknown SVG id: \" + id + \" for attr \"+ attribute + \" and value \" +  value);}\n" +
 					"  });\n" +
 					"};" +
 					"</script>\n" +
@@ -189,7 +191,15 @@ public class VisBStage extends Stage {
 			this.webView.getEngine().loadContent(htmlFile);
 			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();
+			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+            // engine.setConfirmHandler(message -> showConfirm(message));
 		}
+
+	}
+	
+	private void showJavascriptAlert(String message) {
+	    LOGGER.debug("JavaScript ALERT: " + message);
+		alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
 	}
 
 	private void addVisBConnector() {
