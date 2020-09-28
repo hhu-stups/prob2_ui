@@ -304,6 +304,7 @@ public class VisBController {
 		if(visBVisualisation.isReady()) {
 			StringBuilder onClickEventQuery = new StringBuilder();
 			for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
+			    // TO DO: check if visBEvent.getEvent() exists in current model, otherwise generate error message
 				String queryPart = "$(document).ready(function(){\n" +
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").click(function(){\n" +
