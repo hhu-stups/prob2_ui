@@ -75,6 +75,11 @@ public final class DetachViewStageController extends Stage {
 		checkBoxMap.put(VerificationsView.class, detachVerifications);
 		checkBoxMap.put(StatsView.class, detachStats);
 		checkBoxMap.put(ProjectView.class, detachProject);
+		this.setOnCloseRequest(e -> {
+			for (DetachedViewStage stage : wrapperStages) {
+				checkBoxMap.get(stage.getDetachedView().getClass()).setSelected(true);
+			}
+		});
 	}
 	
 	public void selectForDetach(final String name) {
@@ -97,11 +102,6 @@ public final class DetachViewStageController extends Stage {
 	@FXML
 	private void apply() {
 		doDetaching();
-		this.setOnCloseRequest(e -> {
-			for (DetachedViewStage stage : wrapperStages) {
-				checkBoxMap.get(stage.getDetachedView().getClass()).setSelected(true);
-			}
-		});
 		this.hide();
 	}
 
