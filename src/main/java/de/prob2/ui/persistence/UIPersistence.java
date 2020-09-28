@@ -20,11 +20,13 @@ public final class UIPersistence {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIPersistence.class);
 	
 	private final UIState uiState;
+	private final DetachViewStageController detachViewStageController;
 	private final Injector injector;
 	
 	@Inject
-	private UIPersistence(UIState uiState, Injector injector) {
+	private UIPersistence(UIState uiState, DetachViewStageController detachViewStageController, Injector injector) {
 		this.uiState = uiState;
+		this.detachViewStageController = detachViewStageController;
 		this.injector = injector;
 	}
 	
@@ -38,7 +40,7 @@ public final class UIPersistence {
 		if (id.startsWith(DetachViewStageController.PERSISTENCE_ID_PREFIX)) {
 			// Remove the prefix before the name of the detached class
 			final String toDetach = id.substring(DetachViewStageController.PERSISTENCE_ID_PREFIX.length());
-			injector.getInstance(DetachViewStageController.class).selectForDetach(toDetach);
+			detachViewStageController.selectForDetach(toDetach);
 			return;
 		}
 		
@@ -76,6 +78,6 @@ public final class UIPersistence {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
 
-		injector.getInstance(DetachViewStageController.class).doDetaching();
+		detachViewStageController.doDetaching();
 	}
 }
