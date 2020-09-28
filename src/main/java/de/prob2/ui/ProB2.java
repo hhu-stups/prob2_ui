@@ -70,8 +70,6 @@ public class ProB2 extends Application {
 	private ResourceBundle bundle;
 	private StopActions stopActions;
 
-	private Stage primaryStage;
-
 	private boolean isJavaVersionOk(final String javaVersion) {
 		final Matcher javaVersionMatcher = Pattern.compile("(?:1\\.)?(\\d+).*_(\\d+).*").matcher(javaVersion);
 		if (javaVersionMatcher.matches()) {
@@ -126,8 +124,6 @@ public class ProB2 extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		this.primaryStage = primaryStage;
-
 		ProB2Module module = new ProB2Module(this, runtimeOptions);
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 		bundle = injector.getInstance(ResourceBundle.class);
@@ -157,11 +153,11 @@ public class ProB2 extends Application {
 		}
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		currentProject.addListener((observable, from, to) -> this.updateTitle());
-		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle());
+		currentProject.addListener((observable, from, to) -> this.updateTitle(primaryStage));
+		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
 		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
-		currentTrace.addListener((observable, from, to) -> this.updateTitle());
-		this.updateTitle();
+		currentTrace.addListener((observable, from, to) -> this.updateTitle(primaryStage));
+		this.updateTitle(primaryStage);
 
 		Parent root = injector.getInstance(MainController.class);
 		Scene mainScene = new Scene(root);
@@ -222,7 +218,7 @@ public class ProB2 extends Application {
 		emptyStateSpaceLoader.start();
 	}
 
-	private void updateTitle() {
+	private void updateTitle(final Stage stage) {
 		final CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		final CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 
@@ -255,7 +251,7 @@ public class ProB2 extends Application {
 			title.append('*');
 		}
 
-		this.primaryStage.setTitle(title.toString());
+		stage.setTitle(title.toString());
 	}
 
 	private static IllegalStateException die(final String message, final int exitCode) {
