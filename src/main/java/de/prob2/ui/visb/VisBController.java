@@ -180,7 +180,7 @@ public class VisBController {
 				LOGGER.debug("Executing event for id: "+id);
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			} else {
-				updateInfo("visb.infoboy.cannot.execute.event", event.getEvent(), id);
+				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			}
 		}
 	}
