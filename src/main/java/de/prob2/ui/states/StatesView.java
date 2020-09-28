@@ -87,7 +87,6 @@ public final class StatesView extends StackPane {
 	private final Set<BVisual2Formula> expandedFormulas;
 	private final Set<BVisual2Formula> visibleFormulas;
 	private final Map<State, Map<BVisual2Formula, ExpandedFormula>> formulaValueCache;
-	private List<Double> columnWidthsToRestore;
 
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
@@ -134,9 +133,7 @@ public final class StatesView extends StackPane {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.statesViewColumnsWidth != null) {
-					// The table columns cannot be resized until the table view is shown on screen (before then, the resizing always fails).
-					// So we can't restore the column widths yet - that is done later using the restoreColumnWidths() method, which is called by the UI startup code once the main stage is visible.
-					columnWidthsToRestore = configData.statesViewColumnsWidth;
+					TableUtils.setAbsoluteColumnWidths(tv, tv.getColumns(), configData.statesViewColumnsWidth);
 				}
 			}
 			
@@ -150,12 +147,6 @@ public final class StatesView extends StackPane {
 			final Trace trace = this.currentTrace.get();
 			this.updateRootAsync(trace, trace, to);
 		});
-	}
-
-	public void restoreColumnWidths() {
-		if (columnWidthsToRestore != null) {
-			TableUtils.setAbsoluteColumnWidths(tv, tv.getColumns(), columnWidthsToRestore);
-		}
 	}
 
 	private TreeTableRow<StateItem> initTableRow() {

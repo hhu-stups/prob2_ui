@@ -8,7 +8,6 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.ProB2;
 import de.prob2.ui.menu.DetachViewStageController;
-import de.prob2.ui.states.StatesView;
 
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
@@ -78,6 +77,5 @@ public final class UIPersistence {
 		}
 
 		injector.getInstance(DetachViewStageController.class).doDetaching();
-		injector.getInstance(StatesView.class).restoreColumnWidths();
 	}
 }
