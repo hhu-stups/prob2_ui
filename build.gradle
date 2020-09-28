@@ -52,7 +52,6 @@ def appVersion = '1.0.1'
 def JAVA_HOME = Jvm.current().getJavaHome()
 
 task jpackage(type: Exec) {
-	dependsOn 'clean'
 	dependsOn 'shadowJar'
 
 	def iconPath;
