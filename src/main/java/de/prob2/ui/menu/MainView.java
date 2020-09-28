@@ -31,8 +31,6 @@ public class MainView extends StackPane {
 
 	private final Config config;
 
-	private TabPersistenceHandler tabPersistenceHandler;
-
 	@Inject
 	private MainView(StageManager stageManager, Config config) {
 		this.config = config;
@@ -42,27 +40,23 @@ public class MainView extends StackPane {
 
 	@FXML
 	private void initialize() {
-		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
+		final TabPersistenceHandler tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 		consolePane.expandedProperty().addListener((observable, from, to) -> splitPane.setDividerPositions(to ? 0.5 : 0.8));
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentMainTab != null) {
-					getTabPersistenceHandler().setCurrentTab(configData.currentMainTab);
+					tabPersistenceHandler.setCurrentTab(configData.currentMainTab);
 					consolePane.setExpanded(configData.bConsoleExpanded);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentMainTab = getTabPersistenceHandler().getCurrentTab();
+				configData.currentMainTab = tabPersistenceHandler.getCurrentTab();
 				configData.bConsoleExpanded = consolePane.isExpanded();
 			}
 		});
-	}
-
-	public TabPersistenceHandler getTabPersistenceHandler() {
-		return tabPersistenceHandler;
 	}
 
 	public TabPane getTabPane() {

@@ -24,8 +24,6 @@ public class VerificationsView extends AnchorPane {
 	
 	private final Config config;
 	
-	private TabPersistenceHandler tabPersistenceHandler;
-	
 	@Inject
 	private VerificationsView(final StageManager stageManager, final Config config) {
 		this.config = config;
@@ -34,24 +32,19 @@ public class VerificationsView extends AnchorPane {
 	
 	@FXML
 	private void initialize() {
-		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
+		final TabPersistenceHandler tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentVerificationTab != null) {
-					getTabPersistenceHandler().setCurrentTab(configData.currentVerificationTab);
+					tabPersistenceHandler.setCurrentTab(configData.currentVerificationTab);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentVerificationTab = getTabPersistenceHandler().getCurrentTab();
+				configData.currentVerificationTab = tabPersistenceHandler.getCurrentTab();
 			}
 		});
 	}
-	
-	public TabPersistenceHandler getTabPersistenceHandler() {
-		return tabPersistenceHandler;
-	}
-	
 }

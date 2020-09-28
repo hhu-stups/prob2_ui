@@ -76,7 +76,6 @@ public final class PreferencesStage extends Stage {
 	private final GlobalPreferences globalPreferences;
 	private final ProBPreferences globalProBPrefs;
 	private final Config config;
-	private TabPersistenceHandler tabPersistenceHandler;
 
 	@Inject
 	private PreferencesStage(
@@ -164,18 +163,18 @@ public final class PreferencesStage extends Stage {
 		applyButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		resetButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-		this.tabPersistenceHandler = new TabPersistenceHandler(tabPane);
+		final TabPersistenceHandler tabPersistenceHandler = new TabPersistenceHandler(tabPane);
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.currentPreference != null) {
-					getTabPersistenceHandler().setCurrentTab(configData.currentPreference);
+					tabPersistenceHandler.setCurrentTab(configData.currentPreference);
 				}
 			}
 			
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentPreference = getTabPersistenceHandler().getCurrentTab();
+				configData.currentPreference = tabPersistenceHandler.getCurrentTab();
 			}
 		});
 	}
@@ -235,9 +234,4 @@ public final class PreferencesStage extends Stage {
 			this.currentProject.reloadCurrentMachine();
 		}
 	}
-	
-	public TabPersistenceHandler getTabPersistenceHandler() {
-		return tabPersistenceHandler;
-	}
-
 }
