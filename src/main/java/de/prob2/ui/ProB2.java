@@ -176,6 +176,8 @@ public class ProB2 extends Application {
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
 		uiPersistence.open();
 
+		primaryStage.toFront();
+
 		if (runtimeOptions.getMachineFile() != null) {
 			injector.getInstance(ProjectManager.class).openAutomaticProjectFromMachine(Paths.get(runtimeOptions.getMachineFile()));
 		}
