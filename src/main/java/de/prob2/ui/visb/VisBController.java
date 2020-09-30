@@ -91,6 +91,7 @@ public class VisBController {
 			String svgChanges;
 			try{
 				svgChanges = injector.getInstance(VisBParser.class).evaluateFormulas(this.visBVisualisation.getVisBItems());
+				 // TO DO: parse formula once when loading the file to check for syntax errors
 			} catch(VisBParseException | IllegalArgumentException | BCompoundException | ProBError e){
 				alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 				this.clearListeners();

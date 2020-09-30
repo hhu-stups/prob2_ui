@@ -57,10 +57,16 @@ public class VisBParser {
 	String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, BCompoundException{
 		StringBuilder jQueryForChanges = new StringBuilder();
 		for(VisBItem visItem : visItems){
-				AbstractEvalResult abstractEvalResult = evaluateFormula(visItem.getValue());
-				String value = getValueFromResult(abstractEvalResult, visItem);
-				String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
-				jQueryForChanges.append(jQueryTemp);
+		        try {
+					AbstractEvalResult abstractEvalResult = evaluateFormula(visItem.getValue());
+					String value = getValueFromResult(abstractEvalResult, visItem);
+					String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
+					jQueryForChanges.append(jQueryTemp);
+				} catch (EvaluationException e){
+				     System.out.println("Exception for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
+				    // TODO: either add text to exception or be able to call something like alert(e, "visb.exception.header", "visb.infobox.visualisation.formula.error ",visItem.getId(),visItem.getAttribute());
+				     throw(e);
+				}
 		}
 		return jQueryForChanges.toString();
 	}

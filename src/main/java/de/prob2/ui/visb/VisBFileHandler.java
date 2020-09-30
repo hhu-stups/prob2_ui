@@ -61,7 +61,6 @@ class VisBFileHandler {
 		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
 			return null;
 		} else {
-
 			return new VisBVisualisation(visBItems, visBEvents, svgPath);
 		}
 	}
