@@ -121,6 +121,39 @@ public class ProB2 extends Application {
 		}
 	}
 
+	private void openFilesFromCommandLine(final StageManager stageManager, final CurrentProject currentProject) {
+		if (runtimeOptions.getMachineFile() != null) {
+			injector.getInstance(ProjectManager.class).openAutomaticProjectFromMachine(Paths.get(runtimeOptions.getMachineFile()));
+		}
+		
+		if (runtimeOptions.getProject() != null) {
+			injector.getInstance(ProjectManager.class).openProject(Paths.get(runtimeOptions.getProject()));
+		}
+		
+		if (runtimeOptions.getMachine() != null) {
+			final Machine foundMachine = currentProject.get().getMachine(runtimeOptions.getMachine());
+
+			final Preference foundPreference;
+			if (runtimeOptions.getPreference() == null) {
+				foundPreference = Preference.DEFAULT;
+			} else {
+				foundPreference = currentProject.get().getPreference(runtimeOptions.getPreference());
+			}
+
+			if (foundMachine == null) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "common.alerts.noMachine.header",
+						"common.alerts.noMachine.content", runtimeOptions.getMachine(), currentProject.getName())
+						.show();
+			} else if (foundPreference == null) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "common.alerts.noPreference.header",
+						"common.alerts.noPreference.content", runtimeOptions.getPreference(), currentProject.getName())
+						.show();
+			} else {
+				currentProject.startAnimation(foundMachine, foundPreference);
+			}
+		}
+	}
+
 	@Override
 	public void start(Stage primaryStage) {
 		ProB2Module module = new ProB2Module(this, runtimeOptions);
@@ -177,36 +210,7 @@ public class ProB2 extends Application {
 
 		primaryStage.toFront();
 
-		if (runtimeOptions.getMachineFile() != null) {
-			injector.getInstance(ProjectManager.class).openAutomaticProjectFromMachine(Paths.get(runtimeOptions.getMachineFile()));
-		}
-
-		if (runtimeOptions.getProject() != null) {
-			injector.getInstance(ProjectManager.class).openProject(Paths.get(runtimeOptions.getProject()));
-		}
-
-		if (runtimeOptions.getMachine() != null) {
-			final Machine foundMachine = currentProject.get().getMachine(runtimeOptions.getMachine());
-
-			final Preference foundPreference;
-			if (runtimeOptions.getPreference() == null) {
-				foundPreference = Preference.DEFAULT;
-			} else {
-				foundPreference = currentProject.get().getPreference(runtimeOptions.getPreference());
-			}
-
-			if (foundMachine == null) {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "common.alerts.noMachine.header",
-						"common.alerts.noMachine.content", runtimeOptions.getMachine(), currentProject.getName())
-						.show();
-			} else if (foundPreference == null) {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "common.alerts.noPreference.header",
-						"common.alerts.noPreference.content", runtimeOptions.getPreference(), currentProject.getName())
-						.show();
-			} else {
-				currentProject.startAnimation(foundMachine, foundPreference);
-			}
-		}
+		this.openFilesFromCommandLine(stageManager, currentProject);
 
 		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
 		pluginManager.start();
