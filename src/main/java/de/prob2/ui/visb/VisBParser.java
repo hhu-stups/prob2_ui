@@ -20,6 +20,7 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.animator.domainobjects.WDError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
+import de.prob.model.classicalb.ClassicalBModel;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.visb.exceptions.VisBParseException;
@@ -59,6 +60,7 @@ public class VisBParser {
 		for(VisBItem visItem : visItems){
 		        try {
 					AbstractEvalResult abstractEvalResult = evaluateFormula(visItem.getValue());
+					// TO DO: should we group the evaluation of all Formulas to avoid Prolog calling overhead?
 					String value = getValueFromResult(abstractEvalResult, visItem);
 					String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
 					jQueryForChanges.append(jQueryTemp);
@@ -81,10 +83,15 @@ public class VisBParser {
 	 */
 	private AbstractEvalResult evaluateFormula(String formulaToEval) throws EvaluationException, ProBError {
 		//SVG Javascript && ValueTranslator(if necessary)
-		// TO DO: provide a flag or preference to choose between the parser used by the model or classicalB:
-		// Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, possibly too cumbersome for VisB
-		// final IEvalElement formula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND); // use parser associated with the current model
-		final IEvalElement formula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
+		IEvalElement formula;
+		if(currentTrace.getModel() instanceof ClassicalBModel) {
+		   formula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
+		  // use parser associated with the current model, DEFINITIONS are accessible
+		} else {
+		   formula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
+		   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, possibly too cumbersome for VisB
+		}
+		
 		//Take the current trace
 		Trace trace = currentTrace.get();
 		if (trace == null) {
