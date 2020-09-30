@@ -1,16 +1,9 @@
 package de.prob2.ui.visb;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ResourceBundle;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.inject.Injector;
-
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.exception.ProBError;
+import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -19,13 +12,17 @@ import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
-
 import javafx.beans.value.ChangeListener;
-
+import javafx.scene.control.Alert;
 import netscape.javascript.JSException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.util.ResourceBundle;
 
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler} and {@link VisBParser}.
@@ -139,7 +136,7 @@ public class VisBController {
 	 * This method throws an ProB2-UI ExceptionAlert
 	 */
 	private void alert(Throwable ex, String header, String message, Object... params){
-		this.stageManager.makeExceptionAlert(ex, header, message).showAndWait();
+		this.stageManager.makeExceptionAlert(ex, header, message, params).showAndWait();
 	}
 
 	private static int countLines(String str) {
@@ -302,7 +299,14 @@ public class VisBController {
 		if(visBVisualisation.isReady()) {
 			StringBuilder onClickEventQuery = new StringBuilder();
 			for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
-			    // TO DO: check if visBEvent.getEvent() exists in current model, otherwise generate error message
+				String event = visBEvent.getEvent();
+				OperationInfo operationInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
+				boolean isValidTopLevelEvent = operationInfo != null && operationInfo.isTopLevel();
+				if(!isValidTopLevelEvent) {
+					Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.no.events.for.id", event);
+					alert.initOwner(this.injector.getInstance(VisBStage.class));
+					alert.show();
+				}
 				String queryPart = "$(document).ready(function(){\n" +
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").click(function(){\n" +
