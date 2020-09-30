@@ -63,9 +63,9 @@ public class VisBParser {
 					String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
 					jQueryForChanges.append(jQueryTemp);
 				} catch (EvaluationException e){
-				     System.out.println("Exception for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
-				    // TODO: either add text to exception or be able to call something like alert(e, "visb.exception.header", "visb.infobox.visualisation.formula.error ",visItem.getId(),visItem.getAttribute());
-				     throw(e);
+					System.out.println("Exception for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
+					// TODO: either add text to exception or be able to call something like alert(e, "visb.exception.header", "visb.infobox.visualisation.formula.error ",visItem.getId(),visItem.getAttribute());
+					throw(e);
 				}
 		}
 		return jQueryForChanges.toString();
