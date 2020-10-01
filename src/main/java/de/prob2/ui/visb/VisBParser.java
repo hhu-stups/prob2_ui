@@ -24,6 +24,7 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.visb.exceptions.VisBParseException;
+import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBItem;
 
 import javafx.scene.paint.Color;
@@ -55,19 +56,20 @@ public class VisBParser {
 	 * @throws EvaluationException from evaluating formula on trace
 	 * @throws BCompoundException if the B expression is not correct
 	 */
-	String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, BCompoundException{
+	String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
 		StringBuilder jQueryForChanges = new StringBuilder();
 		for(VisBItem visItem : visItems){
 		        try {
 					AbstractEvalResult abstractEvalResult = evaluateFormula(visItem.getValue());
 					// TO DO: should we group the evaluation of all Formulas to avoid Prolog calling overhead?
+					// We should also parse the formulas only once
 					String value = getValueFromResult(abstractEvalResult, visItem);
 					String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
 					jQueryForChanges.append(jQueryTemp);
 				} catch (EvaluationException e){
-					System.out.println("Exception for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
+					System.out.println("\nException for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
 					// TODO: either add text to exception or be able to call something like alert(e, "visb.exception.header", "visb.infobox.visualisation.formula.error ",visItem.getId(),visItem.getAttribute());
-					throw(e);
+					throw(new VisBNestedException("Exception evaluating B formula for "+ visItem.getId() + "."+ visItem.getAttribute() + " : ",e));
 				}
 		}
 		return jQueryForChanges.toString();

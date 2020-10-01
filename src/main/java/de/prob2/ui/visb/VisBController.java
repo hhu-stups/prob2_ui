@@ -10,6 +10,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.exceptions.VisBParseException;
+import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.beans.value.ChangeListener;
@@ -92,7 +93,7 @@ public class VisBController {
 			try{
 				svgChanges = injector.getInstance(VisBParser.class).evaluateFormulas(this.visBVisualisation.getVisBItems());
 				// TO DO: parse formula once when loading the file to check for syntax errors
-			} catch(VisBParseException | IllegalArgumentException | BCompoundException | ProBError e){
+			} catch(VisBParseException | VisBNestedException | IllegalArgumentException | BCompoundException | ProBError e){
 				alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 				this.clearListeners();
 				return;
