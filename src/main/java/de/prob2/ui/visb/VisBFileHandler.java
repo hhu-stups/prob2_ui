@@ -149,15 +149,30 @@ class VisBFileHandler {
 				if (current_obj.has("ignore")) {
 				   System.out.println("Ignoring VisB Item: " + id + "." + attribute);
 				} else if (current_obj.has("repeat")) {
-				   // a list of strings which will replace %this in the three other attributes:
+				   // a list of strings which will replace %0, ... in the id and value attributes:
 				   JsonArray repArray = (JsonArray) current_obj.get("repeat");
 				   for(JsonElement rep : repArray) {
-				      String thisVal = rep.getAsString();
-				      System.out.println("Repeating item " + id + "." + attribute + " for %this = " + thisVal);
-				      
-				      String repId = new String(id).replace("%this", thisVal);
+				      // now replace %0, %1, ... by values provided
+				      String repId = new String(id); 
 				      // no need to replace in attribute
-				      String repVal = new String(value).replace("%this", thisVal);
+				      String repVal = new String(value);
+				      
+				      JsonArray replaceArr;
+				      if(rep instanceof JsonArray) {
+				          replaceArr = rep.getAsJsonArray();
+				      } else {
+				          replaceArr = new JsonArray();
+				          replaceArr.add(rep); // create a one element array
+				      }
+				      
+				      for(int i =0; i<replaceArr.size();i++) {
+				         String thisVal = replaceArr.get(i).getAsString();
+				         String pattern = new String("%"+i);
+				         System.out.println("Repeating item " + id + "." + attribute + " for '" + pattern + "' = " + thisVal);
+				         repId = repId.replace(pattern, thisVal);
+				         repVal = repVal.replace(pattern, thisVal);
+				         // TO DO: check that all arrays have same size; otherwise a pattern will not be replaced
+				      }
 				      visBItems.add(new VisBItem(repId, attribute, repVal));
 				   }
 				} else {
