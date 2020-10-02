@@ -168,7 +168,7 @@ public class VisBStage extends Stage {
 					"<head>\n" +
 					//This is for zooming in and out and scaling the image to the right width and height
 					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-					"<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n" +
+					"<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n" +
 					"<script>\n" +
 					"function checkSvgId(id,ctxt){\n" +
 					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"unknown: \"+id);\n" +
@@ -198,6 +198,7 @@ public class VisBStage extends Stage {
 			addVisBConnector();
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
 			this.webView.getEngine().setOnError(event -> treatJavascriptError(event)); // check if we get errors
+			// Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
             // engine.setConfirmHandler(message -> showConfirm(message));
 		}
 
@@ -265,10 +266,11 @@ public class VisBStage extends Stage {
 	 * @param onClickEventQuery onClick functions to be executed
 	 */
 	void loadOnClickFunctions(String onClickEventQuery){
+	    System.out.println("JS onClick: " + onClickEventQuery);
 		stateListener = (ov, oldState, newState) -> {
 			if (newState == Worker.State.SUCCEEDED) {
-				webView.getEngine().executeScript(onClickEventQuery);
 				LOGGER.debug("On click functions for visBEvents have been loaded.");
+				webView.getEngine().executeScript(onClickEventQuery);
 			}
 		};
 		this.webView.getEngine().getLoadWorker().stateProperty().addListener(stateListener);
@@ -301,14 +303,14 @@ public class VisBStage extends Stage {
 						  if (newValue != Worker.State.SUCCEEDED) {
 							return;
 						  }
+						  LOGGER.debug("runScript: "+jQuery+"\n-----");
 						  webView.getEngine().executeScript(jQuery);
-						  //LOGGER.debug("runScript: "+jQuery+"\n-----");
 						}
 					  } );
 				    LOGGER.debug("registered runScript as Listener");
 		} else {
+			LOGGER.debug("runScript directly: "+jQuery+"\n-----");
 			this.webView.getEngine().executeScript(jQuery);
-			//LOGGER.debug("runScript directly: "+jQuery+"\n-----");
 		}
 	}
 
