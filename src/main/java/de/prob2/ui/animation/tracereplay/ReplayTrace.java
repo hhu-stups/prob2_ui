@@ -6,6 +6,7 @@ import java.util.Objects;
 import com.google.inject.Injector;
 
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
@@ -117,16 +118,20 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	}
 
 	public void setDescription(String description) {
-		PersistentTrace trace = getPersistentTrace();
+		TraceJsonFile trace = getTrace();
 		if (trace != null) {
-			trace.setDescription(description);
+			trace.getTrace().setDescription(description);
 			injector.getInstance(TraceFileHandler.class)
 				.save(trace, injector.getInstance(CurrentProject.class).getLocation().resolve(location));
 		}
 	}
 
 	PersistentTrace getPersistentTrace() {
-		return injector.getInstance(TraceFileHandler.class).load(this.getLocation());
+		return injector.getInstance(TraceFileHandler.class).load_trace(this.getLocation());
+	}
+
+	TraceJsonFile getTrace() {
+		return injector.getInstance(TraceFileHandler.class).load_complete(this.getLocation());
 	}
 	
 	@Override
