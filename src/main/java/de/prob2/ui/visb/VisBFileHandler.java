@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 
 import de.prob2.ui.visb.exceptions.VisBParseException;
@@ -138,8 +139,23 @@ class VisBFileHandler {
 				if(id.isEmpty() || attribute.isEmpty() || value.isEmpty()){
 					throw new VisBParseException("There is an item in your visualisation file, that has an empty id, attr, or value body.");
 				}
-				VisBItem visBItem = new VisBItem(id, attribute, value);
-				visBItems.add(visBItem);
+				if (current_obj.has("ignore")) {
+				   System.out.println("Ignoring VisB Item: " + id + "." + attribute);
+				} else if (current_obj.has("repeat")) {
+				   // a list of strings which will replace %this in the three other attributes:
+				   JsonArray repArray = (JsonArray) current_obj.get("repeat");
+				   for(JsonElement rep : repArray) {
+				      String thisVal = rep.getAsString();
+				      System.out.println("Repeating item " + id + "." + attribute + " for %this = " + thisVal);
+				      
+				      String repId = new String(id).replace("%this", thisVal);
+				      // no need to replace in attribute
+				      String repVal = new String(value).replace("%this", thisVal);
+				      visBItems.add(new VisBItem(repId, attribute, repVal));
+				   }
+				} else {
+				   visBItems.add(new VisBItem(id, attribute, value));
+				}
 			} else if (!current_obj.has("id")){
 				throw new VisBParseException("There is a item in your visualisation file, that has no \"id\" member.");
 			} else if (!current_obj.has("attr")){
