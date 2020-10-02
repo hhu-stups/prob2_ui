@@ -81,24 +81,31 @@ class VisBFileHandler {
 				continue;
 			}
 			if(current_obj.has("id") && current_obj.has("event")) {
-				String id = current_obj.get("id").getAsString();
-				String eventS = current_obj.get("event").getAsString();
-				ArrayList<String> predicates = new ArrayList<>();
-				if(current_obj.has("predicates")){
-					JsonArray jsonPredicates = current_obj.getAsJsonArray("predicates");
-					for(int i = 0; i < jsonPredicates.size();i++){
-						predicates.add(jsonPredicates.get(i).getAsString());
-					}
+				String id = current_obj.get("id").getAsString();				
+				if(id.isEmpty()){
+					throw new VisBParseException("An event in your visualisation file has an empty id.");
 				}
-				if(id.isEmpty() || eventS.isEmpty()){
-					throw new VisBParseException("There is an event in your visualisation file that has an empty id, event, or predicates body.");
-				}
-				VisBEvent visBEvent = new VisBEvent(id, eventS, predicates);
-				boolean add = !containsId(visBEvents, id);
-				if(add) {
-					visBEvents.add(visBEvent);
+			    if (current_obj.has("ignore")) {
+				   System.out.println("Ignoring VisB Event for " + id);
 				} else {
-					throw new VisBParseException("This id has already an event: " +id+".");
+				    String eventS = current_obj.get("event").getAsString();
+					if(eventS.isEmpty()){
+						throw new VisBParseException("There event for " + id + " in your visualisation file has an empty event body.");
+					}
+					ArrayList<String> predicates = new ArrayList<>();
+					if(current_obj.has("predicates")){
+						JsonArray jsonPredicates = current_obj.getAsJsonArray("predicates");
+						for(int i = 0; i < jsonPredicates.size();i++){
+							predicates.add(jsonPredicates.get(i).getAsString());
+						}
+					}
+					VisBEvent visBEvent = new VisBEvent(id, eventS, predicates);
+					boolean add = !containsId(visBEvents, id);
+					if(add) {
+						visBEvents.add(visBEvent);
+					} else {
+						throw new VisBParseException("This id has already an event: " +id+".");
+					}
 				}
 			} else if (!current_obj.has("id")){
 				throw new VisBParseException("There is a event in your visualisation file, that has no \"id\" member.");
