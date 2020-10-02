@@ -60,7 +60,7 @@ public class VisBParser {
 		StringBuilder jQueryForChanges = new StringBuilder();
 		for(VisBItem visItem : visItems){
 		        try {
-					AbstractEvalResult abstractEvalResult = evaluateFormula(visItem.getValue());
+					AbstractEvalResult abstractEvalResult = evaluateFormula(parseItemFormula(visItem));
 					// TO DO: should we group the evaluation of all Formulas to avoid Prolog calling overhead?
 					// We should also parse the formulas only once
 					String value = getValueFromResult(abstractEvalResult, visItem);
@@ -75,25 +75,32 @@ public class VisBParser {
 		return jQueryForChanges.toString();
 	}
 
+
 	/**
 	 * This idea originated from the BInterpreter in the ProB2-UI. In this method a new trace is constructed, on which the formulas, which have to be evaluated can be evaluated on.
+	 * @throws EvaluationException If evaluating formula on trace causes an Exception.
+	 */
+	private IEvalElement parseItemFormula(VisBItem visItem) throws EvaluationException, ProBError {
+		String formulaToEval = visItem.getValue();
+		if (visItem.parsedFormula != null) {
+		   return visItem.parsedFormula; // is already parsed
+		} else if(currentTrace.getModel() instanceof ClassicalBModel) {
+		   visItem.parsedFormula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
+		  // use parser associated with the current model, DEFINITIONS are accessible
+		} else {
+		   visItem.parsedFormula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
+		   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, possibly too cumbersome for VisB
+		}
+	    return visItem.parsedFormula;
+	}
+	
+	/**
 	 * This method makes it not possible, to change the current trace. It was not needed, because the formulas were solely made for producing a value for a JQuery.
-	 * @param formulaToEval the formula, that should be evaluated
 	 * @return an AbstractEvalResult, that will be further evaluated in the getValueFromResult method
 	 * @throws EvaluationException If evaluating formula on trace causes an Exception.
 	 * @throws ProBError If a formula cannot correctly be evaluated.
 	 */
-	private AbstractEvalResult evaluateFormula(String formulaToEval) throws EvaluationException, ProBError {
-		//SVG Javascript && ValueTranslator(if necessary)
-		IEvalElement formula;
-		if(currentTrace.getModel() instanceof ClassicalBModel) {
-		   formula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
-		  // use parser associated with the current model, DEFINITIONS are accessible
-		} else {
-		   formula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
-		   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, possibly too cumbersome for VisB
-		}
-		
+	private AbstractEvalResult evaluateFormula(IEvalElement formula) throws EvaluationException, ProBError {
 		//Take the current trace
 		Trace trace = currentTrace.get();
 		if (trace == null) {

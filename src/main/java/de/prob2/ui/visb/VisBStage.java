@@ -169,6 +169,8 @@ public class VisBStage extends Stage {
 					//This is for zooming in and out and scaling the image to the right width and height
 					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
 					"<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n" +
+					// TO DO: pre-load this https://stackoverflow.com/questions/35703884/trying-to-load-a-local-page-into-javafx-webengine
+					//File f = new File("full\\path\\to\\webView\\main.html"); webEngine.load(f.toURI().toString());
 					"<script>\n" +
 					"function checkSvgId(id,ctxt){\n" +
 					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"unknown: \"+id);\n" +
