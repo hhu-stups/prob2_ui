@@ -5,6 +5,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.FormalismType;
+import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.MachineCreator;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
@@ -29,6 +31,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -131,13 +134,19 @@ public final class HistoryView extends VBox {
 
 	@FXML
 	private void saveTrace() {
+
 		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 		Trace copyTrace = currentTrace.get();
 		if (currentTrace.get() != null) {
 			try {
+
+
+				Path machinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
+				LoadedMachine loadedMachine = injector.getInstance(MachineCreator.class).load(machinePath);
 				traceSaver.save(
 					new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1),
-					currentProject.getCurrentMachine());
+					currentProject.getCurrentMachine(),
+					loadedMachine);
 			} catch (Exception e) {
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "history.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW, Collections.EMPTY_LIST);
 				alert.initOwner(this.getScene().getWindow());

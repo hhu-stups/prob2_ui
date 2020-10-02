@@ -7,16 +7,14 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.exception.ProBError;
-import de.prob.statespace.LoadedMachine;
-import de.prob.statespace.OperationInfo;
-import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
+import de.prob.statespace.*;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -176,7 +174,10 @@ public class TraceDiff extends VBox {
 			this.getScene().getWindow().hide();
 		});
 		showAlert.setOnAction(e -> alert.showAlertAgain());
-		savePersistent.setOnAction(e -> injector.getInstance(TraceFileHandler.class).save(persistent, injector.getInstance(CurrentProject.class).getCurrentMachine()));
+		savePersistent.setOnAction(e -> {
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+						injector.getInstance(TraceFileHandler.class).save(persistent, machine,
+				injector.getInstance(MachineCreator.class).load(machine.getLocation()));});
 		setCurrent.setOnAction(e -> {
 			currentTrace.set(current);
 			this.getScene().getWindow().hide();

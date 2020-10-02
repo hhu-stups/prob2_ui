@@ -12,6 +12,8 @@ import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
+import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.MachineCreator;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.AbstractResultHandler;
@@ -92,7 +94,8 @@ public class TestCaseGenerationResultHandler extends AbstractResultHandler {
 	public void saveTraces(TestCaseGenerationItem item) {
 		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 		if (currentTrace.get() != null) {
-			traceSaver.save(item, currentProject.getCurrentMachine());
+			LoadedMachine loadedMachine = injector.getInstance(MachineCreator.class).load(currentProject.getCurrentMachine().getLocation());
+			traceSaver.save(item, currentProject.getCurrentMachine(), loadedMachine);
 		}
 	}
 
