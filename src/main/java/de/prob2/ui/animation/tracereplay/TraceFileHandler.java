@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,8 +15,13 @@ import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
+import de.prob.check.tracereplay.json.TraceManager;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.check.tracereplay.json.storage.TraceMetaData;
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
+import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.MachineCreator;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
@@ -43,11 +49,11 @@ public class TraceFileHandler {
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
-	private final TraceLoaderSaver traceLoaderSaver;
+	private final TraceManager traceManager;
 
 	@Inject
-	public TraceFileHandler(TraceLoaderSaver traceLoaderSaver, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
-		this.traceLoaderSaver = traceLoaderSaver;
+	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+		this.traceManager = traceManager;
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
@@ -55,14 +61,24 @@ public class TraceFileHandler {
 		this.bundle = bundle;
 	}
 
-	public PersistentTrace load(Path path) {
+	public PersistentTrace load_trace(Path path) {
 		try {
-			return traceLoaderSaver.load(currentProject.getLocation().resolve(path));
+			return traceManager.load(currentProject.getLocation().resolve(path)).getTrace();
 		} catch (IOException | JsonParseException e) {
 			this.showLoadError(path, e);
 			return null;
 		}
 	}
+
+	public TraceJsonFile load_complete(Path path) {
+		try {
+			return traceManager.load(currentProject.getLocation().resolve(path));
+		} catch (IOException | JsonParseException e) {
+			this.showLoadError(path, e);
+			return null;
+		}
+	}
+
 
 	public void showLoadError(Path path, Exception e) {
 		LOGGER.warn("Failed to load trace file", e);
@@ -100,7 +116,7 @@ public class TraceFileHandler {
 		});
 	}
 
-	public void save(TestCaseGenerationItem item, Machine machine) {
+	public void save(TestCaseGenerationItem item, Machine machine, LoadedMachine loadedMachine) {
 		List<PersistentTrace> traces = item.getExamples().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
 				.collect(Collectors.toList());
@@ -129,13 +145,11 @@ public class TraceFileHandler {
 			for(int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
-				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
-				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
-					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-					.withModelName(machine.getName())
-					.withCreator(createdBy)
-					.build();
-				jsonManager.writeToFile(traceFilePath, traces.get(i), metadata);
+
+				TraceMetaData traceMetaData = new TraceMetaData(1, LocalDateTime.now(), createdBy, versionInfo.getCliVersion().getShortVersionString(), "HALLO");
+				TraceJsonFile traceJsonFile = new TraceJsonFile(currentProject.getCurrentMachine().getName(), currentProject.getCurrentMachine().getDescription(), traces.get(i), loadedMachine, traceMetaData);
+				save(traceJsonFile, traceFilePath);
+
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
 		} catch (IOException e) {
@@ -149,22 +163,31 @@ public class TraceFileHandler {
 					NUMBER_MAXIMUM_GENERATED_TRACES).showAndWait();
 		}
 	}
-	
-	public void save(PersistentTrace trace, Machine machine) {
+
+	/**
+	 * Saves the trace
+	 * @param trace the trace to be saved
+	 * @param machine a object containing all properties of a machine
+	 * @param loadedMachine the machine represented as loaded machine
+	 */
+	public void save(PersistentTrace trace, Machine machine, LoadedMachine loadedMachine) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(machine.getName() + "." + TRACE_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TRACE_FILE_EXTENSION));
 		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
-			save(trace, path);
+			//TODO replace creator with something useful
+			TraceMetaData traceMetaData = new TraceMetaData(1, LocalDateTime.now(), "USER", versionInfo.getCliVersion().getShortVersionString(), "HALLO");
+			TraceJsonFile traceJsonFile = new TraceJsonFile(currentProject.getCurrentMachine().getName(), currentProject.getCurrentMachine().getDescription(), trace, loadedMachine, traceMetaData);
+			save(traceJsonFile, path);
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
 	}
 
-	public void save(PersistentTrace trace, Path location) {
+	public void save(TraceJsonFile trace, Path location) {
 		try {
-			traceLoaderSaver.save(trace, location, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
+			traceManager.save(location, trace);
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
 		}
