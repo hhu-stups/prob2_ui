@@ -44,6 +44,7 @@ import javafx.stage.WindowEvent;
 import javafx.scene.control.MenuBar;
 import javafx.event.EventHandler;
 import javafx.scene.web.WebEvent;
+import javafx.scene.web.WebErrorEvent;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -196,10 +197,15 @@ public class VisBStage extends Stage {
 			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-			//this.webView.getEngine().setOnError(event -> showJavascriptAlert(event));
+			this.webView.getEngine().setOnError(event -> treatJavascriptError(event)); // check if we get errors
             // engine.setConfirmHandler(message -> showConfirm(message));
 		}
 
+	}
+	
+	private void treatJavascriptError(WebErrorEvent event) {
+	    LOGGER.debug("JavaScript ERROR: " + event.getMessage());
+		alert(event.getException(), "visb.exception.header", "visb.stage.alert.webview.jsalert", event.getMessage());
 	}
 	
 	private void showJavascriptAlert(String message) {
