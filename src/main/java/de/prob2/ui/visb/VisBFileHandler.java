@@ -99,12 +99,32 @@ class VisBFileHandler {
 							predicates.add(jsonPredicates.get(i).getAsString());
 						}
 					}
-					VisBEvent visBEvent = new VisBEvent(id, eventS, predicates);
-					boolean add = !containsId(visBEvents, id);
-					if(add) {
-						visBEvents.add(visBEvent);
+					if (current_obj.has("repeat")) {
+					   // a list of strings which will replace %0, ... 
+					   JsonArray repArray = (JsonArray) current_obj.get("repeat");
+					   for(JsonElement rep : repArray) {
+						  // now replace %0, %1, ... by values provided
+						  String repId = new String(id);
+						  String repEvent = new String(eventS);
+						  ArrayList<String> repPreds= new ArrayList<String>();
+						  repPreds.addAll(predicates);
+					  
+						  JsonArray replaceArr = getJsonArray(rep);
+						  for(int i =0; i<replaceArr.size();i++) {
+							 String thisVal = replaceArr.get(i).getAsString();
+							 String pattern = new String("%"+i);
+							 System.out.println("Repeating event " + id + " for '" + pattern + "' = " + thisVal);
+							 repId = repId.replace(pattern, thisVal);
+							 repEvent = repEvent.replace(pattern, thisVal);
+							 for(int j = 0; j < repPreds.size(); j++) {
+							     repPreds.set(j,repPreds.get(j).replace(pattern, thisVal));
+							 }
+							 // we could check that all arrays have same size; otherwise a pattern will not be replaced
+						  }
+						  AddVisBEvent(visBEvents, repId, repEvent, repPreds);
+					   }
 					} else {
-						throw new VisBParseException("This id has already an event: " +id+".");
+					    AddVisBEvent(visBEvents, id, eventS, predicates);
 					}
 				}
 			} else if (!current_obj.has("id")){
@@ -115,6 +135,16 @@ class VisBFileHandler {
 			}
 		}
 		return visBEvents;
+	}
+	
+	private static void AddVisBEvent(ArrayList<VisBEvent> visBEvents, 
+	                            String id, String eventS, ArrayList<String> predicates ) throws VisBParseException {
+		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates);
+		if(!containsId(visBEvents, id)) {
+			visBEvents.add(visBEvent);
+		} else {
+			throw new VisBParseException("This id has already an event: " +id+".");
+		}
 	}
 
 	private static boolean containsId(ArrayList<VisBEvent> visBEvents, String id){
@@ -158,21 +188,14 @@ class VisBFileHandler {
 				      // no need to replace in attribute
 				      String repVal = new String(value);
 				      
-				      JsonArray replaceArr;
-				      if(rep instanceof JsonArray) {
-				          replaceArr = rep.getAsJsonArray();
-				      } else {
-				          replaceArr = new JsonArray();
-				          replaceArr.add(rep); // create a one element array
-				      }
-				      
+				      JsonArray replaceArr = getJsonArray(rep);
 				      for(int i =0; i<replaceArr.size();i++) {
 				         String thisVal = replaceArr.get(i).getAsString();
 				         String pattern = new String("%"+i);
 				         System.out.println("Repeating item " + id + "." + attribute + " for '" + pattern + "' = " + thisVal);
 				         repId = repId.replace(pattern, thisVal);
 				         repVal = repVal.replace(pattern, thisVal);
-				         // TO DO: check that all arrays have same size; otherwise a pattern will not be replaced
+				         // we could check that all arrays have same size; otherwise a pattern will not be replaced
 				      }
 				      visBItems.add(new VisBItem(repId, attribute, repVal));
 				   }
@@ -188,6 +211,17 @@ class VisBFileHandler {
 			}
 		}
 		return visBItems;
+	}
+	
+	// utility to get a JsonArray; a single Object is automatically transformed into a single item array
+	private static JsonArray getJsonArray (JsonElement rep) {
+		  if(rep instanceof JsonArray) {
+			  return rep.getAsJsonArray();
+		  } else {
+			  JsonArray replaceArr = new JsonArray();
+			  replaceArr.add(rep); // create a one element array
+			  return replaceArr;
+		  }
 	}
 
 	/**
