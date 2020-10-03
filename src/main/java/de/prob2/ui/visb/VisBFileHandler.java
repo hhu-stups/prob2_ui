@@ -81,7 +81,7 @@ class VisBFileHandler {
 				continue;
 			}
 			if(current_obj.has("id") && current_obj.has("event")) {
-				String id = current_obj.get("id").getAsString();				
+				String id = current_obj.get("id").getAsString();			
 				if(id.isEmpty()){
 					throw new VisBParseException("An event in your visualisation file has an empty id.");
 				}
@@ -90,7 +90,7 @@ class VisBFileHandler {
 				} else {
 				    String eventS = current_obj.get("event").getAsString();
 					if(eventS.isEmpty()){
-						throw new VisBParseException("There event for " + id + " in your visualisation file has an empty event body.");
+						throw new VisBParseException("The event for " + id + " in your visualisation file has an empty event body.");
 					}
 					ArrayList<String> predicates = new ArrayList<>();
 					if(current_obj.has("predicates")){
@@ -108,9 +108,10 @@ class VisBFileHandler {
 					}
 				}
 			} else if (!current_obj.has("id")){
-				throw new VisBParseException("There is a event in your visualisation file, that has no \"id\" member.");
+				throw new VisBParseException("There is a event in your visualisation file, that has no \"id\" attribute.");
 			} else if (!current_obj.has("event")){
-				throw new VisBParseException("There is a event in your visualisation file, that has no \"event\" member.");
+				String id = current_obj.get("id").getAsString();	
+				throw new VisBParseException("The event for " + id + " in your visualisation file has no \"event\" attribute.");
 			}
 		}
 		return visBEvents;
