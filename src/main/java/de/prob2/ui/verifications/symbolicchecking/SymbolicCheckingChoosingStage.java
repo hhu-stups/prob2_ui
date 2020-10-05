@@ -11,7 +11,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
 
 import javafx.fxml.FXML;
 
@@ -32,11 +31,15 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 		stageManager.loadFXML(this, "symbolic_checking_choice.fxml");
 	}
 	
+	private SymbolicCheckingFormulaItem extractItem() {
+		final String formula = extractFormula();
+		return new SymbolicCheckingFormulaItem(formula, formula, this.getExecutionType());
+	}
+	
 	@Override
 	protected boolean updateFormula(SymbolicCheckingFormulaItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		String formula = extractFormula();
-		final SymbolicCheckingFormulaItem newItem = new SymbolicCheckingFormulaItem(formula, formula, this.getExecutionType());
+		final SymbolicCheckingFormulaItem newItem = this.extractItem();
 		if(currentMachine.getSymbolicCheckingFormulas().stream().noneMatch(newItem::settingsEqual)) {
 			currentMachine.getSymbolicCheckingFormulas().set(currentMachine.getSymbolicCheckingFormulas().indexOf(item), newItem);
 			return true;
@@ -46,20 +49,14 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 	
 	@Override
 	public void checkFormula() {
-		SymbolicExecutionType checkingType = this.getExecutionType();
-		final String formula = extractFormula();
-		final SymbolicCheckingFormulaItem formulaItem = new SymbolicCheckingFormulaItem(formula, formula, checkingType);
 		addFormula();
-		symbolicCheckingFormulaHandler.handleItem(formulaItem, false);
+		symbolicCheckingFormulaHandler.handleItem(this.extractItem(), false);
 		this.close();
 	}
 	
 	@Override
 	protected void addFormula() {
-		SymbolicExecutionType checkingType = this.getExecutionType();
-		final String formula = extractFormula();
-		final SymbolicCheckingFormulaItem item = new SymbolicCheckingFormulaItem(formula, formula, checkingType);
-		symbolicCheckingFormulaHandler.addFormula(item);
+		symbolicCheckingFormulaHandler.addFormula(this.extractItem());
 		this.close();
 	}
 	
