@@ -124,8 +124,16 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	}
 	
 	protected void setCheckListeners() {
-		btAdd.setOnAction(e -> addFormula());
-		btCheck.setOnAction(e -> checkFormula());
+		btAdd.setOnAction(e -> {
+			this.formulaHandler.addFormula(this.extractItem());
+			this.close();
+		});
+		btCheck.setOnAction(e -> {
+			final T newItem = this.extractItem();
+			this.formulaHandler.addFormula(newItem);
+			this.close();
+			this.formulaHandler.handleItem(newItem, false);
+		});
 	}
 	
 	public void changeGUIType(final SymbolicGUIType guiType) {
@@ -197,33 +205,21 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		btAdd.setOnAction(e -> {
 			final T newItem = this.extractItem();
 			if(this.formulaHandler.replaceFormula(item, newItem)) {
-				addFormula();
+				this.close();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
-			this.close();
 		});
 		
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
 			if(this.formulaHandler.replaceFormula(item, newItem)) {
-				checkFormula();
+				this.close();
+				this.formulaHandler.handleItem(newItem, false);
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
-			this.close();
 		});
-	}
-	
-	private void checkFormula() {
-		addFormula();
-		this.formulaHandler.handleItem(this.extractItem(), false);
-		this.close();
-	}
-	
-	private void addFormula() {
-		this.formulaHandler.addFormula(this.extractItem());
-		this.close();
 	}
 	
 	@FXML
