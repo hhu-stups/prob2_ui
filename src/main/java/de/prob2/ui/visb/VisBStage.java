@@ -1,17 +1,7 @@
 package de.prob2.ui.visb;
 
-import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ResourceBundle;
-
-import javax.imageio.ImageIO;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.inject.Injector;
-
+import de.prob2.ui.Main;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -22,8 +12,8 @@ import de.prob2.ui.visb.ui.ListViewItem;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
 import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
-
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
@@ -33,6 +23,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
@@ -41,18 +32,18 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.scene.control.MenuBar;
-import javafx.event.EventHandler;
-import javafx.scene.web.WebEvent;
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
-
 import netscape.javascript.JSObject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ResourceBundle;
 
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
@@ -167,7 +158,7 @@ public class VisBStage extends Stage {
 					"<head>\n" +
 					//This is for zooming in and out and scaling the image to the right width and height
 					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-					"<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n" +
+					"<script src=\"" + Main.class.getResource("jquery.js").toExternalForm() + "\"></script>\n" +
 					"<script>\n" +
 					"function checkSvgId(id,ctxt){\n" +
 					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"unknown: \"+id);\n" +
