@@ -154,6 +154,7 @@ public class VisBStage extends Stage {
 		if (svgFile != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
+			// TODO: Load HTML file from file. Option 1: Load from HTML file and add function to place the SVG code. Option 2: Use a template engine
 			String htmlFile = "<!DOCTYPE html>\n" +
 					"<html>\n" +
 					"<head>\n" +
@@ -161,8 +162,6 @@ public class VisBStage extends Stage {
 					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
 
 					"<script src=\"" + Main.class.getResource("jquery.js").toExternalForm() + "\"></script>\n" +
-					// TO DO: pre-load this https://stackoverflow.com/questions/35703884/trying-to-load-a-local-page-into-javafx-webengine
-					//File f = new File("full\\path\\to\\webView\\main.html"); webEngine.load(f.toURI().toString());
 					"<script>\n" +
 					"function checkSvgId(id,ctxt){\n" +
 					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"unknown: \"+id);\n" +
