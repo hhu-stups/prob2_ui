@@ -230,23 +230,31 @@ class VisBFileHandler {
 	
 	// get a JsonArray of repetitions; either as a repeat list of explicit strings, or a for loop
 	private static JsonArray getRepeatArray (JsonObject current_obj) throws VisBParseException {
-	     if (current_obj.has("repeat")) {
-	        return (JsonArray) current_obj.get("repeat");
-	     } else if (current_obj.has("for")) {
+	     if (current_obj.has("for")) {
 	        JsonObject forloop = (JsonObject) current_obj.get("for"); // To do: check if JsonElement instanceof JsonObject
 	        int from = forloop.get("from").getAsInt();
 	        int to = forloop.get("to").getAsInt();
-	        
 			if (to-from > 100000) {
 			    throw new VisBParseException("The for loop " + from + ".." + to + " seems too large.");
 			}
 			JsonArray replaceArr = new JsonArray();
 			for(int i=from; i <= to; i++) {
-			     replaceArr.add(new JsonPrimitive(i) );
-			     System.out.println("repeat-for: " + i);
+				if (current_obj.has("repeat")) {
+				    for(JsonElement rep : (JsonArray) current_obj.get("repeat") ) {
+				       JsonArray arr_inner = new JsonArray();
+				       arr_inner.add(new JsonPrimitive(i)); // add i at end of beginning of list
+				       arr_inner.addAll(getJsonArray(rep)); // now copy original rep list
+				       replaceArr.add(arr_inner); // add modified repetition list to overall list
+				    }
+				} else {
+					replaceArr.add(new JsonPrimitive(i) );
+			    }
+			    System.out.println("repeat-for: " + i);
 			}
 			return replaceArr;
-	     }  else {
+	     }  else if (current_obj.has("repeat")) { // repeat without for
+	        return (JsonArray) current_obj.get("repeat");
+	     } else {
 	        return null;
 	     }
 	}
