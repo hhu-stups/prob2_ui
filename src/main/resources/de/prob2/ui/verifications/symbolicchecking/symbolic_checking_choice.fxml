@@ -18,6 +18,7 @@
 		<TextField fx:id="tfFormula" VBox.vgrow="NEVER"/>
 		<ChoiceBox fx:id="cbOperations" VBox.vgrow="NEVER"/>
 		<PredicateBuilderView fx:id="predicateBuilderView" VBox.vgrow="NEVER"/>
+		<ChoiceBox fx:id="symbolicModelCheckAlgorithmChoiceBox" VBox.vgrow="NEVER"/>
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -38,10 +39,7 @@
 									<SymbolicExecutionItem executionType="CHECK_DYNAMIC_ASSERTIONS" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="CHECK_WELL_DEFINEDNESS" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="IC3" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="KINDUCTION" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="TINDUCTION" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="BMC" guiType="NONE"/>
+									<SymbolicExecutionItem executionType="SYMBOLIC_MODEL_CHECK" guiType="SYMBOLIC_MODEL_CHECK_ALGORITHM"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

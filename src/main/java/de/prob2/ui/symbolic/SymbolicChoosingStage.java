@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -33,6 +34,9 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	
 	@FXML
 	private PredicateBuilderView predicateBuilderView;
+	
+	@FXML
+	private ChoiceBox<SymbolicModelcheckCommand.Algorithm> symbolicModelCheckAlgorithmChoiceBox;
 	
 	@FXML
 	private VBox formulaInput;
@@ -70,6 +74,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			changeGUIType(to.getGUIType());
 			this.sizeToScene();
 		});
+		symbolicModelCheckAlgorithmChoiceBox.getItems().setAll(SymbolicModelcheckCommand.Algorithm.values());
+		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
 	}
 	
 	public SymbolicGUIType getGUIType() {
@@ -96,6 +102,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		predicateBuilderView.reset();
 		cbOperations.getSelectionModel().select(this.checkAllOperations);
 		cbChoice.getSelectionModel().clearSelection();
+		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
 	}
 	
 	protected void update() {
@@ -119,7 +126,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	}
 	
 	public void changeGUIType(final SymbolicGUIType guiType) {
-		formulaInput.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView);
+		formulaInput.getChildren().removeAll(tfFormula, cbOperations, predicateBuilderView, symbolicModelCheckAlgorithmChoiceBox);
 		switch (guiType) {
 			case NONE:
 				break;
@@ -131,6 +138,9 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 				break;
 			case PREDICATE:
 				formulaInput.getChildren().add(0, predicateBuilderView);
+				break;
+			case SYMBOLIC_MODEL_CHECK_ALGORITHM:
+				formulaInput.getChildren().add(0, symbolicModelCheckAlgorithmChoiceBox);
 				break;
 			default:
 				throw new AssertionError("Unhandled GUI type: " + guiType);
@@ -151,6 +161,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			}
 		} else if(this.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
+		} else if (this.getGUIType() == SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM) {
+			formula = symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().getSelectedItem().name();
 		} else {
 			formula = this.getExecutionType().name();
 		}
@@ -172,6 +184,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			} else {
 				cbOperations.getSelectionModel().select(item.getCode());
 			}
+		} else if (this.getGUIType() == SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM) {
+			symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode()));
 		}
 		this.show();
 	}

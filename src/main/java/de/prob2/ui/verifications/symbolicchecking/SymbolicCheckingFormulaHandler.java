@@ -89,8 +89,9 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 	
-	public void handleSymbolic(SymbolicCheckingFormulaItem item, SymbolicModelcheckCommand.Algorithm algorithm, boolean checkAll) {
+	public void handleSymbolic(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
+		final SymbolicModelcheckCommand.Algorithm algorithm = SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode());
 		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(algorithm);
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 		
@@ -135,12 +136,11 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 			case FIND_REDUNDANT_INVARIANTS:
 				findRedundantInvariants(item, checkAll);
 				break;	
+			case SYMBOLIC_MODEL_CHECK:
+				handleSymbolic(item, checkAll);
+				break;
 			default:
-				SymbolicModelcheckCommand.Algorithm algorithm = type.getAlgorithm();
-				if(algorithm != null) {
-					handleSymbolic(item, algorithm, checkAll);
-					break;
-				}
+				throw new AssertionError("Unhandled symbolic checking type: " + type);
 		}
 	}
 	

@@ -242,6 +242,24 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			});
 		});
 	}
+
+	private static void updateV4Project(final JsonObject project) {
+		project.getAsJsonArray("machines").forEach(machineElement -> {
+			final JsonObject machine = machineElement.getAsJsonObject();
+			machine.getAsJsonArray("symbolicCheckingFormulas").forEach(symbolicCheckingItemElement -> {
+				final JsonObject symbolicCheckingItem = symbolicCheckingItemElement.getAsJsonObject();
+				final String oldCheckingType = symbolicCheckingItem.get("type").getAsString();
+				if ("IC3".equals(oldCheckingType) || "TINDUCTION".equals(oldCheckingType) || "KINDUCTION".equals(oldCheckingType) || "BMC".equals(oldCheckingType)) {
+					assert symbolicCheckingItem.get("name").getAsString().equals(oldCheckingType);
+					assert symbolicCheckingItem.get("code").getAsString().equals(oldCheckingType);
+					symbolicCheckingItem.addProperty("type", "SYMBOLIC_MODEL_CHECK");
+				}
+				if (!symbolicCheckingItemElement.getAsJsonObject().has("timeLimit")) {
+					symbolicCheckingItemElement.getAsJsonObject().addProperty("timeLimit", "-");
+				}
+			});
+		});
+	}
 	
 	@Override
 	public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -257,9 +275,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		if (oldMetadata.getFormatVersion() <= 3) {
 			updateV3Project(oldObject);
 		}
-		// Version 4 -> 5 needs no conversion - a new feature was added
-		// (a symbolic invariant checking item can have an empty formula to check all operations using a single item)
-		// but no existing parts of the format have changed.
+		if (oldMetadata.getFormatVersion() <= 4) {
+			updateV4Project(oldObject);
+		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}
 }

@@ -88,8 +88,7 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 	
 	public void handleFormulaResult(SymbolicItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicExecutionType.TINDUCTION || item.getType() == SymbolicExecutionType.KINDUCTION ||
-					item.getType() == SymbolicExecutionType.BMC || item.getType() == SymbolicExecutionType.IC3) {
+		if(item.getType() == SymbolicExecutionType.SYMBOLIC_MODEL_CHECK) {
 			handleSymbolicChecking((SymbolicCheckingFormulaItem) item, (SymbolicModelcheckCommand) cmd);
 		} else if(item.getType() == SymbolicExecutionType.CHECK_STATIC_ASSERTIONS || item.getType() == SymbolicExecutionType.CHECK_DYNAMIC_ASSERTIONS) {
 			handleAssertionChecking((SymbolicCheckingFormulaItem) item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
