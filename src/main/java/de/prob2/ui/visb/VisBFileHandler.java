@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 
 import de.prob2.ui.visb.exceptions.VisBParseException;
@@ -61,7 +62,6 @@ class VisBFileHandler {
 		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
 			return null;
 		} else {
-
 			return new VisBVisualisation(visBItems, visBEvents, svgPath);
 		}
 	}
@@ -81,32 +81,70 @@ class VisBFileHandler {
 				continue;
 			}
 			if(current_obj.has("id") && current_obj.has("event")) {
-				String id = current_obj.get("id").getAsString();
-				String eventS = current_obj.get("event").getAsString();
-				ArrayList<String> predicates = new ArrayList<>();
-				if(current_obj.has("predicates")){
-					JsonArray jsonPredicates = current_obj.getAsJsonArray("predicates");
-					for(int i = 0; i < jsonPredicates.size();i++){
-						predicates.add(jsonPredicates.get(i).getAsString());
+				String id = current_obj.get("id").getAsString();			
+				if(id.isEmpty()){
+					throw new VisBParseException("An event in your visualisation file has an empty id.");
+				}
+			    if (current_obj.has("ignore")) {
+				   System.out.println("Ignoring VisB Event for " + id);
+				} else {
+				    String eventS = current_obj.get("event").getAsString();
+					if(eventS.isEmpty()){
+						throw new VisBParseException("The event for " + id + " in your visualisation file has an empty event body.");
+					}
+					ArrayList<String> predicates = new ArrayList<>();
+					if(current_obj.has("predicates")){
+						JsonArray jsonPredicates = current_obj.getAsJsonArray("predicates");
+						for(int i = 0; i < jsonPredicates.size();i++){
+							predicates.add(jsonPredicates.get(i).getAsString());
+						}
+					}
+					if (current_obj.has("repeat")) {
+					   // a list of strings which will replace %0, ... 
+					   JsonArray repArray = (JsonArray) current_obj.get("repeat");
+					   for(JsonElement rep : repArray) {
+						  // now replace %0, %1, ... by values provided
+						  String repId = new String(id);
+						  String repEvent = new String(eventS);
+						  ArrayList<String> repPreds= new ArrayList<String>();
+						  repPreds.addAll(predicates);
+					  
+						  JsonArray replaceArr = getJsonArray(rep);
+						  for(int i =0; i<replaceArr.size();i++) {
+							 String thisVal = replaceArr.get(i).getAsString();
+							 String pattern = new String("%"+i);
+							 System.out.println("Repeating event " + id + " for '" + pattern + "' = " + thisVal);
+							 repId = repId.replace(pattern, thisVal);
+							 repEvent = repEvent.replace(pattern, thisVal);
+							 for(int j = 0; j < repPreds.size(); j++) {
+							     repPreds.set(j,repPreds.get(j).replace(pattern, thisVal));
+							 }
+							 // we could check that all arrays have same size; otherwise a pattern will not be replaced
+						  }
+						  AddVisBEvent(visBEvents, repId, repEvent, repPreds);
+					   }
+					} else {
+					    AddVisBEvent(visBEvents, id, eventS, predicates);
 					}
 				}
-				if(id.isEmpty() || eventS.isEmpty()){
-					throw new VisBParseException("There is an event in your visualisation file that has an empty id, event, or predicates body.");
-				}
-				VisBEvent visBEvent = new VisBEvent(id, eventS, predicates);
-				boolean add = !containsId(visBEvents, id);
-				if(add) {
-					visBEvents.add(visBEvent);
-				} else {
-					throw new VisBParseException("This id has already an event: " +id+".");
-				}
 			} else if (!current_obj.has("id")){
-				throw new VisBParseException("There is a event in your visualisation file, that has no \"id\" member.");
+				throw new VisBParseException("There is a event in your visualisation file, that has no \"id\" attribute.");
 			} else if (!current_obj.has("event")){
-				throw new VisBParseException("There is a event in your visualisation file, that has no \"event\" member.");
+				String id = current_obj.get("id").getAsString();	
+				throw new VisBParseException("The event for " + id + " in your visualisation file has no \"event\" attribute.");
 			}
 		}
 		return visBEvents;
+	}
+	
+	private static void AddVisBEvent(ArrayList<VisBEvent> visBEvents, 
+	                            String id, String eventS, ArrayList<String> predicates ) throws VisBParseException {
+		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates);
+		if(!containsId(visBEvents, id)) {
+			visBEvents.add(visBEvent);
+		} else {
+			throw new VisBParseException("This id has already an event: " +id+".");
+		}
 	}
 
 	private static boolean containsId(ArrayList<VisBEvent> visBEvents, String id){
@@ -139,8 +177,31 @@ class VisBFileHandler {
 				if(id.isEmpty() || attribute.isEmpty() || value.isEmpty()){
 					throw new VisBParseException("There is an item in your visualisation file, that has an empty id, attr, or value body.");
 				}
-				VisBItem visBItem = new VisBItem(id, attribute, value);
-				visBItems.add(visBItem);
+				if (current_obj.has("ignore")) {
+				   System.out.println("Ignoring VisB Item: " + id + "." + attribute);
+				} else if (current_obj.has("repeat")) {
+				   // a list of strings which will replace %0, ... in the id and value attributes:
+				   JsonArray repArray = (JsonArray) current_obj.get("repeat");
+				   for(JsonElement rep : repArray) {
+				      // now replace %0, %1, ... by values provided
+				      String repId = new String(id); 
+				      // no need to replace in attribute
+				      String repVal = new String(value);
+				      
+				      JsonArray replaceArr = getJsonArray(rep);
+				      for(int i =0; i<replaceArr.size();i++) {
+				         String thisVal = replaceArr.get(i).getAsString();
+				         String pattern = new String("%"+i);
+				         System.out.println("Repeating item " + id + "." + attribute + " for '" + pattern + "' = " + thisVal);
+				         repId = repId.replace(pattern, thisVal);
+				         repVal = repVal.replace(pattern, thisVal);
+				         // we could check that all arrays have same size; otherwise a pattern will not be replaced
+				      }
+				      visBItems.add(new VisBItem(repId, attribute, repVal));
+				   }
+				} else {
+				   visBItems.add(new VisBItem(id, attribute, value));
+				}
 			} else if (!current_obj.has("id")){
 				throw new VisBParseException("There is a item in your visualisation file, that has no \"id\" member.");
 			} else if (!current_obj.has("attr")){
@@ -150,6 +211,17 @@ class VisBFileHandler {
 			}
 		}
 		return visBItems;
+	}
+	
+	// utility to get a JsonArray; a single Object is automatically transformed into a single item array
+	private static JsonArray getJsonArray (JsonElement rep) {
+		  if(rep instanceof JsonArray) {
+			  return rep.getAsJsonArray();
+		  } else {
+			  JsonArray replaceArr = new JsonArray();
+			  replaceArr.add(rep); // create a one element array
+			  return replaceArr;
+		  }
 	}
 
 	/**

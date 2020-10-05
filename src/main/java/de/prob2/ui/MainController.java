@@ -125,7 +125,7 @@ public class MainController extends BorderPane {
 					.map(Accordion::getExpandedPane)
 					.filter(Objects::nonNull)
 					.map(Node::getId)
-					.collect(Collectors.toList());
+					.collect(Collectors.toList()); // get ids of all expanded panes
 				if (horizontalSP != null) {
 					configData.horizontalDividerPositions = horizontalSP.getDividerPositions();
 				}

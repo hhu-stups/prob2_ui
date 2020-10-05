@@ -1,7 +1,9 @@
 package de.prob2.ui.visb;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
+import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,9 +22,11 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.animator.domainobjects.WDError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
+import de.prob.model.classicalb.ClassicalBModel;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.visb.exceptions.VisBParseException;
+import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBItem;
 
 import javafx.scene.paint.Color;
@@ -54,38 +58,65 @@ public class VisBParser {
 	 * @throws EvaluationException from evaluating formula on trace
 	 * @throws BCompoundException if the B expression is not correct
 	 */
-	String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, BCompoundException{
+	String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
 		StringBuilder jQueryForChanges = new StringBuilder();
-		for(VisBItem visItem : visItems){
-				AbstractEvalResult abstractEvalResult = evaluateFormula(visItem.getValue());
+		// get a list of parsed formulas:
+		ArrayList<IEvalElement> formulas = new ArrayList<IEvalElement>();
+		for(VisBItem visItem : visItems) {
+		    formulas.add(parseItemFormula(visItem));
+		}
+		try {
+			Map<IEvalElement, AbstractEvalResult> abstractEvalResults = evaluateItemFormulas(formulas);					
+			for(VisBItem visItem : visItems){
+			    AbstractEvalResult abstractEvalResult = abstractEvalResults.get(parseItemFormula(visItem));
 				String value = getValueFromResult(abstractEvalResult, visItem);
 				String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
 				jQueryForChanges.append(jQueryTemp);
+			}
+		} catch (EvaluationException e){
+			throw(new VisBNestedException("Exception evaluating B formulas",e));
 		}
 		return jQueryForChanges.toString();
 	}
 
+
 	/**
 	 * This idea originated from the BInterpreter in the ProB2-UI. In this method a new trace is constructed, on which the formulas, which have to be evaluated can be evaluated on.
+	 * @throws EvaluationException If evaluating formula on trace causes an Exception.
+	 */
+	private IEvalElement parseItemFormula(VisBItem visItem) throws VisBNestedException, ProBError {
+		String formulaToEval = visItem.getValue();
+		try {
+				if (visItem.parsedFormula != null) {
+				   return visItem.parsedFormula; // is already parsed
+				} else if(currentTrace.getModel() instanceof ClassicalBModel) {
+				   visItem.parsedFormula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
+				  // use parser associated with the current model, DEFINITIONS are accessible
+				} else {
+				   visItem.parsedFormula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
+				   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, cumbersome for VisB
+				}
+		} catch (EvaluationException e){
+			System.out.println("\nException for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
+			throw(new VisBNestedException("Exception parsing B formula for "+ visItem.getId() + "."+ visItem.getAttribute() + " : ",e));
+		}
+	    return visItem.parsedFormula;
+	}
+	
+	/**
 	 * This method makes it not possible, to change the current trace. It was not needed, because the formulas were solely made for producing a value for a JQuery.
-	 * @param formulaToEval the formula, that should be evaluated
 	 * @return an AbstractEvalResult, that will be further evaluated in the getValueFromResult method
 	 * @throws EvaluationException If evaluating formula on trace causes an Exception.
 	 * @throws ProBError If a formula cannot correctly be evaluated.
 	 */
-	private AbstractEvalResult evaluateFormula(String formulaToEval) throws EvaluationException, ProBError {
-		//SVG Javascript && ValueTranslator(if necessary)
-		// TO DO: provide a flag or preference to choose between the parser used by the model or classicalB:
-		// Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, possibly too cumbersome for VisB
-		// final IEvalElement formula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND); // use parser associated with the current model
-		final IEvalElement formula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
+	private Map<IEvalElement, AbstractEvalResult> evaluateItemFormulas(List<? extends IEvalElement> formulas) throws EvaluationException, ProBError {
 		//Take the current trace
 		Trace trace = currentTrace.get();
 		if (trace == null) {
 			trace = new Trace(machineLoader.getEmptyStateSpace());
 		}
 		//Evaluate the formula on the current trace
-		return trace.evalCurrent(formula);
+		return trace.getCurrentState().evalFormulas(formulas);
 	}
 
 	/**
@@ -105,20 +136,20 @@ public class VisBParser {
 		} else if (abstractEvalResult instanceof EvaluationErrorResult) {
 			if (abstractEvalResult instanceof IdentifierNotInitialised) {
 				//Identifier not initialised
-				throw new VisBParseException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". An identifier has not been initialised."+((EvaluationErrorResult) abstractEvalResult).getErrors());
+				throw new VisBParseException("There was a problem evaluating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". An identifier has not been initialised."+((EvaluationErrorResult) abstractEvalResult).getErrors());
 			} else if (abstractEvalResult instanceof WDError) {
 				//Identifier not well defined
-				throw new VisBParseException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". A well-definedness error occurred."+((EvaluationErrorResult) abstractEvalResult).getErrors());
+				throw new VisBParseException("There was a problem evaluating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". A well-definedness error occurred."+((EvaluationErrorResult) abstractEvalResult).getErrors());
 			} else {
 				//Formula evaluation error
-				throw new VisBParseException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". There was an error evaluating the formula."+((EvaluationErrorResult) abstractEvalResult).getErrors());
+				throw new VisBParseException("There was a problem evaluating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". There was an error evaluating the formula."+((EvaluationErrorResult) abstractEvalResult).getErrors());
 			}
 		} else if (abstractEvalResult instanceof EnumerationWarning) {
 			//enumeration warning
-			throw new VisBParseException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". There was an enumeration warning while evaluating the formula."+abstractEvalResult.toString());
+			throw new VisBParseException("There was a problem evaluating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". There was an enumeration warning while evaluating the formula. "+abstractEvalResult.toString());
 		} else if (abstractEvalResult instanceof ComputationNotCompletedResult) {
 			//computation not completed
-			throw new VisBParseException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". Computation of the formula was not completed."+((ComputationNotCompletedResult) abstractEvalResult).getReason());
+			throw new VisBParseException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". Computation of the formula was not completed. "+((ComputationNotCompletedResult) abstractEvalResult).getReason());
 		} else {
 			throw new IllegalArgumentException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". The result of this formula cannot be shown.");
 		}

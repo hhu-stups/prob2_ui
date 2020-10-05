@@ -32,6 +32,18 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+<<<<<<< HEAD
+=======
+import javafx.scene.control.MenuBar;
+import javafx.event.EventHandler;
+import javafx.scene.web.WebEvent;
+import javafx.scene.web.WebErrorEvent;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
+
+>>>>>>> 98bdb879fd703fee8e9312c281c5621860c86a09
 import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +170,10 @@ public class VisBStage extends Stage {
 					"<head>\n" +
 					//This is for zooming in and out and scaling the image to the right width and height
 					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+
 					"<script src=\"" + Main.class.getResource("jquery.js").toExternalForm() + "\"></script>\n" +
+					// TO DO: pre-load this https://stackoverflow.com/questions/35703884/trying-to-load-a-local-page-into-javafx-webengine
+					//File f = new File("full\\path\\to\\webView\\main.html"); webEngine.load(f.toURI().toString());
 					"<script>\n" +
 					"function checkSvgId(id,ctxt){\n" +
 					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"unknown: \"+id);\n" +
@@ -187,10 +202,16 @@ public class VisBStage extends Stage {
 			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-			//this.webView.getEngine().setOnError(event -> showJavascriptAlert(event));
+			this.webView.getEngine().setOnError(event -> treatJavascriptError(event)); // check if we get errors
+			// Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
             // engine.setConfirmHandler(message -> showConfirm(message));
 		}
 
+	}
+	
+	private void treatJavascriptError(WebErrorEvent event) {
+	    LOGGER.debug("JavaScript ERROR: " + event.getMessage());
+		alert(event.getException(), "visb.exception.header", "visb.stage.alert.webview.jsalert", event.getMessage());
 	}
 	
 	private void showJavascriptAlert(String message) {
@@ -250,10 +271,11 @@ public class VisBStage extends Stage {
 	 * @param onClickEventQuery onClick functions to be executed
 	 */
 	void loadOnClickFunctions(String onClickEventQuery){
+	    System.out.println("JS onClick: " + onClickEventQuery);
 		stateListener = (ov, oldState, newState) -> {
 			if (newState == Worker.State.SUCCEEDED) {
-				webView.getEngine().executeScript(onClickEventQuery);
 				LOGGER.debug("On click functions for visBEvents have been loaded.");
+				webView.getEngine().executeScript(onClickEventQuery);
 			}
 		};
 		this.webView.getEngine().getLoadWorker().stateProperty().addListener(stateListener);
@@ -286,14 +308,14 @@ public class VisBStage extends Stage {
 						  if (newValue != Worker.State.SUCCEEDED) {
 							return;
 						  }
+						  LOGGER.debug("runScript: "+jQuery+"\n-----");
 						  webView.getEngine().executeScript(jQuery);
-						  //LOGGER.debug("runScript: "+jQuery+"\n-----");
 						}
 					  } );
 				    LOGGER.debug("registered runScript as Listener");
 		} else {
+			LOGGER.debug("runScript directly: "+jQuery+"\n-----");
 			this.webView.getEngine().executeScript(jQuery);
-			//LOGGER.debug("runScript directly: "+jQuery+"\n-----");
 		}
 	}
 
