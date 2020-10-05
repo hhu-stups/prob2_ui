@@ -49,6 +49,8 @@ variables:
   stage: test
   before_script: &default_before_script_windows
     - SET GRADLE_USER_HOME=%cd%\.gradle
+    - PATH="C:\Program Files\Java\jdk-14.0.2\:%PATH%"
+    - export PATH
   cache:
     paths:
       - .gradle/caches
