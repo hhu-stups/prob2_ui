@@ -2,6 +2,7 @@ package de.prob2.ui.symbolic;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
@@ -130,9 +131,9 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		});
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
-			this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
+			final Optional<T> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
 			this.close();
-			this.formulaHandler.handleItem(newItem, false);
+			this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
 		});
 	}
 	
@@ -204,20 +205,22 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	protected void setChangeListeners(T item, AbstractResultHandler resultHandler) {
 		btAdd.setOnAction(e -> {
 			final T newItem = this.extractItem();
-			if(this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem)) {
-				this.close();
-			} else {
+			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
+			if (existingItem.isPresent()) {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
+			} else {
+				this.close();
 			}
 		});
 		
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
-			if(this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem)) {
+			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
+			if (existingItem.isPresent()) {
+				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
+			} else {
 				this.close();
 				this.formulaHandler.handleItem(newItem, false);
-			} else {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
 		});
 	}
