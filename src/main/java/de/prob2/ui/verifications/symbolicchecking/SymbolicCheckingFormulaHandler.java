@@ -42,6 +42,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		this.symbolicChecker = symbolicChecker;
 	}
 	
+	@Override
 	public void addFormula(SymbolicCheckingFormulaItem formula) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {

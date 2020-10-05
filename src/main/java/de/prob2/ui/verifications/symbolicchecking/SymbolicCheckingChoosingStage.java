@@ -12,12 +12,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
 
-import javafx.fxml.FXML;
-
 @Singleton
 public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<SymbolicCheckingFormulaItem> {
-	private final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler;
-	
 	@Inject
 	private SymbolicCheckingChoosingStage(
 		final StageManager stageManager,
@@ -26,12 +22,12 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace
 	) {
-		super(bundle, currentProject, currentTrace);
-		this.symbolicCheckingFormulaHandler = symbolicCheckingFormulaHandler;
+		super(bundle, currentProject, currentTrace, symbolicCheckingFormulaHandler);
 		stageManager.loadFXML(this, "symbolic_checking_choice.fxml");
 	}
 	
-	private SymbolicCheckingFormulaItem extractItem() {
+	@Override
+	protected SymbolicCheckingFormulaItem extractItem() {
 		final String formula = extractFormula();
 		return new SymbolicCheckingFormulaItem(formula, formula, this.getExecutionType());
 	}
@@ -45,23 +41,5 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 			return true;
 		}
 		return false;
-	}
-	
-	@Override
-	public void checkFormula() {
-		addFormula();
-		symbolicCheckingFormulaHandler.handleItem(this.extractItem(), false);
-		this.close();
-	}
-	
-	@Override
-	protected void addFormula() {
-		symbolicCheckingFormulaHandler.addFormula(this.extractItem());
-		this.close();
-	}
-	
-	@FXML
-	public void cancel() {
-		this.close();
 	}
 }

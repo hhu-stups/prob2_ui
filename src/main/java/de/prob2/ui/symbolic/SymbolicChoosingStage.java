@@ -50,12 +50,15 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	
 	private final CurrentTrace currentTrace;
 	
+	private final SymbolicFormulaHandler<T> formulaHandler;
+	
 	private final String checkAllOperations;
 	
-	public SymbolicChoosingStage(final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+	public SymbolicChoosingStage(final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.formulaHandler = formulaHandler;
 		this.checkAllOperations = bundle.getString("verifications.symbolicchecking.choice.checkAllOperations");
 		
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -169,6 +172,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		return formula;
 	}
 
+	protected abstract T extractItem();
+
 	public void changeFormula(T item, AbstractResultHandler resultHandler) {
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
@@ -210,7 +215,19 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		});
 	}
 	
-	public abstract void checkFormula();
+	private void checkFormula() {
+		addFormula();
+		this.formulaHandler.handleItem(this.extractItem(), false);
+		this.close();
+	}
 	
-	protected abstract void addFormula();
+	private void addFormula() {
+		this.formulaHandler.addFormula(this.extractItem());
+		this.close();
+	}
+	
+	@FXML
+	public void cancel() {
+		this.close();
+	}
 }
