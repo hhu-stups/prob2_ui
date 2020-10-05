@@ -28,22 +28,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebErrorEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-<<<<<<< HEAD
-=======
-import javafx.scene.control.MenuBar;
-import javafx.event.EventHandler;
-import javafx.scene.web.WebEvent;
-import javafx.scene.web.WebErrorEvent;
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
-
->>>>>>> 98bdb879fd703fee8e9312c281c5621860c86a09
 import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
