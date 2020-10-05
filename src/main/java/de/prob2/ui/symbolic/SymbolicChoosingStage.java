@@ -125,12 +125,12 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	
 	protected void setCheckListeners() {
 		btAdd.setOnAction(e -> {
-			this.formulaHandler.addFormula(this.extractItem());
+			this.formulaHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
 			this.close();
 		});
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
-			this.formulaHandler.addFormula(newItem);
+			this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
 			this.close();
 			this.formulaHandler.handleItem(newItem, false);
 		});
@@ -204,7 +204,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	protected void setChangeListeners(T item, AbstractResultHandler resultHandler) {
 		btAdd.setOnAction(e -> {
 			final T newItem = this.extractItem();
-			if(this.formulaHandler.replaceFormula(item, newItem)) {
+			if(this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem)) {
 				this.close();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
@@ -213,7 +213,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
-			if(this.formulaHandler.replaceFormula(item, newItem)) {
+			if(this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem)) {
 				this.close();
 				this.formulaHandler.handleItem(newItem, false);
 			} else {
