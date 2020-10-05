@@ -32,7 +32,6 @@
 							<items>
 								<FXCollections fx:factory="observableArrayList">
 									<SymbolicExecutionItem executionType="INVARIANT" guiType="CHOICE_BOX"/>
-									<SymbolicExecutionItem executionType="CHECK_ALL_OPERATIONS" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="DEADLOCK" guiType="PREDICATE"/>
 									<SymbolicExecutionItem executionType="CHECK_REFINEMENT" guiType="NONE"/>
 									<SymbolicExecutionItem executionType="CHECK_STATIC_ASSERTIONS" guiType="NONE"/>

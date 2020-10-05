@@ -17,7 +17,7 @@ import de.prob2.ui.symbolic.SymbolicExecutionType;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 	ProjectJsonContext(final Gson gson) {
-		super(gson, Project.class, "Project", 4);
+		super(gson, Project.class, "Project", 5);
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
@@ -257,6 +257,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		if (oldMetadata.getFormatVersion() <= 3) {
 			updateV3Project(oldObject);
 		}
+		// Version 4 -> 5 needs no conversion - a new feature was added
+		// (a symbolic invariant checking item can have an empty formula to check all operations using a single item)
+		// but no existing parts of the format have changed.
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}
 }

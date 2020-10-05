@@ -1,6 +1,5 @@
 package de.prob2.ui.symbolic;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -30,7 +29,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	private TextField tfFormula;
 	
 	@FXML
-	protected ChoiceBox<String> cbOperations;
+	private ChoiceBox<String> cbOperations;
 	
 	@FXML
 	private PredicateBuilderView predicateBuilderView;
@@ -47,13 +46,13 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	
 	private final CurrentTrace currentTrace;
 	
-	protected ArrayList<String> events;
+	private final String checkAllOperations;
 	
 	public SymbolicChoosingStage(final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace) {
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.events = new ArrayList<>();
+		this.checkAllOperations = bundle.getString("verifications.symbolicchecking.choice.checkAllOperations");
 		
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
@@ -95,22 +94,22 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		setCheckListeners();
 		tfFormula.clear();
 		predicateBuilderView.reset();
-		cbOperations.getSelectionModel().clearSelection();
+		cbOperations.getSelectionModel().select(this.checkAllOperations);
 		cbChoice.getSelectionModel().clearSelection();
 	}
 	
 	protected void update() {
-		events.clear();
+		cbOperations.getItems().setAll(this.checkAllOperations);
+		cbOperations.getSelectionModel().select(this.checkAllOperations);
 		final Map<String, String> items = new LinkedHashMap<>();
 		if (currentTrace.get() != null) {
 			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
 			if (loadedMachine != null) {
-				events.addAll(loadedMachine.getOperationNames());
+				cbOperations.getItems().addAll(loadedMachine.getOperationNames());
 				loadedMachine.getConstantNames().forEach(s -> items.put(s, ""));
 				loadedMachine.getVariableNames().forEach(s -> items.put(s, ""));
 			}
 		}
-		cbOperations.getItems().setAll(events);
 		predicateBuilderView.setItems(items);
 	}
 	
@@ -145,7 +144,11 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			formula = tfFormula.getText();
 		} else if(this.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
-			formula = cbOperations.getSelectionModel().getSelectedItem();
+			if (this.checkAllOperations.equals(cbOperations.getSelectionModel().getSelectedItem())) {
+				formula = "";
+			} else {
+				formula = cbOperations.getSelectionModel().getSelectedItem();
+			}
 		} else if(this.getGUIType() == SymbolicGUIType.PREDICATE) {
 			formula = predicateBuilderView.getPredicate();
 		} else {
@@ -164,12 +167,11 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		} else if(this.getGUIType() == SymbolicGUIType.PREDICATE) {
 			predicateBuilderView.setFromPredicate(item.getName());
 		} else if(this.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
-			cbOperations.getItems().forEach(operationItem -> {
-				if(operationItem.equals(item.getCode())) {
-					cbOperations.getSelectionModel().select(operationItem);
-					return;
-				}
-			});
+			if (item.getCode().isEmpty()) {
+				cbOperations.getSelectionModel().select(this.checkAllOperations);
+			} else {
+				cbOperations.getSelectionModel().select(item.getCode());
+			}
 		}
 		this.show();
 	}

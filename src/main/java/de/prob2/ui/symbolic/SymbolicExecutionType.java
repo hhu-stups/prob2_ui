@@ -8,7 +8,6 @@ public enum SymbolicExecutionType {
 	INVARIANT("Invariant", null),
 	DEADLOCK("Deadlock", null),
 	FIND_VALID_STATE("Find valid state", null), 
-	CHECK_ALL_OPERATIONS("Check all operations", null), 
 	FIND_REDUNDANT_INVARIANTS("Find redundant invariants", null), 
 	CHECK_REFINEMENT("Refinement Checking", null),
 	CHECK_STATIC_ASSERTIONS("Static Assertion Checking", null),

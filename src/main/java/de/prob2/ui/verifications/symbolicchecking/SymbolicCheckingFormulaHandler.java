@@ -52,9 +52,16 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	}
 	
 	public void handleInvariant(SymbolicCheckingFormulaItem item, boolean checkAll) {
-		ArrayList<String> event = new ArrayList<>();
-		event.add(item.getCode());
-		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), event);
+		final ArrayList<String> eventNames;
+		if (item.getCode().isEmpty()) {
+			// Check all operations/events
+			eventNames = null;
+		} else {
+			// Check only one specific operation/event
+			eventNames = new ArrayList<>();
+			eventNames.add(item.getCode());
+		}
+		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), eventNames);
 		symbolicChecker.checkItem(checker, item, checkAll);
 	}
 		
