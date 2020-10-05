@@ -8,7 +8,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.SymbolicExecutor;
 import de.prob2.ui.symbolic.SymbolicItem;
@@ -17,9 +16,8 @@ import de.prob2.ui.symbolic.SymbolicItem;
 public class SymbolicAnimationChecker extends SymbolicExecutor {
 
 	@Inject
-	public SymbolicAnimationChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
-							final SymbolicAnimationResultHandler resultHandler, final Injector injector) {
-		super(currentTrace, currentProject, resultHandler, injector);
+	public SymbolicAnimationChecker(final CurrentTrace currentTrace, final SymbolicAnimationResultHandler resultHandler, final Injector injector) {
+		super(currentTrace, resultHandler, injector);
 	}
 
 	@Override

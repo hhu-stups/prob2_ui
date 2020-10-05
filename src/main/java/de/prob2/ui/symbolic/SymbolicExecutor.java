@@ -2,7 +2,6 @@ package de.prob2.ui.symbolic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.google.inject.Injector;
 
@@ -10,10 +9,7 @@ import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.DisablePropertyController;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingResultHandler;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -30,8 +26,6 @@ public abstract class SymbolicExecutor {
 	
 	protected final CurrentTrace currentTrace;
 	
-	protected final CurrentProject currentProject;
-	
 	protected final ISymbolicResultHandler resultHandler;
 
 	protected final List<IModelCheckJob> currentJobs;
@@ -39,10 +33,8 @@ public abstract class SymbolicExecutor {
 	protected final ListProperty<Thread> currentJobThreads;
 	
 	
-	public SymbolicExecutor(final CurrentTrace currentTrace, final CurrentProject currentProject,
-							final ISymbolicResultHandler resultHandler, final Injector injector) {
+	public SymbolicExecutor(final CurrentTrace currentTrace, final ISymbolicResultHandler resultHandler, final Injector injector) {
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
 		this.currentJobs = new ArrayList<>();
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
@@ -70,7 +62,6 @@ public abstract class SymbolicExecutor {
 	}
 	
 	public void checkItem(SymbolicItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
-		final SymbolicItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			RuntimeException exception = null;
 			try {
@@ -83,12 +74,12 @@ public abstract class SymbolicExecutor {
 			final RuntimeException finalException = exception;
 			Platform.runLater(() -> {
 				if (finalException == null) {
-					resultHandler.handleFormulaResult(currentItem, cmd);
+					resultHandler.handleFormulaResult(item, cmd);
 				} else {
-					resultHandler.handleFormulaResult(currentItem, finalException);
+					resultHandler.handleFormulaResult(item, finalException);
 				}
 				if(!checkAll) {
-					updateTrace(currentItem);
+					updateTrace(item);
 				}
 			});
 			currentJobThreads.remove(currentThread);
@@ -98,7 +89,6 @@ public abstract class SymbolicExecutor {
 	}
 	
 	public void checkItem(IModelCheckJob checker, SymbolicItem item, boolean checkAll) {
-		final SymbolicItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			currentJobs.add(checker);
 			Object result;
@@ -110,9 +100,9 @@ public abstract class SymbolicExecutor {
 			}
 			final Object finalResult = result;
 			Platform.runLater(() -> {
-				resultHandler.handleFormulaResult(currentItem, finalResult);
+				resultHandler.handleFormulaResult(item, finalResult);
 				if(!checkAll) {
-					updateTrace(currentItem);
+					updateTrace(item);
 				}
 			});
 			currentJobs.remove(checker);
@@ -123,25 +113,4 @@ public abstract class SymbolicExecutor {
 	}
 	
 	protected abstract void updateTrace(SymbolicItem item);
-	
-	protected SymbolicItem getItemIfAlreadyExists(SymbolicItem item) {
-		final Optional<? extends SymbolicItem> existing = getItems()
-			.stream()
-			.filter(item::settingsEqual)
-			.findAny();
-		// Cannot use existing.orElse(item) here,
-		// because of generic type problems with "? extends SymbolicItem".
-		return existing.isPresent() ? existing.get() : item;
-	}
-	
-	private List<? extends SymbolicItem> getItems() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		List<? extends SymbolicItem> formulas;
-		if(resultHandler instanceof SymbolicCheckingResultHandler) {
-			formulas = currentMachine.getSymbolicCheckingFormulas();
-		} else {
-			formulas = currentMachine.getSymbolicAnimationFormulas();
-		}
-		return formulas;
-	}
 }
