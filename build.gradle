@@ -52,6 +52,7 @@ def appVersion = '1.0.1'
 
 def JAVA_HOME = Jvm.current().getJavaHome()
 
+// Assumes that Java 14 is installed correctly
 task jpackage(type: Exec) {
 	dependsOn 'shadowJar'
 
@@ -59,7 +60,7 @@ task jpackage(type: Exec) {
 
 	if (osdetector.os == "windows") {
 		iconPath = 'src\\main\\deploy\\package\\windows\\prob2-ui.ico'
-		commandLine "${JAVA_HOME}\\bin\\jpackage", '--icon', "${iconPath}", "--dest", "build\\distributions",
+		commandLine "jpackage", '--icon', "${iconPath}", "--dest", "build\\distributions",
 				"--name", "${appName}", '--input', 'build\\libs', '--main-class', "${mainClassName}",
 				'--main-jar', "prob2-ui-${project.version}-all.jar", '--win-dir-chooser', '--win-menu', '--win-shortcut', '--win-menu-group', "ProB2-UI", '--win-upgrade-uuid', "9e004b84-41c5-4c95-8aca-32ac44063ef9",
 				'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
