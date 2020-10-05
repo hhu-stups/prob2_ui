@@ -150,8 +150,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		}
 	}
 	
-	protected abstract boolean updateFormula(T item);
-	
 	protected String extractFormula() {
 		String formula;
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
@@ -197,7 +195,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	
 	protected void setChangeListeners(T item, AbstractResultHandler resultHandler) {
 		btAdd.setOnAction(e -> {
-			if(updateFormula(item)) {
+			final T newItem = this.extractItem();
+			if(this.formulaHandler.replaceFormula(item, newItem)) {
 				addFormula();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
@@ -206,7 +205,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		});
 		
 		btCheck.setOnAction(e -> {
-			if(updateFormula(item)) {
+			final T newItem = this.extractItem();
+			if(this.formulaHandler.replaceFormula(item, newItem)) {
 				checkFormula();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);

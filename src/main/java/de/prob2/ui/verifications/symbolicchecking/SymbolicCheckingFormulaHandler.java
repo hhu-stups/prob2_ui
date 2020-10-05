@@ -52,6 +52,16 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		}
 	}
 	
+	@Override
+	public boolean replaceFormula(final SymbolicCheckingFormulaItem oldFormula, final SymbolicCheckingFormulaItem newFormula) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		if(currentMachine.getSymbolicCheckingFormulas().stream().noneMatch(newFormula::settingsEqual)) {
+			currentMachine.getSymbolicCheckingFormulas().set(currentMachine.getSymbolicCheckingFormulas().indexOf(oldFormula), newFormula);
+			return true;
+		}
+		return false;
+	}
+	
 	public void handleInvariant(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		final ArrayList<String> eventNames;
 		if (item.getCode().isEmpty()) {

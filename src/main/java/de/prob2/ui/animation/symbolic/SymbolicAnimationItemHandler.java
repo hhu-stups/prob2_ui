@@ -46,6 +46,16 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		}
 	}
 
+	@Override
+	public boolean replaceFormula(final SymbolicAnimationItem oldFormula, final SymbolicAnimationItem newFormula) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		if(currentMachine.getSymbolicAnimationFormulas().stream().noneMatch(newFormula::settingsEqual)) {
+			currentMachine.getSymbolicAnimationFormulas().set(currentMachine.getSymbolicAnimationFormulas().indexOf(oldFormula), newFormula);
+			return true;
+		}
+		return false;
+	}
+
 	public void handleSequence(SymbolicAnimationItem item, boolean checkAll) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new EventB("true", FormulaExpand.EXPAND));

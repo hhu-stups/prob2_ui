@@ -9,7 +9,6 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
 
 @Singleton
@@ -30,16 +29,5 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 	protected SymbolicCheckingFormulaItem extractItem() {
 		final String formula = extractFormula();
 		return new SymbolicCheckingFormulaItem(formula, formula, this.getExecutionType());
-	}
-	
-	@Override
-	protected boolean updateFormula(SymbolicCheckingFormulaItem item) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		final SymbolicCheckingFormulaItem newItem = this.extractItem();
-		if(currentMachine.getSymbolicCheckingFormulas().stream().noneMatch(newItem::settingsEqual)) {
-			currentMachine.getSymbolicCheckingFormulas().set(currentMachine.getSymbolicCheckingFormulas().indexOf(item), newItem);
-			return true;
-		}
-		return false;
 	}
 }
