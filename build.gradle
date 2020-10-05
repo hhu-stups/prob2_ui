@@ -72,7 +72,7 @@ task jpackage(type: Exec) {
 					'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
 		} else { // Linux
 			iconPath = 'src/main/deploy/package/linux/prob2-ui.png'
-			commandLine "${JAVA_HOME}/bin/jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
+			commandLine "jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
 					"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
 					'--main-jar', "prob2-ui-${project.version}-all.jar", '--linux-menu-group', "ProB2-UI", '--linux-deb-maintainer', "Michael.Leuschel@hhu.de",
 					'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
