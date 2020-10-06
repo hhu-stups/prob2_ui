@@ -100,7 +100,7 @@ class VisBFileHandler {
 							predicates.add(jsonPredicates.get(i).getAsString());
 						}
 					}
-					JsonArray repArray = getRepeatArray(current_obj);
+					JsonArray repArray = getRepeatArray(current_obj,"event "+id);
 					if (repArray != null) {
 						// a list of strings which will replace %0, ... 
 						System.out.println("repeats = " + repArray);
@@ -182,7 +182,7 @@ class VisBFileHandler {
 				if (current_obj.has("ignore")) {
 					System.out.println("Ignoring VisB Item: " + id + "." + attribute);
 				} else {
-					JsonArray repArray = getRepeatArray(current_obj);
+					JsonArray repArray = getRepeatArray(current_obj,"VisB item "+id+ "." + attribute);
 					if (repArray != null) {
 						// a list of strings which will replace %0, ... in the id and value attributes:
 						for(JsonElement rep : repArray) {
@@ -229,16 +229,26 @@ class VisBFileHandler {
 	}
 	
 	// get a JsonArray of repetitions; either as a repeat list of explicit strings, or a for loop
-	private static JsonArray getRepeatArray (JsonObject current_obj) throws VisBParseException {
+	private static JsonArray getRepeatArray (JsonObject current_obj, String ctxt) throws VisBParseException {
 	     if (current_obj.has("for")) {
 	        JsonObject forloop = (JsonObject) current_obj.get("for"); // To do: check if JsonElement instanceof JsonObject
+	        if (!(forloop.has("from") && forloop.has("to"))) {
+			    throw new VisBParseException("A for loop requires both a from and to attribute within "+ctxt);
+	        }
 	        int from = forloop.get("from").getAsInt();
 	        int to = forloop.get("to").getAsInt();
-			if (to-from > 100000) {
-			    throw new VisBParseException("The for loop " + from + ".." + to + " seems too large.");
+	        int step = 1;
+	        if (forloop.has("step")) {
+	           step = forloop.get("step").getAsInt();
+	           if (step<1) {
+			    throw new VisBParseException("The step " + step + " must be > 0 in for loop " + from + ".." + to + " within "+ctxt);
+	           }
+	        }
+			if ((to-from)/step > 100000) {
+			    throw new VisBParseException("The for loop " + from + ".." + to + " seems too large within "+ctxt);
 			}
 			JsonArray replaceArr = new JsonArray();
-			for(int i=from; i <= to; i++) {
+			for(int i=from; i <= to; i += step) {
 				if (current_obj.has("repeat")) {
 				    for(JsonElement rep : (JsonArray) current_obj.get("repeat") ) {
 				       JsonArray arr_inner = new JsonArray();
@@ -249,7 +259,7 @@ class VisBFileHandler {
 				} else {
 					replaceArr.add(new JsonPrimitive(i) );
 			    }
-			    System.out.println("repeat-for: " + i);
+			    System.out.println("repeat-for: " + i + " within "+ctxt);
 			}
 			return replaceArr;
 	     }  else if (current_obj.has("repeat")) { // repeat without for
