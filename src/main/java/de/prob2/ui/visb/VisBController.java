@@ -234,7 +234,7 @@ public class VisBController {
 		try {
 			this.visBVisualisation = VisBFileHandler.constructVisualisationFromJSON(visFile);
 		} catch (IOException e) {
-			alert(e,"visb.alert.io.exception.header", "visb.infobox.visualisation.error");
+			alert(e,"visb.exception.io", "visb.infobox.visualisation.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
 		} catch(Exception e){

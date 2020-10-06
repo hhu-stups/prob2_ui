@@ -1,14 +1,8 @@
 package de.prob2.ui.prob2fx;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
@@ -20,7 +14,6 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -37,6 +30,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
@@ -127,6 +125,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private void updateCurrentMachine(final Machine m, final Preference p) {
 		this.currentMachine.set(m);
 		this.currentPreference.set(p);
+		if(m != null) {
+			m.visBVisualizationProperty().addListener((observable, from, to) -> {
+				boolean equal = (from == null && to == null) || (from != null && from.equals(to));
+				this.saved.set(equal);
+			});
+		}
 	}
 
 	private void clearProperties() {

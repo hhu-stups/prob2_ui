@@ -23,10 +23,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.TitledPane?>
-<fx:root title="%visb.title" type="Stage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="800" height="500" minHeight="500" minWidth="500">
+<fx:root title="%visb.title" type="Stage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="1400" height="500" minHeight="500" minWidth="1000">
     <scene>
         <Scene stylesheets="@/prob.css">
-            <BorderPane prefHeight="500.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+            <BorderPane prefHeight="500.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
                 <top>
                     <MenuBar BorderPane.alignment="CENTER" fx:id="visbMenuBar">
                         <Menu mnemonicParsing="false" text="%visb.menu.file">
@@ -51,7 +51,7 @@
                     </MenuBar>
                 </top>
                 <center>
-                    <SplitPane dividerPositions="0.7" BorderPane.alignment="CENTER">
+                    <SplitPane dividerPositions="0.5" BorderPane.alignment="CENTER">
                         <StackPane fx:id="zoomingPane">
                             <WebView fx:id="webView" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" visible="false" StackPane.alignment="CENTER" />
                             <VBox fx:id="placeholder" alignment="CENTER" StackPane.alignment="CENTER">
@@ -71,7 +71,19 @@
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                     </HBox.margin>
                                 </Button>
+                                <Button fx:id="button_setVis" mnemonicParsing="false" styleClass="button-blue" text="%visb.menu.file.setDefault">
+                                    <HBox.margin>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                    </HBox.margin>
+                                </Button>
+                                <Button fx:id="button_resetVis" mnemonicParsing="false" styleClass="button-blue" text="%visb.menu.file.reset">
+                                    <HBox.margin>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                    </HBox.margin>
+                                </Button>
                             </HBox>
+                            <Label fx:id="lbCurrentVisualisation" styleClass="visb-location"/>
+                            <Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
                             <Accordion>
                                 <panes>
                                     <TitledPane animated="false" text="%visb.items">

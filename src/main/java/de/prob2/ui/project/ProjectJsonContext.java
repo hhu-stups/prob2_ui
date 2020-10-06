@@ -1,19 +1,18 @@
 package de.prob2.ui.project;
 
-import java.util.Iterator;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
+
+import java.util.Iterator;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 	ProjectJsonContext(final Gson gson) {
@@ -260,6 +259,15 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			});
 		});
 	}
+
+	private static void updateV5Project(final JsonObject project) {
+		project.getAsJsonArray("machines").forEach(machineElement -> {
+			final JsonObject machine = machineElement.getAsJsonObject();
+			if(!machine.has("visBVisualisation")) {
+				machine.addProperty("visBVisualisation", "");
+			}
+		});
+	}
 	
 	@Override
 	public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -277,6 +285,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		}
 		if (oldMetadata.getFormatVersion() <= 4) {
 			updateV4Project(oldObject);
+		}
+		if (oldMetadata.getFormatVersion() <= 5) {
+			updateV5Project(oldObject);
 		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}

@@ -1,17 +1,11 @@
 package de.prob2.ui.project.machines;
 
-import java.lang.reflect.Type;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
-
 import com.google.common.io.Files;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-
 import de.prob.json.JsonManager;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
@@ -26,7 +20,6 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
@@ -43,6 +36,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
+
+import java.lang.reflect.Type;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
 
 public class Machine implements DescriptionView.Describable {
 	public enum CheckingStatus {
@@ -65,6 +63,7 @@ public class Machine implements DescriptionView.Describable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
+	private StringProperty visBVisualisation;
 	private transient PatternManager patternManager = new PatternManager();
 	private final transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
@@ -80,7 +79,7 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-		
+		this.visBVisualisation = new SimpleStringProperty(this, "visBVisualisation", "");
 		this.initListeners();
 	}
 	
@@ -97,7 +96,7 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = JsonManager.checkDeserialize(context, object, "testCases", new TypeToken<ListProperty<TestCaseGenerationItem>>() {}.getType());
 		this.traces = JsonManager.checkDeserialize(context, object, "traces", new TypeToken<SetProperty<Path>>() {}.getType());
 		this.modelcheckingItems = JsonManager.checkDeserialize(context, object, "modelcheckingItems", new TypeToken<ListProperty<ModelCheckingItem>>() {}.getType());
-		
+		this.visBVisualisation = JsonManager.checkDeserialize(context, object, "visBVisualisation", StringProperty.class);
 		this.initListeners();
 	}
 	
@@ -326,6 +325,22 @@ public class Machine implements DescriptionView.Describable {
 	
 	public Path getLocation() {
 		return this.location;
+	}
+
+	public StringProperty visBVisualizationProperty() {
+		return visBVisualisation;
+	}
+
+	public String getVisBVisualisation() {
+		return visBVisualisation.get();
+	}
+
+	public void setVisBVisualisation(Path visBVisualisation) {
+		if(visBVisualisation == null) {
+			this.visBVisualisation.set("");
+		} else {
+			this.visBVisualisation.set(visBVisualisation.toString());
+		}
 	}
 
 	@Override

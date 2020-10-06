@@ -5,6 +5,8 @@ import de.prob2.ui.Main;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.ui.ListViewEvent;
@@ -12,6 +14,10 @@ import de.prob2.ui.visb.ui.ListViewItem;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
 import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -44,6 +50,7 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 /**
@@ -56,14 +63,24 @@ public class VisBStage extends Stage {
 	private ResourceBundle bundle;
 	private StageManager stageManager;
 	private CurrentProject currentProject;
+	private CurrentTrace currentTrace;
 	private ChangeListener<Worker.State> stateListener = null;
 	private boolean connectorSet = false;
 	private FileChooserManager fileChooserManager;
+	private ObjectProperty<Path> visBPath;
 
 	@FXML
 	private MenuBar visbMenuBar;
 	@FXML
 	private Button button_loadVis;
+	@FXML
+	private Button button_setVis;
+	@FXML
+	private Button button_resetVis;
+	@FXML
+	private Label lbCurrentVisualisation;
+	@FXML
+	private Label lbDefaultVisualisation;
 	@FXML
 	private StackPane zoomingPane;
 	@FXML
@@ -104,13 +121,16 @@ public class VisBStage extends Stage {
 	 * @param currentProject ProB2-UI currentProject
 	 */
 	@Inject
-	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
+					 final CurrentTrace currentTrace, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		super();
 		this.injector = injector;
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
 		this.fileChooserManager = fileChooserManager;
+		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.stageManager.loadFXML(this, "vis_plugin_stage.fxml");
 	}
 
@@ -122,21 +142,75 @@ public class VisBStage extends Stage {
 		this.stageManager.setMacMenuBar(this, visbMenuBar);
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
 		this.button_loadVis.setOnAction(e -> loadVisBFile());
+		this.button_setVis.setOnAction(e -> setDefaultVisualisation());
+		this.button_resetVis.setOnAction(e -> resetDefaultVisualisation());
 		this.fileMenu_visB.setOnAction(e -> loadVisBFile());
 		this.fileMenu_close.setOnAction(e -> sendCloseRequest());
 		this.fileMenu_export.setOnAction(e -> exportImage());
 		this.editMenu_reload.setOnAction(e -> injector.getInstance(VisBController.class).reloadVisualisation());
-		this.editMenu_close.setOnAction(e -> injector.getInstance(VisBController.class).closeCurrentVisualisation());
+		this.editMenu_close.setOnAction(e -> {
+			visBPath.set(null);
+			injector.getInstance(VisBController.class).closeCurrentVisualisation();
+		});
 		this.viewMenu_zoomIn.setOnAction(e -> webView.setZoom(webView.getZoom()*1.2));
 		this.viewMenu_zoomOut.setOnAction(e -> webView.setZoom(webView.getZoom()/1.2));
 		// zoom fonts in/out (but only of those that are not given a fixed size):
 		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
 		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
 		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
+		this.lbCurrentVisualisation.textProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? "" : String.format(bundle.getString("visb.currentVisualisation"), visBPath.get().toString()), visBPath));
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
 		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
+			visBPath.set(null);
 			injector.getInstance(VisBController.class).closeCurrentVisualisation();
 		});
+		//Load VisB file from machine, when window is opened and set listener on the current machine
+		updateUIOnMachine(currentProject.getCurrentMachine());
+		loadVisBFileFromMachine(currentProject.getCurrentMachine());
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			this.button_resetVis.visibleProperty().unbind();
+			this.lbDefaultVisualisation.textProperty().unbind();
+			updateUIOnMachine(to);
+			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> to.visBVisualizationProperty().isEmpty().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), to.visBVisualizationProperty().get()), to.visBVisualizationProperty()));
+			loadVisBFileFromMachine(to);
+		});
+	}
+
+	private void updateUIOnMachine(Machine machine) {
+		if(machine != null) {
+			this.button_setVis.visibleProperty().bind(visBPath.isNotNull()
+					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !visBPath.get().toString().equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
+			this.button_resetVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotEmpty());
+			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isEmpty().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
+		} else {
+			this.button_setVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+			this.button_resetVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+		}
+	}
+
+	private void loadVisBFileFromMachine(Machine machine) {
+		visBPath.set(null);
+		if(machine != null) {
+			String visBVisualisation = machine.getVisBVisualisation();
+			visBPath.set(visBVisualisation.isEmpty() ? null : Paths.get(visBVisualisation));
+			if(currentTrace.getStateSpace() != null) {
+				Platform.runLater(this::setupMachineVisBFile);
+			} else {
+				this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> {
+					if (to != null && (from == null || !from.getLoadedMachine().equals(to.getLoadedMachine())) && visBPath.isNotNull().get()) {
+						this.setupMachineVisBFile();
+					}
+				});
+			}
+		}
+	}
+
+	private void setupMachineVisBFile() {
+		if(visBPath.isNotNull().get()) {
+			VisBController visBController = injector.getInstance(VisBController.class);
+			File visBfile = visBPath.get().toFile();
+			visBController.setupVisBFile(visBfile);
+		}
 	}
 
 	private void sendCloseRequest(){
@@ -315,11 +389,20 @@ public class VisBStage extends Stage {
 		information.setText(text);
 	}
 
+	private void setDefaultVisualisation() {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		currentMachine.setVisBVisualisation(visBPath.get());
+	}
+
+	private void resetDefaultVisualisation() {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		currentMachine.setVisBVisualisation(null);
+	}
+
 	/**
 	 * On click function for the button and file menu item
 	 */
 	private void loadVisBFile() {
-		clear();
 		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
 			alert(new VisBException(),  "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
@@ -332,6 +415,7 @@ public class VisBStage extends Stage {
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if(path != null) {
+			visBPath.set(path);
 			File visBfile = path.toFile();
 			injector.getInstance(VisBController.class).setupVisBFile(visBfile);
 		}
