@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
 
 import de.prob2.ui.visb.exceptions.VisBParseException;
@@ -99,9 +100,10 @@ class VisBFileHandler {
 							predicates.add(jsonPredicates.get(i).getAsString());
 						}
 					}
-					if (current_obj.has("repeat")) {
+					JsonArray repArray = getRepeatArray(current_obj,"event "+id);
+					if (repArray != null) {
 						// a list of strings which will replace %0, ... 
-						JsonArray repArray = (JsonArray) current_obj.get("repeat");
+						System.out.println("repeats = " + repArray);
 						for(JsonElement rep : repArray) {
 							// now replace %0, %1, ... by values provided
 							String repId = new String(id);
@@ -123,7 +125,7 @@ class VisBFileHandler {
 							}
 							AddVisBEvent(visBEvents, repId, repEvent, repPreds);
 						}
-					} else {
+					} else { // no repititions
 						AddVisBEvent(visBEvents, id, eventS, predicates);
 					}
 				}
@@ -179,28 +181,30 @@ class VisBFileHandler {
 				}
 				if (current_obj.has("ignore")) {
 					System.out.println("Ignoring VisB Item: " + id + "." + attribute);
-				} else if (current_obj.has("repeat")) {
-					// a list of strings which will replace %0, ... in the id and value attributes:
-					JsonArray repArray = (JsonArray) current_obj.get("repeat");
-					for(JsonElement rep : repArray) {
-						// now replace %0, %1, ... by values provided
-						String repId = new String(id); 
-						// no need to replace in attribute
-						String repVal = new String(value);
-						
-						JsonArray replaceArr = getJsonArray(rep);
-						for(int i =0; i<replaceArr.size();i++) {
-							String thisVal = replaceArr.get(i).getAsString();
-							String pattern = new String("%"+i);
-							System.out.println("Repeating item " + id + "." + attribute + " for '" + pattern + "' = " + thisVal);
-							repId = repId.replace(pattern, thisVal);
-							repVal = repVal.replace(pattern, thisVal);
-							// we could check that all arrays have same size; otherwise a pattern will not be replaced
-						}
-						visBItems.add(new VisBItem(repId, attribute, repVal));
-					}
 				} else {
-					visBItems.add(new VisBItem(id, attribute, value));
+					JsonArray repArray = getRepeatArray(current_obj,"VisB item "+id+ "." + attribute);
+					if (repArray != null) {
+						// a list of strings which will replace %0, ... in the id and value attributes:
+						for(JsonElement rep : repArray) {
+							// now replace %0, %1, ... by values provided
+							String repId = new String(id); 
+							// no need to replace in attribute
+							String repVal = new String(value);
+						
+							JsonArray replaceArr = getJsonArray(rep);
+							for(int i =0; i<replaceArr.size();i++) {
+								String thisVal = replaceArr.get(i).getAsString();
+								String pattern = new String("%"+i);
+								System.out.println("Repeating item " + id + "." + attribute + " for '" + pattern + "' = " + thisVal);
+								repId = repId.replace(pattern, thisVal);
+								repVal = repVal.replace(pattern, thisVal);
+								// we could check that all arrays have same size; otherwise a pattern will not be replaced
+							}
+							visBItems.add(new VisBItem(repId, attribute, repVal));
+						}
+					} else { // no repititions
+						visBItems.add(new VisBItem(id, attribute, value));
+					}
 				}
 			} else if (!current_obj.has("id")){
 				throw new VisBParseException("There is a item in your visualisation file, that has no \"id\" member.");
@@ -222,6 +226,47 @@ class VisBFileHandler {
 			replaceArr.add(rep); // create a one element array
 			return replaceArr;
 		}
+	}
+	
+	// get a JsonArray of repetitions; either as a repeat list of explicit strings, or a for loop
+	private static JsonArray getRepeatArray (JsonObject current_obj, String ctxt) throws VisBParseException {
+	     if (current_obj.has("for")) {
+	        JsonObject forloop = (JsonObject) current_obj.get("for"); // To do: check if JsonElement instanceof JsonObject
+	        if (!(forloop.has("from") && forloop.has("to"))) {
+			    throw new VisBParseException("A for loop requires both a from and to attribute within "+ctxt);
+	        }
+	        int from = forloop.get("from").getAsInt();
+	        int to = forloop.get("to").getAsInt();
+	        int step = 1;
+	        if (forloop.has("step")) {
+	           step = forloop.get("step").getAsInt();
+	           if (step<1) {
+			    throw new VisBParseException("The step " + step + " must be > 0 in for loop " + from + ".." + to + " within "+ctxt);
+	           }
+	        }
+			if ((to-from)/step > 100000) {
+			    throw new VisBParseException("The for loop " + from + ".." + to + " seems too large within "+ctxt);
+			}
+			JsonArray replaceArr = new JsonArray();
+			for(int i=from; i <= to; i += step) {
+				if (current_obj.has("repeat")) {
+				    for(JsonElement rep : (JsonArray) current_obj.get("repeat") ) {
+				       JsonArray arr_inner = new JsonArray();
+				       arr_inner.add(new JsonPrimitive(i)); // add i at end of beginning of list
+				       arr_inner.addAll(getJsonArray(rep)); // now copy original rep list
+				       replaceArr.add(arr_inner); // add modified repetition list to overall list
+				    }
+				} else {
+					replaceArr.add(new JsonPrimitive(i) );
+			    }
+			    System.out.println("repeat-for: " + i + " within "+ctxt);
+			}
+			return replaceArr;
+	     }  else if (current_obj.has("repeat")) { // repeat without for
+	        return (JsonArray) current_obj.get("repeat");
+	     } else {
+	        return null;
+	     }
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -17,7 +18,6 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
@@ -30,25 +30,17 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	
 	private final SymbolicFormulaChecker symbolicChecker;
 	
-	private final CurrentProject currentProject;
-	
-	
 	@Inject
-	public SymbolicCheckingFormulaHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
+	public SymbolicCheckingFormulaHandler(final CurrentTrace currentTrace,
 											final SymbolicFormulaChecker symbolicChecker,
 											final SymbolicCheckingResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.symbolicChecker = symbolicChecker;
 	}
 	
-	public void addFormula(SymbolicCheckingFormulaItem formula) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		if (currentMachine != null) {
-			if(currentMachine.getSymbolicCheckingFormulas().stream().noneMatch(formula::settingsEqual)) {
-				currentMachine.getSymbolicCheckingFormulas().add(formula);
-			}
-		}
+	@Override
+	public List<SymbolicCheckingFormulaItem> getItems(final Machine machine) {
+		return machine.getSymbolicCheckingFormulas();
 	}
 	
 	public void handleInvariant(SymbolicCheckingFormulaItem item, boolean checkAll) {

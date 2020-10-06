@@ -2,6 +2,7 @@ package de.prob2.ui.symbolic;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
@@ -50,12 +51,15 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	
 	private final CurrentTrace currentTrace;
 	
+	private final SymbolicFormulaHandler<T> formulaHandler;
+	
 	private final String checkAllOperations;
 	
-	public SymbolicChoosingStage(final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+	public SymbolicChoosingStage(final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.formulaHandler = formulaHandler;
 		this.checkAllOperations = bundle.getString("verifications.symbolicchecking.choice.checkAllOperations");
 		
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -121,8 +125,16 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	}
 	
 	protected void setCheckListeners() {
-		btAdd.setOnAction(e -> addFormula());
-		btCheck.setOnAction(e -> checkFormula());
+		btAdd.setOnAction(e -> {
+			this.formulaHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
+			this.close();
+		});
+		btCheck.setOnAction(e -> {
+			final T newItem = this.extractItem();
+			final Optional<T> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
+			this.close();
+			this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
+		});
 	}
 	
 	public void changeGUIType(final SymbolicGUIType guiType) {
@@ -147,8 +159,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		}
 	}
 	
-	protected abstract boolean updateFormula(T item);
-	
 	protected String extractFormula() {
 		String formula;
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
@@ -168,6 +178,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		}
 		return formula;
 	}
+
+	protected abstract T extractItem();
 
 	public void changeFormula(T item, AbstractResultHandler resultHandler) {
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
@@ -192,25 +204,29 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	
 	protected void setChangeListeners(T item, AbstractResultHandler resultHandler) {
 		btAdd.setOnAction(e -> {
-			if(updateFormula(item)) {
-				addFormula();
-			} else {
+			final T newItem = this.extractItem();
+			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
+			if (existingItem.isPresent()) {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
+			} else {
+				this.close();
 			}
-			this.close();
 		});
 		
 		btCheck.setOnAction(e -> {
-			if(updateFormula(item)) {
-				checkFormula();
-			} else {
+			final T newItem = this.extractItem();
+			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
+			if (existingItem.isPresent()) {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
+			} else {
+				this.close();
+				this.formulaHandler.handleItem(newItem, false);
 			}
-			this.close();
 		});
 	}
 	
-	public abstract void checkFormula();
-	
-	protected abstract void addFormula();
+	@FXML
+	public void cancel() {
+		this.close();
+	}
 }

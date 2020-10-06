@@ -12,7 +12,6 @@ import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
@@ -25,24 +24,17 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 
 	private final SymbolicAnimationChecker symbolicChecker;
 
-	private final CurrentProject currentProject;
-
 	@Inject
-	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
+	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace,
 										   final SymbolicAnimationChecker symbolicChecker,
 										   final SymbolicAnimationResultHandler resultHandler) {
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.symbolicChecker = symbolicChecker;
 	}
 
-	public void addFormula(SymbolicAnimationItem formula) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		if (currentMachine != null) {
-			if(currentMachine.getSymbolicAnimationFormulas().stream().noneMatch(formula::settingsEqual)) {
-				currentMachine.getSymbolicAnimationFormulas().add(formula);
-			}
-		}
+	@Override
+	public List<SymbolicAnimationItem> getItems(final Machine machine) {
+		return machine.getSymbolicAnimationFormulas();
 	}
 
 	public void handleSequence(SymbolicAnimationItem item, boolean checkAll) {
