@@ -78,7 +78,8 @@ public class Project {
 		if (!this.getMachines().contains(machine)) {
 			throw new IllegalArgumentException("Machine " + machine + " is not part of project " + this);
 		}
-		return this.getLocation().resolve(machine.getLocation());
+		//Normalize resulting path to get rid of .. and .
+		return this.getLocation().resolve(machine.getLocation()).normalize();
 	}
 	
 	public List<Preference> getPreferences() {

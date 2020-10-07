@@ -1,18 +1,7 @@
 package de.prob2.ui.visualisation;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.Main;
 import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
@@ -25,7 +14,6 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -35,6 +23,16 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -113,7 +111,8 @@ public class VisualisationView extends AnchorPane {
 
 	private Map<Integer, Image> loadMachineImages(final Map<Integer, String> imageNames) {
 		final Path projectDirectory = currentProject.get().getLocation();
-		final Path machineDirectory = currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine());
+		//getParent is required to access the directory of the machine
+		final Path machineDirectory = currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()).getParent();
 		final Path proBDirectory = Paths.get(Main.getProBDirectory());
 		final List<Path> imageDirectories = Arrays.asList(machineDirectory, projectDirectory, proBDirectory);
 
