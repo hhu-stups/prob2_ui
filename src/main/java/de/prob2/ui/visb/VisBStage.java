@@ -179,7 +179,7 @@ public class VisBStage extends Stage {
 			this.button_setVis.visibleProperty().bind(visBPath.isNotNull()
 					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !visBPath.get().equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
 			this.button_resetVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
-			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNotNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
+			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
 		} else {
 			this.button_setVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
 			this.button_resetVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
@@ -187,6 +187,7 @@ public class VisBStage extends Stage {
 	}
 
 	private void loadVisBFileFromMachine(Machine machine) {
+		clear();
 		visBPath.set(null);
 		if(machine != null) {
 			Path visBVisualisation = machine.getVisBVisualisation();
@@ -413,6 +414,7 @@ public class VisBStage extends Stage {
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if(path != null) {
+			clear();
 			visBPath.set(path);
 			File visBfile = path.toFile();
 			injector.getInstance(VisBController.class).setupVisBFile(visBfile);
