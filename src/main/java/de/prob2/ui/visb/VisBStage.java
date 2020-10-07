@@ -170,7 +170,6 @@ public class VisBStage extends Stage {
 			this.button_resetVis.visibleProperty().unbind();
 			this.lbDefaultVisualisation.textProperty().unbind();
 			updateUIOnMachine(to);
-			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> to.visBVisualizationProperty().isNotNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), to.visBVisualizationProperty().get()), to.visBVisualizationProperty()));
 			loadVisBFileFromMachine(to);
 		});
 	}
