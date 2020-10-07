@@ -268,6 +268,18 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			}
 		});
 	}
+
+	private static void updateV6Project(final JsonObject project) {
+		project.getAsJsonArray("machines").forEach(machineElement -> {
+			final JsonObject machine = machineElement.getAsJsonObject();
+			String visBLocation = machine.get("visBVisualisation").getAsString();
+			if(visBLocation.isEmpty()) {
+				String nullString = null;
+				machine.remove("visBVisualisation");
+				machine.addProperty("visBVisualisation", nullString);
+			}
+		});
+	}
 	
 	@Override
 	public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -288,6 +300,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		}
 		if (oldMetadata.getFormatVersion() <= 5) {
 			updateV5Project(oldObject);
+		}
+		if (oldMetadata.getFormatVersion() <= 6) {
+			updateV6Project(oldObject);
 		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}

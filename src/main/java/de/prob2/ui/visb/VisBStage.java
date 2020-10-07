@@ -50,7 +50,6 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 /**
@@ -171,7 +170,7 @@ public class VisBStage extends Stage {
 			this.button_resetVis.visibleProperty().unbind();
 			this.lbDefaultVisualisation.textProperty().unbind();
 			updateUIOnMachine(to);
-			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> to.visBVisualizationProperty().isEmpty().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), to.visBVisualizationProperty().get()), to.visBVisualizationProperty()));
+			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> to.visBVisualizationProperty().isNotNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), to.visBVisualizationProperty().get()), to.visBVisualizationProperty()));
 			loadVisBFileFromMachine(to);
 		});
 	}
@@ -179,9 +178,9 @@ public class VisBStage extends Stage {
 	private void updateUIOnMachine(Machine machine) {
 		if(machine != null) {
 			this.button_setVis.visibleProperty().bind(visBPath.isNotNull()
-					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !visBPath.get().toString().equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
-			this.button_resetVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotEmpty());
-			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isEmpty().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
+					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !visBPath.get().equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
+			this.button_resetVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
+			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNotNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
 		} else {
 			this.button_setVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
 			this.button_resetVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
@@ -191,8 +190,8 @@ public class VisBStage extends Stage {
 	private void loadVisBFileFromMachine(Machine machine) {
 		visBPath.set(null);
 		if(machine != null) {
-			String visBVisualisation = machine.getVisBVisualisation();
-			visBPath.set(visBVisualisation.isEmpty() ? null : Paths.get(visBVisualisation));
+			Path visBVisualisation = machine.getVisBVisualisation();
+			visBPath.set(visBVisualisation);
 			if(currentTrace.getStateSpace() != null) {
 				Platform.runLater(this::setupMachineVisBFile);
 			} else {

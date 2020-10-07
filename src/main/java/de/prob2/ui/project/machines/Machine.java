@@ -63,7 +63,7 @@ public class Machine implements DescriptionView.Describable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
-	private StringProperty visBVisualisation;
+	private ObjectProperty<Path> visBVisualisation;
 	private transient PatternManager patternManager = new PatternManager();
 	private final transient BooleanProperty changed = new SimpleBooleanProperty(false);
 
@@ -79,7 +79,7 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-		this.visBVisualisation = new SimpleStringProperty(this, "visBVisualisation", "");
+		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.initListeners();
 	}
 	
@@ -96,7 +96,7 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = JsonManager.checkDeserialize(context, object, "testCases", new TypeToken<ListProperty<TestCaseGenerationItem>>() {}.getType());
 		this.traces = JsonManager.checkDeserialize(context, object, "traces", new TypeToken<SetProperty<Path>>() {}.getType());
 		this.modelcheckingItems = JsonManager.checkDeserialize(context, object, "modelcheckingItems", new TypeToken<ListProperty<ModelCheckingItem>>() {}.getType());
-		this.visBVisualisation = JsonManager.checkDeserialize(context, object, "visBVisualisation", StringProperty.class);
+		this.visBVisualisation = JsonManager.checkDeserialize(context, object, "visBVisualisation", new TypeToken<ObjectProperty<Path>>() {}.getType());
 		this.initListeners();
 	}
 	
@@ -328,20 +328,16 @@ public class Machine implements DescriptionView.Describable {
 		return this.location;
 	}
 
-	public StringProperty visBVisualizationProperty() {
+	public ObjectProperty<Path> visBVisualizationProperty() {
 		return visBVisualisation;
 	}
 
-	public String getVisBVisualisation() {
+	public Path getVisBVisualisation() {
 		return visBVisualisation.get();
 	}
 
 	public void setVisBVisualisation(Path visBVisualisation) {
-		if(visBVisualisation == null) {
-			this.visBVisualisation.set("");
-		} else {
-			this.visBVisualisation.set(visBVisualisation.toString());
-		}
+		this.visBVisualizationProperty().set(visBVisualisation);
 	}
 
 	@Override
