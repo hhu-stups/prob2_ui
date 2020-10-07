@@ -103,7 +103,8 @@ public class VisBController {
 			} else {
 				try {
 					injector.getInstance(VisBStage.class).runScript(
-					   "$(\"#visb_debug_messages\").text(\"updated\");\n"  // reset VisB debug text (if it exists)
+					   "$(\"#visb_debug_messages\").text(\"\");\n" + // reset VisB debug text (if it exists)
+					   "$(\"#visb_error_messages ul\").empty();\n"  // reset VisB error list
 					    + svgChanges);
 				} catch (JSException e){
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
