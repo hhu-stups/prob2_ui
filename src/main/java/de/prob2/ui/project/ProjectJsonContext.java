@@ -16,7 +16,7 @@ import java.util.Iterator;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 	ProjectJsonContext(final Gson gson) {
-		super(gson, Project.class, "Project", 5);
+		super(gson, Project.class, "Project", 6);
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
