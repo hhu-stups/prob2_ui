@@ -125,12 +125,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private void updateCurrentMachine(final Machine m, final Preference p) {
 		this.currentMachine.set(m);
 		this.currentPreference.set(p);
-		if(m != null) {
-			m.visBVisualizationProperty().addListener((observable, from, to) -> {
-				boolean equal = (from == null && to == null) || (from != null && from.equals(to));
-				this.saved.set(equal);
-			});
-		}
 	}
 
 	private void clearProperties() {
