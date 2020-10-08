@@ -9,14 +9,21 @@ import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
-	ProjectJsonContext(final Gson gson) {
-		super(gson, Project.class, "Project", 7);
+
+	private CurrentProject currentProject;
+
+	ProjectJsonContext(final Gson gson, final CurrentProject currentProject) {
+		super(gson, Project.class, "Project", 8);
+		this.currentProject = currentProject;
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
@@ -280,6 +287,19 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			}
 		});
 	}
+
+	private static void updateV7Project(final JsonObject project, final Path location) {
+		project.getAsJsonArray("machines").forEach(machineElement -> {
+			final JsonObject machine = machineElement.getAsJsonObject();
+			JsonElement visBLocationElement = machine.get("visBVisualisation");
+			if(!visBLocationElement.isJsonNull()) {
+				Path visBLocation = Paths.get(visBLocationElement.getAsString());
+				machine.remove("visBVisualisation");
+				Path newVisBLocationPath = location.relativize(visBLocation);
+				machine.addProperty("visBVisualisation", newVisBLocationPath.toString());
+			}
+		});
+	}
 	
 	@Override
 	public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -303,6 +323,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		}
 		if (oldMetadata.getFormatVersion() <= 6) {
 			updateV6Project(oldObject);
+		}
+		if (oldMetadata.getFormatVersion() <= 7) {
+			updateV7Project(oldObject, this.currentProject.getLocation());
 		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}

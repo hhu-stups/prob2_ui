@@ -157,7 +157,7 @@ public class VisBStage extends Stage {
 		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
 		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
 		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
-		this.lbCurrentVisualisation.textProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? "" : String.format(bundle.getString("visb.currentVisualisation"), visBPath.get().toString()), visBPath));
+		this.lbCurrentVisualisation.textProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? "" : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBPath.get()).toString()), visBPath));
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
 		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
 			visBPath.set(null);
@@ -177,7 +177,7 @@ public class VisBStage extends Stage {
 	private void updateUIOnMachine(Machine machine) {
 		if(machine != null) {
 			this.button_setVis.visibleProperty().bind(visBPath.isNotNull()
-					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !visBPath.get().equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
+					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
 			this.button_resetVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
 			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
 		} else {
@@ -191,7 +191,7 @@ public class VisBStage extends Stage {
 		visBPath.set(null);
 		if(machine != null) {
 			Path visBVisualisation = machine.getVisBVisualisation();
-			visBPath.set(visBVisualisation);
+			visBPath.set(visBVisualisation == null ? null : currentProject.getLocation().resolve(visBVisualisation));
 			if(currentTrace.getStateSpace() != null) {
 				Platform.runLater(this::setupMachineVisBFile);
 			} else {
@@ -390,7 +390,7 @@ public class VisBStage extends Stage {
 
 	private void setDefaultVisualisation() {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		currentMachine.setVisBVisualisation(visBPath.get());
+		currentMachine.setVisBVisualisation(currentProject.getLocation().relativize(visBPath.get()));
 	}
 
 	private void resetDefaultVisualisation() {
