@@ -54,11 +54,15 @@ class VisBFileHandler {
 		if(visBFile.has("items")) {
 			JsonArray visArray = (JsonArray) visBFile.get("items");
 			visBItems = assembleVisList(visArray);
+		} else {
+		     visBItems = new ArrayList<>();
 		}
 		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
 		if(visBFile.has("events")) {
-			JsonArray eventsArray = (JsonArray) visBFile.get("events");
+			 JsonArray eventsArray = (JsonArray) visBFile.get("events");
 			 visBEvents = assembleEventList(eventsArray);
+		} else {
+		     visBEvents = new ArrayList<>();
 		}
 		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
 			return null;
@@ -75,7 +79,7 @@ class VisBFileHandler {
 	 */
 	private static ArrayList<VisBEvent> assembleEventList(JsonArray array) throws VisBParseException{
 		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-		if(array == null || array.isJsonNull() || array.size() == 0) return null;
+		if(array == null || array.isJsonNull() || array.size() == 0) return visBEvents;
 		for (Object event : array) {
 			JsonObject current_obj = (JsonObject) event;
 			if(current_obj.isJsonNull()){
@@ -166,7 +170,7 @@ class VisBFileHandler {
 	 */
 	private static ArrayList<VisBItem> assembleVisList(JsonArray array) throws VisBParseException{
 		ArrayList<VisBItem> visBItems = new ArrayList<>();
-		if(array == null || array.isJsonNull() || array.size() == 0) return null;
+		if(array == null || array.isJsonNull() || array.size() == 0) return visBItems;
 		for (Object item : array) {
 			JsonObject current_obj = (JsonObject) item;
 			if(current_obj.isJsonNull()){
