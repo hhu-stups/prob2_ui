@@ -292,9 +292,11 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			JsonElement visBLocationElement = machine.get("visBVisualisation");
 			if(!visBLocationElement.isJsonNull()) {
 				Path visBLocation = Paths.get(visBLocationElement.getAsString());
-				machine.remove("visBVisualisation");
-				Path newVisBLocationPath = location.relativize(visBLocation);
-				machine.addProperty("visBVisualisation", newVisBLocationPath.toString());
+				if(visBLocation.isAbsolute()) {
+					machine.remove("visBVisualisation");
+					Path newVisBLocationPath = location.getParent().relativize(visBLocation);
+					machine.addProperty("visBVisualisation", newVisBLocationPath.toString());
+				}
 			}
 		});
 	}
