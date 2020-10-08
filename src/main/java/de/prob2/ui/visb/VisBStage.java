@@ -183,6 +183,7 @@ public class VisBStage extends Stage {
 		} else {
 			this.button_setVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
 			this.button_resetVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+			this.lbDefaultVisualisation.setText("");
 		}
 	}
 
