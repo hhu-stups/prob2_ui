@@ -258,7 +258,7 @@ public class VisBStage extends Stage {
 					"<div text-align=\"center\">" +
 					svgFile +
 					"\n" +
-					"<div id=\"visb_error_messages\" style=\"color:red\"><ul><li>1</ul>\n" + 
+					"<div id=\"visb_error_messages\" style=\"color:red\"><ul></ul>\n" + 
 					"</div>\n" +
 					"</body>\n" +
 					"</html>";

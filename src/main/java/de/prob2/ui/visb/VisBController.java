@@ -63,6 +63,8 @@ public class VisBController {
 			if(newTrace != null){
 				if(newTrace.getCurrentState() != null && newTrace.getCurrentState().isInitialised()){
 					updateVisualisation();
+				} else {
+				    showUpdateVisualisationNotPossible();
 				}
 			}
 		});
@@ -291,8 +293,13 @@ public class VisBController {
 			//Updates visualisation, only if current state is initialised and visualisation items are not empty
 			updateVisualisation();
 		} else {
-			updateInfo("visb.infobox.visualisation.updated.nr",0);
+		    showUpdateVisualisationNotPossible();
 		}
+	}
+	private void showUpdateVisualisationNotPossible(){
+		updateInfo("visb.infobox.visualisation.updated.nr",0);
+		injector.getInstance(VisBStage.class).runScript(
+		   "$(\"#visb_error_messages ul\").append(\'<li style=\"color:blue\">Model not initialised</li>\');\n"  );
 	}
 
 	/**
