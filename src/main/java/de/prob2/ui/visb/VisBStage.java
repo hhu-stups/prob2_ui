@@ -237,9 +237,11 @@ public class VisBStage extends Stage {
 					"<script src=\"" + Main.class.getResource("jquery.js").toExternalForm() + "\"></script>\n" +
 					"<script>\n" +
 					"function checkSvgId(id,ctxt){\n" +
-					"    if(!$(id).length) {$(\"#visb_debug_messages\").text(\"unknown: \"+id);\n" +
-					"                       alert(\"Unknown SVG id: \" + id + \" for \" + ctxt);}\n" +
-					"};" +
+					"    if(!$(id).length) {\n" +
+					// " $(\"#visb_error_messages\").text($(\"#visb_error_messages\").text()+\"unknown: \"+id);\n" +
+					" $(\"#visb_error_messages ul\").append(\"<li>Unknown SVG id <b>\" + id + \"</b> for \" + ctxt + \"</li>\");\n" +
+					// "                       alert(\"Unknown SVG id: \" + id + \" for \" + ctxt);\n" +
+					"}};" +
 					"function changeAttribute(id, attribute, value){\n" +
 					"  $(document).ready(function(){\n" +
 					// Provide debugging if the VisB SVG file contains such a text span:
@@ -256,7 +258,8 @@ public class VisBStage extends Stage {
 					"<div text-align=\"center\">" +
 					svgFile +
 					"\n" +
-					"</div>" +
+					"<div id=\"visb_error_messages\" style=\"color:red\"><ul></ul>\n" + 
+					"</div>\n" +
 					"</body>\n" +
 					"</html>";
 			this.webView.getEngine().loadContent(htmlFile);
