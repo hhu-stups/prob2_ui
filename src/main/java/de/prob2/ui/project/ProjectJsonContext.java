@@ -9,7 +9,6 @@ import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 
@@ -19,11 +18,10 @@ import java.util.Iterator;
 
 class ProjectJsonContext extends JsonManager.Context<Project> {
 
-	private CurrentProject currentProject;
+	private Path location;
 
-	ProjectJsonContext(final Gson gson, final CurrentProject currentProject) {
+	ProjectJsonContext(final Gson gson) {
 		super(gson, Project.class, "Project", 8);
-		this.currentProject = currentProject;
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
@@ -325,8 +323,12 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			updateV6Project(oldObject);
 		}
 		if (oldMetadata.getFormatVersion() <= 7) {
-			updateV7Project(oldObject, this.currentProject.getLocation());
+			updateV7Project(oldObject, location);
 		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
+	}
+
+	public void setProjectLocation(Path location) {
+		this.location = location;
 	}
 }

@@ -56,7 +56,7 @@ public class ProjectManager {
 	@Inject
 	public ProjectManager(Gson gson, JsonManager<Project> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
 		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new ProjectJsonContext(gson, currentProject));
+		this.jsonManager.initContext(new ProjectJsonContext(gson));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -202,6 +202,7 @@ public class ProjectManager {
 
 	private Project loadProject(Path path) {
 		try {
+			((ProjectJsonContext) this.jsonManager.getContext()).setProjectLocation(path);
 			final Project project = this.jsonManager.readFromFile(path).getObject();
 			project.setLocation(path.getParent());
 			return project;
