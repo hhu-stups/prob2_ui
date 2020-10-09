@@ -180,8 +180,16 @@ public class VisBController {
 			Trace trace = currentTrace.get();
 			// if (trace.canExecuteEvent(event.getEvent(), event.getPredicates())) {
 		    try {
-		        // TO DO: replace %shiftKey/%metaKey with TRUE/FALSE
-		        ArrayList<String> preds = event.getPredicates();
+		        // perform replacements to transmit event information:
+		        ArrayList<String> preds= new ArrayList<String>();
+				preds.addAll(event.getPredicates());
+				for(int j = 0; j < preds.size(); j++) {
+					preds.set(j,preds.get(j).replace("%shiftKey", (shiftKey ? "TRUE" : "FALSE"))
+					                        .replace("%metaKey",  (metaKey  ? "TRUE" : "FALSE"))
+					                        .replace("%pageX", Integer.toString(pageX))
+					                        .replace("%pageY", Integer.toString(pageY))
+					             );
+				}
 				trace = trace.execute(event.getEvent(), preds);
 				currentTrace.set(trace);
 				LOGGER.debug("Executing event for id: "+id);
@@ -192,6 +200,7 @@ public class VisBController {
 			}
 		}
 	}
+	
 
 	/**
 	 * Setting up the svg file for internal usage via {@link VisBFileHandler}.
