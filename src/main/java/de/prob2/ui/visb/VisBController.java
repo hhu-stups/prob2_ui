@@ -341,8 +341,8 @@ public class VisBController {
 						// event.clientX,event.clientY, screenX, screenY : less useful probably
 						"  });\n" +
 						// attach a hover function to put event into visb_debug_messages text field
-						"  $(\"#" + visBEvent.getId() + "\").hover(function(){\n" +
-						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + "\");},function(){\n" +
+						"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
+						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);},function(){\n" +
 						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
 						"});";
 				onClickEventQuery.append(queryPart);
