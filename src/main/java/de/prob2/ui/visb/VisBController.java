@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
+import java.util.ArrayList;
 
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler} and {@link VisBParser}.
@@ -177,12 +178,16 @@ public class VisBController {
 			updateInfo("visb.infobox.no.events.for.id", id);
 		} else {
 			Trace trace = currentTrace.get();
-			if (trace.canExecuteEvent(event.getEvent(), event.getPredicates())) {
-				trace = trace.execute(event.getEvent(), event.getPredicates());
+			// if (trace.canExecuteEvent(event.getEvent(), event.getPredicates())) {
+		    try {
+		        // TO DO: replace %shiftKey/%metaKey with TRUE/FALSE
+		        ArrayList<String> preds = event.getPredicates();
+				trace = trace.execute(event.getEvent(), preds);
 				currentTrace.set(trace);
 				LOGGER.debug("Executing event for id: "+id);
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
-			} else {
+			} catch (IllegalArgumentException e) {
+				LOGGER.debug("Cannot execute event for id: "+e);
 				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			}
 		}
