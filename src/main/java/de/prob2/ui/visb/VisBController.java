@@ -165,7 +165,7 @@ public class VisBController {
 	 * This method is used by the {@link VisBConnector} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
-	void executeEvent(String id, int pageX, int pageY){
+	void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey){
 		LOGGER.debug("Finding event for id: "+id);
 		if(!currentTrace.getCurrentState().isInitialised()){
 			updateInfo("visb.infobox.events.not.initialise");
@@ -321,7 +321,10 @@ public class VisBController {
 				String queryPart = "$(document).ready(function(){\n" +
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
-						"    visBConnector.click(this.id,event.clientX,event.clientY,event.pageX,event.pageY);\n" +
+						"    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);\n" +
+						// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
+						// event.which: 1=left mouse button, 2, 3
+						// event.clientX,event.clientY, screenX, screenY : less useful probably
 						"  });\n" +
 						// attach a hover function to put event into visb_debug_messages text field
 						"  $(\"#" + visBEvent.getId() + "\").hover(function(){\n" +
