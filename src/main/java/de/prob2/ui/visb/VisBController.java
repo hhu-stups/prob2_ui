@@ -165,13 +165,14 @@ public class VisBController {
 	 * This method is used by the {@link VisBConnector} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
-	void executeEvent(String id){
+	void executeEvent(String id, int pageX, int pageY){
 		LOGGER.debug("Finding event for id: "+id);
 		if(!currentTrace.getCurrentState().isInitialised()){
 			updateInfo("visb.infobox.events.not.initialise");
 			return;
 		}
 		VisBEvent event = visBVisualisation.getEventForID(id);
+		// TO DO: adapt predicates or add predicate for Click Coordinates
 		if(event == null){
 			updateInfo("visb.infobox.no.events.for.id", id);
 		} else {
