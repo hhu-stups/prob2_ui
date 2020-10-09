@@ -319,8 +319,8 @@ public class VisBController {
 				}
 				String queryPart = "$(document).ready(function(){\n" +
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
-						"  $(\"#" + visBEvent.getId() + "\").click(function(){\n" +
-						"    visBConnector.click(this.id);\n" +
+						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
+						"    visBConnector.click(this.id,event.clientX,event.clientY,event.pageX,event.pageY);\n" +
 						"  });\n" +
 						// attach a hover function to put event into visb_debug_messages text field
 						"  $(\"#" + visBEvent.getId() + "\").hover(function(){\n" +
