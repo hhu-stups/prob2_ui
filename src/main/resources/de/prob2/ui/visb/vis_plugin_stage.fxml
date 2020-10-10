@@ -30,17 +30,17 @@
                 <top>
                     <MenuBar BorderPane.alignment="CENTER" fx:id="visbMenuBar">
                         <Menu mnemonicParsing="false" text="%visb.menu.file">
-                            <MenuItem fx:id="fileMenu_visB" mnemonicParsing="false" text="%visb.menu.file.open" />
+                            <MenuItem fx:id="fileMenu_visB" accelerator="Shortcut+o" mnemonicParsing="false" text="%visb.menu.file.open" />
                             <MenuItem fx:id="fileMenu_close" mnemonicParsing="false" text="%visb.menu.file.close" />
-							<MenuItem fx:id="fileMenu_export" mnemonicParsing="false" text="%visb.menu.file.export" />
+							<MenuItem fx:id="fileMenu_export" accelerator="Shortcut+s" mnemonicParsing="false" text="%visb.menu.file.export" />
 						</Menu>
                         <Menu mnemonicParsing="false" text="%visb.menu.edit">
-                            <MenuItem fx:id="editMenu_reload" mnemonicParsing="false" text="%visb.menu.edit.reload" />
+                            <MenuItem fx:id="editMenu_reload" accelerator="Shortcut+r" mnemonicParsing="false" text="%visb.menu.edit.reload" />
                             <MenuItem fx:id="editMenu_close" mnemonicParsing="false" text="%visb.menu.edit.close" />
                         </Menu>
                         <Menu mnemonicParsing="false" text="%visb.menu.view">
                             <MenuItem fx:id="viewMenu_zoomIn" accelerator="Shortcut+i" mnemonicParsing="false" text="%visb.menu.view.zoom.in" />
-                            <MenuItem fx:id="viewMenu_zoomOut" accelerator="Shortcut+o" mnemonicParsing="false" text="%visb.menu.view.zoom.out" />
+                            <MenuItem fx:id="viewMenu_zoomOut" accelerator="Shortcut+k" mnemonicParsing="false" text="%visb.menu.view.zoom.out" />
 	                         <SeparatorMenuItem />
                             <MenuItem fx:id="viewMenu_zoomFontsIn" mnemonicParsing="false" text="%visb.menu.view.zoom_fonts.in" />
                             <MenuItem fx:id="viewMenu_zoomFontsOut" mnemonicParsing="false" text="%visb.menu.view.zoom_fonts.out" />
