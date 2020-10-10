@@ -104,6 +104,17 @@ class VisBFileHandler {
 							predicates.add(jsonPredicates.get(i).getAsString());
 						}
 					}
+					String hoverAttr; String hoverEnter; String hoverLeave;
+					if(current_obj.has("hover")){
+					   JsonObject hv = current_obj.getAsJsonObject("hover");
+					   hoverAttr = hv.get("attr").getAsString();
+					   hoverEnter = hv.get("enter").getAsString();
+					   hoverLeave = hv.get("leave").getAsString();
+					   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
+					} else {
+					   hoverAttr = null; hoverEnter = null; hoverLeave = null;
+					}
+					
 					JsonArray repArray = getRepeatArray(current_obj,"event "+id);
 					if (repArray != null) {
 						// a list of strings which will replace %0, ... 
@@ -127,10 +138,10 @@ class VisBFileHandler {
 								}
 								// we could check that all arrays have same size; otherwise a pattern will not be replaced
 							}
-							AddVisBEvent(visBEvents, repId, repEvent, repPreds);
+							AddVisBEvent(visBEvents, repId, repEvent, repPreds, hoverAttr, hoverEnter, hoverLeave);
 						}
 					} else { // no repititions
-						AddVisBEvent(visBEvents, id, eventS, predicates);
+						AddVisBEvent(visBEvents, id, eventS, predicates, hoverAttr, hoverEnter, hoverLeave);
 					}
 				}
 			} else if (!current_obj.has("id")){
@@ -144,8 +155,9 @@ class VisBFileHandler {
 	}
 	
 	private static void AddVisBEvent(ArrayList<VisBEvent> visBEvents, 
-	                            String id, String eventS, ArrayList<String> predicates ) throws VisBParseException {
-		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates);
+	                            String id, String eventS, ArrayList<String> predicates,
+	                            String hover, String enter, String leave) throws VisBParseException {
+		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hover, enter, leave);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
 		} else {

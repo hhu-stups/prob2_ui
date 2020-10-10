@@ -332,6 +332,13 @@ public class VisBController {
 					alert.initOwner(this.injector.getInstance(VisBStage.class));
 					alert.show();
 				}
+				String EnterAction; String LeaveAction;
+				if (visBEvent.getHoverAttr()!=null) {
+					EnterAction = "    changeAttribute(\"#" + visBEvent.getId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverEnterVal() + "\");\n";
+					LeaveAction = "    changeAttribute(\"#" + visBEvent.getId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverLeaveVal() + "\");\n";
+				} else {
+				   EnterAction = ""; LeaveAction = "";
+				}
 				String queryPart = "$(document).ready(function(){\n" +
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
@@ -342,9 +349,12 @@ public class VisBController {
 						"  });\n" +
 						// attach a hover function to put event into visb_debug_messages text field
 						"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
-						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);},function(){\n" +
+						    EnterAction +
+						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);}," +
+						"function(){\n" + // function when leaving hover
+						     LeaveAction +
 						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
-						"});";
+						"});\n";
 				onClickEventQuery.append(queryPart);
 			}
 			try {
