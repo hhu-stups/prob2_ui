@@ -190,11 +190,12 @@ public class VisBController {
 					                        .replace("%pageY", Integer.toString(pageY))
 					             );
 				}
+				LOGGER.debug("Executing event for id: "+id + " and preds = " + preds);
 				trace = trace.execute(event.getEvent(), preds);
 				currentTrace.set(trace);
-				LOGGER.debug("Executing event for id: "+id);
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			} catch (IllegalArgumentException e) {
+			    // TO DO: check if event can simply not be executed or if there is an error in the predicates
 				LOGGER.debug("Cannot execute event for id: "+e);
 				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			}
