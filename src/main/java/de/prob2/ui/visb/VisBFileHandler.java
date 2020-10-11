@@ -104,15 +104,20 @@ class VisBFileHandler {
 							predicates.add(jsonPredicates.get(i).getAsString());
 						}
 					}
-					String hoverAttr; String hoverEnter; String hoverLeave;
+					String hoverid; String hoverAttr; String hoverEnter; String hoverLeave;
 					if(current_obj.has("hover")){
 					   JsonObject hv = current_obj.getAsJsonObject("hover");
 					   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
 					   hoverEnter = getAttrString(hv,"enter","hover within event "+id);
 					   hoverLeave = getAttrString(hv,"leave","hover within event "+id);
+					   if(hv.has("id")) {
+					      hoverid = getAttrString(hv,"id","hover within event "+id);
+					   } else {
+					      hoverid = id;
+					   }
 					   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
 					} else {
-					   hoverAttr = null; hoverEnter = null; hoverLeave = null;
+					   hoverid = null; hoverAttr = null; hoverEnter = null; hoverLeave = null;
 					}
 					
 					JsonArray repArray = getRepeatArray(current_obj,"event "+id);
@@ -138,10 +143,10 @@ class VisBFileHandler {
 								}
 								// we could check that all arrays have same size; otherwise a pattern will not be replaced
 							}
-							AddVisBEvent(visBEvents, repId, repEvent, repPreds, hoverAttr, hoverEnter, hoverLeave);
+							AddVisBEvent(visBEvents, repId, repEvent, repPreds, hoverid,hoverAttr, hoverEnter, hoverLeave);
 						}
-					} else { // no repititions
-						AddVisBEvent(visBEvents, id, eventS, predicates, hoverAttr, hoverEnter, hoverLeave);
+					} else { // no repititions have to be applied
+						AddVisBEvent(visBEvents, id, eventS, predicates, hoverid, hoverAttr, hoverEnter, hoverLeave);
 					}
 				}
 			} else if (!current_obj.has("id")){
@@ -166,8 +171,8 @@ class VisBFileHandler {
 	
 	private static void AddVisBEvent(ArrayList<VisBEvent> visBEvents, 
 	                            String id, String eventS, ArrayList<String> predicates,
-	                            String hover, String enter, String leave) throws VisBParseException {
-		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hover, enter, leave);
+	                            String hid, String hoverattr, String enter, String leave) throws VisBParseException {
+		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hid, hoverattr, enter, leave);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
 		} else {

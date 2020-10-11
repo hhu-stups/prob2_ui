@@ -333,9 +333,9 @@ public class VisBController {
 					alert.show();
 				}
 				String EnterAction; String LeaveAction;
-				if (visBEvent.getHoverAttr()!=null) {
-					EnterAction = "    changeAttribute(\"#" + visBEvent.getId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverEnterVal() + "\");\n";
-					LeaveAction = "    changeAttribute(\"#" + visBEvent.getId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverLeaveVal() + "\");\n";
+				if (visBEvent.getHoverAttr()!=null) { // TO DO: for loop
+					EnterAction = "    changeAttribute(\"#" + visBEvent.getHoverId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverEnterVal() + "\");\n";
+					LeaveAction = "    changeAttribute(\"#" + visBEvent.getHoverId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverLeaveVal() + "\");\n";
 				} else {
 				   EnterAction = ""; LeaveAction = "";
 				}
