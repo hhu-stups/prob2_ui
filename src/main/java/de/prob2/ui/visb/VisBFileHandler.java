@@ -17,6 +17,7 @@ import com.google.gson.stream.JsonReader;
 
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
+import de.prob2.ui.visb.visbobjects.VisBHover;
 import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
@@ -159,8 +160,9 @@ class VisBFileHandler {
 	                            String id, String eventS, ArrayList<String> predicates,
 	                            JsonObject current_obj) throws VisBParseException {
 	    
-		String hoverid; String hoverAttr; String hoverEnter; String hoverLeave;
+		VisBHover hover;
 		if(current_obj.has("hover")){
+		   String hoverid; String hoverAttr; String hoverEnter; String hoverLeave;
 		   JsonObject hv = current_obj.getAsJsonObject("hover");
 		   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
 		   hoverEnter = getAttrString(hv,"enter","hover within event "+id); // TO DO: apply replacements
@@ -171,11 +173,12 @@ class VisBFileHandler {
 			  hoverid = id;
 		   }
 		   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
+		   hover = new VisBHover(hoverid,hoverAttr,hoverEnter,hoverLeave);
 		} else {
-		   hoverid = null; hoverAttr = null; hoverEnter = null; hoverLeave = null;
+		   hover = null;
 		}
 		
-		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hoverid, hoverAttr, hoverEnter, hoverLeave);
+		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hover);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
 		} else {
