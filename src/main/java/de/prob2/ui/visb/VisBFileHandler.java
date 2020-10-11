@@ -107,9 +107,9 @@ class VisBFileHandler {
 					String hoverAttr; String hoverEnter; String hoverLeave;
 					if(current_obj.has("hover")){
 					   JsonObject hv = current_obj.getAsJsonObject("hover");
-					   hoverAttr = hv.get("attr").getAsString();
-					   hoverEnter = hv.get("enter").getAsString();
-					   hoverLeave = hv.get("leave").getAsString();
+					   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
+					   hoverEnter = getAttrString(hv,"enter","hover within event "+id);
+					   hoverLeave = getAttrString(hv,"leave","hover within event "+id);
 					   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
 					} else {
 					   hoverAttr = null; hoverEnter = null; hoverLeave = null;
@@ -152,6 +152,16 @@ class VisBFileHandler {
 			}
 		}
 		return visBEvents;
+	}
+	
+	// utility to get attribute and throw exception if it does not exist
+	private static String getAttrString(JsonObject obj, String attr,String ctxt) throws VisBParseException {
+	   JsonElement el = obj.get(attr);
+	   if(el==null) {
+	       throw new VisBParseException("Missing attribute "+attr+" for "+ctxt);
+	   } else {
+	     return el.getAsString();
+	   }
 	}
 	
 	private static void AddVisBEvent(ArrayList<VisBEvent> visBEvents, 
