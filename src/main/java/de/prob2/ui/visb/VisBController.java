@@ -174,7 +174,7 @@ public class VisBController {
 		}
 		VisBEvent event = visBVisualisation.getEventForID(id);
 		// TO DO: adapt predicates or add predicate for Click Coordinates
-		if(event == null){
+		if(event == null || event.getEvent().equals("")) {
 			updateInfo("visb.infobox.no.events.for.id", id);
 		} else {
 			Trace trace = currentTrace.get();
@@ -327,12 +327,15 @@ public class VisBController {
 			StringBuilder onClickEventQuery = new StringBuilder();
 			for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
 				String event = visBEvent.getEvent();
-				OperationInfo operationInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
-				boolean isValidTopLevelEvent = operationInfo != null && operationInfo.isTopLevel();
-				if(!isValidTopLevelEvent) {
-					Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.no.events.for.id", event);
-					alert.initOwner(this.injector.getInstance(VisBStage.class));
-					alert.show();
+				if (!event.equals("")) { // we allow to provide just hover
+				    System.out.println("Check event " + event);
+					OperationInfo operationInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
+					boolean isValidTopLevelEvent = operationInfo != null && operationInfo.isTopLevel();
+					if(!isValidTopLevelEvent) {
+						Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.no.events.for.id", event);
+						alert.initOwner(this.injector.getInstance(VisBStage.class));
+						alert.show();
+					}
 				}
 				String EnterAction; String LeaveAction;
 				if (visBEvent.hasHover()) { // TO DO: for loop

@@ -95,9 +95,7 @@ class VisBFileHandler {
 					System.out.println("Ignoring VisB Event for " + id);
 				} else {
 					String eventS = current_obj.get("event").getAsString();
-					if(eventS.isEmpty()){
-						throw new VisBParseException("The event for " + id + " in your visualisation file has an empty event body.");
-					}
+					// we now also allow empty event in case we only want to hover
 					ArrayList<String> predicates = new ArrayList<>();
 					if(current_obj.has("predicates")){
 						JsonArray jsonPredicates = current_obj.getAsJsonArray("predicates");
