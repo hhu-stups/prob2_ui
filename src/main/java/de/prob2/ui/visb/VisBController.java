@@ -343,7 +343,7 @@ public class VisBController {
 				}
 				String queryPart = "$(document).ready(function(){\n" +
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
-						"  $(\"#" + visBEvent.getId() + "\").off(\"click\");\n" + // remove any previous click functions
+						"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
 						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
 						"    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);\n" +
 						// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
