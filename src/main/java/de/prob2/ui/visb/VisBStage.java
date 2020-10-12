@@ -408,7 +408,7 @@ public class VisBStage extends Stage {
 	 * On click function for the button and file menu item
 	 */
 	@FXML
-	private void loadVisBFile() {
+	public void loadVisBFile() {
 		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
 			alert(new VisBException(),  "visb.stage.alert.load.machine.header", "visb.exception.no.machine");

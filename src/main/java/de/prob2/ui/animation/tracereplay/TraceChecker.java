@@ -1,17 +1,9 @@
 package de.prob2.ui.animation.tracereplay;
 
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Scanner;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.check.tracereplay.ITraceChecker;
 import de.prob.check.tracereplay.PersistentTrace;
@@ -26,7 +18,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
-
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
@@ -34,6 +25,14 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.Region;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -119,7 +118,7 @@ public class TraceChecker implements ITraceChecker {
 				PersistentTransition persistentTransition = (PersistentTransition) replayInformation.get("persistentTransition");
 				PredicateBuilder predicateBuilder = (PredicateBuilder) replayInformation.get("predicateBuilder");
 				replayTrace.setErrorMessageBundleKey("animation.tracereplay.traceChecker.errorMessage");
-				replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicateBuilder, String.join(", ", command.getErrors()));
+				replayTrace.setErrorMessageParams(persistentTransition.getOperationName(), predicateBuilder, command.getErrors().stream().map(GetOperationByPredicateCommand.GetOperationError::getMessage).collect(Collectors.joining(", ")));
 				break;
 			}
 			case NO_OPERATION_POSSIBLE: {

@@ -2,6 +2,8 @@ package de.prob2.ui.visb;
 
 import com.google.inject.Injector;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.prob.animator.command.ExecuteOperationException;
+import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.exception.ProBError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
@@ -25,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler} and {@link VisBParser}.
@@ -195,8 +198,12 @@ public class VisBController {
 				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + preds);
 				currentTrace.set(trace);
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
-			} catch (IllegalArgumentException e) {
-			    // TO DO: check if event can simply not be executed or if there is an error in the predicates
+			} catch (ExecuteOperationException e) {
+				if(e.getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
+					Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
+					alert.initOwner(this.injector.getInstance(VisBStage.class));
+					alert.show();
+				}
 				LOGGER.debug("Cannot execute event for id: "+e);
 				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			}
