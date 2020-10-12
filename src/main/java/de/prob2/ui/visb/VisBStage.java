@@ -249,7 +249,7 @@ public class VisBStage extends Stage {
 					"  $(document).ready(function(){\n" +
 					// Provide debugging if the VisB SVG file contains such a text span:
 					//"    $(\"#visb_debug_messages\").text(\"changeAttribute(\" + id + \",\" + attribute + \",\" + value +\")\");\n" +
-					"    $(id).attr(attribute, value);\n" +
+					"    if(attribute==\"text\") { $(id).text(value); } else { $(id).attr(attribute, value); };\n" +
 					// Provide warning alert if an SVG object id cannot be found:
 					"    checkSvgId(id,attribute);\n" +
 					"  });\n" +

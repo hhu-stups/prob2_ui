@@ -398,7 +398,7 @@ public class VisBParser {
 			case "word-spacing":
 				break;
 			case "text":
-				return "$(\"#"+id+"\").text(\""+value+"\");\n";
+				return "$(\"#"+id+"\").text(\""+value+"\");\n"; // Note: special case no longer necessary; changeAttribute can deal with text
 			default:
 				throw new VisBParseException("The following attribute cannot be used: \'"+attr+
 											 "\'. Check the VisB help section for supported attributes.");
