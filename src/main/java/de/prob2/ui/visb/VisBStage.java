@@ -1,11 +1,9 @@
 package de.prob2.ui.visb;
 
 import com.google.inject.Injector;
-import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.statespace.Trace;
 import de.prob2.ui.Main;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
+import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -54,7 +52,6 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.ResourceBundle;
 
 /**
@@ -460,20 +457,7 @@ public class VisBStage extends Stage {
 
 	@FXML
 	public void saveTrace() {
-		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
-		Trace copyTrace = currentTrace.get();
-		if (currentTrace.get() != null) {
-			try {
-				traceSaver.save(
-						new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1),
-						currentProject.getCurrentMachine());
-			} catch (Exception e) {
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "history.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW, Collections.EMPTY_LIST);
-				alert.initOwner(this.getScene().getWindow());
-				alert.setCopyTrace(copyTrace);
-				alert.setErrorMessage();
-			}
-		}
+		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB);
 	}
 
 }

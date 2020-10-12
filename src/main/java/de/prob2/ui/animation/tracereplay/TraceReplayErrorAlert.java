@@ -1,11 +1,7 @@
 package de.prob2.ui.animation.tracereplay;
 
 
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 import com.google.inject.Injector;
-
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
@@ -18,10 +14,13 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 
+import java.util.Optional;
+import java.util.ResourceBundle;
+
 
 public final class TraceReplayErrorAlert extends Alert {
 	public enum Trigger {
-		TRIGGER_HISTORY_VIEW, TRIGGER_TRACE_CHECKER, TRIGGER_TRACE_REPLAY_VIEW
+		TRIGGER_VISB, TRIGGER_HISTORY_VIEW, TRIGGER_TRACE_CHECKER, TRIGGER_TRACE_REPLAY_VIEW
 	}
 
 	@FXML
@@ -80,6 +79,7 @@ public final class TraceReplayErrorAlert extends Alert {
 			case TRIGGER_TRACE_REPLAY_VIEW:
 				this.getButtonTypes().add(ButtonType.CLOSE);
 				break;
+			case TRIGGER_VISB:
 			case TRIGGER_HISTORY_VIEW:
 			case TRIGGER_TRACE_CHECKER:
 				this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
@@ -96,9 +96,10 @@ public final class TraceReplayErrorAlert extends Alert {
 
 	void setErrorMessage(boolean tracesAreEqual) {
 		switch (trigger) {
+			case TRIGGER_VISB:
 			case TRIGGER_HISTORY_VIEW:
-				this.setHeaderText(bundle.getString("history.buttons.saveTrace.error"));
-				error.setText(bundle.getString("history.buttons.saveTrace.error.msg"));
+				this.setHeaderText(bundle.getString("traceSave.buttons.saveTrace.error"));
+				error.setText(bundle.getString("traceSave.buttons.saveTrace.error.msg"));
 				this.getDialogPane().setExpandableContent(null);
 				handleAlert(copyTrace, null);
 				break;
