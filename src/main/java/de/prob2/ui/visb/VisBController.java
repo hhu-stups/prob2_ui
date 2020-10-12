@@ -81,8 +81,9 @@ public class VisBController {
 		if(currentProject.getCurrentMachine() != null) {
 			currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 				//This prepares VisB for the new Visualisation
+				closeCurrentVisualisation();
+				//injector.getInstance(VisBStage.class).clear();
 				this.visBVisualisation = new VisBVisualisation();
-				injector.getInstance(VisBStage.class).clear();
 			});
 			currentTrace.addListener(currentTraceChangeListener);
 			injector.getInstance(VisBStage.class).onCloseRequestProperty().setValue(t -> this.clearListeners());
@@ -137,8 +138,8 @@ public class VisBController {
 	 * This method removes the ChangeListener on the Trace. It is used, when the VisB Window is closed.
 	 */
 	void clearListeners(){
-		this.visBVisualisation = new VisBVisualisation();
 		currentTrace.removeListener(currentTraceChangeListener);
+		this.visBVisualisation = new VisBVisualisation();
 	}
 
 	/**
@@ -323,7 +324,7 @@ public class VisBController {
 	private void showUpdateVisualisationNotPossible(){
 		updateInfo("visb.infobox.visualisation.updated.nr",0);
 		injector.getInstance(VisBStage.class).runScript(
-		   "$(\"#visb_error_messages ul\").append(\'<li style=\"color:blue\">Model not initialised</li>\');\n"  );
+		   "$(\"#visb_error_messages ul\").append(\'<li style=\"color:blue\">Model not initialised (" + visBVisualisation.getJsonFile() + ")</li>\');\n"  );
 	}
 
 	/**
@@ -351,7 +352,7 @@ public class VisBController {
 				} else {
 				   EnterAction = ""; LeaveAction = "";
 				}
-				String queryPart = "$(document).ready(function(){\n" +
+				String queryPart = // "$(document).ready(function(){\n" + // This does not seem necessary; and it results in Click Actions being re-added over and over for new models (see PROB2UI-419)
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
 						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
@@ -367,7 +368,8 @@ public class VisBController {
 						"function(){\n" + // function when leaving hover
 						     LeaveAction +
 						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
-						"});\n";
+						// "})" +
+						";\n";
 				onClickEventQuery.append(queryPart);
 			}
 			try {
