@@ -82,7 +82,7 @@
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
-								<Button fx:id="zoomOutButton" onAction="#zoomOut">
+								<Button fx:id="zoomOutButton" onAction="#loadVisBFile">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>

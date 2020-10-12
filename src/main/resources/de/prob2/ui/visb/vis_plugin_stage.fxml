@@ -76,6 +76,14 @@
                                 </padding>
                                 <NavigationButtons/>
                                 <Spacer/>
+                                <Button fx:id="loadVisualisationButton" onAction="#loadVisBFile">
+                                    <graphic>
+                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="%visb.menu.file.open" />
+                                    </tooltip>
+                                </Button>
                                 <Button fx:id="saveTraceButton" onAction="#saveTrace">
                                     <graphic>
                                         <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
@@ -102,11 +110,6 @@
                                 </Button>
                             </HBox>
                             <HBox spacing="10.0">
-                                <Button fx:id="button_loadVis" mnemonicParsing="false" styleClass="button-blue" text="%visb.menu.file.open">
-                                    <HBox.margin>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                    </HBox.margin>
-                                </Button>
                                 <Button fx:id="button_setVis" mnemonicParsing="false" styleClass="button-blue" text="%visb.menu.file.setDefault">
                                     <HBox.margin>
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

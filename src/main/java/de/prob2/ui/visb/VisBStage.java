@@ -73,7 +73,7 @@ public class VisBStage extends Stage {
 	@FXML
 	private MenuBar visbMenuBar;
 	@FXML
-	private Button button_loadVis;
+	private Button loadVisualisationButton;
 	@FXML
 	private Button button_setVis;
 	@FXML
@@ -142,7 +142,7 @@ public class VisBStage extends Stage {
 	public void initialize(){
 		this.stageManager.setMacMenuBar(this, visbMenuBar);
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
-		this.button_loadVis.setOnAction(e -> loadVisBFile());
+		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
 		this.button_setVis.setOnAction(e -> setDefaultVisualisation());
 		this.button_resetVis.setOnAction(e -> resetDefaultVisualisation());
 		this.fileMenu_visB.setOnAction(e -> loadVisBFile());
@@ -407,6 +407,7 @@ public class VisBStage extends Stage {
 	/**
 	 * On click function for the button and file menu item
 	 */
+	@FXML
 	private void loadVisBFile() {
 		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
