@@ -78,8 +78,9 @@ public class VisBController {
 		if(currentProject.getCurrentMachine() != null) {
 			currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 				//This prepares VisB for the new Visualisation
+				closeCurrentVisualisation();
+				//injector.getInstance(VisBStage.class).clear();
 				this.visBVisualisation = new VisBVisualisation();
-				injector.getInstance(VisBStage.class).clear();
 			});
 			currentTrace.addListener(currentTraceChangeListener);
 			injector.getInstance(VisBStage.class).onCloseRequestProperty().setValue(t -> this.clearListeners());
@@ -134,8 +135,8 @@ public class VisBController {
 	 * This method removes the ChangeListener on the Trace. It is used, when the VisB Window is closed.
 	 */
 	void clearListeners(){
-		this.visBVisualisation = new VisBVisualisation();
 		currentTrace.removeListener(currentTraceChangeListener);
+		this.visBVisualisation = new VisBVisualisation();
 	}
 
 	/**
