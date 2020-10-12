@@ -345,7 +345,7 @@ public class VisBController {
 				} else {
 				   EnterAction = ""; LeaveAction = "";
 				}
-				String queryPart = "$(document).ready(function(){\n" +
+				String queryPart = "$(document).one(function(){\n" +
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
 						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
