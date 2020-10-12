@@ -316,7 +316,7 @@ public class VisBController {
 	private void showUpdateVisualisationNotPossible(){
 		updateInfo("visb.infobox.visualisation.updated.nr",0);
 		injector.getInstance(VisBStage.class).runScript(
-		   "$(\"#visb_error_messages ul\").append(\'<li style=\"color:blue\">Model not initialised</li>\');\n"  );
+		   "$(\"#visb_error_messages ul\").append(\'<li style=\"color:blue\">Model not initialised (" + visBVisualisation.getJsonFile() + ")</li>\');\n"  );
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package de.prob2.ui.visb.visbobjects;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
@@ -8,6 +9,7 @@ import java.util.ArrayList;
  */
 public class VisBVisualisation {
 	private Path svgPath;
+	private File jsonFile;
 	private ArrayList<VisBItem> visBItems;
 	private ArrayList<VisBEvent> visBEvents;
 
@@ -15,12 +17,14 @@ public class VisBVisualisation {
 		this.visBItems = null;
 		this.visBEvents = null;
 		this.svgPath = null;
+		this.jsonFile = null;
 	}
 
-	public VisBVisualisation(ArrayList<VisBItem> visBItems, ArrayList<VisBEvent> visBEvents, Path svgPath) {
+	public VisBVisualisation(ArrayList<VisBItem> visBItems, ArrayList<VisBEvent> visBEvents, Path svgPath, File jFile) {
 		this.visBItems = visBItems;
 		this.visBEvents = visBEvents;
 		this.svgPath = svgPath;
+		this.jsonFile = jFile;
 	}
 
 	public ArrayList<VisBEvent> getVisBEvents() {
@@ -33,6 +37,10 @@ public class VisBVisualisation {
 
 	public Path getSvgPath() {
 		return svgPath;
+	}
+
+	public File getJsonFile() {
+		return jsonFile;
 	}
 
 	public VisBEvent getEventForID(String id){
