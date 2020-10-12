@@ -153,8 +153,8 @@ public class VisBStage extends Stage {
 			visBPath.set(null);
 			injector.getInstance(VisBController.class).closeCurrentVisualisation();
 		});
-		this.viewMenu_zoomIn.setOnAction(e -> webView.setZoom(webView.getZoom()*1.2));
-		this.viewMenu_zoomOut.setOnAction(e -> webView.setZoom(webView.getZoom()/1.2));
+		this.viewMenu_zoomIn.setOnAction(e -> zoomIn());
+		this.viewMenu_zoomOut.setOnAction(e -> zoomOut());
 		// zoom fonts in/out (but only of those that are not given a fixed size):
 		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
 		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
@@ -458,6 +458,15 @@ public class VisBStage extends Stage {
 	@FXML
 	public void saveTrace() {
 		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB);
+	}
+
+	@FXML
+	public void zoomIn() {
+		webView.setZoom(webView.getZoom()*1.2);
+	}
+
+	public void zoomOut() {
+		webView.setZoom(webView.getZoom()/1.2);
 	}
 
 }

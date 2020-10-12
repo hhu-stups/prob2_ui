@@ -84,6 +84,22 @@
                                         <Tooltip text="%history.buttons.saveTrace.tooltip" />
                                     </tooltip>
                                 </Button>
+                                <Button fx:id="zoomInButton" onAction="#zoomIn">
+                                    <graphic>
+                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="%visb.menu.view.zoom.in" />
+                                    </tooltip>
+                                </Button>
+                                <Button fx:id="zoomOutButton" onAction="#zoomOut">
+                                    <graphic>
+                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="%visb.menu.view.zoom.out" />
+                                    </tooltip>
+                                </Button>
                             </HBox>
                             <HBox spacing="10.0">
                                 <Button fx:id="button_loadVis" mnemonicParsing="false" styleClass="button-blue" text="%visb.menu.file.open">
