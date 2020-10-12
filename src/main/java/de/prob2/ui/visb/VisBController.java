@@ -14,6 +14,7 @@ import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
+import de.prob2.ui.visb.visbobjects.VisBHover;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
@@ -345,13 +346,15 @@ public class VisBController {
 						alert.show();
 					}
 				}
-				String EnterAction; String LeaveAction;
-				if (visBEvent.hasHover()) { // TO DO: for loop
-					EnterAction = "    changeAttribute(\"#" + visBEvent.getHoverId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverEnterVal() + "\");\n";
-					LeaveAction = "    changeAttribute(\"#" + visBEvent.getHoverId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverLeaveVal() + "\");\n";
-				} else {
-				   EnterAction = ""; LeaveAction = "";
-				}
+				StringBuilder EnterAction = new StringBuilder(); StringBuilder LeaveAction = new StringBuilder();
+				ArrayList<VisBHover> hvs = visBEvent.getHovers();
+				for(int j = 0; j < hvs.size(); j++) {
+					EnterAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
+					          + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverEnterVal() + "\");\n");
+					LeaveAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
+					          + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverLeaveVal() + "\");\n");
+				} 
+				
 				String queryPart = // "$(document).ready(function(){\n" + // This does not seem necessary; and it results in Click Actions being re-added over and over for new models (see PROB2UI-419)
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
@@ -363,10 +366,10 @@ public class VisBController {
 						"  });\n" +
 						// attach a hover function to put event into visb_debug_messages text field
 						"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
-						    EnterAction +
+						    EnterAction.toString() +
 						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);}," +
 						"function(){\n" + // function when leaving hover
-						     LeaveAction +
+						     LeaveAction.toString() +
 						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
 						// "})" +
 						";\n";

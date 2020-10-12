@@ -158,8 +158,10 @@ class VisBFileHandler {
 	                            String id, String eventS, ArrayList<String> predicates,
 	                            JsonObject current_obj) throws VisBParseException {
 	    
-		VisBHover hover;
+		ArrayList<VisBHover> hovers = new ArrayList<VisBHover>();
 		if(current_obj.has("hover")){
+		   // TO DO: treat list of hovers
+		   VisBHover hover;
 		   String hoverid; String hoverAttr; String hoverEnter; String hoverLeave;
 		   JsonObject hv = current_obj.getAsJsonObject("hover");
 		   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
@@ -172,11 +174,10 @@ class VisBFileHandler {
 		   }
 		   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
 		   hover = new VisBHover(hoverid,hoverAttr,hoverEnter,hoverLeave);
-		} else {
-		   hover = null;
+		   hovers.add(hover);
 		}
 		
-		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hover);
+		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hovers);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
 		} else {
