@@ -24,8 +24,10 @@ public class VisBConnector {
 	 * Whenever a svg item, that has an event in the JSON / VisB file is clicked, this method redirects the click towards the {@link VisBController}
 	 * @param id of the svg item, that is clicked
 	 */
-	public void click(String id){
-		LOGGER.debug("SVG Element with ID "+id+" was clicked.");
-		this.injector.getInstance(VisBController.class).executeEvent(id);
+	public void click(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey){
+	    // probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
+		LOGGER.debug("\nSVG Element with ID "+id+" was clicked at page position " + pageX + "," + pageY 
+		                + " with shift "+shiftKey + " cmd/meta " + metaKey); // 1=left, 2=middle, 3=right
+		this.injector.getInstance(VisBController.class).executeEvent(id,pageX,pageY,shiftKey,metaKey);
 	}
 }

@@ -17,6 +17,7 @@ import com.google.gson.stream.JsonReader;
 
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
+import de.prob2.ui.visb.visbobjects.VisBHover;
 import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
@@ -94,9 +95,7 @@ class VisBFileHandler {
 					System.out.println("Ignoring VisB Event for " + id);
 				} else {
 					String eventS = current_obj.get("event").getAsString();
-					if(eventS.isEmpty()){
-						throw new VisBParseException("The event for " + id + " in your visualisation file has an empty event body.");
-					}
+					// we now also allow empty event in case we only want to hover
 					ArrayList<String> predicates = new ArrayList<>();
 					if(current_obj.has("predicates")){
 						JsonArray jsonPredicates = current_obj.getAsJsonArray("predicates");
@@ -104,6 +103,7 @@ class VisBFileHandler {
 							predicates.add(jsonPredicates.get(i).getAsString());
 						}
 					}
+					
 					JsonArray repArray = getRepeatArray(current_obj,"event "+id);
 					if (repArray != null) {
 						// a list of strings which will replace %0, ... 
@@ -127,10 +127,10 @@ class VisBFileHandler {
 								}
 								// we could check that all arrays have same size; otherwise a pattern will not be replaced
 							}
-							AddVisBEvent(visBEvents, repId, repEvent, repPreds);
+							AddVisBEvent(visBEvents, repId, repEvent, repPreds, current_obj);
 						}
-					} else { // no repititions
-						AddVisBEvent(visBEvents, id, eventS, predicates);
+					} else { // no repititions have to be applied
+						AddVisBEvent(visBEvents, id, eventS, predicates, current_obj);
 					}
 				}
 			} else if (!current_obj.has("id")){
@@ -143,9 +143,40 @@ class VisBFileHandler {
 		return visBEvents;
 	}
 	
+	// utility to get attribute and throw exception if it does not exist
+	private static String getAttrString(JsonObject obj, String attr,String ctxt) throws VisBParseException {
+	   JsonElement el = obj.get(attr);
+	   if(el==null) {
+	       throw new VisBParseException("Missing attribute "+attr+" for "+ctxt);
+	   } else {
+	     return el.getAsString();
+	   }
+	}
+	
+	// create the VisB Event, after assembling hover information
 	private static void AddVisBEvent(ArrayList<VisBEvent> visBEvents, 
-	                            String id, String eventS, ArrayList<String> predicates ) throws VisBParseException {
-		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates);
+	                            String id, String eventS, ArrayList<String> predicates,
+	                            JsonObject current_obj) throws VisBParseException {
+	    
+		VisBHover hover;
+		if(current_obj.has("hover")){
+		   String hoverid; String hoverAttr; String hoverEnter; String hoverLeave;
+		   JsonObject hv = current_obj.getAsJsonObject("hover");
+		   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
+		   hoverEnter = getAttrString(hv,"enter","hover within event "+id); // TO DO: apply replacements
+		   hoverLeave = getAttrString(hv,"leave","hover within event "+id); // ditto
+		   if(hv.has("id")) {
+			  hoverid = getAttrString(hv,"id","hover within event "+id); // ditto
+		   } else {
+			  hoverid = id;
+		   }
+		   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
+		   hover = new VisBHover(hoverid,hoverAttr,hoverEnter,hoverLeave);
+		} else {
+		   hover = null;
+		}
+		
+		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hover);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
 		} else {

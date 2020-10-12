@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
+import java.util.ArrayList;
 
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler} and {@link VisBParser}.
@@ -165,27 +166,43 @@ public class VisBController {
 	 * This method is used by the {@link VisBConnector} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
-	void executeEvent(String id){
+	void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey){
 		LOGGER.debug("Finding event for id: "+id);
 		if(!currentTrace.getCurrentState().isInitialised()){
 			updateInfo("visb.infobox.events.not.initialise");
 			return;
 		}
 		VisBEvent event = visBVisualisation.getEventForID(id);
-		if(event == null){
+		// TO DO: adapt predicates or add predicate for Click Coordinates
+		if(event == null || event.getEvent().equals("")) {
 			updateInfo("visb.infobox.no.events.for.id", id);
 		} else {
 			Trace trace = currentTrace.get();
-			if (trace.canExecuteEvent(event.getEvent(), event.getPredicates())) {
-				trace = trace.execute(event.getEvent(), event.getPredicates());
+			// if (trace.canExecuteEvent(event.getEvent(), event.getPredicates())) {
+		    try {
+		        // perform replacements to transmit event information:
+		        ArrayList<String> preds= new ArrayList<String>();
+				preds.addAll(event.getPredicates());
+				for(int j = 0; j < preds.size(); j++) {
+					preds.set(j,preds.get(j).replace("%shiftKey", (shiftKey ? "TRUE" : "FALSE"))
+					                        .replace("%metaKey",  (metaKey  ? "TRUE" : "FALSE"))
+					                        .replace("%pageX", Integer.toString(pageX))
+					                        .replace("%pageY", Integer.toString(pageY))
+					             );
+				}
+				LOGGER.debug("Executing event for id: "+id + " and preds = " + preds);
+				trace = trace.execute(event.getEvent(), preds);
+				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + preds);
 				currentTrace.set(trace);
-				LOGGER.debug("Executing event for id: "+id);
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
-			} else {
+			} catch (IllegalArgumentException e) {
+			    // TO DO: check if event can simply not be executed or if there is an error in the predicates
+				LOGGER.debug("Cannot execute event for id: "+e);
 				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			}
 		}
 	}
+	
 
 	/**
 	 * Setting up the svg file for internal usage via {@link VisBFileHandler}.
@@ -310,23 +327,40 @@ public class VisBController {
 			StringBuilder onClickEventQuery = new StringBuilder();
 			for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
 				String event = visBEvent.getEvent();
-				OperationInfo operationInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
-				boolean isValidTopLevelEvent = operationInfo != null && operationInfo.isTopLevel();
-				if(!isValidTopLevelEvent) {
-					Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.no.events.for.id", event);
-					alert.initOwner(this.injector.getInstance(VisBStage.class));
-					alert.show();
+				if (!event.equals("")) { // we allow to provide just hover
+				    System.out.println("Check event " + event);
+					OperationInfo operationInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
+					boolean isValidTopLevelEvent = operationInfo != null && operationInfo.isTopLevel();
+					if(!isValidTopLevelEvent) {
+						Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.no.events.for.id", event);
+						alert.initOwner(this.injector.getInstance(VisBStage.class));
+						alert.show();
+					}
+				}
+				String EnterAction; String LeaveAction;
+				if (visBEvent.hasHover()) { // TO DO: for loop
+					EnterAction = "    changeAttribute(\"#" + visBEvent.getHoverId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverEnterVal() + "\");\n";
+					LeaveAction = "    changeAttribute(\"#" + visBEvent.getHoverId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverLeaveVal() + "\");\n";
+				} else {
+				   EnterAction = ""; LeaveAction = "";
 				}
 				String queryPart = "$(document).ready(function(){\n" +
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
-						"  $(\"#" + visBEvent.getId() + "\").click(function(){\n" +
-						"    visBConnector.click(this.id);\n" +
+						"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
+						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
+						"    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);\n" +
+						// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
+						// event.which: 1=left mouse button, 2, 3
+						// event.clientX,event.clientY, screenX, screenY : less useful probably
 						"  });\n" +
 						// attach a hover function to put event into visb_debug_messages text field
-						"  $(\"#" + visBEvent.getId() + "\").hover(function(){\n" +
-						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + "\");},function(){\n" +
+						"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
+						    EnterAction +
+						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);}," +
+						"function(){\n" + // function when leaving hover
+						     LeaveAction +
 						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
-						"});";
+						"});\n";
 				onClickEventQuery.append(queryPart);
 			}
 			try {
