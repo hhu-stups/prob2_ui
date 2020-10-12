@@ -345,7 +345,7 @@ public class VisBController {
 				} else {
 				   EnterAction = ""; LeaveAction = "";
 				}
-				String queryPart = "$(document).one(function(){\n" +
+				String queryPart = // "$(document).ready(function(){\n" + // This does not seem necessary; and it results in Click Actions being re-added over and over for new models (see PROB2UI-419)
 				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
 						"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
 						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
@@ -361,7 +361,8 @@ public class VisBController {
 						"function(){\n" + // function when leaving hover
 						     LeaveAction +
 						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
-						"});\n";
+						// "})" +
+						";\n";
 				onClickEventQuery.append(queryPart);
 			}
 			try {
