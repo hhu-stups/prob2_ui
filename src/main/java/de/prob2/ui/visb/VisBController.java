@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
@@ -69,7 +70,7 @@ public class VisBController {
 				if(newTrace.getCurrentState() != null && newTrace.getCurrentState().isInitialised()){
 					updateVisualisation();
 				} else {
-				    showUpdateVisualisationNotPossible();
+					showUpdateVisualisationNotPossible();
 				}
 			}
 		});
@@ -113,7 +114,7 @@ public class VisBController {
 					injector.getInstance(VisBStage.class).runScript(
 					   "$(\"#visb_debug_messages\").text(\"\");\n" + // reset VisB debug text (if it exists)
 					   "$(\"#visb_error_messages ul\").empty();\n"  // reset VisB error list
-					    + svgChanges);
+						+ svgChanges);
 				} catch (JSException e){
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 					updateInfo("visb.infobox.visualisation.error");
@@ -184,16 +185,16 @@ public class VisBController {
 		} else {
 			Trace trace = currentTrace.get();
 			// if (trace.canExecuteEvent(event.getEvent(), event.getPredicates())) {
-		    try {
-		        // perform replacements to transmit event information:
-		        ArrayList<String> preds= new ArrayList<String>();
+			try {
+				// perform replacements to transmit event information:
+				ArrayList<String> preds= new ArrayList<String>();
 				preds.addAll(event.getPredicates());
 				for(int j = 0; j < preds.size(); j++) {
 					preds.set(j,preds.get(j).replace("%shiftKey", (shiftKey ? "TRUE" : "FALSE"))
-					                        .replace("%metaKey",  (metaKey  ? "TRUE" : "FALSE"))
-					                        .replace("%pageX", Integer.toString(pageX))
-					                        .replace("%pageY", Integer.toString(pageY))
-					             );
+											.replace("%metaKey",  (metaKey  ? "TRUE" : "FALSE"))
+											.replace("%pageX", Integer.toString(pageX))
+											.replace("%pageY", Integer.toString(pageY))
+								 );
 				}
 				LOGGER.debug("Executing event for id: "+id + " and preds = " + preds);
 				trace = trace.execute(event.getEvent(), preds);
@@ -202,10 +203,16 @@ public class VisBController {
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			} catch (ExecuteOperationException e) {
 				if(e.getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
-					Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
+					Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
 					alert.initOwner(this.injector.getInstance(VisBStage.class));
 					alert.show();
 				}
+				LOGGER.debug("Cannot execute event for id: "+e);
+				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
+			} catch (EvaluationException e) {
+				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
+				alert.initOwner(this.injector.getInstance(VisBStage.class));
+				alert.show();
 				LOGGER.debug("Cannot execute event for id: "+e);
 				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			}
@@ -319,11 +326,10 @@ public class VisBController {
 			//Updates visualisation, only if current state is initialised and visualisation items are not empty
 			updateVisualisation();
 		} else {
-		    showUpdateVisualisationNotPossible();
+			showUpdateVisualisationNotPossible();
 		}
 	}
 	private void showUpdateVisualisationNotPossible(){
-		LOGGER.debug("showUpdateVisualisationNotPossible");
 		updateInfo("visb.infobox.visualisation.updated.nr",0);
 		injector.getInstance(VisBStage.class).runScript(
 		   "$(\"#visb_error_messages ul\").append(\'<li style=\"color:blue\">Model not initialised (" + visBVisualisation.getJsonFile() + ")</li>\');\n"  );
@@ -386,7 +392,7 @@ public class VisBController {
 	}
 	
 	private boolean isValidTopLevelEvent(String event) {
-			System.out.println("Check event " + event);
+			System.out.println("Check if event toplevel " + event);
 			OperationInfo operationInfo = 
 			        currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
 			return operationInfo != null && operationInfo.isTopLevel();

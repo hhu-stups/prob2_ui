@@ -418,10 +418,6 @@ public final class StatesView extends StackPane {
 		}
 
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
-		// Workaround for JavaFX bug JDK-8199324/PROB2UI-377 on Java 10 and later.
-		// If the contents of a TreeTableView are changed while there is a selection,
-		// JavaFX incorrectly throws an IllegalStateException with message "Not a permutation change".
-		tv.getSelectionModel().clearSelection();
 
 		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(to.getStateSpace());
 		// If there is a filter, recursively expand and evaluate the entire tree beforehand.
@@ -435,6 +431,10 @@ public final class StatesView extends StackPane {
 		final TreeItem<StateItem> newRoot = createRootItem();
 		addSubformulaItems(newRoot, topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
 		Platform.runLater(() -> {
+			// Workaround for JavaFX bug JDK-8199324/PROB2UI-377 on Java 10 and later.
+			// If the contents of a TreeTableView are changed while there is a selection,
+			// JavaFX incorrectly throws an IllegalStateException with message "Not a permutation change".
+			tv.getSelectionModel().clearSelection();
 			this.tv.setRoot(newRoot);
 			this.tv.getSelectionModel().select(selectedRow);
 		});

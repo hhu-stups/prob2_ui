@@ -16,22 +16,28 @@
 <fx:root type="MainController" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.3,0.7">
-			<Accordion fx:id="leftAccordion">
-				<panes>
-					<TitledPane text="%common.views.operations" fx:id="operationsTP" id="operationsTP">
-						<OperationsView/>
-					</TitledPane>
-					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
-						<AnimationView/>
-					</TitledPane>
-					<TitledPane text="%common.views.verifications" fx:id="verificationsTP" id="verificationsTP">
-						<VerificationsView/>
-					</TitledPane>
-					<TitledPane text="%common.views.project" fx:id="projectTP" id="projectTP">
-						<ProjectView fx:id="projectView"/>
-					</TitledPane>
-				</panes>
-			</Accordion>
+			<SplitPane fx:id="verticalSP" dividerPositions="0.5" orientation="VERTICAL">
+				<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
+					<panes>
+						<TitledPane text="%common.views.operations" fx:id="operationsTP" id="operationsTP" collapsible="false">
+							<OperationsView/>
+						</TitledPane>
+					</panes>
+				</Accordion>
+				<Accordion fx:id="leftAccordion2">
+					<panes>
+						<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
+							<AnimationView/>
+						</TitledPane>
+						<TitledPane text="%common.views.verifications" fx:id="verificationsTP" id="verificationsTP">
+							<VerificationsView/>
+						</TitledPane>
+						<TitledPane text="%common.views.project" fx:id="projectTP" id="projectTP">
+							<ProjectView fx:id="projectView"/>
+						</TitledPane>
+					</panes>
+				</Accordion>
+			</SplitPane>
 			<MainView/>
 			<Accordion fx:id="rightAccordion">
 				<panes>
