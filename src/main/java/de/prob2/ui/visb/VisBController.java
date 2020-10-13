@@ -341,7 +341,7 @@ public class VisBController {
 					OperationInfo operationInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
 					boolean isValidTopLevelEvent = operationInfo != null && operationInfo.isTopLevel();
 					if(!isValidTopLevelEvent) {
-						Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.no.events.for.id", event);
+						Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.invalid.event", event);
 						alert.initOwner(this.injector.getInstance(VisBStage.class));
 						alert.show();
 					}
