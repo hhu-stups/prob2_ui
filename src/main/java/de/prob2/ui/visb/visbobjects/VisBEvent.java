@@ -10,7 +10,7 @@ public class VisBEvent {
 	private String id;
 	private String event;
 	private ArrayList<String> predicates;
-	private VisBHover hover; // TO DO: maybe provide multiple values and allow value to depend on B state
+	private ArrayList<VisBHover> hovers; // TO DO: maybe provide multiple values and allow value to depend on B state
 
 
 	/**
@@ -20,11 +20,11 @@ public class VisBEvent {
 	 * @param predicates the predicates have to be the predicates, which are used for the event above
 	 */
 	public VisBEvent(String id, String event, ArrayList<String> predicates,
-	                 VisBHover hover){
+	                 ArrayList<VisBHover> hovers){
 		this.id = id;
 		this.event = event;
 		this.predicates = predicates;
-		this.hover = hover;
+		this.hovers = hovers;
 	}
 
 	public String getEvent() {
@@ -38,22 +38,9 @@ public class VisBEvent {
 	public String getId() {
 		return id;
 	}
-
-	public boolean hasHover() {  // TO DO: return number of hovers
-	    if(hover!=null) return true ; return false;
-	}
 	
-	public String getHoverId() {
-		return hover.getHoverId();
-	}
-	public String getHoverAttr() {
-		return hover.getHoverAttr();
-	}
-	public String getHoverEnterVal() {
-		return hover.getHoverEnterVal();
-	}
-	public String getHoverLeaveVal() {
-		return hover.getHoverLeaveVal();
+	public ArrayList<VisBHover> getHovers() {
+		return hovers;
 	}
 
 	@Override

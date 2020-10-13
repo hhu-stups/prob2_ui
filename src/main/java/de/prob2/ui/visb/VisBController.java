@@ -15,6 +15,7 @@ import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
+import de.prob2.ui.visb.visbobjects.VisBHover;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
@@ -347,36 +348,38 @@ public class VisBController {
 					OperationInfo operationInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
 					boolean isValidTopLevelEvent = operationInfo != null && operationInfo.isTopLevel();
 					if(!isValidTopLevelEvent) {
-						Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.no.events.for.id", event);
+						Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.invalid.event", event);
 						alert.initOwner(this.injector.getInstance(VisBStage.class));
 						alert.show();
 					}
 				}
-				String EnterAction; String LeaveAction;
-				if (visBEvent.hasHover()) { // TO DO: for loop
-					EnterAction = "    changeAttribute(\"#" + visBEvent.getHoverId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverEnterVal() + "\");\n";
-					LeaveAction = "    changeAttribute(\"#" + visBEvent.getHoverId() + "\", \""+ visBEvent.getHoverAttr() + "\", \""+ visBEvent.getHoverLeaveVal() + "\");\n";
-				} else {
-				   EnterAction = ""; LeaveAction = "";
+				StringBuilder EnterAction = new StringBuilder(); StringBuilder LeaveAction = new StringBuilder();
+				ArrayList<VisBHover> hvs = visBEvent.getHovers();
+				for(int j = 0; j < hvs.size(); j++) {
+					EnterAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
+							  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverEnterVal() + "\");\n");
+					LeaveAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
+							  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverLeaveVal() + "\");\n");
 				}
+
 				String queryPart = // "$(document).ready(function(){\n" + // This does not seem necessary; and it results in Click Actions being re-added over and over for new models (see PROB2UI-419)
 						"  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
-						"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
-						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
-						"    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);\n" +
-						// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
-						// event.which: 1=left mouse button, 2, 3
-						// event.clientX,event.clientY, screenX, screenY : less useful probably
-						"  });\n" +
-						// attach a hover function to put event into visb_debug_messages text field
-						"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
-							EnterAction +
-						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);}," +
-						"function(){\n" + // function when leaving hover
-							 LeaveAction +
-						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
-						// "})" +
-						";\n";
+								"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
+								"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
+								"    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);\n" +
+								// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
+								// event.which: 1=left mouse button, 2, 3
+								// event.clientX,event.clientY, screenX, screenY : less useful probably
+								"  });\n" +
+								// attach a hover function to put event into visb_debug_messages text field
+								"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
+								EnterAction.toString() +
+								"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);}," +
+								"function(){\n" + // function when leaving hover
+								LeaveAction.toString() +
+								"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
+								// "})" +
+								";\n";
 				onClickEventQuery.append(queryPart);
 			}
 			try {

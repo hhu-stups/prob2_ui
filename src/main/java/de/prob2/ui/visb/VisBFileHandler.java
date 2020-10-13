@@ -158,25 +158,27 @@ class VisBFileHandler {
 	                            String id, String eventS, ArrayList<String> predicates,
 	                            JsonObject current_obj) throws VisBParseException {
 	    
-		VisBHover hover;
-		if(current_obj.has("hover")){
-		   String hoverid; String hoverAttr; String hoverEnter; String hoverLeave;
-		   JsonObject hv = current_obj.getAsJsonObject("hover");
-		   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
-		   hoverEnter = getAttrString(hv,"enter","hover within event "+id); // TO DO: apply replacements
-		   hoverLeave = getAttrString(hv,"leave","hover within event "+id); // ditto
-		   if(hv.has("id")) {
-			  hoverid = getAttrString(hv,"id","hover within event "+id); // ditto
-		   } else {
-			  hoverid = id;
+		ArrayList<VisBHover> hovers = new ArrayList<VisBHover>();
+		if(current_obj.has("hovers")){
+           JsonArray jsonHovers = current_obj.getAsJsonArray("hovers");
+		   for(int i = 0; i < jsonHovers.size();i++){
+			   JsonObject hv = jsonHovers.get(i).getAsJsonObject();
+		   
+			   String hoverid; String hoverAttr; String hoverEnter; String hoverLeave;
+			   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
+			   hoverEnter = getAttrString(hv,"enter","hover within event "+id); // TO DO: apply replacements
+			   hoverLeave = getAttrString(hv,"leave","hover within event "+id); // ditto
+			   if(hv.has("id")) {
+				  hoverid = getAttrString(hv,"id","hover within event "+id); // ditto
+			   } else {
+				  hoverid = id;
+			   }
+			   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
+			   hovers.add(new VisBHover(hoverid,hoverAttr,hoverEnter,hoverLeave));
 		   }
-		   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
-		   hover = new VisBHover(hoverid,hoverAttr,hoverEnter,hoverLeave);
-		} else {
-		   hover = null;
 		}
 		
-		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hover);
+		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hovers);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
 		} else {
