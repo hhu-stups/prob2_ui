@@ -177,8 +177,8 @@ class VisBFileHandler {
 			   hovers.add(new VisBHover(hoverid,hoverAttr,hoverEnter,hoverLeave));
 		   }
 		}
-		
-		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hovers);
+		Boolean optional = (current_obj.has("optional") && current_obj.get("optional").getAsBoolean());
+		VisBEvent visBEvent = new VisBEvent(id, optional , eventS, predicates, hovers);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
 		} else {

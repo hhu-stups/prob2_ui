@@ -323,6 +323,7 @@ public class VisBController {
 		}
 	}
 	private void showUpdateVisualisationNotPossible(){
+		LOGGER.debug("showUpdateVisualisationNotPossible");
 		updateInfo("visb.infobox.visualisation.updated.nr",0);
 		injector.getInstance(VisBStage.class).runScript(
 		   "$(\"#visb_error_messages ul\").append(\'<li style=\"color:blue\">Model not initialised (" + visBVisualisation.getJsonFile() + ")</li>\');\n"  );
@@ -336,44 +337,44 @@ public class VisBController {
 			StringBuilder onClickEventQuery = new StringBuilder();
 			for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
 				String event = visBEvent.getEvent();
-				if (!event.equals("")) { // we allow to provide just hover
-				    System.out.println("Check event " + event);
-					OperationInfo operationInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
-					boolean isValidTopLevelEvent = operationInfo != null && operationInfo.isTopLevel();
-					if(!isValidTopLevelEvent) {
+				if (!(event.equals("") || isValidTopLevelEvent(event))) { // for "" we allow to provide just hover
+					if (visBEvent.eventIsOptional()) {
+					    System.out.println("Ignoring event " + event);
+					} else {
 						Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.invalid.event", event);
 						alert.initOwner(this.injector.getInstance(VisBStage.class));
 						alert.show();
 					}
-				}
-				StringBuilder EnterAction = new StringBuilder(); StringBuilder LeaveAction = new StringBuilder();
-				ArrayList<VisBHover> hvs = visBEvent.getHovers();
-				for(int j = 0; j < hvs.size(); j++) {
-					EnterAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
-					          + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverEnterVal() + "\");\n");
-					LeaveAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
-					          + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverLeaveVal() + "\");\n");
-				} 
+				} else {
+					StringBuilder EnterAction = new StringBuilder(); StringBuilder LeaveAction = new StringBuilder();
+					ArrayList<VisBHover> hvs = visBEvent.getHovers();
+					for(int j = 0; j < hvs.size(); j++) {
+						EnterAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
+								  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverEnterVal() + "\");\n");
+						LeaveAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
+								  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverLeaveVal() + "\");\n");
+					} 
 				
-				String queryPart = // "$(document).ready(function(){\n" + // This does not seem necessary; and it results in Click Actions being re-added over and over for new models (see PROB2UI-419)
-				        "  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
-						"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
-						"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
-						"    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);\n" +
-						// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
-						// event.which: 1=left mouse button, 2, 3
-						// event.clientX,event.clientY, screenX, screenY : less useful probably
-						"  });\n" +
-						// attach a hover function to put event into visb_debug_messages text field
-						"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
-						    EnterAction.toString() +
-						"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);}," +
-						"function(){\n" + // function when leaving hover
-						     LeaveAction.toString() +
-						"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
-						// "})" +
-						";\n";
-				onClickEventQuery.append(queryPart);
+					String queryPart = // "$(document).ready(function(){\n" + // This does not seem necessary; and it results in Click Actions being re-added over and over for new models (see PROB2UI-419)
+							"  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
+							"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
+							"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
+							"    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);\n" +
+							// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
+							// event.which: 1=left mouse button, 2, 3
+							// event.clientX,event.clientY, screenX, screenY : less useful probably
+							"  });\n" +
+							// attach a hover function to put event into visb_debug_messages text field
+							"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
+								EnterAction.toString() +
+							"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);}," +
+							"function(){\n" + // function when leaving hover
+								 LeaveAction.toString() +
+							"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
+							// "})" +
+							";\n";
+					onClickEventQuery.append(queryPart);
+				}
 			}
 			try {
 				this.injector.getInstance(VisBStage.class).loadOnClickFunctions(onClickEventQuery.toString());
@@ -382,5 +383,12 @@ public class VisBController {
 				updateInfo(bundle.getString("visb.infobox.visualisation.events.alert"));
 			}
 		}
+	}
+	
+	private boolean isValidTopLevelEvent(String event) {
+			System.out.println("Check event " + event);
+			OperationInfo operationInfo = 
+			        currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
+			return operationInfo != null && operationInfo.isTopLevel();
 	}
 }
