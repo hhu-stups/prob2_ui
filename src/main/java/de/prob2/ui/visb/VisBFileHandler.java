@@ -37,6 +37,7 @@ class VisBFileHandler {
 		Gson gson = new Gson();
 		JsonReader reader = new JsonReader(new FileReader(inputFile));
 		JsonObject visBFile = gson.fromJson(reader, JsonObject.class);
+		String parentFile = inputFile.getParentFile().toString();
 		Path svgPath;
 		if(visBFile.has("svg")){
 			String filePath = visBFile.get("svg").getAsString();
@@ -45,7 +46,7 @@ class VisBFileHandler {
 			} else {
 				svgPath = Paths.get(filePath);
 				if (!svgPath.isAbsolute()) {
-					svgPath = Paths.get(inputFile.getParentFile().toString(), filePath);
+					svgPath = Paths.get(parentFile, filePath);
 				}
 			}
 		} else{
@@ -54,8 +55,8 @@ class VisBFileHandler {
 		
 	    ArrayList<VisBItem> visBItems = new ArrayList<>();
 		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-		assembleVisList(visBFile,visBItems);
-		assembleEventList(visBFile,visBEvents);
+		
+		processCoreFile(gson, visBFile, parentFile, visBItems, visBEvents);
 		
 		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
 			return null;
@@ -64,7 +65,27 @@ class VisBFileHandler {
 		}
 	}
 	
-
+	
+	private static void processCoreFile (Gson gson, JsonObject visBFile, String parentFile,
+	                                     ArrayList<VisBItem> visBItems, 
+	                                     ArrayList<VisBEvent> visBEvents) throws IOException, VisBParseException {
+	
+		if(visBFile.has("include")) {
+			String includedFileName = visBFile.get("include").getAsString();
+			Path includedFilePath = Paths.get(includedFileName);
+			if (!includedFilePath.isAbsolute()) {
+				includedFilePath = Paths.get(parentFile, includedFileName);
+			}
+			// TO DO : check for cycles in inclusion
+			JsonReader reader = new JsonReader(new FileReader(includedFilePath.toFile()));
+			JsonObject includedVisBFile = gson.fromJson(reader, JsonObject.class);
+			processCoreFile(gson, includedVisBFile,  parentFile, visBItems, visBEvents);
+		}
+		assembleVisList(visBFile,visBItems);
+		assembleEventList(visBFile,visBEvents);
+	}
+    
+    
 	/**
 	 * This method assembles the events into a {@link ArrayList}. There is only one event possible for on click events for SVGs.
 	 * @param array {@link JsonArray} containing possible events
