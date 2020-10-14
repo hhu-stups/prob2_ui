@@ -51,26 +51,19 @@ class VisBFileHandler {
 		} else{
 			throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
 		}
-		ArrayList<VisBItem> visBItems = new ArrayList<>();
-		if(visBFile.has("items")) {
-			JsonArray visArray = (JsonArray) visBFile.get("items");
-			visBItems = assembleVisList(visArray);
-		} else {
-		     visBItems = new ArrayList<>();
-		}
+		
+	    ArrayList<VisBItem> visBItems = new ArrayList<>();
 		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-		if(visBFile.has("events")) {
-			 JsonArray eventsArray = (JsonArray) visBFile.get("events");
-			 visBEvents = assembleEventList(eventsArray);
-		} else {
-		     visBEvents = new ArrayList<>();
-		}
+		assembleVisList(visBFile,visBItems);
+		assembleEventList(visBFile,visBEvents);
+		
 		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
 			return null;
 		} else {
 			return new VisBVisualisation(visBItems, visBEvents, svgPath, inputFile);
 		}
 	}
+	
 
 	/**
 	 * This method assembles the events into a {@link ArrayList}. There is only one event possible for on click events for SVGs.
@@ -78,9 +71,12 @@ class VisBFileHandler {
 	 * @return {@link ArrayList}, where the key is the String id and the {@link VisBEvent} is the value
 	 * @throws VisBParseException If the format of the file is not right.
 	 */
-	private static ArrayList<VisBEvent> assembleEventList(JsonArray array) throws VisBParseException{
-		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-		if(array == null || array.isJsonNull() || array.size() == 0) return visBEvents;
+	private static void assembleEventList(JsonObject visBFile, ArrayList<VisBEvent> visBEvents) 
+	                    throws VisBParseException{
+		if(!visBFile.has("events"))
+		    return;
+		JsonArray array = (JsonArray) visBFile.get("events");
+		if(array == null || array.isJsonNull() || array.size() == 0) return;
 		for (Object event : array) {
 			JsonObject current_obj = (JsonObject) event;
 			if(current_obj.isJsonNull()){
@@ -140,7 +136,7 @@ class VisBFileHandler {
 				throw new VisBParseException("The event for " + id + " in your visualisation file has no \"event\" attribute.");
 			}
 		}
-		return visBEvents;
+		return;
 	}
 	
 	// utility to get attribute and throw exception if it does not exist
@@ -201,9 +197,12 @@ class VisBFileHandler {
 	 * @return {@link ArrayList}, which contains {@link VisBItem} as items.
 	 * @throws VisBParseException If the format of the file is not right.
 	 */
-	private static ArrayList<VisBItem> assembleVisList(JsonArray array) throws VisBParseException{
-		ArrayList<VisBItem> visBItems = new ArrayList<>();
-		if(array == null || array.isJsonNull() || array.size() == 0) return visBItems;
+	private static void assembleVisList(JsonObject visBFile, ArrayList<VisBItem> visBItems)
+	               throws VisBParseException{
+		if(!visBFile.has("items"))
+		    return;
+		JsonArray array = (JsonArray) visBFile.get("items");
+		if(array == null || array.isJsonNull() || array.size() == 0) return;
 		for (Object item : array) {
 			JsonObject current_obj = (JsonObject) item;
 			if(current_obj.isJsonNull()){
@@ -251,7 +250,7 @@ class VisBFileHandler {
 				throw new VisBParseException("There is a item in your visualisation file, that has no \"value\" member.");
 			}
 		}
-		return visBItems;
+		return;
 	}
 	
 	// utility to get a JsonArray; a single Object is automatically transformed into a single item array
