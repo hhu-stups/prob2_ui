@@ -160,7 +160,7 @@ public class TraceChecker implements ITraceChecker {
 		if (isNewTrace) {
 			Platform.runLater(() -> {
 				Alert alert = new Alert(Alert.AlertType.WARNING);
-				alert.initOwner(stageManager.getCurrent());
+				stageManager.register(alert);
 				alert.setContentText(String.format(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"), lineNumber(replayTrace, copyTrace.size()), replayTrace.getErrorMessageParams()[0], replayTrace.getErrorMessageParams()[1]));
 				alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 				alert.show();
@@ -172,6 +172,7 @@ public class TraceChecker implements ITraceChecker {
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, replayTrace.getErrorMessageParams());
 				boolean isEqual = currentTrace.get().getTransitionList().equals(copyTrace.getTransitionList());
 
+				stageManager.register(alert);
 				alert.setTraceSize(copyTrace.getTransitionList().size());
 				alert.setPersistentTraceSize(persistentTrace.getTransitionList().size());
 				alert.setLineNumber(lineNumber(replayTrace, copyTrace.size()));

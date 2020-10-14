@@ -49,7 +49,6 @@ public class TraceDiff extends VBox {
 
 	@FXML private Button setReplayed;
 	@FXML private Button showAlert;
-	@FXML private Button savePersistent;
 	@FXML private Button setCurrent;
 
 	@FXML private VBox persistentBox;
@@ -74,10 +73,9 @@ public class TraceDiff extends VBox {
 	@FXML
 	private void initialize() {
 		this.setPadding(new Insets(5,5,5,5));
-		double initialWidth = this.getWidth()/4;
+		double initialWidth = this.getWidth()/3;
 		setReplayed.setPrefWidth(initialWidth);
 		showAlert.setPrefWidth(initialWidth);
-		savePersistent.setPrefWidth(initialWidth);
 		setCurrent.setPrefWidth(initialWidth);
 
 		this.checkBoxListViewMap.put(replayed, replayedList);
@@ -176,7 +174,6 @@ public class TraceDiff extends VBox {
 			this.getScene().getWindow().hide();
 		});
 		showAlert.setOnAction(e -> alert.showAlertAgain());
-		savePersistent.setOnAction(e -> injector.getInstance(TraceFileHandler.class).save(persistent, injector.getInstance(CurrentProject.class).getCurrentMachine()));
 		setCurrent.setOnAction(e -> {
 			currentTrace.set(current);
 			this.getScene().getWindow().hide();
@@ -281,16 +278,10 @@ public class TraceDiff extends VBox {
 				persistent.setSelected(false);
 				listBox.getChildren().remove(persistentBox);
 			}
-			if (buttonBox.getChildren().contains(savePersistent)) {
-				buttonBox.getChildren().remove(savePersistent);
-			}
 		} else {
 			replayed.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
 			if (!listBox.getChildren().contains(persistentBox)) {
 				listBox.getChildren().add(persistentBox);
-			}
-			if (!buttonBox.getChildren().contains(savePersistent)) {
-				buttonBox.getChildren().add(savePersistent);
 			}
 		}
 	}
