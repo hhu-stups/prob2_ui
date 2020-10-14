@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -56,7 +57,10 @@ class VisBFileHandler {
 	    ArrayList<VisBItem> visBItems = new ArrayList<>();
 		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
 		
-		processCoreFile(gson, visBFile, parentFile, visBItems, visBEvents);
+		HashSet<String> visbfiles = new HashSet<String>();
+		visbfiles.add(inputFile.toString());
+		
+		processCoreFile(gson, visBFile, parentFile, visbfiles, visBItems, visBEvents);
 		
 		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
 			return null;
@@ -66,7 +70,7 @@ class VisBFileHandler {
 	}
 	
 	
-	private static void processCoreFile (Gson gson, JsonObject visBFile, String parentFile,
+	private static void processCoreFile (Gson gson, JsonObject visBFile, String parentFile, HashSet<String> visbfiles,
 	                                     ArrayList<VisBItem> visBItems, 
 	                                     ArrayList<VisBEvent> visBEvents) throws IOException, VisBParseException {
 	
@@ -77,9 +81,15 @@ class VisBFileHandler {
 				includedFilePath = Paths.get(parentFile, includedFileName);
 			}
 			// TO DO : check for cycles in inclusion
-			JsonReader reader = new JsonReader(new FileReader(includedFilePath.toFile()));
-			JsonObject includedVisBFile = gson.fromJson(reader, JsonObject.class);
-			processCoreFile(gson, includedVisBFile,  parentFile, visBItems, visBEvents);
+			if (visbfiles.contains(includedFilePath.toString())) {
+				throw new VisBParseException("There is a loop in your VisB include statements leading to: " +  includedFileName);
+			} else {
+				visbfiles.add(includedFilePath.toString());
+				System.out.println("Processing subsidiary VisB JSON file: " + includedFilePath);
+				JsonReader reader = new JsonReader(new FileReader(includedFilePath.toFile()));
+				JsonObject includedVisBFile = gson.fromJson(reader, JsonObject.class);
+				processCoreFile(gson, includedVisBFile,  parentFile, visbfiles, visBItems, visBEvents);
+			}
 		}
 		assembleVisList(visBFile,visBItems);
 		assembleEventList(visBFile,visBEvents);
