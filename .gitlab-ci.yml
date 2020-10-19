@@ -29,6 +29,7 @@ variables:
   stage: test
   before_script: &default_before_script_mac
     - export PATH="/usr/local/jdk/jdk-14.0.2.jdk/Contents/Home/bin:${PATH}"
+    - export JAVA_HOME="/usr/local/jdk/jdk-14.0.2.jdk/Contents/Home"
     - export GRADLE_USER_HOME="${PWD}/.gradle"
   cache:
     paths:
