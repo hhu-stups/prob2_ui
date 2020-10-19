@@ -98,8 +98,8 @@ class VisBFileHandler {
     
 	/**
 	 * This method assembles the events into a {@link ArrayList}. There is only one event possible for on click events for SVGs.
-	 * @param array {@link JsonArray} containing possible events
-	 * @return {@link ArrayList}, where the key is the String id and the {@link VisBEvent} is the value
+	 * @param visBFile {@link JsonObject} containing possible events
+	 * @param visBEvents {@link ArrayList} into which the events are assembled
 	 * @throws VisBParseException If the format of the file is not right.
 	 */
 	private static void assembleEventList(JsonObject visBFile, ArrayList<VisBEvent> visBEvents) 
@@ -224,8 +224,8 @@ class VisBFileHandler {
 
 	/**
 	 * This method assembles the visualisation items into an {@link ArrayList}. There are multiple possible attribute changes for an SVG element after a state changed.
-	 * @param array {@link JsonArray} containing possible items
-	 * @return {@link ArrayList}, which contains {@link VisBItem} as items.
+	 * @param visBFile {@link JsonObject} containing possible items
+	 * @param visBItems {@link ArrayList} into which the {@link VisBItem}s are assembled
 	 * @throws VisBParseException If the format of the file is not right.
 	 */
 	private static void assembleVisList(JsonObject visBFile, ArrayList<VisBItem> visBItems)
