@@ -75,11 +75,11 @@ public class VisBStage extends Stage {
 	@FXML
 	private Button loadVisualisationButton;
 	@FXML
-	private Button button_loadDefaultVis;
+	private Button loadDefaultVisualisationButton;
 	@FXML
-	private Button button_setVis;
+	private Button setDefaultVisualisationButton;
 	@FXML
-	private Button button_resetVis;
+	private Button resetDefaultVisualisationButton;
 	@FXML
 	private Label lbCurrentVisualisation;
 	@FXML
@@ -145,9 +145,9 @@ public class VisBStage extends Stage {
 		this.stageManager.setMacMenuBar(this, visbMenuBar);
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
 		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
-		this.button_loadDefaultVis.setOnAction(e -> loadDefaultVisualisation());
-		this.button_setVis.setOnAction(e -> setDefaultVisualisation());
-		this.button_resetVis.setOnAction(e -> resetDefaultVisualisation());
+		this.loadDefaultVisualisationButton.setOnAction(e -> loadDefaultVisualisation());
+		this.setDefaultVisualisationButton.setOnAction(e -> setDefaultVisualisation());
+		this.resetDefaultVisualisationButton.setOnAction(e -> resetDefaultVisualisation());
 		this.fileMenu_visB.setOnAction(e -> loadVisBFile());
 		this.fileMenu_close.setOnAction(e -> sendCloseRequest());
 		this.fileMenu_export.setOnAction(e -> exportImage());
@@ -169,8 +169,8 @@ public class VisBStage extends Stage {
 		updateUIOnMachine(currentProject.getCurrentMachine());
 		loadVisBFileFromMachine(currentProject.getCurrentMachine());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			this.button_loadDefaultVis.visibleProperty().unbind();
-			this.button_resetVis.visibleProperty().unbind();
+			this.loadDefaultVisualisationButton.visibleProperty().unbind();
+			this.resetDefaultVisualisationButton.visibleProperty().unbind();
 			this.lbDefaultVisualisation.textProperty().unbind();
 			updateUIOnMachine(to);
 			loadVisBFileFromMachine(to);
@@ -179,15 +179,15 @@ public class VisBStage extends Stage {
 
 	private void updateUIOnMachine(Machine machine) {
 		if(machine != null) {
-			this.button_loadDefaultVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
-			this.button_setVis.visibleProperty().bind(visBPath.isNotNull()
+			this.loadDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
+			this.setDefaultVisualisationButton.visibleProperty().bind(visBPath.isNotNull()
 					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
-			this.button_resetVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
+			this.resetDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
 			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
 		} else {
-			this.button_loadDefaultVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
-			this.button_setVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
-			this.button_resetVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+			this.loadDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+			this.setDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+			this.resetDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
 			this.lbDefaultVisualisation.setText("");
 		}
 	}

@@ -131,7 +131,7 @@
                                 <Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
                                 <Spacer/>
                                 <HBox alignment="CENTER_RIGHT">
-                                    <Button fx:id="button_loadDefaultVis">
+                                    <Button fx:id="loadDefaultVisualisationButton">
                                         <graphic>
                                             <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}" />
                                         </graphic>
@@ -139,7 +139,7 @@
                                             <Tooltip text="%visb.stage.loadDefault" />
                                         </tooltip>
                                     </Button>
-                                    <Button fx:id="button_setVis">
+                                    <Button fx:id="setDefaultVisualisationButton">
                                         <graphic>
                                             <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
                                         </graphic>
@@ -147,7 +147,7 @@
                                             <Tooltip text="%visb.stage.setDefault" />
                                         </tooltip>
                                     </Button>
-                                    <Button fx:id="button_resetVis">
+                                    <Button fx:id="resetDefaultVisualisationButton">
                                         <graphic>
                                             <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
                                         </graphic>
