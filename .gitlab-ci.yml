@@ -44,7 +44,7 @@ variables:
 .test-windows:
   stage: test
   before_script: &default_before_script_windows
-    - SET PATH=%PATH%;C:\Program Files\Java\jdk-14.0.2\bin
+    - SET PATH=C:\Program Files\Java\jdk-14.0.2\bin;%PATH%
     - SET GRADLE_USER_HOME=%cd%\.gradle
   cache:
     paths:
