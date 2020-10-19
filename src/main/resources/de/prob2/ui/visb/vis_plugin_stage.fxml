@@ -82,6 +82,22 @@
                                         <Tooltip text="%visb.menu.file.open" />
                                     </tooltip>
                                 </Button>
+                                <Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
+                                    <graphic>
+                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}" />
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="%visb.menu.edit.reload" />
+                                    </tooltip>
+                                </Button>
+                                <Button fx:id="closeVisualisationButton" onAction="#closeVisualisation">
+                                    <graphic>
+                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="%visb.menu.edit.close" />
+                                    </tooltip>
+                                </Button>
                                 <Button fx:id="zoomInButton" onAction="#zoomIn">
                                     <graphic>
                                         <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
@@ -115,12 +131,20 @@
                                 <Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
                                 <Spacer/>
                                 <HBox alignment="CENTER_RIGHT">
+                                    <Button fx:id="button_loadDefaultVis">
+                                        <graphic>
+                                            <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}" />
+                                        </graphic>
+                                        <tooltip>
+                                            <Tooltip text="%visb.stage.loadDefault" />
+                                        </tooltip>
+                                    </Button>
                                     <Button fx:id="button_setVis">
                                         <graphic>
                                             <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
                                         </graphic>
                                         <tooltip>
-                                            <Tooltip text="%visb.menu.file.setDefault" />
+                                            <Tooltip text="%visb.stage.setDefault" />
                                         </tooltip>
                                     </Button>
                                     <Button fx:id="button_resetVis">
@@ -128,7 +152,7 @@
                                             <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
                                         </graphic>
                                         <tooltip>
-                                            <Tooltip text="%visb.menu.file.reset" />
+                                            <Tooltip text="%visb.stage.resetDefault" />
                                         </tooltip>
                                     </Button>
                                 </HBox>

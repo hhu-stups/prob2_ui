@@ -75,6 +75,8 @@ public class VisBStage extends Stage {
 	@FXML
 	private Button loadVisualisationButton;
 	@FXML
+	private Button button_loadDefaultVis;
+	@FXML
 	private Button button_setVis;
 	@FXML
 	private Button button_resetVis;
@@ -143,16 +145,14 @@ public class VisBStage extends Stage {
 		this.stageManager.setMacMenuBar(this, visbMenuBar);
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
 		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
+		this.button_loadDefaultVis.setOnAction(e -> loadDefaultVisualisation());
 		this.button_setVis.setOnAction(e -> setDefaultVisualisation());
 		this.button_resetVis.setOnAction(e -> resetDefaultVisualisation());
 		this.fileMenu_visB.setOnAction(e -> loadVisBFile());
 		this.fileMenu_close.setOnAction(e -> sendCloseRequest());
 		this.fileMenu_export.setOnAction(e -> exportImage());
-		this.editMenu_reload.setOnAction(e -> injector.getInstance(VisBController.class).reloadVisualisation());
-		this.editMenu_close.setOnAction(e -> {
-			visBPath.set(null);
-			injector.getInstance(VisBController.class).closeCurrentVisualisation();
-		});
+		this.editMenu_reload.setOnAction(e -> reloadVisualisation());
+		this.editMenu_close.setOnAction(e -> closeVisualisation());
 		this.viewMenu_zoomIn.setOnAction(e -> zoomIn());
 		this.viewMenu_zoomOut.setOnAction(e -> zoomOut());
 		// zoom fonts in/out (but only of those that are not given a fixed size):
@@ -169,6 +169,7 @@ public class VisBStage extends Stage {
 		updateUIOnMachine(currentProject.getCurrentMachine());
 		loadVisBFileFromMachine(currentProject.getCurrentMachine());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			this.button_loadDefaultVis.visibleProperty().unbind();
 			this.button_resetVis.visibleProperty().unbind();
 			this.lbDefaultVisualisation.textProperty().unbind();
 			updateUIOnMachine(to);
@@ -178,11 +179,13 @@ public class VisBStage extends Stage {
 
 	private void updateUIOnMachine(Machine machine) {
 		if(machine != null) {
+			this.button_loadDefaultVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
 			this.button_setVis.visibleProperty().bind(visBPath.isNotNull()
 					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
 			this.button_resetVis.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
 			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
 		} else {
+			this.button_loadDefaultVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
 			this.button_setVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
 			this.button_resetVis.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
 			this.lbDefaultVisualisation.setText("");
@@ -394,6 +397,11 @@ public class VisBStage extends Stage {
 		information.setText(text);
 	}
 
+	private void loadDefaultVisualisation() {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		loadVisBFileFromMachine(currentMachine);
+	}
+
 	private void setDefaultVisualisation() {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		currentMachine.setVisBVisualisation(currentProject.getLocation().relativize(visBPath.get()));
@@ -462,10 +470,22 @@ public class VisBStage extends Stage {
 	}
 
 	@FXML
+	public void reloadVisualisation() {
+		injector.getInstance(VisBController.class).reloadVisualisation();
+	}
+
+	@FXML
+	public void closeVisualisation() {
+		visBPath.set(null);
+		injector.getInstance(VisBController.class).closeCurrentVisualisation();
+	}
+
+	@FXML
 	public void zoomIn() {
 		webView.setZoom(webView.getZoom()*1.2);
 	}
 
+	@FXML
 	public void zoomOut() {
 		webView.setZoom(webView.getZoom()/1.2);
 	}
