@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 plugins {
@@ -51,6 +52,7 @@ def appVersion = '1.0.1'
 
 // Assumes that Java 14 is installed correctly
 task jpackage(type: Exec) {
+	// Use single-platform shadowJar
 	dependsOn 'shadowJar'
 
 	def iconPath;
@@ -215,13 +217,21 @@ jar {
 	}
 }
 
-shadowJar {
+task multiPlatformShadowJar(type: ShadowJar) {
 	manifest {
+		inheritFrom(jar.manifest)
 		attributes([
-			"Multi-Release": "true",
+				"Main-Class": mainClassName,
+				"Multi-Release": "true",
 		])
 	}
-	
+
+	archiveClassifier = "multi"
+	from(sourceSets.main.output)
+	configurations = [
+			project.configurations.runtimeClasspath,
+	]
+
 	// Java 11 and newer normally don't have JavaFX preinstalled,
 	// so include OpenJFX 11 for these Java versions so they can run the jar.
 	// We don't bundle OpenJFX for older Java versions,
@@ -231,6 +241,8 @@ shadowJar {
 		from(project.configurations.javafxAllPlatforms.collect {zipTree(it)})
 	}
 }
+
+
 
 macAppBundle {
 	dmgName = project.name + "-" + project.version + "-mac"
