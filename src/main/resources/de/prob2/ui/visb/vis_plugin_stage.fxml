@@ -74,22 +74,12 @@
                                 <padding>
                                     <Insets left="5.0"/>
                                 </padding>
-                                <NavigationButtons/>
-                                <Spacer/>
                                 <Button fx:id="loadVisualisationButton" onAction="#loadVisBFile">
                                     <graphic>
                                         <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
                                     </graphic>
                                     <tooltip>
                                         <Tooltip text="%visb.menu.file.open" />
-                                    </tooltip>
-                                </Button>
-                                <Button fx:id="saveTraceButton" onAction="#saveTrace">
-                                    <graphic>
-                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-                                    </graphic>
-                                    <tooltip>
-                                        <Tooltip text="%history.buttons.saveTrace.tooltip" />
                                     </tooltip>
                                 </Button>
                                 <Button fx:id="zoomInButton" onAction="#zoomIn">
@@ -108,21 +98,41 @@
                                         <Tooltip text="%visb.menu.view.zoom.out" />
                                     </tooltip>
                                 </Button>
-                            </HBox>
-                            <HBox spacing="10.0">
-                                <Button fx:id="button_setVis" mnemonicParsing="false" styleClass="button-blue" text="%visb.menu.file.setDefault">
-                                    <HBox.margin>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                    </HBox.margin>
-                                </Button>
-                                <Button fx:id="button_resetVis" mnemonicParsing="false" styleClass="button-blue" text="%visb.menu.file.reset">
-                                    <HBox.margin>
-                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                    </HBox.margin>
+                                <Spacer/>
+                                <NavigationButtons/>
+                                <Spacer/>
+                                <Button fx:id="saveTraceButton" onAction="#saveTrace">
+                                    <graphic>
+                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="%history.buttons.saveTrace.tooltip" />
+                                    </tooltip>
                                 </Button>
                             </HBox>
                             <Label fx:id="lbCurrentVisualisation" styleClass="visb-location"/>
-                            <Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
+                            <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+                                <Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
+                                <Spacer/>
+                                <HBox alignment="CENTER_RIGHT">
+                                    <Button fx:id="button_setVis">
+                                        <graphic>
+                                            <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+                                        </graphic>
+                                        <tooltip>
+                                            <Tooltip text="%visb.menu.file.setDefault" />
+                                        </tooltip>
+                                    </Button>
+                                    <Button fx:id="button_resetVis">
+                                        <graphic>
+                                            <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
+                                        </graphic>
+                                        <tooltip>
+                                            <Tooltip text="%visb.menu.file.reset" />
+                                        </tooltip>
+                                    </Button>
+                                </HBox>
+                            </HBox>
                             <Accordion>
                                 <panes>
                                     <TitledPane animated="false" text="%visb.items">
