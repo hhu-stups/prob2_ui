@@ -452,9 +452,4 @@ public final class StatesView extends StackPane {
 		stage.setValue(item);
 		stage.show();
 	}
-
-	public void refresh() {
-		tv.refresh();
-	}
-
 }
