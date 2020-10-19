@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -37,6 +38,7 @@ class VisBFileHandler {
 		Gson gson = new Gson();
 		JsonReader reader = new JsonReader(new FileReader(inputFile));
 		JsonObject visBFile = gson.fromJson(reader, JsonObject.class);
+		String parentFile = inputFile.getParentFile().toString();
 		Path svgPath;
 		if(visBFile.has("svg")){
 			String filePath = visBFile.get("svg").getAsString();
@@ -45,42 +47,67 @@ class VisBFileHandler {
 			} else {
 				svgPath = Paths.get(filePath);
 				if (!svgPath.isAbsolute()) {
-					svgPath = Paths.get(inputFile.getParentFile().toString(), filePath);
+					svgPath = Paths.get(parentFile, filePath);
 				}
 			}
 		} else{
 			throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
 		}
-		ArrayList<VisBItem> visBItems = new ArrayList<>();
-		if(visBFile.has("items")) {
-			JsonArray visArray = (JsonArray) visBFile.get("items");
-			visBItems = assembleVisList(visArray);
-		} else {
-		     visBItems = new ArrayList<>();
-		}
+		
+	    ArrayList<VisBItem> visBItems = new ArrayList<>();
 		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-		if(visBFile.has("events")) {
-			 JsonArray eventsArray = (JsonArray) visBFile.get("events");
-			 visBEvents = assembleEventList(eventsArray);
-		} else {
-		     visBEvents = new ArrayList<>();
-		}
+		
+		HashSet<String> visbfiles = new HashSet<String>();
+		visbfiles.add(inputFile.toString());
+		
+		processCoreFile(gson, visBFile, parentFile, visbfiles, visBItems, visBEvents);
+		
 		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
 			return null;
 		} else {
 			return new VisBVisualisation(visBItems, visBEvents, svgPath, inputFile);
 		}
 	}
-
+	
+	
+	private static void processCoreFile (Gson gson, JsonObject visBFile, String parentFile, HashSet<String> visbfiles,
+	                                     ArrayList<VisBItem> visBItems, 
+	                                     ArrayList<VisBEvent> visBEvents) throws IOException, VisBParseException {
+	
+		if(visBFile.has("include")) {
+			String includedFileName = visBFile.get("include").getAsString();
+			Path includedFilePath = Paths.get(includedFileName);
+			if (!includedFilePath.isAbsolute()) {
+				includedFilePath = Paths.get(parentFile, includedFileName);
+			}
+			// TO DO : check for cycles in inclusion
+			if (visbfiles.contains(includedFilePath.toString())) {
+				throw new VisBParseException("There is a loop in your VisB include statements leading to: " +  includedFileName);
+			} else {
+				visbfiles.add(includedFilePath.toString());
+				System.out.println("Processing subsidiary VisB JSON file: " + includedFilePath);
+				JsonReader reader = new JsonReader(new FileReader(includedFilePath.toFile()));
+				JsonObject includedVisBFile = gson.fromJson(reader, JsonObject.class);
+				processCoreFile(gson, includedVisBFile,  parentFile, visbfiles, visBItems, visBEvents);
+			}
+		}
+		assembleVisList(visBFile,visBItems);
+		assembleEventList(visBFile,visBEvents);
+	}
+    
+    
 	/**
 	 * This method assembles the events into a {@link ArrayList}. There is only one event possible for on click events for SVGs.
 	 * @param array {@link JsonArray} containing possible events
 	 * @return {@link ArrayList}, where the key is the String id and the {@link VisBEvent} is the value
 	 * @throws VisBParseException If the format of the file is not right.
 	 */
-	private static ArrayList<VisBEvent> assembleEventList(JsonArray array) throws VisBParseException{
-		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-		if(array == null || array.isJsonNull() || array.size() == 0) return visBEvents;
+	private static void assembleEventList(JsonObject visBFile, ArrayList<VisBEvent> visBEvents) 
+	                    throws VisBParseException{
+		if(!visBFile.has("events"))
+		    return;
+		JsonArray array = (JsonArray) visBFile.get("events");
+		if(array == null || array.isJsonNull() || array.size() == 0) return;
 		for (Object event : array) {
 			JsonObject current_obj = (JsonObject) event;
 			if(current_obj.isJsonNull()){
@@ -140,7 +167,7 @@ class VisBFileHandler {
 				throw new VisBParseException("The event for " + id + " in your visualisation file has no \"event\" attribute.");
 			}
 		}
-		return visBEvents;
+		return;
 	}
 	
 	// utility to get attribute and throw exception if it does not exist
@@ -177,8 +204,8 @@ class VisBFileHandler {
 			   hovers.add(new VisBHover(hoverid,hoverAttr,hoverEnter,hoverLeave));
 		   }
 		}
-		
-		VisBEvent visBEvent = new VisBEvent(id, eventS, predicates, hovers);
+		Boolean optional = (current_obj.has("optional") && current_obj.get("optional").getAsBoolean());
+		VisBEvent visBEvent = new VisBEvent(id, optional , eventS, predicates, hovers);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
 		} else {
@@ -201,9 +228,12 @@ class VisBFileHandler {
 	 * @return {@link ArrayList}, which contains {@link VisBItem} as items.
 	 * @throws VisBParseException If the format of the file is not right.
 	 */
-	private static ArrayList<VisBItem> assembleVisList(JsonArray array) throws VisBParseException{
-		ArrayList<VisBItem> visBItems = new ArrayList<>();
-		if(array == null || array.isJsonNull() || array.size() == 0) return visBItems;
+	private static void assembleVisList(JsonObject visBFile, ArrayList<VisBItem> visBItems)
+	               throws VisBParseException{
+		if(!visBFile.has("items"))
+		    return;
+		JsonArray array = (JsonArray) visBFile.get("items");
+		if(array == null || array.isJsonNull() || array.size() == 0) return;
 		for (Object item : array) {
 			JsonObject current_obj = (JsonObject) item;
 			if(current_obj.isJsonNull()){
@@ -251,7 +281,7 @@ class VisBFileHandler {
 				throw new VisBParseException("There is a item in your visualisation file, that has no \"value\" member.");
 			}
 		}
-		return visBItems;
+		return;
 	}
 	
 	// utility to get a JsonArray; a single Object is automatically transformed into a single item array

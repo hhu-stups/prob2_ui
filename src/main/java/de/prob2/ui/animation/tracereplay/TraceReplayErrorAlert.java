@@ -63,10 +63,8 @@ public final class TraceReplayErrorAlert extends Alert {
 	
 	@FXML
 	private void initialize() {
-		this.initOwner(stageManager.getCurrent());
 		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		this.setHeaderText(bundle.getString("animation.tracereplay.alerts.traceReplayError.header"));
-		this.setAlertType(AlertType.ERROR);
 		stageManager.register(this);
 		taError.setText(text);
 		double padding = this.getDialogPane().getPadding().getRight() + this.getDialogPane().getPadding().getLeft();
@@ -104,15 +102,8 @@ public final class TraceReplayErrorAlert extends Alert {
 				handleAlert(copyTrace, null);
 				break;
 			case TRIGGER_TRACE_CHECKER:
-				if (tracesAreEqual) {
-					error.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreEqual"));
-					this.getButtonTypes().clear();
-					this.getButtonTypes().addAll(ButtonType.OK);
-					this.show();
-				} else {
-					error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.tracesAreNotEqual"), traceSize, persistentTraceSize, lineNumber));
-					handleAlert(copyTrace, persistentTrace);
-				}
+				error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error"), traceSize, persistentTraceSize, lineNumber));
+				handleAlert(copyTrace, persistentTrace);
 				break;
 			case TRIGGER_TRACE_REPLAY_VIEW:
 				error.setText(text);

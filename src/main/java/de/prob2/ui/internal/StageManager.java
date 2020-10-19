@@ -269,6 +269,7 @@ public final class StageManager {
 		// If no owner is set, the dialog appears on the user's primary screen,
 		// which may be a different screen than the one with the window that created the dialog.
 		dialog.initOwner(this.getMainStage());
+		dialog.setResizable(true); // Necessary to make a registered dialog readable
 		dialog.getDialogPane().getStylesheets().add(STYLESHEET);
 	}
 
