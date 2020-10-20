@@ -12,6 +12,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.TraceSelectionView;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.NumberBinding;
@@ -75,6 +76,8 @@ public final class HistoryView extends VBox {
 	@FXML
 	private TableColumn<HistoryItem, String> transitionColumn;
 	@FXML
+	private Button openTraceSelectionButton;
+	@FXML
 	private Button saveTraceButton;
 	@FXML
 	private HelpButton helpButton;
@@ -113,6 +116,7 @@ public final class HistoryView extends VBox {
 
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 
+		openTraceSelectionButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		saveTraceButton.disableProperty()
 				.bind(partOfDisableBinding.or(currentProject.isNotNull().and(currentTrace.isNotNull()).not()));
 	}
@@ -131,4 +135,12 @@ public final class HistoryView extends VBox {
 	private void saveTrace() {
 		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
 	}
+
+	@FXML
+	private void openTraceSelection() {
+		TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
+		traceSelectionView.show();
+		traceSelectionView.toFront();
+	}
+
 }

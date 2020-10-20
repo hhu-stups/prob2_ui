@@ -24,14 +24,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.web.WebView?>
-<?import javafx.stage.Stage?>
-<fx:root title="%visb.title" type="Stage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="1400" height="500" minHeight="500" minWidth="1000">
+<?import de.prob2.ui.visb.VisBStage?>
+
+<fx:root title="%visb.title" type="VisBStage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="1400" height="500" minHeight="500" minWidth="1000">
     <fx:define>
         <FontSize fx:id="fontSize" />
     </fx:define>
     <scene>
         <Scene stylesheets="@/prob.css">
-            <BorderPane prefHeight="500.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+            <BorderPane prefHeight="500.0" prefWidth="1000.0" xmlns:fx="http://javafx.com/fxml/1">
                 <top>
                     <MenuBar BorderPane.alignment="CENTER" fx:id="visbMenuBar">
                         <Menu mnemonicParsing="false" text="%visb.menu.file">
@@ -117,12 +118,20 @@
                                 <Spacer/>
                                 <NavigationButtons/>
                                 <Spacer/>
+                                <Button fx:id="openTraceSelectionButton" onAction="#openTraceSelection">
+                                    <graphic>
+                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILE" bindableFontSize="${fontSize.fontSize + 2}" />
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="%common.buttons.openTraceSelection" />
+                                    </tooltip>
+                                </Button>
                                 <Button fx:id="saveTraceButton" onAction="#saveTrace">
                                     <graphic>
                                         <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
                                     </graphic>
                                     <tooltip>
-                                        <Tooltip text="%history.buttons.saveTrace.tooltip" />
+                                        <Tooltip text="%common.buttons.saveTrace" />
                                     </tooltip>
                                 </Button>
                             </HBox>

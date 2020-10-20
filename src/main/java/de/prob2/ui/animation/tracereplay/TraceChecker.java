@@ -53,11 +53,11 @@ public class TraceChecker implements ITraceChecker {
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
-	void checkAll(List<ReplayTrace> replayTraces) {
+	public void checkAll(List<ReplayTrace> replayTraces) {
 		replayTraces.forEach(trace -> replayTrace(trace, false));
 	}
 
-	void check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
+	public void check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
 		replayTrace(replayTrace, setCurrentAnimation);
 	}
 
@@ -183,7 +183,7 @@ public class TraceChecker implements ITraceChecker {
 		}
 	}
 
-	void cancelReplay() {
+	public void cancelReplay() {
 		currentJobThreads.forEach(Thread::interrupt);
 		currentJobThreads.clear();
 	}
@@ -196,7 +196,7 @@ public class TraceChecker implements ITraceChecker {
 		return this.runningProperty().get();
 	}
 
-	void isNewTrace() {
+	public void isNewTrace() {
 		isNewTrace = true;
 	}
 
@@ -222,4 +222,5 @@ public class TraceChecker implements ITraceChecker {
 		}
 		return lineNumber;
 	}
+
 }

@@ -24,12 +24,20 @@
 		</padding>
 		<NavigationButtons/>
 		<Spacer/>
+		<Button fx:id="openTraceSelectionButton" onAction="#openTraceSelection">
+			<graphic>
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILE" bindableFontSize="${fontSize.fontSize + 2}" />
+			</graphic>
+			<tooltip>
+				<Tooltip text="%common.buttons.openTraceSelection" />
+			</tooltip>
+		</Button>
 		<Button fx:id="saveTraceButton" onAction="#saveTrace">
 			<graphic>
 				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 			</graphic>
 			<tooltip>
-				<Tooltip text="%history.buttons.saveTrace.tooltip" />
+				<Tooltip text="%common.buttons.saveTrace" />
 			</tooltip>
 		</Button>
 		<HelpButton fx:id="helpButton" />

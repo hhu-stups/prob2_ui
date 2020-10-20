@@ -9,6 +9,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.sharedviews.TraceSelectionView;
 import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.ui.ListViewEvent;
@@ -488,6 +489,13 @@ public class VisBStage extends Stage {
 	@FXML
 	public void zoomOut() {
 		webView.setZoom(webView.getZoom()/1.2);
+	}
+
+	@FXML
+	private void openTraceSelection() {
+		TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
+		traceSelectionView.show();
+		traceSelectionView.toFront();
 	}
 
 }

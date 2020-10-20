@@ -3,7 +3,6 @@ package de.prob2.ui.prob2fx;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob2.ui.animation.tracereplay.TraceReplayView;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -13,6 +12,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -144,7 +144,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		injector.getInstance(LTLPatternParser.class).parseMachine(m);
-		injector.getInstance(TraceReplayView.class).reset();
+		injector.getInstance(TraceViewHandler.class).reset();
 	}
 
 	public void reloadCurrentMachine() {
