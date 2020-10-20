@@ -21,7 +21,7 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 	private Path location;
 
 	ProjectJsonContext(final Gson gson) {
-		super(gson, Project.class, "Project", 8);
+		super(gson, Project.class, "Project", 9);
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
@@ -300,6 +300,29 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			}
 		});
 	}
+
+	private static void updateV8Project(final JsonObject project) {
+		project.getAsJsonArray("machines").forEach(machineElement -> {
+			final JsonObject machine = machineElement.getAsJsonObject();
+			JsonElement visBLocationElement = machine.get("visBVisualisation");
+			if(!visBLocationElement.isJsonNull()) {
+				Path visBLocation = Paths.get(visBLocationElement.getAsString().replaceAll("\\\\", "/"));
+				machine.remove("visBVisualisation");
+				machine.addProperty("visBVisualisation", visBLocation.toString());
+			}
+			JsonElement locationElement = machine.get("location");
+			Path location = Paths.get(locationElement.getAsString().replaceAll("\\\\", "/"));
+			machine.remove("location");
+			machine.addProperty("location", location.toString());
+			JsonArray newTraceArray = new JsonArray();
+			for(JsonElement traceElement : machine.getAsJsonArray("traces")) {
+				Path traceLocation = Paths.get(traceElement.getAsString().replaceAll("\\\\", "/"));
+				newTraceArray.add(traceLocation.toString());
+			}
+			machine.remove("traces");
+			machine.add("traces", newTraceArray);
+		});
+	}
 	
 	@Override
 	public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -326,6 +349,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		}
 		if (oldMetadata.getFormatVersion() <= 7) {
 			updateV7Project(oldObject, location);
+		}
+		if (oldMetadata.getFormatVersion() <= 8) {
+			updateV8Project(oldObject);
 		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}
