@@ -8,7 +8,6 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -25,8 +24,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
-import java.util.ResourceBundle;
-
 @FXMLInjected
 @Singleton
 public class TraceSelectionView extends Stage {
@@ -40,23 +37,18 @@ public class TraceSelectionView extends Stage {
 	private SplitPane splitPane;
 
 	private final StageManager stageManager;
-	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final TraceChecker traceChecker;
-	private final ResourceBundle bundle;
 	private final Injector injector;
 	private final TraceViewHandler traceViewHandler;
 	private boolean showDescription;
 
 	@Inject
-	public TraceSelectionView(final StageManager stageManager, final CurrentProject currentProject,
-                               final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
+	public TraceSelectionView(final StageManager stageManager, final CurrentTrace currentTrace, final TraceChecker traceChecker,
                                final Injector injector, final TraceViewHandler traceViewHandler) {
 		this.stageManager = stageManager;
-		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
-		this.bundle = bundle;
 		this.injector = injector;
 		this.traceViewHandler = traceViewHandler;
 		stageManager.loadFXML(this, "trace_selection_view.fxml");
