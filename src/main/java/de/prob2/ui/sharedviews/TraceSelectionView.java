@@ -81,22 +81,14 @@ public class TraceSelectionView extends Stage {
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<ReplayTrace> row = new TableRow<>();
 
-            final MenuItem replayTraceItem = new MenuItem(
-                    bundle.getString("animation.tracereplay.view.contextMenu.replayTrace"));
-            replayTraceItem.setDisable(true);
-
-            final MenuItem showDescriptionItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.showDescription"));
-            showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
-
-            final MenuItem showErrorItem = new MenuItem(
-                    bundle.getString("animation.tracereplay.view.contextMenu.showError"));
-            showErrorItem.setDisable(true);
-
-            final MenuItem openInExternalEditorItem = new MenuItem(
-                    bundle.getString("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+            final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
+            final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
+            final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
+            final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
 
             // Set listeners for menu items
             traceViewHandler.initializeRow(this.getScene(), row, replayTraceItem, showErrorItem, openInExternalEditorItem);
+            showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 
             row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())

@@ -112,28 +112,16 @@ public class TraceReplayView extends ScrollPane {
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<ReplayTrace> row = new TableRow<>();
 
-            final MenuItem replayTraceItem = new MenuItem(
-                    bundle.getString("animation.tracereplay.view.contextMenu.replayTrace"));
-            replayTraceItem.setDisable(true);
-
-            final MenuItem showErrorItem = new MenuItem(
-                    bundle.getString("animation.tracereplay.view.contextMenu.showError"));
-            showErrorItem.setDisable(true);
-
-			final MenuItem deleteTraceItem = new MenuItem(
-					bundle.getString("animation.tracereplay.view.contextMenu.removeTrace"));
-			deleteTraceItem.setOnAction(
-					event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
-
-			final MenuItem showDescriptionItem = new MenuItem(
-				bundle.getString("animation.tracereplay.view.contextMenu.showDescription"));
-			showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
-
-            final MenuItem openInExternalEditorItem = new MenuItem(
-                    bundle.getString("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+            final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
+            final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
+            final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
+            final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
+			final MenuItem deleteTraceItem = traceViewHandler.createDeleteTraceItem();
 
             // Set listeners for menu items
             traceViewHandler.initializeRow(this.getScene(), row, replayTraceItem, showErrorItem, openInExternalEditorItem);
+            deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
+            showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())

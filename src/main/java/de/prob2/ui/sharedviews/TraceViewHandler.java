@@ -43,6 +43,8 @@ public class TraceViewHandler {
 
     private final Injector injector;
 
+    private final ResourceBundle bundle;
+
     private final ObservableList<ReplayTrace> traces;
 
     private final BooleanProperty noTraces;
@@ -52,6 +54,7 @@ public class TraceViewHandler {
         this.traceChecker = traceChecker;
         this.currentProject = currentProject;
         this.injector = injector;
+        this.bundle = bundle;
         this.traces = FXCollections.observableArrayList();
         this.noTraces = new SimpleBooleanProperty();
         initialize();
@@ -138,6 +141,31 @@ public class TraceViewHandler {
 
     public ObservableList<ReplayTrace> getTraces() {
         return traces;
+    }
+
+    public MenuItem createReplayTraceItem() {
+        final MenuItem replayTraceItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.replayTrace"));
+        replayTraceItem.setDisable(true);
+        return replayTraceItem;
+    }
+
+    public MenuItem createDeleteTraceItem() {
+        return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.removeTrace"));
+    }
+
+    public MenuItem createShowDescriptionItem() {
+        return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.showDescription"));
+    }
+
+    public MenuItem createShowErrorItem() {
+        final MenuItem showErrorItem = new MenuItem(
+                bundle.getString("animation.tracereplay.view.contextMenu.showError"));
+        showErrorItem.setDisable(true);
+        return showErrorItem;
+    }
+
+    public MenuItem createOpenInExternalEditorItem() {
+        return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.openInExternalEditor"));
     }
 
     private static void updateStatusIcon(final BindableGlyph iconView, final Checked status) {
