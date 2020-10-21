@@ -86,6 +86,7 @@ public final class StatesView extends StackPane {
 	private final Set<BVisual2Formula> expandedFormulas;
 	private final Set<BVisual2Formula> visibleFormulas;
 	private final Map<BVisual2Formula, ExpandedFormulaStructure> formulaStructureCache;
+	private boolean structureFullyExpanded;
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCache;
 	private final StateItem.FormulaEvaluator cachingEvaluator;
 
@@ -104,6 +105,7 @@ public final class StatesView extends StackPane {
 		this.expandedFormulas = new HashSet<>();
 		this.visibleFormulas = new HashSet<>();
 		this.formulaStructureCache = new HashMap<>();
+		this.structureFullyExpanded = false;
 		this.formulaValueCache = new HashMap<>();
 		this.cachingEvaluator = new StateItem.FormulaEvaluator() {
 			@Override
@@ -488,6 +490,7 @@ public final class StatesView extends StackPane {
 			this.expandedFormulas.clear();
 			this.visibleFormulas.clear();
 			this.formulaStructureCache.clear();
+			this.structureFullyExpanded = false;
 			this.formulaValueCache.clear();
 			return;
 		}
@@ -496,6 +499,7 @@ public final class StatesView extends StackPane {
 			this.expandedFormulas.clear();
 			this.visibleFormulas.clear();
 			this.formulaStructureCache.clear();
+			this.structureFullyExpanded = false;
 			this.formulaValueCache.clear();
 		} else {
 			// Pre-cache the current and previous values of all visible formulas.
@@ -515,7 +519,12 @@ public final class StatesView extends StackPane {
 		} else {
 			// If there is a filter, recursively expand the entire tree beforehand.
 			// The filtering code usually has to expand most of the tree to search for matching items, so this improves performance when filtering.
-			addFormulaStructuresToCache(BVisual2Formula.expandStructureMultiple(topLevel));
+			// This only needs to be done once unless the state space changes,
+			// because the structure is always the same in all states.
+			if (!this.structureFullyExpanded) {
+				addFormulaStructuresToCache(BVisual2Formula.expandStructureMultiple(topLevel));
+				this.structureFullyExpanded = true;
+			}
 			addSubformulaItemsFiltered(newRoot, topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
 		}
 		Platform.runLater(() -> {
