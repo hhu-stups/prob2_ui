@@ -27,7 +27,7 @@ public class TraceSaver {
 
     public void saveTrace(Window window, TraceReplayErrorAlert.Trigger trigger) {
         TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
-        Trace copyTrace = currentTrace.get();
+        Trace possiblyLostTrace = currentTrace.get();
         if (currentTrace.get() != null) {
             try {
                 traceSaver.save(
@@ -36,7 +36,7 @@ public class TraceSaver {
             } catch (Exception e) {
                 TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
                 alert.initOwner(window);
-                alert.setCopyTrace(copyTrace);
+                alert.setAttemptedReplayOrLostTrace(possiblyLostTrace);
                 alert.setErrorMessage();
             }
         }

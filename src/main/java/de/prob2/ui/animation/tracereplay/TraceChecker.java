@@ -23,14 +23,11 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.control.Alert;
-import javafx.scene.layout.Region;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -43,7 +40,6 @@ public class TraceChecker implements ITraceChecker {
 	private final StageManager stageManager;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
-	private boolean isNewTrace;
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager, final DisablePropertyController disablePropertyController) {
@@ -156,31 +152,19 @@ public class TraceChecker implements ITraceChecker {
 
 	private void showTraceReplayCompleteFailed(Trace trace, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
-		final Trace copyTrace = trace;
-		if (isNewTrace) {
-			Platform.runLater(() -> {
-				Alert alert = new Alert(Alert.AlertType.WARNING);
-				stageManager.register(alert);
-				alert.setContentText(String.format(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.newTraceContent"), lineNumber(replayTrace, copyTrace.size()), replayTrace.getErrorMessageParams()[0], replayTrace.getErrorMessageParams()[1]));
-				alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-				alert.show();
-			});
-			isNewTrace = false;
-		} else {
-			PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
-			Platform.runLater(() -> {
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, replayTrace.getErrorMessageParams());
-				boolean isEqual = currentTrace.get().getTransitionList().equals(copyTrace.getTransitionList());
+		final Trace copyFailedTrace = trace;
+		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
+		Platform.runLater(() -> {
+			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, replayTrace.getErrorMessageParams());
 
-				stageManager.register(alert);
-				alert.setTraceSize(copyTrace.getTransitionList().size());
-				alert.setPersistentTraceSize(persistentTrace.getTransitionList().size());
-				alert.setLineNumber(lineNumber(replayTrace, copyTrace.size()));
-				alert.setCopyTrace(copyTrace);
-				alert.setPersistentTrace(persistentTrace);
-				alert.setErrorMessage(isEqual);
-			});
-		}
+			stageManager.register(alert);
+			alert.setLineNumber(lineNumber(replayTrace, copyFailedTrace.size()));
+			alert.setAttemptedReplayOrLostTrace(copyFailedTrace);
+			alert.setStoredTrace(persistentTrace);
+			alert.setHistory(currentTrace.get());
+			currentTrace.set(copyFailedTrace);
+			alert.setErrorMessage();
+		});
 	}
 
 	public void cancelReplay() {
@@ -196,12 +180,8 @@ public class TraceChecker implements ITraceChecker {
 		return this.runningProperty().get();
 	}
 
-	public void isNewTrace() {
-		isNewTrace = true;
-	}
-
-	private int lineNumber(ReplayTrace replayTrace, int copyTraceLength) {
-		PersistentTransition failedTransition = replayTrace.getPersistentTrace().getTransitionList().get(copyTraceLength);
+	private int lineNumber(ReplayTrace replayTrace, int copyFailedTraceLength) {
+		PersistentTransition failedTransition = replayTrace.getPersistentTrace().getTransitionList().get(copyFailedTraceLength);
 		int lineNumber = 0;
 		int operationNumber = 0;
 		try {
@@ -212,7 +192,7 @@ public class TraceChecker implements ITraceChecker {
 				String nextLine = scanner.nextLine();
 				if (nextLine.contains("name")) {
 					operationNumber++;
-					if (nextLine.contains(failedTransition.getOperationName()) && operationNumber > copyTraceLength) {
+					if (nextLine.contains(failedTransition.getOperationName()) && operationNumber > copyFailedTraceLength) {
 						break;
 					}
 				}

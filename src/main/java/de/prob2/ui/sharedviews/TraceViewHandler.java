@@ -66,7 +66,6 @@ public class TraceViewHandler {
                 ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(), injector);
                 traces.add(replayTrace);
                 this.traceChecker.check(replayTrace, true);
-                this.traceChecker.isNewTrace();
             }
             if (c.wasRemoved()) {
                 removeTraceItems(c.getElementRemoved());

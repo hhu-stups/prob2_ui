@@ -25,8 +25,6 @@
 		</VBox>
 	</HBox>
 	<HBox fx:id="buttonBox" spacing="5">
-		<Button fx:id="setReplayed" styleClass="button-dark2" maxWidth="Infinity" HBox.hgrow="ALWAYS" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.setReplayed"/>
 		<Button fx:id="showAlert" styleClass="button-dark2" maxWidth="Infinity" HBox.hgrow="ALWAYS" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.showAlert"/>
-		<Button fx:id="setCurrent" styleClass="button-dark2" maxWidth="Infinity" HBox.hgrow="ALWAYS" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.setCurrent"/>
 	</HBox>
 </fx:root>

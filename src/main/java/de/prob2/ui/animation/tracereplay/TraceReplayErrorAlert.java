@@ -33,12 +33,13 @@ public final class TraceReplayErrorAlert extends Alert {
 	private final ResourceBundle bundle;
 	private final String text;
 	private final Trigger trigger;
-	private int traceSize = -1;
-	private int persistentTraceSize = -1;
+	private int attemptedReplayTraceSize = -1;
+	private int storedTraceSize = -1;
 	private int lineNumber = -1;
 	private ButtonType showTraceDiff;
-	private Trace copyTrace = null;
-	private PersistentTrace persistentTrace = null;
+	private Trace attemptedReplayTrace = null;
+	private PersistentTrace storedTrace = null;
+	private Trace history = null;
 	
 	public TraceReplayErrorAlert(final Injector injector, final String contentBundleKey, Trigger trigger, final Object... contentParams) {
 		super(AlertType.ERROR);
@@ -51,15 +52,21 @@ public final class TraceReplayErrorAlert extends Alert {
 		stageManager.loadFXML(this, "trace_replay_error_alert.fxml");
 	}
 
-	void setTraceSize(int traceSize) {this.traceSize = traceSize;}
-
-	void setPersistentTraceSize(int persistentTraceSize) {this.persistentTraceSize = persistentTraceSize;}
-
 	void setLineNumber(int lineNumber) {this.lineNumber = lineNumber;}
 
-	public void setCopyTrace(Trace copyTrace) {this.copyTrace = copyTrace;}
+	public void setAttemptedReplayOrLostTrace(Trace copyFailedTrace) {
+		this.attemptedReplayTrace = copyFailedTrace;
+		this.attemptedReplayTraceSize = copyFailedTrace.getTransitionList().size();
+	}
 
-	void setPersistentTrace(PersistentTrace persistentTrace) {this.persistentTrace = persistentTrace;}
+	void setStoredTrace(PersistentTrace persistentTrace) {
+		this.storedTrace = persistentTrace;
+		this.storedTraceSize = persistentTrace.getTransitionList().size();
+	}
+
+	void setHistory(Trace history) {
+		this.history = history;
+	}
 	
 	@FXML
 	private void initialize() {
@@ -89,21 +96,17 @@ public final class TraceReplayErrorAlert extends Alert {
 	}
 
 	public void setErrorMessage() {
-		setErrorMessage(false);
-	}
-
-	void setErrorMessage(boolean tracesAreEqual) {
 		switch (trigger) {
 			case TRIGGER_VISB:
 			case TRIGGER_HISTORY_VIEW:
 				this.setHeaderText(bundle.getString("traceSave.buttons.saveTrace.error"));
 				error.setText(bundle.getString("traceSave.buttons.saveTrace.error.msg"));
 				this.getDialogPane().setExpandableContent(null);
-				handleAlert(copyTrace, null);
+				handleAlert();
 				break;
 			case TRIGGER_TRACE_CHECKER:
-				error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error"), traceSize, persistentTraceSize, lineNumber));
-				handleAlert(copyTrace, persistentTrace);
+				error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error"), attemptedReplayTraceSize, storedTraceSize, lineNumber));
+				handleAlert();
 				break;
 			case TRIGGER_TRACE_REPLAY_VIEW:
 				error.setText(text);
@@ -120,19 +123,19 @@ public final class TraceReplayErrorAlert extends Alert {
 	}
 
 	public void showAlertAgain() {
-		handleAlert(copyTrace, persistentTrace);
+		handleAlert();
 	}
 
-	private void handleAlert(Trace copyTrace, PersistentTrace persistentTrace) {
+	private void handleAlert() {
 		injector.getInstance(TraceDiffStage.class).close();
 		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 		Optional<ButtonType> type = this.showAndWait();
-		if (type.get() == ButtonType.YES) {
-			currentTrace.set(copyTrace);
+		if (type.get() == ButtonType.NO) {
+			currentTrace.set(history);
 		} else if (type.get() == showTraceDiff) {
 			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
 			traceDiffStage.setAlert(this);
-			traceDiffStage.setLists(copyTrace, persistentTrace, currentTrace.get());
+			traceDiffStage.setLists(attemptedReplayTrace, storedTrace, history);
 			traceDiffStage.show();
 		}
 	}
