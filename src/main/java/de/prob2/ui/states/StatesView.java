@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.animator.domainobjects.ExpandedFormulaStructure;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
@@ -52,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -281,22 +279,6 @@ public final class StatesView extends StackPane {
 	}
 
 	/**
-	 * Add the given expanded formula values (and their children, recursively) to a cache map.
-	 * 
-	 * @param expandedValues the expanded formula values to add
-	 * @param cache the cache to which to add the expanded formula values
-	 */
-	private void addFormulaValuesToCache(final Collection<ExpandedFormula> expandedValues, final Map<BVisual2Formula, BVisual2Value> cache) {
-		for (final ExpandedFormula expanded : expandedValues) {
-			this.formulaStructureCache.putIfAbsent(expanded.getFormula(), expanded);
-			cache.put(expanded.getFormula(), expanded.getValue());
-			if (expanded.getChildren() != null) {
-				addFormulaValuesToCache(expanded.getChildren(), cache);
-			}
-		}
-	}
-
-	/**
 	 * <p>Evaluate the given formulas and cache their values, if they are not already present in the cache.</p>
 	 * <p>This is faster than evaluating each formula individually via {@link StateItem} and {@link #evaluateFormulaWithCaching(BVisual2Formula, State)}, because this method internally evaluates all formulas in a single Prolog command, instead of one command per formula.</p>
 	 * 
@@ -314,19 +296,45 @@ public final class StatesView extends StackPane {
 		}
 	}
 
-	/**
-	 * Evaluate the given formulas recursively and cache their values.
-	 * 
-	 * @param formulas the formulas for which to recursively cache the values
-	 * @param state the state in which to evaluate the formulas
-	 */
-	private void cacheFormulaValuesRecursive(final List<BVisual2Formula> formulas, final State state) {
-		addFormulaValuesToCache(BVisual2Formula.expandMultiple(formulas, state), getFormulaValueCacheForState(state));
+	private ChangeListener<Boolean> getTrackVisibleListener(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas) {
+		return (o, from, to) -> {
+			if (to) {
+				visibleFormulas.addAll(subformulas);
+			} else {
+				visibleFormulas.removeAll(subformulas);
+				
+				// When treeItem is collapsed, also collapse all of its children.
+				// This will recurse automatically as the children's listeners for tracking visibility are fired.
+				// JavaFX does not do this automatically by default,
+				// which leads to problems with visibleFormulas containing formulas where the parent is expanded,
+				// but (for example) the grandparent is collapsed.
+				// In that case our code incorrectly thinks that the children are visible, even though they aren't.
+				treeItem.getChildren().forEach(subTreeItem -> subTreeItem.setExpanded(false));
+			}
+		};
 	}
 
-	private void addSubformulaItems(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState, final String filter) {
+	/**
+	 * <p>
+	 * Generate treeItem's children from the given subformulas.
+	 * The subformulas are not filtered.
+	 * </p>
+	 * <p>
+	 * Calling this method only generates the direct children of treeItem.
+	 * The next level of the tree (the children's children) is generated only once treeItem is expanded by the user.
+	 * (If treeItem is already expanded once this method is called, the next level is generated immediately.)
+	 * </p>
+	 * 
+	 * @param treeItem the tree item into which the children should be generated
+	 * @param subformulas the subformulas of treeItem's formula, from which the children are generated
+	 * @param currentState the current state (never null), used to display the formula's current value
+	 * @param previousState the previous state (may be null if at the start of the trace), used to display the formula's previous value
+	 */
+	private void addSubformulaItemsUnfiltered(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState) {
 		// Generate the tree items for treeItem's children right away.
 		// This must be done even if treeItem is not expanded, because otherwise treeItem would have no child items and thus no expansion arrow, even if it actually has subformulas.
+		// TODO Don't expand the subformulas until they are actually visible
+		cacheMissingFormulaStructures(subformulas);
 		final List<TreeItem<StateItem>> children = subformulas.stream()
 			.map(f -> new TreeItem<>(new StateItem(this.expandFormulaWithCaching(f), currentState, previousState, this::evaluateFormulaWithCaching)))
 			.collect(Collectors.toList());
@@ -338,25 +346,13 @@ public final class StatesView extends StackPane {
 			@Override
 			public void changed(final ObservableValue<? extends Boolean> o, final Boolean from, final Boolean to) {
 				if (to) {
-					// Pre-cache the structures and current and previous values of the newly visible formulas.
-					cacheMissingFormulaStructures(subformulas);
-					// TODO Don't evaluate subformulas that will be removed by the filter
+					// Pre-cache the current and previous values of the newly visible formulas.
 					cacheMissingFormulaValues(subformulas, currentState);
 					if (previousState != null) {
 						cacheMissingFormulaValues(subformulas, previousState);
 					}
 					for (final TreeItem<StateItem> subTreeItem : children) {
-						// If treeItem or subTreeItem matches the filter, don't filter subTreeItem's children.
-						final String subFilter;
-						if (
-							(treeItem.getValue() != null && matchesFilter(filter, treeItem.getValue().getLabel()))
-							|| matchesFilter(filter, subTreeItem.getValue().getLabel())
-						) {
-							subFilter = "";
-						} else {
-							subFilter = filter;
-						}
-						addSubformulaItems(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState, subFilter);
+						addSubformulaItemsUnfiltered(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState);
 					}
 					treeItem.expandedProperty().removeListener(this);
 				}
@@ -364,12 +360,12 @@ public final class StatesView extends StackPane {
 		};
 		treeItem.expandedProperty().addListener(generateGrandchildrenListener);
 
-		// This listener tracks the expanded and visible states of each formula.
-		// Unlike the previous listener, this one does *not* remove itself after it runs.
-		final ChangeListener<Boolean> trackExpandedVisibleListener = (o, from, to) -> {
+		// This listener tracks the expanded state of each formula.
+		// Unlike the first listener, this one does *not* remove itself after it runs.
+		final ChangeListener<Boolean> trackExpandedListener = (o, from, to) -> {
 			// The root item has its value set to null. Its expanded state does not need to be stored.
 			// Don't track expanded states while a filter is present, because the filtering code automatically expands items.
-			if (treeItem.getValue() != null && filter.isEmpty()) {
+			if (treeItem.getValue() != null) {
 				final BVisual2Formula formula = treeItem.getValue().getFormula();
 				if (to) {
 					expandedFormulas.add(formula);
@@ -377,53 +373,93 @@ public final class StatesView extends StackPane {
 					expandedFormulas.remove(formula);
 				}
 			}
-
-			if (to) {
-				visibleFormulas.addAll(subformulas);
-			} else {
-				visibleFormulas.removeAll(subformulas);
-
-				// When treeItem is collapsed, also collapse all of its children.
-				// This will recurse automatically as the children's expanded listeners are fired.
-				// JavaFX does not do this automatically by default,
-				// which leads to problems with visibleFormulas containing formulas where the parent is expanded,
-				// but (for example) the grandparent is collapsed.
-				// In that case our code incorrectly thinks that the children are visible, even though they aren't.
-				treeItem.getChildren().forEach(subTreeItem -> subTreeItem.setExpanded(false));
-			}
 		};
-		treeItem.expandedProperty().addListener(trackExpandedVisibleListener);
+		treeItem.expandedProperty().addListener(trackExpandedListener);
+
+		// This listener tracks the visible state of each formula.
+		// Unlike the first listener, this one does *not* remove itself after it runs.
+		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem, subformulas);
+		treeItem.expandedProperty().addListener(trackVisibleListener);
 
 		// If treeItem is already expanded, immediately fire the appropriate listeners.
 		if (treeItem.isExpanded()) {
 			generateGrandchildrenListener.changed(treeItem.expandedProperty(), false, true);
-			trackExpandedVisibleListener.changed(treeItem.expandedProperty(), false, true);
+			trackExpandedListener.changed(treeItem.expandedProperty(), false, true);
+			trackVisibleListener.changed(treeItem.expandedProperty(), false, true);
 		}
 
 		treeItem.getChildren().setAll(children);
 
-		// If treeItem does not match the filter, expand it (to set up its children's listeners), then filter its children.
-		if (treeItem.getValue() == null || !matchesFilter(filter, treeItem.getValue().getLabel())) {
-			treeItem.setExpanded(true);
-			for (final Iterator<TreeItem<StateItem>> it = treeItem.getChildren().iterator(); it.hasNext();) {
-				final TreeItem<StateItem> subTreeItem = it.next();
-				// If subTreeItem does not match the filter, expand it.
-				// This will fire the listeners to generate and filter its children.
-				if (!matchesFilter(filter, subTreeItem.getValue().getLabel())) {
-					subTreeItem.setExpanded(true);
-					// If subTreeItem's children (which have already been filtered) are empty, remove subTreeItem,
-					// because it and its children do not match the filter.
-					if (subTreeItem.getChildren().isEmpty()) {
-						it.remove();
-					}
+		// Restore the previous expanded state of treeItem.
+		// If this expands treeItem, this triggers the listener above.
+		// The root item has its value set to null. It should always be expanded.
+		treeItem.setExpanded(treeItem.getValue() == null || this.expandedFormulas.contains(treeItem.getValue().getFormula()));
+	}
+
+	/**
+	 * <p>
+	 * Generate treeItem's children from the given subformulas.
+	 * The subformulas are filtered based on the given filter string.
+	 * Only formulas whose label matches the filter (and the parents of those formulas) are shown.
+	 * It's assumed that treeItem's label never matches the filter
+	 * (if it does, you should call {@link #addSubformulaItemsUnfiltered(TreeItem, List, State, State)} instead of this method).
+	 * </p>
+	 * <p>
+	 * Calling this method generates all children of treeItem recursively.
+	 * This is necessary because even if none of the direct children match the filter,
+	 * some of the children's children might,
+	 * so the entire tree has to be generated and filtered.
+	 * If a (direct or indirect) child is found that matches the filter,
+	 * it is generated lazily using {@link #addSubformulaItemsUnfiltered(TreeItem, List, State, State)} and not recursively,
+	 * but this usually doesn't make a big performance difference.
+	 * </p>
+	 * 
+	 * @param treeItem the tree item into which the children should be generated
+	 * @param subformulas the subformulas of treeItem's formula, from which the children are generated
+	 * @param currentState the current state (never null), used to display the formula's current value
+	 * @param previousState the previous state (may be null if at the start of the trace), used to display the formula's previous value
+	 * @param filter the string by which to filter the subformulas
+	 */
+	private void addSubformulaItemsFiltered(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState, final String filter) {
+		assert !filter.isEmpty();
+		assert treeItem.getValue() == null || !matchesFilter(filter, treeItem.getValue().getLabel());
+
+		// Pre-cache the structures of the formulas to filter.
+		cacheMissingFormulaStructures(subformulas);
+		final List<TreeItem<StateItem>> matchingChildren = new ArrayList<>();
+		for (final BVisual2Formula subformula : subformulas) {
+			final ExpandedFormulaStructure subformulaStructure = this.expandFormulaWithCaching(subformula);
+			final TreeItem<StateItem> subTreeItem = new TreeItem<>(new StateItem(subformulaStructure, currentState, previousState, this::evaluateFormulaWithCaching));
+			// If subTreeItem matches the filter, don't filter its children.
+			if (matchesFilter(filter, subformulaStructure.getLabel())) {
+				addSubformulaItemsUnfiltered(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState);
+				matchingChildren.add(subTreeItem);
+			} else {
+				addSubformulaItemsFiltered(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState, filter);
+				// subTreeItem doesn't match the filter,
+				// so add it only if it has any children that matched the filter.
+				if (!subTreeItem.getChildren().isEmpty()) {
+					matchingChildren.add(subTreeItem);
 				}
 			}
-		} else {
-			// Restore the previous expanded state of treeItem.
-			// If this expands treeItem, this triggers the listener above.
-			// The root item has its value set to null. It should always be expanded.
-			treeItem.setExpanded(treeItem.getValue() == null || this.expandedFormulas.contains(treeItem.getValue().getFormula()));
 		}
+		// Pre-cache the current and previous values of the matching subformulas, which will be immediately visible.
+		final List<BVisual2Formula> matchingFormulas = matchingChildren.stream()
+			.map(TreeItem::getValue)
+			.map(StateItem::getFormula)
+			.collect(Collectors.toList());
+		cacheMissingFormulaValues(matchingFormulas, currentState);
+		if (previousState != null) {
+			cacheMissingFormulaValues(matchingFormulas, previousState);
+		}
+		treeItem.getChildren().setAll(matchingChildren);
+
+		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem, subformulas);
+		treeItem.expandedProperty().addListener(trackVisibleListener);
+
+		// Always expand treeItem, because it doesn't match the filter.
+		treeItem.setExpanded(true);
+		trackVisibleListener.changed(treeItem.expandedProperty(), false, true);
 	}
 
 	private static TreeItem<StateItem> createRootItem() {
@@ -463,18 +499,15 @@ public final class StatesView extends StackPane {
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
 		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(to.getStateSpace());
-		// If there is a filter, recursively expand and evaluate the entire tree beforehand.
-		// The filtering code usually has to expand most of the tree to search for matching items, so this improves performance when filtering.
-		// TODO Only expand the structure and don't evaluate the values
-		// (not possible here yet, because the filtering code currently still evaluates all formulas, even if they don't match the filter)
-		if (!filter.isEmpty()) {
-			cacheFormulaValuesRecursive(topLevel, to.getCurrentState());
-			if (to.canGoBack()) {
-				cacheFormulaValuesRecursive(topLevel, to.getPreviousState());
-			}
-		}
 		final TreeItem<StateItem> newRoot = createRootItem();
-		addSubformulaItems(newRoot, topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
+		if (filter.isEmpty()) {
+			addSubformulaItemsUnfiltered(newRoot, topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null);
+		} else {
+			// If there is a filter, recursively expand the entire tree beforehand.
+			// The filtering code usually has to expand most of the tree to search for matching items, so this improves performance when filtering.
+			addFormulaStructuresToCache(BVisual2Formula.expandStructureMultiple(topLevel));
+			addSubformulaItemsFiltered(newRoot, topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
+		}
 		Platform.runLater(() -> {
 			// Workaround for JavaFX bug JDK-8199324/PROB2UI-377 on Java 10 and later.
 			// If the contents of a TreeTableView are changed while there is a selection,
