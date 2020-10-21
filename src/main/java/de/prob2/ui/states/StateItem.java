@@ -9,33 +9,31 @@ import de.prob.statespace.State;
 
 // This class needs to be public (even though it's only used inside this package) so that Bindings.select can access its getters.
 public final class StateItem {
-	@FunctionalInterface
 	public interface FormulaEvaluator {
+		public abstract ExpandedFormulaStructure expand(final BVisual2Formula formula);
 		public abstract BVisual2Value evaluate(final BVisual2Formula formula, final State state);
 	}
 
-	private final ExpandedFormulaStructure structure;
+	private final BVisual2Formula formula;
 	private final State currentState;
 	private final State previousState;
 	private final StateItem.FormulaEvaluator evaluator;
+	private ExpandedFormulaStructure structure;
 	private BVisual2Value currentValue;
 	private BVisual2Value previousValue;
 
-	StateItem(final ExpandedFormulaStructure structure, final State currentState, final State previousState, final StateItem.FormulaEvaluator evaluator) {
-		this.structure = structure;
+	StateItem(final BVisual2Formula formula, final State currentState, final State previousState, final StateItem.FormulaEvaluator evaluator) {
+		this.formula = formula;
 		this.currentState = currentState;
 		this.previousState = previousState;
 		this.evaluator = evaluator;
+		this.structure = null;
 		this.currentValue = null;
 		this.previousValue = null;
 	}
 
-	private ExpandedFormulaStructure getStructure() {
-		return this.structure;
-	}
-
 	public BVisual2Formula getFormula() {
-		return this.getStructure().getFormula();
+		return this.formula;
 	}
 
 	public State getCurrentState() {
@@ -44,6 +42,13 @@ public final class StateItem {
 
 	public State getPreviousState() {
 		return this.previousState;
+	}
+
+	private ExpandedFormulaStructure getStructure() {
+		if (this.structure == null) {
+			this.structure = this.evaluator.expand(this.getFormula());
+		}
+		return this.structure;
 	}
 
 	public String getLabel() {

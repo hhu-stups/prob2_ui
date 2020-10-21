@@ -87,6 +87,7 @@ public final class StatesView extends StackPane {
 	private final Set<BVisual2Formula> visibleFormulas;
 	private final Map<BVisual2Formula, ExpandedFormulaStructure> formulaStructureCache;
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCache;
+	private final StateItem.FormulaEvaluator cachingEvaluator;
 
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
@@ -104,6 +105,17 @@ public final class StatesView extends StackPane {
 		this.visibleFormulas = new HashSet<>();
 		this.formulaStructureCache = new HashMap<>();
 		this.formulaValueCache = new HashMap<>();
+		this.cachingEvaluator = new StateItem.FormulaEvaluator() {
+			@Override
+			public ExpandedFormulaStructure expand(final BVisual2Formula formula) {
+				return expandFormulaWithCaching(formula);
+			}
+
+			@Override
+			public BVisual2Value evaluate(final BVisual2Formula formula, final State state) {
+				return evaluateFormulaWithCaching(formula, state);
+			}
+		};
 
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
@@ -333,10 +345,8 @@ public final class StatesView extends StackPane {
 	private void addSubformulaItemsUnfiltered(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas, final State currentState, final State previousState) {
 		// Generate the tree items for treeItem's children right away.
 		// This must be done even if treeItem is not expanded, because otherwise treeItem would have no child items and thus no expansion arrow, even if it actually has subformulas.
-		// TODO Don't expand the subformulas until they are actually visible
-		cacheMissingFormulaStructures(subformulas);
 		final List<TreeItem<StateItem>> children = subformulas.stream()
-			.map(f -> new TreeItem<>(new StateItem(this.expandFormulaWithCaching(f), currentState, previousState, this::evaluateFormulaWithCaching)))
+			.map(f -> new TreeItem<>(new StateItem(f, currentState, previousState, this.cachingEvaluator)))
 			.collect(Collectors.toList());
 
 		// The tree items for the children of treeItem's children are generated once treeItem is expanded.
@@ -346,7 +356,8 @@ public final class StatesView extends StackPane {
 			@Override
 			public void changed(final ObservableValue<? extends Boolean> o, final Boolean from, final Boolean to) {
 				if (to) {
-					// Pre-cache the current and previous values of the newly visible formulas.
+					// Pre-cache the structures and current and previous values of the newly visible formulas.
+					cacheMissingFormulaStructures(subformulas);
 					cacheMissingFormulaValues(subformulas, currentState);
 					if (previousState != null) {
 						cacheMissingFormulaValues(subformulas, previousState);
@@ -428,10 +439,9 @@ public final class StatesView extends StackPane {
 		cacheMissingFormulaStructures(subformulas);
 		final List<TreeItem<StateItem>> matchingChildren = new ArrayList<>();
 		for (final BVisual2Formula subformula : subformulas) {
-			final ExpandedFormulaStructure subformulaStructure = this.expandFormulaWithCaching(subformula);
-			final TreeItem<StateItem> subTreeItem = new TreeItem<>(new StateItem(subformulaStructure, currentState, previousState, this::evaluateFormulaWithCaching));
+			final TreeItem<StateItem> subTreeItem = new TreeItem<>(new StateItem(subformula, currentState, previousState, this.cachingEvaluator));
 			// If subTreeItem matches the filter, don't filter its children.
-			if (matchesFilter(filter, subformulaStructure.getLabel())) {
+			if (matchesFilter(filter, subTreeItem.getValue().getLabel())) {
 				addSubformulaItemsUnfiltered(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState);
 				matchingChildren.add(subTreeItem);
 			} else {
