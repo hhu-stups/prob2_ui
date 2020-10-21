@@ -216,6 +216,7 @@ public class VisBStage extends Stage {
 			VisBController visBController = injector.getInstance(VisBController.class);
 			File visBfile = visBPath.get().toFile();
 			visBController.setupVisBFile(visBfile);
+			visBController.setupVisualisation();
 		}
 	}
 
@@ -433,7 +434,9 @@ public class VisBStage extends Stage {
 			clear();
 			visBPath.set(path);
 			File visBfile = path.toFile();
-			injector.getInstance(VisBController.class).setupVisBFile(visBfile);
+			VisBController visBController = injector.getInstance(VisBController.class);
+			visBController.setupVisBFile(visBfile);
+			visBController.setupVisualisation();
 		}
 	}
 

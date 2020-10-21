@@ -278,14 +278,9 @@ public class VisBController {
 			updateInfo("visb.infobox.visualisation.error");
 			return;
 		}
-		try {
-			setupVisualisation();
-		} catch (Exception e){
-			alert(e, "visb.infobox.visualisation.error", "visb.exception.visb.file.error");
-		}
 	}
 
-	private void setupVisualisation(){
+	public void setupVisualisation(){
 		if(visBVisualisation == null){
 			updateInfo("visb.infobox.visualisation.error");
 			alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
@@ -300,6 +295,7 @@ public class VisBController {
 		}
 		try {
 			setupSVGFile(new File(this.visBVisualisation.getSvgPath().toUri()));
+			setupVisBFile(this.visBVisualisation.getJsonFile());
 		} catch(VisBException e){
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
 			return;
