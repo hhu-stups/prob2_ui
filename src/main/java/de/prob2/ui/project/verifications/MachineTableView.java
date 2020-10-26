@@ -23,9 +23,9 @@ public class MachineTableView extends TableView<Machine> {
 			super();
 			
 			this.setText(null);
-			final BindableGlyph iconView = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+			final BindableGlyph iconView = new BindableGlyph("FontAwesome", FontAwesome.Glyph.BAN);
 			iconView.setVisible(false);
-			iconView.getStyleClass().addAll("status-icon", "unknown");
+			iconView.getStyleClass().addAll("status-icon", "none");
 			this.setGraphic(iconView);
 		}
 		
