@@ -46,13 +46,55 @@ public class Machine implements DescriptionView.Describable {
 	public enum CheckingStatus {
 		UNKNOWN, SUCCESSFUL, FAILED, NONE
 	}
+
+	public static class MachineCheckingStatus {
+		private CheckingStatus status;
+		private int numberSuccess;
+		private int numberTotal;
+
+		public MachineCheckingStatus(CheckingStatus status, int numberSuccess, int numberTotal) {
+			this.status = status;
+			this.numberSuccess = numberSuccess;
+			this.numberTotal = numberTotal;
+		}
+
+		public MachineCheckingStatus(CheckingStatus status) {
+			this.status = status;
+			this.numberSuccess = 0;
+			this.numberTotal = 0;
+		}
+
+		public CheckingStatus getStatus() {
+			return status;
+		}
+
+		public int getNumberSuccess() {
+			return numberSuccess;
+		}
+
+		public int getNumberTotal() {
+			return numberTotal;
+		}
+
+		public void setStatus(CheckingStatus status) {
+			this.status = status;
+		}
+
+		public void setNumberSuccess(int numberSuccess) {
+			this.numberSuccess = numberSuccess;
+		}
+
+		public void setNumberTotal(int numberTotal) {
+			this.numberTotal = numberTotal;
+		}
+	}
 	
 	public static final JsonDeserializer<Machine> JSON_DESERIALIZER = Machine::new;
 
-	private final transient ObjectProperty<CheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", CheckingStatus.NONE);
-	private final transient ObjectProperty<CheckingStatus> ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", CheckingStatus.NONE);
-	private final transient ObjectProperty<CheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", CheckingStatus.NONE);
-	private final transient ObjectProperty<CheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.NONE);
+	private final transient ObjectProperty<MachineCheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus(CheckingStatus.NONE));
+	private final transient ObjectProperty<MachineCheckingStatus> ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", new MachineCheckingStatus(CheckingStatus.NONE));
+	private final transient ObjectProperty<MachineCheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus(CheckingStatus.NONE));
+	private final transient ObjectProperty<MachineCheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus(CheckingStatus.NONE));
 	private final StringProperty name;
 	private final StringProperty description;
 	private final Path location;
@@ -116,9 +158,16 @@ public class Machine implements DescriptionView.Describable {
 		}
 		return anyEnabled ? Machine.CheckingStatus.SUCCESSFUL : Machine.CheckingStatus.NONE;
 	}
+
+	private static Machine.MachineCheckingStatus combineMachineCheckingStatus(final List<? extends IExecutableItem> items) {
+		CheckingStatus status = combineCheckingStatus(items);
+		int numberSuccess = (int) items.stream().filter(item -> item.getChecked() == Checked.SUCCESS).count();
+		int numberTotal = items.size();
+		return new MachineCheckingStatus(status, numberSuccess, numberTotal);
+	}
 	
-	public static void addCheckingStatusListener(final ReadOnlyListProperty<? extends IExecutableItem> items, final ObjectProperty<Machine.CheckingStatus> statusProperty) {
-		final InvalidationListener updateListener = o -> Platform.runLater(() -> statusProperty.set(combineCheckingStatus(items)));
+	public static void addCheckingStatusListener(final ReadOnlyListProperty<? extends IExecutableItem> items, final ObjectProperty<Machine.MachineCheckingStatus> statusProperty) {
+		final InvalidationListener updateListener = o -> Platform.runLater(() -> statusProperty.set(combineMachineCheckingStatus(items)));
 		items.addListener((ListChangeListener<IExecutableItem>)change -> {
 			while (change.next()) {
 				change.getRemoved().forEach(item -> {
@@ -198,51 +247,51 @@ public class Machine implements DescriptionView.Describable {
 		modelcheckingItems.forEach(ModelCheckingItem::reset);
 	}
 
-	public ObjectProperty<CheckingStatus> traceReplayStatusProperty() {
+	public ObjectProperty<MachineCheckingStatus> traceReplayStatusProperty() {
 		return traceReplayStatus;
 	}
 
-	public CheckingStatus getTraceReplayStatus() {
+	public MachineCheckingStatus getTraceReplayStatus() {
 		return traceReplayStatus.get();
 	}
 
-	public void setTraceReplayStatus(final CheckingStatus status) {
+	public void setTraceReplayStatus(final MachineCheckingStatus status) {
 		this.traceReplayStatusProperty().set(status);
 	}
 
-	public ObjectProperty<CheckingStatus> ltlStatusProperty() {
+	public ObjectProperty<MachineCheckingStatus> ltlStatusProperty() {
 		return this.ltlStatus;
 	}
 	
-	public CheckingStatus getLtlStatus() {
+	public MachineCheckingStatus getLtlStatus() {
 		return this.ltlStatusProperty().get();
 	}
 	
-	public void setLtlStatus(final CheckingStatus status) {
+	public void setLtlStatus(final MachineCheckingStatus status) {
 		this.ltlStatusProperty().set(status);
 	}
 
-	public ObjectProperty<CheckingStatus> symbolicCheckingStatusProperty() {
+	public ObjectProperty<MachineCheckingStatus> symbolicCheckingStatusProperty() {
 		return this.symbolicCheckingStatus;
 	}
 
-	public CheckingStatus getSymbolicCheckingStatus() {
+	public MachineCheckingStatus getSymbolicCheckingStatus() {
 		return this.symbolicCheckingStatusProperty().get();
 	}
 
-	public void setSymbolicCheckingStatus(final CheckingStatus status) {
+	public void setSymbolicCheckingStatus(final MachineCheckingStatus status) {
 		this.symbolicCheckingStatusProperty().set(status);
 	}
 	
-	public ObjectProperty<CheckingStatus> modelcheckingStatusProperty() {
+	public ObjectProperty<MachineCheckingStatus> modelcheckingStatusProperty() {
 		return this.modelcheckingStatus;
 	}
 	
-	public CheckingStatus getModelcheckingStatus() {
+	public MachineCheckingStatus getModelcheckingStatus() {
 		return this.modelcheckingStatusProperty().get();
 	}
 	
-	public void setModelcheckingStatus(final CheckingStatus status) {
+	public void setModelcheckingStatus(final MachineCheckingStatus status) {
 		this.modelcheckingStatusProperty().set(status);
 	}
 	

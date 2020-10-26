@@ -18,7 +18,7 @@ import javax.inject.Inject;
 @FXMLInjected
 @Singleton
 public class MachineTableView extends TableView<Machine> {
-	private static final class StatusIconCell extends TableCell<Machine, Machine.CheckingStatus> {
+	private static final class StatusIconCell extends TableCell<Machine, Machine.MachineCheckingStatus> {
 		private StatusIconCell() {
 			super();
 			
@@ -30,7 +30,7 @@ public class MachineTableView extends TableView<Machine> {
 		}
 		
 		@Override
-		protected void updateItem(final Machine.CheckingStatus item, final boolean empty) {
+		protected void updateItem(final Machine.MachineCheckingStatus item, final boolean empty) {
 			super.updateItem(item, empty);
 			
 			final BindableGlyph graphic = (BindableGlyph) this.getGraphic();
@@ -41,7 +41,7 @@ public class MachineTableView extends TableView<Machine> {
 				graphic.setVisible(true);
 				final String styleClass;
 				final FontAwesome.Glyph icon;
-				switch (item) {
+				switch (item.getStatus()) {
 					case UNKNOWN:
 						styleClass = "unknown";
 						icon = FontAwesome.Glyph.QUESTION_CIRCLE;
@@ -71,10 +71,10 @@ public class MachineTableView extends TableView<Machine> {
 		}
 	}
 
-	@FXML private TableColumn<Machine, Machine.CheckingStatus> machineTraceReplayColumn;
-	@FXML private TableColumn<Machine, Machine.CheckingStatus> machineLTLColumn;
-	@FXML private TableColumn<Machine, Machine.CheckingStatus> machineSymbolicColumn;
-	@FXML private TableColumn<Machine, Machine.CheckingStatus> machineModelcheckColumn;
+	@FXML private TableColumn<Machine, Machine.MachineCheckingStatus> machineTraceReplayColumn;
+	@FXML private TableColumn<Machine, Machine.MachineCheckingStatus> machineLTLColumn;
+	@FXML private TableColumn<Machine, Machine.MachineCheckingStatus> machineSymbolicColumn;
+	@FXML private TableColumn<Machine, Machine.MachineCheckingStatus> machineModelcheckColumn;
 	@FXML private TableColumn<Machine, String> machineNameColumn;
 	
 	private CurrentProject currentProject;
