@@ -82,19 +82,28 @@ public class TraceViewHandler {
             }
         };
 
+        currentProject.addListener((observable, from, to) -> {
+            this.machinesToTraces.clear();
+            if(to != null) {
+                to.getMachines().forEach(machine -> {
+                    final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
+                    machinesToTraces.put(machine, machineTraces);
+                    machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, injector)));
+                    Machine.addCheckingStatusListener(machineTraces, machine.traceReplayStatusProperty());
+                });
+            }
+        });
+
         currentProject.currentMachineProperty().addListener((observable, from, to) -> {
             if (from != null) {
                 from.getTraceFiles().removeListener(listener);
             }
             traces.unbind();
             if (to != null) {
-                final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(to) == null ? new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList()) : machinesToTraces.get(to);
-                machinesToTraces.put(to, machineTraces);
+                final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(to);
                 traces.bind(machineTraces);
                 noTraces.bind(to.tracesProperty().emptyProperty());
-                to.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, injector)));
                 to.getTraceFiles().addListener(listener);
-                Machine.addCheckingStatusListener(machineTraces, to.traceReplayStatusProperty());
             } else {
                 noTraces.unbind();
                 noTraces.set(true);
