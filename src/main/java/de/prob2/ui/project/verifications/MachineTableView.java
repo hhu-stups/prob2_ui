@@ -41,7 +41,8 @@ public class MachineTableView extends TableView<Machine> {
 				graphic.setVisible(true);
 				final String styleClass;
 				final FontAwesome.Glyph icon;
-				switch (item.getStatus()) {
+				final Machine.CheckingStatus status = item.getStatus();
+				switch (status) {
 					case UNKNOWN:
 						styleClass = "unknown";
 						icon = FontAwesome.Glyph.QUESTION_CIRCLE;
@@ -67,6 +68,7 @@ public class MachineTableView extends TableView<Machine> {
 				}
 				graphic.getStyleClass().add(styleClass);
 				graphic.setIcon(icon);
+				this.setText(status == Machine.CheckingStatus.NONE ? "" : String.format("(%d/%d)", item.getNumberSuccess(), item.getNumberTotal()));
 			}
 		}
 	}
