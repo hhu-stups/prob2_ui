@@ -76,7 +76,6 @@ public class TraceViewHandler {
                 ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
                 machineTraces.add(replayTrace);
                 this.traceChecker.check(replayTrace, true);
-                this.traceChecker.isNewTrace();
             }
             if (c.wasRemoved()) {
                 removeTraceItems(c.getElementRemoved());

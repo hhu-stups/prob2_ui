@@ -11,11 +11,9 @@ import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -47,9 +45,7 @@ public class TraceDiff extends VBox {
 	@FXML private ListView<String> persistentList;
 	@FXML private ListView<String> currentList;
 
-	@FXML private Button setReplayed;
 	@FXML private Button showAlert;
-	@FXML private Button setCurrent;
 
 	@FXML private VBox persistentBox;
 
@@ -73,10 +69,8 @@ public class TraceDiff extends VBox {
 	@FXML
 	private void initialize() {
 		this.setPadding(new Insets(5,5,5,5));
-		double initialWidth = this.getWidth()/3;
-		setReplayed.setPrefWidth(initialWidth);
+		double initialWidth = this.getWidth();
 		showAlert.setPrefWidth(initialWidth);
-		setCurrent.setPrefWidth(initialWidth);
 
 		this.checkBoxListViewMap.put(replayed, replayedList);
 		this.checkBoxListViewMap.put(persistent, persistentList);
@@ -169,15 +163,7 @@ public class TraceDiff extends VBox {
 		translateList(pTransitions, persistentList, maxSize);
 		translateList(cTransitions, currentList, maxSize);
 
-		setReplayed.setOnAction(e -> {
-			currentTrace.set(replayedOrLost);
-			this.getScene().getWindow().hide();
-		});
 		showAlert.setOnAction(e -> alert.showAlertAgain());
-		setCurrent.setOnAction(e -> {
-			currentTrace.set(current);
-			this.getScene().getWindow().hide();
-		});
 	}
 
 	private void translateList(List<?> list, ListView<String> listView, int maxSize) {
@@ -223,13 +209,13 @@ public class TraceDiff extends VBox {
 		}
 
 		if (Transition.SETUP_CONSTANTS_NAME.equals(t.getName())
-				&& t.getDestination().getConstantValues(FormulaExpand.EXPAND) != null
-				&& !t.getDestination().getConstantValues(FormulaExpand.EXPAND).isEmpty()) {
-			t.getDestination().getConstantValues(FormulaExpand.EXPAND).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
+				&& t.getDestination().getConstantValues(FormulaExpand.TRUNCATE) != null
+				&& !t.getDestination().getConstantValues(FormulaExpand.TRUNCATE).isEmpty()) {
+			t.getDestination().getConstantValues(FormulaExpand.TRUNCATE).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
 		} else if (Transition.INITIALISE_MACHINE_NAME.equals(t.getName())
-				&& t.getDestination().getVariableValues(FormulaExpand.EXPAND) != null
-				&& !t.getDestination().getVariableValues(FormulaExpand.EXPAND).isEmpty()) {
-			t.getDestination().getVariableValues(FormulaExpand.EXPAND).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
+				&& t.getDestination().getVariableValues(FormulaExpand.TRUNCATE) != null
+				&& !t.getDestination().getVariableValues(FormulaExpand.TRUNCATE).isEmpty()) {
+			t.getDestination().getVariableValues(FormulaExpand.TRUNCATE).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
 		}
 
 		if (!args.isEmpty()) {
