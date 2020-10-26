@@ -310,8 +310,13 @@ public final class StatesView extends StackPane {
 		}
 	}
 
-	private ChangeListener<Boolean> getTrackVisibleListener(final TreeItem<StateItem> treeItem, final List<BVisual2Formula> subformulas) {
+	private ChangeListener<Boolean> getTrackVisibleListener(final TreeItem<StateItem> treeItem) {
 		return (o, from, to) -> {
+			final List<BVisual2Formula> subformulas = treeItem.getChildren().stream()
+				.map(TreeItem::getValue)
+				.map(StateItem::getFormula)
+				.collect(Collectors.toList());
+			
 			if (to) {
 				visibleFormulas.addAll(subformulas);
 			} else {
@@ -391,7 +396,7 @@ public final class StatesView extends StackPane {
 
 		// This listener tracks the visible state of each formula.
 		// Unlike the first listener, this one does *not* remove itself after it runs.
-		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem, subformulas);
+		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem);
 		treeItem.expandedProperty().addListener(trackVisibleListener);
 
 		// If treeItem is already expanded, immediately fire the appropriate listeners.
@@ -466,7 +471,7 @@ public final class StatesView extends StackPane {
 		}
 		treeItem.getChildren().setAll(matchingChildren);
 
-		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem, subformulas);
+		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem);
 		treeItem.expandedProperty().addListener(trackVisibleListener);
 
 		// Always expand treeItem, because it doesn't match the filter.
@@ -488,7 +493,6 @@ public final class StatesView extends StackPane {
 		if (to == null) {
 			Platform.runLater(() -> this.tv.setRoot(createRootItem()));
 			this.expandedFormulas.clear();
-			this.visibleFormulas.clear();
 			this.formulaStructureCache.clear();
 			this.structureFullyExpanded = false;
 			this.formulaValueCache.clear();
@@ -497,7 +501,6 @@ public final class StatesView extends StackPane {
 
 		if (from == null || !from.getStateSpace().equals(to.getStateSpace())) {
 			this.expandedFormulas.clear();
-			this.visibleFormulas.clear();
 			this.formulaStructureCache.clear();
 			this.structureFullyExpanded = false;
 			this.formulaValueCache.clear();
@@ -509,6 +512,9 @@ public final class StatesView extends StackPane {
 				cacheMissingFormulaValues(this.visibleFormulas, to.getPreviousState());
 			}
 		}
+		// After the visible formulas have been evaluted,
+		// clear the collection and let createRootItem recalculate the currently visible formulas.
+		this.visibleFormulas.clear();
 
 		final int selectedRow = tv.getSelectionModel().getSelectedIndex();
 
