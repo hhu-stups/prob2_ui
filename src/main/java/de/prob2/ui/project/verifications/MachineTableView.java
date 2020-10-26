@@ -70,7 +70,8 @@ public class MachineTableView extends TableView<Machine> {
 			}
 		}
 	}
-	
+
+	@FXML private TableColumn<Machine, Machine.CheckingStatus> machineTraceReplayColumn;
 	@FXML private TableColumn<Machine, Machine.CheckingStatus> machineLTLColumn;
 	@FXML private TableColumn<Machine, Machine.CheckingStatus> machineSymbolicColumn;
 	@FXML private TableColumn<Machine, Machine.CheckingStatus> machineModelcheckColumn;
@@ -86,6 +87,8 @@ public class MachineTableView extends TableView<Machine> {
 	
 	@FXML
 	public void initialize() {
+		machineTraceReplayColumn.setCellFactory(col -> new StatusIconCell());
+		machineTraceReplayColumn.setCellValueFactory(features -> features.getValue().traceReplayStatusProperty());
 		machineLTLColumn.setCellFactory(col -> new StatusIconCell());
 		machineLTLColumn.setCellValueFactory(features -> features.getValue().ltlStatusProperty());
 		machineSymbolicColumn.setCellFactory(col -> new StatusIconCell());
@@ -94,13 +97,5 @@ public class MachineTableView extends TableView<Machine> {
 		machineModelcheckColumn.setCellValueFactory(features -> features.getValue().modelcheckingStatusProperty());
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		this.itemsProperty().bind(currentProject.machinesProperty());
-
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if(to != null) {
-				to.setModelcheckingStatus(Machine.CheckingStatus.UNKNOWN);
-				to.setLtlStatus(Machine.CheckingStatus.UNKNOWN);
-				to.setSymbolicCheckingStatus(Machine.CheckingStatus.UNKNOWN);
-			}
-		});
 	}
 }

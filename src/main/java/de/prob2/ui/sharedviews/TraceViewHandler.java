@@ -11,10 +11,13 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,6 +35,8 @@ import javafx.util.Callback;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 @Singleton
@@ -45,7 +50,9 @@ public class TraceViewHandler {
 
     private final ResourceBundle bundle;
 
-    private final ObservableList<ReplayTrace> traces;
+    private final ListProperty<ReplayTrace> traces;
+
+    private final Map<Machine, ListProperty<ReplayTrace>> machinesToTraces;
 
     private final BooleanProperty noTraces;
 
@@ -55,7 +62,8 @@ public class TraceViewHandler {
         this.currentProject = currentProject;
         this.injector = injector;
         this.bundle = bundle;
-        this.traces = FXCollections.observableArrayList();
+        this.traces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
+        this.machinesToTraces = new HashMap<>();
         this.noTraces = new SimpleBooleanProperty();
         initialize();
     }
@@ -64,7 +72,9 @@ public class TraceViewHandler {
         final SetChangeListener<Path> listener = c -> {
             if (c.wasAdded()) {
                 ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(), injector);
-                traces.add(replayTrace);
+                Machine machine = currentProject.getCurrentMachine();
+                ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
+                machineTraces.add(replayTrace);
                 this.traceChecker.check(replayTrace, true);
                 this.traceChecker.isNewTrace();
             }
@@ -77,11 +87,15 @@ public class TraceViewHandler {
             if (from != null) {
                 from.getTraceFiles().removeListener(listener);
             }
-            traces.clear();
+            traces.unbind();
             if (to != null) {
+                final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(to) == null ? new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList()) : machinesToTraces.get(to);
+                machinesToTraces.put(to, machineTraces);
+                traces.bind(machineTraces);
                 noTraces.bind(to.tracesProperty().emptyProperty());
-                to.getTraceFiles().forEach(tracePath -> traces.add(new ReplayTrace(tracePath, injector)));
+                to.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, injector)));
                 to.getTraceFiles().addListener(listener);
+                Machine.addCheckingStatusListener(machineTraces, to.traceReplayStatusProperty());
             } else {
                 noTraces.unbind();
                 noTraces.set(true);

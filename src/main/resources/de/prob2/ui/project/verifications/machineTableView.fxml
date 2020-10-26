@@ -11,6 +11,7 @@
 	</columnResizePolicy>
 	<columns>
 		<TableColumn fx:id="machineNameColumn" minWidth="80.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.machine" />
+		<TableColumn fx:id="machineTraceReplayColumn" minWidth="120.0" maxWidth="120.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.tracereplay" />
 		<TableColumn fx:id="machineModelcheckColumn" minWidth="120.0" maxWidth="120.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.modelChecking" />
 		<TableColumn fx:id="machineLTLColumn" minWidth="40.0" maxWidth="40.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.ltl" />
 		<TableColumn fx:id="machineSymbolicColumn" minWidth="100.0" maxWidth="100.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.symbolic" />

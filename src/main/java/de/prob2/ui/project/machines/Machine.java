@@ -48,10 +48,11 @@ public class Machine implements DescriptionView.Describable {
 	}
 	
 	public static final JsonDeserializer<Machine> JSON_DESERIALIZER = Machine::new;
-	
-	private final transient ObjectProperty<CheckingStatus> ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", CheckingStatus.UNKNOWN);
-	private final transient ObjectProperty<CheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", CheckingStatus.UNKNOWN);
-	private final transient ObjectProperty<CheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.UNKNOWN);
+
+	private final transient ObjectProperty<CheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", CheckingStatus.NONE);
+	private final transient ObjectProperty<CheckingStatus> ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", CheckingStatus.NONE);
+	private final transient ObjectProperty<CheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", CheckingStatus.NONE);
+	private final transient ObjectProperty<CheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", CheckingStatus.NONE);
 	private final StringProperty name;
 	private final StringProperty description;
 	private final Path location;
@@ -116,7 +117,7 @@ public class Machine implements DescriptionView.Describable {
 		return anyEnabled ? Machine.CheckingStatus.SUCCESSFUL : Machine.CheckingStatus.NONE;
 	}
 	
-	private static void addCheckingStatusListener(final ReadOnlyListProperty<? extends IExecutableItem> items, final ObjectProperty<Machine.CheckingStatus> statusProperty) {
+	public static void addCheckingStatusListener(final ReadOnlyListProperty<? extends IExecutableItem> items, final ObjectProperty<Machine.CheckingStatus> statusProperty) {
 		final InvalidationListener updateListener = o -> Platform.runLater(() -> statusProperty.set(combineCheckingStatus(items)));
 		items.addListener((ListChangeListener<IExecutableItem>)change -> {
 			while (change.next()) {
@@ -151,7 +152,7 @@ public class Machine implements DescriptionView.Describable {
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
-		
+
 		addCheckingStatusListener(this.ltlFormulasProperty(), this.ltlStatusProperty());
 		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolicCheckingStatusProperty());
 		addCheckingStatusListener(this.modelcheckingItemsProperty(), this.modelcheckingStatusProperty());
@@ -196,7 +197,19 @@ public class Machine implements DescriptionView.Describable {
 		testCases.forEach(TestCaseGenerationItem::reset);
 		modelcheckingItems.forEach(ModelCheckingItem::reset);
 	}
-	
+
+	public ObjectProperty<CheckingStatus> traceReplayStatusProperty() {
+		return traceReplayStatus;
+	}
+
+	public CheckingStatus getTraceReplayStatus() {
+		return traceReplayStatus.get();
+	}
+
+	public void setTraceReplayStatus(final CheckingStatus status) {
+		this.traceReplayStatusProperty().set(status);
+	}
+
 	public ObjectProperty<CheckingStatus> ltlStatusProperty() {
 		return this.ltlStatus;
 	}
