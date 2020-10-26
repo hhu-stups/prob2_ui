@@ -36,7 +36,7 @@ public class HistoryItem {
 		if (this.getIndex() == -1) {
 			return "---root---";
 		} else {
-			return OperationItem.forTransition(this.getTrace().getStateSpace(), this.getTrace().getTransitionList().get(this.getIndex())).toPrettyString(true);
+			return OperationItem.forTransitionFast(this.getTrace().getStateSpace(), this.getTrace().getTransitionList().get(this.getIndex())).toPrettyString(true);
 		}
 	}
 }
