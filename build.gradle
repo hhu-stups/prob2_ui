@@ -146,6 +146,7 @@ dependencies {
 	implementation group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.2"
 	implementation group: "org.pf4j", name: "pf4j", version: "2.6.0"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
+	implementation group: "com.github.spullara.mustache.java", name: "compiler", version: "0.9.7"
 }
 
 final javafxVersion = "11.0.2"
