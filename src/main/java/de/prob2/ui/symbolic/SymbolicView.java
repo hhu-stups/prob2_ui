@@ -16,11 +16,11 @@ import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -116,14 +116,16 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	public void initialize() {
 		setBindings();
 		setContextMenu();
-		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
+		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				tvFormula.itemsProperty().bind(formulasProperty(newValue));
 			} else {
 				tvFormula.getItems().clear();
 				tvFormula.itemsProperty().unbind();
 			}
-		});
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 	
 	protected abstract ListProperty<T> formulasProperty(Machine machine);
