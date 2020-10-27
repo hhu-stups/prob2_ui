@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -336,15 +337,18 @@ public class VisBController {
 	}
 	private void showUpdateVisualisationNotPossible(){
 		updateInfo("visb.infobox.visualisation.updated.nr",0);
+		injector.getInstance(VisBStage.class).runScript(getModelNotInitialisedString());
+	}
+
+	private String getModelNotInitialisedString() {
 		try {
 			URI uri = this.getClass().getResource("model_not_initialised.mustache").toURI();
 			MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
 			templateManager.put("jsonFile", visBVisualisation.getJsonFile());
-			String result = templateManager.apply();
-			injector.getInstance(VisBStage.class).runScript(result);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			return templateManager.apply();
+		} catch (URISyntaxException e) {
 			LOGGER.error("", e);
+			return "";
 		}
 	}
 
@@ -365,33 +369,17 @@ public class VisBController {
 						alert.show();
 					}
 				} else {
-					StringBuilder EnterAction = new StringBuilder(); StringBuilder LeaveAction = new StringBuilder();
+					StringBuilder EnterAction = new StringBuilder();
+					StringBuilder LeaveAction = new StringBuilder();
 					ArrayList<VisBHover> hvs = visBEvent.getHovers();
 					for(int j = 0; j < hvs.size(); j++) {
 						EnterAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
 								  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverEnterVal() + "\");\n");
 						LeaveAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
 								  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverLeaveVal() + "\");\n");
-					} 
-				
-					String queryPart = // "$(document).ready(function(){\n" + // This does not seem necessary; and it results in Click Actions being re-added over and over for new models (see PROB2UI-419)
-							"  checkSvgId(\"#" + visBEvent.getId() + "\", \"VisB Event\");\n" +
-							"  $(\"#" + visBEvent.getId() + "\").off(\"click hover\");\n" + // remove any previous click functions
-							"  $(\"#" + visBEvent.getId() + "\").click(function(event){\n" +
-							"    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);\n" +
-							// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
-							// event.which: 1=left mouse button, 2, 3
-							// event.clientX,event.clientY, screenX, screenY : less useful probably
-							"  });\n" +
-							// attach a hover function to put event into visb_debug_messages text field
-							"  $(\"#" + visBEvent.getId() + "\").hover(function(ev){\n" +
-								EnterAction.toString() +
-							"    $(\"#visb_debug_messages\").text(\"" + visBEvent.getEvent() + " \" + ev.pageX + \",\" + ev.pageY);}," +
-							"function(){\n" + // function when leaving hover
-								 LeaveAction.toString() +
-							"    $(\"#visb_debug_messages\").text(\"\"); });\n" +
-							// "})" +
-							";\n";
+					}
+					String queryPart = getQueryString(visBEvent, EnterAction, LeaveAction);
+					System.out.println(queryPart);
 					onClickEventQuery.append(queryPart);
 				}
 			}
@@ -401,6 +389,21 @@ public class VisBController {
 				alert(new VisBException(), "visb.exception.header", "visb.exception.no.items.and.events");
 				updateInfo(bundle.getString("visb.infobox.visualisation.events.alert"));
 			}
+		}
+	}
+
+	private String getQueryString(VisBEvent visBEvent, StringBuilder enterAction, StringBuilder leaveAction) {
+		try {
+			URI uri = this.getClass().getResource("on_click_event_query.mustache").toURI();
+			MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
+			templateManager.put("eventID", visBEvent.getId());
+			templateManager.put("eventName", visBEvent.getEvent());
+			templateManager.put("enterAction", enterAction.toString());
+			templateManager.put("leaveAction", leaveAction.toString());
+			return templateManager.apply();
+		} catch (URISyntaxException e) {
+			LOGGER.error("", e);
+			return "";
 		}
 	}
 	

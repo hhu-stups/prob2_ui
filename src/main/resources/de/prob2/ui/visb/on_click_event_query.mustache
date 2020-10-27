@@ -1,0 +1,22 @@
+  checkSvgId("#{{eventID}}", "VisB Event");
+
+  $("#{{eventID}}").off("click hover"); {{! remove any previous click functions}}
+
+  $("#{{eventID}}").click(function(event) {
+    visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);
+    {{! we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp}}
+    {{! event.which: 1=left mouse button, 2, 3}}
+    {{! event.clientX,event.clientY, screenX, screenY : less useful probably}}
+  });
+
+  {{! attach a hover function to put event into visb_debug_messages text field}}
+
+  $("#{{eventID}}").hover(
+  function(ev) {
+    {{enterAction}}
+    $("#visb_debug_messages").text("{{eventName}} " + ev.pageX + "," + ev.pageY);
+  },
+  function() { {{! function when leaving hover}}
+    {{leaveAction}}
+    $("#visb_debug_messages").text("");
+  });
