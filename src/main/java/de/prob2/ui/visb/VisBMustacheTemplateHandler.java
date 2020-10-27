@@ -40,4 +40,18 @@ public class VisBMustacheTemplateHandler {
         }
     }
 
+    public static String getChangeAttributeString(String id, String attr, String value) {
+        try {
+            URI uri = VisBMustacheTemplateHandler.class.getResource("change_attribute.mustache").toURI();
+            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
+            templateManager.put("id", id);
+            templateManager.put("attr", attr);
+            templateManager.put("value", value);
+            return templateManager.apply();
+        } catch (URISyntaxException e) {
+            LOGGER.error("", e);
+            return "";
+        }
+    }
+
 }

@@ -31,6 +31,8 @@ import de.prob2.ui.visb.visbobjects.VisBItem;
 
 import javafx.scene.paint.Color;
 
+import static de.prob2.ui.visb.VisBMustacheTemplateHandler.getChangeAttributeString;
+
 /**
  * This class will get the items of an VisB visualisation and evaluate them to construct executable JQueries.
  */
@@ -409,7 +411,7 @@ public class VisBParser {
 			"\' cannot be parsed for the attribute \'"+ attr+
 			"\'. Check the VisB help section for supported values.");
 		}
-		return "changeAttribute(\"#"+id+"\", \""+attr+"\", \""+value+"\");\n";
+		return getChangeAttributeString(id, attr, value);
 	}
 
 	/**
