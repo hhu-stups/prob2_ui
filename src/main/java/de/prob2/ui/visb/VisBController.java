@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import static de.prob2.ui.visb.VisBMustacheTemplateHandler.getModelNotInitialisedString;
+
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler} and {@link VisBParser}.
  * Everything that can be done in Java only and uses interaction with ProB2-UI should be in here, not in the other classes.
@@ -337,19 +339,7 @@ public class VisBController {
 	}
 	private void showUpdateVisualisationNotPossible(){
 		updateInfo("visb.infobox.visualisation.updated.nr",0);
-		injector.getInstance(VisBStage.class).runScript(getModelNotInitialisedString());
-	}
-
-	private String getModelNotInitialisedString() {
-		try {
-			URI uri = this.getClass().getResource("model_not_initialised.mustache").toURI();
-			MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
-			templateManager.put("jsonFile", visBVisualisation.getJsonFile());
-			return templateManager.apply();
-		} catch (URISyntaxException e) {
-			LOGGER.error("", e);
-			return "";
-		}
+		injector.getInstance(VisBStage.class).runScript(getModelNotInitialisedString(visBVisualisation.getJsonFile()));
 	}
 
 	/**
@@ -378,7 +368,7 @@ public class VisBController {
 						LeaveAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
 								  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverLeaveVal() + "\");\n");
 					}
-					String queryPart = getQueryString(visBEvent, EnterAction, LeaveAction);
+					String queryPart = VisBMustacheTemplateHandler.getQueryString(visBEvent, EnterAction, LeaveAction);
 					System.out.println(queryPart);
 					onClickEventQuery.append(queryPart);
 				}
@@ -389,21 +379,6 @@ public class VisBController {
 				alert(new VisBException(), "visb.exception.header", "visb.exception.no.items.and.events");
 				updateInfo(bundle.getString("visb.infobox.visualisation.events.alert"));
 			}
-		}
-	}
-
-	private String getQueryString(VisBEvent visBEvent, StringBuilder enterAction, StringBuilder leaveAction) {
-		try {
-			URI uri = this.getClass().getResource("on_click_event_query.mustache").toURI();
-			MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
-			templateManager.put("eventID", visBEvent.getId());
-			templateManager.put("eventName", visBEvent.getEvent());
-			templateManager.put("enterAction", enterAction.toString());
-			templateManager.put("leaveAction", leaveAction.toString());
-			return templateManager.apply();
-		} catch (URISyntaxException e) {
-			LOGGER.error("", e);
-			return "";
 		}
 	}
 	
