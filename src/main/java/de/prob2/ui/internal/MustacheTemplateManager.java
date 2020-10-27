@@ -46,7 +46,8 @@ public class MustacheTemplateManager {
     public static Mustache createMustacheTemplate(URI uri, String name) {
         try {
             MustacheFactory mf = new DefaultMustacheFactory();
-            String template = Files.readString(Paths.get(uri));
+            //Avoid readString for Java 8 compatibility
+            String template = new String(Files.readAllBytes(Paths.get(uri)));
             return mf.compile(new StringReader(template), name);
         } catch (IOException e) {
             LOGGER.error("", e);
