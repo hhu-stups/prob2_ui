@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
+import static de.prob2.ui.visb.VisBMustacheTemplateHandler.generateHTMLFileWithSVG;
+
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
  */
@@ -235,41 +237,8 @@ public class VisBStage extends Stage {
 		if (svgFile != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
-			// TODO: Load HTML file from file. Option 1: Load from HTML file and add function to place the SVG code. Option 2: Use a template engine
-			String htmlFile = "<!DOCTYPE html>\n" +
-					"<html>\n" +
-					"<head>\n" +
-					//This is for zooming in and out and scaling the image to the right width and height
-					"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-
-					"<script src=\"" + Main.class.getResource("jquery.js").toExternalForm() + "\"></script>\n" +
-					"<script>\n" +
-					"function checkSvgId(id,ctxt){\n" +
-					"    if(!$(id).length) {\n" +
-					// " $(\"#visb_error_messages\").text($(\"#visb_error_messages\").text()+\"unknown: \"+id);\n" +
-					" $(\"#visb_error_messages ul\").append(\"<li>Unknown SVG id <b>\" + id + \"</b> for \" + ctxt + \"</li>\");\n" +
-					// "                       alert(\"Unknown SVG id: \" + id + \" for \" + ctxt);\n" +
-					"}};" +
-					"function changeAttribute(id, attribute, value){\n" +
-					"  $(document).ready(function(){\n" +
-					// Provide debugging if the VisB SVG file contains such a text span:
-					//"    $(\"#visb_debug_messages\").text(\"changeAttribute(\" + id + \",\" + attribute + \",\" + value +\")\");\n" +
-					"    if(attribute==\"text\") { $(id).text(value); } else { $(id).attr(attribute, value); };\n" +
-					// Provide warning alert if an SVG object id cannot be found:
-					"    checkSvgId(id,attribute);\n" +
-					"  });\n" +
-					"};" +
-					"</script>\n" +
-					"</head>\n" +
-					"<body>\n" +
-					"\n" +
-					"<div text-align=\"center\">" +
-					svgFile +
-					"\n" +
-					"<div id=\"visb_error_messages\" style=\"color:red\"><ul></ul>\n" + 
-					"</div>\n" +
-					"</body>\n" +
-					"</html>";
+			String jqueryLink = Main.class.getResource("jquery.js").toExternalForm();
+			String htmlFile = generateHTMLFileWithSVG(jqueryLink, svgFile);
 			this.webView.getEngine().loadContent(htmlFile);
 			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();

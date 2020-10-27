@@ -23,7 +23,7 @@ public class VisBMustacheTemplateHandler {
                 .collect(Collectors.joining("\n"));
         try {
             URI uri = VisBMustacheTemplateHandler.class.getResource("on_click_event_query.mustache").toURI();
-            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
+            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "on_click_event_query");
             templateManager.put("eventID", visBEvent.getId());
             templateManager.put("eventName", visBEvent.getEvent());
             templateManager.put("enterAction", enterAction);
@@ -50,10 +50,23 @@ public class VisBMustacheTemplateHandler {
     public static String getChangeAttributeString(String id, String attr, String value) {
         try {
             URI uri = VisBMustacheTemplateHandler.class.getResource("change_attribute.mustache").toURI();
-            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
+            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "change_attribute");
             templateManager.put("id", id);
             templateManager.put("attr", attr);
             templateManager.put("value", value);
+            return templateManager.apply();
+        } catch (URISyntaxException e) {
+            LOGGER.error("", e);
+            return "";
+        }
+    }
+
+    public static String generateHTMLFileWithSVG(String jqueryLink, String svgFile) {
+        try {
+            URI uri = VisBMustacheTemplateHandler.class.getResource("visb_html_view.mustache").toURI();
+            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "visb_html_view");
+            templateManager.put("jqueryLink", jqueryLink);
+            templateManager.put("svgFile", svgFile);
             return templateManager.apply();
         } catch (URISyntaxException e) {
             LOGGER.error("", e);

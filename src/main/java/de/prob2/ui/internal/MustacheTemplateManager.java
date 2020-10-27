@@ -12,6 +12,8 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -70,9 +72,10 @@ public class MustacheTemplateManager {
      * @return the resulting String
      */
     public String apply() {
+        System.out.println("PLACEHOLDERS: " + placeholders);
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            Writer writer = new OutputStreamWriter(stream);
+            Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
             mustache.execute(writer, placeholders);
             writer.flush();
             return stream.toString();
