@@ -1,8 +1,5 @@
 package de.prob2.ui.visb;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
 import com.google.inject.Injector;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.command.ExecuteOperationException;
@@ -11,7 +8,6 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.MustacheTemplateManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -29,18 +25,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
+import static de.prob2.ui.visb.VisBMustacheTemplateHandler.getChangeAttributeString;
 import static de.prob2.ui.visb.VisBMustacheTemplateHandler.getModelNotInitialisedString;
 
 /**
@@ -359,16 +351,7 @@ public class VisBController {
 						alert.show();
 					}
 				} else {
-					StringBuilder EnterAction = new StringBuilder();
-					StringBuilder LeaveAction = new StringBuilder();
-					ArrayList<VisBHover> hvs = visBEvent.getHovers();
-					for(int j = 0; j < hvs.size(); j++) {
-						EnterAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
-								  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverEnterVal() + "\");\n");
-						LeaveAction.append("    changeAttribute(\"#" + hvs.get(j).getHoverId() + "\",\""
-								  + hvs.get(j).getHoverAttr() + "\", \""+ hvs.get(j).getHoverLeaveVal() + "\");\n");
-					}
-					String queryPart = VisBMustacheTemplateHandler.getQueryString(visBEvent, EnterAction, LeaveAction);
+					String queryPart = VisBMustacheTemplateHandler.getQueryString(visBEvent);
 					System.out.println(queryPart);
 					onClickEventQuery.append(queryPart);
 				}

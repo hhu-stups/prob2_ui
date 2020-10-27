@@ -8,19 +8,26 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.stream.Collectors;
 
 public class VisBMustacheTemplateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VisBMustacheTemplateHandler.class);
 
-    public static String getQueryString(VisBEvent visBEvent, StringBuilder enterAction, StringBuilder leaveAction) {
+    public static String getQueryString(VisBEvent visBEvent) {
+        String enterAction = visBEvent.getHovers().stream()
+                .map(hover -> getChangeAttributeString(hover.getHoverId(), hover.getHoverAttr(), hover.getHoverEnterVal()))
+                .collect(Collectors.joining("\n"));
+        String leaveAction = visBEvent.getHovers().stream()
+                .map(hover -> getChangeAttributeString(hover.getHoverId(), hover.getHoverAttr(), hover.getHoverLeaveVal()))
+                .collect(Collectors.joining("\n"));
         try {
             URI uri = VisBMustacheTemplateHandler.class.getResource("on_click_event_query.mustache").toURI();
             MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
             templateManager.put("eventID", visBEvent.getId());
             templateManager.put("eventName", visBEvent.getEvent());
-            templateManager.put("enterAction", enterAction.toString());
-            templateManager.put("leaveAction", leaveAction.toString());
+            templateManager.put("enterAction", enterAction);
+            templateManager.put("leaveAction", leaveAction);
             return templateManager.apply();
         } catch (URISyntaxException e) {
             LOGGER.error("", e);
