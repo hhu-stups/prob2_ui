@@ -26,6 +26,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -164,14 +165,16 @@ public final class ModelcheckingView extends ScrollPane {
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noModelcheckingItems = new SimpleBooleanProperty();
-		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			if (to != null) {
 				noModelcheckingItems.bind(to.modelcheckingItemsProperty().emptyProperty());
 			} else {
 				noModelcheckingItems.unbind();
 				noModelcheckingItems.set(true);
 			}
-		});
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 		checkMachineButton.disableProperty().bind(currentTrace.isNull().or(noModelcheckingItems.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -229,14 +232,16 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 	
 	private void setListeners() {
-		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
+		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
 			} else {
 				tvItems.getItems().clear();
 				tvItems.itemsProperty().unbind();
 			}
-		});
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 	
 	private void tvItemsClicked(MouseEvent e) {

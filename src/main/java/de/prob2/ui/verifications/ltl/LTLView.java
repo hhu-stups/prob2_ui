@@ -41,6 +41,7 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -159,7 +160,7 @@ public class LTLView extends AnchorPane {
 		setOnItemClicked();
 		setContextMenus();
 		setBindings();
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			if(to != null) {
 				if(from != null) {
 					from.clearPatternManager();
@@ -172,7 +173,9 @@ public class LTLView extends AnchorPane {
 				tvPattern.getItems().clear();
 				tvPattern.itemsProperty().unbind();
 			}
-		});
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 	
 	private void setOnItemClicked() {

@@ -126,7 +126,7 @@ public class OperationItem {
 		return values;
 	}
 
-	public static Collection<OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions) {
+	private static Collection<OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions, final boolean avoidCliCommunication) {
 		final LoadedMachine loadedMachine = stateSpace.getLoadedMachine();
 		final Map<String, List<Transition>> transitionsByName = transitions.stream().collect(Collectors.groupingBy(Transition::getName));
 		final List<OperationItem> items = new ArrayList<>();
@@ -163,17 +163,29 @@ public class OperationItem {
 					}
 			}
 			
-			final List<IEvalElement> allEvalElements = new ArrayList<>(constantEvalElements);
-			allEvalElements.addAll(variableEvalElements);
-			final List<State> destinationStates = transitionsWithName.stream()
-				.map(Transition::getDestination)
-				.collect(Collectors.toList());
-			final Map<State, Map<IEvalElement, AbstractEvalResult>> valuesByState = stateSpace.evaluateForGivenStates(destinationStates, allEvalElements);
+			final Map<State, Map<IEvalElement, AbstractEvalResult>> valuesByState;
+			if (avoidCliCommunication) {
+				valuesByState = Collections.emptyMap();
+			} else {
+				final List<IEvalElement> allEvalElements = new ArrayList<>(constantEvalElements);
+				allEvalElements.addAll(variableEvalElements);
+				final List<State> destinationStates = transitionsWithName.stream()
+					.map(Transition::getDestination)
+					.collect(Collectors.toList());
+				valuesByState = stateSpace.evaluateForGivenStates(destinationStates, allEvalElements);
+			}
 			
 			for (final Transition transition : transitionsWithName) {
-				final Map<IEvalElement, AbstractEvalResult> results = valuesByState.get(transition.getDestination());
-				final Map<String, String> constants = extractValues(results, constantEvalElements);
-				final Map<String, String> variables = extractValues(results, variableEvalElements);
+				final Map<String, String> constants;
+				final Map<String, String> variables;
+				if (avoidCliCommunication) {
+					constants = Collections.emptyMap();
+					variables = Collections.emptyMap();
+				} else {
+					final Map<IEvalElement, AbstractEvalResult> results = valuesByState.get(transition.getDestination());
+					constants = extractValues(results, constantEvalElements);
+					variables = extractValues(results, variableEvalElements);
+				}
 				
 				final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
 				final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
@@ -186,8 +198,22 @@ public class OperationItem {
 		return items;
 	}
 
+	public static Collection<OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions) {
+		return forTransitions(stateSpace, transitions, false);
+	}
+
+	public static Collection<OperationItem> forTransitionsFast(final StateSpace stateSpace, final Collection<Transition> transitions) {
+		return forTransitions(stateSpace, transitions, true);
+	}
+
 	public static OperationItem forTransition(final StateSpace stateSpace, final Transition transition) {
 		final Collection<OperationItem> items = forTransitions(stateSpace, Collections.singletonList(transition));
+		assert items.size() == 1;
+		return items.iterator().next();
+	}
+
+	public static OperationItem forTransitionFast(final StateSpace stateSpace, final Transition transition) {
+		final Collection<OperationItem> items = forTransitionsFast(stateSpace, Collections.singletonList(transition));
 		assert items.size() == 1;
 		return items.iterator().next();
 	}

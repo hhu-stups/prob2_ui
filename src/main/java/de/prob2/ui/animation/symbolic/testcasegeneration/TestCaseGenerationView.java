@@ -20,6 +20,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -176,14 +177,16 @@ public class TestCaseGenerationView extends ScrollPane {
 		helpButton.setHelpContent("animation", "Symbolic");
 		setBindings();
 		tvTestCases.setRowFactory(new TestCaseGenerationCellFactory());
-		currentProject.currentMachineProperty().addListener((observable, oldValue, newValue) -> {
+		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				tvTestCases.itemsProperty().bind(newValue.testCasesProperty());
 			} else {
 				tvTestCases.getItems().clear();
 				tvTestCases.itemsProperty().unbind();
 			}
-		});
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 	
 	private void setBindings() {
