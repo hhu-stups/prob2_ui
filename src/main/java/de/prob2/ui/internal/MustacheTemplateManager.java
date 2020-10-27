@@ -25,11 +25,24 @@ public class MustacheTemplateManager {
 
     private Map<String, Object> placeholders;
 
+    /**
+     * creates a {@link MustacheTemplateManager} containing the Mustache template
+     *
+     * @param uri the uri of the path for the template
+     * @param name the name of the template
+     */
     public MustacheTemplateManager(URI uri, String name) {
         this.mustache = createMustacheTemplate(uri, name);
         this.placeholders = new HashMap<>();
     }
 
+    /**
+     * creates a {@link Mustache} from the given parameters
+     *
+     * @param uri the uri of the path for the template
+     * @param name the name of the template
+     * @return returns the resulting Mustache template
+     */
     public static Mustache createMustacheTemplate(URI uri, String name) {
         try {
             MustacheFactory mf = new DefaultMustacheFactory();
@@ -41,10 +54,20 @@ public class MustacheTemplateManager {
         }
     }
 
+    /**
+     * adds an object replacing the given key
+     *
+     * @param key the key representing the name of the placeholder
+     * @param object the object replacing the placeholder
+     */
     public void put(String key, Object object) {
         placeholders.put(key, object);
     }
 
+    /**
+     * replaces the given placeholders in the Mustache template by its objects and returns the resulting String
+     * @return the resulting String
+     */
     public String apply() {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
