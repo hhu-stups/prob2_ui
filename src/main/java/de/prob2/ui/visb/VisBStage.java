@@ -69,7 +69,6 @@ public class VisBStage extends Stage {
     private StageManager stageManager;
     private CurrentProject currentProject;
     private CurrentTrace currentTrace;
-    private ChangeListener<Worker.State> stateListener = null;
     private boolean connectorSet = false;
     private FileChooserManager fileChooserManager;
     private ObjectProperty<Path> visBPath;
@@ -305,34 +304,10 @@ public class VisBStage extends Stage {
      */
     void clear(){
         LOGGER.debug("Clear the stage!");
-        if(connectorSet && stateListener != null) {
-            LOGGER.debug("Remove State Listener - VisBConnector - from VisBStage");
-            this.webView.getEngine().getLoadWorker().stateProperty().removeListener(stateListener);
-            stateListener = null;
-        }
         this.webView.setVisible(false);
         this.placeholder.setVisible(true);
         this.visBEvents.setItems(null);
         this.visBItems.setItems(null);
-    }
-
-    /**
-     * In here, the onClick functions for the SVG image objects, which are declared in the JSON/ VisB file are loaded.
-     * @param onClickEventQuery onClick functions to be executed
-     */
-    void loadOnClickFunctions(String onClickEventQuery){
-        System.out.println("JS onClick: " + onClickEventQuery);
-        if(stateListener != null) {
-            this.webView.getEngine().getLoadWorker().stateProperty().removeListener(stateListener);
-        }
-        stateListener = (ov, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-                LOGGER.debug("On click functions for visBEvents have been loaded.");
-                webView.getEngine().executeScript(onClickEventQuery);
-            }
-        };
-
-        this.webView.getEngine().getLoadWorker().stateProperty().addListener(stateListener);
     }
 
     /**
