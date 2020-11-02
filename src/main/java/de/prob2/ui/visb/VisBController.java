@@ -28,9 +28,13 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler} and {@link VisBParser}.
@@ -240,7 +244,7 @@ public class VisBController {
 		}
 		String svgContent = this.injector.getInstance(VisBFileHandler.class).fileToString(svgFile);
 		if(svgContent != null && !svgContent.isEmpty()) {
-			String clickEvents = generateClickEventString();
+			List<VisBOnClickMustacheItem> clickEvents = generateOnClickItems();
 			this.injector.getInstance(VisBStage.class).initialiseWebView(svgFile, clickEvents, jsonFile, svgContent);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
@@ -344,8 +348,8 @@ public class VisBController {
 	/**
 	 * Checks if on click functionality for the svg items can be added, yet. If not, nothing happens. If it can be added, the JQuery that is needed is build and executed via {@link VisBStage}.
 	 */
-	private String generateClickEventString(){
-		StringBuilder onClickEventQuery = new StringBuilder();
+	private List<VisBOnClickMustacheItem> generateOnClickItems(){
+		List<VisBOnClickMustacheItem> onClickItems = new ArrayList<>();
 
 		for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
 			String event = visBEvent.getEvent();
@@ -358,11 +362,18 @@ public class VisBController {
 					alert.show();
 				}
 			} else {
-				String queryPart = VisBMustacheTemplateHandler.getQueryString(visBEvent);
-				onClickEventQuery.append(queryPart);
+				String enterAction = visBEvent.getHovers().stream()
+						.map(hover -> buildInvocation("changeAttribute", wrapAsString("#" + hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
+						.collect(Collectors.joining("\n"));
+				String leaveAction = visBEvent.getHovers().stream()
+						.map(hover -> buildInvocation("changeAttribute", wrapAsString("#" + hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
+						.collect(Collectors.joining("\n"));
+				String eventID = visBEvent.getId();
+				String eventName = visBEvent.getEvent();
+				onClickItems.add(new VisBOnClickMustacheItem(enterAction, leaveAction, eventID, eventName));
 			}
 		}
-		return onClickEventQuery.toString();
+		return onClickItems;
 	}
 	
 	private boolean isValidTopLevelEvent(String event) {

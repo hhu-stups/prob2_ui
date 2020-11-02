@@ -5,6 +5,7 @@ import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.MustacheTemplateManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -53,10 +54,12 @@ import javax.inject.Singleton;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.ResourceBundle;
 
-import static de.prob2.ui.visb.VisBMustacheTemplateHandler.generateHTMLFileWithSVG;
 
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
@@ -240,7 +243,7 @@ public class VisBStage extends Stage {
      * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
      * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
      */
-    void initialiseWebView(File file, String clickEvents, File jsonFile, String svgContent) {
+    void initialiseWebView(File file, List<VisBOnClickMustacheItem> clickEvents, File jsonFile, String svgContent) {
         if (svgContent != null) {
             this.placeholder.setVisible(false);
             this.webView.setVisible(true);
@@ -456,6 +459,21 @@ public class VisBStage extends Stage {
         TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
         traceSelectionView.show();
         traceSelectionView.toFront();
+    }
+
+    private String generateHTMLFileWithSVG(String jqueryLink, List<VisBOnClickMustacheItem> clickEvents, File jsonFile, String svgContent) {
+        try {
+            URI uri = VisBStage.class.getResource("visb_html_view.mustache").toURI();
+            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "visb_html_view");
+            templateManager.put("jqueryLink", jqueryLink);
+            templateManager.put("clickEvents", clickEvents);
+            templateManager.put("jsonFile", jsonFile);
+            templateManager.put("svgContent", svgContent);
+            return templateManager.apply();
+        } catch (URISyntaxException e) {
+            LOGGER.error("", e);
+            return "";
+        }
     }
 
 }
