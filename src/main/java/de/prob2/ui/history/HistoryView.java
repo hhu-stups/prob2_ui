@@ -116,7 +116,16 @@ public final class HistoryView extends VBox {
 
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 
-		openTraceSelectionButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
+		openTraceSelectionButton.disableProperty().bind(openTraceDefaultDisableProperty);
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			openTraceSelectionButton.disableProperty().unbind();
+			if(to != null) {
+				openTraceSelectionButton.disableProperty().bind(to.tracesProperty().emptyProperty());
+			} else {
+				openTraceSelectionButton.disableProperty().bind(openTraceDefaultDisableProperty);
+			}
+		});
 		saveTraceButton.disableProperty()
 				.bind(partOfDisableBinding.or(currentProject.isNotNull().and(currentTrace.isNotNull()).not()));
 	}

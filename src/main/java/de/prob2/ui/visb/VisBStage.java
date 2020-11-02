@@ -19,6 +19,7 @@ import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -87,6 +88,8 @@ public class VisBStage extends Stage {
     private Label lbCurrentVisualisation;
     @FXML
     private Label lbDefaultVisualisation;
+    @FXML
+    private Button openTraceSelectionButton;
     @FXML
     private StackPane zoomingPane;
     @FXML
@@ -169,25 +172,30 @@ public class VisBStage extends Stage {
             injector.getInstance(VisBController.class).closeCurrentVisualisation();
         });
         //Load VisB file from machine, when window is opened and set listener on the current machine
+        
         updateUIOnMachine(currentProject.getCurrentMachine());
         loadVisBFileFromMachine(currentProject.getCurrentMachine());
         this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
             this.loadDefaultVisualisationButton.visibleProperty().unbind();
             this.resetDefaultVisualisationButton.visibleProperty().unbind();
             this.lbDefaultVisualisation.textProperty().unbind();
+            openTraceSelectionButton.disableProperty().unbind();
             updateUIOnMachine(to);
             loadVisBFileFromMachine(to);
         });
     }
 
     private void updateUIOnMachine(Machine machine) {
+        final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
         if(machine != null) {
+            openTraceSelectionButton.disableProperty().bind(machine.tracesProperty().emptyProperty());
             this.loadDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
             this.setDefaultVisualisationButton.visibleProperty().bind(visBPath.isNotNull()
                     .and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
             this.resetDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
             this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
         } else {
+            openTraceSelectionButton.disableProperty().bind(openTraceDefaultDisableProperty);
             this.loadDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
             this.setDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
             this.resetDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
