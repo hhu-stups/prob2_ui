@@ -10,16 +10,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.stream.Collectors;
 
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
+
 public class VisBMustacheTemplateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VisBMustacheTemplateHandler.class);
 
     public static String getQueryString(VisBEvent visBEvent) {
         String enterAction = visBEvent.getHovers().stream()
-                .map(hover -> getChangeAttributeString(hover.getHoverId(), hover.getHoverAttr(), hover.getHoverEnterVal()))
+                .map(hover -> buildInvocation("changeAttribute", wrapAsString("#" + hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
                 .collect(Collectors.joining("\n"));
         String leaveAction = visBEvent.getHovers().stream()
-                .map(hover -> getChangeAttributeString(hover.getHoverId(), hover.getHoverAttr(), hover.getHoverLeaveVal()))
+                .map(hover -> buildInvocation("changeAttribute", wrapAsString("#" + hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
                 .collect(Collectors.joining("\n"));
         try {
             URI uri = VisBMustacheTemplateHandler.class.getResource("on_click_event_query.mustache").toURI();

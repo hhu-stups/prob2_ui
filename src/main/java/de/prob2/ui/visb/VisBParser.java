@@ -23,6 +23,7 @@ import de.prob.animator.domainobjects.WDError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
 import de.prob.model.classicalb.ClassicalBModel;
+import de.prob2.ui.internal.JavascriptFunctionInvoker;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.visb.exceptions.VisBParseException;
@@ -31,7 +32,8 @@ import de.prob2.ui.visb.visbobjects.VisBItem;
 
 import javafx.scene.paint.Color;
 
-import static de.prob2.ui.visb.VisBMustacheTemplateHandler.getChangeAttributeString;
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 
 /**
  * This class will get the items of an VisB visualisation and evaluate them to construct executable JQueries.
@@ -411,7 +413,7 @@ public class VisBParser {
 			"\' cannot be parsed for the attribute \'"+ attr+
 			"\'. Check the VisB help section for supported values.");
 		}
-		return getChangeAttributeString(id, attr, value);
+		return buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString(attr), wrapAsString(value));
 	}
 
 	/**
