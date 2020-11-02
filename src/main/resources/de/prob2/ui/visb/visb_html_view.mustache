@@ -25,11 +25,15 @@
         function activateClickEvents() {
             {{&clickEvents}}
         }
+
+        function showModelNotInitialised() {
+            $("#visb_error_messages ul").append('<li style="color:blue">Model not initialised ({{&jsonFile}})</li>');
+        }
     </script>
     </head>
 <body>
 
-    <div text-align="center"> {{&svgFile}}
+    <div text-align="center"> {{&svgContent}}
     </div>
     <div id="visb_error_messages" style="color:red"><ul></ul>
     </div>

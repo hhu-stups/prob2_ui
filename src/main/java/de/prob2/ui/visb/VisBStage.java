@@ -238,14 +238,14 @@ public class VisBStage extends Stage {
 
     /**
      * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
-     * @param svgFile the image/ svg, that should to be loaded into the context of the WebView
+     * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
      */
-    void initialiseWebView(File file, String clickEvents, String svgFile) {
-        if (svgFile != null) {
+    void initialiseWebView(File file, String clickEvents, File jsonFile, String svgContent) {
+        if (svgContent != null) {
             this.placeholder.setVisible(false);
             this.webView.setVisible(true);
             String jqueryLink = Main.class.getResource("jquery.js").toExternalForm();
-            String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, svgFile);
+            String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, jsonFile, svgContent);
             this.webView.getEngine().loadContent(htmlFile);
             LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
             addVisBConnector();

@@ -32,8 +32,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.prob2.ui.visb.VisBMustacheTemplateHandler.getModelNotInitialisedString;
-
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler} and {@link VisBParser}.
  * Everything that can be done in Java only and uses interaction with ProB2-UI should be in here, not in the other classes.
@@ -232,16 +230,17 @@ public class VisBController {
 
 	/**
 	 * Setting up the html file, it also sets the svg file for internal usage via {@link VisBFileHandler}.
-	 * @param file svg file to be used
+	 * @param svgFile svg file to be used
+	 * @param jsonFile json file to be used
 	 */
-	private void setupHTMLFile(File file) throws VisBException, IOException{
-		if(file == null || !file.exists()){
+	private void setupHTMLFile(File svgFile, File jsonFile) throws VisBException, IOException{
+		if(svgFile == null || !svgFile.exists()){
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
 		}
-		String svgFile = this.injector.getInstance(VisBFileHandler.class).fileToString(file);
-		if(svgFile != null && !svgFile.isEmpty()) {
+		String svgContent = this.injector.getInstance(VisBFileHandler.class).fileToString(svgFile);
+		if(svgContent != null && !svgContent.isEmpty()) {
 			String clickEvents = generateClickEventString();
-			this.injector.getInstance(VisBStage.class).initialiseWebView(file, clickEvents, svgFile);
+			this.injector.getInstance(VisBStage.class).initialiseWebView(svgFile, clickEvents, jsonFile, svgContent);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
@@ -304,7 +303,7 @@ public class VisBController {
 			updateInfo("visb.infobox.visualisation.initialise");
 		}
 		try {
-			setupHTMLFile(new File(this.visBVisualisation.getSvgPath().toUri()));
+			setupHTMLFile(new File(this.visBVisualisation.getSvgPath().toUri()), this.visBVisualisation.getJsonFile());
 			setupVisBFile(this.visBVisualisation.getJsonFile());
 		} catch(VisBException e){
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
@@ -335,8 +334,10 @@ public class VisBController {
 		}
 	}
 	private void showUpdateVisualisationNotPossible(){
-		updateInfo("visb.infobox.visualisation.updated.nr",0);
-		injector.getInstance(VisBStage.class).runScript(getModelNotInitialisedString(visBVisualisation.getJsonFile()));
+		if(this.currentTrace.get().getTransitionList().size() == 0) {
+			updateInfo("visb.infobox.visualisation.updated.nr", 0);
+			injector.getInstance(VisBStage.class).runScript("showModelNotInitialised()");
+		}
 	}
 
 	/**

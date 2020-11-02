@@ -35,18 +35,6 @@ public class VisBMustacheTemplateHandler {
         }
     }
 
-    public static String getModelNotInitialisedString(File jsonFile) {
-        try {
-            URI uri = VisBMustacheTemplateHandler.class.getResource("model_not_initialised.mustache").toURI();
-            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "model_not_initialised");
-            templateManager.put("jsonFile", jsonFile);
-            return templateManager.apply();
-        } catch (URISyntaxException e) {
-            LOGGER.error("", e);
-            return "";
-        }
-    }
-
     public static String getChangeAttributeString(String id, String attr, String value) {
         try {
             URI uri = VisBMustacheTemplateHandler.class.getResource("change_attribute.mustache").toURI();
@@ -61,13 +49,14 @@ public class VisBMustacheTemplateHandler {
         }
     }
 
-    public static String generateHTMLFileWithSVG(String jqueryLink, String clickEvents, String svgFile) {
+    public static String generateHTMLFileWithSVG(String jqueryLink, String clickEvents, File jsonFile, String svgContent) {
         try {
             URI uri = VisBMustacheTemplateHandler.class.getResource("visb_html_view.mustache").toURI();
             MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "visb_html_view");
             templateManager.put("jqueryLink", jqueryLink);
             templateManager.put("clickEvents", clickEvents);
-            templateManager.put("svgFile", svgFile);
+            templateManager.put("jsonFile", jsonFile);
+            templateManager.put("svgContent", svgContent);
             return templateManager.apply();
         } catch (URISyntaxException e) {
             LOGGER.error("", e);
