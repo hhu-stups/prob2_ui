@@ -62,413 +62,417 @@ import static de.prob2.ui.visb.VisBMustacheTemplateHandler.generateHTMLFileWithS
  */
 @Singleton
 public class VisBStage extends Stage {
-	private static final Logger LOGGER = LoggerFactory.getLogger(VisBStage.class);
-	private Injector injector;
-	private ResourceBundle bundle;
-	private StageManager stageManager;
-	private CurrentProject currentProject;
-	private CurrentTrace currentTrace;
-	private ChangeListener<Worker.State> stateListener = null;
-	private boolean connectorSet = false;
-	private FileChooserManager fileChooserManager;
-	private ObjectProperty<Path> visBPath;
+    private static final Logger LOGGER = LoggerFactory.getLogger(VisBStage.class);
+    private Injector injector;
+    private ResourceBundle bundle;
+    private StageManager stageManager;
+    private CurrentProject currentProject;
+    private CurrentTrace currentTrace;
+    private ChangeListener<Worker.State> stateListener = null;
+    private boolean connectorSet = false;
+    private FileChooserManager fileChooserManager;
+    private ObjectProperty<Path> visBPath;
 
-	@FXML
-	private MenuBar visbMenuBar;
-	@FXML
-	private Button loadVisualisationButton;
-	@FXML
-	private Button loadDefaultVisualisationButton;
-	@FXML
-	private Button setDefaultVisualisationButton;
-	@FXML
-	private Button resetDefaultVisualisationButton;
-	@FXML
-	private Label lbCurrentVisualisation;
-	@FXML
-	private Label lbDefaultVisualisation;
-	@FXML
-	private StackPane zoomingPane;
-	@FXML
-	private WebView webView;
-	@FXML
-	private ListView<VisBItem> visBItems;
-	@FXML
-	private ListView<VisBEvent> visBEvents;
-	@FXML
-	private MenuItem editMenu_reload;
-	@FXML
-	private MenuItem editMenu_close;
-	@FXML
-	private MenuItem fileMenu_close;
-	@FXML
-	private MenuItem fileMenu_visB;
-	@FXML
-	private MenuItem fileMenu_export;
-	@FXML
-	private MenuItem viewMenu_zoomIn;
-	@FXML
-	private MenuItem viewMenu_zoomOut;
-	@FXML
-	private MenuItem viewMenu_zoomFontsIn;
-	@FXML
-	private MenuItem viewMenu_zoomFontsOut;
-	@FXML
-	private MenuItem helpMenu_userManual;
-	@FXML
-	private Label information;
-	@FXML
-	private VBox placeholder;
+    @FXML
+    private MenuBar visbMenuBar;
+    @FXML
+    private Button loadVisualisationButton;
+    @FXML
+    private Button loadDefaultVisualisationButton;
+    @FXML
+    private Button setDefaultVisualisationButton;
+    @FXML
+    private Button resetDefaultVisualisationButton;
+    @FXML
+    private Label lbCurrentVisualisation;
+    @FXML
+    private Label lbDefaultVisualisation;
+    @FXML
+    private StackPane zoomingPane;
+    @FXML
+    private WebView webView;
+    @FXML
+    private ListView<VisBItem> visBItems;
+    @FXML
+    private ListView<VisBEvent> visBEvents;
+    @FXML
+    private MenuItem editMenu_reload;
+    @FXML
+    private MenuItem editMenu_close;
+    @FXML
+    private MenuItem fileMenu_close;
+    @FXML
+    private MenuItem fileMenu_visB;
+    @FXML
+    private MenuItem fileMenu_export;
+    @FXML
+    private MenuItem viewMenu_zoomIn;
+    @FXML
+    private MenuItem viewMenu_zoomOut;
+    @FXML
+    private MenuItem viewMenu_zoomFontsIn;
+    @FXML
+    private MenuItem viewMenu_zoomFontsOut;
+    @FXML
+    private MenuItem helpMenu_userManual;
+    @FXML
+    private Label information;
+    @FXML
+    private VBox placeholder;
 
-	/**
-	 * The public constructor of this class is injected with the ProB2-UI injector.
-	 * @param injector ProB2-UI injector
-	 * @param stageManager ProB2-UI stageManager
-	 * @param currentProject ProB2-UI currentProject
-	 */
-	@Inject
-	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
-					 final CurrentTrace currentTrace, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
-		super();
-		this.injector = injector;
-		this.bundle = bundle;
-		this.stageManager = stageManager;
-		this.currentProject = currentProject;
-		this.currentTrace = currentTrace;
-		this.fileChooserManager = fileChooserManager;
-		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
-		this.stageManager.loadFXML(this, "vis_plugin_stage.fxml");
-	}
+    /**
+     * The public constructor of this class is injected with the ProB2-UI injector.
+     * @param injector ProB2-UI injector
+     * @param stageManager ProB2-UI stageManager
+     * @param currentProject ProB2-UI currentProject
+     */
+    @Inject
+    public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
+                     final CurrentTrace currentTrace, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+        super();
+        this.injector = injector;
+        this.bundle = bundle;
+        this.stageManager = stageManager;
+        this.currentProject = currentProject;
+        this.currentTrace = currentTrace;
+        this.fileChooserManager = fileChooserManager;
+        this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
+        this.stageManager.loadFXML(this, "vis_plugin_stage.fxml");
+    }
 
-	/**
-	 * With this method a visible stage with an empty WebView and an empty ListView is initialised.
-	 */
-	@FXML
-	public void initialize(){
-		this.stageManager.setMacMenuBar(this, visbMenuBar);
-		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
-		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
-		this.loadDefaultVisualisationButton.setOnAction(e -> loadDefaultVisualisation());
-		this.setDefaultVisualisationButton.setOnAction(e -> setDefaultVisualisation());
-		this.resetDefaultVisualisationButton.setOnAction(e -> resetDefaultVisualisation());
-		this.fileMenu_visB.setOnAction(e -> loadVisBFile());
-		this.fileMenu_close.setOnAction(e -> sendCloseRequest());
-		this.fileMenu_export.setOnAction(e -> exportImage());
-		this.editMenu_reload.setOnAction(e -> reloadVisualisation());
-		this.editMenu_close.setOnAction(e -> closeVisualisation());
-		this.viewMenu_zoomIn.setOnAction(e -> zoomIn());
-		this.viewMenu_zoomOut.setOnAction(e -> zoomOut());
-		// zoom fonts in/out (but only of those that are not given a fixed size):
-		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
-		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
-		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
-		this.lbCurrentVisualisation.textProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? "" : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBPath.get()).toString()), visBPath));
-		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
-		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
-			visBPath.set(null);
-			injector.getInstance(VisBController.class).closeCurrentVisualisation();
-		});
-		//Load VisB file from machine, when window is opened and set listener on the current machine
-		updateUIOnMachine(currentProject.getCurrentMachine());
-		loadVisBFileFromMachine(currentProject.getCurrentMachine());
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			this.loadDefaultVisualisationButton.visibleProperty().unbind();
-			this.resetDefaultVisualisationButton.visibleProperty().unbind();
-			this.lbDefaultVisualisation.textProperty().unbind();
-			updateUIOnMachine(to);
-			loadVisBFileFromMachine(to);
-		});
-	}
+    /**
+     * With this method a visible stage with an empty WebView and an empty ListView is initialised.
+     */
+    @FXML
+    public void initialize(){
+        this.stageManager.setMacMenuBar(this, visbMenuBar);
+        this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
+        this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
+        this.loadDefaultVisualisationButton.setOnAction(e -> loadDefaultVisualisation());
+        this.setDefaultVisualisationButton.setOnAction(e -> setDefaultVisualisation());
+        this.resetDefaultVisualisationButton.setOnAction(e -> resetDefaultVisualisation());
+        this.fileMenu_visB.setOnAction(e -> loadVisBFile());
+        this.fileMenu_close.setOnAction(e -> sendCloseRequest());
+        this.fileMenu_export.setOnAction(e -> exportImage());
+        this.editMenu_reload.setOnAction(e -> reloadVisualisation());
+        this.editMenu_close.setOnAction(e -> closeVisualisation());
+        this.viewMenu_zoomIn.setOnAction(e -> zoomIn());
+        this.viewMenu_zoomOut.setOnAction(e -> zoomOut());
+        // zoom fonts in/out (but only of those that are not given a fixed size):
+        this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
+        this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
+        this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
+        this.lbCurrentVisualisation.textProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? "" : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBPath.get()).toString()), visBPath));
+        this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
+        this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
+            visBPath.set(null);
+            injector.getInstance(VisBController.class).closeCurrentVisualisation();
+        });
+        //Load VisB file from machine, when window is opened and set listener on the current machine
+        updateUIOnMachine(currentProject.getCurrentMachine());
+        loadVisBFileFromMachine(currentProject.getCurrentMachine());
+        this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+            this.loadDefaultVisualisationButton.visibleProperty().unbind();
+            this.resetDefaultVisualisationButton.visibleProperty().unbind();
+            this.lbDefaultVisualisation.textProperty().unbind();
+            updateUIOnMachine(to);
+            loadVisBFileFromMachine(to);
+        });
+    }
 
-	private void updateUIOnMachine(Machine machine) {
-		if(machine != null) {
-			this.loadDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
-			this.setDefaultVisualisationButton.visibleProperty().bind(visBPath.isNotNull()
-					.and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
-			this.resetDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
-			this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
-		} else {
-			this.loadDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
-			this.setDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
-			this.resetDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
-			this.lbDefaultVisualisation.setText("");
-		}
-	}
+    private void updateUIOnMachine(Machine machine) {
+        if(machine != null) {
+            this.loadDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
+            this.setDefaultVisualisationButton.visibleProperty().bind(visBPath.isNotNull()
+                    .and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
+            this.resetDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
+            this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
+        } else {
+            this.loadDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+            this.setDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+            this.resetDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
+            this.lbDefaultVisualisation.setText("");
+        }
+    }
 
-	private void loadVisBFileFromMachine(Machine machine) {
-		clear();
-		visBPath.set(null);
-		if(machine != null) {
-			Path visBVisualisation = machine.getVisBVisualisation();
-			visBPath.set(visBVisualisation == null ? null : currentProject.getLocation().resolve(visBVisualisation));
-			if(currentTrace.getStateSpace() != null) {
-				Platform.runLater(this::setupMachineVisBFile);
-			} else {
-				this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> {
-					if (to != null && (from == null || !from.getLoadedMachine().equals(to.getLoadedMachine())) && visBPath.isNotNull().get()) {
-						this.setupMachineVisBFile();
-					}
-				});
-			}
-		}
-	}
+    private void loadVisBFileFromMachine(Machine machine) {
+        clear();
+        visBPath.set(null);
+        if(machine != null) {
+            Path visBVisualisation = machine.getVisBVisualisation();
+            visBPath.set(visBVisualisation == null ? null : currentProject.getLocation().resolve(visBVisualisation));
+            if(currentTrace.getStateSpace() != null) {
+                Platform.runLater(this::setupMachineVisBFile);
+            } else {
+                this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> {
+                    if (to != null && (from == null || !from.getLoadedMachine().equals(to.getLoadedMachine())) && visBPath.isNotNull().get()) {
+                        this.setupMachineVisBFile();
+                    }
+                });
+            }
+        }
+    }
 
-	private void setupMachineVisBFile() {
-		if(visBPath.isNotNull().get()) {
-			VisBController visBController = injector.getInstance(VisBController.class);
-			File visBfile = visBPath.get().toFile();
-			visBController.setupVisBFile(visBfile);
-			visBController.setupVisualisation();
-		}
-	}
+    private void setupMachineVisBFile() {
+        if(visBPath.isNotNull().get()) {
+            VisBController visBController = injector.getInstance(VisBController.class);
+            File visBfile = visBPath.get().toFile();
+            visBController.setupVisBFile(visBfile);
+            visBController.setupVisualisation();
+        }
+    }
 
-	private void sendCloseRequest(){
-		this.fireEvent(new WindowEvent(
-				this,
-				WindowEvent.WINDOW_CLOSE_REQUEST)
-		);
-	}
+    private void sendCloseRequest(){
+        this.fireEvent(new WindowEvent(
+                this,
+                WindowEvent.WINDOW_CLOSE_REQUEST)
+        );
+    }
 
-	/**
-	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
-	 * @param svgFile the image/ svg, that should to be loaded into the context of the WebView
-	 */
-	void initialiseWebView(File file, String svgFile) {
-		if (svgFile != null) {
-			this.placeholder.setVisible(false);
-			this.webView.setVisible(true);
-			String jqueryLink = Main.class.getResource("jquery.js").toExternalForm();
-			String htmlFile = generateHTMLFileWithSVG(jqueryLink, svgFile);
-			this.webView.getEngine().loadContent(htmlFile);
-			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
-			addVisBConnector();
-			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-			this.webView.getEngine().setOnError(event -> treatJavascriptError(event)); // check if we get errors
-			// Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
+    /**
+     * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
+     * @param svgFile the image/ svg, that should to be loaded into the context of the WebView
+     */
+    void initialiseWebView(File file, String svgFile) {
+        if (svgFile != null) {
+            this.placeholder.setVisible(false);
+            this.webView.setVisible(true);
+            String jqueryLink = Main.class.getResource("jquery.js").toExternalForm();
+            String htmlFile = generateHTMLFileWithSVG(jqueryLink, svgFile);
+            this.webView.getEngine().loadContent(htmlFile);
+            LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
+            addVisBConnector();
+            this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+            this.webView.getEngine().setOnError(event -> treatJavascriptError(event)); // check if we get errors
+            // Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
             // engine.setConfirmHandler(message -> showConfirm(message));
-		}
+        }
 
-	}
-	
-	private void treatJavascriptError(WebErrorEvent event) {
-	    LOGGER.debug("JavaScript ERROR: " + event.getMessage());
-		alert(event.getException(), "visb.exception.header", "visb.stage.alert.webview.jsalert", event.getMessage());
-	}
-	
-	private void showJavascriptAlert(String message) {
-	    LOGGER.debug("JavaScript ALERT: " + message);
-		alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
-	}
+    }
 
-	private void addVisBConnector() {
-		if(connectorSet){
-			LOGGER.debug("Connector is already set, no action needed.");
-		} else {
-			LOGGER.debug("VisBConnector is set into globals.");
-			connectorSet = true;
-			this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-				if (newState == Worker.State.SUCCEEDED) {
-					JSObject jsobj = (JSObject) webView.getEngine().executeScript("window");
-					jsobj.setMember("visBConnector", injector.getInstance(VisBConnector.class));
-				}
-			});
-			this.webView.getEngine().setOnError(e -> {
-				alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.error");
-			});
-			LOGGER.debug("VisBConnector was set into globals.");
-		}
-	}
+    private void treatJavascriptError(WebErrorEvent event) {
+        LOGGER.debug("JavaScript ERROR: " + event.getMessage());
+        alert(event.getException(), "visb.exception.header", "visb.stage.alert.webview.jsalert", event.getMessage());
+    }
 
-	/**
-	 * After loading the JSON/ VisB file and preparing it in the {@link VisBController} the ListViews are initialised.
-	 * @param visBVisualisation is needed to display the items and events in the ListViews
-	 */
-	void initialiseListViews(VisBVisualisation visBVisualisation){
-		//Preparing the Items
-		this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
-		//Preparing the Events
-		this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
+    private void showJavascriptAlert(String message) {
+        LOGGER.debug("JavaScript ALERT: " + message);
+        alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
+    }
 
-	}
+    private void addVisBConnector() {
+        if(connectorSet){
+            LOGGER.debug("Connector is already set, no action needed.");
+        } else {
+            LOGGER.debug("VisBConnector is set into globals.");
+            connectorSet = true;
+            this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+                if (newState == Worker.State.SUCCEEDED) {
+                    JSObject jsobj = (JSObject) webView.getEngine().executeScript("window");
+                    jsobj.setMember("visBConnector", injector.getInstance(VisBConnector.class));
+                }
+            });
+            this.webView.getEngine().setOnError(e -> {
+                alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.error");
+            });
+            LOGGER.debug("VisBConnector was set into globals.");
+        }
+    }
 
-	/**
-	 * This method clears our the WebView and the ListView and removes possible listeners, so that the VisBStage no longer interacts with anything.
-	 */
-	void clear(){
-		LOGGER.debug("Clear the stage!");
-		if(connectorSet && stateListener != null) {
-			LOGGER.debug("Remove State Listener - VisBConnector - from VisBStage");
-			this.webView.getEngine().getLoadWorker().stateProperty().removeListener(stateListener);
-			stateListener = null;
-		}
-		this.webView.setVisible(false);
-		this.placeholder.setVisible(true);
-		this.visBEvents.setItems(null);
-		this.visBItems.setItems(null);
-	}
+    /**
+     * After loading the JSON/ VisB file and preparing it in the {@link VisBController} the ListViews are initialised.
+     * @param visBVisualisation is needed to display the items and events in the ListViews
+     */
+    void initialiseListViews(VisBVisualisation visBVisualisation){
+        //Preparing the Items
+        this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
+        //Preparing the Events
+        this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
 
-	/**
-	 * In here, the onClick functions for the SVG image objects, which are declared in the JSON/ VisB file are loaded.
-	 * @param onClickEventQuery onClick functions to be executed
-	 */
-	void loadOnClickFunctions(String onClickEventQuery){
-	    System.out.println("JS onClick: " + onClickEventQuery);
-		stateListener = (ov, oldState, newState) -> {
-			if (newState == Worker.State.SUCCEEDED) {
-				LOGGER.debug("On click functions for visBEvents have been loaded.");
-				webView.getEngine().executeScript(onClickEventQuery);
-			}
-		};
-		this.webView.getEngine().getLoadWorker().stateProperty().addListener(stateListener);
-	}
+    }
 
-	/**
-	 * This method runs the jQuery script in the WebView.
-	 * @param jQuery script to be run
-	 */
-	void runScript(String jQuery) {
-		if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
-		   // execute JQuery script once page fully loaded
-		   // https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
-			webView.getEngine().getLoadWorker().stateProperty().addListener(
-					  new ChangeListener<Worker.State>() {
-						@Override
-						public void changed(
-									ObservableValue<? extends Worker.State> observable,
-									Worker.State oldValue, Worker.State newValue) {
-						  switch (newValue) {
-							case SUCCEEDED:
-							case FAILED:
-							case CANCELLED:
-							  webView
-								.getEngine()
-								.getLoadWorker()
-								.stateProperty()
-								.removeListener(this);
-						  }
-						  if (newValue != Worker.State.SUCCEEDED) {
-							return;
-						  }
-						  LOGGER.debug("runScript: "+jQuery+"\n-----");
-						  webView.getEngine().executeScript(jQuery);
-						}
-					  } );
-				    LOGGER.debug("registered runScript as Listener");
-		} else {
-			LOGGER.debug("runScript directly: "+jQuery+"\n-----");
-			this.webView.getEngine().executeScript(jQuery);
-		}
-	}
+    /**
+     * This method clears our the WebView and the ListView and removes possible listeners, so that the VisBStage no longer interacts with anything.
+     */
+    void clear(){
+        LOGGER.debug("Clear the stage!");
+        if(connectorSet && stateListener != null) {
+            LOGGER.debug("Remove State Listener - VisBConnector - from VisBStage");
+            this.webView.getEngine().getLoadWorker().stateProperty().removeListener(stateListener);
+            stateListener = null;
+        }
+        this.webView.setVisible(false);
+        this.placeholder.setVisible(true);
+        this.visBEvents.setItems(null);
+        this.visBItems.setItems(null);
+    }
 
-	/**
-	 * Setter for the info label.
-	 * @param text to be set
-	 */
-	void updateInfo(String text){
-		information.setText(text);
-	}
+    /**
+     * In here, the onClick functions for the SVG image objects, which are declared in the JSON/ VisB file are loaded.
+     * @param onClickEventQuery onClick functions to be executed
+     */
+    void loadOnClickFunctions(String onClickEventQuery){
+        System.out.println("JS onClick: " + onClickEventQuery);
+        if(stateListener != null) {
+            this.webView.getEngine().getLoadWorker().stateProperty().removeListener(stateListener);
+        }
+        stateListener = (ov, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                LOGGER.debug("On click functions for visBEvents have been loaded.");
+                webView.getEngine().executeScript(onClickEventQuery);
+            }
+        };
 
-	private void loadDefaultVisualisation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		loadVisBFileFromMachine(currentMachine);
-	}
+        this.webView.getEngine().getLoadWorker().stateProperty().addListener(stateListener);
+    }
 
-	private void setDefaultVisualisation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		currentMachine.setVisBVisualisation(currentProject.getLocation().relativize(visBPath.get()));
-	}
+    /**
+     * This method runs the jQuery script in the WebView.
+     * @param jQuery script to be run
+     */
+    void runScript(String jQuery) {
+        if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
+           // execute JQuery script once page fully loaded
+           // https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
+            webView.getEngine().getLoadWorker().stateProperty().addListener(
+                      new ChangeListener<Worker.State>() {
+                        @Override
+                        public void changed(
+                                    ObservableValue<? extends Worker.State> observable,
+                                    Worker.State oldValue, Worker.State newValue) {
+                          switch (newValue) {
+                            case SUCCEEDED:
+                            case FAILED:
+                            case CANCELLED:
+                              webView
+                                .getEngine()
+                                .getLoadWorker()
+                                .stateProperty()
+                                .removeListener(this);
+                          }
+                          if (newValue != Worker.State.SUCCEEDED) {
+                            return;
+                          }
+                          LOGGER.debug("runScript: "+jQuery+"\n-----");
+                          webView.getEngine().executeScript(jQuery);
+                        }
+                      } );
+                    LOGGER.debug("registered runScript as Listener");
+        } else {
+            LOGGER.debug("runScript directly: "+jQuery+"\n-----");
+            this.webView.getEngine().executeScript(jQuery);
+        }
+    }
 
-	private void resetDefaultVisualisation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		currentMachine.setVisBVisualisation(null);
-	}
+    /**
+     * Setter for the info label.
+     * @param text to be set
+     */
+    void updateInfo(String text){
+        information.setText(text);
+    }
 
-	/**
-	 * On click function for the button and file menu item
-	 */
-	@FXML
-	public void loadVisBFile() {
-		if(currentProject.getCurrentMachine() == null){
-			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
-			alert(new VisBException(),  "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
-			return;
-		}
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("visb.stage.filechooser.title"));
-		fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
-		);
-		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
-		if(path != null) {
-			clear();
-			visBPath.set(path);
-			File visBfile = path.toFile();
-			VisBController visBController = injector.getInstance(VisBController.class);
-			visBController.setupVisBFile(visBfile);
-			visBController.setupVisualisation();
-		}
-	}
+    private void loadDefaultVisualisation() {
+        Machine currentMachine = currentProject.getCurrentMachine();
+        loadVisBFileFromMachine(currentMachine);
+    }
 
-	/**
-	 * This method throws an ProB2-UI ExceptionAlert
-	 */
-	private void alert(Throwable ex, String header, String body, Object... params){
-		final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
-		alert.initOwner(this);
-		alert.showAndWait();
-	}
+    private void setDefaultVisualisation() {
+        Machine currentMachine = currentProject.getCurrentMachine();
+        currentMachine.setVisBVisualisation(currentProject.getLocation().relativize(visBPath.get()));
+    }
 
-	private void exportImage() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("visb.stage.filechooser.export.title"));
-		fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
-		);
-		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
-		if(path != null) {
-			File file = path.toFile();
-			WritableImage snapshot = webView.snapshot(new SnapshotParameters(), null);
-			RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot, null);
-			try {
-				ImageIO.write(renderedImage, "png", file);
-			} catch (IOException e){
-				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
-			}
-		}
-	}
+    private void resetDefaultVisualisation() {
+        Machine currentMachine = currentProject.getCurrentMachine();
+        currentMachine.setVisBVisualisation(null);
+    }
 
-	@FXML
-	public void saveTrace() {
-		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB);
-	}
+    /**
+     * On click function for the button and file menu item
+     */
+    @FXML
+    public void loadVisBFile() {
+        if(currentProject.getCurrentMachine() == null){
+            LOGGER.debug("Tried to start visualisation when no machine was loaded.");
+            alert(new VisBException(),  "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(bundle.getString("visb.stage.filechooser.title"));
+        fileChooser.getExtensionFilters().addAll(
+                fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
+        );
+        Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+        if(path != null) {
+            clear();
+            visBPath.set(path);
+            File visBfile = path.toFile();
+            VisBController visBController = injector.getInstance(VisBController.class);
+            visBController.setupVisBFile(visBfile);
+            visBController.setupVisualisation();
+        }
+    }
 
-	@FXML
-	public void reloadVisualisation() {
-		injector.getInstance(VisBController.class).reloadVisualisation();
-	}
+    /**
+     * This method throws an ProB2-UI ExceptionAlert
+     */
+    private void alert(Throwable ex, String header, String body, Object... params){
+        final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
+        alert.initOwner(this);
+        alert.showAndWait();
+    }
 
-	@FXML
-	public void closeVisualisation() {
-		visBPath.set(null);
-		injector.getInstance(VisBController.class).closeCurrentVisualisation();
-	}
+    private void exportImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(bundle.getString("visb.stage.filechooser.export.title"));
+        fileChooser.getExtensionFilters().addAll(
+                fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
+        );
+        Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+        if(path != null) {
+            File file = path.toFile();
+            WritableImage snapshot = webView.snapshot(new SnapshotParameters(), null);
+            RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot, null);
+            try {
+                ImageIO.write(renderedImage, "png", file);
+            } catch (IOException e){
+                alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
+            }
+        }
+    }
 
-	@FXML
-	public void zoomIn() {
-		webView.setZoom(webView.getZoom()*1.2);
-	}
+    @FXML
+    public void saveTrace() {
+        injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB);
+    }
 
-	@FXML
-	public void zoomOut() {
-		webView.setZoom(webView.getZoom()/1.2);
-	}
+    @FXML
+    public void reloadVisualisation() {
+        injector.getInstance(VisBController.class).reloadVisualisation();
+    }
 
-	@FXML
-	private void openTraceSelection() {
-		TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
-		traceSelectionView.show();
-		traceSelectionView.toFront();
-	}
+    @FXML
+    public void closeVisualisation() {
+        visBPath.set(null);
+        injector.getInstance(VisBController.class).closeCurrentVisualisation();
+    }
+
+    @FXML
+    public void zoomIn() {
+        webView.setZoom(webView.getZoom()*1.2);
+    }
+
+    @FXML
+    public void zoomOut() {
+        webView.setZoom(webView.getZoom()/1.2);
+    }
+
+    @FXML
+    private void openTraceSelection() {
+        TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
+        traceSelectionView.show();
+        traceSelectionView.toFront();
+    }
 
 }
 
