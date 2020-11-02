@@ -29,6 +29,15 @@
         function showModelNotInitialised() {
             $("#visb_error_messages ul").append('<li style="color:blue">Model not initialised ({{&jsonFile}})</li>');
         }
+
+        function resetDebugMessages() {
+            $("#visb_debug_messages").text("");
+        }
+
+        function resetErrorMessages() {
+            $("#visb_error_messages ul").empty();
+        }
+
     </script>
     </head>
 <body>

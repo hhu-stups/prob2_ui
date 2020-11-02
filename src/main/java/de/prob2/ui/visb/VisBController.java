@@ -113,10 +113,9 @@ public class VisBController {
 				updateInfo("visb.infobox.no.change");
 			} else {
 				try {
-					injector.getInstance(VisBStage.class).runScript(
-					   "$(\"#visb_debug_messages\").text(\"\");\n" + // reset VisB debug text (if it exists)
-					   "$(\"#visb_error_messages ul\").empty();\n"  // reset VisB error list
-						+ svgChanges);
+					VisBStage visBStage = injector.getInstance(VisBStage.class);
+					visBStage.runScript("resetDebugMessages()");
+					visBStage.runScript("resetErrorMessages()");
 				} catch (JSException e){
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 					updateInfo("visb.infobox.visualisation.error");
