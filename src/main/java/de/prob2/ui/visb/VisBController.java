@@ -72,6 +72,7 @@ public class VisBController {
 					updateVisualisation();
 				} else {
 					showUpdateVisualisationNotPossible();
+					reloadVisualisation();
 				}
 			}
 		});
@@ -140,7 +141,7 @@ public class VisBController {
 	/**
 	 * This method removes the ChangeListener on the Trace. It is used, when the VisB Window is closed.
 	 */
-	void clearListeners(){
+	private void clearListeners(){
 		currentTrace.removeListener(currentTraceChangeListener);
 		this.visBVisualisation = new VisBVisualisation();
 	}
@@ -334,7 +335,7 @@ public class VisBController {
 		}
 	}
 	private void showUpdateVisualisationNotPossible(){
-		if(this.currentTrace.get().getTransitionList().size() == 0) {
+		if("root".equals(this.currentTrace.get().getCurrent().toString())) {
 			updateInfo("visb.infobox.visualisation.updated.nr", 0);
 			injector.getInstance(VisBStage.class).runScript("showModelNotInitialised()");
 		}
