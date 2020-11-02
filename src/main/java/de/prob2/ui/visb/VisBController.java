@@ -8,6 +8,7 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -15,7 +16,6 @@ import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
-import de.prob2.ui.visb.visbobjects.VisBHover;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
@@ -28,11 +28,10 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.prob2.ui.visb.VisBMustacheTemplateHandler.getChangeAttributeString;
 import static de.prob2.ui.visb.VisBMustacheTemplateHandler.getModelNotInitialisedString;
 
 /**
@@ -179,7 +178,14 @@ public class VisBController {
 	void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey){
 		LOGGER.debug("Finding event for id: "+id);
 		if(!currentTrace.getCurrentState().isInitialised()){
-			updateInfo("visb.infobox.events.not.initialise");
+			Set<Transition> nextTransitions = currentTrace.get().getNextTransitions();
+			if(currentTrace.get().getNextTransitions().size() == 1) {
+				String transitionName = nextTransitions.stream().map(Transition::getName).collect(Collectors.toList()).get(0);
+				Trace trace = currentTrace.get().execute(transitionName, new ArrayList<>());
+				currentTrace.set(trace);
+			} else {
+				updateInfo("visb.infobox.events.not.initialise");
+			}
 			return;
 		}
 		VisBEvent event = visBVisualisation.getEventForID(id);
