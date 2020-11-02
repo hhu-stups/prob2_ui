@@ -116,6 +116,7 @@ public class VisBController {
 					VisBStage visBStage = injector.getInstance(VisBStage.class);
 					visBStage.runScript("resetDebugMessages()");
 					visBStage.runScript("resetErrorMessages()");
+					visBStage.runScript(svgChanges);
 				} catch (JSException e){
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 					updateInfo("visb.infobox.visualisation.error");
