@@ -38,20 +38,6 @@ public class VisBMustacheTemplateHandler {
         }
     }
 
-    public static String getChangeAttributeString(String id, String attr, String value) {
-        try {
-            URI uri = VisBMustacheTemplateHandler.class.getResource("change_attribute.mustache").toURI();
-            MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "change_attribute");
-            templateManager.put("id", id);
-            templateManager.put("attr", attr);
-            templateManager.put("value", value);
-            return templateManager.apply();
-        } catch (URISyntaxException e) {
-            LOGGER.error("", e);
-            return "";
-        }
-    }
-
     public static String generateHTMLFileWithSVG(String jqueryLink, String clickEvents, File jsonFile, String svgContent) {
         try {
             URI uri = VisBMustacheTemplateHandler.class.getResource("visb_html_view.mustache").toURI();
