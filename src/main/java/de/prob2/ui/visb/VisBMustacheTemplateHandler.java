@@ -61,11 +61,12 @@ public class VisBMustacheTemplateHandler {
         }
     }
 
-    public static String generateHTMLFileWithSVG(String jqueryLink, String svgFile) {
+    public static String generateHTMLFileWithSVG(String jqueryLink, String clickEvents, String svgFile) {
         try {
             URI uri = VisBMustacheTemplateHandler.class.getResource("visb_html_view.mustache").toURI();
             MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "visb_html_view");
             templateManager.put("jqueryLink", jqueryLink);
+            templateManager.put("clickEvents", clickEvents);
             templateManager.put("svgFile", svgFile);
             return templateManager.apply();
         } catch (URISyntaxException e) {

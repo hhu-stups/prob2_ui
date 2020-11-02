@@ -172,7 +172,7 @@ public class VisBStage extends Stage {
             injector.getInstance(VisBController.class).closeCurrentVisualisation();
         });
         //Load VisB file from machine, when window is opened and set listener on the current machine
-        
+
         updateUIOnMachine(currentProject.getCurrentMachine());
         loadVisBFileFromMachine(currentProject.getCurrentMachine());
         this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -241,12 +241,12 @@ public class VisBStage extends Stage {
      * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
      * @param svgFile the image/ svg, that should to be loaded into the context of the WebView
      */
-    void initialiseWebView(File file, String svgFile) {
+    void initialiseWebView(File file, String clickEvents, String svgFile) {
         if (svgFile != null) {
             this.placeholder.setVisible(false);
             this.webView.setVisible(true);
             String jqueryLink = Main.class.getResource("jquery.js").toExternalForm();
-            String htmlFile = generateHTMLFileWithSVG(jqueryLink, svgFile);
+            String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, svgFile);
             this.webView.getEngine().loadContent(htmlFile);
             LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
             addVisBConnector();
@@ -278,6 +278,7 @@ public class VisBStage extends Stage {
                 if (newState == Worker.State.SUCCEEDED) {
                     JSObject jsobj = (JSObject) webView.getEngine().executeScript("window");
                     jsobj.setMember("visBConnector", injector.getInstance(VisBConnector.class));
+                    webView.getEngine().executeScript("activateClickEvents();");
                 }
             });
             this.webView.getEngine().setOnError(e -> {

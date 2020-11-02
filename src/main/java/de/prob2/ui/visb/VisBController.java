@@ -231,17 +231,17 @@ public class VisBController {
 	
 
 	/**
-	 * Setting up the svg file for internal usage via {@link VisBFileHandler}.
+	 * Setting up the html file, it also sets the svg file for internal usage via {@link VisBFileHandler}.
 	 * @param file svg file to be used
 	 */
-	private void setupSVGFile(File file) throws VisBException, IOException{
+	private void setupHTMLFile(File file) throws VisBException, IOException{
 		if(file == null || !file.exists()){
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
 		}
-		String svgFile;
-		svgFile = this.injector.getInstance(VisBFileHandler.class).fileToString(file);
+		String svgFile = this.injector.getInstance(VisBFileHandler.class).fileToString(file);
 		if(svgFile != null && !svgFile.isEmpty()) {
-			this.injector.getInstance(VisBStage.class).initialiseWebView(file, svgFile);
+			String clickEvents = generateClickEventString();
+			this.injector.getInstance(VisBStage.class).initialiseWebView(file, clickEvents, svgFile);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
@@ -304,7 +304,7 @@ public class VisBController {
 			updateInfo("visb.infobox.visualisation.initialise");
 		}
 		try {
-			setupSVGFile(new File(this.visBVisualisation.getSvgPath().toUri()));
+			setupHTMLFile(new File(this.visBVisualisation.getSvgPath().toUri()));
 			setupVisBFile(this.visBVisualisation.getJsonFile());
 		} catch(VisBException e){
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
@@ -315,7 +315,6 @@ public class VisBController {
 		}
 		if(this.visBVisualisation.isReady()) {
 			this.injector.getInstance(VisBStage.class).initialiseListViews(visBVisualisation);
-			loadOnClickFunctions();
 			startVisualisation();
 			updateVisualisationIfPossible();
 			//LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
@@ -343,32 +342,25 @@ public class VisBController {
 	/**
 	 * Checks if on click functionality for the svg items can be added, yet. If not, nothing happens. If it can be added, the JQuery that is needed is build and executed via {@link VisBStage}.
 	 */
-	private void loadOnClickFunctions(){
-		if(visBVisualisation.isReady()) {
-			StringBuilder onClickEventQuery = new StringBuilder();
-			for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
-				String event = visBEvent.getEvent();
-				if (!(event.equals("") || isValidTopLevelEvent(event))) { // for "" we allow to provide just hover
-					if (visBEvent.eventIsOptional()) {
-					    System.out.println("Ignoring event " + event);
-					} else {
-						Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.invalid.event", event);
-						alert.initOwner(this.injector.getInstance(VisBStage.class));
-						alert.show();
-					}
+	private String generateClickEventString(){
+		StringBuilder onClickEventQuery = new StringBuilder();
+
+		for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
+			String event = visBEvent.getEvent();
+			if (!(event.equals("") || isValidTopLevelEvent(event))) { // for "" we allow to provide just hover
+				if (visBEvent.eventIsOptional()) {
+					System.out.println("Ignoring event " + event);
 				} else {
-					String queryPart = VisBMustacheTemplateHandler.getQueryString(visBEvent);
-					System.out.println(queryPart);
-					onClickEventQuery.append(queryPart);
+					Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.invalid.event", event);
+					alert.initOwner(this.injector.getInstance(VisBStage.class));
+					alert.show();
 				}
-			}
-			try {
-				this.injector.getInstance(VisBStage.class).loadOnClickFunctions(onClickEventQuery.toString());
-			} catch (JSException e) {
-				alert(new VisBException(), "visb.exception.header", "visb.exception.no.items.and.events");
-				updateInfo(bundle.getString("visb.infobox.visualisation.events.alert"));
+			} else {
+				String queryPart = VisBMustacheTemplateHandler.getQueryString(visBEvent);
+				onClickEventQuery.append(queryPart);
 			}
 		}
+		return onClickEventQuery.toString();
 	}
 	
 	private boolean isValidTopLevelEvent(String event) {

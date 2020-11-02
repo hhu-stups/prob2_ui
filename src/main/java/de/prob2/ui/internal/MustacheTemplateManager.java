@@ -72,7 +72,6 @@ public class MustacheTemplateManager {
      * @return the resulting String
      */
     public String apply() {
-        System.out.println("PLACEHOLDERS: " + placeholders);
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
