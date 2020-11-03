@@ -58,114 +58,119 @@
                 </top>
                 <center>
                     <SplitPane dividerPositions="0.5" BorderPane.alignment="CENTER">
-                        <StackPane fx:id="zoomingPane">
-                            <WebView fx:id="webView" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" visible="false" StackPane.alignment="CENTER" />
-                            <VBox fx:id="placeholder" alignment="CENTER" StackPane.alignment="CENTER">
-                                <padding>
-                                    <Insets topRightBottomLeft="4" />
-                                </padding>
-                                <ImageView preserveRatio="true" fitWidth="200.0">
-                                    <Image url="/de/prob2/ui/ProB_Logo.png" />
-                                </ImageView>
-                                <Label text="%visb.placeholder.text" textAlignment="CENTER" />
-                            </VBox>
-                        </StackPane>
+						<VBox BorderPane.alignment="CENTER">
+							<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+								<padding>
+									<Insets left="5.0"/>
+								</padding>
+								<Button fx:id="loadVisualisationButton" onAction="#loadVisBFile">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%visb.menu.file.open" />
+									</tooltip>
+								</Button>
+								<Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%visb.menu.edit.reload" />
+									</tooltip>
+								</Button>
+								<Button fx:id="closeVisualisationButton" onAction="#closeVisualisation">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%visb.menu.edit.close" />
+									</tooltip>
+								</Button>
+								<Button fx:id="zoomInButton" onAction="#zoomIn">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%visb.menu.view.zoom.in" />
+									</tooltip>
+								</Button>
+								<Button fx:id="zoomOutButton" onAction="#zoomOut">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%visb.menu.view.zoom.out" />
+									</tooltip>
+								</Button>
+								<Spacer/>
+								<NavigationButtons/>
+								<Spacer/>
+								<Button fx:id="openTraceSelectionButton" onAction="#openTraceSelection">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.openTraceSelection" />
+									</tooltip>
+								</Button>
+								<Button fx:id="saveTraceButton" onAction="#saveTrace">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.saveTrace" />
+									</tooltip>
+								</Button>
+							</HBox>
+							<VBox styleClass="border">
+								<Label fx:id="lbCurrentVisualisation" styleClass="visb-location"/>
+								<HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+									<Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
+									<Spacer/>
+									<HBox alignment="CENTER_RIGHT">
+										<Button fx:id="loadDefaultVisualisationButton">
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%visb.stage.loadDefault" />
+											</tooltip>
+										</Button>
+										<Button fx:id="setDefaultVisualisationButton">
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%visb.stage.setDefault" />
+											</tooltip>
+										</Button>
+										<Button fx:id="resetDefaultVisualisationButton">
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%visb.stage.resetDefault" />
+											</tooltip>
+										</Button>
+									</HBox>
+								</HBox>
+							</VBox>
+							<StackPane fx:id="zoomingPane" VBox.vgrow="ALWAYS">
+								<WebView fx:id="webView" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" visible="false" StackPane.alignment="CENTER" />
+								<VBox fx:id="placeholder" alignment="CENTER" StackPane.alignment="CENTER">
+									<padding>
+										<Insets topRightBottomLeft="4" />
+									</padding>
+									<ImageView preserveRatio="true" fitWidth="200.0">
+										<Image url="/de/prob2/ui/ProB_Logo.png" />
+									</ImageView>
+									<Label text="%visb.placeholder.text" textAlignment="CENTER" />
+								</VBox>
+							</StackPane>
+						</VBox>
                         <VBox BorderPane.alignment="CENTER">
-                            <HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-                                <padding>
-                                    <Insets left="5.0"/>
-                                </padding>
-                                <Button fx:id="loadVisualisationButton" onAction="#loadVisBFile">
-                                    <graphic>
-                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
-                                    </graphic>
-                                    <tooltip>
-                                        <Tooltip text="%visb.menu.file.open" />
-                                    </tooltip>
-                                </Button>
-                                <Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
-                                    <graphic>
-                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}" />
-                                    </graphic>
-                                    <tooltip>
-                                        <Tooltip text="%visb.menu.edit.reload" />
-                                    </tooltip>
-                                </Button>
-                                <Button fx:id="closeVisualisationButton" onAction="#closeVisualisation">
-                                    <graphic>
-                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
-                                    </graphic>
-                                    <tooltip>
-                                        <Tooltip text="%visb.menu.edit.close" />
-                                    </tooltip>
-                                </Button>
-                                <Button fx:id="zoomInButton" onAction="#zoomIn">
-                                    <graphic>
-                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
-                                    </graphic>
-                                    <tooltip>
-                                        <Tooltip text="%visb.menu.view.zoom.in" />
-                                    </tooltip>
-                                </Button>
-                                <Button fx:id="zoomOutButton" onAction="#zoomOut">
-                                    <graphic>
-                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
-                                    </graphic>
-                                    <tooltip>
-                                        <Tooltip text="%visb.menu.view.zoom.out" />
-                                    </tooltip>
-                                </Button>
-                                <Spacer/>
-                                <NavigationButtons/>
-                                <Spacer/>
-                                <Button fx:id="openTraceSelectionButton" onAction="#openTraceSelection">
-                                    <graphic>
-                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILE" bindableFontSize="${fontSize.fontSize + 2}" />
-                                    </graphic>
-                                    <tooltip>
-                                        <Tooltip text="%common.buttons.openTraceSelection" />
-                                    </tooltip>
-                                </Button>
-                                <Button fx:id="saveTraceButton" onAction="#saveTrace">
-                                    <graphic>
-                                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-                                    </graphic>
-                                    <tooltip>
-                                        <Tooltip text="%common.buttons.saveTrace" />
-                                    </tooltip>
-                                </Button>
-                            </HBox>
-                            <Label fx:id="lbCurrentVisualisation" styleClass="visb-location"/>
-                            <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-                                <Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
-                                <Spacer/>
-                                <HBox alignment="CENTER_RIGHT">
-                                    <Button fx:id="loadDefaultVisualisationButton">
-                                        <graphic>
-                                            <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}" />
-                                        </graphic>
-                                        <tooltip>
-                                            <Tooltip text="%visb.stage.loadDefault" />
-                                        </tooltip>
-                                    </Button>
-                                    <Button fx:id="setDefaultVisualisationButton">
-                                        <graphic>
-                                            <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-                                        </graphic>
-                                        <tooltip>
-                                            <Tooltip text="%visb.stage.setDefault" />
-                                        </tooltip>
-                                    </Button>
-                                    <Button fx:id="resetDefaultVisualisationButton">
-                                        <graphic>
-                                            <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
-                                        </graphic>
-                                        <tooltip>
-                                            <Tooltip text="%visb.stage.resetDefault" />
-                                        </tooltip>
-                                    </Button>
-                                </HBox>
-                            </HBox>
+
                             <Accordion>
                                 <panes>
                                     <TitledPane animated="false" text="%visb.items">
