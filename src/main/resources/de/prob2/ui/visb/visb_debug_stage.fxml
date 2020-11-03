@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.SplitPane?>
+
+<?import de.prob2.ui.visb.VisBDebugStage?>
+
+
+<?import javafx.scene.layout.StackPane?>
+<fx:root title="%visb.debug.title" type="VisBDebugStage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="700" height="300" minHeight="300" minWidth="700">
+    <scene>
+        <Scene stylesheets="@/prob.css">
+			<StackPane>
+				<SplitPane dividerPositions="1.0" orientation="VERTICAL">
+					<VBox>
+						<Accordion prefHeight="300" prefWidth="700" VBox.vgrow="ALWAYS">
+							<panes>
+								<TitledPane animated="false" text="%visb.items">
+									<ListView fx:id="visBItems" fixedCellSize="50" styleClass="list-view" />
+								</TitledPane>
+								<TitledPane animated="false" text="%visb.events">
+									<ListView fx:id="visBEvents" fixedCellSize="50" styleClass="list-view" />
+								</TitledPane>
+							</panes>
+						</Accordion>
+					</VBox>
+				</SplitPane>
+			</StackPane>
+		</Scene>
+    </scene>
+</fx:root>

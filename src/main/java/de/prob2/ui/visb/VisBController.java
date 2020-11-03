@@ -318,7 +318,7 @@ public class VisBController {
 			return;
 		}
 		if(this.visBVisualisation.isReady()) {
-			this.injector.getInstance(VisBStage.class).initialiseListViews(visBVisualisation);
+			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 			startVisualisation();
 			updateVisualisationIfPossible();
 			//LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
