@@ -83,16 +83,14 @@ test:jdk-14-linux:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
   script:
-    - ./gradlew ${GRADLE_OPTIONS} check
-    - ./gradlew ${GRADLE_OPTIONS} jpackage
+    - ./gradlew ${GRADLE_OPTIONS} check jpackage
 
 tests:jdk-14-macos:
   extends: .test-mac
   before_script:
     - *default_before_script_mac
   script:
-    - ./gradlew ${GRADLE_OPTIONS} check
-    - ./gradlew ${GRADLE_OPTIONS} jpackage
+    - ./gradlew ${GRADLE_OPTIONS} check jpackage
   tags:
     - macos
 
@@ -101,8 +99,7 @@ tests:jdk-14-windows64:
   before_script:
     - *default_before_script_windows
   script:
-    - call gradlew %GRADLE_OPTIONS% check
-    - call gradlew %GRADLE_OPTIONS% jpackage
+    - call gradlew %GRADLE_OPTIONS% check jpackage
   tags:
     - prob
     - win64
