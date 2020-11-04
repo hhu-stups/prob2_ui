@@ -74,7 +74,7 @@ test:jdk-8-linux:
     - dpkg-deb --extract "libopenjfx-java.deb" "libopenjfx-java"
     - rsync -a "libopenjfx-java/usr/share/java/openjfx/" "${JAVA_HOME}"
     - rm -r "libopenjfx-java.deb" "libopenjfx-java"
-  script: ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar createAppZip
+  script: ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar
 
 test:jdk-14-linux:
   extends: .test-linux
