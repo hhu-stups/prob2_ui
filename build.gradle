@@ -229,6 +229,10 @@ final probBinariesByOs = [
 ].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
 
 shadowJar {
+	// Set the classifier depending on the current OS to make it clear that this jar is platform-specific.
+	// The mapping converts the OS names to the format used by the OpenJFX Maven artifacts (this isn't necessary, but it's more consistent this way).
+	archiveClassifier = ["windows": "win", "osx": "mac", "linux": "linux"][osdetector.os]
+
 	// Exclude all probcli zips that are not for the current platform.
 	// It's safer to do this with an exclude rule that lists all resources that we know we don't want.
 	// This way nothing will break if ProB 2 adds new resources that shouldn't be excluded.
