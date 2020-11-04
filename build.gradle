@@ -55,25 +55,38 @@ task jpackage(type: Exec) {
 	dependsOn 'shadowJar'
 
 	executable = "jpackage"
+	args = [
+		"--dest", "build/distributions",
+		"--input", "build/libs",
+		"--main-jar", "prob2-ui-${project.version}-all.jar",
+		'--main-class', mainClassName,
+		"--name", appName,
+		"--app-version", appVersion,
+		"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020",
+		"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
+		"--license-file", "LICENSE",
+	]
 
 	if (osdetector.os == "windows") {
-		args '--icon', "src/main/deploy/package/windows/prob2-ui.ico", "--dest", "build/distributions",
-				"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
-				'--main-jar', "prob2-ui-${project.version}-all.jar", '--win-dir-chooser', '--win-menu', '--win-shortcut', '--win-menu-group', "ProB2-UI", '--win-upgrade-uuid', "9e004b84-41c5-4c95-8aca-32ac44063ef9",
-				'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
+		args += [
+			"--icon", "src/main/deploy/package/windows/prob2-ui.ico",
+			"--win-dir-chooser",
+			"--win-menu",
+			"--win-shortcut",
+			"--win-menu-group", appName,
+			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
+		]
+	} else if (osdetector.os == "osx") {
+		args += [
+			"--icon", "src/main/deploy/package/macosx/prob2-ui.icns"
+		]
 	} else {
-		if (osdetector.os == "osx") {
-			args '--icon', "src/main/deploy/package/macosx/prob2-ui.icns", "--dest", "build/distributions",
-					"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
-					'--main-jar', "prob2-ui-${project.version}-all.jar",
-					'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
-		} else { // Linux
-			args '--icon', "src/main/deploy/package/linux/prob2-ui.png", "--dest", "build/distributions",
-					"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
-					'--main-jar', "prob2-ui-${project.version}-all.jar", '--linux-menu-group', "ProB2-UI", '--linux-deb-maintainer', "Michael.Leuschel@hhu.de",
-					'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
-		}
-
+		// Linux
+		args += [
+			"--icon", "src/main/deploy/package/linux/prob2-ui.png",
+			"--linux-menu-group", appName,
+			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
+		]
 	}
 }
 
