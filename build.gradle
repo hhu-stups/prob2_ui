@@ -286,7 +286,7 @@ task jpackage(type: Exec) {
 	executable = "jpackage"
 	args = [
 		"--verbose",
-		"--dest", project.distsDir,
+		"--dest", project.distsDirectory.get().asFile,
 		"--input", shadowJarFile.parent,
 		"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
 		'--main-class', mainClassName,
