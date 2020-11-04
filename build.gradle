@@ -80,13 +80,14 @@ task jpackage(type: Exec) {
 		args += [
 			"--icon", "src/main/deploy/package/macosx/prob2-ui.icns"
 		]
-	} else {
-		// Linux
+	} else if (osdetector.os == "linux") {
 		args += [
 			"--icon", "src/main/deploy/package/linux/prob2-ui.png",
 			"--linux-menu-group", appName,
 			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
 		]
+	} else {
+		throw new GradleException("Unsupported OS: ${osdetector.os} (expected windows, osx, or linux)")
 	}
 }
 
