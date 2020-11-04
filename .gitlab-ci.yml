@@ -85,7 +85,7 @@ test:jdk-14-linux:
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
 
-tests:jdk-14-macos:
+test:jdk-14-macos:
   extends: .test-mac
   before_script:
     - *default_before_script_mac
@@ -94,7 +94,7 @@ tests:jdk-14-macos:
   tags:
     - macos
 
-tests:jdk-14-windows64:
+test:jdk-14-windows64:
   extends: .test-windows
   before_script:
     - *default_before_script_windows
