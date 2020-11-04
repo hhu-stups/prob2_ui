@@ -54,24 +54,19 @@ task jpackage(type: Exec) {
 	// Use single-platform shadowJar
 	dependsOn 'shadowJar'
 
-	def iconPath;
-
 	if (osdetector.os == "windows") {
-		iconPath = 'src/main/deploy/package/windows/prob2-ui.ico'
-		commandLine "jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
+		commandLine "jpackage", '--icon', "src/main/deploy/package/windows/prob2-ui.ico", "--dest", "build/distributions",
 				"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
 				'--main-jar', "prob2-ui-${project.version}-all.jar", '--win-dir-chooser', '--win-menu', '--win-shortcut', '--win-menu-group', "ProB2-UI", '--win-upgrade-uuid', "9e004b84-41c5-4c95-8aca-32ac44063ef9",
 				'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
 	} else {
 		if (osdetector.os == "osx") {
-			iconPath = 'src/main/deploy/package/macosx/prob2-ui.icns'
-			commandLine "jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
+			commandLine "jpackage", '--icon', "src/main/deploy/package/macosx/prob2-ui.icns", "--dest", "build/distributions",
 					"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
 					'--main-jar', "prob2-ui-${project.version}-all.jar",
 					'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
 		} else { // Linux
-			iconPath = 'src/main/deploy/package/linux/prob2-ui.png'
-			commandLine "jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
+			commandLine "jpackage", '--icon', "src/main/deploy/package/linux/prob2-ui.png", "--dest", "build/distributions",
 					"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
 					'--main-jar', "prob2-ui-${project.version}-all.jar", '--linux-menu-group', "ProB2-UI", '--linux-deb-maintainer', "Michael.Leuschel@hhu.de",
 					'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
