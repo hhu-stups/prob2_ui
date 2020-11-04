@@ -233,6 +233,19 @@ jar {
 	}
 }
 
+final probBinariesByOs = [
+	"windows": "win64",
+	"osx": "leopard64",
+	"linux": "linux64",
+].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
+
+shadowJar {
+	// Exclude all probcli zips that are not for the current platform.
+	// It's safer to do this with an exclude rule that lists all resources that we know we don't want.
+	// This way nothing will break if ProB 2 adds new resources that shouldn't be excluded.
+	exclude(probBinariesByOs.findAll {k, v -> k != osdetector.os}.values())
+}
+
 task multiPlatformShadowJar(type: ShadowJar) {
 	manifest {
 		inheritFrom(jar.manifest)
