@@ -54,8 +54,12 @@ task jpackage(type: Exec) {
 	// Use single-platform shadowJar
 	dependsOn 'shadowJar'
 
+	// Show jpackage --verbose output only if running Gradle with --info (or higher)
+	logging.captureStandardOutput(LogLevel.INFO)
+
 	executable = "jpackage"
 	args = [
+		"--verbose",
 		"--dest", "build/distributions",
 		"--input", "build/libs",
 		"--main-jar", "prob2-ui-${project.version}-all.jar",
