@@ -31,6 +31,11 @@ if (project != rootProject) {
 	)
 }
 
+wrapper {
+	gradleVersion = "6.3"
+	distributionType = Wrapper.DistributionType.ALL
+}
+
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
 
@@ -45,56 +50,6 @@ repositories {
 // Our actual application class is de.prob2.ui.ProB2.
 // See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
 mainClassName = "de.prob2.ui.Main"
-
-def appName = 'ProB2-UI'
-
-// Assumes that Java 14 is installed correctly
-task jpackage(type: Exec) {
-	// Use single-platform shadowJar
-	dependsOn 'shadowJar'
-
-	// Show jpackage --verbose output only if running Gradle with --info (or higher)
-	logging.captureStandardOutput(LogLevel.INFO)
-
-	final shadowJarFile = shadowJar.archiveFile.get().asFile
-	executable = "jpackage"
-	args = [
-		"--verbose",
-		"--dest", project.distsDir,
-		"--input", shadowJarFile.parent,
-		"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
-		'--main-class', mainClassName,
-		"--name", appName,
-		// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
-		"--app-version", project.version.replaceAll(/-SNAPSHOT/, ""),
-		"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020",
-		"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
-		"--license-file", "LICENSE",
-	]
-
-	if (osdetector.os == "windows") {
-		args += [
-			"--icon", "src/main/deploy/package/windows/prob2-ui.ico",
-			"--win-dir-chooser",
-			"--win-menu",
-			"--win-shortcut",
-			"--win-menu-group", appName,
-			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
-		]
-	} else if (osdetector.os == "osx") {
-		args += [
-			"--icon", "src/main/deploy/package/macosx/prob2-ui.icns"
-		]
-	} else if (osdetector.os == "linux") {
-		args += [
-			"--icon", "src/main/deploy/package/linux/prob2-ui.png",
-			"--linux-menu-group", appName,
-			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
-		]
-	} else {
-		throw new GradleException("Unsupported OS: ${osdetector.os} (expected windows, osx, or linux)")
-	}
-}
 
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [
@@ -208,6 +163,40 @@ sourceSets {
 	}
 }
 
+final helpSourceDir = file("src/main/helpsources")
+final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
+final helpOutputDir = new File(generatedResourcesDir, "de/prob2/ui/helpsystem/helppages")
+final helpFilterLuaScript = file("pandoc_links_to_html.lua")
+task createHelp {
+	inputs.file(helpFilterLuaScript)
+	inputs.files(helpSourceFiles)
+	outputs.dir(helpOutputDir)
+
+	doLast {
+		delete(helpOutputDir)
+		helpSourceFiles.each {inputFile ->
+			final title = inputFile.name.replaceAll(/\.md$/, '')
+			final relativePath = helpSourceDir.toPath().relativize(inputFile.toPath())
+			final relativePathWithNewExtension = relativePath.parent.resolve(relativePath.fileName.toString().replaceAll(/\.md$/, ".html"))
+			final outputFile = helpOutputDir.toPath().resolve(relativePathWithNewExtension).toFile()
+			outputFile.parentFile.mkdirs()
+			exec {
+				executable = "pandoc"
+				args = [
+					"--from=gfm",
+					"--to=html",
+					"--metadata=title=${title}",
+					"--standalone",
+					"--lua-filter=${helpFilterLuaScript}",
+					"--output=${outputFile}",
+					"${inputFile}",
+				]
+			}
+		}
+	}
+}
+processResources.dependsOn(createHelp)
+
 def readCurrentGitCommit() {
 	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
 	def exitCode = proc.waitFor()
@@ -271,49 +260,60 @@ task multiPlatformShadowJar(type: ShadowJar) {
 	}
 }
 
-wrapper {
-	gradleVersion = "6.3"
-	distributionType = Wrapper.DistributionType.ALL
-}
-
-final helpSourceDir = file("src/main/helpsources")
-final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
-final helpOutputDir = new File(generatedResourcesDir, "de/prob2/ui/helpsystem/helppages")
-final helpFilterLuaScript = file("pandoc_links_to_html.lua")
-task createHelp {
-	inputs.file(helpFilterLuaScript)
-	inputs.files(helpSourceFiles)
-	outputs.dir(helpOutputDir)
-
-	doLast {
-		delete(helpOutputDir)
-		helpSourceFiles.each {inputFile ->
-			final title = inputFile.name.replaceAll(/\.md$/, '')
-			final relativePath = helpSourceDir.toPath().relativize(inputFile.toPath())
-			final relativePathWithNewExtension = relativePath.parent.resolve(relativePath.fileName.toString().replaceAll(/\.md$/, ".html"))
-			final outputFile = helpOutputDir.toPath().resolve(relativePathWithNewExtension).toFile()
-			outputFile.parentFile.mkdirs()
-			exec {
-				executable = "pandoc"
-				args = [
-					"--from=gfm",
-					"--to=html",
-					"--metadata=title=${title}",
-					"--standalone",
-					"--lua-filter=${helpFilterLuaScript}",
-					"--output=${outputFile}",
-					"${inputFile}",
-				]
-			}
-		}
-	}
-}
-processResources.dependsOn(createHelp)
-
 if (project.hasProperty("probHome")) {
 	allprojects {
 		tasks.withType(JavaForkOptions) {
 			delegate.systemProperties["prob.home"] = project.probHome
 		}
+	}
+}
+
+final appName = 'ProB2-UI'
+
+// Assumes that Java 14 is installed correctly
+task jpackage(type: Exec) {
+	// Use single-platform shadowJar
+	dependsOn 'shadowJar'
+
+	// Show jpackage --verbose output only if running Gradle with --info (or higher)
+	logging.captureStandardOutput(LogLevel.INFO)
+
+	final shadowJarFile = shadowJar.archiveFile.get().asFile
+	executable = "jpackage"
+	args = [
+		"--verbose",
+		"--dest", project.distsDir,
+		"--input", shadowJarFile.parent,
+		"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
+		'--main-class', mainClassName,
+		"--name", appName,
+		// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
+		"--app-version", project.version.replaceAll(/-SNAPSHOT/, ""),
+		"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020",
+		"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
+		"--license-file", "LICENSE",
+	]
+
+	if (osdetector.os == "windows") {
+		args += [
+			"--icon", "src/main/deploy/package/windows/prob2-ui.ico",
+			"--win-dir-chooser",
+			"--win-menu",
+			"--win-shortcut",
+			"--win-menu-group", appName,
+			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
+		]
+	} else if (osdetector.os == "osx") {
+		args += [
+			"--icon", "src/main/deploy/package/macosx/prob2-ui.icns"
+		]
+	} else if (osdetector.os == "linux") {
+		args += [
+			"--icon", "src/main/deploy/package/linux/prob2-ui.png",
+			"--linux-menu-group", appName,
+			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
+		]
+	} else {
+		throw new GradleException("Unsupported OS: ${osdetector.os} (expected windows, osx, or linux)")
 	}
 }
