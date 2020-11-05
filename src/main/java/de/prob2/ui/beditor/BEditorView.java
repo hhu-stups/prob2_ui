@@ -209,12 +209,15 @@ public class BEditorView extends BorderPane {
 			cbUnicode.setManaged(true);
 			if (stateSpace == null) {
 				setHint();
+                cbUnicode.setSelected(false);
 			} else {
+			    cbUnicode.setSelected(true);
 				showInternalRepresentation(stateSpace, machinePath);
 			}
 		} else {
 			cbUnicode.setVisible(false);
 			cbUnicode.setManaged(false);
+			cbUnicode.setSelected(false);
 			setText(machinePath);
 		}
 	}
