@@ -4,7 +4,6 @@ import org.gradle.plugins.ide.eclipse.model.AccessRule
 plugins {
 	id "com.github.johnrengelman.shadow" version "5.2.0"
 	id "com.google.osdetector" version "1.6.2"
-	id "edu.sc.seis.macAppBundle" version "2.3.0"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
 	id "org.openjfx.javafxplugin" version "0.0.8" apply false
 }
@@ -32,6 +31,11 @@ if (project != rootProject) {
 	)
 }
 
+wrapper {
+	gradleVersion = "6.3"
+	distributionType = Wrapper.DistributionType.ALL
+}
+
 sourceCompatibility="1.8"
 targetCompatibility="1.8"
 
@@ -46,40 +50,6 @@ repositories {
 // Our actual application class is de.prob2.ui.ProB2.
 // See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
 mainClassName = "de.prob2.ui.Main"
-
-def appName = 'ProB2-UI'
-def appVersion = '1.0.1'
-
-// Assumes that Java 14 is installed correctly
-task jpackage(type: Exec) {
-	// Use single-platform shadowJar
-	dependsOn 'shadowJar'
-
-	def iconPath;
-
-	if (osdetector.os == "windows") {
-		iconPath = 'src\\main\\deploy\\package\\windows\\prob2-ui.ico'
-		commandLine "jpackage", '--icon', "${iconPath}", "--dest", "build\\distributions",
-				"--name", "${appName}", '--input', 'build\\libs', '--main-class', "${mainClassName}",
-				'--main-jar', "prob2-ui-${project.version}-all.jar", '--win-dir-chooser', '--win-menu', '--win-shortcut', '--win-menu-group', "ProB2-UI", '--win-upgrade-uuid', "9e004b84-41c5-4c95-8aca-32ac44063ef9",
-				'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
-	} else {
-		if (osdetector.os == "osx") {
-			iconPath = 'src/main/deploy/package/macosx/prob2-ui.icns'
-			commandLine "jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
-					"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
-					'--main-jar', "prob2-ui-${project.version}-all.jar",
-					'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
-		} else { // Linux
-			iconPath = 'src/main/deploy/package/linux/prob2-ui.png'
-			commandLine "jpackage", '--icon', "${iconPath}", "--dest", "build/distributions",
-					"--name", "${appName}", '--input', 'build/libs', '--main-class', "${mainClassName}",
-					'--main-jar', "prob2-ui-${project.version}-all.jar", '--linux-menu-group', "ProB2-UI", '--linux-deb-maintainer', "Michael.Leuschel@hhu.de",
-					'--app-version', "${appVersion}", '--copyright', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020", '--vendor', "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen", '--license-file', "LICENSE"
-		}
-
-	}
-}
 
 final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [
@@ -193,73 +163,6 @@ sourceSets {
 	}
 }
 
-def readCurrentGitCommit() {
-	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
-	def exitCode = proc.waitFor()
-	if (exitCode != 0) {
-		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
-	}
-	return proc.in.readLines()[0]
-}
-
-processResources {
-	filesMatching("de/prob2/ui/build.properties") {
-		expand(version: project.version, commit: readCurrentGitCommit())
-	}
-}
-
-jar {
-	manifest {
-		attributes([
-			"JavaFX-Preloader-Class": preloaderClassName,
-			"Add-Exports": exports.join(" "),
-			"Add-Opens": opens.join(" "),
-		])
-	}
-}
-
-task multiPlatformShadowJar(type: ShadowJar) {
-	manifest {
-		inheritFrom(jar.manifest)
-		attributes([
-				"Main-Class": mainClassName,
-				"Multi-Release": "true",
-		])
-	}
-
-	archiveClassifier = "multi"
-	from(sourceSets.main.output)
-	configurations = [
-			project.configurations.runtimeClasspath,
-	]
-
-	// Java 11 and newer normally don't have JavaFX preinstalled,
-	// so include OpenJFX 11 for these Java versions so they can run the jar.
-	// We don't bundle OpenJFX for older Java versions,
-	// because they usually have JavaFX preinstalled,
-	// and there are no easily usable standalone versions of OpenJFX < 11 that we could use anyway.
-	into("META-INF/versions/11") {
-		from(project.configurations.javafxAllPlatforms.collect {zipTree(it)})
-	}
-}
-
-
-
-macAppBundle {
-	dmgName = project.name + "-" + project.version + "-mac"
-	icon = "src/main/deploy/package/macosx/prob2-ui.icns"
-	bundleJRE = false
-	jreHome = null
-	javaProperties = systemProperties
-}
-
-macAppBundle.mainClassName = mainClassName
-
-wrapper {
-	gradleVersion = "6.3"
-	distributionType = Wrapper.DistributionType.ALL
-}
-
 final helpSourceDir = file("src/main/helpsources")
 final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
 final helpOutputDir = new File(generatedResourcesDir, "de/prob2/ui/helpsystem/helppages")
@@ -294,10 +197,127 @@ task createHelp {
 }
 processResources.dependsOn(createHelp)
 
+def readCurrentGitCommit() {
+	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
+	def exitCode = proc.waitFor()
+	if (exitCode != 0) {
+		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
+	}
+	return proc.in.readLines()[0]
+}
+
+processResources {
+	filesMatching("de/prob2/ui/build.properties") {
+		expand(version: project.version, commit: readCurrentGitCommit())
+	}
+}
+
+jar {
+	manifest {
+		attributes([
+			"JavaFX-Preloader-Class": preloaderClassName,
+			"Add-Exports": exports.join(" "),
+			"Add-Opens": opens.join(" "),
+		])
+	}
+}
+
+final probBinariesByOs = [
+	"windows": "win64",
+	"osx": "leopard64",
+	"linux": "linux64",
+].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
+
+shadowJar {
+	// Set the classifier depending on the current OS to make it clear that this jar is platform-specific.
+	// The mapping converts the OS names to the format used by the OpenJFX Maven artifacts (this isn't necessary, but it's more consistent this way).
+	archiveClassifier = ["windows": "win", "osx": "mac", "linux": "linux"][osdetector.os]
+
+	// Exclude all probcli zips that are not for the current platform.
+	// It's safer to do this with an exclude rule that lists all resources that we know we don't want.
+	// This way nothing will break if ProB 2 adds new resources that shouldn't be excluded.
+	exclude(probBinariesByOs.findAll {k, v -> k != osdetector.os}.values())
+}
+
+task multiPlatformShadowJar(type: ShadowJar) {
+	manifest {
+		inheritFrom(jar.manifest)
+		attributes([
+				"Main-Class": mainClassName,
+				"Multi-Release": "true",
+		])
+	}
+
+	archiveClassifier = "multi"
+	from(sourceSets.main.output)
+	configurations = [
+			project.configurations.runtimeClasspath,
+	]
+
+	// Java 11 and newer normally don't have JavaFX preinstalled,
+	// so include OpenJFX 11 for these Java versions so they can run the jar.
+	// We don't bundle OpenJFX for older Java versions,
+	// because they usually have JavaFX preinstalled,
+	// and there are no easily usable standalone versions of OpenJFX < 11 that we could use anyway.
+	into("META-INF/versions/11") {
+		from(project.configurations.javafxAllPlatforms.collect {zipTree(it)})
+	}
+}
+
 if (project.hasProperty("probHome")) {
 	allprojects {
 		tasks.withType(JavaForkOptions) {
 			delegate.systemProperties["prob.home"] = project.probHome
 		}
+	}
+}
+
+final appName = 'ProB2-UI'
+
+// Assumes that Java 14 is installed correctly
+task jpackage(type: Exec) {
+	// Use single-platform shadowJar
+	dependsOn 'shadowJar'
+
+	// Show jpackage --verbose output only if running Gradle with --info (or higher)
+	logging.captureStandardOutput(LogLevel.INFO)
+
+	final shadowJarFile = shadowJar.archiveFile.get().asFile
+	executable = "jpackage"
+	args = [
+		"--verbose",
+		"--dest", project.distsDirectory.get().asFile,
+		"--input", shadowJarFile.parent,
+		"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
+		'--main-class', mainClassName,
+		"--name", appName,
+		// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
+		"--app-version", project.version.replaceAll(/-SNAPSHOT/, ""),
+		"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020",
+		"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
+		"--license-file", "LICENSE",
+	]
+
+	if (osdetector.os == "windows") {
+		args += [
+			"--icon", "src/main/deploy/package/windows/prob2-ui.ico",
+			"--win-dir-chooser",
+			"--win-menu",
+			"--win-shortcut",
+			"--win-menu-group", appName,
+			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
+		]
+	} else if (osdetector.os == "osx") {
+		args += [
+			"--icon", "src/main/deploy/package/macosx/prob2-ui.icns"
+		]
+	} else if (osdetector.os == "linux") {
+		args += [
+			"--icon", "src/main/deploy/package/linux/prob2-ui.png",
+			"--linux-menu-group", appName,
+			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
+		]
+	} else {
+		throw new GradleException("Unsupported OS: ${osdetector.os} (expected windows, osx, or linux)")
 	}
 }

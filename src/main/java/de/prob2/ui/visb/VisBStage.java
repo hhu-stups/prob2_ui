@@ -13,11 +13,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceSelectionView;
 import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.help.UserManualStage;
-import de.prob2.ui.visb.ui.ListViewEvent;
-import de.prob2.ui.visb.ui.ListViewItem;
-import de.prob2.ui.visb.visbobjects.VisBEvent;
-import de.prob2.ui.visb.visbobjects.VisBItem;
-import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -25,7 +20,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -33,7 +27,6 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
@@ -97,10 +90,6 @@ public class VisBStage extends Stage {
     @FXML
     private WebView webView;
     @FXML
-    private ListView<VisBItem> visBItems;
-    @FXML
-    private ListView<VisBEvent> visBEvents;
-    @FXML
     private MenuItem editMenu_reload;
     @FXML
     private MenuItem editMenu_close;
@@ -142,7 +131,7 @@ public class VisBStage extends Stage {
         this.currentTrace = currentTrace;
         this.fileChooserManager = fileChooserManager;
         this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
-        this.stageManager.loadFXML(this, "vis_plugin_stage.fxml");
+        this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
     }
 
     /**
@@ -166,9 +155,7 @@ public class VisBStage extends Stage {
         // zoom fonts in/out (but only of those that are not given a fixed size):
         this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
         this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
-        this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
         this.lbCurrentVisualisation.textProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? "" : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBPath.get()).toString()), visBPath));
-        this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
         this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
             visBPath.set(null);
             injector.getInstance(VisBController.class).closeCurrentVisualisation();
@@ -291,26 +278,13 @@ public class VisBStage extends Stage {
     }
 
     /**
-     * After loading the JSON/ VisB file and preparing it in the {@link VisBController} the ListViews are initialised.
-     * @param visBVisualisation is needed to display the items and events in the ListViews
-     */
-    void initialiseListViews(VisBVisualisation visBVisualisation){
-        //Preparing the Items
-        this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
-        //Preparing the Events
-        this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
-
-    }
-
-    /**
      * This method clears our the WebView and the ListView and removes possible listeners, so that the VisBStage no longer interacts with anything.
      */
     void clear(){
         LOGGER.debug("Clear the stage!");
         this.webView.setVisible(false);
         this.placeholder.setVisible(true);
-        this.visBEvents.setItems(null);
-        this.visBItems.setItems(null);
+        injector.getInstance(VisBDebugStage.class).clear();
     }
 
     /**
@@ -475,6 +449,11 @@ public class VisBStage extends Stage {
             return "";
         }
     }
+
+    @FXML
+	public void showVisBItemsAndEvents() {
+    	injector.getInstance(VisBDebugStage.class).show();
+	}
 
 }
 
