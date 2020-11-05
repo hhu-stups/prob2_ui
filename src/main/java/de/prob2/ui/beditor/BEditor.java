@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
+import de.prob.scripting.EventBPackageFactory;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StopActions;
@@ -228,7 +229,7 @@ public class BEditor extends CodeArea {
 			return StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
 		}
 		Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
-		if (modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class) {
+		if (modelFactoryClass == ClassicalBFactory.class || modelFactoryClass == EventBFactory.class || modelFactoryClass == EventBPackageFactory.class) {
 			return BLexerSyntaxHighlighting.computeBHighlighting(text);
 		} else if (RegexSyntaxHighlighting.canHighlight(modelFactoryClass)) {
 			return RegexSyntaxHighlighting.computeHighlighting(modelFactoryClass, text);
