@@ -166,12 +166,6 @@ public class ProB2 extends Application {
 		primaryStage.setTitle("Loading ProB 2.0...");
 		primaryStage.show();
 
-		ProB2Module module = new ProB2Module(this, runtimeOptions);
-		injector = Guice.createInjector(module);
-		// Ensure that MenuToolkit is loaded on the JavaFX application thread
-		// (it throws an exception if loaded on any other thread).
-		injector.getInstance(MenuToolkit.class);
-
 		new Thread(() -> {
 			final Scene mainScene = this.startInBackground(primaryStage);
 			Platform.runLater(() -> this.postStart(primaryStage, mainScene));
@@ -179,6 +173,13 @@ public class ProB2 extends Application {
 	}
 
 	private Scene startInBackground(final Stage primaryStage) {
+		ProB2Module module = new ProB2Module(this, runtimeOptions);
+		injector = Guice.createInjector(module);
+
+		// Ensure that MenuToolkit is loaded on the JavaFX application thread
+		// (it throws an exception if loaded on any other thread).
+		Platform.runLater(() -> injector.getInstance(MenuToolkit.class));
+
 		bundle = injector.getInstance(ResourceBundle.class);
 		this.stopActions = injector.getInstance(StopActions.class);
 		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
