@@ -25,6 +25,10 @@ final class TypeCell extends TreeTableCell<Object, Object> {
 		} else if (item instanceof ErrorItem) {
 			final String typeName;
 			switch (((ErrorItem)item).getType()) {
+				case MESSAGE:
+					typeName = bundle.getString("error.errorTable.type.message");
+					break;
+				
 				case WARNING:
 					typeName = bundle.getString("error.errorTable.type.warning");
 					break;

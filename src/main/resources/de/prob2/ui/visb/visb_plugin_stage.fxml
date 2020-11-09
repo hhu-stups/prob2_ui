@@ -54,7 +54,6 @@
 				</top>
 				<center>
 					<VBox BorderPane.alignment="CENTER">
-						<Label fx:id="lbCurrentVisualisation" styleClass="visb-location"/>
 						<HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
 							<Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
 							<Spacer/>
