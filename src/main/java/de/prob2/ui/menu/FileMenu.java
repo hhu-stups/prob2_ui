@@ -16,8 +16,6 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
 import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
@@ -128,6 +126,7 @@ public class FileMenu extends Menu {
 	private void handleViewFormattedCode() {
 		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
 		stage.show();
+		stage.toFront();
 	}
 
 	@FXML

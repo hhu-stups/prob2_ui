@@ -1,23 +1,20 @@
 package de.prob2.ui.menu;
 
-import java.util.ResourceBundle;
-import java.util.StringJoiner;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ResourceBundle;
+import java.util.StringJoiner;
 
 @Singleton
 public final class AboutBox extends Stage {

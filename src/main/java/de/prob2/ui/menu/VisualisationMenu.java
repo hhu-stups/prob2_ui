@@ -45,12 +45,16 @@ public class VisualisationMenu extends Menu {
 
 	@FXML
 	private void openGraphVisualisation() {
-		injector.getInstance(DotView.class).show();
+		DotView dotView = injector.getInstance(DotView.class);
+		dotView.show();
+		dotView.toFront();
 	}
 
 	@FXML
 	private void openTableVisualisation() {
-		injector.getInstance(ExpressionTableView.class).show();
+		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+		expressionTableView.show();
+		expressionTableView.toFront();
 	}
 	
 	@FXML

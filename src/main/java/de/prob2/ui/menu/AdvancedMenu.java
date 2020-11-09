@@ -79,6 +79,7 @@ public class AdvancedMenu extends Menu {
 	private void showPluginMenu() {
 		PluginMenuStage pluginMenuStage = injector.getInstance(PluginMenuStage.class);
 		pluginMenuStage.show();
+		pluginMenuStage.toFront();
 	}
 
 	@FXML

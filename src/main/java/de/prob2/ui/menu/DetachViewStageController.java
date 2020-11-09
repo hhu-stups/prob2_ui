@@ -1,15 +1,8 @@
 package de.prob2.ui.menu;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.MainController;
 import de.prob2.ui.animation.AnimationView;
 import de.prob2.ui.history.HistoryView;
@@ -19,7 +12,6 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
@@ -30,9 +22,14 @@ import javafx.scene.control.TitledPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 @Singleton
 public final class DetachViewStageController extends Stage {
@@ -147,5 +144,6 @@ public final class DetachViewStageController extends Stage {
 			wrapperStages.remove(stage);
 		});
 		stage.show();
+		stage.toFront();
 	}
 }
