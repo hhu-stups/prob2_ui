@@ -14,13 +14,14 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
@@ -28,18 +29,16 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
 public class TraceDiff extends VBox {
-	@FXML private CheckBox replayed;
-	@FXML private CheckBox persistent;
-	@FXML private CheckBox current;
+	@FXML private CheckBox linkScrolling;
+
+	@FXML private Label replayed;
 
 	@FXML private ListView<String> replayedList;
 	@FXML private ListView<String> persistentList;
@@ -53,16 +52,13 @@ public class TraceDiff extends VBox {
 	@FXML private HBox buttonBox;
 
 	private ResourceBundle bundle;
-	private CurrentTrace currentTrace;
 	private TraceReplayErrorAlert alert;
-	private Injector injector;
-	private Map<CheckBox,ListView<String>> checkBoxListViewMap = new HashMap<>();
+	private ArrayList<ListView> listViews = new ArrayList();
+	private List<ScrollBar> scrollBarList = new ArrayList();
 
 	@Inject
-	private TraceDiff(StageManager stageManager, Injector injector, CurrentTrace currentTrace) {
+	private TraceDiff(StageManager stageManager, Injector injector) {
 		this.bundle = injector.getInstance(ResourceBundle.class);
-		this.currentTrace = currentTrace;
-		this.injector = injector;
 		stageManager.loadFXML(this,"trace_diff.fxml");
 	}
 
@@ -72,74 +68,53 @@ public class TraceDiff extends VBox {
 		double initialWidth = this.getWidth();
 		showAlert.setPrefWidth(initialWidth);
 
-		this.checkBoxListViewMap.put(replayed, replayedList);
-		this.checkBoxListViewMap.put(persistent, persistentList);
-		this.checkBoxListViewMap.put(current, currentList);
+		this.listViews.add(replayedList);
+		this.listViews.add(persistentList);
+		this.listViews.add(currentList);
 
-		// Arrow key synchronicity
-		ChangeListener<? super Number> replayedListCL = createChangeListenerForListView(persistent, current);
-		ChangeListener<? super Number> persistentListCL = createChangeListenerForListView(replayed, current);
-		ChangeListener<? super Number> currentListCL = createChangeListenerForListView(replayed, persistent);
-
-		replayed.selectedProperty().addListener(createChangeListenerForCheckBox(replayedList, replayedListCL));
-		persistent.selectedProperty().addListener(createChangeListenerForCheckBox(persistentList, persistentListCL));
-		current.selectedProperty().addListener(createChangeListenerForCheckBox(currentList, currentListCL));
-
-		// Scrollbar synchronicity
-		replayed.selectedProperty().addListener(createChangeListenerForCheckBox(replayed));
-		persistent.selectedProperty().addListener(createChangeListenerForCheckBox(persistent));
-		current.selectedProperty().addListener(createChangeListenerForCheckBox(current));
+		// Arrow key and scrollbar synchronicity
+		ChangeListener<? super Number> listViewCL = createChangeListenerForListView();
+		linkScrolling.selectedProperty().addListener(createChangeListenerForCheckBox(listViewCL));
 	}
 
-	private ScrollBar getScrollBar(ListView<String> listView) {
-		return (ScrollBar) listView.lookup(".scroll-bar:vertical");
+	private void getScrollBars() {
+		scrollBarList.clear();
+		listViews.forEach(lv -> {
+			ScrollBar sb = (ScrollBar) lv.lookup(".scroll-bar:vertical");
+			if (sb != null) {
+				scrollBarList.add(sb);
+			}
+		});
 	}
 
-	private ChangeListener<? super Boolean> createChangeListenerForCheckBox(CheckBox checkBox) {
+	private ChangeListener<? super Boolean> createChangeListenerForCheckBox(ChangeListener<? super Number> listViewChangeListener) {
 		return (obs, o, n) -> {
-			ScrollBar related = getScrollBar(checkBoxListViewMap.get(checkBox));
-			if (related != null) {
-				if (n) {
-					for (Map.Entry<CheckBox, ListView<String>> entry : checkBoxListViewMap.entrySet()) {
-						CheckBox cb = entry.getKey();
-						ScrollBar scrollBar = getScrollBar(entry.getValue());
-						if (cb != checkBox && scrollBar != null && cb.isSelected()) {
-							related.valueProperty().bindBidirectional(scrollBar.valueProperty());
-						}
-					}
-				} else {
-					for (Map.Entry<CheckBox, ListView<String>> entry : checkBoxListViewMap.entrySet()) {
-						ScrollBar scrollBar = getScrollBar(entry.getValue());
-						if (entry.getKey() != checkBox && scrollBar != null) {
-							related.valueProperty().unbindBidirectional(scrollBar.valueProperty());
-						}
-					}
+			if (n) {
+				// Arrow key synchronicity
+				listViews.forEach(lv -> lv.getSelectionModel().selectedIndexProperty().addListener(listViewChangeListener));
+				// Scrollbar synchronicity
+				getScrollBars();
+				for (int i = 0; i < scrollBarList.size()-1; i++) {
+					scrollBarList.get(i).valueProperty().bindBidirectional(scrollBarList.get(i+1).valueProperty());
+				}
+			} else {
+				listViews.forEach(lv -> lv.getSelectionModel().selectedIndexProperty().removeListener(listViewChangeListener));
+				for (int i = 0; i < scrollBarList.size()-1; i++) {
+					scrollBarList.get(i).valueProperty().unbindBidirectional(scrollBarList.get(i+1).valueProperty());
 				}
 			}
 		};
 	}
 
-	private ChangeListener<? super Boolean> createChangeListenerForCheckBox(ListView<String> listView, ChangeListener<? super Number> listViewChangeListener) {
-		return (obs, o, n) -> {
-			if (n) {
-				listView.getSelectionModel().selectedIndexProperty().addListener(listViewChangeListener);
-			} else {
-				listView.getSelectionModel().selectedIndexProperty().removeListener(listViewChangeListener);
-			}
-		};
-	}
-
-	private ChangeListener<? super Number> createChangeListenerForListView(CheckBox firstCB, CheckBox secondCB) {
+	private ChangeListener<? super Number> createChangeListenerForListView() {
 		return (obs, o, n) -> {
 			int value = n.intValue();
-			scrollToEntry(firstCB, value);
-			scrollToEntry(secondCB, value);
+			listViews.forEach(lv -> scrollToEntry(lv, value));
 		};
 	}
 
-	private void scrollToEntry(CheckBox cb, int value) {
-		if (cb.isSelected()) {
-			ListView<String> lv = checkBoxListViewMap.get(cb);
+	private void scrollToEntry(ListView lv, int value) {
+		if (linkScrolling.isSelected()) {
 			lv.getSelectionModel().select(value);
 			lv.getFocusModel().focus(value);
 			lv.scrollTo(value);
@@ -261,7 +236,6 @@ public class TraceDiff extends VBox {
 		if (alert.getTrigger().equals(TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW)) {
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
 			if (listBox.getChildren().contains(persistentBox)) {
-				persistent.setSelected(false);
 				listBox.getChildren().remove(persistentBox);
 			}
 		} else {

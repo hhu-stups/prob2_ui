@@ -9,18 +9,18 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.CheckBox?>
 <fx:root type="TraceDiff" xmlns:fx="http://javafx.com/fxml/1" prefWidth="600" stylesheets="@/prob.css" spacing="5">
-	<Label text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.link" wrapText="true"/>
+	<CheckBox fx:id="linkScrolling" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.link"/>
 	<HBox fx:id="listBox" maxHeight="Infinity" spacing="5" VBox.vgrow="ALWAYS">
 		<VBox spacing="5" HBox.hgrow="ALWAYS">
-			<CheckBox fx:id="replayed" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"/>
+			<Label fx:id="replayed" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"/>
 			<ListView fx:id="replayedList" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 		</VBox>
 		<VBox fx:id="persistentBox" spacing="5" HBox.hgrow="ALWAYS">
-			<CheckBox fx:id="persistent" HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.persistent"/>
+			<Label HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.persistent"/>
 			<ListView fx:id="persistentList" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 		</VBox>
 		<VBox spacing="5" HBox.hgrow="ALWAYS">
-			<CheckBox fx:id="current" HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.current"/>
+			<Label HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.current"/>
 			<ListView fx:id="currentList" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 		</VBox>
 	</HBox>
