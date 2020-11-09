@@ -80,8 +80,6 @@ public class VisBStage extends Stage {
     @FXML
     private Button resetDefaultVisualisationButton;
     @FXML
-    private Label lbCurrentVisualisation;
-    @FXML
     private Label lbDefaultVisualisation;
     @FXML
     private Button openTraceSelectionButton;
@@ -155,7 +153,7 @@ public class VisBStage extends Stage {
         // zoom fonts in/out (but only of those that are not given a fixed size):
         this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
         this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
-        this.lbCurrentVisualisation.textProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? "" : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBPath.get()).toString()), visBPath));
+        this.titleProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBPath.get()).toString()), visBPath));
         this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
             visBPath.set(null);
             injector.getInstance(VisBController.class).closeCurrentVisualisation();
