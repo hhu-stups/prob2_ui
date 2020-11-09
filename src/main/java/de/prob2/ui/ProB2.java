@@ -158,6 +158,14 @@ public class ProB2 extends Application {
 	public void start(Stage primaryStage) {
 		ProB2Module module = new ProB2Module(this, runtimeOptions);
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+
+		new Thread(() -> {
+			final Scene mainScene = this.startInBackground(primaryStage);
+			Platform.runLater(() -> this.postStart(primaryStage, mainScene));
+		}, "Main UI Loader").start();
+	}
+
+	private Scene startInBackground(final Stage primaryStage) {
 		bundle = injector.getInstance(ResourceBundle.class);
 		this.stopActions = injector.getInstance(StopActions.class);
 		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
@@ -175,13 +183,15 @@ public class ProB2 extends Application {
 
 		final String javaVersion = System.getProperty("java.version");
 		if (!isJavaVersionOk(javaVersion)) {
-			stageManager.makeAlert(
-				Alert.AlertType.ERROR,
-				"internal.javaVersionTooOld.header",
-				"internal.javaVersionTooOld.content",
-				javaVersion
-			).showAndWait();
-			throw die("Java version too old: " + javaVersion, 1);
+			Platform.runLater(() -> {
+				stageManager.makeAlert(
+					Alert.AlertType.ERROR,
+					"internal.javaVersionTooOld.header",
+					"internal.javaVersionTooOld.content",
+					javaVersion
+				).showAndWait();
+				throw die("Java version too old: " + javaVersion, 1);
+			});
 		}
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
@@ -189,15 +199,20 @@ public class ProB2 extends Application {
 		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
 		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 		currentTrace.addListener((observable, from, to) -> this.updateTitle(primaryStage));
-		this.updateTitle(primaryStage);
+		Platform.runLater(() -> this.updateTitle(primaryStage));
 
 		Parent root = injector.getInstance(MainController.class);
-		Scene mainScene = new Scene(root);
+		return new Scene(root);
+	}
+
+	private void postStart(final Stage primaryStage, final Scene mainScene) {
 		primaryStage.setScene(mainScene);
 		primaryStage.sizeToScene();
 		primaryStage.setMinWidth(1100);
 		primaryStage.setMinHeight(480);
 
+		final StageManager stageManager = injector.getInstance(StageManager.class);
+		final CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));

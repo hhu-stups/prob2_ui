@@ -10,6 +10,8 @@ import com.google.inject.Singleton;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -73,8 +75,10 @@ public final class MenuController extends MenuBar {
 
 	public void setMacMenu() {
 		if (this.menuToolkit != null) {
-			this.menuToolkit.setApplicationMenu(this.getMenus().get(0));
-			this.stageManager.setGlobalMacMenuBar(this);
+			Platform.runLater(() -> {
+				this.menuToolkit.setApplicationMenu(this.getMenus().get(0));
+				this.stageManager.setGlobalMacMenuBar(this);
+			});
 		}
 	}
 }
