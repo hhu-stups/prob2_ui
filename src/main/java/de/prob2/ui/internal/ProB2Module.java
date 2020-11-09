@@ -1,5 +1,11 @@
 package de.prob2.ui.internal;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
@@ -9,7 +15,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.util.Providers;
+
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
@@ -25,24 +31,19 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.visb.VisBDebugStage;
 import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
 import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.BoundingBox;
 import javafx.util.BuilderFactory;
-import org.hildan.fxgson.FxGson;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import org.hildan.fxgson.FxGson;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -63,15 +64,7 @@ public class ProB2Module extends AbstractModule {
 		install(new MainModule());
 		install(new DataPathsModule());
 
-		// General stuff
-		final Locale locale = Locale.getDefault();
-		bind(Locale.class).toInstance(locale);
-		final ResourceBundle bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale);
-		bind(ResourceBundle.class).toInstance(bundle);
-		final MenuToolkit toolkit = IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true"))
-				? MenuToolkit.toolkit(locale)
-				: null;
-		bind(MenuToolkit.class).toProvider(Providers.of(toolkit));
+		bind(Locale.class).toProvider(Locale::getDefault);
 		bind(Application.class).toInstance(this.application);
 		bind(ProB2.class).toInstance(this.application);
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
@@ -79,6 +72,22 @@ public class ProB2Module extends AbstractModule {
 		bind(MagicGraphI.class).to(MagicGraphFX.class);
 
 		bind(PrologOutput.class);
+	}
+
+	@Provides
+	@Singleton
+	private static ResourceBundle provideResourceBundle(final Locale locale) {
+		return ResourceBundle.getBundle("de.prob2.ui.prob2", locale);
+	}
+
+	@Provides
+	@Singleton
+	private static MenuToolkit provideMenuToolkit(final Locale locale) {
+		if (IS_MAC && "true".equals(System.getProperty("de.prob2.ui.useMacMenuBar", "true"))) {
+			return MenuToolkit.toolkit(locale);
+		} else {
+			return null;
+		}
 	}
 
 	@Provides
