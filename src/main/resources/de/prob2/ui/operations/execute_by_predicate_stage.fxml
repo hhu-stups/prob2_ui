@@ -10,7 +10,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 
-<fx:root type="Stage" minWidth="600" minHeight="800" width="800" height="1080" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
+<fx:root type="Stage" minWidth="600" minHeight="400" maxHeight="400" width="800" height="400" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
 	<scene>
 		<Scene>
 			<StackPane>
@@ -20,7 +20,7 @@
 					</padding>
 					<Label fx:id="operationLabel"/>
 					<Label fx:id="paramsLabel" text="%operations.executeByPredicate.parameters"/>
-					<PredicateBuilderView fx:id="predicateBuilderView" VBox.vgrow="always"/>
+					<PredicateBuilderView fx:id="predicateBuilderView"/>
 					<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute"/>
 					<HBox alignment="TOP_CENTER" fx:id="executeFailedBox" visible="false" spacing="5.0">
 						<Label fx:id="warningLabel" styleClass="warning" text="%operations.executeByPredicate.alerts.failedToExecuteOperation.content"/>
