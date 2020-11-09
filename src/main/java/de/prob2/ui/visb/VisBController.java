@@ -9,6 +9,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -154,7 +155,9 @@ public class VisBController {
 	 * This method throws an ProB2-UI ExceptionAlert
 	 */
 	private void alert(Throwable ex, String header, String message, Object... params){
-		this.stageManager.makeExceptionAlert(ex, header, message, params).showAndWait();
+		Alert exceptionAlert = this.stageManager.makeExceptionAlert(ex, header, message, params);
+		exceptionAlert.initOwner(injector.getInstance(VisBStage.class));
+		exceptionAlert.showAndWait();
 	}
 
 	private static int countLines(String str) {
@@ -286,16 +289,18 @@ public class VisBController {
 		} catch (IOException e) {
 			alert(e,"visb.exception.io", "visb.infobox.visualisation.error");
 			updateInfo("visb.infobox.visualisation.error");
+			closeCurrentVisualisation();
 			return;
 		} catch(Exception e){
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
+			closeCurrentVisualisation();
 			return;
 		}
 	}
 
 	public void setupVisualisation(){
-		if(visBVisualisation == null){
+		if(visBVisualisation == null || visBVisualisation.getVisBItems() == null || visBVisualisation.getVisBEvents() == null){
 			updateInfo("visb.infobox.visualisation.error");
 			alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			return;
