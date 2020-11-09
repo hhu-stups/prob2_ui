@@ -26,6 +26,8 @@ import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -50,7 +52,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 
@@ -74,13 +78,7 @@ public class VisBStage extends Stage {
     @FXML
     private Button loadVisualisationButton;
     @FXML
-    private Button loadDefaultVisualisationButton;
-    @FXML
-    private Button setDefaultVisualisationButton;
-    @FXML
-    private Button resetDefaultVisualisationButton;
-    @FXML
-    private Label lbDefaultVisualisation;
+    private Button manageDefaultVisualisationButton;
     @FXML
     private Button openTraceSelectionButton;
     @FXML
@@ -140,9 +138,6 @@ public class VisBStage extends Stage {
         this.stageManager.setMacMenuBar(this, visbMenuBar);
         this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
         this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
-        this.loadDefaultVisualisationButton.setOnAction(e -> loadDefaultVisualisation());
-        this.setDefaultVisualisationButton.setOnAction(e -> setDefaultVisualisation());
-        this.resetDefaultVisualisationButton.setOnAction(e -> resetDefaultVisualisation());
         this.fileMenu_visB.setOnAction(e -> loadVisBFile());
         this.fileMenu_close.setOnAction(e -> sendCloseRequest());
         this.fileMenu_export.setOnAction(e -> exportImage());
@@ -163,9 +158,6 @@ public class VisBStage extends Stage {
         updateUIOnMachine(currentProject.getCurrentMachine());
         loadVisBFileFromMachine(currentProject.getCurrentMachine());
         this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-            this.loadDefaultVisualisationButton.visibleProperty().unbind();
-            this.resetDefaultVisualisationButton.visibleProperty().unbind();
-            this.lbDefaultVisualisation.textProperty().unbind();
             openTraceSelectionButton.disableProperty().unbind();
             updateUIOnMachine(to);
             loadVisBFileFromMachine(to);
@@ -174,19 +166,11 @@ public class VisBStage extends Stage {
 
     private void updateUIOnMachine(Machine machine) {
         final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
+        manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
         if(machine != null) {
             openTraceSelectionButton.disableProperty().bind(machine.tracesProperty().emptyProperty());
-            this.loadDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
-            this.setDefaultVisualisationButton.visibleProperty().bind(visBPath.isNotNull()
-                    .and(Bindings.createBooleanBinding(() -> visBPath.isNotNull().get() && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation()), visBPath, machine.visBVisualizationProperty())));
-            this.resetDefaultVisualisationButton.visibleProperty().bind(machine.visBVisualizationProperty().isNotNull());
-            this.lbDefaultVisualisation.textProperty().bind(Bindings.createStringBinding(() -> machine.visBVisualizationProperty().isNull().get() ? "" : String.format(bundle.getString("visb.defaultVisualisation"), machine.visBVisualizationProperty().get()), machine.visBVisualizationProperty()));
         } else {
             openTraceSelectionButton.disableProperty().bind(openTraceDefaultDisableProperty);
-            this.loadDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
-            this.setDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
-            this.resetDefaultVisualisationButton.visibleProperty().bind(currentProject.currentMachineProperty().isNotNull());
-            this.lbDefaultVisualisation.setText("");
         }
     }
 
@@ -453,6 +437,54 @@ public class VisBStage extends Stage {
     	injector.getInstance(VisBDebugStage.class).show();
 	}
 
+	@FXML
+    public void manageDefaultVisualisation() {
+        Machine machine = currentProject.getCurrentMachine();
+        List<ButtonType> buttons = new ArrayList<>();
+
+        ButtonType loadButton = new ButtonType(bundle.getString("visb.defaultVisualisation.load"));
+        ButtonType setButton = new ButtonType(bundle.getString("visb.defaultVisualisation.set"));
+        ButtonType resetButton = new ButtonType(bundle.getString("visb.defaultVisualisation.reset"));
+
+        if(machine.visBVisualizationProperty().isNotNull().get()) {
+            buttons.add(loadButton);
+        }
+
+
+        if(machine.visBVisualizationProperty().isNull().get()) {
+            if(visBPath != null && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation())) {
+                buttons.add(setButton);
+            }
+        } else {
+            buttons.add(resetButton);
+        }
+
+        ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        buttons.add(buttonTypeCancel);
+
+        Alert alert;
+
+        if(machine.visBVisualizationProperty().isNotNull().get()) {
+            alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "visb.defaultVisualisation.header", "visb.defaultVisualisation.text", machine.visBVisualizationProperty().get());
+        } else {
+            alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "visb.defaultVisualisation.header", "visb.noDefaultVisualisation.text");
+        }
+
+        alert.initOwner(this);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.isPresent()) {
+            if (result.get() == loadButton) {
+                loadDefaultVisualisation();
+            } else if (result.get() == setButton) {
+                setDefaultVisualisation();
+            } else if (result.get() == resetButton) {
+                resetDefaultVisualisation();
+            } else {
+               alert.close();
+            }
+        }
+    }
 }
 
 

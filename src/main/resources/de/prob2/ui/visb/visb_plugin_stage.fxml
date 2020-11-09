@@ -54,36 +54,6 @@
 				</top>
 				<center>
 					<VBox BorderPane.alignment="CENTER">
-						<HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-							<Label fx:id="lbDefaultVisualisation" styleClass="visb-location"/>
-							<Spacer/>
-							<HBox alignment="CENTER_RIGHT">
-								<Button fx:id="loadDefaultVisualisationButton">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}" />
-									</graphic>
-									<tooltip>
-										<Tooltip text="%visb.stage.loadDefault" />
-									</tooltip>
-								</Button>
-								<Button fx:id="setDefaultVisualisationButton">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-									</graphic>
-									<tooltip>
-										<Tooltip text="%visb.stage.setDefault" />
-									</tooltip>
-								</Button>
-								<Button fx:id="resetDefaultVisualisationButton">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES" bindableFontSize="${fontSize.fontSize + 2}" />
-									</graphic>
-									<tooltip>
-										<Tooltip text="%visb.stage.resetDefault" />
-									</tooltip>
-								</Button>
-							</HBox>
-						</HBox>
 						<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
 							<padding>
 								<Insets left="5.0"/>
@@ -131,6 +101,14 @@
 							<Button fx:id="showVisBItemsAndEventsButton" onAction="#showVisBItemsAndEvents">
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="INFO" bindableFontSize="${fontSize.fontSize + 2}" />
+								</graphic>
+								<tooltip>
+									<Tooltip text="%visb.buttons.showItemsAndEvents" />
+								</tooltip>
+							</Button>
+							<Button fx:id="manageDefaultVisualisationButton" onAction="#manageDefaultVisualisation">
+								<graphic>
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG" bindableFontSize="${fontSize.fontSize + 2}" />
 								</graphic>
 								<tooltip>
 									<Tooltip text="%visb.buttons.showItemsAndEvents" />
