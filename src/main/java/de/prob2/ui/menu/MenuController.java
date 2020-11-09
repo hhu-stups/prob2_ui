@@ -53,19 +53,18 @@ public final class MenuController extends MenuBar {
 			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
 
 			// Create Mac-style application menu
-			final Menu applicationMenu = menuToolkit.createDefaultApplicationMenu(bundle.getString("common.prob2"));
-			this.getMenus().add(0, applicationMenu);
-
 			MenuItem quit = menuToolkit.createQuitMenuItem(bundle.getString("common.prob2"));
 			quit.setOnAction(event -> {
 				for (Stage stage : stageManager.getRegistered()) {
 					stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 				}
 			});
-			applicationMenu.getItems().setAll(aboutItem, new SeparatorMenuItem(), preferencesItem,
+			final Menu applicationMenu = new Menu(bundle.getString("common.prob2"), null,
+					aboutItem, new SeparatorMenuItem(), preferencesItem,
 					new SeparatorMenuItem(), menuToolkit.createHideMenuItem(bundle.getString("common.prob2")),
 					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
 					new SeparatorMenuItem(), quit);
+			this.getMenus().add(0, applicationMenu);
 
 			// Make this the global menu bar
 			this.setMacMenu();
