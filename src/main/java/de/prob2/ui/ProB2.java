@@ -19,6 +19,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
+import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob.statespace.Trace;
@@ -157,7 +158,10 @@ public class ProB2 extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		ProB2Module module = new ProB2Module(this, runtimeOptions);
-		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+		injector = Guice.createInjector(module);
+		// Ensure that MenuToolkit is loaded on the JavaFX application thread
+		// (it throws an exception if loaded on any other thread).
+		injector.getInstance(MenuToolkit.class);
 
 		new Thread(() -> {
 			final Scene mainScene = this.startInBackground(primaryStage);
