@@ -51,15 +51,9 @@ repositories {
 // See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
 mainClassName = "de.prob2.ui.Main"
 
-final preloaderClassName = "de.prob2.ui.ProB2Preloader"
 applicationDefaultJvmArgs += [
 	"-Xss2M",
 ]
-
-def systemProperties = [
-	"javafx.preloader": preloaderClassName,
-]
-applicationDefaultJvmArgs += systemProperties.collect {k, v -> "-D${k}=${v}".toString()}
 
 // Module export/open declarations for Java 9+
 def exports = []
@@ -215,7 +209,6 @@ processResources {
 jar {
 	manifest {
 		attributes([
-			"JavaFX-Preloader-Class": preloaderClassName,
 			"Add-Exports": exports.join(" "),
 			"Add-Opens": opens.join(" "),
 		])
