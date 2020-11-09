@@ -433,11 +433,11 @@ public class VisBStage extends Stage {
     }
 
     @FXML
-	public void showVisBItemsAndEvents() {
-    	injector.getInstance(VisBDebugStage.class).show();
-	}
+    public void showVisBItemsAndEvents() {
+        injector.getInstance(VisBDebugStage.class).show();
+    }
 
-	@FXML
+    @FXML
     public void manageDefaultVisualisation() {
         Machine machine = currentProject.getCurrentMachine();
         List<ButtonType> buttons = new ArrayList<>();
