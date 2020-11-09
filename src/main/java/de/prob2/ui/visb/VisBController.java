@@ -112,6 +112,7 @@ public class VisBController {
 			} catch(VisBParseException | VisBNestedException | IllegalArgumentException | BCompoundException | ProBError e){
 				alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 				this.clearListeners();
+				closeCurrentVisualisation();
 				return;
 			}
 			if(svgChanges == null || svgChanges.isEmpty()){
