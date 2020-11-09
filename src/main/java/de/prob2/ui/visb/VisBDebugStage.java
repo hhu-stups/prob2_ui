@@ -2,6 +2,7 @@ package de.prob2.ui.visb;
 
 
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.ui.ListViewEvent;
 import de.prob2.ui.visb.ui.ListViewItem;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
@@ -19,24 +20,31 @@ import javax.inject.Singleton;
 
 @Singleton
 public class VisBDebugStage extends Stage {
-    private StageManager stageManager;
+
+    private final StageManager stageManager;
+
+    private final CurrentTrace currentTrace;
 
     @FXML
     private ListView<VisBItem> visBItems;
     @FXML
     private ListView<VisBEvent> visBEvents;
 
-
     @Inject
-    public VisBDebugStage(final StageManager stageManager) {
+    public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace) {
         super();
         this.stageManager = stageManager;
+        this.currentTrace = currentTrace;
         this.stageManager.loadFXML(this, "visb_debug_stage.fxml");
     }
 
     @FXML
     public void initialize() {
-        this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager));
+        this.currentTrace.addListener((observable, from, to) -> {
+            visBItems.refresh();
+            visBEvents.refresh();
+        });
+        this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, currentTrace));
         this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
     }
 

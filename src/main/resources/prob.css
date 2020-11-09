@@ -1050,7 +1050,7 @@
 .machines-item .name {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
-	-fx-font-size: 1.1em; 
+	-fx-font-size: 1.1em;
 }
 .machines-item .location {
 	-fx-font-family: ARIAL;
@@ -1063,6 +1063,27 @@
 .machines-item .status-icon.running {
 	-fx-text-fill: limegreen;
 }
+
+.visb-item {
+	-fx-cell-size: 2.8em;
+}
+.visb-item .name {
+	-fx-font-family: ARIAL;
+	-fx-font-weight: bold;
+	-fx-font-size: 1.1em;
+}
+.visb-item .information {
+	-fx-font-family: ARIAL;
+	-fx-font-style: italic;
+	-fx-font-size: 0.9em;
+}
+.visb-item .value {
+	-fx-font-family: ARIAL;
+	-fx-font-style: italic;
+	-fx-font-size: 0.9em;
+	-fx-background-color: #D0D0D0;
+}
+
 .project-location {
 	-fx-font-family: ARIAL;
 	-fx-font-style: italic;

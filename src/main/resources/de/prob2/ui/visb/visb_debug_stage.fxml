@@ -21,7 +21,7 @@
 						<Accordion prefHeight="300" prefWidth="700" VBox.vgrow="ALWAYS">
 							<panes>
 								<TitledPane animated="false" text="%visb.items">
-									<ListView fx:id="visBItems" fixedCellSize="50" styleClass="list-view" />
+									<ListView fx:id="visBItems" fixedCellSize="70" styleClass="list-view" />
 								</TitledPane>
 								<TitledPane animated="false" text="%visb.events">
 									<ListView fx:id="visBEvents" fixedCellSize="50" styleClass="list-view" />
