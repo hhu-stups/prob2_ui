@@ -417,12 +417,14 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	public int getInputStart() {
 		int length = instructionLengthInLine > 1 ? EMPTY_PROMPT.length() : this.getPrompt().length();
-		return this.getLineStart() + length;
+		String line = this.getLine();
+		return this.getLineStart() + Math.min(line.length(), length);
 	}
 	
 	public String getInput() {
 		int length = instructionLengthInLine > 1 ? EMPTY_PROMPT.length() : this.getPrompt().length();
-		return this.getLine().substring(length);
+		String line = this.getLine();
+		return line.length() <= length ? "" : this.getLine().substring(length);
 	}
 	
 	public List<String> saveInstructions() {
