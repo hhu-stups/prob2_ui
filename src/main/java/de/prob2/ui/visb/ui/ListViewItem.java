@@ -9,6 +9,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
+import java.util.ResourceBundle;
+
 public class ListViewItem extends ListCell<VisBItem> {
 	@FXML
 	private VBox item_box;
@@ -25,10 +27,13 @@ public class ListViewItem extends ListCell<VisBItem> {
 
 	private final CurrentTrace currentTrace;
 
-	public ListViewItem(final StageManager stageManager, final CurrentTrace currentTrace){
+	private final ResourceBundle bundle;
+
+	public ListViewItem(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle){
 		stageManager.loadFXML(this,"list_view_item.fxml");
 		this.visBItem = null;
 		this.currentTrace = currentTrace;
+		this.bundle = bundle;
 	}
 
 	@FXML
@@ -43,11 +48,11 @@ public class ListViewItem extends ListCell<VisBItem> {
 		if(visBItem != null){
 			this.visBItem = visBItem;
 			this.item_id.setText(visBItem.getId());
-			this.label_value.setText(visBItem.getValue());
-			this.label_attr.setText(visBItem.getAttribute());
+			this.label_value.setText(String.format(bundle.getString("visb.item.expression"), visBItem.getValue()));
+			this.label_attr.setText(String.format(bundle.getString("visb.item.attribute"), visBItem.getAttribute()));
 			if(visBItem.parsedFormula != null) {
 				AbstractEvalResult result = currentTrace.getCurrentState().eval(visBItem.parsedFormula);
-				this.label_evalValue.setText(result.toString());
+				this.label_evalValue.setText(String.format(bundle.getString("visb.item.value"), result.toString()));
 			} else {
 				this.label_evalValue.setText("");
 			}

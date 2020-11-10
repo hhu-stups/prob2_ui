@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
+import java.util.ResourceBundle;
 
 
 @Singleton
@@ -25,27 +25,30 @@ public class VisBDebugStage extends Stage {
 
     private final CurrentTrace currentTrace;
 
+    private final ResourceBundle bundle;
+
     @FXML
     private ListView<VisBItem> visBItems;
     @FXML
     private ListView<VisBEvent> visBEvents;
 
     @Inject
-    public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace) {
+    public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
         super();
         this.stageManager = stageManager;
         this.currentTrace = currentTrace;
+        this.bundle = bundle;
         this.stageManager.loadFXML(this, "visb_debug_stage.fxml");
     }
 
     @FXML
     public void initialize() {
+		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, currentTrace, bundle));
+		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
         this.currentTrace.addListener((observable, from, to) -> {
             visBItems.refresh();
             visBEvents.refresh();
         });
-        this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, currentTrace));
-        this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
     }
 
     /**

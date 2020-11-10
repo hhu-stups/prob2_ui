@@ -2,13 +2,12 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListCell?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="ListCell" stylesheets="@/prob.css" styleClass="visb-item" xmlns:fx="http://javafx.com/fxml/1">
     <VBox fx:id="item_box">
         <Label fx:id="item_id" styleClass="name"/>
         <Label fx:id="label_attr" styleClass="information" />
         <Label fx:id="label_value" styleClass="information" />
-        <Label fx:id="label_evalValue" styleClass="value" />
+        <Label fx:id="label_evalValue" styleClass="information" />
     </VBox>
 </fx:root>
