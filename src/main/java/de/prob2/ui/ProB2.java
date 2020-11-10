@@ -19,6 +19,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
+import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob.statespace.Trace;
@@ -41,13 +42,14 @@ import de.prob2.ui.project.preferences.Preference;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.application.Preloader;
 import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import org.apache.commons.cli.CommandLine;
@@ -156,8 +158,28 @@ public class ProB2 extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		final ImageView loadingImageView = new ImageView(ProB2.class.getResource("ProB_Logo.png").toExternalForm());
+		loadingImageView.setPreserveRatio(true);
+		loadingImageView.setFitHeight(100.0);
+		final Scene loadingScene = new Scene(new BorderPane(loadingImageView));
+		primaryStage.setScene(loadingScene);
+		primaryStage.setTitle("Loading ProB 2.0...");
+		primaryStage.show();
+
+		new Thread(() -> {
+			final Scene mainScene = this.startInBackground(primaryStage);
+			Platform.runLater(() -> this.postStart(primaryStage, mainScene));
+		}, "Main UI Loader").start();
+	}
+
+	private Scene startInBackground(final Stage primaryStage) {
 		ProB2Module module = new ProB2Module(this, runtimeOptions);
-		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
+		injector = Guice.createInjector(module);
+
+		// Ensure that MenuToolkit is loaded on the JavaFX application thread
+		// (it throws an exception if loaded on any other thread).
+		Platform.runLater(() -> injector.getInstance(MenuToolkit.class));
+
 		bundle = injector.getInstance(ResourceBundle.class);
 		this.stopActions = injector.getInstance(StopActions.class);
 		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
@@ -175,13 +197,15 @@ public class ProB2 extends Application {
 
 		final String javaVersion = System.getProperty("java.version");
 		if (!isJavaVersionOk(javaVersion)) {
-			stageManager.makeAlert(
-				Alert.AlertType.ERROR,
-				"internal.javaVersionTooOld.header",
-				"internal.javaVersionTooOld.content",
-				javaVersion
-			).showAndWait();
-			throw die("Java version too old: " + javaVersion, 1);
+			Platform.runLater(() -> {
+				stageManager.makeAlert(
+					Alert.AlertType.ERROR,
+					"internal.javaVersionTooOld.header",
+					"internal.javaVersionTooOld.content",
+					javaVersion
+				).showAndWait();
+				throw die("Java version too old: " + javaVersion, 1);
+			});
 		}
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
@@ -189,20 +213,24 @@ public class ProB2 extends Application {
 		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
 		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 		currentTrace.addListener((observable, from, to) -> this.updateTitle(primaryStage));
-		this.updateTitle(primaryStage);
 
 		Parent root = injector.getInstance(MainController.class);
-		Scene mainScene = new Scene(root);
+		return new Scene(root);
+	}
+
+	private void postStart(final Stage primaryStage, final Scene mainScene) {
+		primaryStage.hide();
 		primaryStage.setScene(mainScene);
 		primaryStage.sizeToScene();
 		primaryStage.setMinWidth(1100);
 		primaryStage.setMinHeight(480);
+		this.updateTitle(primaryStage);
 
+		final StageManager stageManager = injector.getInstance(StageManager.class);
+		final CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		stageManager.registerMainStage(primaryStage, this.getClass().getName());
 
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
-
-		this.notifyPreloader(new Preloader.ProgressNotification(100));
 		primaryStage.show();
 
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
