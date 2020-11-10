@@ -138,6 +138,10 @@ public class BInterpreter implements Executable {
 			logger.info("B evaluation failed", e);
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}
-		return new ConsoleExecResult("", this.formatResult(res), ConsoleExecResultType.PASSED);
+		if(res instanceof EvaluationErrorResult || res instanceof ComputationNotCompletedResult) {
+			return new ConsoleExecResult("", this.formatResult(res), ConsoleExecResultType.ERROR);
+		} else {
+			return new ConsoleExecResult("", this.formatResult(res), ConsoleExecResultType.PASSED);
+		}
 	}
 }
