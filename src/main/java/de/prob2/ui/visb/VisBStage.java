@@ -159,6 +159,7 @@ public class VisBStage extends Stage {
         loadVisBFileFromMachine(currentProject.getCurrentMachine());
         this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
             openTraceSelectionButton.disableProperty().unbind();
+            manageDefaultVisualisationButton.disableProperty().unbind();
             updateUIOnMachine(to);
             loadVisBFileFromMachine(to);
         });
@@ -166,7 +167,7 @@ public class VisBStage extends Stage {
 
     private void updateUIOnMachine(Machine machine) {
         final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
-        manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+        manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBPath.isNull()));
         if(machine != null) {
             openTraceSelectionButton.disableProperty().bind(machine.tracesProperty().emptyProperty());
         } else {
@@ -446,27 +447,22 @@ public class VisBStage extends Stage {
         ButtonType setButton = new ButtonType(bundle.getString("visb.defaultVisualisation.set"));
         ButtonType resetButton = new ButtonType(bundle.getString("visb.defaultVisualisation.reset"));
 
+        Alert alert;
         if(machine.visBVisualizationProperty().isNotNull().get()) {
             buttons.add(loadButton);
-        }
-
-
-        if(machine.visBVisualizationProperty().isNull().get()) {
             if(visBPath != null && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation())) {
                 buttons.add(setButton);
             }
-        } else {
             buttons.add(resetButton);
-        }
-
-        ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        buttons.add(buttonTypeCancel);
-
-        Alert alert;
-
-        if(machine.visBVisualizationProperty().isNotNull().get()) {
+            ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+            buttons.add(buttonTypeCancel);
             alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "visb.defaultVisualisation.header", "visb.defaultVisualisation.text", machine.visBVisualizationProperty().get());
         } else {
+            if(visBPath != null) {
+                buttons.add(setButton);
+            }
+            ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+            buttons.add(buttonTypeCancel);
             alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "visb.defaultVisualisation.header", "visb.noDefaultVisualisation.text");
         }
 
