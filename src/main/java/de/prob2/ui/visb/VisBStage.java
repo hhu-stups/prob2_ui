@@ -274,7 +274,7 @@ public class VisBStage extends Stage {
      * This method runs the jQuery script in the WebView.
      * @param jQuery script to be run
      */
-    void runScript(String jQuery) {
+    public void runScript(String jQuery) {
         if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
            // execute JQuery script once page fully loaded
            // https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded

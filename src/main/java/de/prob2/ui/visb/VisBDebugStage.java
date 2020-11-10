@@ -1,13 +1,16 @@
 package de.prob2.ui.visb;
 
 
+import com.google.inject.Injector;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.ui.ListViewEvent;
 import de.prob2.ui.visb.ui.ListViewItem;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
 import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
@@ -17,6 +20,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ResourceBundle;
 
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
+
 
 @Singleton
 public class VisBDebugStage extends Stage {
@@ -25,7 +31,11 @@ public class VisBDebugStage extends Stage {
 
     private final CurrentTrace currentTrace;
 
+    private final CurrentProject currentProject;
+
     private final ResourceBundle bundle;
+
+    private final Injector injector;
 
     @FXML
     private ListView<VisBItem> visBItems;
@@ -33,22 +43,41 @@ public class VisBDebugStage extends Stage {
     private ListView<VisBEvent> visBEvents;
 
     @Inject
-    public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+    public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector) {
         super();
         this.stageManager = stageManager;
         this.currentTrace = currentTrace;
+        this.currentProject = currentProject;
         this.bundle = bundle;
+        this.injector = injector;
         this.stageManager.loadFXML(this, "visb_debug_stage.fxml");
     }
 
     @FXML
     public void initialize() {
-		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, currentTrace, bundle));
+		ChangeListener<VisBItem> listener = (observable, from, to) -> {
+			if(from != null) {
+				String fromID = from.getId();
+				String fromInvocation = buildInvocation("changeAttribute", wrapAsString("#" + fromID), wrapAsString("opacity"), wrapAsString("1.0"));
+				injector.getInstance(VisBStage.class).runScript(fromInvocation);
+			}
+			if(to != null) {
+				String toID = to.getId();
+				String toInvocation = buildInvocation("changeAttribute", wrapAsString("#" + toID), wrapAsString("opacity"), wrapAsString("0.5"));
+				injector.getInstance(VisBStage.class).runScript(toInvocation);
+			}
+		};
+		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, currentTrace, bundle, injector));
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
         this.currentTrace.addListener((observable, from, to) -> {
             visBItems.refresh();
             visBEvents.refresh();
         });
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			visBItems.refresh();
+			visBEvents.refresh();
+		});
+		this.visBItems.getSelectionModel().selectedItemProperty().addListener(listener);
     }
 
     /**
@@ -56,8 +85,9 @@ public class VisBDebugStage extends Stage {
      * @param visBVisualisation is needed to display the items and events in the ListViews
      */
     void initialiseListViews(VisBVisualisation visBVisualisation){
-        this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
-        this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
+    	clear();
+		this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
+		this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
     }
 
     public void clear(){
