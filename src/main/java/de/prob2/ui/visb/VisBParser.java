@@ -197,11 +197,12 @@ public class VisBParser {
 			case "clip-rule":
 				checkValue = "nonezero".equals(value) || "evenodd".equals(value) || "inherit".equals(value);
 				break;
-			case "cx":
+			case "cx": // center of circle
 			case "cy":
 				//Checks the value for regex for length-percentage
-				checkValue = value.matches("^calc\\("+length_per+" [+\\-*/]{1}+ "+length_per+"\\)$") ||
-						value.matches("^"+length_per+"$");
+				checkValue = checkNumber(value) ||
+				             value.matches("^calc\\("+length_per+" [+\\-*/]{1}+ "+length_per+"\\)$") || // TO DO: I don't understand this regex
+						     value.matches("^"+length_per+"$");
 				break;
 			case "d":
 				//TODO: How do I verify that?
@@ -280,6 +281,7 @@ public class VisBParser {
 				checkValue = checkNumber(value);
 				if(!checkValue){
 					checkValue = value.matches("^"+length_per+"$");
+					// auto also allowed ?
 				}
 				break;
 			case "id":
