@@ -9,7 +9,10 @@ import de.prob.check.tracereplay.ITraceChecker;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.TraceReplay;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.check.tracereplay.json.storage.TraceMetaData;
 import de.prob.formula.PredicateBuilder;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -25,6 +28,8 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,12 +45,16 @@ public class TraceChecker implements ITraceChecker {
 	private final StageManager stageManager;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
+	private final CurrentProject currentProject;
 
 	@Inject
-	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager, final DisablePropertyController disablePropertyController) {
+	private TraceChecker(final CurrentTrace currentTrace,  final CurrentProject currentProject,
+						 final Injector injector, final StageManager stageManager,
+						 final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
+		this.currentProject = currentProject;
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
@@ -70,6 +79,34 @@ public class TraceChecker implements ITraceChecker {
 		Map<String, Object> replayInformation = new HashMap<>();
 		replayInformation.put("replayTrace", replayTrace);
 		Thread replayThread = new Thread(() -> {
+			TraceJsonFile traceJsonFile = replayTrace.getTrace();
+			String pathy = ((TraceMetaData) traceJsonFile.getMetaData()).getPath();
+
+			try {
+
+				Path oldPath = currentProject.getLocation().resolve(Paths.get( ((TraceMetaData) traceJsonFile.getMetaData()).getPath()));
+				Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
+
+				TraceModificationChecker traceModificationChecker =
+						new TraceModificationChecker(
+								persistentTrace, traceJsonFile.getMachineOperationInfos(),
+								stateSpace.getLoadedMachine().getOperations(),
+								newPath.toString(),
+								oldPath.toString(),
+								injector, stageManager);
+				System.out.println("------------------------------------------------");
+				System.out.println("Modification");
+				Platform.runLater(() -> {
+					TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, traceModificationChecker);
+
+					dialog.showAndWait();
+					//					alert.show();
+				});
+
+			} catch (IOException | ModelTranslationError e) {
+				e.printStackTrace();
+			}
+
 			Trace trace = TraceReplay.replayTrace(persistentTrace, stateSpace, setCurrentAnimation, replayInformation, this);
 			if (setCurrentAnimation) {
 				// set the current trace if no error has occurred. Otherwise leave the decision to the user
@@ -149,6 +186,8 @@ public class TraceChecker implements ITraceChecker {
 				break;
 		}
 	}
+
+
 
 	private void showTraceReplayCompleteFailed(Trace trace, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
