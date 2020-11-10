@@ -52,7 +52,8 @@ public class TraceFileHandler {
 	private final TraceManager traceManager;
 
 	@Inject
-	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject,
+							StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.traceManager = traceManager;
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
@@ -146,7 +147,7 @@ public class TraceFileHandler {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
 
-				TraceMetaData traceMetaData = new TraceMetaData(1, LocalDateTime.now(), createdBy, versionInfo.getCliVersion().getShortVersionString(), "HALLO");
+				TraceMetaData traceMetaData = new TraceMetaData(1, LocalDateTime.now(), createdBy, versionInfo.getCliVersion().getShortVersionString(), "HALLO", machine.getLocation().toString());
 				TraceJsonFile traceJsonFile = new TraceJsonFile(currentProject.getCurrentMachine().getName(), currentProject.getCurrentMachine().getDescription(), traces.get(i), loadedMachine, traceMetaData);
 				save(traceJsonFile, traceFilePath);
 
@@ -178,8 +179,11 @@ public class TraceFileHandler {
 		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			//TODO replace creator with something useful
-			TraceMetaData traceMetaData = new TraceMetaData(1, LocalDateTime.now(), "USER", versionInfo.getCliVersion().getShortVersionString(), "HALLO");
-			TraceJsonFile traceJsonFile = new TraceJsonFile(currentProject.getCurrentMachine().getName(), currentProject.getCurrentMachine().getDescription(), trace, loadedMachine, traceMetaData);
+			TraceMetaData traceMetaData = new TraceMetaData(1, LocalDateTime.now(), "USER",
+					versionInfo.getCliVersion().getShortVersionString(), "HALLO", machine.getLocation().toString());
+
+			TraceJsonFile traceJsonFile = new TraceJsonFile(currentProject.getCurrentMachine().getName(),
+					currentProject.getCurrentMachine().getDescription(), trace, loadedMachine, traceMetaData);
 			save(traceJsonFile, path);
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
