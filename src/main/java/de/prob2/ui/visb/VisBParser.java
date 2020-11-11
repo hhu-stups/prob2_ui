@@ -170,8 +170,8 @@ public class VisBParser {
 	 */
 	private String getJQueryFromInput(String id, String attr, String value) throws VisBParseException{
 		boolean checkValue = false;
-		String length_per = "(0|([1-9]+\\d*))[%]?(em)?(ex)?(px)?(in)?(cm)?(mm)?(pt)?(pc)?";
-		String number_per = "^(0|([1-9]+\\d*))[%]?$";
+		String length_per = "[-]?(0|([1-9]+\\d*))[%]?(em)?(ex)?(px)?(in)?(cm)?(mm)?(pt)?(pc)?"; // TO DO: allow leading minus
+		String number_per = "^[-]?(0|([1-9]+\\d*))[%]?$";
 		String verified_string = "^[a-zA-Z][a-zA-Z0-9_\\-]*$";
 		switch(attr){
 			case "alignment-baseline":
@@ -218,7 +218,7 @@ public class VisBParser {
 			case "dx":
 			case "dy":
 				//Checking for length - list
-				checkValue = value.matches("^(" + length_per + " )*" + length_per + "$");
+				checkValue = value.matches("^(" + length_per + " )+$");
 				break;
 			case "fill":
 				//Checking for color
@@ -230,7 +230,7 @@ public class VisBParser {
 				}
 				break;
 			case "fill-opacity":
-				if(value.matches("^"+number_per+"$")){
+				if(value.matches(number_per)){
 					checkValue = true;
 				} else{
 					checkValue = checkNumber(value);
@@ -244,11 +244,11 @@ public class VisBParser {
 				checkValue = value.matches(verified_string);
 				break;
 			case "font-size":
-				checkValue = value.matches(length_per) || "smaller".equals(value) || "bigger".equals(value);
+				checkValue = value.matches("^(" + length_per + " )+$") || "smaller".equals(value) || "bigger".equals(value);
 				break;
 			case "font-stretch":
 				//Chech for percentage and values
-				if(value.matches("^"+number_per+"$")){
+				if(value.matches(number_per)){
 					checkValue = true;
 				}
 				String[] valueTypesFS = {"normal", "ultra-condensed", "extra-condensed", "condensed", "semi-condensed", "semi-expanded", "expanded", "extra-expanded", "ultra-expanded"};
