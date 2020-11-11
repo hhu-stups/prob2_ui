@@ -4,8 +4,8 @@ import com.google.inject.Injector;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.VisBStage;
+import de.prob2.ui.visb.visbobjects.VisBItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -71,7 +71,7 @@ public class ListViewItem extends ListCell<VisBItem> {
 			this.item_id.setText(visBItem.getId());
 			this.label_value.setText(String.format(bundle.getString("visb.item.expression"), visBItem.getValue()));
 			this.label_attr.setText(String.format(bundle.getString("visb.item.attribute"), visBItem.getAttribute()));
-			if(visBItem.parsedFormula != null) {
+			if(visBItem.parsedFormula != null && currentTrace.isNotNull().get() && currentTrace.getCurrentState() != null) {
 				AbstractEvalResult result = currentTrace.getCurrentState().eval(visBItem.parsedFormula);
 				this.label_evalValue.setText(String.format(bundle.getString("visb.item.value"), result.toString()));
 			} else {
@@ -92,4 +92,5 @@ public class ListViewItem extends ListCell<VisBItem> {
 		this.setGraphic(this.item_box);
 		this.setText("");
 	}
+
 }

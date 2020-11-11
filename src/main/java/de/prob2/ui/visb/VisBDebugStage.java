@@ -78,6 +78,7 @@ public class VisBDebugStage extends Stage {
 			visBEvents.refresh();
 		});
 		this.visBItems.getSelectionModel().selectedItemProperty().addListener(listener);
+		this.setOnCloseRequest(e -> this.visBItems.getSelectionModel().clearSelection());
     }
 
     /**
