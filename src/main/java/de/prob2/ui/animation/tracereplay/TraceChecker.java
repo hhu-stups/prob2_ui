@@ -10,6 +10,7 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.check.tracereplay.json.storage.TraceMetaData;
 import de.prob.formula.PredicateBuilder;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;

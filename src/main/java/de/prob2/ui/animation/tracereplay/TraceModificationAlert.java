@@ -3,6 +3,7 @@ package de.prob2.ui.animation.tracereplay;
 import com.google.inject.Injector;
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.statespace.OperationInfo;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
@@ -24,6 +25,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private final ResourceBundle resourceBundle;
 	private final StageManager stageManager;
 	private final TraceModificationChecker traceModificationChecker;
+	List<PersistentTransition> selectedTrace;
 
 	@FXML
 	private TextFlow textFlow;
@@ -65,14 +67,21 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 
-		this.setResultConverter(new Callback<ButtonType, List<PersistentTrace>>() {
-			@Override
-			public List<PersistentTrace> call(ButtonType param) {
+		this.setResultConverter(param -> {
 
-				if(param == ButtonType.NO){
-					return null;
+			if(param.getButtonData() == ButtonBar.ButtonData.NO){
+				return Collections.singletonList(traceModificationChecker.traceChecker.getTrace());
+			}else {
+				if(param.getButtonData() == ButtonBar.ButtonData.APPLY){
+					return  Arrays.asList(traceModificationChecker.traceChecker.getTrace(),
+							new PersistentTrace(traceModificationChecker.traceChecker.getTrace().getDescription(), selectedTrace));
+				}else {
+					if(param.getButtonData() == ButtonBar.ButtonData.YES){
+						return Collections.singletonList(new PersistentTrace(traceModificationChecker.traceChecker.getTrace().getDescription(), selectedTrace));
+					}else {
+						return Collections.singletonList(traceModificationChecker.traceChecker.getTrace());
+					}
 				}
-				return null;
 			}
 		});
 	}
@@ -95,6 +104,8 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
 		accordion.prefWidthProperty().bindBidirectional(typeII.prefWidthProperty());
 
+
+		selectedTrace = traceModificationChecker.traceChecker.getTraceModifier().getLastChange();
 	}
 
 
@@ -102,9 +113,31 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		Map<String, Map<String, String>> resultTypeII = traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeII();
 		Map<String, OperationInfo> operationInfoMap = traceModificationChecker.traceChecker.getOldOperationInfos();
+		Map<String, String> globalVars = traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeIIInit();
 
 		VBox result = new VBox();
 
+		{
+			int row = 0;
+			GridPane gridPane = new GridPane();
+
+
+			Label empty = new Label();
+			Label newL = new Label("Current");
+			Label oldL = new Label("Old");
+
+
+			row = registerRow(gridPane, empty, oldL, newL, row);
+
+
+			registerRow(gridPane, new Label("Name"), prepareColumn(new ArrayList<>(globalVars.keySet())),
+					prepareColumn(new ArrayList<>(globalVars.values())), row);
+
+			TitledPane titledPane = new TitledPane("Initialisation", gridPane);
+
+
+			result.getChildren().add(titledPane);
+		}
 
 
 		for(Map.Entry<String, Map<String, String>> entry : resultTypeII.entrySet()){
