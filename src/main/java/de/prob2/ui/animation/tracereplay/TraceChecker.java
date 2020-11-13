@@ -79,33 +79,6 @@ public class TraceChecker implements ITraceChecker {
 		Map<String, Object> replayInformation = new HashMap<>();
 		replayInformation.put("replayTrace", replayTrace);
 		Thread replayThread = new Thread(() -> {
-			TraceJsonFile traceJsonFile = replayTrace.getTrace();
-			String pathy = ((TraceMetaData) traceJsonFile.getMetaData()).getPath();
-
-			try {
-
-				Path oldPath = currentProject.getLocation().resolve(Paths.get( ((TraceMetaData) traceJsonFile.getMetaData()).getPath()));
-				Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
-
-				TraceModificationChecker traceModificationChecker =
-						new TraceModificationChecker(
-								persistentTrace, traceJsonFile.getMachineOperationInfos(),
-								stateSpace.getLoadedMachine().getOperations(),
-								newPath.toString(),
-								oldPath.toString(),
-								injector, stageManager);
-				System.out.println("------------------------------------------------");
-				System.out.println("Modification");
-				Platform.runLater(() -> {
-					TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, traceModificationChecker);
-
-					dialog.showAndWait();
-					//					alert.show();
-				});
-
-			} catch (IOException | ModelTranslationError e) {
-				e.printStackTrace();
-			}
 
 			Trace trace = TraceReplay.replayTrace(persistentTrace, stateSpace, setCurrentAnimation, replayInformation, this);
 			if (setCurrentAnimation) {

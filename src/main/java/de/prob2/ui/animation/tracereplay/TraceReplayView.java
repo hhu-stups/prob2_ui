@@ -1,8 +1,13 @@
 package de.prob2.ui.animation.tracereplay;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.json.TraceManager;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
@@ -34,7 +39,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.ResourceBundle;
 
 @FXMLInjected
@@ -156,15 +163,33 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	@FXML
-	private void loadTraceFromFile() {
+	private void loadTraceFromFile() throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.loadTrace.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
 		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
+
 		if (traceFile != null) {
-			Path relative = currentProject.getLocation().relativize(traceFile);
-			currentProject.getCurrentMachine().addTraceFile(relative);
+		//Check if machine file is valid
+		TraceManager traceManager = new TraceManager(new ObjectMapper());
+		TraceJsonFile traceJsonFile = traceManager.load(traceFile);
+
+		try {
+			TraceModificationChecker traceModificationChecker =
+					new TraceModificationChecker(traceManager, traceFile, currentTrace.getStateSpace(), injector, currentProject, stageManager);
+			List<Path> persistentTraceList = traceModificationChecker.checkTrace();
+
+
+
+			persistentTraceList.forEach(element -> {
+
+				Path relative = currentProject.getLocation().relativize(element);
+				currentProject.getCurrentMachine().addTraceFile(relative);
+			});
+		} catch (ModelTranslationError modelTranslationError) {
+			modelTranslationError.printStackTrace();
+		}
 		}
 	}
 
