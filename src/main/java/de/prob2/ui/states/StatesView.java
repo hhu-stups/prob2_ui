@@ -169,6 +169,7 @@ public final class StatesView extends StackPane {
 
 		row.itemProperty().addListener((observable, from, to) -> {
 			row.getStyleClass().remove("changed");
+			row.setTooltip(null);
 			if (to != null) {
 				if (!to.getCurrentValue().equals(to.getPreviousValue())) {
 					row.getStyleClass().add("changed");
