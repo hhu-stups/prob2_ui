@@ -1,6 +1,5 @@
 package de.prob2.ui.visb.visbobjects;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ public class VisBEvent {
 	 * @param predicates the predicates have to be the predicates, which are used for the event above
 	 */
 	public VisBEvent(String id, Boolean eventIsOptional,
-	                 String event, ArrayList<String> predicates,
+	                 String event, List<String> predicates,
 	                 List<VisBHover> hovers){
 		this.id = id;
 		this.eventIsOptional = eventIsOptional;

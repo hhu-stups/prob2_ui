@@ -62,7 +62,7 @@ public class VisBParser {
 	 * @throws EvaluationException from evaluating formula on trace
 	 * @throws BCompoundException if the B expression is not correct
 	 */
-	public String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
+	public String evaluateFormulas(List<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
 		StringBuilder jQueryForChanges = new StringBuilder();
 		// get a list of parsed formulas:
 		ArrayList<IEvalElement> formulas = new ArrayList<IEvalElement>();

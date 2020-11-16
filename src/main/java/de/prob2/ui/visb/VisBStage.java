@@ -149,14 +149,16 @@ public class VisBStage extends Stage {
         this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
         this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
         this.titleProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBPath.get()).toString()), visBPath));
+
         this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
             visBPath.set(null);
             injector.getInstance(VisBController.class).closeCurrentVisualisation();
         });
         //Load VisB file from machine, when window is opened and set listener on the current machine
-
-        updateUIOnMachine(currentProject.getCurrentMachine());
-        loadVisBFileFromMachine(currentProject.getCurrentMachine());
+        this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> {
+            updateUIOnMachine(currentProject.getCurrentMachine());
+            loadVisBFileFromMachine(currentProject.getCurrentMachine());
+        });
         this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
             openTraceSelectionButton.disableProperty().unbind();
             manageDefaultVisualisationButton.disableProperty().unbind();
@@ -433,6 +435,7 @@ public class VisBStage extends Stage {
 
     @FXML
     public void showVisBItemsAndEvents() {
+        injector.getInstance(VisBDebugStage.class).initOwner(this);
         injector.getInstance(VisBDebugStage.class).show();
     }
 
