@@ -1,7 +1,7 @@
 package de.prob2.ui.visb.visbobjects;
 
 import java.util.ArrayList;
-import de.prob2.ui.visb.visbobjects.VisBHover;
+import java.util.List;
 
 /**
  * The VisBEvent is designed for the JSON / VisB file
@@ -9,9 +9,9 @@ import de.prob2.ui.visb.visbobjects.VisBHover;
 public class VisBEvent {
 	private String id;
 	private String event;
-	private Boolean event_is_optional; // do not complain if the event does not exist
-	private ArrayList<String> predicates;
-	private ArrayList<VisBHover> hovers; // TO DO: maybe provide multiple values and allow value to depend on B state
+	private Boolean eventIsOptional; // do not complain if the event does not exist
+	private List<String> predicates;
+	private List<VisBHover> hovers; // TO DO: maybe provide multiple values and allow value to depend on B state
 
 
 	/**
@@ -20,11 +20,11 @@ public class VisBEvent {
 	 * @param event the event has to be an executable operation of the corresponding B machine
 	 * @param predicates the predicates have to be the predicates, which are used for the event above
 	 */
-	public VisBEvent(String id, Boolean event_is_optional,
+	public VisBEvent(String id, Boolean eventIsOptional,
 	                 String event, ArrayList<String> predicates,
-	                 ArrayList<VisBHover> hovers){
+	                 List<VisBHover> hovers){
 		this.id = id;
-		this.event_is_optional = event_is_optional;
+		this.eventIsOptional = eventIsOptional;
 		this.event = event;
 		this.predicates = predicates;
 		this.hovers = hovers;
@@ -35,10 +35,10 @@ public class VisBEvent {
 	}
 
 	public Boolean eventIsOptional() {
-		return event_is_optional;
+		return eventIsOptional;
 	}
 
-	public ArrayList<String> getPredicates() {
+	public List<String> getPredicates() {
 		return predicates;
 	}
 
@@ -46,7 +46,7 @@ public class VisBEvent {
 		return id;
 	}
 	
-	public ArrayList<VisBHover> getHovers() {
+	public List<VisBHover> getHovers() {
 		return hovers;
 	}
 
