@@ -56,13 +56,12 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		this.traceModificationChecker = traceModificationChecker;
 		stageManager.loadFXML(this, "prototypeAlertView.fxml");
 
-		ButtonType buttonTypeI = new ButtonType("Only use Current", ButtonBar.ButtonData.NO);
-		ButtonType buttonTypeB = new ButtonType("Use Both", ButtonBar.ButtonData.APPLY);
-		ButtonType buttonTypeN = new ButtonType("Only use New", ButtonBar.ButtonData.YES);
+		ButtonType buttonTypeI = new ButtonType(resourceBundle.getString("traceModification.alert.button.current"), ButtonBar.ButtonData.NO);
+		ButtonType buttonTypeB = new ButtonType(resourceBundle.getString("traceModification.alert.button.both"), ButtonBar.ButtonData.APPLY);
+		ButtonType buttonTypeN = new ButtonType(resourceBundle.getString("traceModification.alert.button.new"), ButtonBar.ButtonData.YES);
 
-		this.setTitle("Trace Loading Conflict");
-		this.setHeaderText("While loading the trace a mismatch between the contained transitions and the existing operations were identified.\n" +
-				"The Mismatches are listed below. If you press 'X' only the currently loaded trace file will be used.");
+		this.setTitle(resourceBundle.getString("traceModification.alert.header.title"));
+		this.setHeaderText(resourceBundle.getString("traceModification.alert.header.text"));
 		this.getDialogPane().getButtonTypes().addAll(buttonTypeI, buttonTypeB, buttonTypeN);
 
 
@@ -91,16 +90,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private void initialize(){
 		stageManager.register(this);
 
-		ScrollPane scrollPane = new ScrollPane();
-		GridPane gridPane = new GridPane();
-		//scrollPane.prefViewportHeightProperty().bindBidirectional();
-
-
-
-
-
 		VBox accordion = setTypeIIConflicts();
 		typeII.setContent(accordion);
+		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + accordion.getChildren().size()+ ")");
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
 		accordion.prefWidthProperty().bindBidirectional(typeII.prefWidthProperty());
 
@@ -123,17 +115,17 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 			Label empty = new Label();
-			Label newL = new Label("Current");
-			Label oldL = new Label("Old");
+			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
+			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
 
 
 			row = registerRow(gridPane, empty, oldL, newL, row);
 
 
-			registerRow(gridPane, new Label("Name"), prepareColumn(new ArrayList<>(globalVars.keySet())),
+			registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.name")), prepareColumn(new ArrayList<>(globalVars.keySet())),
 					prepareColumn(new ArrayList<>(globalVars.values())), row);
 
-			TitledPane titledPane = new TitledPane("Initialisation", gridPane);
+			TitledPane titledPane = new TitledPane(resourceBundle.getString("traceModification.alert.init"), gridPane);
 
 
 			result.getChildren().add(titledPane);
@@ -148,14 +140,14 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			Map<String, String> partner = resultTypeII.get(entry.getKey());
 
 			Label empty = new Label();
-			Label newL = new Label("Current");
-			Label oldL = new Label("Old");
+			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
+			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
 
 
 			row = registerRow(gridPane, empty, oldL, newL, row);
 
 
-			Label operations = new Label("Name");
+			Label operations = new Label(resourceBundle.getString("traceModification.alert.name"));
 
 
 			VBox oldB = prepareColumn(Collections.singletonList(entry.getKey()));
@@ -169,18 +161,18 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 			if(!variables.isEmpty()){
-				row = registerRow(gridPane, new Label("Variables"), prepareColumn(variables),
+				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.variables")), prepareColumn(variables),
 						prepareColumn(retractEntries(variables,partner)), row);
 			}
 
 			if(!operationInfo.getParameterNames().isEmpty()){
-				row = registerRow(gridPane, new Label("Input Parameter"),
+				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.input")),
 						prepareColumn(operationInfo.getParameterNames()),
 						prepareColumn(retractEntries(operationInfo.getParameterNames(),partner)), row);
 			}
 
 			if(!operationInfo.getParameterNames().isEmpty()){
-				registerRow(gridPane, new Label("Output Parameter"),
+				registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.output")),
 						prepareColumn(operationInfo.getOutputParameterNames()),
 						prepareColumn(retractEntries(operationInfo.getOutputParameterNames(),partner)), row);
 			}
