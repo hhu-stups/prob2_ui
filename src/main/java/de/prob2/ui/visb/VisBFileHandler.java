@@ -1,5 +1,18 @@
 package de.prob2.ui.visb;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import de.prob2.ui.visb.exceptions.VisBParseException;
+import de.prob2.ui.visb.visbobjects.VisBEvent;
+import de.prob2.ui.visb.visbobjects.VisBHover;
+import de.prob2.ui.visb.visbobjects.VisBItem;
+import de.prob2.ui.visb.visbobjects.VisBVisualisation;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,19 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.stream.JsonReader;
-
-import de.prob2.ui.visb.exceptions.VisBParseException;
-import de.prob2.ui.visb.visbobjects.VisBEvent;
-import de.prob2.ui.visb.visbobjects.VisBHover;
-import de.prob2.ui.visb.visbobjects.VisBItem;
-import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 /**
  * The VisBFileHandler handles everything, that needs to be done with files for the {@link VisBController}.
@@ -34,15 +34,15 @@ class VisBFileHandler {
 	 * @throws IOException If the file cannot be found, does not exist or is otherwise not accessible.
 	 * @throws VisBParseException If the file does not have the VisB format.
 	 */
-	static VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException {
+	static VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException, JsonSyntaxException {
 		Gson gson = new Gson();
 		JsonReader reader = new JsonReader(new FileReader(inputFile));
 		JsonObject visBFile = gson.fromJson(reader, JsonObject.class);
 		String parentFile = inputFile.getParentFile().toString();
 		Path svgPath;
-		if(visBFile.has("svg")){
+		if (visBFile.has("svg")) {
 			String filePath = visBFile.get("svg").getAsString();
-			if(filePath == null ||filePath.isEmpty()){
+			if (filePath == null || filePath.isEmpty()) {
 				throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
 			} else {
 				svgPath = Paths.get(filePath);
@@ -50,23 +50,19 @@ class VisBFileHandler {
 					svgPath = Paths.get(parentFile, filePath);
 				}
 			}
-		} else{
+		} else {
 			throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
 		}
-		
-	    ArrayList<VisBItem> visBItems = new ArrayList<>();
+
+		ArrayList<VisBItem> visBItems = new ArrayList<>();
 		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-		
+
 		HashSet<String> visbfiles = new HashSet<String>();
 		visbfiles.add(inputFile.toString());
-		
+
 		processCoreFile(gson, visBFile, parentFile, visbfiles, visBItems, visBEvents);
-		
-		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
-			return null;
-		} else {
-			return new VisBVisualisation(visBItems, visBEvents, svgPath, inputFile);
-		}
+
+		return new VisBVisualisation(visBItems, visBEvents, svgPath, inputFile);
 	}
 	
 	

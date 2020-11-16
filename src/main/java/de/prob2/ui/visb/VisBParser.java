@@ -62,7 +62,7 @@ public class VisBParser {
 	 * @throws EvaluationException from evaluating formula on trace
 	 * @throws BCompoundException if the B expression is not correct
 	 */
-	String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
+	public String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
 		StringBuilder jQueryForChanges = new StringBuilder();
 		// get a list of parsed formulas:
 		ArrayList<IEvalElement> formulas = new ArrayList<IEvalElement>();
@@ -70,7 +70,7 @@ public class VisBParser {
 		    formulas.add(parseItemFormula(visItem));
 		}
 		try {
-			Map<IEvalElement, AbstractEvalResult> abstractEvalResults = evaluateItemFormulas(formulas);					
+			Map<IEvalElement, AbstractEvalResult> abstractEvalResults = evaluateItemFormulas(formulas);
 			for(VisBItem visItem : visItems){
 			    AbstractEvalResult abstractEvalResult = abstractEvalResults.get(parseItemFormula(visItem));
 				String value = getValueFromResult(abstractEvalResult, visItem);
@@ -91,15 +91,15 @@ public class VisBParser {
 	private IEvalElement parseItemFormula(VisBItem visItem) throws VisBNestedException, ProBError {
 		String formulaToEval = visItem.getValue();
 		try {
-				if (visItem.parsedFormula != null) {
-				   return visItem.parsedFormula; // is already parsed
-				} else if(currentTrace.getModel() instanceof ClassicalBModel) {
-				   visItem.parsedFormula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
-				  // use parser associated with the current model, DEFINITIONS are accessible
-				} else {
-				   visItem.parsedFormula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
-				   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, cumbersome for VisB
-				}
+			if (visItem.parsedFormula != null) {
+			   return visItem.parsedFormula; // is already parsed
+			} else if(currentTrace.getModel() instanceof ClassicalBModel) {
+			   visItem.parsedFormula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
+			  // use parser associated with the current model, DEFINITIONS are accessible
+			} else {
+			   visItem.parsedFormula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
+			   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, cumbersome for VisB
+			}
 		} catch (EvaluationException e){
 			System.out.println("\nException for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
 			throw(new VisBNestedException("Exception parsing B formula for "+ visItem.getId() + "."+ visItem.getAttribute() + " : ",e));

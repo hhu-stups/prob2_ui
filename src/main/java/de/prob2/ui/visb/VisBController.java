@@ -1,7 +1,8 @@
 package de.prob2.ui.visb;
 
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Injector;
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -9,7 +10,6 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 
 import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
 import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
@@ -73,6 +75,7 @@ public class VisBController {
 		LOGGER.debug("Initialise TraceChangeListener");
 		currentTraceChangeListener = ((observable, oldTrace, newTrace) -> {
 			if(newTrace != null){
+				VisBStage visBStage = injector.getInstance(VisBStage.class);
 				if(newTrace.getCurrentState() != null && newTrace.getCurrentState().isInitialised()){
 					updateVisualisation();
 				} else {
@@ -91,10 +94,10 @@ public class VisBController {
 			currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 				//This prepares VisB for the new Visualisation
 				closeCurrentVisualisation();
-				//injector.getInstance(VisBStage.class).clear();
 				this.visBVisualisation = new VisBVisualisation();
 			});
 			currentTrace.addListener(currentTraceChangeListener);
+			injector.getInstance(VisBStage.class).activateJavaScriptInteraction();
 			injector.getInstance(VisBStage.class).onCloseRequestProperty().setValue(t -> this.clearListeners());
 		}
 	}
@@ -103,23 +106,24 @@ public class VisBController {
 	 * This method is used for updating the visualisation.
 	 */
 	private void updateVisualisation(){
-		//SVG Javascript && ValueTranslator (if necessary)
 		if(this.visBVisualisation.isReady()) {
 			String svgChanges;
-			try{
-				svgChanges = injector.getInstance(VisBParser.class).evaluateFormulas(this.visBVisualisation.getVisBItems());
-				// TO DO: parse formula once when loading the file to check for syntax errors
+			VisBParser visBParser = injector.getInstance(VisBParser.class);
+			VisBStage visBStage = injector.getInstance(VisBStage.class);
+			try {
+				svgChanges = visBParser.evaluateFormulas(this.visBVisualisation.getVisBItems());
 			} catch(VisBParseException | VisBNestedException | IllegalArgumentException | BCompoundException | ProBError e){
 				alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
-				this.clearListeners();
-				closeCurrentVisualisation();
+				updateInfo("visb.infobox.visualisation.error");
+				visBStage.clear();
 				return;
 			}
+
+			// TO DO: parse formula once when loading the file to check for syntax errors
 			if(svgChanges == null || svgChanges.isEmpty()){
 				updateInfo("visb.infobox.no.change");
 			} else {
 				try {
-					VisBStage visBStage = injector.getInstance(VisBStage.class);
 					visBStage.runScript("resetDebugMessages()");
 					visBStage.runScript("resetErrorMessages()");
 					visBStage.runScript(svgChanges);
@@ -257,14 +261,18 @@ public class VisBController {
 	}
 
 	void reloadVisualisation(){
-		if(!visBVisualisation.isReady()){
-			updateInfo("visb.infoboy.empty.reload");
-			return;
-		}
 		VisBVisualisation currentVisualisation = this.visBVisualisation;
 		closeCurrentVisualisation();
 		this.visBVisualisation = currentVisualisation;
 		setupVisualisation();
+		if(!visBVisualisation.isReady()){
+			if(visBVisualisation.getSvgPath() != null) {
+				updateInfo("visb.infobox.visualisation.error");
+			} else {
+				updateInfo("visb.infoboy.empty.reload");
+			}
+			return;
+		}
 		LOGGER.debug("Visualisation has been reloaded.");
 	}
 
@@ -279,45 +287,44 @@ public class VisBController {
 	 * Setting up the JSON / VisB file for internal usage via {@link VisBFileHandler}.
 	 * @param visFile JSON / VisB file to be used
 	 */
-	void setupVisBFile(File visFile){
+	void setupVisBFile(File visFile) throws JsonSyntaxException, MalformedJsonException {
 		if(visFile == null){
 			return;
 		}
-		this.visBVisualisation = null;
-		clearListeners();
+		currentTrace.removeListener(currentTraceChangeListener);
 		try {
 			this.visBVisualisation = VisBFileHandler.constructVisualisationFromJSON(visFile);
+		} catch (JsonSyntaxException | MalformedJsonException e) {
+			throw e;
 		} catch (IOException e) {
 			alert(e,"visb.exception.io", "visb.infobox.visualisation.error");
 			updateInfo("visb.infobox.visualisation.error");
-			closeCurrentVisualisation();
+			VisBStage visBStage = injector.getInstance(VisBStage.class);
+			visBStage.resetJavaScriptInteraction();
 			return;
 		} catch(Exception e){
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
-			closeCurrentVisualisation();
+			VisBStage visBStage = injector.getInstance(VisBStage.class);
+			visBStage.resetJavaScriptInteraction();
 			return;
 		}
 	}
 
-	public void setupVisualisation(){
-		if(visBVisualisation == null || visBVisualisation.getVisBItems() == null || visBVisualisation.getVisBEvents() == null){
-			updateInfo("visb.infobox.visualisation.error");
-			alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
-			return;
-		} else if (visBVisualisation.getVisBItems().isEmpty()){
-			updateInfo("visb.infobox.visualisation.items.alert");
-		} else if (visBVisualisation.getVisBEvents().isEmpty()){
-			//There is no need to load on click functions, if no events are available.
-			updateInfo("visb.infobox.visualisation.events.alert");
-		} else {
-			updateInfo("visb.infobox.visualisation.initialise");
-		}
+	public void setupVisualisation(File file){
 		try {
-			setupHTMLFile(new File(this.visBVisualisation.getSvgPath().toUri()), this.visBVisualisation.getJsonFile());
-			setupVisBFile(this.visBVisualisation.getJsonFile());
-		} catch(VisBException e){
+			setupVisBFile(file);
+			setupHTMLFile(new File(this.visBVisualisation.getSvgPath().toUri()), file);
+		} catch(VisBException e) {
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
+			updateInfo("visb.infobox.visualisation.error");
+			return;
+		} catch (JsonSyntaxException e) {
+			this.visBVisualisation = new VisBVisualisation(null, null, null, file);
+			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
+			updateInfo("visb.infobox.visualisation.error");
+			VisBStage visBStage = injector.getInstance(VisBStage.class);
+			visBStage.resetJavaScriptInteraction();
 			return;
 		} catch(IOException e){
 			alert(e, "visb.exception.header", "visb.exception.io");
@@ -329,6 +336,22 @@ public class VisBController {
 			updateVisualisationIfPossible();
 			//LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
 		}
+		if(visBVisualisation.getVisBItems() == null || visBVisualisation.getVisBEvents() == null){
+			updateInfo("visb.infobox.visualisation.error");
+			alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
+			return;
+		} else if (visBVisualisation.getVisBItems().isEmpty()){
+			updateInfo("visb.infobox.visualisation.items.alert");
+		} else if (visBVisualisation.getVisBEvents().isEmpty()){
+			//There is no need to load on click functions, if no events are available.
+			updateInfo("visb.infobox.visualisation.events.alert");
+		} else {
+			updateInfo("visb.infobox.visualisation.initialise");
+		}
+	}
+
+	public void setupVisualisation(){
+		setupVisualisation(this.visBVisualisation.getJsonFile());
 	}
 
 	/**

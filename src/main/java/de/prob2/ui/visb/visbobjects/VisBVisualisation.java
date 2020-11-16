@@ -62,18 +62,41 @@ public class VisBVisualisation {
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Visualisation Items List:\n");
-		for (VisBItem visBItem : visBItems){
-			stringBuilder.append(visBItem.toString());
+		if(visBItems != null) {
+			for (VisBItem visBItem : visBItems) {
+				stringBuilder.append(visBItem.toString());
+				stringBuilder.append("\n");
+			}
+		} else {
+			stringBuilder.append("null");
 			stringBuilder.append("\n");
 		}
 		stringBuilder.append("Visualisation Events List:\n");
-		for (VisBEvent visBEvent : visBEvents){
-			stringBuilder.append(visBEvent.toString());
+		if(visBEvents != null) {
+			for (VisBEvent visBEvent : visBEvents) {
+				stringBuilder.append(visBEvent.toString());
+				stringBuilder.append("\n");
+			}
+		} else {
+			stringBuilder.append("null");
 			stringBuilder.append("\n");
 		}
 		stringBuilder.append("SVG: \n");
-		stringBuilder.append(svgPath.toString());
-		stringBuilder.append("\n");
+		if(this.svgPath != null) {
+			stringBuilder.append(svgPath.toString());
+			stringBuilder.append("\n");
+		} else {
+			stringBuilder.append("null");
+			stringBuilder.append("\n");
+		}
+		stringBuilder.append("JSON: \n");
+		if(this.jsonFile != null) {
+			stringBuilder.append(jsonFile.getPath());
+			stringBuilder.append("\n");
+		} else {
+			stringBuilder.append("null");
+			stringBuilder.append("\n");
+		}
 		return stringBuilder.toString();
 	}
 }

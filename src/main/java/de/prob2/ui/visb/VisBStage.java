@@ -197,8 +197,7 @@ public class VisBStage extends Stage {
         if(visBPath.isNotNull().get()) {
             VisBController visBController = injector.getInstance(VisBController.class);
             File visBfile = visBPath.get().toFile();
-            visBController.setupVisBFile(visBfile);
-            visBController.setupVisualisation();
+            visBController.setupVisualisation(visBfile);
         }
     }
 
@@ -352,8 +351,7 @@ public class VisBStage extends Stage {
             visBPath.set(path);
             File visBfile = path.toFile();
             VisBController visBController = injector.getInstance(VisBController.class);
-            visBController.setupVisBFile(visBfile);
-            visBController.setupVisualisation();
+            visBController.setupVisualisation(visBfile);
         }
     }
 
@@ -481,6 +479,15 @@ public class VisBStage extends Stage {
             }
         }
     }
+
+    public void resetJavaScriptInteraction() {
+        this.webView.setDisable(true);
+    }
+
+    public void activateJavaScriptInteraction() {
+        this.webView.setDisable(false);
+    }
+
 }
 
 
