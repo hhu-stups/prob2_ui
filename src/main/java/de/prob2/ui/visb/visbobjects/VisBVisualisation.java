@@ -3,6 +3,7 @@ package de.prob2.ui.visb.visbobjects;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The VisBVisualisation Object contains the functions needed to store all the visualisation information.
@@ -62,41 +63,34 @@ public class VisBVisualisation {
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Visualisation Items List:\n");
-		if(visBItems != null) {
-			for (VisBItem visBItem : visBItems) {
-				stringBuilder.append(visBItem.toString());
-				stringBuilder.append("\n");
-			}
-		} else {
-			stringBuilder.append("null");
-			stringBuilder.append("\n");
-		}
+		appendListWithNull(stringBuilder, visBItems);
 		stringBuilder.append("Visualisation Events List:\n");
-		if(visBEvents != null) {
-			for (VisBEvent visBEvent : visBEvents) {
-				stringBuilder.append(visBEvent.toString());
-				stringBuilder.append("\n");
+		appendListWithNull(stringBuilder, visBEvents);
+		stringBuilder.append("SVG: \n");
+		appendObjectWithNull(stringBuilder, svgPath);
+		stringBuilder.append("JSON: \n");
+		appendObjectWithNull(stringBuilder, jsonFile);
+		return stringBuilder.toString();
+	}
+
+	private void appendListWithNull(StringBuilder sb, List list) {
+		if(list != null) {
+			for (Object obj : list) {
+				sb.append(obj);
+				sb.append("\n");
 			}
 		} else {
-			stringBuilder.append("null");
-			stringBuilder.append("\n");
+			sb.append("null");
+			sb.append("\n");
 		}
-		stringBuilder.append("SVG: \n");
-		if(this.svgPath != null) {
-			stringBuilder.append(svgPath.toString());
-			stringBuilder.append("\n");
+	}
+
+	private void appendObjectWithNull(StringBuilder sb, Object obj) {
+		if(obj != null) {
+			sb.append(obj);
 		} else {
-			stringBuilder.append("null");
-			stringBuilder.append("\n");
+			sb.append("null");
 		}
-		stringBuilder.append("JSON: \n");
-		if(this.jsonFile != null) {
-			stringBuilder.append(jsonFile.getPath());
-			stringBuilder.append("\n");
-		} else {
-			stringBuilder.append("null");
-			stringBuilder.append("\n");
-		}
-		return stringBuilder.toString();
+		sb.append("\n");
 	}
 }

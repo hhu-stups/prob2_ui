@@ -50,15 +50,9 @@ public class ListViewItem extends ListCell<VisBItem> {
 		this.setGraphic(this.item_box);
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if(visBItem != null) {
-				if (to) {
-					String toID = visBItem.getId();
-					String toInvocation = buildInvocation("changeAttribute", wrapAsString("#" + toID), wrapAsString("opacity"), wrapAsString("0.5"));
-					injector.getInstance(VisBStage.class).runScript(toInvocation);
-				} else {
-					String fromID = visBItem.getId();
-					String fromInvocation = buildInvocation("changeAttribute", wrapAsString("#" + fromID), wrapAsString("opacity"), wrapAsString("1.0"));
-					injector.getInstance(VisBStage.class).runScript(fromInvocation);
-				}
+				String id = visBItem.getId();
+				String invocation = buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString("opacity"), to ? wrapAsString("0.5") : wrapAsString("1.0"));
+				injector.getInstance(VisBStage.class).runScript(invocation);
 			}
 		});
 	}
