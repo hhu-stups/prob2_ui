@@ -22,13 +22,13 @@
 					<center>
 						<Accordion fx:id="toplevelAccordion">
 							<panes>
-								<TitledPane fx:id="typeII" animated="false" text="Es gab Umbennungen von Operationen" >
+								<TitledPane fx:id="typeII" animated="false" text="Placeholder" >
 								</TitledPane>
-								<TitledPane fx:id="typeIIPer" animated="false" text="Es gibt mehrere Kandidaten fuer eine Opereration">
+								<TitledPane fx:id="typeIIPer" animated="false" text="Placeholder">
 								</TitledPane>
-								<TitledPane fx:id="typeIII" animated="false" text="Es gab eine Aenderung in der Signatur">
+								<TitledPane fx:id="typeIII" animated="false" text="Placeholder">
 								</TitledPane>
-								<TitledPane fx:id="typeIV" animated="false" text="Es gab Stateveraendernde Operationen">
+								<TitledPane fx:id="typeIV" animated="false" text="Placeholder">
 								</TitledPane>
 							</panes>
 						</Accordion>
