@@ -10,13 +10,13 @@ import javafx.scene.layout.VBox;
 
 public class ListViewEvent extends ListCell<VisBEvent> {
 	@FXML
-	private VBox event_box;
+	private VBox eventBox;
 	@FXML
-	private Label event_id;
+	private Label lbID;
 	@FXML
-	private Label label_event;
+	private Label lbEvent;
 	@FXML
-	private Label label_predicates;
+	private Label lbPredicates;
 
 	private VisBEvent visBEvent;
 
@@ -28,7 +28,7 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 	@FXML
 	public void initialize(){
 		this.setText("");
-		this.setGraphic(this.event_box);
+		this.setGraphic(this.eventBox);
 		this.getStyleClass().add("visb-item");
 	}
 
@@ -37,10 +37,10 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 		super.updateItem(visBEvent, empty);
 		if(visBEvent != null){
 			this.visBEvent = visBEvent;
-			event_id.setText(visBEvent.getId());
-			label_event.setText(visBEvent.getEvent());
-			label_predicates.setText(visBEvent.getPredicates().toString());
-			this.setGraphic(this.event_box);
+			lbID.setText(visBEvent.getId());
+			lbEvent.setText(visBEvent.getEvent());
+			lbPredicates.setText(visBEvent.getPredicates().toString());
+			this.setGraphic(this.eventBox);
 			this.setText("");
 		}
 	}
