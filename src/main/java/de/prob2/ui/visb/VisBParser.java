@@ -41,7 +41,7 @@ import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 @Singleton
 public class VisBParser {
 	private final CurrentTrace currentTrace;
-	private MachineLoader machineLoader;
+	private final MachineLoader machineLoader;
 
 	/**
 	 * As all other constructors in this plugin, this one needs interaction with the ProB2-UI to be able to evaluate the visualisation items.
@@ -65,7 +65,7 @@ public class VisBParser {
 	public String evaluateFormulas(List<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
 		StringBuilder jQueryForChanges = new StringBuilder();
 		// get a list of parsed formulas:
-		ArrayList<IEvalElement> formulas = new ArrayList<IEvalElement>();
+		List<IEvalElement> formulas = new ArrayList<>();
 		for(VisBItem visItem : visItems) {
 		    formulas.add(parseItemFormula(visItem));
 		}
@@ -424,6 +424,7 @@ public class VisBParser {
 	 * @return true, if it is a valid number, else otherwise
 	 */
 	private boolean checkNumber(String value){
+		// TODO: Valid float? Valid number? Integer?
 		try{
 			Float.parseFloat(value.replace(",","."));
 			return true;
