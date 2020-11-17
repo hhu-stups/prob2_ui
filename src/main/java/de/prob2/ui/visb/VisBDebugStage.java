@@ -64,7 +64,7 @@ public class VisBDebugStage extends Stage {
 			}
 		};
 		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, currentTrace, bundle, injector));
-		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
+		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, bundle));
         this.currentTrace.addListener((observable, from, to) -> refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> refresh());
 		this.visBItems.getSelectionModel().selectedItemProperty().addListener(listener);
