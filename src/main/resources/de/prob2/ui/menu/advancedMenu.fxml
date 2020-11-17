@@ -8,6 +8,8 @@
 	<MenuItem text="%menu.advanced.items.groovy" onAction="#handleGroovyConsole" />
 	<MenuItem text="%menu.advanced.items.prologoutput" onAction="#handlePrologOutput" />
 	<SeparatorMenuItem />
+	<MenuItem text="Open Simulator" onAction="#openSimulator"/>
+	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
 	<SeparatorMenuItem />
 	<Menu text="%menu.advanced.items.useVisualisation" fx:id="visualisationFxMenu">

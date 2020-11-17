@@ -10,6 +10,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.plugin.ProBPluginManager;
+import de.prob2.ui.simulation.Simulator;
+import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 
 import javafx.fxml.FXML;
@@ -98,6 +100,13 @@ public class AdvancedMenu extends Menu {
 	void detachVisualisation() {
 		LOGGER.debug("Detach menu-item called.");
 		visualisationController.detachVisualisation();
+	}
+
+	@FXML
+	private void openSimulator() {
+		SimulatorStage simulatorStage = injector.getInstance(SimulatorStage.class);
+		simulatorStage.show();
+		simulatorStage.toFront();
 	}
 
 }
