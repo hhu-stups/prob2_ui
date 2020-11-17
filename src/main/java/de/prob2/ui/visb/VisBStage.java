@@ -78,6 +78,8 @@ public class VisBStage extends Stage {
 	@FXML
 	private Button loadVisualisationButton;
 	@FXML
+	private Button reloadVisualisationButton;
+	@FXML
 	private Button manageDefaultVisualisationButton;
 	@FXML
 	private Button openTraceSelectionButton;
@@ -159,6 +161,9 @@ public class VisBStage extends Stage {
 			updateUIOnMachine(currentProject.getCurrentMachine());
 			loadVisBFileFromMachine(currentProject.getCurrentMachine());
 		});
+
+		this.reloadVisualisationButton.disableProperty().bind(visBPath.isNull());
+
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			openTraceSelectionButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().unbind();

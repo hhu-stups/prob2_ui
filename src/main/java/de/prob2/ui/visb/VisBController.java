@@ -74,7 +74,7 @@ public class VisBController {
 		this.visBVisualisation = new VisBVisualisation();
 
 		LOGGER.debug("Initialise TraceChangeListener");
-		this. currentTraceChangeListener = ((observable, oldTrace, newTrace) -> {
+		this.currentTraceChangeListener = ((observable, oldTrace, newTrace) -> {
 			if(newTrace != null){
 				if(newTrace.getCurrentState() != null && newTrace.getCurrentState().isInitialised()){
 					updateVisualisation();
