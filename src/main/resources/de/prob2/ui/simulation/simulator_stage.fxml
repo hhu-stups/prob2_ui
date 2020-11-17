@@ -17,9 +17,9 @@
 			<VBox>
 				<HBox>
 					<Label text="Timer: " textAlignment="CENTER" />
-					<TextField/>
+					<TextField fx:id="tfTimer"/>
 				</HBox>
-				<Button styleClass="button-blue" text="Start"/>
+				<Button fx:id="btSimulate" styleClass="button-blue" text="Start" onAction="#simulate"/>
 			</VBox>
 		</Scene>
     </scene>
