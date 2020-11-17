@@ -483,14 +483,6 @@ public class VisBStage extends Stage {
         }
     }
 
-    public void resetJavaScriptInteraction() {
-        this.webView.setDisable(true);
-    }
-
-    public void activateJavaScriptInteraction() {
-        this.webView.setDisable(false);
-    }
-
 }
 
 

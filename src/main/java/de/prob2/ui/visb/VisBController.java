@@ -51,8 +51,8 @@ public class VisBController {
 	private final ChangeListener<Trace> currentTraceChangeListener;
 	private final Injector injector;
 	private final StageManager stageManager;
-	private CurrentProject currentProject;
-	private ResourceBundle bundle;
+	private final CurrentProject currentProject;
+	private final ResourceBundle bundle;
 
 	private VisBVisualisation visBVisualisation;
 
@@ -62,6 +62,7 @@ public class VisBController {
 	 * @param stageManager currently not used
 	 * @param currentProject used to add {@link ChangeListener} for changing machine
 	 * @param currentTrace used to add {@link ChangeListener} for interacting with trace
+	 * @param bundle used to access string resources
 	 */
 	@Inject
 	public VisBController(final Injector injector, final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final ResourceBundle bundle) {
@@ -73,9 +74,8 @@ public class VisBController {
 		this.visBVisualisation = new VisBVisualisation();
 
 		LOGGER.debug("Initialise TraceChangeListener");
-		currentTraceChangeListener = ((observable, oldTrace, newTrace) -> {
+		this. currentTraceChangeListener = ((observable, oldTrace, newTrace) -> {
 			if(newTrace != null){
-				VisBStage visBStage = injector.getInstance(VisBStage.class);
 				if(newTrace.getCurrentState() != null && newTrace.getCurrentState().isInitialised()){
 					updateVisualisation();
 				} else {
@@ -97,7 +97,6 @@ public class VisBController {
 				this.visBVisualisation = new VisBVisualisation();
 			});
 			currentTrace.addListener(currentTraceChangeListener);
-			injector.getInstance(VisBStage.class).activateJavaScriptInteraction();
 			injector.getInstance(VisBStage.class).onCloseRequestProperty().setValue(t -> this.clearListeners());
 		}
 	}
@@ -107,44 +106,42 @@ public class VisBController {
 	 */
 	private void updateVisualisation(){
 		if(this.visBVisualisation.isReady()) {
-			String svgChanges;
-			VisBParser visBParser = injector.getInstance(VisBParser.class);
-			VisBStage visBStage = injector.getInstance(VisBStage.class);
+			applySVGChanges();
+		} else if(visBVisualisation.getVisBEvents() == null){
+			updateInfo("visb.infobox.visualisation.items.alert");
+		} else if(visBVisualisation.getSvgPath() == null){
+			updateInfo("visb.infobox.visualisation.svg.alert");
+		}
+	}
+
+	private void applySVGChanges() {
+		String svgChanges;
+		VisBParser visBParser = injector.getInstance(VisBParser.class);
+		VisBStage visBStage = injector.getInstance(VisBStage.class);
+		try {
+			svgChanges = visBParser.evaluateFormulas(this.visBVisualisation.getVisBItems());
+		} catch(VisBParseException | VisBNestedException | IllegalArgumentException | BCompoundException | ProBError e){
+			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
+			updateInfo("visb.infobox.visualisation.error");
+			visBStage.clear();
+			return;
+		}
+
+		// TO DO: parse formula once when loading the file to check for syntax errors
+		if(svgChanges == null || svgChanges.isEmpty()){
+			updateInfo("visb.infobox.no.change");
+		} else {
 			try {
-				svgChanges = visBParser.evaluateFormulas(this.visBVisualisation.getVisBItems());
-			} catch(VisBParseException | VisBNestedException | IllegalArgumentException | BCompoundException | ProBError e){
-				alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
+				visBStage.runScript("resetDebugMessages()");
+				visBStage.runScript("resetErrorMessages()");
+				visBStage.runScript(svgChanges);
+			} catch (JSException e){
+				alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 				updateInfo("visb.infobox.visualisation.error");
-				visBStage.clear();
 				return;
 			}
-
-			// TO DO: parse formula once when loading the file to check for syntax errors
-			if(svgChanges == null || svgChanges.isEmpty()){
-				updateInfo("visb.infobox.no.change");
-			} else {
-				try {
-					visBStage.runScript("resetDebugMessages()");
-					visBStage.runScript("resetErrorMessages()");
-					visBStage.runScript(svgChanges);
-				} catch (JSException e){
-					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
-					updateInfo("visb.infobox.visualisation.error");
-					return;
-				}
-				//LOGGER.debug("Running script: "+svgChanges);
-				updateInfo("visb.infobox.visualisation.updated.nr",countLines(svgChanges));
-			}
-		} else{
-			if(!visBVisualisation.isReady()) {
-				updateInfo("visb.infobox.visualisation.none.loaded");
-			} else if(visBVisualisation.getVisBEvents() == null){
-				updateInfo("visb.infobox.visualisation.items.alert");
-			} else if(visBVisualisation.getSvgPath() == null){
-				updateInfo("visb.infobox.visualisation.svg.alert");
-			} else{
-				updateInfo("visb.infobox.visualisation.error");
-			}
+			//LOGGER.debug("Running script: "+svgChanges);
+			updateInfo("visb.infobox.visualisation.updated.nr",countLines(svgChanges));
 		}
 	}
 
@@ -186,57 +183,67 @@ public class VisBController {
 	 * This method is used by the {@link VisBConnector} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
-	void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey){
-		LOGGER.debug("Finding event for id: "+id);
+	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey){
 		if(!currentTrace.getCurrentState().isInitialised()){
-			Set<Transition> nextTransitions = currentTrace.get().getNextTransitions();
-			if(currentTrace.get().getNextTransitions().size() == 1) {
-				String transitionName = nextTransitions.stream().map(Transition::getName).collect(Collectors.toList()).get(0);
-				Trace trace = currentTrace.get().execute(transitionName, new ArrayList<>());
-				currentTrace.set(trace);
-			} else {
-				updateInfo("visb.infobox.events.not.initialise");
-			}
+			executeBeforeInitialisation();
 			return;
 		}
+		LOGGER.debug("Finding event for id: " + id);
 		VisBEvent event = visBVisualisation.getEventForID(id);
 		// TO DO: adapt predicates or add predicate for Click Coordinates
 		if(event == null || event.getEvent().equals("")) {
 			updateInfo("visb.infobox.no.events.for.id", id);
 		} else {
-			Trace trace = currentTrace.get();
-			// if (trace.canExecuteEvent(event.getEvent(), event.getPredicates())) {
 			try {
-				// perform replacements to transmit event information:
-				ArrayList<String> preds= new ArrayList<String>();
-				preds.addAll(event.getPredicates());
-				for(int j = 0; j < preds.size(); j++) {
-					preds.set(j,preds.get(j).replace("%shiftKey", (shiftKey ? "TRUE" : "FALSE"))
-											.replace("%metaKey",  (metaKey  ? "TRUE" : "FALSE"))
-											.replace("%pageX", Integer.toString(pageX))
-											.replace("%pageY", Integer.toString(pageY))
-								 );
-				}
-				LOGGER.debug("Executing event for id: "+id + " and preds = " + preds);
-				trace = trace.execute(event.getEvent(), preds);
-				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + preds);
-				currentTrace.set(trace);
-				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
-			} catch (ExecuteOperationException e) {
-				if(e.getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
-					Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
-					alert.initOwner(this.injector.getInstance(VisBStage.class));
-					alert.show();
-				}
-				LOGGER.debug("Cannot execute event for id: "+e);
-				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
-			} catch (EvaluationException e) {
-				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
+				executeEvent(event, currentTrace.get(), id, pageX, pageY, shiftKey, metaKey);
+			} catch (Exception e) {
+				handleExecuteOperationError(e, event, id);
+			}
+		}
+	}
+
+	private void executeBeforeInitialisation() {
+		Set<Transition> nextTransitions = currentTrace.get().getNextTransitions();
+		if(currentTrace.get().getNextTransitions().size() == 1) {
+			String transitionName = nextTransitions.stream().map(Transition::getName).collect(Collectors.toList()).get(0);
+			Trace trace = currentTrace.get().execute(transitionName, new ArrayList<>());
+			currentTrace.set(trace);
+		} else {
+			updateInfo("visb.infobox.events.not.initialise");
+		}
+	}
+
+	private void executeEvent(VisBEvent event, Trace trace, String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+		// perform replacements to transmit event information:
+		List<String> preds = event.getPredicates();
+		for(int j = 0; j < preds.size(); j++) {
+			preds.set(j, preds.get(j).replace("%shiftKey", (shiftKey ? "TRUE" : "FALSE"))
+					.replace("%metaKey",  (metaKey  ? "TRUE" : "FALSE"))
+					.replace("%pageX", Integer.toString(pageX))
+					.replace("%pageY", Integer.toString(pageY)));
+		}
+		LOGGER.debug("Executing event for id: "+id + " and preds = " + preds);
+		trace = trace.execute(event.getEvent(), preds);
+		LOGGER.debug("Finished executed event for id: "+id + " and preds = " + preds);
+		currentTrace.set(trace);
+		updateInfo("visb.infobox.execute.event", event.getEvent(), id);
+	}
+
+	private void handleExecuteOperationError(Exception e, VisBEvent event, String id) {
+		if (e instanceof ExecuteOperationException) {
+			if (((ExecuteOperationException) e).getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
+				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", ((ExecuteOperationException) e).getErrorMessages()));
 				alert.initOwner(this.injector.getInstance(VisBStage.class));
 				alert.show();
-				LOGGER.debug("Cannot execute event for id: "+e);
-				updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			}
+			LOGGER.debug("Cannot execute event for id: " + e);
+			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
+		} else if(e instanceof EvaluationException) {
+			Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
+			alert.initOwner(this.injector.getInstance(VisBStage.class));
+			alert.show();
+			LOGGER.debug("Cannot execute event for id: "+e);
+			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 		}
 	}
 	
@@ -299,15 +306,9 @@ public class VisBController {
 		} catch (IOException e) {
 			alert(e,"visb.exception.io", "visb.infobox.visualisation.error");
 			updateInfo("visb.infobox.visualisation.error");
-			VisBStage visBStage = injector.getInstance(VisBStage.class);
-			visBStage.resetJavaScriptInteraction();
-			return;
 		} catch(Exception e){
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
-			VisBStage visBStage = injector.getInstance(VisBStage.class);
-			visBStage.resetJavaScriptInteraction();
-			return;
 		}
 	}
 
@@ -320,26 +321,27 @@ public class VisBController {
 			updateInfo("visb.infobox.visualisation.error");
 			return;
 		} catch (JsonSyntaxException e) {
+			// Set VisB Visualisation with VisB file only. This is then used for reload (after the JSON syntax errors are fixed)
 			this.visBVisualisation = new VisBVisualisation(null, null, null, file);
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
-			VisBStage visBStage = injector.getInstance(VisBStage.class);
-			visBStage.resetJavaScriptInteraction();
 			return;
 		} catch(IOException e){
 			alert(e, "visb.exception.header", "visb.exception.io");
 			return;
 		}
+		showVisualisationAfterSetup();
+	}
+
+	private void showVisualisationAfterSetup() {
 		if(this.visBVisualisation.isReady()) {
 			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 			startVisualisation();
 			updateVisualisationIfPossible();
-			//LOGGER.debug("LOADED:\n"+this.visBVisualisation.toString());
 		}
 		if(visBVisualisation.getVisBItems() == null || visBVisualisation.getVisBEvents() == null){
 			updateInfo("visb.infobox.visualisation.error");
 			alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
-			return;
 		} else if (visBVisualisation.getVisBItems().isEmpty()){
 			updateInfo("visb.infobox.visualisation.items.alert");
 		} else if (visBVisualisation.getVisBEvents().isEmpty()){
@@ -379,34 +381,36 @@ public class VisBController {
 	 */
 	private List<VisBOnClickMustacheItem> generateOnClickItems(){
 		List<VisBOnClickMustacheItem> onClickItems = new ArrayList<>();
-
 		for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
-			String event = visBEvent.getEvent();
-			if (!(event.equals("") || isValidTopLevelEvent(event))) { // for "" we allow to provide just hover
-				if (visBEvent.eventIsOptional()) {
-					System.out.println("Ignoring event " + event);
-				} else {
-					Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.invalid.event", event);
-					alert.initOwner(this.injector.getInstance(VisBStage.class));
-					alert.show();
-				}
-			} else {
-				String enterAction = visBEvent.getHovers().stream()
-						.map(hover -> buildInvocation("changeAttribute", wrapAsString("#" + hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
-						.collect(Collectors.joining("\n"));
-				String leaveAction = visBEvent.getHovers().stream()
-						.map(hover -> buildInvocation("changeAttribute", wrapAsString("#" + hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
-						.collect(Collectors.joining("\n"));
-				String eventID = visBEvent.getId();
-				String eventName = visBEvent.getEvent();
-				onClickItems.add(new VisBOnClickMustacheItem(enterAction, leaveAction, eventID, eventName));
-			}
+			addOnClickItem(visBEvent, onClickItems);
 		}
 		return onClickItems;
 	}
+
+	private void addOnClickItem(VisBEvent visBEvent, List<VisBOnClickMustacheItem> onClickItems) {
+		String event = visBEvent.getEvent();
+		if (!(event.equals("") || isValidTopLevelEvent(event))) { // for "" we allow to provide just hover
+			if (visBEvent.eventIsOptional()) {
+				System.out.println("Ignoring event " + event);
+			} else {
+				Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.invalid.event", event);
+				alert.initOwner(this.injector.getInstance(VisBStage.class));
+				alert.show();
+			}
+		} else {
+			String enterAction = visBEvent.getHovers().stream()
+					.map(hover -> buildInvocation("changeAttribute", wrapAsString("#" + hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
+					.collect(Collectors.joining("\n"));
+			String leaveAction = visBEvent.getHovers().stream()
+					.map(hover -> buildInvocation("changeAttribute", wrapAsString("#" + hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
+					.collect(Collectors.joining("\n"));
+			String eventID = visBEvent.getId();
+			String eventName = visBEvent.getEvent();
+			onClickItems.add(new VisBOnClickMustacheItem(enterAction, leaveAction, eventID, eventName));
+		}
+	}
 	
 	private boolean isValidTopLevelEvent(String event) {
-			System.out.println("Check if event toplevel " + event);
 			OperationInfo operationInfo = 
 			        currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
 			return operationInfo != null && operationInfo.isTopLevel();
