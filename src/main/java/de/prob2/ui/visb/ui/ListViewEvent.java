@@ -1,7 +1,9 @@
 package de.prob2.ui.visb.ui;
 
 
+import com.google.inject.Injector;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.visb.VisBStage;
 import de.prob2.ui.visb.visbobjects.VisBEvent;
 
 import javafx.fxml.FXML;
@@ -10,6 +12,9 @@ import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
 import java.util.ResourceBundle;
+
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 
 public class ListViewEvent extends ListCell<VisBEvent> {
 	@FXML
@@ -25,10 +30,13 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 
 	private final ResourceBundle bundle;
 
-	public ListViewEvent(StageManager stageManager, ResourceBundle bundle){
+	private final Injector injector;
+
+	public ListViewEvent(final StageManager stageManager, final ResourceBundle bundle, final Injector injector) {
 		stageManager.loadFXML(this,"list_view_event.fxml");
 		this.visBEvent = null;
 		this.bundle = bundle;
+		this.injector = injector;
 	}
 
 	@FXML
@@ -36,6 +44,13 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 		this.setText("");
 		this.setGraphic(this.eventBox);
 		this.getStyleClass().add("visb-item");
+		this.hoverProperty().addListener((observable, from, to) -> {
+			if(visBEvent != null) {
+				String id = visBEvent.getId();
+				String invocation = buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString("opacity"), to ? wrapAsString("0.5") : wrapAsString("1.0"));
+				injector.getInstance(VisBStage.class).runScript(invocation);
+			}
+		});
 	}
 
 	@Override
