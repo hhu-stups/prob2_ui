@@ -57,34 +57,37 @@ public class VisBDebugStage extends Stage {
     public void initialize() {
 		ChangeListener<VisBItem> listener = (observable, from, to) -> {
 			if(from != null) {
-				String fromID = from.getId();
-				String fromInvocation = buildInvocation("changeAttribute", wrapAsString("#" + fromID), wrapAsString("opacity"), wrapAsString("1.0"));
-				injector.getInstance(VisBStage.class).runScript(fromInvocation);
+				removeHighlighting(from);
 			}
 			if(to != null) {
-				String toID = to.getId();
-				String toInvocation = buildInvocation("changeAttribute", wrapAsString("#" + toID), wrapAsString("opacity"), wrapAsString("0.5"));
-				injector.getInstance(VisBStage.class).runScript(toInvocation);
+				applyHighlighting(to);
 			}
 		};
 		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, currentTrace, bundle, injector));
-		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager));
-        this.currentTrace.addListener((observable, from, to) -> {
-            visBItems.refresh();
-            visBEvents.refresh();
-        });
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			visBItems.refresh();
-			visBEvents.refresh();
-		});
+		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, bundle, injector));
+        this.currentTrace.addListener((observable, from, to) -> refresh());
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> refresh());
 		this.visBItems.getSelectionModel().selectedItemProperty().addListener(listener);
+		this.setOnCloseRequest(e -> this.visBItems.getSelectionModel().clearSelection());
     }
+
+    private void removeHighlighting(VisBItem item) {
+		String id = item.getId();
+		String invocation = buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString("opacity"), wrapAsString("1.0"));
+		injector.getInstance(VisBStage.class).runScript(invocation);
+	}
+
+	private void applyHighlighting(VisBItem item) {
+		String id = item.getId();
+		String invocation = buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString("opacity"), wrapAsString("0.5"));
+		injector.getInstance(VisBStage.class).runScript(invocation);
+	}
 
     /**
      * After loading the JSON/ VisB file and preparing it in the {@link VisBController} the ListViews are initialised.
      * @param visBVisualisation is needed to display the items and events in the ListViews
      */
-    void initialiseListViews(VisBVisualisation visBVisualisation){
+    public void initialiseListViews(VisBVisualisation visBVisualisation){
     	clear();
 		this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
 		this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
@@ -94,6 +97,11 @@ public class VisBDebugStage extends Stage {
         this.visBEvents.setItems(null);
         this.visBItems.setItems(null);
     }
+
+    private void refresh() {
+		visBItems.refresh();
+		visBEvents.refresh();
+	}
 
 
 }

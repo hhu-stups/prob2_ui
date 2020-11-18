@@ -41,7 +41,7 @@ import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 @Singleton
 public class VisBParser {
 	private final CurrentTrace currentTrace;
-	private MachineLoader machineLoader;
+	private final MachineLoader machineLoader;
 
 	/**
 	 * As all other constructors in this plugin, this one needs interaction with the ProB2-UI to be able to evaluate the visualisation items.
@@ -62,15 +62,15 @@ public class VisBParser {
 	 * @throws EvaluationException from evaluating formula on trace
 	 * @throws BCompoundException if the B expression is not correct
 	 */
-	String evaluateFormulas(ArrayList<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
+	public String evaluateFormulas(List<VisBItem> visItems) throws VisBParseException, EvaluationException, VisBNestedException, BCompoundException{
 		StringBuilder jQueryForChanges = new StringBuilder();
 		// get a list of parsed formulas:
-		ArrayList<IEvalElement> formulas = new ArrayList<IEvalElement>();
+		List<IEvalElement> formulas = new ArrayList<>();
 		for(VisBItem visItem : visItems) {
 		    formulas.add(parseItemFormula(visItem));
 		}
 		try {
-			Map<IEvalElement, AbstractEvalResult> abstractEvalResults = evaluateItemFormulas(formulas);					
+			Map<IEvalElement, AbstractEvalResult> abstractEvalResults = evaluateItemFormulas(formulas);
 			for(VisBItem visItem : visItems){
 			    AbstractEvalResult abstractEvalResult = abstractEvalResults.get(parseItemFormula(visItem));
 				String value = getValueFromResult(abstractEvalResult, visItem);
@@ -91,15 +91,15 @@ public class VisBParser {
 	private IEvalElement parseItemFormula(VisBItem visItem) throws VisBNestedException, ProBError {
 		String formulaToEval = visItem.getValue();
 		try {
-				if (visItem.parsedFormula != null) {
-				   return visItem.parsedFormula; // is already parsed
-				} else if(currentTrace.getModel() instanceof ClassicalBModel) {
-				   visItem.parsedFormula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
-				  // use parser associated with the current model, DEFINITIONS are accessible
-				} else {
-				   visItem.parsedFormula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
-				   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, cumbersome for VisB
-				}
+			if (visItem.parsedFormula != null) {
+			   return visItem.parsedFormula; // is already parsed
+			} else if(currentTrace.getModel() instanceof ClassicalBModel) {
+			   visItem.parsedFormula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
+			  // use parser associated with the current model, DEFINITIONS are accessible
+			} else {
+			   visItem.parsedFormula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
+			   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, cumbersome for VisB
+			}
 		} catch (EvaluationException e){
 			System.out.println("\nException for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
 			throw(new VisBNestedException("Exception parsing B formula for "+ visItem.getId() + "."+ visItem.getAttribute() + " : ",e));
@@ -170,8 +170,8 @@ public class VisBParser {
 	 */
 	private String getJQueryFromInput(String id, String attr, String value) throws VisBParseException{
 		boolean checkValue = false;
-		String length_per = "(0|([1-9]+\\d*))[%]?(em)?(ex)?(px)?(in)?(cm)?(mm)?(pt)?(pc)?";
-		String number_per = "^(0|([1-9]+\\d*))[%]?$";
+		String length_per = "[-]?(0|([1-9]+\\d*))[%]?(em)?(ex)?(px)?(in)?(cm)?(mm)?(pt)?(pc)?"; // TO DO: allow leading minus
+		String number_per = "^[-]?(0|([1-9]+\\d*))[%]?$";
 		String verified_string = "^[a-zA-Z][a-zA-Z0-9_\\-]*$";
 		switch(attr){
 			case "alignment-baseline":
@@ -218,7 +218,7 @@ public class VisBParser {
 			case "dx":
 			case "dy":
 				//Checking for length - list
-				checkValue = value.matches("^(" + length_per + " )*" + length_per + "$");
+				checkValue = value.matches("^(" + length_per + " )+$");
 				break;
 			case "fill":
 				//Checking for color
@@ -230,7 +230,7 @@ public class VisBParser {
 				}
 				break;
 			case "fill-opacity":
-				if(value.matches("^"+number_per+"$")){
+				if(value.matches(number_per)){
 					checkValue = true;
 				} else{
 					checkValue = checkNumber(value);
@@ -244,11 +244,11 @@ public class VisBParser {
 				checkValue = value.matches(verified_string);
 				break;
 			case "font-size":
-				checkValue = value.matches(length_per) || "smaller".equals(value) || "bigger".equals(value);
+				checkValue = value.matches("^(" + length_per + " )+$") || "smaller".equals(value) || "bigger".equals(value);
 				break;
 			case "font-stretch":
 				//Chech for percentage and values
-				if(value.matches("^"+number_per+"$")){
+				if(value.matches(number_per)){
 					checkValue = true;
 				}
 				String[] valueTypesFS = {"normal", "ultra-condensed", "extra-condensed", "condensed", "semi-condensed", "semi-expanded", "expanded", "extra-expanded", "ultra-expanded"};
@@ -424,6 +424,7 @@ public class VisBParser {
 	 * @return true, if it is a valid number, else otherwise
 	 */
 	private boolean checkNumber(String value){
+		// TODO: Valid float? Valid number? Integer?
 		try{
 			Float.parseFloat(value.replace(",","."));
 			return true;

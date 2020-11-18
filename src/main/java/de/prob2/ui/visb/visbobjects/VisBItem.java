@@ -3,6 +3,8 @@ package de.prob2.ui.visb.visbobjects;
 import de.prob2.ui.visb.VisBParser;
 import de.prob.animator.domainobjects.IEvalElement;
 
+import java.util.Objects;
+
 /**
  * The VisBItem is designed for the JSON / VisB file
  */
@@ -38,5 +40,19 @@ public class VisBItem {
 	@Override
 	public String toString(){
 		return "{ID: " + this.id +", ATTRIBUTE: "+this.attribute+", VALUE: "+this.value+"} ";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof VisBItem)) {
+			return false;
+		}
+		VisBItem other = (VisBItem) obj;
+		return this.id.equals(other.id) && this.attribute.equals(other.attribute) && this.value.equals(other.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, attribute, value);
 	}
 }

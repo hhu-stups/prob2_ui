@@ -5,33 +5,33 @@ package de.prob2.ui.visb.visbobjects;
  * The VisBEvent is designed for the JSON / VisB file
  */
 public class VisBHover {
-	private String hover_id; // id of the object whose attribute is modified upon hover
-	private String hover_attribute;
-	private String hover_enter_value;
-	private String hover_leave_value;
+	private String hoverID; // id of the object whose attribute is modified upon hover
+	private String hoverAttribute;
+	private String hoverEnterValue;
+	private String hoverLeaveValue;
 
-	public VisBHover(String hoverid, String attr, String enter, String leave){
-		this.hover_id = hoverid;
-		this.hover_attribute = attr;
-		this.hover_enter_value = enter;
-		this.hover_leave_value = leave;
+	public VisBHover(String hoverID, String hoverAttribute, String hoverEnterValue, String hoverLeaveValue){
+		this.hoverID = hoverID;
+		this.hoverAttribute = hoverAttribute;
+		this.hoverEnterValue = hoverEnterValue;
+		this.hoverLeaveValue = hoverLeaveValue;
 	}
 
 	public String getHoverId() {
-		return hover_id;
+		return hoverID;
 	}
 	public String getHoverAttr() {
-		return hover_attribute;
+		return hoverAttribute;
 	}
 	public String getHoverEnterVal() {
-		return hover_enter_value;
+		return hoverEnterValue;
 	}
 	public String getHoverLeaveVal() {
-		return hover_leave_value;
+		return hoverLeaveValue;
 	}
 
 	@Override
 	public String toString(){
-		return "<Hover changing " + hover_id + "." + hover_attribute+ " upon enter: "+hover_enter_value+ " leave: " + hover_leave_value + ">";
+		return "<Hover changing " + hoverID + "." + hoverAttribute+ " upon enter: "+hoverEnterValue+ " leave: " + hoverLeaveValue + ">";
 	}
 }

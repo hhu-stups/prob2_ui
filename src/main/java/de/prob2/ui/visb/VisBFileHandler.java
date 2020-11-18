@@ -1,5 +1,18 @@
 package de.prob2.ui.visb;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import de.prob2.ui.visb.exceptions.VisBParseException;
+import de.prob2.ui.visb.visbobjects.VisBEvent;
+import de.prob2.ui.visb.visbobjects.VisBHover;
+import de.prob2.ui.visb.visbobjects.VisBItem;
+import de.prob2.ui.visb.visbobjects.VisBVisualisation;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,19 +21,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.stream.JsonReader;
-
-import de.prob2.ui.visb.exceptions.VisBParseException;
-import de.prob2.ui.visb.visbobjects.VisBEvent;
-import de.prob2.ui.visb.visbobjects.VisBHover;
-import de.prob2.ui.visb.visbobjects.VisBItem;
-import de.prob2.ui.visb.visbobjects.VisBVisualisation;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The VisBFileHandler handles everything, that needs to be done with files for the {@link VisBController}.
@@ -34,15 +36,15 @@ class VisBFileHandler {
 	 * @throws IOException If the file cannot be found, does not exist or is otherwise not accessible.
 	 * @throws VisBParseException If the file does not have the VisB format.
 	 */
-	static VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException {
+	static VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException, JsonSyntaxException {
 		Gson gson = new Gson();
 		JsonReader reader = new JsonReader(new FileReader(inputFile));
 		JsonObject visBFile = gson.fromJson(reader, JsonObject.class);
 		String parentFile = inputFile.getParentFile().toString();
 		Path svgPath;
-		if(visBFile.has("svg")){
+		if (visBFile.has("svg")) {
 			String filePath = visBFile.get("svg").getAsString();
-			if(filePath == null ||filePath.isEmpty()){
+			if (filePath == null || filePath.isEmpty()) {
 				throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
 			} else {
 				svgPath = Paths.get(filePath);
@@ -50,29 +52,24 @@ class VisBFileHandler {
 					svgPath = Paths.get(parentFile, filePath);
 				}
 			}
-		} else{
+		} else {
 			throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
 		}
-		
-	    ArrayList<VisBItem> visBItems = new ArrayList<>();
-		ArrayList<VisBEvent> visBEvents = new ArrayList<>();
-		
-		HashSet<String> visbfiles = new HashSet<String>();
-		visbfiles.add(inputFile.toString());
-		
-		processCoreFile(gson, visBFile, parentFile, visbfiles, visBItems, visBEvents);
-		
-		if((visBItems.isEmpty() && visBEvents.isEmpty()) || svgPath == null){
-			return null;
-		} else {
-			return new VisBVisualisation(visBItems, visBEvents, svgPath, inputFile);
-		}
+
+		List<VisBItem> visBItems = new ArrayList<>();
+		List<VisBEvent> visBEvents = new ArrayList<>();
+
+		Set<String> visBFiles = new HashSet<>();
+		visBFiles.add(inputFile.toString());
+
+		processCoreFile(gson, visBFile, parentFile, visBFiles, visBItems, visBEvents);
+
+		return new VisBVisualisation(visBItems, visBEvents, svgPath, inputFile);
 	}
 	
 	
-	private static void processCoreFile (Gson gson, JsonObject visBFile, String parentFile, HashSet<String> visbfiles,
-	                                     ArrayList<VisBItem> visBItems, 
-	                                     ArrayList<VisBEvent> visBEvents) throws IOException, VisBParseException {
+	private static void processCoreFile (Gson gson, JsonObject visBFile, String parentFile, Set<String> visBFiles,
+	                                     List<VisBItem> visBItems, List<VisBEvent> visBEvents) throws IOException, VisBParseException {
 	
 		if(visBFile.has("include")) {
 			String includedFileName = visBFile.get("include").getAsString();
@@ -81,71 +78,70 @@ class VisBFileHandler {
 				includedFilePath = Paths.get(parentFile, includedFileName);
 			}
 			// TO DO : check for cycles in inclusion
-			if (visbfiles.contains(includedFilePath.toString())) {
+			if (visBFiles.contains(includedFilePath.toString())) {
 				throw new VisBParseException("There is a loop in your VisB include statements leading to: " +  includedFileName);
 			} else {
-				visbfiles.add(includedFilePath.toString());
+				visBFiles.add(includedFilePath.toString());
 				System.out.println("Processing subsidiary VisB JSON file: " + includedFilePath);
 				JsonReader reader = new JsonReader(new FileReader(includedFilePath.toFile()));
 				JsonObject includedVisBFile = gson.fromJson(reader, JsonObject.class);
-				processCoreFile(gson, includedVisBFile,  parentFile, visbfiles, visBItems, visBEvents);
+				processCoreFile(gson, includedVisBFile,  parentFile, visBFiles, visBItems, visBEvents);
 			}
 		}
-		assembleVisList(visBFile,visBItems);
-		assembleEventList(visBFile,visBEvents);
+		assembleItemList(visBFile, visBItems);
+		assembleEventList(visBFile, visBEvents);
 	}
     
     
 	/**
-	 * This method assembles the events into a {@link ArrayList}. There is only one event possible for on click events for SVGs.
+	 * This method assembles the events into a {@link List}. There is only one event possible for on click events for SVGs.
 	 * @param visBFile {@link JsonObject} containing possible events
-	 * @param visBEvents {@link ArrayList} into which the events are assembled
+	 * @param visBEvents {@link List} into which the events are assembled
 	 * @throws VisBParseException If the format of the file is not right.
 	 */
-	private static void assembleEventList(JsonObject visBFile, ArrayList<VisBEvent> visBEvents) 
+	private static void assembleEventList(JsonObject visBFile, List<VisBEvent> visBEvents)
 	                    throws VisBParseException{
 		if(!visBFile.has("events"))
 		    return;
 		JsonArray array = (JsonArray) visBFile.get("events");
 		if(array == null || array.isJsonNull() || array.size() == 0) return;
 		for (Object event : array) {
-			JsonObject current_obj = (JsonObject) event;
-			if(current_obj.isJsonNull()){
+			JsonObject currentObj = (JsonObject) event;
+			if(currentObj.isJsonNull()){
 				continue;
 			}
-			if(current_obj.has("id") && current_obj.has("event")) {
-				String id = current_obj.get("id").getAsString();
+			if(currentObj.has("id") && currentObj.has("event")) {
+				String id = currentObj.get("id").getAsString();
 				if(id.isEmpty()){
 					throw new VisBParseException("An event in your visualisation file has an empty id.");
 				}
-				if (current_obj.has("ignore")) {
+				if (currentObj.has("ignore")) {
 					System.out.println("Ignoring VisB Event for " + id);
 				} else {
-					String eventS = current_obj.get("event").getAsString();
+					String eventS = currentObj.get("event").getAsString();
 					// we now also allow empty event in case we only want to hover
-					ArrayList<String> predicates = new ArrayList<>();
-					if(current_obj.has("predicates")){
-						JsonArray jsonPredicates = current_obj.getAsJsonArray("predicates");
+					List<String> predicates = new ArrayList<>();
+					if(currentObj.has("predicates")){
+						JsonArray jsonPredicates = currentObj.getAsJsonArray("predicates");
 						for(int i = 0; i < jsonPredicates.size();i++){
 							predicates.add(jsonPredicates.get(i).getAsString());
 						}
 					}
 					
-					JsonArray repArray = getRepeatArray(current_obj,"event "+id);
+					JsonArray repArray = getRepeatArray(currentObj,"event "+id);
 					if (repArray != null) {
 						// a list of strings which will replace %0, ... 
 						System.out.println("repeats = " + repArray);
 						for(JsonElement rep : repArray) {
 							// now replace %0, %1, ... by values provided
-							String repId = new String(id);
-							String repEvent = new String(eventS);
-							ArrayList<String> repPreds= new ArrayList<String>();
-							repPreds.addAll(predicates);
+							String repId = id;
+							String repEvent = eventS;
+							List<String> repPreds = new ArrayList<>(predicates);
 							
 							JsonArray replaceArr = getJsonArray(rep);
 							for(int i =0; i<replaceArr.size();i++) {
 								String thisVal = replaceArr.get(i).getAsString();
-								String pattern = new String("%"+i);
+								String pattern = "%"+i;
 								System.out.println("Repeating event " + id + " for '" + pattern + "' = " + thisVal);
 								repId = repId.replace(pattern, thisVal);
 								repEvent = repEvent.replace(pattern, thisVal);
@@ -154,20 +150,19 @@ class VisBFileHandler {
 								}
 								// we could check that all arrays have same size; otherwise a pattern will not be replaced
 							}
-							AddVisBEvent(visBEvents, repId, repEvent, repPreds, current_obj);
+							addVisBEvent(visBEvents, repId, repEvent, repPreds, currentObj);
 						}
 					} else { // no repititions have to be applied
-						AddVisBEvent(visBEvents, id, eventS, predicates, current_obj);
+						addVisBEvent(visBEvents, id, eventS, predicates, currentObj);
 					}
 				}
-			} else if (!current_obj.has("id")){
+			} else if (!currentObj.has("id")){
 				throw new VisBParseException("There is a event in your visualisation file, that has no \"id\" attribute.");
-			} else if (!current_obj.has("event")){
-				String id = current_obj.get("id").getAsString();
+			} else if (!currentObj.has("event")){
+				String id = currentObj.get("id").getAsString();
 				throw new VisBParseException("The event for " + id + " in your visualisation file has no \"event\" attribute.");
 			}
 		}
-		return;
 	}
 	
 	// utility to get attribute and throw exception if it does not exist
@@ -175,36 +170,38 @@ class VisBFileHandler {
 	   JsonElement el = obj.get(attr);
 	   if(el==null) {
 	       throw new VisBParseException("Missing attribute "+attr+" for "+ctxt);
-	   } else {
-	     return el.getAsString();
 	   }
+	   return el.getAsString();
 	}
 	
 	// create the VisB Event, after assembling hover information
-	private static void AddVisBEvent(ArrayList<VisBEvent> visBEvents, 
-	                            String id, String eventS, ArrayList<String> predicates,
-	                            JsonObject current_obj) throws VisBParseException {
+	private static void addVisBEvent(List<VisBEvent> visBEvents,
+	                            String id, String eventS, List<String> predicates,
+	                            JsonObject currentObj) throws VisBParseException {
 	    
-		ArrayList<VisBHover> hovers = new ArrayList<VisBHover>();
-		if(current_obj.has("hovers")){
-           JsonArray jsonHovers = current_obj.getAsJsonArray("hovers");
+		List<VisBHover> hovers = new ArrayList<>();
+		if(currentObj.has("hovers")){
+           JsonArray jsonHovers = currentObj.getAsJsonArray("hovers");
 		   for(int i = 0; i < jsonHovers.size();i++){
 			   JsonObject hv = jsonHovers.get(i).getAsJsonObject();
 		   
-			   String hoverid; String hoverAttr; String hoverEnter; String hoverLeave;
+			   String hoverID;
+			   String hoverAttr;
+			   String hoverEnter;
+			   String hoverLeave;
 			   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
 			   hoverEnter = getAttrString(hv,"enter","hover within event "+id); // TO DO: apply replacements
 			   hoverLeave = getAttrString(hv,"leave","hover within event "+id); // ditto
 			   if(hv.has("id")) {
-				  hoverid = getAttrString(hv,"id","hover within event "+id); // ditto
+			   		hoverID = getAttrString(hv,"id","hover within event "+id); // ditto
 			   } else {
-				  hoverid = id;
+			   		hoverID = id;
 			   }
 			   System.out.println("Detected hover: " +id + " for "+ hoverAttr);
-			   hovers.add(new VisBHover(hoverid,hoverAttr,hoverEnter,hoverLeave));
+			   hovers.add(new VisBHover(hoverID, hoverAttr, hoverEnter, hoverLeave));
 		   }
 		}
-		Boolean optional = (current_obj.has("optional") && current_obj.get("optional").getAsBoolean());
+		Boolean optional = (currentObj.has("optional") && currentObj.get("optional").getAsBoolean());
 		VisBEvent visBEvent = new VisBEvent(id, optional , eventS, predicates, hovers);
 		if(!containsId(visBEvents, id)) {
 			visBEvents.add(visBEvent);
@@ -213,7 +210,7 @@ class VisBFileHandler {
 		}
 	}
 
-	private static boolean containsId(ArrayList<VisBEvent> visBEvents, String id){
+	private static boolean containsId(List<VisBEvent> visBEvents, String id){
 		for(VisBEvent visBEvent : visBEvents){
 			if(id.equals(visBEvent.getId())){
 				return true;
@@ -223,33 +220,33 @@ class VisBFileHandler {
 	}
 
 	/**
-	 * This method assembles the visualisation items into an {@link ArrayList}. There are multiple possible attribute changes for an SVG element after a state changed.
+	 * This method assembles the visualisation items into an {@link List}. There are multiple possible attribute changes for an SVG element after a state changed.
 	 * @param visBFile {@link JsonObject} containing possible items
-	 * @param visBItems {@link ArrayList} into which the {@link VisBItem}s are assembled
+	 * @param visBItems {@link List} into which the {@link VisBItem}s are assembled
 	 * @throws VisBParseException If the format of the file is not right.
 	 */
-	private static void assembleVisList(JsonObject visBFile, ArrayList<VisBItem> visBItems)
+	private static void assembleItemList(JsonObject visBFile, List<VisBItem> visBItems)
 	               throws VisBParseException{
 		if(!visBFile.has("items"))
 		    return;
 		JsonArray array = (JsonArray) visBFile.get("items");
 		if(array == null || array.isJsonNull() || array.size() == 0) return;
 		for (Object item : array) {
-			JsonObject current_obj = (JsonObject) item;
-			if(current_obj.isJsonNull()){
+			JsonObject currentObj = (JsonObject) item;
+			if(currentObj.isJsonNull()){
 				continue;
 			}
-			if(current_obj.has("id") && current_obj.has("attr") && current_obj.has("value")) {
-				String id = current_obj.get("id").getAsString();
-				String attribute = current_obj.get("attr").getAsString();
-				String value = current_obj.get("value").getAsString();
+			if(currentObj.has("id") && currentObj.has("attr") && currentObj.has("value")) {
+				String id = currentObj.get("id").getAsString();
+				String attribute = currentObj.get("attr").getAsString();
+				String value = currentObj.get("value").getAsString();
 				if(id.isEmpty() || attribute.isEmpty() || value.isEmpty()){
 					throw new VisBParseException("There is an item in your visualisation file, that has an empty id, attr, or value body.");
 				}
-				if (current_obj.has("ignore")) {
+				if (currentObj.has("ignore")) {
 					System.out.println("Ignoring VisB Item: " + id + "." + attribute);
 				} else {
-					JsonArray repArray = getRepeatArray(current_obj,"VisB item "+id+ "." + attribute);
+					JsonArray repArray = getRepeatArray(currentObj,"VisB item "+id+ "." + attribute);
 					if (repArray != null) {
 						// a list of strings which will replace %0, ... in the id and value attributes:
 						for(JsonElement rep : repArray) {
@@ -273,15 +270,14 @@ class VisBFileHandler {
 						visBItems.add(new VisBItem(id, attribute, value));
 					}
 				}
-			} else if (!current_obj.has("id")){
+			} else if (!currentObj.has("id")){
 				throw new VisBParseException("There is a item in your visualisation file, that has no \"id\" member.");
-			} else if (!current_obj.has("attr")){
+			} else if (!currentObj.has("attr")){
 				throw new VisBParseException("There is a item in your visualisation file, that has no \"attr\" member.");
-			} else if (!current_obj.has("value")){
+			} else if (!currentObj.has("value")){
 				throw new VisBParseException("There is a item in your visualisation file, that has no \"value\" member.");
 			}
 		}
-		return;
 	}
 	
 	// utility to get a JsonArray; a single Object is automatically transformed into a single item array
@@ -296,9 +292,9 @@ class VisBFileHandler {
 	}
 	
 	// get a JsonArray of repetitions; either as a repeat list of explicit strings, or a for loop
-	private static JsonArray getRepeatArray (JsonObject current_obj, String ctxt) throws VisBParseException {
-	     if (current_obj.has("for")) {
-	        JsonObject forloop = (JsonObject) current_obj.get("for"); // To do: check if JsonElement instanceof JsonObject
+	private static JsonArray getRepeatArray (JsonObject currentObj, String ctxt) throws VisBParseException {
+	     if (currentObj.has("for")) {
+	        JsonObject forloop = (JsonObject) currentObj.get("for"); // To do: check if JsonElement instanceof JsonObject
 	        if (!(forloop.has("from") && forloop.has("to"))) {
 			    throw new VisBParseException("A for loop requires both a from and to attribute within "+ctxt);
 	        }
@@ -316,12 +312,12 @@ class VisBFileHandler {
 			}
 			JsonArray replaceArr = new JsonArray();
 			for(int i=from; i <= to; i += step) {
-				if (current_obj.has("repeat")) {
-				    for(JsonElement rep : (JsonArray) current_obj.get("repeat") ) {
-				       JsonArray arr_inner = new JsonArray();
-				       arr_inner.add(new JsonPrimitive(i)); // add i at end of beginning of list
-				       arr_inner.addAll(getJsonArray(rep)); // now copy original rep list
-				       replaceArr.add(arr_inner); // add modified repetition list to overall list
+				if (currentObj.has("repeat")) {
+				    for(JsonElement rep : (JsonArray) currentObj.get("repeat") ) {
+						JsonArray arrInner = new JsonArray();
+						arrInner.add(new JsonPrimitive(i)); // add i at end of beginning of list
+						arrInner.addAll(getJsonArray(rep)); // now copy original rep list
+						replaceArr.add(arrInner); // add modified repetition list to overall list
 				    }
 				} else {
 					replaceArr.add(new JsonPrimitive(i) );
@@ -329,8 +325,8 @@ class VisBFileHandler {
 			    System.out.println("repeat-for: " + i + " within "+ctxt);
 			}
 			return replaceArr;
-	     }  else if (current_obj.has("repeat")) { // repeat without for
-	        return (JsonArray) current_obj.get("repeat");
+	     }  else if (currentObj.has("repeat")) { // repeat without for
+	        return (JsonArray) currentObj.get("repeat");
 	     } else {
 	        return null;
 	     }

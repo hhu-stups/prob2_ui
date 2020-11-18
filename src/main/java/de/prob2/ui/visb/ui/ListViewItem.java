@@ -4,8 +4,8 @@ import com.google.inject.Injector;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.VisBStage;
+import de.prob2.ui.visb.visbobjects.VisBItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -18,15 +18,15 @@ import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 
 public class ListViewItem extends ListCell<VisBItem> {
 	@FXML
-	private VBox item_box;
+	private VBox itemBox;
 	@FXML
-	private Label item_id;
+	private Label lbID;
 	@FXML
-	private Label label_attr;
+	private Label lbAttribute;
 	@FXML
-	private Label label_value;
+	private Label lbExpression;
 	@FXML
-	private Label label_evalValue;
+	private Label lbValue;
 
 	private VisBItem visBItem;
 
@@ -47,18 +47,12 @@ public class ListViewItem extends ListCell<VisBItem> {
 	@FXML
 	public void initialize(){
 		this.setText("");
-		this.setGraphic(this.item_box);
+		this.setGraphic(this.itemBox);
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if(visBItem != null) {
-				if (to) {
-					String toID = visBItem.getId();
-					String toInvocation = buildInvocation("changeAttribute", wrapAsString("#" + toID), wrapAsString("opacity"), wrapAsString("0.5"));
-					injector.getInstance(VisBStage.class).runScript(toInvocation);
-				} else {
-					String fromID = visBItem.getId();
-					String fromInvocation = buildInvocation("changeAttribute", wrapAsString("#" + fromID), wrapAsString("opacity"), wrapAsString("1.0"));
-					injector.getInstance(VisBStage.class).runScript(fromInvocation);
-				}
+				String id = visBItem.getId();
+				String invocation = buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString("opacity"), to ? wrapAsString("0.5") : wrapAsString("1.0"));
+				injector.getInstance(VisBStage.class).runScript(invocation);
 			}
 		});
 	}
@@ -68,16 +62,16 @@ public class ListViewItem extends ListCell<VisBItem> {
 		super.updateItem(visBItem, empty);
 		this.visBItem = visBItem;
 		if(visBItem != null) {
-			this.item_id.setText(visBItem.getId());
-			this.label_value.setText(String.format(bundle.getString("visb.item.expression"), visBItem.getValue()));
-			this.label_attr.setText(String.format(bundle.getString("visb.item.attribute"), visBItem.getAttribute()));
-			if(visBItem.parsedFormula != null) {
+			this.lbID.setText(visBItem.getId());
+			this.lbExpression.setText(String.format(bundle.getString("visb.item.expression"), visBItem.getValue()));
+			this.lbAttribute.setText(String.format(bundle.getString("visb.item.attribute"), visBItem.getAttribute()));
+			if(visBItem.parsedFormula != null && currentTrace.isNotNull().get() && currentTrace.getCurrentState() != null) {
 				AbstractEvalResult result = currentTrace.getCurrentState().eval(visBItem.parsedFormula);
-				this.label_evalValue.setText(String.format(bundle.getString("visb.item.value"), result.toString()));
+				this.lbValue.setText(String.format(bundle.getString("visb.item.value"), result.toString()));
 			} else {
-				this.label_evalValue.setText("");
+				this.lbValue.setText("");
 			}
-			this.setGraphic(this.item_box);
+			this.setGraphic(this.itemBox);
 			this.setText("");
 		} else {
 			clear();
@@ -85,11 +79,12 @@ public class ListViewItem extends ListCell<VisBItem> {
 	}
 
 	public void clear() {
-		this.item_id.setText("");
-		this.label_value.setText("");
-		this.label_attr.setText("");
-		this.label_evalValue.setText("");
-		this.setGraphic(this.item_box);
+		this.lbID.setText("");
+		this.lbExpression.setText("");
+		this.lbAttribute.setText("");
+		this.lbValue.setText("");
+		this.setGraphic(this.itemBox);
 		this.setText("");
 	}
+
 }
