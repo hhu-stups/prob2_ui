@@ -5,6 +5,7 @@ import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.check.Delta;
+import de.prob.check.tracereplay.check.TraceCheckerUtils;
 import de.prob.statespace.OperationInfo;
 import de.prob2.ui.internal.StageManager;
 import javafx.beans.property.SetProperty;
@@ -124,7 +125,8 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		VBox result = new VBox();
 
-		{
+		if(traceModificationChecker.traceChecker.getTypeFinder().getInitIsTypeIorIICandidate()
+			&&!traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeIIInit().isEmpty()){
 			int row = 0;
 			GridPane gridPane = new GridPane();
 
@@ -245,6 +247,20 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
+	VBox prepareFlexibleColumn2(Map<String, StringProperty> stuff){
+		List<Label> labels = stuff.values().stream().map(stringProperty -> {
+			Label result = new Label();
+			result.textProperty().bindBidirectional(stringProperty);
+			return result;
+		}).collect(Collectors.toList());
+
+		Node[] elements = new Node[labels.size()];
+		labels.toArray(elements);
+
+		return new VBox(elements);
+	}
+
+
 	public VBox setTypeIIAmbiguousConflicts() {
 
 
@@ -267,14 +283,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 			StringProperty title = new SimpleStringProperty("Title");
 
-			final List<StringProperty> variableSlotsNew = new ArrayList<>();
-			final List<StringProperty> variableSlotsOld = new ArrayList<>();
-
-			final List<StringProperty> inputSlotsNew = new ArrayList<>();
-			final List<StringProperty> inputSlotsOld = new ArrayList<>();
-
-			final List<StringProperty> outputSlotsNew = new ArrayList<>();
-			final List<StringProperty> outputSlotsOld = new ArrayList<>();
+			final Map<String, StringProperty> mapVariables = new HashMap<>();
+			final Map<String, StringProperty> mapInput = new HashMap<>();
+			final Map<String, StringProperty> mapOutput = new HashMap<>();
 
 			int row = 0;
 			GridPane gridPane = new GridPane();
@@ -306,45 +317,43 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 			if(!variables.isEmpty()){
+				mapVariables.putAll(
+						TraceCheckerUtils.zip(variables, variables.stream().map(SimpleStringProperty::new).collect(Collectors.toList())));
 
-				variableSlotsOld.addAll(variables.stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
-
-				variableSlotsNew.addAll(variables.stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
-
-				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.variables")), prepareFlexibleColumn(variableSlotsOld),
-						prepareFlexibleColumn(variableSlotsNew), row);
+				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.variables")),
+						prepareColumn(variables), prepareFlexibleColumn2(mapVariables), row);
 			}
 
 
 			if(!operationInfo.getParameterNames().isEmpty()){
 
-				inputSlotsOld.addAll(operationInfo.getParameterNames().stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
+				List<String> inputValues = (List<String>) entry.getValue().get(0).getInputParameters().values();
+				List<String> inputKeys = new ArrayList<>(entry.getValue().get(0).getInputParameters().keySet());
 
-				inputSlotsNew.addAll(operationInfo.getParameterNames().stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
-
+				mapInput.putAll(TraceCheckerUtils.zip(inputKeys,
+						inputValues.stream().map(SimpleStringProperty::new).collect(Collectors.toList())));
 
 				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.input")),
-						prepareFlexibleColumn(inputSlotsOld),
-						prepareFlexibleColumn(inputSlotsNew), row);
+						prepareColumn(operationInfo.getParameterNames()),
+						prepareFlexibleColumn2(mapInput), row);
 			}
 
 			if(!operationInfo.getParameterNames().isEmpty()){
-				outputSlotsOld.addAll(operationInfo.getOutputParameterNames().stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
 
-				outputSlotsNew.addAll(operationInfo.getOutputParameterNames().stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
+				List<String> outputValues = (List<String>) entry.getValue().get(0).getOutputParameters().values();
+				List<String> outputKeys = new ArrayList<>(entry.getValue().get(0).getOutputParameters().keySet());
 
+				mapOutput.putAll(TraceCheckerUtils.zip(outputKeys,
+						outputValues.stream().map(SimpleStringProperty::new).collect(Collectors.toList())));
 
-				registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.output")),
-						prepareFlexibleColumn(outputSlotsOld),
-						prepareFlexibleColumn(outputSlotsNew), row);
+				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.output")),
+						prepareColumn(operationInfo.getParameterNames()),
+						prepareFlexibleColumn2(mapInput), row);
 			}
-
 
 
 
 			choiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-
-
 				selected.remove(new Pair<>(entry.getKey(), oldValue));
 				selected.add(new Pair<>(entry.getKey(), newValue));
 
@@ -352,31 +361,20 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 				Pair<String, String> key = new Pair<>(entry.getKey(), newValue);
 
-				variableSlotsOld.clear();
-				variableSlotsNew.clear();
-
-				inputSlotsOld.clear();
-				inputSlotsNew.clear();
-
-				outputSlotsOld.clear();
-				outputSlotsNew.clear();
-
 
 				title.set(entry.getKey() + "<->" + newValue);
 
 				changeToDelta.get(key).getVariables().forEach((key1, value) -> {
-					variableSlotsOld.add(new SimpleStringProperty(key1));
-					variableSlotsNew.add(new SimpleStringProperty(value));
+					mapVariables.get(key1).set(value);
 				});
 
 				changeToDelta.get(key).getInputParameters().forEach((key1, value) -> {
-					inputSlotsOld.add(new SimpleStringProperty(key1));
-					inputSlotsNew.add(new SimpleStringProperty(value));
+					mapInput.get(key1).set(value);
 				});
 
 				changeToDelta.get(key).getOutputParameters().forEach((key1, value) -> {
-					outputSlotsOld.add(new SimpleStringProperty(key1));
-					outputSlotsNew.add(new SimpleStringProperty(value));
+					mapOutput.get(key1).set(value);
+
 				});
 
 			});
@@ -387,6 +385,54 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 			result.getChildren().add(titledPane);
 
+		}
+
+		return result;
+
+	}
+
+
+
+	public int flexibleRow(List<Delta> newValues, Map<String, StringProperty> map, GridPane gridPane, int row, String key){
+		List<String> outputValues = (List<String>) newValues.get(0).getOutputParameters().values();
+		List<String> outputKeys = new ArrayList<>(newValues.get(0).getOutputParameters().keySet());
+
+		map.putAll(TraceCheckerUtils.zip(outputKeys,
+				outputValues.stream().map(SimpleStringProperty::new).collect(Collectors.toList())));
+
+		return registerRow(gridPane, new Label(resourceBundle.getString(key)),
+				prepareColumn(outputKeys),
+				prepareFlexibleColumn2(map), row);
+	}
+
+	public VBox setTypeIVInitialisation(){
+		Map<String, Map<String, String>> resultTypeII = traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeII();
+		Map<String, OperationInfo> operationInfoMap = traceModificationChecker.traceChecker.getOldOperationInfos();
+		Map<String, String> globalVars = traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeIIInit();
+
+		VBox result = new VBox();
+
+		if(!traceModificationChecker.traceChecker.getTypeFinder().getInitIsTypeIorIICandidate() &&
+				!traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeIIInit().isEmpty()){
+			int row = 0;
+			GridPane gridPane = new GridPane();
+
+
+			Label empty = new Label();
+			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
+			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
+
+
+			row = registerRow(gridPane, empty, oldL, newL, row);
+
+
+			registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.name")), prepareColumn(new ArrayList<>(globalVars.keySet())),
+					prepareColumn(new ArrayList<>(globalVars.values())), row);
+
+			TitledPane titledPane = new TitledPane(resourceBundle.getString("traceModification.alert.init"), gridPane);
+
+
+			result.getChildren().add(titledPane);
 		}
 
 		return result;
