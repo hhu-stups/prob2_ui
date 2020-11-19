@@ -4,8 +4,17 @@ import com.google.inject.Injector;
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
+import de.prob.check.tracereplay.check.Delta;
 import de.prob.statespace.OperationInfo;
 import de.prob2.ui.internal.StageManager;
+import javafx.beans.property.SetProperty;
+import javafx.beans.property.SimpleSetProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -14,6 +23,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Callback;
+import javafx.util.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,6 +36,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private final StageManager stageManager;
 	private final TraceModificationChecker traceModificationChecker;
 	List<PersistentTransition> selectedTrace;
+
 
 	@FXML
 	private TextFlow textFlow;
@@ -66,6 +77,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 
+
 		this.setResultConverter(param -> {
 
 			if(param.getButtonData() == ButtonBar.ButtonData.NO){
@@ -96,6 +108,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
 		accordion.prefWidthProperty().bindBidirectional(typeII.prefWidthProperty());
 
+		VBox accordion2 = setTypeIIAmbiguousConflicts();
+		typeIIPer.setContent(accordion2);
+		typeIIPer.textProperty().set(resourceBundle.getString("traceModification.alert.typeIIAmbiguous" ));
 
 		selectedTrace = traceModificationChecker.traceChecker.getTraceModifier().getLastChange();
 	}
@@ -137,7 +152,6 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			GridPane gridPane = new GridPane();
 
 
-			Map<String, String> partner = resultTypeII.get(entry.getKey());
 
 			Label empty = new Label();
 			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
@@ -159,6 +173,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			List<String> variables = Stream.of(operationInfo.getReadVariables(), operationInfo.getNonDetWrittenVariables(), operationInfo.getWrittenVariables())
 					.flatMap(Collection::stream).distinct().collect(Collectors.toList());
 
+			Map<String, String> partner = resultTypeII.get(entry.getKey());
 
 			if(!variables.isEmpty()){
 				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.variables")), prepareColumn(variables),
@@ -204,9 +219,6 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-
-
-
 	VBox prepareColumn(List<String> stuff){
 
 		List<Label> oldStuffFX = stuff.stream().map(Label::new).collect(Collectors.toList());
@@ -217,6 +229,170 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		return new VBox(elements);
 	}
+
+
+	VBox prepareFlexibleColumn(List<StringProperty> stuff){
+		List<Label> labels = stuff.stream().map(stringProperty -> {
+			Label result = new Label();
+			result.textProperty().bindBidirectional(stringProperty);
+			return result;
+		}).collect(Collectors.toList());
+
+		Node[] elements = new Node[labels.size()];
+		labels.toArray(elements);
+
+		return new VBox(elements);
+	}
+
+
+	public VBox setTypeIIAmbiguousConflicts() {
+
+
+		Map<String, List<Delta>> resultTypeII = traceModificationChecker.traceChecker.getTypeIICandidates();
+		Map<Pair<String, String>, Delta> changeToDelta = resultTypeII.entrySet().stream().flatMap(entry -> entry.getValue().stream()
+						.map(delta -> new Pair<>(new Pair<>(delta.getOriginalName(), delta.getDeltaName()), delta)))
+				.collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+
+		Map<String, OperationInfo> operationInfoMap = traceModificationChecker.traceChecker.getOldOperationInfos();
+
+		Map<Set<Delta>, List<PersistentTransition>> changelogPhase2II = traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase2II();
+
+		final Set<Pair<String, String>> selected = new HashSet<>();
+
+
+		VBox result = new VBox();
+
+
+		for(Map.Entry<String, List<Delta>> entry : resultTypeII.entrySet()){
+
+			StringProperty title = new SimpleStringProperty("Title");
+
+			final List<StringProperty> variableSlotsNew = new ArrayList<>();
+			final List<StringProperty> variableSlotsOld = new ArrayList<>();
+
+			final List<StringProperty> inputSlotsNew = new ArrayList<>();
+			final List<StringProperty> inputSlotsOld = new ArrayList<>();
+
+			final List<StringProperty> outputSlotsNew = new ArrayList<>();
+			final List<StringProperty> outputSlotsOld = new ArrayList<>();
+
+			int row = 0;
+			GridPane gridPane = new GridPane();
+
+			Label empty = new Label();
+			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
+			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
+
+
+			row = registerRow(gridPane, empty, oldL, newL, row);
+
+
+			Label name = new Label(resourceBundle.getString("traceModification.alert.name"));
+
+
+			VBox newB = new VBox(); // prepareColumn(Collections.singletonList(entry.getKey()));
+			ChoiceBox<String> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(entry.getValue().stream().map(Delta::getDeltaName).collect(Collectors.toList())));
+			choiceBox.getSelectionModel().selectFirst();
+			selected.add(new Pair<>(entry.getKey(), choiceBox.getValue()));
+			newB.getChildren().add(choiceBox);
+			VBox oldB = new VBox(new Label(entry.getKey()));
+			row = registerRow(gridPane, name, oldB, newB, row);
+
+
+			OperationInfo operationInfo = operationInfoMap.get(entry.getKey());
+			List<String> variables = Stream.of(operationInfo.getReadVariables(), operationInfo.getNonDetWrittenVariables(), operationInfo.getWrittenVariables())
+					.flatMap(Collection::stream).distinct().collect(Collectors.toList());
+
+
+
+			if(!variables.isEmpty()){
+
+				variableSlotsOld.addAll(variables.stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
+
+				variableSlotsNew.addAll(variables.stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
+
+				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.variables")), prepareFlexibleColumn(variableSlotsOld),
+						prepareFlexibleColumn(variableSlotsNew), row);
+			}
+
+
+			if(!operationInfo.getParameterNames().isEmpty()){
+
+				inputSlotsOld.addAll(operationInfo.getParameterNames().stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
+
+				inputSlotsNew.addAll(operationInfo.getParameterNames().stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
+
+
+				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.input")),
+						prepareFlexibleColumn(inputSlotsOld),
+						prepareFlexibleColumn(inputSlotsNew), row);
+			}
+
+			if(!operationInfo.getParameterNames().isEmpty()){
+				outputSlotsOld.addAll(operationInfo.getOutputParameterNames().stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
+
+				outputSlotsNew.addAll(operationInfo.getOutputParameterNames().stream().map(SimpleStringProperty::new).collect(Collectors.toList()));
+
+
+				registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.output")),
+						prepareFlexibleColumn(outputSlotsOld),
+						prepareFlexibleColumn(outputSlotsNew), row);
+			}
+
+
+
+
+			choiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+
+
+				selected.remove(new Pair<>(entry.getKey(), oldValue));
+				selected.add(new Pair<>(entry.getKey(), newValue));
+
+				selectedTrace = changelogPhase2II.get(selected.stream().map(changeToDelta::get).collect(Collectors.toSet()));
+
+				Pair<String, String> key = new Pair<>(entry.getKey(), newValue);
+
+				variableSlotsOld.clear();
+				variableSlotsNew.clear();
+
+				inputSlotsOld.clear();
+				inputSlotsNew.clear();
+
+				outputSlotsOld.clear();
+				outputSlotsNew.clear();
+
+
+				title.set(entry.getKey() + "<->" + newValue);
+
+				changeToDelta.get(key).getVariables().forEach((key1, value) -> {
+					variableSlotsOld.add(new SimpleStringProperty(key1));
+					variableSlotsNew.add(new SimpleStringProperty(value));
+				});
+
+				changeToDelta.get(key).getInputParameters().forEach((key1, value) -> {
+					inputSlotsOld.add(new SimpleStringProperty(key1));
+					inputSlotsNew.add(new SimpleStringProperty(value));
+				});
+
+				changeToDelta.get(key).getOutputParameters().forEach((key1, value) -> {
+					outputSlotsOld.add(new SimpleStringProperty(key1));
+					outputSlotsNew.add(new SimpleStringProperty(value));
+				});
+
+			});
+
+
+			TitledPane titledPane = new TitledPane("", gridPane);
+			titledPane.textProperty().bindBidirectional(title);
+
+			result.getChildren().add(titledPane);
+
+		}
+
+		return result;
+
+	}
+
 
 
 
