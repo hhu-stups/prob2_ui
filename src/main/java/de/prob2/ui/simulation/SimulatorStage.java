@@ -3,6 +3,7 @@ package de.prob2.ui.simulation;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -17,11 +18,9 @@ import java.nio.file.Path;
 import java.util.ResourceBundle;
 
 
+@FXMLInjected
 @Singleton
 public class SimulatorStage extends Stage {
-
-	@FXML
-	private TextField tfTimer;
 
 	@FXML
 	private Button btSimulate;
@@ -38,12 +37,13 @@ public class SimulatorStage extends Stage {
 
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final Simulator simulator, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+		super();
 		this.stageManager = stageManager;
 	    this.simulator = simulator;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
         this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
-		stageManager.loadFXML(this, "simulator_stage.fxml");
+		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
 	}
 
 	@FXML
@@ -55,6 +55,7 @@ public class SimulatorStage extends Stage {
 				btSimulate.setText("Start");
 			}
 		});
+		btSimulate.disableProperty().bind(configurationPath.isNull());
 	}
 
 

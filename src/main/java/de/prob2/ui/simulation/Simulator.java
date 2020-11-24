@@ -3,6 +3,8 @@ package de.prob2.ui.simulation;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -60,14 +63,40 @@ public class Simulator {
 	}
 
 	public void chooseOperation() {
-	    Set<String> enabledOperations = currentTrace.getCurrentState().getOutTransitions()
-                .stream()
-                .map(trans -> trans.getName())
-                .collect(Collectors.toSet());
-	    // TODO:
+	    List<OperationConfiguration> possibleOperations = config.getOperationConfigurations()
+				.stream()
+				.filter(config -> config.getProbability() > 0.0)
+				.collect(Collectors.toList());
+
+		List<OperationConfiguration> enabledPossibleOperations = possibleOperations.stream()
+				.filter(op -> currentTrace.getCurrentState().getOutTransitions()
+						.stream()
+						.map(Transition::getName)
+						.collect(Collectors.toSet()).contains(op.getOpName()))
+				.collect(Collectors.toList());
+
 	    double ranDouble = Math.random();
-        Trace trace = currentTrace.get().randomAnimation(1);
-        currentTrace.set(trace);
+	    double minimumProbability = 0.0;
+	    String chosenOperation = "";
+
+
+	    for(OperationConfiguration config : enabledPossibleOperations) {
+			float newProbablity = (config.getProbability()/enabledPossibleOperations.size()) * possibleOperations.size();
+			minimumProbability += newProbablity;
+			chosenOperation = config.getOpName();
+			if(minimumProbability > ranDouble) {
+				break;
+			}
+
+		}
+
+	    if("".equals(chosenOperation)) {
+	    	currentTrace.set(currentTrace.get().randomAnimation(1));
+		} else {
+			Transition nextTransition = currentTrace.getCurrentState().findTransition(chosenOperation, "1=1");
+			Trace newTrace = currentTrace.get().add(nextTransition);
+			currentTrace.set(newTrace);
+		}
     }
 
 	public void stop() {
