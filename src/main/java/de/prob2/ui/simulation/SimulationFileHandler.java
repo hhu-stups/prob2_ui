@@ -27,8 +27,8 @@ public class SimulationFileHandler {
         for(int i = 0; i < operationConfigurationsAsArray.size(); i++) {
             JsonObject jsonObject = (JsonObject) operationConfigurationsAsArray.get(i);
             String opName = jsonObject.get("opName").getAsString();
-            int opTime = jsonObject.get("time").getAsInt();
-            float probability = jsonObject.get("probability").getAsFloat();
+            int opTime =  jsonObject.get("time") == null ? -1 : jsonObject.get("time").getAsInt();
+            float probability = jsonObject.get("probability") == null ? -1.0f : jsonObject.get("probability").getAsFloat();
             operationConfigurations.add(new OperationConfiguration(opName, opTime, probability));
         }
 

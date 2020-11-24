@@ -6,16 +6,24 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 @Singleton
 public class Simulator {
 
-	private Timer timer;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Simulator.class);
 
-	private int interval; // in ms
+    private SimulationConfiguration config;
+
+	private Timer timer;
 
 	private final CurrentTrace currentTrace;
 
@@ -23,17 +31,21 @@ public class Simulator {
 
 	@Inject
 	public Simulator(final CurrentTrace currentTrace) {
+	    this.config = null;
 		this.currentTrace = currentTrace;
 		this.runningProperty = new SimpleBooleanProperty(false);
 	}
 
-	public void initSimulator(int interval) {
-		this.interval = interval;
+	public void initSimulator(File configFile) {
+	    this.config = null;
+	    try {
+            this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
+        } catch (IOException e) {
+            LOGGER.debug("Tried to load simulation configuration file");
+            //TODO: Implement alert
+            return;
+        }
 		this.timer = new Timer();
-	}
-
-	public void setInterval(int interval) {
-		this.interval = interval;
 	}
 
 	public void run() {
@@ -41,12 +53,22 @@ public class Simulator {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				Trace trace = currentTrace.get().randomAnimation(1);
-				currentTrace.set(trace);
+                chooseOperation();
 			}
 		};
-		timer.schedule(task, interval,1000);
+		timer.schedule(task, config.getTime(),1000);
 	}
+
+	public void chooseOperation() {
+	    Set<String> enabledOperations = currentTrace.getCurrentState().getOutTransitions()
+                .stream()
+                .map(trans -> trans.getName())
+                .collect(Collectors.toSet());
+	    // TODO:
+	    double ranDouble = Math.random();
+        Trace trace = currentTrace.get().randomAnimation(1);
+        currentTrace.set(trace);
+    }
 
 	public void stop() {
 		timer.cancel();

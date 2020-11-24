@@ -1,21 +1,7 @@
 package de.prob2.ui.config;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.model.brules.RulesModelFactory;
 import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
@@ -29,15 +15,27 @@ import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob.scripting.ZFuzzFactory;
 import de.prob2.ui.project.ProjectManager;
-
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 @Singleton
 public class FileChooserManager {
 	public enum Kind {
-		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL
+		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL, SIMULATION
 	}
 
 	public static final String EXTENSION_PATTERN_PREFIX = "*.";
