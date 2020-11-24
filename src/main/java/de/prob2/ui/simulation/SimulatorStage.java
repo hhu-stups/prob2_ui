@@ -5,6 +5,8 @@ import com.google.inject.Singleton;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -27,6 +29,8 @@ public class SimulatorStage extends Stage {
 
 	private final StageManager stageManager;
 
+	private final CurrentProject currentProject;
+
 	private final Simulator simulator;
 
 	private final ResourceBundle bundle;
@@ -36,9 +40,10 @@ public class SimulatorStage extends Stage {
     private final ObjectProperty<Path> configurationPath;
 
 	@Inject
-	public SimulatorStage(final StageManager stageManager, final Simulator simulator, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final Simulator simulator, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		super();
 		this.stageManager = stageManager;
+		this.currentProject = currentProject;
 	    this.simulator = simulator;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
@@ -56,6 +61,7 @@ public class SimulatorStage extends Stage {
 			}
 		});
 		btSimulate.disableProperty().bind(configurationPath.isNull());
+		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
 	}
 
 
@@ -77,15 +83,10 @@ public class SimulatorStage extends Stage {
         );
         Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
         if(path != null) {
-            clear();
             configurationPath.set(path);
             File configFile = path.toFile();
             simulator.initSimulator(configFile);
         }
-    }
-
-    public void clear() {
-
     }
 
 }

@@ -41,8 +41,6 @@ public class Simulator {
 
 	@Inject
 	public Simulator(final CurrentTrace currentTrace) {
-		this.initialOperationToRemainingTime = new HashMap<>();
-		this.operationToRemainingTime = new HashMap<>();
 		this.currentTrace = currentTrace;
 		this.operationExecutedInThisStep = false;
 		this.runningProperty = new SimpleBooleanProperty(false);
@@ -57,7 +55,8 @@ public class Simulator {
             //TODO: Implement alert
             return;
         }
-		this.timer = new Timer();
+		this.initialOperationToRemainingTime = new HashMap<>();
+		this.operationToRemainingTime = new HashMap<>();
 	    initializeRemainingTime();
 	}
 
@@ -72,6 +71,7 @@ public class Simulator {
 	}
 
 	public void run() {
+		this.timer = new Timer();
 		runningProperty.set(true);
 		TimerTask task = new TimerTask() {
 			@Override
@@ -81,7 +81,7 @@ public class Simulator {
 				operationExecutedInThisStep = false;
 			}
 		};
-		timer.schedule(task, config.getTime(),1000);
+		timer.scheduleAtFixedRate(task, 0, config.getTime());
 	}
 
 	public void chooseOperation() {
@@ -118,19 +118,22 @@ public class Simulator {
 		Trace newTrace = currentTrace.get();
 		while(executedOperation.size() > 0) {
 			int previousExecutedOperationSize = executedOperation.size();
+			List<String> removedExecutedOperations = new ArrayList<>();
 			for(int i = 0; i < executedOperation.size(); i++) {
 				String chosenOperation = executedOperation.get(i);
-				if(currentTrace.getCurrentState().getOutTransitions()
+				if(currentTrace.getCurrentState().getTransitions()
 						.stream()
 						.map(Transition::getName)
 						.collect(Collectors.toList()).contains(chosenOperation)) {
 					Transition nextTransition = currentTrace.getCurrentState().findTransition(chosenOperation, "1=1");
 					newTrace = newTrace.add(nextTransition);
-					executedOperation.remove(chosenOperation);
+					removedExecutedOperations.add(chosenOperation);
 					operationToRemainingTime.computeIfPresent(chosenOperation, (k, v) -> initialOperationToRemainingTime.get(chosenOperation));
 					operationExecutedInThisStep = true;
 				}
 			}
+			executedOperation.removeAll(removedExecutedOperations);
+
 			if(previousExecutedOperationSize == executedOperation.size()) {
 				break;
 			}
@@ -147,7 +150,7 @@ public class Simulator {
 
 		//Calculate executable operations that are enabled
 		List<OperationConfiguration> enabledPossibleOperations = possibleOperations.stream()
-				.filter(op -> currentTrace.getCurrentState().getOutTransitions()
+				.filter(op -> currentTrace.getCurrentState().getTransitions()
 						.stream()
 						.map(Transition::getName)
 						.collect(Collectors.toSet()).contains(op.getOpName()))
@@ -165,7 +168,6 @@ public class Simulator {
 			if(minimumProbability > ranDouble) {
 				break;
 			}
-
 		}
 
 		//Execute chosen operation
@@ -179,6 +181,7 @@ public class Simulator {
 
 	public void stop() {
 		timer.cancel();
+		timer = null;
 		runningProperty.set(false);
 	}
 

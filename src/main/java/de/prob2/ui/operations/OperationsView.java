@@ -413,7 +413,7 @@ public final class OperationsView extends VBox {
 	}
 
 	private int compareParams(final List<String> left, final List<String> right) {
-		int minSize = left.size() < right.size() ? left.size() : right.size();
+		int minSize = Math.min(left.size(), right.size());
 		for (int i = 0; i < minSize; i++) {
 			int cmp = alphanumericComparator.compare(left.get(i), right.get(i));
 			if (cmp != 0) {
