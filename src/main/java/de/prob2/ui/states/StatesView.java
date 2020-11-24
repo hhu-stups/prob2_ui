@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.ExpandedFormulaStructure;
+import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
@@ -85,7 +85,7 @@ public final class StatesView extends StackPane {
 	private final BackgroundUpdater updater;
 	private final Set<BVisual2Formula> expandedFormulas;
 	private final Set<BVisual2Formula> visibleFormulas;
-	private final Map<BVisual2Formula, ExpandedFormulaStructure> formulaStructureCache;
+	private final Map<BVisual2Formula, ExpandedFormula> formulaStructureCache;
 	private boolean structureFullyExpanded;
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCache;
 	private final StateItem.FormulaEvaluator cachingEvaluator;
@@ -109,7 +109,7 @@ public final class StatesView extends StackPane {
 		this.formulaValueCache = new HashMap<>();
 		this.cachingEvaluator = new StateItem.FormulaEvaluator() {
 			@Override
-			public ExpandedFormulaStructure expand(final BVisual2Formula formula) {
+			public ExpandedFormula expand(final BVisual2Formula formula) {
 				return expandFormulaWithCaching(formula);
 			}
 
@@ -253,7 +253,7 @@ public final class StatesView extends StackPane {
 		return string.toLowerCase().contains(filter.toLowerCase());
 	}
 
-	private ExpandedFormulaStructure expandFormulaWithCaching(final BVisual2Formula formula) {
+	private ExpandedFormula expandFormulaWithCaching(final BVisual2Formula formula) {
 		return this.formulaStructureCache.computeIfAbsent(formula, BVisual2Formula::expandStructureNonrecursive);
 	}
 
@@ -272,8 +272,8 @@ public final class StatesView extends StackPane {
 	 * 
 	 * @param expandedStructures the expanded formula values to add
 	 */
-	private void addFormulaStructuresToCache(final Collection<? extends ExpandedFormulaStructure> expandedStructures) {
-		for (final ExpandedFormulaStructure expanded : expandedStructures) {
+	private void addFormulaStructuresToCache(final Collection<? extends ExpandedFormula> expandedStructures) {
+		for (final ExpandedFormula expanded : expandedStructures) {
 			this.formulaStructureCache.put(expanded.getFormula(), expanded);
 			if (expanded.getChildren() != null) {
 				this.addFormulaStructuresToCache(expanded.getChildren());
