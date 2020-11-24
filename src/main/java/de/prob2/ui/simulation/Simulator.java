@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -13,8 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
@@ -28,14 +29,22 @@ public class Simulator {
 
 	private Timer timer;
 
+	private Map<String, Integer> initialOperationToRemainingTime;
+
+	private Map<String, Integer> operationToRemainingTime;
+
 	private final CurrentTrace currentTrace;
 
 	private final BooleanProperty runningProperty;
 
+	private boolean operationExecutedInThisStep;
+
 	@Inject
 	public Simulator(final CurrentTrace currentTrace) {
-	    this.config = null;
+		this.initialOperationToRemainingTime = new HashMap<>();
+		this.operationToRemainingTime = new HashMap<>();
 		this.currentTrace = currentTrace;
+		this.operationExecutedInThisStep = false;
 		this.runningProperty = new SimpleBooleanProperty(false);
 	}
 
@@ -49,6 +58,17 @@ public class Simulator {
             return;
         }
 		this.timer = new Timer();
+	    initializeRemainingTime();
+	}
+
+	private void initializeRemainingTime() {
+		config.getOperationConfigurations()
+				.stream()
+				.filter(config -> config.getTime() > 0)
+				.forEach(config -> {
+					operationToRemainingTime.put(config.getOpName(), config.getTime());
+					initialOperationToRemainingTime.put(config.getOpName(), config.getTime());
+				});
 	}
 
 	public void run() {
@@ -56,18 +76,76 @@ public class Simulator {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
+				updateRemainingTime();
                 chooseOperation();
+				operationExecutedInThisStep = false;
 			}
 		};
 		timer.schedule(task, config.getTime(),1000);
 	}
 
 	public void chooseOperation() {
-	    List<OperationConfiguration> possibleOperations = config.getOperationConfigurations()
+		if(!currentTrace.getCurrentState().isInitialised()) {
+			currentTrace.set(currentTrace.get().randomAnimation(1));
+			return;
+		}
+		executeWithTime();
+		if(operationExecutedInThisStep) {
+			return;
+		}
+		executeWithProbability();
+    }
+
+    public void updateRemainingTime() {
+		for(String key : operationToRemainingTime.keySet()) {
+			operationToRemainingTime.computeIfPresent(key, (k, v) -> v - config.getTime());
+		}
+	}
+
+    private void executeWithTime() {
+
+		List<String> executedOperation = new ArrayList<>();
+
+		// Update operation that must be executed
+		for(String key : operationToRemainingTime.keySet()) {
+			int remainingTime = operationToRemainingTime.get(key);
+			if(remainingTime <= 0) {
+				executedOperation.add(key);
+			}
+		}
+
+		// Execute operations that must be executed if possible
+		Trace newTrace = currentTrace.get();
+		while(executedOperation.size() > 0) {
+			int previousExecutedOperationSize = executedOperation.size();
+			for(int i = 0; i < executedOperation.size(); i++) {
+				String chosenOperation = executedOperation.get(i);
+				if(currentTrace.getCurrentState().getOutTransitions()
+						.stream()
+						.map(Transition::getName)
+						.collect(Collectors.toList()).contains(chosenOperation)) {
+					Transition nextTransition = currentTrace.getCurrentState().findTransition(chosenOperation, "1=1");
+					newTrace = newTrace.add(nextTransition);
+					executedOperation.remove(chosenOperation);
+					operationToRemainingTime.computeIfPresent(chosenOperation, (k, v) -> initialOperationToRemainingTime.get(chosenOperation));
+					operationExecutedInThisStep = true;
+				}
+			}
+			if(previousExecutedOperationSize == executedOperation.size()) {
+				break;
+			}
+		}
+		currentTrace.set(newTrace);
+	}
+
+    private void executeWithProbability() {
+		//Calculate executable operations
+		List<OperationConfiguration> possibleOperations = config.getOperationConfigurations()
 				.stream()
 				.filter(config -> config.getProbability() > 0.0)
 				.collect(Collectors.toList());
 
+		//Calculate executable operations that are enabled
 		List<OperationConfiguration> enabledPossibleOperations = possibleOperations.stream()
 				.filter(op -> currentTrace.getCurrentState().getOutTransitions()
 						.stream()
@@ -75,12 +153,12 @@ public class Simulator {
 						.collect(Collectors.toSet()).contains(op.getOpName()))
 				.collect(Collectors.toList());
 
-	    double ranDouble = Math.random();
-	    double minimumProbability = 0.0;
-	    String chosenOperation = "";
+		double ranDouble = Math.random();
+		double minimumProbability = 0.0;
+		String chosenOperation = "";
 
-
-	    for(OperationConfiguration config : enabledPossibleOperations) {
+		//Choose operation for execution
+		for(OperationConfiguration config : enabledPossibleOperations) {
 			float newProbablity = (config.getProbability()/enabledPossibleOperations.size()) * possibleOperations.size();
 			minimumProbability += newProbablity;
 			chosenOperation = config.getOpName();
@@ -90,14 +168,14 @@ public class Simulator {
 
 		}
 
-	    if("".equals(chosenOperation)) {
-	    	currentTrace.set(currentTrace.get().randomAnimation(1));
-		} else {
+		//Execute chosen operation
+		if(!"".equals(chosenOperation)) {
 			Transition nextTransition = currentTrace.getCurrentState().findTransition(chosenOperation, "1=1");
 			Trace newTrace = currentTrace.get().add(nextTransition);
 			currentTrace.set(newTrace);
+			operationExecutedInThisStep = true;
 		}
-    }
+	}
 
 	public void stop() {
 		timer.cancel();
