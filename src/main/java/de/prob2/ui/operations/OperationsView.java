@@ -361,7 +361,7 @@ public final class OperationsView extends VBox {
 		}
 	}
 
-	private void updateBG(final Trace trace) {
+	private synchronized void updateBG(final Trace trace) {
 		events.clear();
 		final Set<Transition> operations = trace.getNextTransitions(true, FormulaExpand.EXPAND);
 		events.addAll(OperationItem.computeUnambiguousConstantsAndVariables(
