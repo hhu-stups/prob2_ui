@@ -201,7 +201,12 @@ public class FullValueStage extends Stage {
 			return;
 		}
 		
-		this.setTitle(newValue.getLabel());
+		if (newValue.getRodinLabels() != null && !newValue.getRodinLabels().isEmpty()) {
+			this.setTitle("@" + String.join(";", newValue.getRodinLabels()));
+		} else {
+			this.setTitle(newValue.getLabel());
+		}
+		
 		this.formulaTextarea.setText(newValue.getLabel());
 		this.descriptionTextarea.setText(newValue.getDescription());
 		final String cv = prettifyIfEnabled(valueToString(newValue.getCurrentValue()));
@@ -226,7 +231,9 @@ public class FullValueStage extends Stage {
 			defaultExtension = ".txt";
 		}
 		final String defaultFileName;
-		if (this.getValue().getLabel().matches("[\\w\\s]+")) {
+		if (this.getValue().getRodinLabels() != null && !this.getValue().getRodinLabels().isEmpty()) {
+			defaultFileName = this.getValue().getRodinLabels().get(0).replace(':', ' ');
+		} else if (this.getValue().getLabel().matches("[\\w\\s]+")) {
 			defaultFileName = this.getValue().getLabel();
 		} else {
 			defaultFileName = bundle.getString("states.fullValueStage.saveAs.defaultFileName");
