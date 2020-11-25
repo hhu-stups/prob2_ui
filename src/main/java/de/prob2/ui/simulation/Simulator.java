@@ -37,6 +37,8 @@ public class Simulator {
 
 	private final BooleanProperty runningProperty;
 
+	private final BooleanProperty executingOperationProperty;
+
 	private boolean operationExecutedInThisStep;
 
 	@Inject
@@ -44,6 +46,7 @@ public class Simulator {
 		this.currentTrace = currentTrace;
 		this.operationExecutedInThisStep = false;
 		this.runningProperty = new SimpleBooleanProperty(false);
+		this.executingOperationProperty = new SimpleBooleanProperty(false);
 	}
 
 	public void initSimulator(File configFile) {
@@ -76,17 +79,20 @@ public class Simulator {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
+				executingOperationProperty.set(true);
 				updateRemainingTime();
                 chooseOperation();
 				operationExecutedInThisStep = false;
+				executingOperationProperty.set(false);
 			}
 		};
 		timer.scheduleAtFixedRate(task, 0, config.getTime());
 	}
 
 	public void chooseOperation() {
-		if(!currentTrace.getCurrentState().isInitialised()) {
-			currentTrace.set(currentTrace.get().randomAnimation(1));
+		Trace trace = currentTrace.get();
+		if(!trace.getCurrentState().isInitialised()) {
+			currentTrace.set(trace.randomAnimation(1));
 			return;
 		}
 		executeWithTime();
@@ -191,5 +197,9 @@ public class Simulator {
 
 	public boolean isRunning() {
 		return runningProperty.get();
+	}
+
+	public BooleanProperty executingOperationPropertyProperty() {
+		return executingOperationProperty;
 	}
 }
