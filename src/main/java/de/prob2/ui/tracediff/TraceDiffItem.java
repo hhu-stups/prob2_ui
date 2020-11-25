@@ -3,7 +3,6 @@ package de.prob2.ui.tracediff;
 class TraceDiffItem {
 	private final int id;
 	private final String string;
-	private boolean notVisited = true;
 
 	TraceDiffItem(int id, String string) {
 		this.id = id;
