@@ -2,50 +2,25 @@ package de.prob2.ui.tracediff;
 
 import javafx.scene.control.ListCell;
 
-public class TraceDiffCell extends ListCell<String> {
-	private int minSize;
-	TraceDiff.TraceDiffList stringList;
-	int cnt = 0;
-
-	public TraceDiffCell(TraceDiff.TraceDiffList stringList, int minSize) {
-		this.stringList = stringList;
-		this.minSize = minSize;
+class TraceDiffCell extends ListCell<TraceDiffItem> {
+	TraceDiffCell() {
+		getStyleClass().add("trace-diff-cell");
 	}
 
 	@Override
-	protected void updateItem(String item, boolean empty) {
-		if (empty || item == null) {
-			setText(null);
-			setStyle(null);
-		} else if (getText()==null || getText().isEmpty()){
-			setText(item);
-			cnt++;
-			System.out.println("------" + item  + "------");
-			for (TraceDiff.IdStringTuple t : stringList) {
-				if (t.isNotVisited() && item.equals(t.getString())) {
-					System.out.println(t.getId() + " " + t.getString());
-					int id = t.getId();
-					if (id == minSize) {
-						setStyle("-fx-text-fill: red");
-						System.out.println("red");
-					} else if (id > minSize) {
-						setStyle("-fx-text-fill: blue");
-						System.out.println("blue");
-					} else {
-						setStyle("-fx-text-fill: black");
-						System.out.println("black");
-					}
-					t.setVisited();
-					break;
-				}
+	protected void updateItem(TraceDiffItem item, boolean empty) {
+		super.updateItem(item, empty);
+		getStyleClass().removeAll("faulty", "following");
+		if (item != null){
+			setText(item.getString());
+			if (item.getId() == TraceDiff.getMinSize()) {
+				getStyleClass().add("faulty");
+			} else if (item.getId() > TraceDiff.getMinSize()) {
+				getStyleClass().add("following");
 			}
-			if (cnt >= stringList.size()) {
-				cnt = 0;
-				stringList.resetVisitation();
-				System.out.println("!!!!!!!!!!!!!!reset!!!!!!!!!!!!!!!");
-			}
+			this.setHeight(item.getString().split("\n").length * 15);
 		} else {
-			setText(item);
+			setText(null);
 		}
 	}
 }

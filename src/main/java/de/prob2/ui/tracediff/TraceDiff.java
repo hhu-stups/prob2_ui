@@ -14,7 +14,6 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -40,9 +39,9 @@ public class TraceDiff extends VBox {
 
 	@FXML private Label replayed;
 
-	@FXML private ListView<String> replayedList;
-	@FXML private ListView<String> persistentList;
-	@FXML private ListView<String> currentList;
+	@FXML private ListView<TraceDiffItem> replayedList;
+	@FXML private ListView<TraceDiffItem> persistentList;
+	@FXML private ListView<TraceDiffItem> currentList;
 
 	@FXML private Button showAlert;
 
@@ -53,55 +52,17 @@ public class TraceDiff extends VBox {
 
 	private final ResourceBundle bundle;
 	private TraceReplayErrorAlert alert;
-	private ArrayList<ListView<String>> listViews = new ArrayList<>();
+	private ArrayList<ListView<TraceDiffItem>> listViews = new ArrayList<>();
 	private List<ScrollBar> scrollBarList = new ArrayList<>();
-	private int minSize = -1;
+	private static int minSize = -1;
 	private int maxSize = -1;
 
-	static class IdStringTuple {
-		private final int id;
-		private final String s;
-		private boolean notVisited = true;
-
-		IdStringTuple (int id, String s) {
-			this.id = id;
-			this.s = s;
-		}
-
-		int getId() {
-			return id;
-		}
-
-		String getString() {
-			return s;
-		}
-
-		boolean isNotVisited() {
-			return notVisited;
-		}
-
-		void setVisited() {
-			notVisited = false;
-		}
-
-		void setUnvisited() {
-			notVisited = true;
-		}
-	}
-
-	static class TraceDiffList extends ArrayList<IdStringTuple> {
-		private final ArrayList<String> strings = new ArrayList<>();
-
+	static class TraceDiffList extends ArrayList<TraceDiffItem> {
 		TraceDiffList(List<?> list) {
 			for (int i = 0; i < list.size(); i++) {
 				String s = getRep(list.get(i));
-				this.add(new IdStringTuple(i, s));
-				strings.add(s);
+				this.add(new TraceDiffItem(i, s));
 			}
-		}
-
-		void resetVisitation() {
-			this.forEach(t -> t.setUnvisited());
 		}
 
 		private String getRep(Object t) {
@@ -149,13 +110,13 @@ public class TraceDiff extends VBox {
 
 			if (!args.isEmpty()) {
 				stringBuilder.append('(');
-				stringBuilder.append(String.join(", ", args));
+				stringBuilder.append(String.join(",\n", args));
 				stringBuilder.append(')');
 			}
 
 			if (t.getReturnValues() != null && !t.getReturnValues().isEmpty()) {
 				stringBuilder.append(" → ");
-				stringBuilder.append(String.join(", ", t.getReturnValues()));
+				stringBuilder.append(String.join(",\n", t.getReturnValues()));
 			}
 
 			return stringBuilder.toString();
@@ -174,19 +135,19 @@ public class TraceDiff extends VBox {
 
 			if (!args.isEmpty()) {
 				stringBuilder.append('(');
-				stringBuilder.append(String.join(", ", args));
+				stringBuilder.append(String.join(",\n", args));
 				stringBuilder.append(')');
 			}
 
 			if (t.getOutputParameters() != null && !t.getOutputParameters().isEmpty()) {
 				stringBuilder.append(" → ");
-				stringBuilder.append(String.join(", ", t.getOutputParameters().values()));
+				stringBuilder.append(String.join(",\n", t.getOutputParameters().values()));
 			}
 			return stringBuilder.toString();
 		}
 
 		public boolean add(String s) {
-			return super.add(new IdStringTuple(this.size(), s));
+			return super.add(new TraceDiffItem(this.size(), s));
 		}
 	}
 
@@ -247,7 +208,7 @@ public class TraceDiff extends VBox {
 		};
 	}
 
-	private void scrollToEntry(ListView<String> lv, int value) {
+	private void scrollToEntry(ListView<TraceDiffItem> lv, int value) {
 		if (linkScrolling.isSelected()) {
 			lv.getSelectionModel().select(value);
 			lv.getFocusModel().focus(value);
@@ -276,16 +237,14 @@ public class TraceDiff extends VBox {
 		showAlert.setOnAction(e -> alert.showAlertAgain());
 	}
 
-	private void translateList(TraceDiffList stringList, ListView<String> listView) {
+	private void translateList(TraceDiffList stringList, ListView<TraceDiffItem> listView) {
 		//Add "empty" entries to ensure same length (needed for synchronized scrolling)
 		while (stringList.size() < maxSize) {
 			stringList.add("");
 		}
-		System.out.println("--------");
-		stringList.forEach(t -> System.out.println(t.getId()+" "+t.getString()));
 		// Mark faulty operation index red and following operation indices blue -> TraceDiffCell
-		listView.setCellFactory(param -> new TraceDiffCell(stringList, minSize));
-		listView.setItems(FXCollections.observableList(stringList.strings));
+		listView.setCellFactory(param -> new TraceDiffCell());
+		listView.setItems(FXCollections.observableList(stringList));
 	}
 
 	void setAlert(TraceReplayErrorAlert alert) {
@@ -301,5 +260,9 @@ public class TraceDiff extends VBox {
 				listBox.getChildren().add(persistentBox);
 			}
 		}
+	}
+
+	static int getMinSize() {
+		return minSize;
 	}
 }

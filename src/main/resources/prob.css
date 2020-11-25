@@ -1192,3 +1192,16 @@
 	-fx-font-style: italic;
 	-fx-font-size: 0.9em;
 }
+
+/* ==================== TRACE DIFF ======================== */
+.trace-diff-cell {
+	-fx-text-fill: black;
+}
+
+.trace-diff-cell.faulty {
+	-fx-text-fill: red;
+}
+
+.trace-diff-cell.following {
+	-fx-text-fill: blue;
+}
