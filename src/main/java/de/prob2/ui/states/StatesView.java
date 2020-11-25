@@ -175,7 +175,7 @@ public final class StatesView extends StackPane {
 					row.getStyleClass().add("changed");
 				}
 
-				if (!to.getDescription().isEmpty()) {
+				if (to.getDescription() != null && !to.getDescription().isEmpty()) {
 					row.setTooltip(new Tooltip(to.getDescription()));
 				}
 			}
