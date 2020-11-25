@@ -59,6 +59,14 @@ public final class StateItem {
 		return this.getStructure().getDescription();
 	}
 
+	public String getFunctorSymbol() {
+		return this.getStructure().getFunctorSymbol();
+	}
+
+	public List<String> getRodinLabels() {
+		return this.getStructure().getRodinLabels();
+	}
+
 	public BVisual2Value getCurrentValue() {
 		if (this.currentValue == null) {
 			this.currentValue = this.evaluator.evaluate(this.getFormula(), this.getCurrentState());
