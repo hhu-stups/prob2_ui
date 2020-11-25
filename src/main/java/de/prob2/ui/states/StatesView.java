@@ -44,8 +44,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-import javafx.util.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,13 +193,7 @@ public final class StatesView extends StackPane {
 		}
 
 		if (sb.length() > 0) {
-			final Tooltip tooltip = new Tooltip(sb.toString());
-			// Show tooltip more quickly than by default (1000ms according to docs).
-			tooltip.setShowDelay(Duration.millis(500));
-			// Keep tooltip visible for longer than by default (200ms according to docs),
-			// to make it easier to move from one item to another without the tooltip disappearing.
-			tooltip.setHideDelay(Duration.millis(500));
-			return tooltip;
+			return new Tooltip(sb.toString());
 		} else {
 			return null;
 		}
