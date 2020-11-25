@@ -22,13 +22,13 @@
 <?import javafx.scene.web.WebView?>
 <?import de.prob2.ui.visb.VisBStage?>
 
-<fx:root title="%visb.title" type="VisBStage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="1400" height="500" minHeight="500" minWidth="1000">
+<fx:root title="%visb.title" type="VisBStage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="1000" height="500" minHeight="160" minWidth="480">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<BorderPane prefHeight="500.0" prefWidth="1000.0" xmlns:fx="http://javafx.com/fxml/1">
+			<BorderPane prefHeight="400.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1">
 				<top>
 					<MenuBar BorderPane.alignment="CENTER" fx:id="visbMenuBar">
 						<Menu mnemonicParsing="false" text="%visb.menu.file">

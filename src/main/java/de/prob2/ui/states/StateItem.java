@@ -4,13 +4,13 @@ import java.util.List;
 
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
-import de.prob.animator.domainobjects.ExpandedFormulaStructure;
+import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.statespace.State;
 
 // This class needs to be public (even though it's only used inside this package) so that Bindings.select can access its getters.
 public final class StateItem {
 	public interface FormulaEvaluator {
-		public abstract ExpandedFormulaStructure expand(final BVisual2Formula formula);
+		public abstract ExpandedFormula expand(final BVisual2Formula formula);
 		public abstract BVisual2Value evaluate(final BVisual2Formula formula, final State state);
 	}
 
@@ -18,7 +18,7 @@ public final class StateItem {
 	private final State currentState;
 	private final State previousState;
 	private final StateItem.FormulaEvaluator evaluator;
-	private ExpandedFormulaStructure structure;
+	private ExpandedFormula structure;
 	private BVisual2Value currentValue;
 	private BVisual2Value previousValue;
 
@@ -44,7 +44,7 @@ public final class StateItem {
 		return this.previousState;
 	}
 
-	private ExpandedFormulaStructure getStructure() {
+	private ExpandedFormula getStructure() {
 		if (this.structure == null) {
 			this.structure = this.evaluator.expand(this.getFormula());
 		}
