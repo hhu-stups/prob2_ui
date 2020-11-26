@@ -2,8 +2,10 @@ package de.prob2.ui.simulation;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -42,11 +44,12 @@ public class Simulator {
 	private boolean operationExecutedInThisStep;
 
 	@Inject
-	public Simulator(final CurrentTrace currentTrace) {
+	public Simulator(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.operationExecutedInThisStep = false;
 		this.runningProperty = new SimpleBooleanProperty(false);
 		this.executingOperationProperty = new SimpleBooleanProperty(false);
+        disablePropertyController.addDisableExpression(this.executingOperationProperty);
 	}
 
 	public void initSimulator(File configFile) {
@@ -80,8 +83,10 @@ public class Simulator {
 			@Override
 			public void run() {
 				executingOperationProperty.set(true);
+				// Read trace and pass it through chooseOperation to avoid race condition
+				Trace trace = currentTrace.get();
 				updateRemainingTime();
-                chooseOperation();
+                chooseOperation(trace);
 				operationExecutedInThisStep = false;
 				executingOperationProperty.set(false);
 			}
@@ -89,17 +94,18 @@ public class Simulator {
 		timer.scheduleAtFixedRate(task, 0, config.getTime());
 	}
 
-	public void chooseOperation() {
-		Trace trace = currentTrace.get();
+	public void chooseOperation(Trace trace) {
 		if(!trace.getCurrentState().isInitialised()) {
 			currentTrace.set(trace.randomAnimation(1));
 			return;
 		}
-		executeWithTime();
+
+		// Pass trace through executeWithTime and executeWithProbability to avoid race condition
+		executeWithTime(trace);
 		if(operationExecutedInThisStep) {
 			return;
 		}
-		executeWithProbability();
+		executeWithProbability(trace);
     }
 
     public void updateRemainingTime() {
@@ -108,7 +114,7 @@ public class Simulator {
 		}
 	}
 
-    private void executeWithTime() {
+    private void executeWithTime(Trace trace) {
 
 		List<String> executedOperation = new ArrayList<>();
 
@@ -121,17 +127,18 @@ public class Simulator {
 		}
 
 		// Execute operations that must be executed if possible
-		Trace newTrace = currentTrace.get();
+		Trace newTrace = trace;
+        State currentState = trace.getCurrentState();
 		while(executedOperation.size() > 0) {
 			int previousExecutedOperationSize = executedOperation.size();
 			List<String> removedExecutedOperations = new ArrayList<>();
 			for(int i = 0; i < executedOperation.size(); i++) {
 				String chosenOperation = executedOperation.get(i);
-				if(currentTrace.getCurrentState().getTransitions()
+				if(currentState.getTransitions()
 						.stream()
 						.map(Transition::getName)
 						.collect(Collectors.toList()).contains(chosenOperation)) {
-					Transition nextTransition = currentTrace.getCurrentState().findTransition(chosenOperation, "1=1");
+					Transition nextTransition = currentState.findTransition(chosenOperation, "1=1");
 					newTrace = newTrace.add(nextTransition);
 					removedExecutedOperations.add(chosenOperation);
 					operationToRemainingTime.computeIfPresent(chosenOperation, (k, v) -> initialOperationToRemainingTime.get(chosenOperation));
@@ -147,7 +154,9 @@ public class Simulator {
 		currentTrace.set(newTrace);
 	}
 
-    private void executeWithProbability() {
+    private void executeWithProbability(Trace trace) {
+	    State currentState = trace.getCurrentState();
+
 		//Calculate executable operations
 		List<OperationConfiguration> possibleOperations = config.getOperationConfigurations()
 				.stream()
@@ -156,7 +165,7 @@ public class Simulator {
 
 		//Calculate executable operations that are enabled
 		List<OperationConfiguration> enabledPossibleOperations = possibleOperations.stream()
-				.filter(op -> currentTrace.getCurrentState().getTransitions()
+				.filter(op -> currentState.getTransitions()
 						.stream()
 						.map(Transition::getName)
 						.collect(Collectors.toSet()).contains(op.getOpName()))
@@ -178,16 +187,18 @@ public class Simulator {
 
 		//Execute chosen operation
 		if(!"".equals(chosenOperation)) {
-			Transition nextTransition = currentTrace.getCurrentState().findTransition(chosenOperation, "1=1");
-			Trace newTrace = currentTrace.get().add(nextTransition);
+			Transition nextTransition = currentState.findTransition(chosenOperation, "1=1");
+			Trace newTrace = trace.add(nextTransition);
 			currentTrace.set(newTrace);
 			operationExecutedInThisStep = true;
 		}
 	}
 
 	public void stop() {
-		timer.cancel();
-		timer = null;
+		if(timer != null) {
+			timer.cancel();
+			timer = null;
+		}
 		runningProperty.set(false);
 	}
 
@@ -199,7 +210,4 @@ public class Simulator {
 		return runningProperty.get();
 	}
 
-	public BooleanProperty executingOperationPropertyProperty() {
-		return executingOperationProperty;
-	}
 }

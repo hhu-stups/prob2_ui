@@ -77,8 +77,10 @@ public class VisualisationView extends AnchorPane {
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
 		this.updater.runningProperty().addListener((o, from, to) -> {
-			this.currentStateVisualisation.setDisable(to);
-			this.previousStateVisualisation.setDisable(to);
+			Platform.runLater(() -> {
+				this.currentStateVisualisation.setDisable(to);
+				this.previousStateVisualisation.setDisable(to);
+			});
 		});
 
 		currentTrace.addListener((o, from, to) -> {

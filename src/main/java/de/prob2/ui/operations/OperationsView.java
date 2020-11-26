@@ -21,7 +21,6 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.Simulator;
 import de.prob2.ui.statusbar.StatusBar;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -223,7 +222,6 @@ public final class OperationsView extends VBox {
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		disablePropertyController.addDisableExpression(this.updater.runningProperty());
 		disablePropertyController.addDisableExpression(this.randomExecutionThread.isNotNull());
-		disablePropertyController.addDisableExpression(injector.getInstance(Simulator.class).executingOperationPropertyProperty());
 		stageManager.loadFXML(this, "operations_view.fxml");
 	}
 
