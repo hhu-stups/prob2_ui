@@ -164,6 +164,41 @@ public final class StatesView extends StackPane {
 		});
 	}
 
+	private Tooltip buildItemTooltip(final StateItem item) {
+		final StringBuilder sb = new StringBuilder();
+
+		final boolean hasRodinLabels = item.getRodinLabels() != null && !item.getRodinLabels().isEmpty();
+		final boolean hasDescription = item.getDescription() != null && !item.getDescription().isEmpty();
+		if (hasRodinLabels) {
+			sb.append('@');
+			sb.append(String.join(";", item.getRodinLabels()));
+			if (hasDescription) {
+				sb.append(": ");
+			}
+		}
+		if (hasDescription) {
+			sb.append(item.getDescription());
+		}
+		if (sb.length() > 0) {
+			sb.append('\n');
+		}
+
+		final int childrenCount = item.getSubformulas().size();
+		if (childrenCount > 0) {
+			if (item.getFunctorSymbol() != null) {
+				sb.append(String.format(bundle.getString("states.statesView.tooltip.formulaChildren"), item.getFunctorSymbol(), childrenCount));
+			} else {
+				sb.append(String.format(bundle.getString("states.statesView.tooltip.elementChildren"), childrenCount));
+			}
+		}
+
+		if (sb.length() > 0) {
+			return new Tooltip(sb.toString());
+		} else {
+			return null;
+		}
+	}
+
 	private TreeTableRow<StateItem> initTableRow() {
 		final TreeTableRow<StateItem> row = new TreeTableRow<>();
 
@@ -175,9 +210,7 @@ public final class StatesView extends StackPane {
 					row.getStyleClass().add("changed");
 				}
 
-				if (!to.getDescription().isEmpty()) {
-					row.setTooltip(new Tooltip(to.getDescription()));
-				}
+				row.setTooltip(this.buildItemTooltip(to));
 			}
 		});
 
