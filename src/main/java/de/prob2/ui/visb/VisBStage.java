@@ -441,8 +441,9 @@ public class VisBStage extends Stage {
 
 		Alert alert;
 		if(machine.visBVisualizationProperty().isNotNull().get()) {
-			buttons.add(loadButton);
-			if(visBPath != null && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation())) {
+			boolean visBPathNotEqualsMachinePath = !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation());
+			if(visBPath.get() != null && visBPathNotEqualsMachinePath) {
+				buttons.add(loadButton);
 				buttons.add(setButton);
 			}
 			buttons.add(resetButton);
