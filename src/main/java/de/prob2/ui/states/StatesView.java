@@ -516,16 +516,11 @@ public final class StatesView extends StackPane {
 		}
 		treeItem.getChildren().setAll(matchingChildren);
 
-		final ChangeListener<Boolean> updateItemExpandedListener = getUpdateItemExpandedListener(treeItem);
-		treeItem.expandedProperty().addListener(updateItemExpandedListener);
-
-		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem);
-		treeItem.expandedProperty().addListener(trackVisibleListener);
+		treeItem.expandedProperty().addListener(getUpdateItemExpandedListener(treeItem));
+		treeItem.expandedProperty().addListener(getTrackVisibleListener(treeItem));
 
 		// Always expand treeItem, because it doesn't match the filter.
 		treeItem.setExpanded(true);
-		updateItemExpandedListener.changed(treeItem.expandedProperty(), false, true);
-		trackVisibleListener.changed(treeItem.expandedProperty(), false, true);
 	}
 
 	private static TreeItem<StateItem> createRootItem() {
