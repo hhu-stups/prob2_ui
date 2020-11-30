@@ -72,7 +72,7 @@ public class VisBVisualisation {
 		return stringBuilder.toString();
 	}
 
-	private void appendListWithNull(StringBuilder sb, List list) {
+	private void appendListWithNull(StringBuilder sb, List<?> list) {
 		if(list != null) {
 			for (Object obj : list) {
 				sb.append(obj);
