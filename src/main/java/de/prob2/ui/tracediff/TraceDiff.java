@@ -42,9 +42,9 @@ public class TraceDiff extends VBox {
 
 	@FXML private Label replayed;
 
-	@FXML private TraceDiffListView replayedList;
-	@FXML private TraceDiffListView persistentList;
-	@FXML private TraceDiffListView currentList;
+	@FXML private ListView<TraceDiffItem> replayedList;
+	@FXML private ListView<TraceDiffItem> persistentList;
+	@FXML private ListView<TraceDiffItem> currentList;
 
 	@FXML private Button showAlert;
 
@@ -55,18 +55,17 @@ public class TraceDiff extends VBox {
 
 	private final ResourceBundle bundle;
 	private TraceReplayErrorAlert alert;
-	private ArrayList<TraceDiffListView> listViews = new ArrayList<>();
+	private ArrayList<ListView<TraceDiffItem>> listViews = new ArrayList<>();
 	private List<ScrollBar> scrollBarList = new ArrayList<>();
 	private static int minSize = -1;
 	private int maxSize = -1;
-	private static HashMap<Integer, Integer> indexLinesMap = new HashMap<>();
+	static HashMap<Integer, Integer> indexLinesMap = new HashMap<>();
 
 	static class TraceDiffList extends ArrayList<TraceDiffItem> {
 		TraceDiffList(List<?> list) {
 			for (int i = 0; i < list.size(); i++) {
 				String s = getRep(list.get(i));
 				this.add(new TraceDiffItem(i, s));
-
 				int lines = s == null? 0 : s.split("\n").length;
 				if (TraceDiff.indexLinesMap.get(i) == null || TraceDiff.indexLinesMap.get(i) < lines) {
 					TraceDiff.indexLinesMap.put(i,lines);
@@ -118,7 +117,7 @@ public class TraceDiff extends VBox {
 			}
 
 			if (!args.isEmpty()) {
-				stringBuilder.append('(');
+				stringBuilder.append("\n(");
 				stringBuilder.append(String.join(",\n", args));
 				stringBuilder.append(')');
 			}
@@ -143,7 +142,7 @@ public class TraceDiff extends VBox {
 			}
 
 			if (!args.isEmpty()) {
-				stringBuilder.append('(');
+				stringBuilder.append("\n(");
 				stringBuilder.append(String.join(",\n", args));
 				stringBuilder.append(')');
 			}
@@ -182,7 +181,7 @@ public class TraceDiff extends VBox {
 
 		// Renew scrollbar list if stage was resized
 		Platform.runLater(() -> {
-			ChangeListener stageSizeChangelistener = (observable, oldValue, newValue) -> getScrollBars();
+			ChangeListener<? super Number> stageSizeChangelistener = (observable, oldValue, newValue) -> getScrollBars();
 			this.getScene().getWindow().heightProperty().addListener(stageSizeChangelistener);
 			this.getScene().getWindow().widthProperty().addListener(stageSizeChangelistener);
 		});
@@ -247,25 +246,14 @@ public class TraceDiff extends VBox {
 		minSize = Math.min(rTransitions.size(), pTransitions.size());
 
 		indexLinesMap.clear();
-
 		translateList(new TraceDiffList(rTransitions), replayedList);
 		translateList(new TraceDiffList(pTransitions), persistentList);
 		translateList(new TraceDiffList(cTransitions), currentList);
 
-		listViews.forEach(listView -> listView.getTranslatedProperty().addListener(fullTranslationListener()));
-
 		showAlert.setOnAction(e -> alert.showAlertAgain());
 	}
 
-	private ChangeListener fullTranslationListener() {
-		return (obs,o,n) -> {
-			if (!listViews.stream().map(l -> l.getTranslatedProperty().get()).collect(Collectors.toList()).contains(false)) {
-				autosizeCells();
-			}
-		};
-	}
-
-	private void translateList(TraceDiffList stringList, TraceDiffListView listView) {
+	private void translateList(TraceDiffList stringList, ListView<TraceDiffItem> listView) {
 		//Add "empty" entries to ensure same length (needed for synchronized scrolling)
 		while (stringList.size() < maxSize) {
 			stringList.add("");
@@ -273,20 +261,6 @@ public class TraceDiff extends VBox {
 		// Mark faulty operation index red and following operation indices blue -> TraceDiffCell
 		listView.setCellFactory(param -> new TraceDiffCell());
 		listView.setItems(FXCollections.observableList(stringList));
-		listView.getTranslatedProperty().set(true);
-	}
-
-	private void autosizeCells() {
-		listViews.forEach(listView -> listView.lookupAll(".list-cell").forEach(t -> {
-			TraceDiffCell tdc = (TraceDiffCell) t;
-			if (tdc != null && tdc.getTraceDiffItem() != null) {
-				System.out.println(tdc.getTraceDiffItem());
-				System.out.println(tdc.getTraceDiffItem().getId());
-				int i = indexLinesMap.get(tdc.getTraceDiffItem().getId());
-				System.out.println(i);
-				tdc.setPrefHeight(tdc.getHeight() * i);
-			}
-		}));
 	}
 
 	void setAlert(TraceReplayErrorAlert alert) {
