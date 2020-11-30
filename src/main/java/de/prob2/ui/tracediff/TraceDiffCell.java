@@ -4,8 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.control.ListCell;
 
 class TraceDiffCell extends ListCell<TraceDiffItem> {
-	private TraceDiffItem traceDiffItem;
-	private int cellHeight = 20;
+	private final int cellHeight = 20;
 
 	TraceDiffCell() {
 		getStyleClass().add("trace-diff-cell");
@@ -15,7 +14,6 @@ class TraceDiffCell extends ListCell<TraceDiffItem> {
 	protected void updateItem(TraceDiffItem item, boolean empty) {
 		super.updateItem(item, empty);
 		getStyleClass().removeAll("faulty", "following");
-		traceDiffItem = item;
 		if (item != null){
 			String s = item.getString();
 			setText(s);
@@ -37,9 +35,5 @@ class TraceDiffCell extends ListCell<TraceDiffItem> {
 		} else {
 			setText(null);
 		}
-	}
-
-	TraceDiffItem getTraceDiffItem() {
-		return traceDiffItem;
 	}
 }

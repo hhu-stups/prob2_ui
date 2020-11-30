@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
