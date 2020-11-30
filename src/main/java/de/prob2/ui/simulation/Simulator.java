@@ -126,21 +126,31 @@ public class Simulator {
 
     private Trace executeSetupConstants(State currentState, Trace trace) {
 		List<VariableChoice> setupConfigs = config.getSetupConfigurations();
-		String predicate = setupConfigs.stream()
-				.map(VariableChoice::getChoice)
-				.map(choice -> chooseVariableValues(currentState, choice))
-				.collect(Collectors.joining(" & "));
-		Transition nextTransition = currentState.findTransition("$setup_constants", predicate);
+		Transition nextTransition = null;
+		if(setupConfigs == null) {
+			nextTransition = currentState.findTransition("$setup_constants", "1=1");
+		} else {
+			String predicate = setupConfigs.stream()
+					.map(VariableChoice::getChoice)
+					.map(choice -> chooseVariableValues(currentState, choice))
+					.collect(Collectors.joining(" & "));
+			nextTransition = currentState.findTransition("$setup_constants", predicate);
+		}
 		return trace.add(nextTransition);
 	}
 
     private Trace executeInitialisation(State currentState, Trace trace) {
-		List<VariableChoice> setupConfigs = config.getSetupConfigurations();
-		String predicate = setupConfigs.stream()
-				.map(VariableChoice::getChoice)
-				.map(choice -> chooseVariableValues(currentState, choice))
-				.collect(Collectors.joining(" & "));
-		Transition nextTransition = currentState.findTransition("$initialise_machine", predicate);
+		List<VariableChoice> initialisationConfigs = config.getInitialisationConfigurations();
+		Transition nextTransition = null;
+		if(initialisationConfigs == null) {
+			nextTransition = currentState.findTransition("$initialise_machine", "1=1");
+		} else {
+			String predicate = initialisationConfigs.stream()
+					.map(VariableChoice::getChoice)
+					.map(choice -> chooseVariableValues(currentState, choice))
+					.collect(Collectors.joining(" & "));
+			nextTransition = currentState.findTransition("$initialise_machine", predicate);
+		}
 		return trace.add(nextTransition);
 	}
 
