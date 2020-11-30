@@ -265,9 +265,12 @@ class VisBFileHandler {
 								// we could check that all arrays have same size; otherwise a pattern will not be replaced
 							}
 							visBItems.add(new VisBItem(repId, attribute, repVal));
+							// note: we do not check if an old item for this id and attribute already exists;
+							// this actually allows overriding VisB items from included files
+							// TODO: we could remove the old item if it exists; we could provide a warning if the old item is in the same file; it would probably be better to use a hash map then
 						}
-					} else { // no repititions
-						visBItems.add(new VisBItem(id, attribute, value));
+					} else { // no repetitions
+						visBItems.add(new VisBItem(id, attribute, value)); // see comment above
 					}
 				}
 			} else if (!currentObj.has("id")){

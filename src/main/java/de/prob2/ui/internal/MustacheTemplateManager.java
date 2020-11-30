@@ -6,18 +6,20 @@ import com.github.mustachejava.MustacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.Writer;
-import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MustacheTemplateManager {
 
@@ -30,26 +32,27 @@ public class MustacheTemplateManager {
     /**
      * creates a {@link MustacheTemplateManager} containing the Mustache template
      *
-     * @param uri the uri of the path for the template
+     * @param inputStream the input stream from the path for the template
      * @param name the name of the template
      */
-    public MustacheTemplateManager(URI uri, String name) {
-        this.mustache = createMustacheTemplate(uri, name);
+    public MustacheTemplateManager(InputStream inputStream, String name) {
+        this.mustache = createMustacheTemplate(inputStream, name);
         this.placeholders = new HashMap<>();
     }
 
     /**
      * creates a {@link Mustache} from the given parameters
      *
-     * @param uri the uri of the path for the template
+     * @param inputStream the input stream from the path for the template
      * @param name the name of the template
      * @return returns the resulting Mustache template
      */
-    public static Mustache createMustacheTemplate(URI uri, String name) {
-        try {
+    public static Mustache createMustacheTemplate(InputStream inputStream, String name) {
+        try(InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            BufferedReader reader = new BufferedReader(inputStreamReader)) {
             MustacheFactory mf = new DefaultMustacheFactory();
             //Avoid readString for Java 8 compatibility
-            String template = new String(Files.readAllBytes(Paths.get(uri)));
+            String template = reader.lines().collect(Collectors.joining("\n"));
             return mf.compile(new StringReader(template), name);
         } catch (IOException e) {
             LOGGER.error("", e);
