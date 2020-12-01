@@ -1064,20 +1064,6 @@
 	-fx-text-fill: limegreen;
 }
 
-.visb-item {
-	-fx-cell-size: 2.8em;
-}
-.visb-item .name {
-	-fx-font-family: ARIAL;
-	-fx-font-weight: bold;
-	-fx-font-size: 1.1em;
-}
-.visb-item .information {
-	-fx-font-family: ARIAL;
-	-fx-font-style: italic;
-	-fx-font-size: 0.9em;
-}
-
 .project-location {
 	-fx-font-family: ARIAL;
 	-fx-font-style: italic;
@@ -1095,6 +1081,34 @@
 }
 .machine-table-view .status-icon.none {
 	-fx-text-fill: gray;
+}
+
+.visb-item {
+	-fx-cell-size: 2.8em;
+}
+.visb-item .name {
+	-fx-font-family: ARIAL;
+	-fx-font-weight: bold;
+	-fx-font-size: 1.1em;
+}
+.visb-item .information {
+	-fx-font-family: ARIAL;
+	-fx-font-style: italic;
+	-fx-font-size: 0.9em;
+}
+
+.simulation-item {
+	-fx-cell-size: 6.8em;
+}
+.simulation-item .name {
+	-fx-font-family: ARIAL;
+	-fx-font-weight: bold;
+	-fx-font-size: 1.1em;
+}
+.simulation-item .information {
+	-fx-font-family: ARIAL;
+	-fx-font-style: italic;
+	-fx-font-size: 0.9em;
 }
 
 /* =================== STATES VIEW =================== */

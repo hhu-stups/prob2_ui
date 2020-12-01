@@ -261,4 +261,7 @@ public class Simulator {
 		return runningProperty.get();
 	}
 
+	public SimulationConfiguration getConfig() {
+		return config;
+	}
 }

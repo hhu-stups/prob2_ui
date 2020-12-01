@@ -15,6 +15,7 @@
 <?import javafx.scene.control.ScrollPane?>
 
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ListView?>
 <fx:root title="Simulator" type="SimulatorStage" width="700" height="300" minHeight="300" minWidth="700" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -38,11 +39,11 @@
 							</Button>
 							<Button fx:id="btSimulate" styleClass="button-blue" text="Start" onAction="#simulate"/>
 						</HBox>
-						<TableView VBox.vgrow="ALWAYS">
-							<columnResizePolicy>
-								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-							</columnResizePolicy>
-						</TableView>
+						<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
+							<content>
+								<ListView fx:id="simulationItems" styleClass="list-view" />
+							</content>
+						</ScrollPane>
 					</VBox>
 				</AnchorPane>
 			</ScrollPane>
