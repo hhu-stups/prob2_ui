@@ -184,18 +184,16 @@ public class Simulator {
 		}
 	}
 
-	//1. select operations where time <= 0 (X)
-	//2. sort operations after priority (less number means higher priority) (X)
-	//3. check whether operation is executable (X)
-	//4. calculate probability for each operation whether it should be executed (X)
-	//5. execute operation and append to trace (X)
+
 
 	private void executeOperations(CurrentTrace currentTrace, State currentState, Trace trace) {
+		//1. select operations where time <= 0
 		List<OperationConfiguration> nextOperations = config.getOperationConfigurations().stream()
 				.filter(opConfig -> operationToRemainingTime.get(opConfig.getOpName()) <= 0)
 				.collect(Collectors.toList());
 
 
+		//2. sort operations after priority (less number means higher priority)
 		nextOperations.sort(Comparator.comparingInt(OperationConfiguration::getPriority));
 
 		Trace newTrace = trace;
@@ -205,12 +203,15 @@ public class Simulator {
 			double ranDouble = Math.random();
 
 			AbstractEvalResult evalResult = newCurrentState.eval(opConfig.getProbability(), FormulaExpand.EXPAND);
+
+			//3. calculate probability for each operation whether it should be executed
 			if(Double.parseDouble(evalResult.toString()) > ranDouble) {
 				List<String> enabledOperations = newTrace.getNextTransitions().stream()
 						.map(Transition::getName)
 						.collect(Collectors.toList());
 				String opName = opConfig.getOpName();
 				operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
+				//4. check whether operation is executable
 				if (enabledOperations.contains(opName)) {
 					List<VariableChoice> choices = opConfig.getVariableChoices();
 					int delay = opConfig.getDelay();
@@ -221,6 +222,8 @@ public class Simulator {
 							LOGGER.error("", e);
 						}
 					}
+
+					//5. execute operation and append to trace
 					if(choices == null) {
 						Transition transition = newCurrentState.findTransition(opName, "1=1");
 						newTrace = newTrace.add(transition);
