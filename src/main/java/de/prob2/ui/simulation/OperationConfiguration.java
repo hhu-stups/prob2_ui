@@ -8,15 +8,18 @@ public class OperationConfiguration {
 
     private int time;
 
+    private int delay;
+
     private String probability;
 
     private int priority;
 
     private List<VariableChoice> variableChoices;
 
-    public OperationConfiguration(String opName, int time, String probability, int priority, List<VariableChoice> variableChoices) {
+    public OperationConfiguration(String opName, int time, int delay, String probability, int priority, List<VariableChoice> variableChoices) {
         this.opName = opName;
         this.time = time;
+        this.delay = delay;
         this.probability = probability;
         this.priority = priority;
         this.variableChoices = variableChoices;
@@ -28,6 +31,10 @@ public class OperationConfiguration {
 
     public int getTime() {
         return time;
+    }
+
+    public int getDelay() {
+        return delay;
     }
 
     public String getProbability() {

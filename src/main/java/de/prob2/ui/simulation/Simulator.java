@@ -120,7 +120,7 @@ public class Simulator {
 				currentTrace.set(executeInitialisation(currentState, trace));
 			}
 		} else {
-			currentTrace.set(executeOperations(currentState, trace));
+			executeOperations(currentTrace, currentState, trace);
 		}
     }
 
@@ -141,7 +141,7 @@ public class Simulator {
 
     private Trace executeInitialisation(State currentState, Trace trace) {
 		List<VariableChoice> initialisationConfigs = config.getInitialisationConfigurations();
-		Transition nextTransition = null;
+		Transition nextTransition;
 		if(initialisationConfigs == null) {
 			nextTransition = currentState.findTransition("$initialise_machine", "1=1");
 		} else {
@@ -172,7 +172,8 @@ public class Simulator {
 		Map<String, String> chosenValues = chosenConfiguration.getValues();
 		List<String> conjuncts = new ArrayList<>();
 		for(String key : chosenValues.keySet()) {
-			conjuncts.add(key + " = " + chosenValues.get(key));
+			AbstractEvalResult evalResult = currentState.eval(chosenValues.get(key), FormulaExpand.EXPAND);
+			conjuncts.add(key + " = " + evalResult.toString());
 		}
 		return String.join(" & ", conjuncts);
 	}
@@ -187,9 +188,9 @@ public class Simulator {
 	//2. sort operations after priority (less number means higher priority) (X)
 	//3. check whether operation is executable (X)
 	//4. calculate probability for each operation whether it should be executed (X)
-	//5. execute operation and append to trace
+	//5. execute operation and append to trace (X)
 
-	private Trace executeOperations(State currentState, Trace trace) {
+	private void executeOperations(CurrentTrace currentTrace, State currentState, Trace trace) {
 		List<OperationConfiguration> nextOperations = config.getOperationConfigurations().stream()
 				.filter(opConfig -> operationToRemainingTime.get(opConfig.getOpName()) <= 0)
 				.collect(Collectors.toList());
@@ -198,34 +199,49 @@ public class Simulator {
 		nextOperations.sort(Comparator.comparingInt(OperationConfiguration::getPriority));
 
 		Trace newTrace = trace;
+		State newCurrentState = currentState;
 
 		for(OperationConfiguration opConfig : nextOperations) {
 			double ranDouble = Math.random();
-			AbstractEvalResult evalResult = currentState.eval(opConfig.getProbability(), FormulaExpand.EXPAND);
+
+			AbstractEvalResult evalResult = newCurrentState.eval(opConfig.getProbability(), FormulaExpand.EXPAND);
 			if(Double.parseDouble(evalResult.toString()) > ranDouble) {
-				List<String> enabledOperations = trace.getNextTransitions().stream()
+				List<String> enabledOperations = newTrace.getNextTransitions().stream()
 						.map(Transition::getName)
 						.collect(Collectors.toList());
 				String opName = opConfig.getOpName();
 				operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
-				State newCurrentState = newTrace.getCurrentState();
 				if (enabledOperations.contains(opName)) {
 					List<VariableChoice> choices = opConfig.getVariableChoices();
+					int delay = opConfig.getDelay();
+					if(delay > 0) {
+						try {
+							Thread.sleep(delay);
+						} catch (InterruptedException e) {
+							LOGGER.error("", e);
+						}
+					}
 					if(choices == null) {
-						Transition transition = currentState.findTransition(opName, "1=1");
-						newTrace = trace.add(transition);
+						Transition transition = newCurrentState.findTransition(opName, "1=1");
+						newTrace = newTrace.add(transition);
+						newCurrentState = newTrace.getCurrentState();
+						currentTrace.set(newTrace);
 					} else {
+						State finalNewCurrentState = newCurrentState;
 						String predicate = choices.stream()
 								.map(VariableChoice::getChoice)
-								.map(choice -> chooseVariableValues(newCurrentState, choice))
+								.map(choice -> chooseVariableValues(finalNewCurrentState, choice))
 								.collect(Collectors.joining(" & "));
-						Transition transition = currentState.findTransition(opName, predicate);
-						newTrace = trace.add(transition);
+						if(newCurrentState.getStateSpace().isValidOperation(newCurrentState, opName, predicate)) {
+							Transition transition = newCurrentState.findTransition(opName, predicate);
+							newTrace = newTrace.add(transition);
+							newCurrentState = newTrace.getCurrentState();
+							currentTrace.set(newTrace);
+						}
 					}
 				}
 			}
 		}
-		return newTrace;
 	}
 
 
