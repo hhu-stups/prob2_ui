@@ -109,7 +109,7 @@ public class SimulationListViewItem extends ListCell<SimulationItem> {
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
 					AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(item.getValuesProbability(), FormulaExpand.EXPAND);
-					Label lbValuesProbability = new Label(String.format(bundle.getString("simulation.item.probabilityValue"), evalResult.toString()));
+					Label lbValuesProbability = new Label(String.format(bundle.getString("simulation.item.concreteValuesProbabilities"), evalResult.toString()));
 					lbValuesProbability.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbValuesProbability);
 				}
