@@ -222,7 +222,6 @@ public final class OperationsView extends VBox {
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		disablePropertyController.addDisableExpression(this.updater.runningProperty());
 		disablePropertyController.addDisableExpression(this.randomExecutionThread.isNotNull());
-
 		stageManager.loadFXML(this, "operations_view.fxml");
 	}
 

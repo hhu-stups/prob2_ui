@@ -4,17 +4,24 @@ import java.util.List;
 
 public class SimulationConfiguration {
 
-    private int time;
+    private List<VariableChoice> setupConfigurations;
+
+    private List<VariableChoice> initialisationConfigurations;
 
     private List<OperationConfiguration> operationConfigurations;
 
-    public SimulationConfiguration(int time, List<OperationConfiguration> operationConfigurations) {
-        this.time = time;
+    public SimulationConfiguration(List<VariableChoice> setupConfigurations, List<VariableChoice> initialisationConfigurations, List<OperationConfiguration> operationConfigurations) {
+        this.setupConfigurations = setupConfigurations;
+        this.initialisationConfigurations = initialisationConfigurations;
         this.operationConfigurations = operationConfigurations;
     }
 
-    public int getTime() {
-        return time;
+    public List<VariableChoice> getSetupConfigurations() {
+        return setupConfigurations;
+    }
+
+    public List<VariableChoice> getInitialisationConfigurations() {
+        return initialisationConfigurations;
     }
 
     public List<OperationConfiguration> getOperationConfigurations() {

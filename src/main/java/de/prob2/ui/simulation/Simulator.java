@@ -2,8 +2,12 @@ package de.prob2.ui.simulation;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -13,9 +17,11 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
@@ -27,6 +33,8 @@ public class Simulator {
 
     private SimulationConfiguration config;
 
+    private int interval;
+
 	private Timer timer;
 
 	private Map<String, Integer> initialOperationToRemainingTime;
@@ -37,13 +45,14 @@ public class Simulator {
 
 	private final BooleanProperty runningProperty;
 
-	private boolean operationExecutedInThisStep;
+	private final BooleanProperty executingOperationProperty;
 
 	@Inject
-	public Simulator(final CurrentTrace currentTrace) {
+	public Simulator(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
-		this.operationExecutedInThisStep = false;
 		this.runningProperty = new SimpleBooleanProperty(false);
+		this.executingOperationProperty = new SimpleBooleanProperty(false);
+        disablePropertyController.addDisableExpression(this.executingOperationProperty);
 	}
 
 	public void initSimulator(File configFile) {
@@ -57,13 +66,26 @@ public class Simulator {
         }
 		this.initialOperationToRemainingTime = new HashMap<>();
 		this.operationToRemainingTime = new HashMap<>();
+		calculateInterval();
 	    initializeRemainingTime();
+	}
+
+	private void calculateInterval() {
+		Optional<Integer> result = config.getOperationConfigurations().stream()
+				.map(OperationConfiguration::getTime)
+				.reduce(Simulator::gcd);
+		result.ifPresent(integer -> interval = integer);
+	}
+
+	private static int gcd(int a, int b) {
+		if(b == 0) {
+			return a;
+		}
+		return gcd(b, a % b);
 	}
 
 	private void initializeRemainingTime() {
 		config.getOperationConfigurations()
-				.stream()
-				.filter(config -> config.getTime() > 0)
 				.forEach(config -> {
 					operationToRemainingTime.put(config.getOpName(), config.getTime());
 					initialOperationToRemainingTime.put(config.getOpName(), config.getTime());
@@ -76,112 +98,158 @@ public class Simulator {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
+				executingOperationProperty.set(true);
+				// Read trace and pass it through chooseOperation to avoid race condition
+				Trace trace = currentTrace.get();
 				updateRemainingTime();
-                chooseOperation();
-				operationExecutedInThisStep = false;
+				execute(trace);
+				executingOperationProperty.set(false);
 			}
 		};
-		timer.scheduleAtFixedRate(task, 0, config.getTime());
+		timer.scheduleAtFixedRate(task, 0, interval);
 	}
 
-	public void chooseOperation() {
-		if(!currentTrace.getCurrentState().isInitialised()) {
-			currentTrace.set(currentTrace.get().randomAnimation(1));
-			return;
+	public void execute(Trace trace) {
+		State currentState = trace.getCurrentState();
+		// Pass trace through execute operations to avoid race condition
+		if(!currentState.isInitialised()) {
+			List<String> nextTransitions = trace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
+			if(nextTransitions.contains("$setup_constants")) {
+				currentTrace.set(executeSetupConstants(currentState, trace));
+			} else if(nextTransitions.contains("$initialise_machine")) {
+				currentTrace.set(executeInitialisation(currentState, trace));
+			}
+		} else {
+			executeOperations(currentTrace, currentState, trace);
 		}
-		executeWithTime();
-		if(operationExecutedInThisStep) {
-			return;
-		}
-		executeWithProbability();
     }
 
-    public void updateRemainingTime() {
-		for(String key : operationToRemainingTime.keySet()) {
-			operationToRemainingTime.computeIfPresent(key, (k, v) -> v - config.getTime());
+    private Trace executeSetupConstants(State currentState, Trace trace) {
+		List<VariableChoice> setupConfigs = config.getSetupConfigurations();
+		Transition nextTransition = null;
+		if(setupConfigs == null) {
+			nextTransition = currentState.findTransition("$setup_constants", "1=1");
+		} else {
+			String predicate = setupConfigs.stream()
+					.map(VariableChoice::getChoice)
+					.map(choice -> chooseVariableValues(currentState, choice))
+					.collect(Collectors.joining(" & "));
+			nextTransition = currentState.findTransition("$setup_constants", predicate);
 		}
+		return trace.add(nextTransition);
 	}
 
-    private void executeWithTime() {
-
-		List<String> executedOperation = new ArrayList<>();
-
-		// Update operation that must be executed
-		for(String key : operationToRemainingTime.keySet()) {
-			int remainingTime = operationToRemainingTime.get(key);
-			if(remainingTime <= 0) {
-				executedOperation.add(key);
-			}
+    private Trace executeInitialisation(State currentState, Trace trace) {
+		List<VariableChoice> initialisationConfigs = config.getInitialisationConfigurations();
+		Transition nextTransition;
+		if(initialisationConfigs == null) {
+			nextTransition = currentState.findTransition("$initialise_machine", "1=1");
+		} else {
+			String predicate = initialisationConfigs.stream()
+					.map(VariableChoice::getChoice)
+					.map(choice -> chooseVariableValues(currentState, choice))
+					.collect(Collectors.joining(" & "));
+			nextTransition = currentState.findTransition("$initialise_machine", predicate);
 		}
-
-		// Execute operations that must be executed if possible
-		Trace newTrace = currentTrace.get();
-		while(executedOperation.size() > 0) {
-			int previousExecutedOperationSize = executedOperation.size();
-			List<String> removedExecutedOperations = new ArrayList<>();
-			for(int i = 0; i < executedOperation.size(); i++) {
-				String chosenOperation = executedOperation.get(i);
-				if(currentTrace.getCurrentState().getTransitions()
-						.stream()
-						.map(Transition::getName)
-						.collect(Collectors.toList()).contains(chosenOperation)) {
-					Transition nextTransition = currentTrace.getCurrentState().findTransition(chosenOperation, "1=1");
-					newTrace = newTrace.add(nextTransition);
-					removedExecutedOperations.add(chosenOperation);
-					operationToRemainingTime.computeIfPresent(chosenOperation, (k, v) -> initialOperationToRemainingTime.get(chosenOperation));
-					operationExecutedInThisStep = true;
-				}
-			}
-			executedOperation.removeAll(removedExecutedOperations);
-
-			if(previousExecutedOperationSize == executedOperation.size()) {
-				break;
-			}
-		}
-		currentTrace.set(newTrace);
+		return trace.add(nextTransition);
 	}
 
-    private void executeWithProbability() {
-		//Calculate executable operations
-		List<OperationConfiguration> possibleOperations = config.getOperationConfigurations()
-				.stream()
-				.filter(config -> config.getProbability() > 0.0)
-				.collect(Collectors.toList());
-
-		//Calculate executable operations that are enabled
-		List<OperationConfiguration> enabledPossibleOperations = possibleOperations.stream()
-				.filter(op -> currentTrace.getCurrentState().getTransitions()
-						.stream()
-						.map(Transition::getName)
-						.collect(Collectors.toSet()).contains(op.getOpName()))
-				.collect(Collectors.toList());
-
+	private String chooseVariableValues(State currentState, List<VariableConfiguration> choice) {
 		double ranDouble = Math.random();
 		double minimumProbability = 0.0;
-		String chosenOperation = "";
+		VariableConfiguration chosenConfiguration = choice.get(0);
 
-		//Choose operation for execution
-		for(OperationConfiguration config : enabledPossibleOperations) {
-			float newProbablity = (config.getProbability()/enabledPossibleOperations.size()) * possibleOperations.size();
-			minimumProbability += newProbablity;
-			chosenOperation = config.getOpName();
+		//Choose configuration for execution
+		for(VariableConfiguration config : choice) {
+			AbstractEvalResult probabilityResult = currentState.eval(config.getProbability(), FormulaExpand.EXPAND);
+			minimumProbability += Double.parseDouble(probabilityResult.toString());
+			chosenConfiguration = config;
 			if(minimumProbability > ranDouble) {
 				break;
 			}
 		}
 
-		//Execute chosen operation
-		if(!"".equals(chosenOperation)) {
-			Transition nextTransition = currentTrace.getCurrentState().findTransition(chosenOperation, "1=1");
-			Trace newTrace = currentTrace.get().add(nextTransition);
-			currentTrace.set(newTrace);
-			operationExecutedInThisStep = true;
+		Map<String, String> chosenValues = chosenConfiguration.getValues();
+		List<String> conjuncts = new ArrayList<>();
+		for(String key : chosenValues.keySet()) {
+			AbstractEvalResult evalResult = currentState.eval(chosenValues.get(key), FormulaExpand.EXPAND);
+			conjuncts.add(key + " = " + evalResult.toString());
+		}
+		return String.join(" & ", conjuncts);
+	}
+
+    public void updateRemainingTime() {
+		for(String key : operationToRemainingTime.keySet()) {
+			operationToRemainingTime.computeIfPresent(key, (k, v) -> v - interval);
 		}
 	}
 
+	//1. select operations where time <= 0 (X)
+	//2. sort operations after priority (less number means higher priority) (X)
+	//3. check whether operation is executable (X)
+	//4. calculate probability for each operation whether it should be executed (X)
+	//5. execute operation and append to trace (X)
+
+	private void executeOperations(CurrentTrace currentTrace, State currentState, Trace trace) {
+		List<OperationConfiguration> nextOperations = config.getOperationConfigurations().stream()
+				.filter(opConfig -> operationToRemainingTime.get(opConfig.getOpName()) <= 0)
+				.collect(Collectors.toList());
+
+
+		nextOperations.sort(Comparator.comparingInt(OperationConfiguration::getPriority));
+
+		Trace newTrace = trace;
+		State newCurrentState = currentState;
+
+		for(OperationConfiguration opConfig : nextOperations) {
+			double ranDouble = Math.random();
+
+			AbstractEvalResult evalResult = newCurrentState.eval(opConfig.getProbability(), FormulaExpand.EXPAND);
+			if(Double.parseDouble(evalResult.toString()) > ranDouble) {
+				List<String> enabledOperations = newTrace.getNextTransitions().stream()
+						.map(Transition::getName)
+						.collect(Collectors.toList());
+				String opName = opConfig.getOpName();
+				operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
+				if (enabledOperations.contains(opName)) {
+					List<VariableChoice> choices = opConfig.getVariableChoices();
+					int delay = opConfig.getDelay();
+					if(delay > 0) {
+						try {
+							Thread.sleep(delay);
+						} catch (InterruptedException e) {
+							LOGGER.error("", e);
+						}
+					}
+					if(choices == null) {
+						Transition transition = newCurrentState.findTransition(opName, "1=1");
+						newTrace = newTrace.add(transition);
+						newCurrentState = newTrace.getCurrentState();
+						currentTrace.set(newTrace);
+					} else {
+						State finalNewCurrentState = newCurrentState;
+						String predicate = choices.stream()
+								.map(VariableChoice::getChoice)
+								.map(choice -> chooseVariableValues(finalNewCurrentState, choice))
+								.collect(Collectors.joining(" & "));
+						if(newCurrentState.getStateSpace().isValidOperation(newCurrentState, opName, predicate)) {
+							Transition transition = newCurrentState.findTransition(opName, predicate);
+							newTrace = newTrace.add(transition);
+							newCurrentState = newTrace.getCurrentState();
+							currentTrace.set(newTrace);
+						}
+					}
+				}
+			}
+		}
+	}
+
+
 	public void stop() {
-		timer.cancel();
-		timer = null;
+		if(timer != null) {
+			timer.cancel();
+			timer = null;
+		}
 		runningProperty.set(false);
 	}
 
@@ -192,4 +260,5 @@ public class Simulator {
 	public boolean isRunning() {
 		return runningProperty.get();
 	}
+
 }

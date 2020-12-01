@@ -1,22 +1,21 @@
 package de.prob2.ui.internal;
 
-import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * <p>An executor that runs tasks in a single background thread, and automatically cancels any previous tasks when a new task is submitted.</p>
@@ -70,10 +69,10 @@ public final class BackgroundUpdater implements Executor {
 			this.lastFuture.cancel(false);
 			this.lastFuture = this.executor.submit(() -> {
 				try {
-					this.running.set(true);
+					Platform.runLater(() -> this.running.set(true));
 					command.run();
 				} finally {
-					this.running.set(false);
+					Platform.runLater(() -> this.running.set(false));
 				}
 			}, null);
 			Futures.addCallback(this.lastFuture, THROW_EXCEPTIONS_CALLBACK, MoreExecutors.directExecutor());

@@ -1,17 +1,28 @@
 package de.prob2.ui.simulation;
 
+import java.util.List;
+
 public class OperationConfiguration {
 
     private String opName;
 
     private int time;
 
-    private float probability;
+    private int delay;
 
-    public OperationConfiguration(String opName, int time, float probability) {
+    private String probability;
+
+    private int priority;
+
+    private List<VariableChoice> variableChoices;
+
+    public OperationConfiguration(String opName, int time, int delay, String probability, int priority, List<VariableChoice> variableChoices) {
         this.opName = opName;
         this.time = time;
+        this.delay = delay;
         this.probability = probability;
+        this.priority = priority;
+        this.variableChoices = variableChoices;
     }
 
     public String getOpName() {
@@ -22,7 +33,19 @@ public class OperationConfiguration {
         return time;
     }
 
-    public float getProbability() {
+    public int getDelay() {
+        return delay;
+    }
+
+    public String getProbability() {
         return probability;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public List<VariableChoice> getVariableChoices() {
+        return variableChoices;
     }
 }
