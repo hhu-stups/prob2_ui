@@ -1,5 +1,7 @@
 package de.prob2.ui.simulation.table;
 
+import java.util.Map;
+
 public class SimulationItem {
 
 	private String opName;
@@ -14,12 +16,12 @@ public class SimulationItem {
 
 	private String choiceID;
 
-	private String values;
+	private Map<String, String> values;
 
 	private String valuesProbability;
 
 	public SimulationItem(String opName, String time, String delay, String priority, String probability,
-						  String choiceID, String values, String valuesProbability) {
+						  String choiceID, Map<String, String> values, String valuesProbability) {
 		this.opName = opName;
 		this.time = time;
 		this.delay = delay;
@@ -54,8 +56,12 @@ public class SimulationItem {
 		return choiceID;
 	}
 
-	public String getValues() {
+	public Map<String, String> getValues() {
 		return values;
+	}
+
+	public String getValuesAsString() {
+		return values == null ? "" : values.toString();
 	}
 
 	public String getValuesProbability() {

@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 
@@ -75,6 +76,8 @@ public class SimulatorStage extends Stage {
 		btSimulate.disableProperty().bind(configurationPath.isNull());
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
 		this.simulationItems.setCellFactory(lv -> new SimulationListViewItem(stageManager, currentTrace, bundle));
+		this.currentTrace.addListener((observable, from, to) -> simulationItems.refresh());
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> simulationItems.refresh());
 	}
 
 
@@ -111,7 +114,7 @@ public class SimulatorStage extends Stage {
 			int setupID = 0;
 			for(VariableChoice choice : config.getSetupConfigurations()) {
 				for(VariableConfiguration variableConfiguration : choice.getChoice()) {
-					observableList.add(new SimulationItem("SETUP_CONSTANTS", "", "", "", "", String.valueOf(setupID), variableConfiguration.getValues().toString(), variableConfiguration.getProbability()));
+					observableList.add(new SimulationItem("SETUP_CONSTANTS", "", "", "", "", String.valueOf(setupID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
 				}
 				setupID++;
 			}
@@ -121,7 +124,7 @@ public class SimulatorStage extends Stage {
 			int initialisationID = 0;
 			for(VariableChoice choice : config.getInitialisationConfigurations()) {
 				for(VariableConfiguration variableConfiguration : choice.getChoice()) {
-					observableList.add(new SimulationItem("INITIALISATION", "", "", "", "", String.valueOf(initialisationID), variableConfiguration.getValues().toString(), variableConfiguration.getProbability()));
+					observableList.add(new SimulationItem("INITIALISATION", "", "", "", "", String.valueOf(initialisationID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
 				}
 				initialisationID++;
 			}
@@ -135,12 +138,12 @@ public class SimulatorStage extends Stage {
 			String priority = String.valueOf(opConfig.getPriority());
 			String probability = opConfig.getProbability();
 			if(opConfig.getVariableChoices() == null) {
-				observableList.add(new SimulationItem(opName, time, delay, priority, probability, "", "", ""));
+				observableList.add(new SimulationItem(opName, time, delay, priority, probability, "", null, ""));
 			} else {
 				int variableID = 0;
 				for(VariableChoice choice : opConfig.getVariableChoices()) {
 					for(VariableConfiguration variableConfiguration : choice.getChoice()) {
-						observableList.add(new SimulationItem(opName, time, delay, priority, probability, String.valueOf(variableID), variableConfiguration.getValues().toString(), variableConfiguration.getProbability()));
+						observableList.add(new SimulationItem(opName, time, delay, priority, probability, String.valueOf(variableID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
 					}
 				}
 			}
