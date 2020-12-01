@@ -77,7 +77,11 @@ public class SimulatorStage extends Stage {
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
 		this.simulationItems.setCellFactory(lv -> new SimulationListViewItem(stageManager, currentTrace, bundle));
 		this.currentTrace.addListener((observable, from, to) -> simulationItems.refresh());
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> simulationItems.refresh());
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			configurationPath.set(null);
+			simulationItems.getItems().clear();
+			simulationItems.refresh();
+		});
 	}
 
 
