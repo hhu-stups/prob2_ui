@@ -14,6 +14,7 @@ public final class StateItem {
 		public abstract BVisual2Value evaluate(final BVisual2Formula formula, final State state);
 	}
 
+	private final boolean expanded;
 	private final BVisual2Formula formula;
 	private final State currentState;
 	private final State previousState;
@@ -22,7 +23,8 @@ public final class StateItem {
 	private BVisual2Value currentValue;
 	private BVisual2Value previousValue;
 
-	StateItem(final BVisual2Formula formula, final State currentState, final State previousState, final StateItem.FormulaEvaluator evaluator) {
+	StateItem(final boolean expanded, final BVisual2Formula formula, final State currentState, final State previousState, final StateItem.FormulaEvaluator evaluator) {
+		this.expanded = expanded;
 		this.formula = formula;
 		this.currentState = currentState;
 		this.previousState = previousState;
@@ -30,6 +32,14 @@ public final class StateItem {
 		this.structure = null;
 		this.currentValue = null;
 		this.previousValue = null;
+	}
+
+	public boolean isExpanded() {
+		return this.expanded;
+	}
+
+	public StateItem withExpanded(final boolean expanded) {
+		return new StateItem(expanded, this.getFormula(), this.getCurrentState(), this.getPreviousState(), this.evaluator);
 	}
 
 	public BVisual2Formula getFormula() {
@@ -57,6 +67,14 @@ public final class StateItem {
 
 	public String getDescription() {
 		return this.getStructure().getDescription();
+	}
+
+	public String getFunctorSymbol() {
+		return this.getStructure().getFunctorSymbol();
+	}
+
+	public List<String> getRodinLabels() {
+		return this.getStructure().getRodinLabels();
 	}
 
 	public BVisual2Value getCurrentValue() {

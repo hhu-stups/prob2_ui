@@ -49,8 +49,7 @@ import javax.inject.Singleton;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -416,18 +415,13 @@ public class VisBStage extends Stage {
 	}
 
 	private String generateHTMLFileWithSVG(String jqueryLink, List<VisBOnClickMustacheItem> clickEvents, File jsonFile, String svgContent) {
-		try {
-			URI uri = VisBStage.class.getResource("visb_html_view.mustache").toURI();
-			MustacheTemplateManager templateManager = new MustacheTemplateManager(uri, "visb_html_view");
-			templateManager.put("jqueryLink", jqueryLink);
-			templateManager.put("clickEvents", clickEvents);
-			templateManager.put("jsonFile", jsonFile);
-			templateManager.put("svgContent", svgContent);
-			return templateManager.apply();
-		} catch (URISyntaxException e) {
-			LOGGER.error("", e);
-			return "";
-		}
+		InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.mustache");
+		MustacheTemplateManager templateManager = new MustacheTemplateManager(inputStream, "visb_html_view");
+		templateManager.put("jqueryLink", jqueryLink);
+		templateManager.put("clickEvents", clickEvents);
+		templateManager.put("jsonFile", jsonFile);
+		templateManager.put("svgContent", svgContent);
+		return templateManager.apply();
 	}
 
 	@FXML
@@ -447,8 +441,9 @@ public class VisBStage extends Stage {
 
 		Alert alert;
 		if(machine.visBVisualizationProperty().isNotNull().get()) {
-			buttons.add(loadButton);
-			if(visBPath != null && !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation())) {
+			boolean visBPathNotEqualsMachinePath = !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation());
+			if(visBPath.get() != null && visBPathNotEqualsMachinePath) {
+				buttons.add(loadButton);
 				buttons.add(setButton);
 			}
 			buttons.add(resetButton);

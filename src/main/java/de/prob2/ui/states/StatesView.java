@@ -164,6 +164,41 @@ public final class StatesView extends StackPane {
 		});
 	}
 
+	private Tooltip buildItemTooltip(final StateItem item) {
+		final StringBuilder sb = new StringBuilder();
+
+		final boolean hasRodinLabels = item.getRodinLabels() != null && !item.getRodinLabels().isEmpty();
+		final boolean hasDescription = item.getDescription() != null && !item.getDescription().isEmpty();
+		if (hasRodinLabels) {
+			sb.append('@');
+			sb.append(String.join(";", item.getRodinLabels()));
+			if (hasDescription) {
+				sb.append(": ");
+			}
+		}
+		if (hasDescription) {
+			sb.append(item.getDescription());
+		}
+		if (sb.length() > 0) {
+			sb.append('\n');
+		}
+
+		final int childrenCount = item.getSubformulas().size();
+		if (childrenCount > 0) {
+			if (item.getFunctorSymbol() != null) {
+				sb.append(String.format(bundle.getString("states.statesView.tooltip.formulaChildren"), item.getFunctorSymbol(), childrenCount));
+			} else {
+				sb.append(String.format(bundle.getString("states.statesView.tooltip.elementChildren"), childrenCount));
+			}
+		}
+
+		if (sb.length() > 0) {
+			return new Tooltip(sb.toString());
+		} else {
+			return null;
+		}
+	}
+
 	private TreeTableRow<StateItem> initTableRow() {
 		final TreeTableRow<StateItem> row = new TreeTableRow<>();
 
@@ -175,9 +210,7 @@ public final class StatesView extends StackPane {
 					row.getStyleClass().add("changed");
 				}
 
-				if (!to.getDescription().isEmpty()) {
-					row.setTooltip(new Tooltip(to.getDescription()));
-				}
+				row.setTooltip(this.buildItemTooltip(to));
 			}
 		});
 
@@ -334,6 +367,15 @@ public final class StatesView extends StackPane {
 		};
 	}
 
+	private static ChangeListener<Boolean> getUpdateItemExpandedListener(final TreeItem<StateItem> treeItem) {
+		return (o, from, to) -> {
+			final StateItem currentValue = treeItem.getValue();
+			if (currentValue != null) {
+				treeItem.setValue(currentValue.withExpanded(to));
+			}
+		};
+	}
+
 	/**
 	 * <p>
 	 * Generate treeItem's children from the given subformulas.
@@ -354,7 +396,7 @@ public final class StatesView extends StackPane {
 		// Generate the tree items for treeItem's children right away.
 		// This must be done even if treeItem is not expanded, because otherwise treeItem would have no child items and thus no expansion arrow, even if it actually has subformulas.
 		final List<TreeItem<StateItem>> children = subformulas.stream()
-			.map(f -> new TreeItem<>(new StateItem(f, currentState, previousState, this.cachingEvaluator)))
+			.map(f -> new TreeItem<>(new StateItem(false, f, currentState, previousState, this.cachingEvaluator)))
 			.collect(Collectors.toList());
 
 		// The tree items for the children of treeItem's children are generated once treeItem is expanded.
@@ -395,8 +437,9 @@ public final class StatesView extends StackPane {
 		};
 		treeItem.expandedProperty().addListener(trackExpandedListener);
 
-		// This listener tracks the visible state of each formula.
-		// Unlike the first listener, this one does *not* remove itself after it runs.
+		// These listeners also *do not* remove themselves after they run.
+		final ChangeListener<Boolean> updateItemExpandedListener = getUpdateItemExpandedListener(treeItem);
+		treeItem.expandedProperty().addListener(updateItemExpandedListener);
 		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem);
 		treeItem.expandedProperty().addListener(trackVisibleListener);
 
@@ -404,6 +447,7 @@ public final class StatesView extends StackPane {
 		if (treeItem.isExpanded()) {
 			generateGrandchildrenListener.changed(treeItem.expandedProperty(), false, true);
 			trackExpandedListener.changed(treeItem.expandedProperty(), false, true);
+			updateItemExpandedListener.changed(treeItem.expandedProperty(), false, true);
 			trackVisibleListener.changed(treeItem.expandedProperty(), false, true);
 		}
 
@@ -447,7 +491,7 @@ public final class StatesView extends StackPane {
 		cacheMissingFormulaStructures(subformulas);
 		final List<TreeItem<StateItem>> matchingChildren = new ArrayList<>();
 		for (final BVisual2Formula subformula : subformulas) {
-			final TreeItem<StateItem> subTreeItem = new TreeItem<>(new StateItem(subformula, currentState, previousState, this.cachingEvaluator));
+			final TreeItem<StateItem> subTreeItem = new TreeItem<>(new StateItem(false, subformula, currentState, previousState, this.cachingEvaluator));
 			// If subTreeItem matches the filter, don't filter its children.
 			if (matchesFilter(filter, subTreeItem.getValue().getLabel())) {
 				addSubformulaItemsUnfiltered(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState);
@@ -472,12 +516,11 @@ public final class StatesView extends StackPane {
 		}
 		treeItem.getChildren().setAll(matchingChildren);
 
-		final ChangeListener<Boolean> trackVisibleListener = getTrackVisibleListener(treeItem);
-		treeItem.expandedProperty().addListener(trackVisibleListener);
+		treeItem.expandedProperty().addListener(getUpdateItemExpandedListener(treeItem));
+		treeItem.expandedProperty().addListener(getTrackVisibleListener(treeItem));
 
 		// Always expand treeItem, because it doesn't match the filter.
 		treeItem.setExpanded(true);
-		trackVisibleListener.changed(treeItem.expandedProperty(), false, true);
 	}
 
 	private static TreeItem<StateItem> createRootItem() {
