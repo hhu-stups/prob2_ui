@@ -11,6 +11,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceSelectionView;
+import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.help.UserManualStage;
 import javafx.application.Platform;
@@ -82,6 +83,8 @@ public class VisBStage extends Stage {
 	private Button manageDefaultVisualisationButton;
 	@FXML
 	private Button openTraceSelectionButton;
+	@FXML
+	private Button openSimulationButton;
 	@FXML
 	private StackPane zoomingPane;
 	@FXML
@@ -165,6 +168,7 @@ public class VisBStage extends Stage {
 
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			openTraceSelectionButton.disableProperty().unbind();
+			openSimulationButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().unbind();
 			updateUIOnMachine(to);
 			loadVisBFileFromMachine(to);
@@ -174,6 +178,7 @@ public class VisBStage extends Stage {
 	private void updateUIOnMachine(Machine machine) {
 		final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
 		manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBPath.isNull()));
+		openSimulationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		if(machine != null) {
 			openTraceSelectionButton.disableProperty().bind(machine.tracesProperty().emptyProperty());
 		} else {
@@ -412,6 +417,13 @@ public class VisBStage extends Stage {
 		TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
 		traceSelectionView.show();
 		traceSelectionView.toFront();
+	}
+
+	@FXML
+	private void openSimulation() {
+		SimulatorStage simulatorStage = injector.getInstance(SimulatorStage.class);
+		simulatorStage.show();
+		simulatorStage.toFront();
 	}
 
 	private String generateHTMLFileWithSVG(String jqueryLink, List<VisBOnClickMustacheItem> clickEvents, File jsonFile, String svgContent) {

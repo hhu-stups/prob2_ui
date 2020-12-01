@@ -125,6 +125,14 @@
 									<Tooltip text="%common.buttons.openTraceSelection" />
 								</tooltip>
 							</Button>
+							<Button fx:id="openSimulationButton" onAction="#openSimulation">
+								<graphic>
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY" bindableFontSize="${fontSize.fontSize + 2}" />
+								</graphic>
+								<tooltip>
+									<Tooltip text="%common.buttons.openSimulation" />
+								</tooltip>
+							</Button>
 							<Button fx:id="saveTraceButton" onAction="#saveTrace">
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
