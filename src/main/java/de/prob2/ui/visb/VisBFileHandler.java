@@ -240,6 +240,7 @@ class VisBFileHandler {
 				String id = currentObj.get("id").getAsString();
 				String attribute = currentObj.get("attr").getAsString();
 				String value = currentObj.get("value").getAsString();
+		        Boolean optional = (currentObj.has("optional") && currentObj.get("optional").getAsBoolean());
 				if(id.isEmpty() || attribute.isEmpty() || value.isEmpty()){
 					throw new VisBParseException("There is an item in your visualisation file, that has an empty id, attr, or value body.");
 				}
@@ -264,13 +265,13 @@ class VisBFileHandler {
 								repVal = repVal.replace(pattern, thisVal);
 								// we could check that all arrays have same size; otherwise a pattern will not be replaced
 							}
-							visBItems.add(new VisBItem(repId, attribute, repVal));
+							visBItems.add(new VisBItem(repId, attribute, repVal,optional));
 							// note: we do not check if an old item for this id and attribute already exists;
 							// this actually allows overriding VisB items from included files
 							// TODO: we could remove the old item if it exists; we could provide a warning if the old item is in the same file; it would probably be better to use a hash map then
 						}
 					} else { // no repetitions
-						visBItems.add(new VisBItem(id, attribute, value)); // see comment above
+						visBItems.add(new VisBItem(id, attribute, value, optional)); // see comment above
 					}
 				}
 			} else if (!currentObj.has("id")){

@@ -74,8 +74,10 @@ public class VisBParser {
 			for(VisBItem visItem : visItems){
 			    AbstractEvalResult abstractEvalResult = abstractEvalResults.get(parseItemFormula(visItem));
 				String value = getValueFromResult(abstractEvalResult, visItem);
-				String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
-				jQueryForChanges.append(jQueryTemp);
+				if (!value.equals("@visb-ignore")) {
+					String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
+					jQueryForChanges.append(jQueryTemp);
+				}
 			}
 		} catch (EvaluationException e){
 			throw(new VisBNestedException("Exception evaluating B formulas",e));
@@ -102,7 +104,7 @@ public class VisBParser {
 			}
 		} catch (EvaluationException e){
 			System.out.println("\nException for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
-			throw(new VisBNestedException("Exception parsing B formula for "+ visItem.getId() + "."+ visItem.getAttribute() + " : ",e));
+		    throw(new VisBNestedException("Exception parsing B formula for "+ visItem.getId() + "."+ visItem.getAttribute() + " : ",e));
 		}
 	    return visItem.parsedFormula;
 	}
@@ -136,7 +138,8 @@ public class VisBParser {
 		String value;
 		Objects.requireNonNull(abstractEvalResult);
 		if (abstractEvalResult instanceof EvalResult) {
-			value = abstractEvalResult.toString().replaceAll("^\"|\"$", ""); // remove leading and trailing double quotes from B string values
+			value = abstractEvalResult.toString().replaceAll("^\"|\"$", ""); 
+			// remove leading and trailing double quotes from B string values
 		} else if (abstractEvalResult instanceof EvaluationErrorResult) {
 			if (abstractEvalResult instanceof IdentifierNotInitialised) {
 				//Identifier not initialised
@@ -153,7 +156,16 @@ public class VisBParser {
 			throw new VisBParseException("There was a problem evaluating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". There was an enumeration warning while evaluating the formula. "+abstractEvalResult.toString());
 		} else if (abstractEvalResult instanceof ComputationNotCompletedResult) {
 			//computation not completed
-			throw new VisBParseException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". Computation of the formula was not completed. "+((ComputationNotCompletedResult) abstractEvalResult).getReason());
+			if (visBItem.itemIsOptional()) {
+			    System.out.println("Ignoring: "+((ComputationNotCompletedResult) abstractEvalResult).getReason());
+			    value = "@visb-ignore"; // it would be so nice if Java could return multiple values
+			} else {
+				throw new VisBParseException("There was a problem type checking your formula for id: \"" +
+											visBItem.getId() + "\", and attribute: \"" +
+											visBItem.getAttribute() + "\"" +
+											". Computation of the formula was not completed. " +
+											((ComputationNotCompletedResult) abstractEvalResult).getReason());
+			}
 		} else {
 			throw new IllegalArgumentException("There was a problem translating your formula for id: \""+visBItem.getId()+"\", and attribute: \""+visBItem.getAttribute()+"\""+". The result of this formula cannot be shown.");
 		}
