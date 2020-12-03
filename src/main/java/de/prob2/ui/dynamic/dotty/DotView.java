@@ -1,5 +1,6 @@
 package de.prob2.ui.dynamic.dotty;
 
+import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.CommandInterruptedException;
@@ -44,9 +45,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -100,8 +101,7 @@ public class DotView extends DynamicCommandStage {
 
 	private String dot;
 	private String dotEngine;
-	private ObjectProperty<Path> dotFilePath;
-	private ObjectProperty<Path> svgFilePath;
+	private final ObjectProperty<byte[]> currentDotContent;
 
 	private double oldMousePositionX = -1;
 	private double oldMousePositionY = -1;
@@ -117,8 +117,7 @@ public class DotView extends DynamicCommandStage {
 		
 		this.dot = null;
 		this.dotEngine = null;
-		this.dotFilePath = new SimpleObjectProperty<>(this, "dotFilePath", null);
-		this.svgFilePath = new SimpleObjectProperty<>(this, "svgFilePath", null);
+		this.currentDotContent = new SimpleObjectProperty<>(this, "currentDotContent", null);
 		stageManager.loadFXML(this, "dot_view.fxml");
 	}
 
@@ -127,7 +126,7 @@ public class DotView extends DynamicCommandStage {
 	public void initialize() {
 		super.initialize();
 		stageManager.setMacMenuBar(this, this.menuBar);
-		saveButton.disableProperty().bind(dotFilePath.isNull());
+		saveButton.disableProperty().bind(currentDotContent.isNull());
 		helpButton.setHelpContent("graphVisualisation", null);
 		initializeZooming();
 	}
@@ -184,7 +183,8 @@ public class DotView extends DynamicCommandStage {
 				}
 				setUpSvgForDotCommand(trace, item, formulas);
 				if(!Thread.currentThread().isInterrupted()) {
-					loadGraph();
+					final byte[] svgData = renderDot(this.currentDotContent.get(), TargetFormat.SVG);
+					loadGraph(new String(svgData, StandardCharsets.UTF_8));
 				}
 			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Dot visualization interrupted", e);
@@ -208,32 +208,52 @@ public class DotView extends DynamicCommandStage {
 		if (item.getArity() > 0) {
 			formulas.add(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
 		}
-		this.dotFilePath.set(Files.createTempFile("prob2-ui", ".dot"));
-		this.svgFilePath.set(Files.createTempFile("prob2-ui", ".svg"));
-
-		final GetPreferenceCommand getDotCmd = new GetPreferenceCommand("DOT");
-		final GetPreferenceCommand getDotEngineCmd = new GetPreferenceCommand("DOT_ENGINE");
-		final ComposedCommand ccmd = new ComposedCommand(
-			getDotCmd,
-			getDotEngineCmd,
-			new GetDotForVisualizationCommand(trace.getCurrentState(), item, dotFilePath.get().toFile(), formulas)
-		);
-		trace.getStateSpace().execute(ccmd);
-		this.dot = getDotCmd.getValue();
-		this.dotEngine = item.getAdditionalInfo().stream()
-			.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
-			.map(t -> BindingGenerator.getCompoundTerm(t, 1))
-			.map(t -> PrologTerm.atomicString(t.getArgument(1)))
-			.findAny()
-			.orElseGet(getDotEngineCmd::getValue);
-		writeFileFromDot(TargetFormat.SVG, dot, dotEngine, dotFilePath.get(), svgFilePath.get());
+		final Path dotFilePath = Files.createTempFile("prob2-ui", ".dot");
+		
+		try {
+			final GetPreferenceCommand getDotCmd = new GetPreferenceCommand("DOT");
+			final GetPreferenceCommand getDotEngineCmd = new GetPreferenceCommand("DOT_ENGINE");
+			final ComposedCommand ccmd = new ComposedCommand(
+				getDotCmd,
+				getDotEngineCmd,
+				new GetDotForVisualizationCommand(trace.getCurrentState(), item, dotFilePath.toFile(), formulas)
+			);
+			trace.getStateSpace().execute(ccmd);
+			this.dot = getDotCmd.getValue();
+			this.dotEngine = item.getAdditionalInfo().stream()
+				.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
+				.map(t -> BindingGenerator.getCompoundTerm(t, 1))
+				.map(t -> PrologTerm.atomicString(t.getArgument(1)))
+				.findAny()
+				.orElseGet(getDotEngineCmd::getValue);
+			this.currentDotContent.set(Files.readAllBytes(dotFilePath));
+		} finally {
+			try {
+				Files.delete(dotFilePath);
+			} catch (IOException e) {
+				LOGGER.error("Failed to delete temporary dot file", e);
+			}
+		}
 	}
 
-	private static void writeFileFromDot(final TargetFormat format, final String dotCommand, final String dotEngine, final Path dotFilePath, final Path targetFilePath) throws IOException, InterruptedException {
-		ProcessBuilder dotProcessBuilder = new ProcessBuilder(dotCommand, "-K" + dotEngine, formatToFlag.get(format), dotFilePath.toString(), "-o", targetFilePath.toString());
+	private byte[] renderDot(final byte[] dotContent, final TargetFormat format) throws IOException, InterruptedException {
+		// No input or output file names are passed to dot -
+		// input written to stdin and output read from stdout.
+		ProcessBuilder dotProcessBuilder = new ProcessBuilder(this.dot, "-K" + this.dotEngine, formatToFlag.get(format));
 
 		LOGGER.debug("Starting dot command: {}", dotProcessBuilder.command());
 		final Process dotProcess = dotProcessBuilder.start();
+		
+		// Write to stdin in a background thread, so that if dot's stdin buffer fills up, it doesn't block our code.
+		final Thread stdinWriter = new Thread(() -> {
+			try {
+				dotProcess.getOutputStream().write(dotContent);
+				dotProcess.getOutputStream().close();
+			} catch (IOException e) {
+				LOGGER.error("Failed to write dot input", e);
+			}
+		}, "dot stdin writer");
+		stdinWriter.start();
 		
 		// Read stderr in a background thread, to prevent the stream buffer from filling up and blocking dot.
 		// (This is very unlikely to happen, because dot normally doesn't produce a lot of stderr output.)
@@ -252,7 +272,11 @@ public class DotView extends DynamicCommandStage {
 			}
 		}, "dot stderr logger");
 		stderrLogger.start();
-
+		
+		// Read stdout while dot is running, to prevent the stream buffer from filling up and blocking dot.
+		// (Unlike with stderr, this actually happens in practice, when the generated output is large.)
+		final byte[] rendered = ByteStreams.toByteArray(dotProcess.getInputStream());
+		
 		final int exitCode = dotProcess.waitFor();
 		LOGGER.debug("dot exited with status code {}", exitCode);
 		
@@ -260,23 +284,20 @@ public class DotView extends DynamicCommandStage {
 			stderrLogger.join(); // Make sure that all stderr output has been read
 			throw new ProBError("dot exited with status code " + exitCode + ":\n" + errorOutput);
 		}
+		
+		return rendered;
 	}
 
-	private void loadGraph() {
-		try {
-			String svg = new String(Files.readAllBytes(svgFilePath.get()));
-			Thread thread = Thread.currentThread();
-			Platform.runLater(() -> {
-				if (!thread.isInterrupted()) {
-					dotView.getEngine().loadContent("<center>" + svg + "</center>");
-					statusBar.setText("");
-					taErrors.clear();
-				}
-				currentThread.set(null);
-			});
-		} catch (IOException e) {
-			LOGGER.error("Loading Graph failed");
-		}
+	private void loadGraph(final String svgContent) {
+		Thread thread = Thread.currentThread();
+		Platform.runLater(() -> {
+			if (!thread.isInterrupted()) {
+				dotView.getEngine().loadContent("<center>" + svgContent + "</center>");
+				statusBar.setText("");
+				taErrors.clear();
+			}
+			currentThread.set(null);
+		});
 	}
 	
 	@FXML
@@ -315,8 +336,7 @@ public class DotView extends DynamicCommandStage {
 
 	private void saveDot(final Path path) {
 		try {
-			byte[] fileContent = Files.readAllBytes(Paths.get(dotFilePath.get().toUri()));
-			Files.write(path, fileContent);
+			Files.write(path, this.currentDotContent.get());
 		} catch (IOException e) {
 			LOGGER.error("Failed to save Dot", e);
 		}
@@ -324,7 +344,7 @@ public class DotView extends DynamicCommandStage {
 
 	private void saveConverted(TargetFormat format, final Path path) {
 		try {
-			writeFileFromDot(format, dot, dotEngine, dotFilePath.get(), path);
+			Files.write(path, renderDot(this.currentDotContent.get(), format));
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}
@@ -372,18 +392,9 @@ public class DotView extends DynamicCommandStage {
 	
 	@Override
 	protected void reset() {
-		try {
-			if(dotFilePath.isNotNull().get()) {
-				Files.delete(dotFilePath.get());
-			}
-			if(svgFilePath.isNotNull().get()) {
-				Files.delete(svgFilePath.get());
-			}
-			dotFilePath.setValue(null);
-			svgFilePath.setValue(null);
-		} catch (IOException e) {
-			LOGGER.error("Failed to delete temporary dot file", e);
-		}
+		this.dot = null;
+		this.dotEngine = null;
+		this.currentDotContent.set(null);
 		dotView.getEngine().loadContent("");
 		statusBar.setText("");
 	}
