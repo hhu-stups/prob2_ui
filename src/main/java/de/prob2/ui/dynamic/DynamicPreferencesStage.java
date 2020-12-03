@@ -43,7 +43,7 @@ public class DynamicPreferencesStage extends Stage {
 	private final ProBPreferences proBPreferences;
 	private final GlobalPreferences globalPreferences;
 	
-	private DynamicCommandStage toRefresh;
+	private DynamicCommandStage<?> toRefresh;
 	
 	@Inject
 	private DynamicPreferencesStage(final StageManager stageManager, final ProBPreferences proBPreferences, final GlobalPreferences globalPreferences, final CurrentTrace currentTrace) {
@@ -65,7 +65,7 @@ public class DynamicPreferencesStage extends Stage {
 		this.preferences.setPreferences(this.proBPreferences);
 	}
 	
-	public void setToRefresh(final DynamicCommandStage toRefresh) {
+	public void setToRefresh(final DynamicCommandStage<?> toRefresh) {
 		this.toRefresh = toRefresh;
 	}
 	

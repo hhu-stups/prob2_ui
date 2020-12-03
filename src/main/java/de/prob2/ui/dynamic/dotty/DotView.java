@@ -1,45 +1,5 @@
 package de.prob2.ui.dynamic.dotty;
 
-import com.google.common.io.ByteStreams;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import de.prob.animator.CommandInterruptedException;
-import de.prob.animator.command.ComposedCommand;
-import de.prob.animator.command.GetAllDotCommands;
-import de.prob.animator.command.GetDotForVisualizationCommand;
-import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.exception.ProBError;
-import de.prob.parser.BindingGenerator;
-import de.prob.prolog.term.PrologTerm;
-import de.prob.statespace.Trace;
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.dynamic.DynamicCommandStage;
-import de.prob2.ui.dynamic.DynamicPreferencesStage;
-import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ListChangeListener;
-import javafx.fxml.FXML;
-import javafx.geometry.Orientation;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.layout.HBox;
-import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -58,8 +18,48 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import com.google.common.io.ByteStreams;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import de.prob.animator.CommandInterruptedException;
+import de.prob.animator.domainobjects.DotVisualizationCommand;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
+import de.prob.parser.BindingGenerator;
+import de.prob.prolog.term.PrologTerm;
+import de.prob.statespace.State;
+import de.prob.statespace.Trace;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.DynamicCommandStage;
+import de.prob2.ui.dynamic.DynamicPreferencesStage;
+import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
+import javafx.fxml.FXML;
+import javafx.geometry.Orientation;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.layout.HBox;
+import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
-public class DotView extends DynamicCommandStage {
+public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	public enum TargetFormat {
 		SVG, PNG, PDF;
@@ -160,12 +160,12 @@ public class DotView extends DynamicCommandStage {
 	}
 
 	@Override
-	protected void fillCommands() {
-		super.fillCommands(new GetAllDotCommands(currentTrace.getCurrentState()));
+	protected List<DotVisualizationCommand> getCommandsInState(final State state) {
+		return DotVisualizationCommand.getAll(state);
 	}
 
 	@Override
-	protected void visualize(DynamicCommandItem item) {
+	protected void visualize(DotVisualizationCommand item) {
 		if (!item.isAvailable()) {
 			return;
 		}
@@ -204,28 +204,21 @@ public class DotView extends DynamicCommandStage {
 		thread.start();
 	}
 
-	private void setUpSvgForDotCommand(final Trace trace, final DynamicCommandItem item, final List<IEvalElement> formulas) throws IOException, InterruptedException {
+	private void setUpSvgForDotCommand(final Trace trace, final DotVisualizationCommand item, final List<IEvalElement> formulas) throws IOException, InterruptedException {
 		if (item.getArity() > 0) {
 			formulas.add(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
 		}
 		final Path dotFilePath = Files.createTempFile("prob2-ui", ".dot");
 		
 		try {
-			final GetPreferenceCommand getDotCmd = new GetPreferenceCommand("DOT");
-			final GetPreferenceCommand getDotEngineCmd = new GetPreferenceCommand("DOT_ENGINE");
-			final ComposedCommand ccmd = new ComposedCommand(
-				getDotCmd,
-				getDotEngineCmd,
-				new GetDotForVisualizationCommand(trace.getCurrentState(), item, dotFilePath.toFile(), formulas)
-			);
-			trace.getStateSpace().execute(ccmd);
-			this.dot = getDotCmd.getValue();
+			item.visualizeAsDotToFile(dotFilePath, formulas);
+			this.dot = trace.getStateSpace().getCurrentPreference("DOT");
 			this.dotEngine = item.getAdditionalInfo().stream()
 				.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
 				.map(t -> BindingGenerator.getCompoundTerm(t, 1))
 				.map(t -> PrologTerm.atomicString(t.getArgument(1)))
 				.findAny()
-				.orElseGet(getDotEngineCmd::getValue);
+				.orElseGet(() -> trace.getStateSpace().getCurrentPreference("DOT_ENGINE"));
 			this.currentDotContent.set(Files.readAllBytes(dotFilePath));
 		} finally {
 			try {
@@ -401,7 +394,7 @@ public class DotView extends DynamicCommandStage {
 	
 	@FXML
 	private void editPreferences() {
-		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
+		DotVisualizationCommand currentItem = lvChoice.getSelectionModel().getSelectedItem();
 		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
 		preferences.show();
 	}
@@ -410,7 +403,7 @@ public class DotView extends DynamicCommandStage {
 		taErrors.clear();
 		Thread thread = new Thread(() -> {
 			try {
-				DynamicCommandItem choice = lvChoice.getItems().stream()
+				DotVisualizationCommand choice = lvChoice.getItems().stream()
 						.filter(item -> "formula_tree".equals(item.getCommand()))
 						.collect(Collectors.toList())
 						.get(0);

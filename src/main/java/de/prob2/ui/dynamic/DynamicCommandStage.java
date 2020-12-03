@@ -1,12 +1,14 @@
 package de.prob2.ui.dynamic;
 
-import de.prob.animator.command.AbstractGetDynamicCommands;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.exception.CliError;
-import de.prob.exception.ProBError;
+import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -22,20 +24,16 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ResourceBundle;
-
-public abstract class DynamicCommandStage extends Stage {
-	private static final class DynamicCommandItemCell extends ListCell<DynamicCommandItem> {
+public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends Stage {
+	private static final class DynamicCommandItemCell<T extends DynamicCommandItem> extends ListCell<T> {
 		private DynamicCommandItemCell() {
 			super();
 			getStyleClass().add("dynamic-command-cell");
 		}
 		
 		@Override
-		protected void updateItem(final DynamicCommandItem item, final boolean empty) {
+		protected void updateItem(final T item, final boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll("dynamiccommandenabled", "dynamiccommanddisabled");
 			if (item != null && !empty) {
@@ -49,10 +47,8 @@ public abstract class DynamicCommandStage extends Stage {
 		}
 	}
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
-	
 	@FXML
-	protected ListView<DynamicCommandItem> lvChoice;
+	protected ListView<T> lvChoice;
 
 	@FXML
 	protected TextArea taFormula;
@@ -78,7 +74,7 @@ public abstract class DynamicCommandStage extends Stage {
 	@FXML
 	protected DynamicCommandStatusBar statusBar;
 	
-	protected DynamicCommandItem lastItem;
+	protected T lastItem;
 	
 	protected final DynamicPreferencesStage preferences;
 	
@@ -118,7 +114,7 @@ public abstract class DynamicCommandStage extends Stage {
 
 		this.showingProperty().addListener((observable, from, to) -> {
 			if(!from && to) {
-				DynamicCommandItem choice = lvChoice.getSelectionModel().getSelectedItem();
+				T choice = lvChoice.getSelectionModel().getSelectedItem();
 				if(choice != null) {
 					visualize(choice);
 				}
@@ -163,7 +159,7 @@ public abstract class DynamicCommandStage extends Stage {
 		taFormula.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
 				if (!e.isShiftDown()) {
-					DynamicCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
+					T item = lvChoice.getSelectionModel().getSelectedItem();
 					if (item == null) {
 						return;
 					}
@@ -174,25 +170,20 @@ public abstract class DynamicCommandStage extends Stage {
 				}
 			}
 		});
-		lvChoice.setCellFactory(item -> new DynamicCommandItemCell());
+		lvChoice.setCellFactory(item -> new DynamicCommandItemCell<>());
 		cancelButton.disableProperty().bind(currentThread.isNull());
 		editPreferencesButton.disableProperty().bind(Bindings.createBooleanBinding(() -> {
-			final DynamicCommandItem item = lvChoice.getSelectionModel().getSelectedItem();
+			final T item = lvChoice.getSelectionModel().getSelectedItem();
 			return item == null || item.getRelevantPreferences().isEmpty();
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
 	}
 	
-	protected void fillCommands(AbstractGetDynamicCommands cmd) {
-		if(currentTrace.get() == null) {
+	protected void fillCommands() {
+		final State currentState = currentTrace.getCurrentState();
+		if (currentState == null) {
 			return;
 		}
-		try {
-			lvChoice.getItems().clear();
-			currentTrace.getStateSpace().execute(cmd);
-			lvChoice.getItems().setAll(cmd.getCommands());
-		} catch (ProBError | CliError e) {
-			LOGGER.error("Extract all expression table commands failed", e);
-		}
+		lvChoice.getItems().setAll(this.getCommandsInState(currentState));
 	}
 	
 	@FXML
@@ -223,8 +214,8 @@ public abstract class DynamicCommandStage extends Stage {
 	
 	protected abstract void reset();
 	
-	protected abstract void visualize(DynamicCommandItem item);
+	protected abstract void visualize(T item);
 	
-	protected abstract void fillCommands();
+	protected abstract List<T> getCommandsInState(final State state);
 
 }
