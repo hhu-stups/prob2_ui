@@ -193,25 +193,15 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		if (item.getArity() > 0) {
 			formulas.add(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
 		}
-		final Path dotFilePath = Files.createTempFile("prob2-ui", ".dot");
 		
-		try {
-			item.visualizeAsDotToFile(dotFilePath, formulas);
-			this.dot = trace.getStateSpace().getCurrentPreference("DOT");
-			this.dotEngine = item.getAdditionalInfo().stream()
-				.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
-				.map(t -> BindingGenerator.getCompoundTerm(t, 1))
-				.map(t -> PrologTerm.atomicString(t.getArgument(1)))
-				.findAny()
-				.orElseGet(() -> trace.getStateSpace().getCurrentPreference("DOT_ENGINE"));
-			this.currentDotContent.set(Files.readAllBytes(dotFilePath));
-		} finally {
-			try {
-				Files.delete(dotFilePath);
-			} catch (IOException e) {
-				LOGGER.error("Failed to delete temporary dot file", e);
-			}
-		}
+		this.dot = trace.getStateSpace().getCurrentPreference("DOT");
+		this.dotEngine = item.getAdditionalInfo().stream()
+			.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
+			.map(t -> BindingGenerator.getCompoundTerm(t, 1))
+			.map(t -> PrologTerm.atomicString(t.getArgument(1)))
+			.findAny()
+			.orElseGet(() -> trace.getStateSpace().getCurrentPreference("DOT_ENGINE"));
+		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
 	}
 
 	private void loadGraph(final String svgContent) {
