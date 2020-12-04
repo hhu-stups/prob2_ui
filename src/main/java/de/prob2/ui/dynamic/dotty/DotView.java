@@ -1,28 +1,23 @@
 package de.prob2.ui.dynamic.dotty;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.CommandInterruptedException;
+import de.prob.animator.domainobjects.DotCall;
+import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
@@ -60,21 +55,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
-
-	public enum TargetFormat {
-		SVG, PNG, PDF;
-	}
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
-
-	private static final Map<TargetFormat, String> formatToFlag;
-
-	static {
-		formatToFlag = new HashMap<>();
-		formatToFlag.put(TargetFormat.SVG, "-Tsvg");
-		formatToFlag.put(TargetFormat.PNG, "-Tpng");
-		formatToFlag.put(TargetFormat.PDF, "-Tpdf");
-	}
 
 	@FXML
 	private WebView dotView;
@@ -183,7 +164,11 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				}
 				setUpSvgForDotCommand(trace, item, formulas);
 				if(!Thread.currentThread().isInterrupted()) {
-					final byte[] svgData = renderDot(this.currentDotContent.get(), TargetFormat.SVG);
+					final byte[] svgData = new DotCall(this.dot)
+						.layoutEngine(this.dotEngine)
+						.outputFormat(DotOutputFormat.SVG)
+						.input(this.currentDotContent.get())
+						.call();
 					loadGraph(new String(svgData, StandardCharsets.UTF_8));
 				}
 			} catch (CommandInterruptedException | InterruptedException e) {
@@ -229,58 +214,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		}
 	}
 
-	private byte[] renderDot(final byte[] dotContent, final TargetFormat format) throws IOException, InterruptedException {
-		// No input or output file names are passed to dot -
-		// input written to stdin and output read from stdout.
-		ProcessBuilder dotProcessBuilder = new ProcessBuilder(this.dot, "-K" + this.dotEngine, formatToFlag.get(format));
-
-		LOGGER.debug("Starting dot command: {}", dotProcessBuilder.command());
-		final Process dotProcess = dotProcessBuilder.start();
-		
-		// Write to stdin in a background thread, so that if dot's stdin buffer fills up, it doesn't block our code.
-		final Thread stdinWriter = new Thread(() -> {
-			try {
-				dotProcess.getOutputStream().write(dotContent);
-				dotProcess.getOutputStream().close();
-			} catch (IOException e) {
-				LOGGER.error("Failed to write dot input", e);
-			}
-		}, "dot stdin writer");
-		stdinWriter.start();
-		
-		// Read stderr in a background thread, to prevent the stream buffer from filling up and blocking dot.
-		// (This is very unlikely to happen, because dot normally doesn't produce a lot of stderr output.)
-		final StringJoiner errorOutput = new StringJoiner("\n");
-		final Thread stderrLogger = new Thread(() -> {
-			try (
-				final Reader reader = new InputStreamReader(dotProcess.getErrorStream());
-				final BufferedReader br = new BufferedReader(reader);
-			) {
-				br.lines().forEach(line -> {
-					errorOutput.add(line);
-					LOGGER.error("Error output from dot: {}", line);
-				});
-			} catch (IOException e) {
-				LOGGER.error("Failed to read dot error output", e);
-			}
-		}, "dot stderr logger");
-		stderrLogger.start();
-		
-		// Read stdout while dot is running, to prevent the stream buffer from filling up and blocking dot.
-		// (Unlike with stderr, this actually happens in practice, when the generated output is large.)
-		final byte[] rendered = ByteStreams.toByteArray(dotProcess.getInputStream());
-		
-		final int exitCode = dotProcess.waitFor();
-		LOGGER.debug("dot exited with status code {}", exitCode);
-		
-		if (exitCode != 0) {
-			stderrLogger.join(); // Make sure that all stderr output has been read
-			throw new ProBError("dot exited with status code " + exitCode + ":\n" + errorOutput);
-		}
-		
-		return rendered;
-	}
-
 	private void loadGraph(final String svgContent) {
 		Thread thread = Thread.currentThread();
 		Platform.runLater(() -> {
@@ -310,18 +243,18 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		if(selectedFilter.equals(dotFilter)) {
 			saveDot(path);
 		} else {
-			TargetFormat format = getTargetFormat(selectedFilter, svgFilter, pngFilter, pdfFilter);
+			final String format = getTargetFormat(selectedFilter, svgFilter, pngFilter, pdfFilter);
 			saveConverted(format, path);
 		}
 	}
 
-	private TargetFormat getTargetFormat(FileChooser.ExtensionFilter selectedFilter, FileChooser.ExtensionFilter svgFilter, FileChooser.ExtensionFilter pngFilter, FileChooser.ExtensionFilter pdfFilter) {
+	private String getTargetFormat(FileChooser.ExtensionFilter selectedFilter, FileChooser.ExtensionFilter svgFilter, FileChooser.ExtensionFilter pngFilter, FileChooser.ExtensionFilter pdfFilter) {
 		if(selectedFilter.equals(svgFilter)) {
-			return TargetFormat.SVG;
+			return DotOutputFormat.SVG;
 		} else if(selectedFilter.equals(pngFilter)) {
-			return TargetFormat.PNG;
+			return DotOutputFormat.PNG;
 		} else if(selectedFilter.equals(pdfFilter)) {
-			return TargetFormat.PDF;
+			return DotOutputFormat.PDF;
 		} else {
 			throw new RuntimeException("Target Format cannot be extracted from selected filter: " + selectedFilter);
 		}
@@ -335,9 +268,13 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		}
 	}
 
-	private void saveConverted(TargetFormat format, final Path path) {
+	private void saveConverted(String format, final Path path) {
 		try {
-			Files.write(path, renderDot(this.currentDotContent.get(), format));
+			Files.write(path, new DotCall(this.dot)
+				.layoutEngine(this.dotEngine)
+				.outputFormat(format)
+				.input(this.currentDotContent.get())
+				.call());
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}
