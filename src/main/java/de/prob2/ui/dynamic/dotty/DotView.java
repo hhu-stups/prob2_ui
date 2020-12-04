@@ -195,11 +195,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		}
 		
 		this.dot = trace.getStateSpace().getCurrentPreference("DOT");
-		this.dotEngine = item.getAdditionalInfo().stream()
-			.filter(t -> "preferred_dot_type".equals(t.getFunctor()))
-			.map(t -> BindingGenerator.getCompoundTerm(t, 1))
-			.map(t -> PrologTerm.atomicString(t.getArgument(1)))
-			.findAny()
+		this.dotEngine = item.getPreferredDotLayoutEngine()
 			.orElseGet(() -> trace.getStateSpace().getCurrentPreference("DOT_ENGINE"));
 		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
 	}
