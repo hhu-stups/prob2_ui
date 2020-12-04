@@ -71,9 +71,16 @@ public class Simulator {
 	}
 
 	private void calculateInterval() {
-		Optional<Integer> result = config.getOperationConfigurations().stream()
+		List<Integer> relevantTimes = new ArrayList<>(config.getOperationConfigurations().stream()
 				.map(OperationConfiguration::getTime)
-				.reduce(Simulator::gcd);
+				.collect(Collectors.toList()));
+		for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
+			if(opConfig.getDelay() != null) {
+				relevantTimes.addAll(opConfig.getDelay().values());
+			}
+		}
+
+		Optional<Integer> result = relevantTimes.stream().reduce(Simulator::gcd);
 		result.ifPresent(integer -> interval = integer);
 	}
 
@@ -126,7 +133,7 @@ public class Simulator {
 
     private Trace executeSetupConstants(State currentState, Trace trace) {
 		List<VariableChoice> setupConfigs = config.getSetupConfigurations();
-		Transition nextTransition = null;
+		Transition nextTransition;
 		if(setupConfigs == null) {
 			nextTransition = currentState.findTransition("$setup_constants", "1=1");
 		} else {
@@ -200,6 +207,14 @@ public class Simulator {
 		State newCurrentState = currentState;
 
 		for(OperationConfiguration opConfig : nextOperations) {
+			String opName = opConfig.getOpName();
+			//time for next execution has been delayed by a previous transition
+			if(operationToRemainingTime.get(opName) > 0) {
+				continue;
+			}
+
+			operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
+
 			double ranDouble = Math.random();
 
 			AbstractEvalResult evalResult = newCurrentState.eval(opConfig.getProbability(), FormulaExpand.EXPAND);
@@ -209,26 +224,19 @@ public class Simulator {
 				List<String> enabledOperations = newTrace.getNextTransitions().stream()
 						.map(Transition::getName)
 						.collect(Collectors.toList());
-				String opName = opConfig.getOpName();
-				operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
+
 				//4. check whether operation is executable
 				if (enabledOperations.contains(opName)) {
 					List<VariableChoice> choices = opConfig.getVariableChoices();
-					int delay = opConfig.getDelay();
-					if(delay > 0) {
-						try {
-							Thread.sleep(delay);
-						} catch (InterruptedException e) {
-							LOGGER.error("", e);
-						}
-					}
 
 					//5. execute operation and append to trace
+					boolean operationExecuted = false;
 					if(choices == null) {
 						Transition transition = newCurrentState.findTransition(opName, "1=1");
 						newTrace = newTrace.add(transition);
 						newCurrentState = newTrace.getCurrentState();
 						currentTrace.set(newTrace);
+						operationExecuted = true;
 					} else {
 						State finalNewCurrentState = newCurrentState;
 						String predicate = choices.stream()
@@ -240,6 +248,13 @@ public class Simulator {
 							newTrace = newTrace.add(transition);
 							newCurrentState = newTrace.getCurrentState();
 							currentTrace.set(newTrace);
+							operationExecuted = true;
+						}
+					}
+					Map<String, Integer> delay = opConfig.getDelay();
+					if(operationExecuted && delay != null) {
+						for (String key : delay.keySet()) {
+							operationToRemainingTime.computeIfPresent(key, (k, v) -> v + delay.get(key));
 						}
 					}
 				}

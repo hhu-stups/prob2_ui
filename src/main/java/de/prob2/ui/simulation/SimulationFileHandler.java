@@ -70,7 +70,16 @@ public class SimulationFileHandler {
             String probability = jsonObject.get("probability") == null ? "-1.0f" : jsonObject.get("probability").getAsString();
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
             int opTime =  jsonObject.get("time") == null ? -1 : jsonObject.get("time").getAsInt();
-            int delay =  jsonObject.get("delay") == null ? 0 : jsonObject.get("delay").getAsInt();
+
+            JsonObject delayObject =  jsonObject.get("delay") == null ? null : jsonObject.get("delay").getAsJsonObject();
+            Map<String, Integer> delay = null;
+            if(delayObject != null) {
+                delay = new HashMap<>();
+                for (String key : delayObject.keySet()) {
+                    delay.put(key, delayObject.get(key).getAsInt());
+                }
+            }
+
             List<VariableChoice> variableChoices = jsonObject.get("variableChoices") == null ? null : buildVariableChoices(jsonObject.get("variableChoices").getAsJsonArray());
             operationConfigurations.add(new OperationConfiguration(opName, opTime, delay, probability, priority, variableChoices));
         }

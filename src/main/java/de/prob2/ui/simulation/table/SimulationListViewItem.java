@@ -74,6 +74,12 @@ public class SimulationListViewItem extends ListCell<SimulationItem> {
 				}
 			}
 
+			if(!item.getPriority().isEmpty()) {
+				Label lbPriority = new Label(String.format(bundle.getString("simulation.item.priority"), item.getPriority()));
+				lbPriority.getStyleClass().add("information");
+				this.itemBox.getChildren().add(lbPriority);
+			}
+
 			if(!item.getChoiceID().isEmpty()) {
 				Label lbChoiceID = new Label(String.format(bundle.getString("simulation.item.choiceID"), item.getChoiceID()));
 				lbChoiceID.getStyleClass().add("information");
