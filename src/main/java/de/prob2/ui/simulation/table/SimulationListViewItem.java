@@ -55,7 +55,7 @@ public class SimulationListViewItem extends ListCell<SimulationItem> {
 				this.itemBox.getChildren().add(lbTime);
 			}
 
-			if(!item.getDelay().isEmpty()) {
+			if(!item.getDelayAsString().isEmpty()) {
 				Label lbDelay = new Label(String.format(bundle.getString("simulation.item.delay"), item.getDelay()));
 				lbDelay.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbDelay);

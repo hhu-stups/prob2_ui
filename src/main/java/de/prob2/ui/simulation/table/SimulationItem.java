@@ -8,7 +8,7 @@ public class SimulationItem {
 
 	private String time;
 
-	private String delay;
+	private Map<String, Integer> delay;
 
 	private String priority;
 
@@ -20,7 +20,7 @@ public class SimulationItem {
 
 	private String valuesProbability;
 
-	public SimulationItem(String opName, String time, String delay, String priority, String probability,
+	public SimulationItem(String opName, String time, Map<String, Integer> delay, String priority, String probability,
 						  String choiceID, Map<String, String> values, String valuesProbability) {
 		this.opName = opName;
 		this.time = time;
@@ -40,8 +40,12 @@ public class SimulationItem {
 		return time;
 	}
 
-	public String getDelay() {
+	public Map<String, Integer> getDelay() {
 		return delay;
+	}
+
+	public String getDelayAsString() {
+		return delay == null ? "" : delay.toString();
 	}
 
 	public String getPriority() {

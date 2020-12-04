@@ -22,7 +22,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 
@@ -118,7 +118,7 @@ public class SimulatorStage extends Stage {
 			int setupID = 0;
 			for(VariableChoice choice : config.getSetupConfigurations()) {
 				for(VariableConfiguration variableConfiguration : choice.getChoice()) {
-					observableList.add(new SimulationItem("SETUP_CONSTANTS", "", "", "", "", String.valueOf(setupID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
+					observableList.add(new SimulationItem("SETUP_CONSTANTS", "", null, "", "", String.valueOf(setupID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
 				}
 				setupID++;
 			}
@@ -128,7 +128,7 @@ public class SimulatorStage extends Stage {
 			int initialisationID = 0;
 			for(VariableChoice choice : config.getInitialisationConfigurations()) {
 				for(VariableConfiguration variableConfiguration : choice.getChoice()) {
-					observableList.add(new SimulationItem("INITIALISATION", "", "", "", "", String.valueOf(initialisationID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
+					observableList.add(new SimulationItem("INITIALISATION", "", null, "", "", String.valueOf(initialisationID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
 				}
 				initialisationID++;
 			}
@@ -138,7 +138,7 @@ public class SimulatorStage extends Stage {
 		for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
 			String opName = opConfig.getOpName();
 			String time = String.valueOf(opConfig.getTime());
-			String delay = String.valueOf(opConfig.getDelay());
+			Map<String, Integer> delay = opConfig.getDelay();
 			String priority = String.valueOf(opConfig.getPriority());
 			String probability = opConfig.getProbability();
 			if(opConfig.getVariableChoices() == null) {
