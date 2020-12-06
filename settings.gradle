@@ -1,1 +1,2 @@
 rootProject.name="prob2-ui"
+includeBuild("../prob2_kernel/de.prob2.kernel")

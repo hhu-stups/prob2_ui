@@ -12,6 +12,7 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class TraceModificationChecker {
 	private final TraceManager traceManager;
 	private final Path path;
 
-	public TraceModificationChecker(TraceManager traceManager,Path traceJsonFilePath, StateSpace stateSpace,
+	public TraceModificationChecker(TraceManager traceManager, Path traceJsonFilePath, StateSpace stateSpace,
 									Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException, ModelTranslationError {
 		this.path = traceJsonFilePath;
 		this.traceManager = traceManager;
@@ -49,7 +50,7 @@ public class TraceModificationChecker {
 		traceChecker = new TraceChecker(persistentTrace,
 				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
 				new HashMap<>(stateSpace.getLoadedMachine().getOperations()), new HashSet<>(traceJsonFile.getVariableNames()),
-				new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()), oldPath.toString(), newPath.toString(), injector);
+				new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()), oldPath.toString(), newPath.toString(), injector, stateSpace);
 
 	}
 
@@ -58,33 +59,38 @@ public class TraceModificationChecker {
 	public List<Path> checkTrace(){
 
 		final List<Path> result = new ArrayList<>();
-		result.add(path);
 
-		TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, this);
-		stageManager.register(dialog);
+		if(traceChecker.getTraceModifier().isDirty()) {
+			TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, this);
+			stageManager.register(dialog);
 
 
-		Optional<List<PersistentTrace>> bla = dialog.showAndWait();
+			Optional<List<PersistentTrace>> bla = dialog.showAndWait();
 
-		final List<PersistentTrace> persistentTraces = new ArrayList<>(bla.get());
+			final List<PersistentTrace> persistentTraces = new ArrayList<>(bla.get());
 
-		persistentTraces.remove(persistentTrace);
-
-		persistentTraces.forEach(element -> {
-
-			String filename = Files.getNameWithoutExtension(path.toString());
-			String modified = filename + "_edited." + Files.getFileExtension(path.toString());
-
-			Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
-
-			result.add(saveAt);
-			try {
-				traceManager.save(saveAt,
-						traceJsonFile.changeTrace(element));
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (persistentTraces.remove(persistentTrace)) {
+				result.add(path);
 			}
-		});
+
+			persistentTraces.forEach(element -> {
+
+				String filename = Files.getNameWithoutExtension(path.toString());
+				String modified = filename + "_edited." + Files.getFileExtension(path.toString());
+
+				Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
+
+				result.add(saveAt);
+				try {
+					traceManager.save(saveAt,
+							traceJsonFile.changeTrace(element));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			});
+		}else{
+			result.add(path);
+		}
 
 		return result;
 
