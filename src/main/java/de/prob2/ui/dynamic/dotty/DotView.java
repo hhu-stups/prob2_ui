@@ -23,8 +23,6 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-import de.prob.parser.BindingGenerator;
-import de.prob.prolog.term.PrologTerm;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
@@ -32,6 +30,7 @@ import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -91,8 +90,8 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	@Inject
 	public DotView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle);
+			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+		super(stageManager, preferences, currentTrace, currentProject, bundle, stopActions, "Graph Visualizer");
 		
 		this.fileChooserManager = fileChooserManager;
 		
@@ -153,13 +152,12 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 
-		Thread thread = new Thread(() -> {
+		this.updater.execute(() -> {
 			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
 				Trace trace = currentTrace.get();
 				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
 					Platform.runLater(this::reset);
-					currentThread.set(null);
 					return;
 				}
 				setUpSvgForDotCommand(trace, item, formulas);
@@ -177,16 +175,13 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				Platform.runLater(this::reset);
 			} catch (IOException | UncheckedIOException | ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
-				currentThread.set(null);
 				Platform.runLater(() -> {
 					taErrors.setText(e.getMessage());
 					dotView.getEngine().loadContent("");
 					statusBar.setText("");
 				});
 			}
-		}, "Graph Visualizer");
-		currentThread.set(thread);
-		thread.start();
+		});
 	}
 
 	private void setUpSvgForDotCommand(final Trace trace, final DotVisualizationCommand item, final List<IEvalElement> formulas) throws IOException, InterruptedException {
@@ -208,7 +203,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				statusBar.setText("");
 				taErrors.clear();
 			}
-			currentThread.set(null);
 		});
 	}
 	
@@ -324,7 +318,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	public void visualizeFormula(final Object formula) {
 		taErrors.clear();
-		Thread thread = new Thread(() -> {
+		this.updater.execute(() -> {
 			try {
 				DotVisualizationCommand choice = lvChoice.getItems().stream()
 						.filter(item -> "formula_tree".equals(item.getCommand()))
@@ -344,8 +338,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				Platform.runLater(() -> taErrors.setText(exception.getMessage()));
 			}
 		});
-		currentThread.set(thread);
-		thread.start();
 	}
 
 }
