@@ -17,6 +17,7 @@ import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -111,8 +112,8 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	
 	@Inject
 	public ExpressionTableView(final Injector injector, final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
-							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle);
+							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+		super(stageManager, preferences, currentTrace, currentProject, bundle, stopActions, "Expression Table Visualizer");
 		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
@@ -150,12 +151,11 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 
-		Thread thread = new Thread(() -> {
+		this.updater.execute(() -> {
 			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
 			try {
 				if(currentTrace.get() == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
 					Platform.runLater(this::reset);
-					currentThread.set(null);
 					return;
 				}
 				if(item.getArity() > 0) {
@@ -166,18 +166,14 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 					reset();
 					currentTable.set(table);
 				});
-				currentThread.set(null);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Table visualization failed", e);
-				currentThread.set(null);
 				Platform.runLater(() -> {
 					taErrors.setText(e.getMessage());
 					reset();
 				});
 			}
 		});
-		currentThread.set(thread);
-		thread.start();
 	}
 	
 	private void fillTable(TableData data) {

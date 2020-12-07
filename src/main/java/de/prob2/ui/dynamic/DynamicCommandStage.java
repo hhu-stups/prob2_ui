@@ -5,14 +5,14 @@ import java.util.ResourceBundle;
 
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.statespace.State;
+import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -86,10 +86,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected final StageManager stageManager;
 	
-	protected final ObjectProperty<Thread> currentThread;
+	protected final BackgroundUpdater updater;
 	
 	protected DynamicCommandStage(final StageManager stageManager, final DynamicPreferencesStage preferences,
-			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle) {
+			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final StopActions stopActions, final String threadName) {
 		this.preferences = preferences;
 		this.preferences.initOwner(this);
 		this.preferences.initModality(Modality.WINDOW_MODAL);
@@ -98,7 +98,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.currentProject = currentProject;
 		this.bundle = bundle;
 		this.stageManager = stageManager;
-		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
+		this.updater = new BackgroundUpdater(threadName);
+		stopActions.add(this.updater::shutdownNow);
 	}
 	
 	
@@ -144,7 +145,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 			lastItem = to;
 		});
-		lvChoice.disableProperty().bind(currentThread.isNotNull().or(currentTrace.stateSpaceProperty().isNull()));
+		lvChoice.disableProperty().bind(this.updater.runningProperty().or(currentTrace.stateSpaceProperty().isNull()));
 
 		currentTrace.addListener((observable, from, to) -> refresh());
 		currentTrace.addStatesCalculatedListener(newOps -> Platform.runLater(this::refresh));
@@ -171,7 +172,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell<>());
-		cancelButton.disableProperty().bind(currentThread.isNull());
+		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
 		editPreferencesButton.disableProperty().bind(Bindings.createBooleanBinding(() -> {
 			final T item = lvChoice.getSelectionModel().getSelectedItem();
 			return item == null || item.getRelevantPreferences().isEmpty();
@@ -205,10 +206,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	}
 	
 	protected void interrupt() {
-		if (currentThread.get() != null) {
-			currentThread.get().interrupt();
-			currentThread.set(null);
-		}
+		this.updater.cancel(true);
 		reset();
 	}
 	
