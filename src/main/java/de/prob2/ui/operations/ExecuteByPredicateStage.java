@@ -94,21 +94,27 @@ public final class ExecuteByPredicateStage extends Stage {
 				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getPrettyName()));
 				
 				final Map<String, String> items = new LinkedHashMap<>();
-				if (to.getParameterValues().isEmpty()) {
-					for (final String name : to.getParameterNames()) {
-						items.put(name, "");
-					}
-				} else {
-					assert to.getParameterNames().size() == to.getParameterValues().size();
-					for (int i = 0; i < to.getParameterNames().size(); i++) {
-						items.put(to.getParameterNames().get(i), to.getParameterValues().get(i));
-					}
-				}
+				buildParameters(to.getParameterValues(), to.getParameterNames(), items);
+				buildParameters(to.getReturnParameterValues(), to.getReturnParameterNames(), items);
+
 				items.putAll(to.getConstants());
 				items.putAll(to.getVariables());
 				this.predicateBuilderView.setItems(items);
 			}
 		});
+	}
+
+	private void buildParameters(List<String> parameterValues, List<String> parameterNames, Map<String, String> items) {
+		if (parameterValues.isEmpty()) {
+			for (final String name : parameterNames) {
+				items.put(name, "");
+			}
+		} else {
+			assert parameterNames.size() == parameterValues.size();
+			for (int i = 0; i < parameterNames.size(); i++) {
+				items.put(parameterNames.get(i), parameterValues.get(i));
+			}
+		}
 	}
 	
 	public ObjectProperty<OperationItem> itemProperty() {
