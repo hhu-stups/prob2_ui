@@ -171,7 +171,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				LOGGER.info("Dot visualization interrupted", e);
 				Thread.currentThread().interrupt();
 				Platform.runLater(this::reset);
-			} catch (IOException | UncheckedIOException | ProBError | EvaluationException e) {
+			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Graph visualization failed", e);
 				Platform.runLater(() -> {
 					taErrors.setText(e.getMessage());
@@ -182,7 +182,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		});
 	}
 
-	private void setUpSvgForDotCommand(final Trace trace, final DotVisualizationCommand item) throws IOException, InterruptedException {
+	private void setUpSvgForDotCommand(final Trace trace, final DotVisualizationCommand item) {
 		final List<IEvalElement> formulas;
 		if (item.getArity() > 0) {
 			formulas = Collections.singletonList(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
