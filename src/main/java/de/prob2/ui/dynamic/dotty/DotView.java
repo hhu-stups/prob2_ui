@@ -318,26 +318,22 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	public void visualizeFormula(final Object formula) {
 		taErrors.clear();
-		this.updater.execute(() -> {
-			try {
-				DotVisualizationCommand choice = lvChoice.getItems().stream()
-						.filter(item -> "formula_tree".equals(item.getCommand()))
-						.collect(Collectors.toList())
-						.get(0);
-				Platform.runLater(() -> {
-					statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
-					if(formula instanceof IEvalElement) {
-						taFormula.setText(((IEvalElement) formula).getCode());
-					} else {
-						taFormula.setText((String) formula);
-					}
-					lvChoice.getSelectionModel().select(choice);
-					visualize(choice);
-				});
-			} catch (EvaluationException | ProBError exception) {
-				Platform.runLater(() -> taErrors.setText(exception.getMessage()));
+		try {
+			DotVisualizationCommand choice = lvChoice.getItems().stream()
+					.filter(item -> "formula_tree".equals(item.getCommand()))
+					.collect(Collectors.toList())
+					.get(0);
+			statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
+			if(formula instanceof IEvalElement) {
+				taFormula.setText(((IEvalElement) formula).getCode());
+			} else {
+				taFormula.setText((String) formula);
 			}
-		});
+			lvChoice.getSelectionModel().select(choice);
+			visualize(choice);
+		} catch (EvaluationException | ProBError exception) {
+			taErrors.setText(exception.getMessage());
+		}
 	}
 
 }
