@@ -317,19 +317,14 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	public void visualizeFormula(final String formula) {
-		taErrors.clear();
-		try {
-			DotVisualizationCommand choice = lvChoice.getItems().stream()
-					.filter(item -> "formula_tree".equals(item.getCommand()))
-					.findAny()
-					.orElseThrow(() -> new AssertionError("Formula tree visualization command not found"));
-			statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
-			taFormula.setText(formula);
-			lvChoice.getSelectionModel().select(choice);
-			visualize(choice);
-		} catch (EvaluationException | ProBError exception) {
-			taErrors.setText(exception.getMessage());
-		}
+		DotVisualizationCommand choice = lvChoice.getItems().stream()
+				.filter(item -> "formula_tree".equals(item.getCommand()))
+				.findAny()
+				.orElseThrow(() -> new AssertionError("Formula tree visualization command not found"));
+		statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
+		taFormula.setText(formula);
+		lvChoice.getSelectionModel().select(choice);
+		visualize(choice);
 	}
 
 }
