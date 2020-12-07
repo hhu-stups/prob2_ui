@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
@@ -232,7 +233,11 @@ public class Simulator {
 					//5. execute operation and append to trace
 					boolean operationExecuted = false;
 					if(choices == null) {
-						Transition transition = newCurrentState.findTransition(opName, "1=1");
+						List<Transition> transitions = newCurrentState.getTransitions().stream()
+								.filter(trans -> trans.getName().equals(opName))
+								.collect(Collectors.toList());
+						Random rand = new Random();
+						Transition transition = transitions.get(rand.nextInt(transitions.size()));
 						newTrace = newTrace.add(transition);
 						newCurrentState = newTrace.getCurrentState();
 						currentTrace.set(newTrace);
