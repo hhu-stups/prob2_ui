@@ -206,10 +206,9 @@ public final class StatesView extends StackPane {
 			row.getStyleClass().remove("changed");
 			row.setTooltip(null);
 			if (to != null) {
-				if (!to.getCurrentValue().equals(to.getPreviousValue())) {
+				if (!to.getCurrentValue().equals(to.getPreviousValue()) && currentTrace.getCurrentState().isInitialised()) {
 					row.getStyleClass().add("changed");
 				}
-
 				row.setTooltip(this.buildItemTooltip(to));
 			}
 		});
