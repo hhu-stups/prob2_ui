@@ -1,21 +1,8 @@
 package de.prob2.ui.dynamic.table;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.GetShortestTraceCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
@@ -24,17 +11,14 @@ import de.prob.animator.domainobjects.TableData;
 import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -49,9 +33,20 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
@@ -256,16 +251,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 
 			showSourceItem.setOnAction(e -> {
 				if(!line.isEmpty() && !column.isEmpty() && !path.isEmpty()) {
-					stageManager.getMainStage().toFront();
-					injector.getInstance(MainView.class).switchTabPane("beditorTab");
-
-					BEditorView bEditorView = injector.getInstance(BEditorView.class);
-					bEditorView.selectMachine(path.get(0));
-
-					BEditor bEditor = injector.getInstance(BEditor.class);
-					bEditor.requestFocus();
-					bEditor.moveTo(line.get(0), column.get(0));
-					bEditor.requestFollowCaret();
+					injector.getInstance(BEditorView.class).jumpToSource(path.get(0), line.get(0), column.get(0));
 				}
 			});
 		}
