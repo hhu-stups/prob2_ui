@@ -7,21 +7,20 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.exception.ProBError;
-import de.prob.statespace.LoadedMachine;
-import de.prob.statespace.OperationInfo;
-import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
+import de.prob.statespace.*;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
@@ -29,22 +28,27 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
 public class TraceDiff extends VBox {
-	@FXML private CheckBox linkScrolling;
-
-	@FXML private Label replayed;
+	@FXML private CheckBox replayed;
+	@FXML private CheckBox persistent;
+	@FXML private CheckBox current;
 
 	@FXML private ListView<String> replayedList;
 	@FXML private ListView<String> persistentList;
 	@FXML private ListView<String> currentList;
 
+	@FXML private Button setReplayed;
 	@FXML private Button showAlert;
+	@FXML private Button savePersistent;
+	@FXML private Button setCurrent;
 
 	@FXML private VBox persistentBox;
 
@@ -52,69 +56,96 @@ public class TraceDiff extends VBox {
 	@FXML private HBox buttonBox;
 
 	private ResourceBundle bundle;
+	private CurrentTrace currentTrace;
 	private TraceReplayErrorAlert alert;
-	private ArrayList<ListView> listViews = new ArrayList();
-	private List<ScrollBar> scrollBarList = new ArrayList();
+	private Injector injector;
+	private Map<CheckBox,ListView<String>> checkBoxListViewMap = new HashMap<>();
 
 	@Inject
-	private TraceDiff(StageManager stageManager, Injector injector) {
+	private TraceDiff(StageManager stageManager, Injector injector, CurrentTrace currentTrace) {
 		this.bundle = injector.getInstance(ResourceBundle.class);
+		this.currentTrace = currentTrace;
+		this.injector = injector;
 		stageManager.loadFXML(this,"trace_diff.fxml");
 	}
 
 	@FXML
 	private void initialize() {
 		this.setPadding(new Insets(5,5,5,5));
-		double initialWidth = this.getWidth();
+		double initialWidth = this.getWidth()/4;
+		setReplayed.setPrefWidth(initialWidth);
 		showAlert.setPrefWidth(initialWidth);
+		savePersistent.setPrefWidth(initialWidth);
+		setCurrent.setPrefWidth(initialWidth);
 
-		this.listViews.add(replayedList);
-		this.listViews.add(persistentList);
-		this.listViews.add(currentList);
+		this.checkBoxListViewMap.put(replayed, replayedList);
+		this.checkBoxListViewMap.put(persistent, persistentList);
+		this.checkBoxListViewMap.put(current, currentList);
 
-		// Arrow key and scrollbar synchronicity
-		ChangeListener<? super Number> listViewCL = createChangeListenerForListView();
-		linkScrolling.selectedProperty().addListener(createChangeListenerForCheckBox(listViewCL));
+		// Arrow key synchronicity
+		ChangeListener<? super Number> replayedListCL = createChangeListenerForListView(persistent, current);
+		ChangeListener<? super Number> persistentListCL = createChangeListenerForListView(replayed, current);
+		ChangeListener<? super Number> currentListCL = createChangeListenerForListView(replayed, persistent);
+
+		replayed.selectedProperty().addListener(createChangeListenerForCheckBox(replayedList, replayedListCL));
+		persistent.selectedProperty().addListener(createChangeListenerForCheckBox(persistentList, persistentListCL));
+		current.selectedProperty().addListener(createChangeListenerForCheckBox(currentList, currentListCL));
+
+		// Scrollbar synchronicity
+		replayed.selectedProperty().addListener(createChangeListenerForCheckBox(replayed));
+		persistent.selectedProperty().addListener(createChangeListenerForCheckBox(persistent));
+		current.selectedProperty().addListener(createChangeListenerForCheckBox(current));
 	}
 
-	private void getScrollBars() {
-		scrollBarList.clear();
-		listViews.forEach(lv -> {
-			ScrollBar sb = (ScrollBar) lv.lookup(".scroll-bar:vertical");
-			if (sb != null) {
-				scrollBarList.add(sb);
+	private ScrollBar getScrollBar(ListView<String> listView) {
+		return (ScrollBar) listView.lookup(".scroll-bar:vertical");
+	}
+
+	private ChangeListener<? super Boolean> createChangeListenerForCheckBox(CheckBox checkBox) {
+		return (obs, o, n) -> {
+			ScrollBar related = getScrollBar(checkBoxListViewMap.get(checkBox));
+			if (related != null) {
+				if (n) {
+					for (Map.Entry<CheckBox, ListView<String>> entry : checkBoxListViewMap.entrySet()) {
+						CheckBox cb = entry.getKey();
+						ScrollBar scrollBar = getScrollBar(entry.getValue());
+						if (cb != checkBox && scrollBar != null && cb.isSelected()) {
+							related.valueProperty().bindBidirectional(scrollBar.valueProperty());
+						}
+					}
+				} else {
+					for (Map.Entry<CheckBox, ListView<String>> entry : checkBoxListViewMap.entrySet()) {
+						ScrollBar scrollBar = getScrollBar(entry.getValue());
+						if (entry.getKey() != checkBox && scrollBar != null) {
+							related.valueProperty().unbindBidirectional(scrollBar.valueProperty());
+						}
+					}
+				}
 			}
-		});
+		};
 	}
 
-	private ChangeListener<? super Boolean> createChangeListenerForCheckBox(ChangeListener<? super Number> listViewChangeListener) {
+	private ChangeListener<? super Boolean> createChangeListenerForCheckBox(ListView<String> listView, ChangeListener<? super Number> listViewChangeListener) {
 		return (obs, o, n) -> {
 			if (n) {
-				// Arrow key synchronicity
-				listViews.forEach(lv -> lv.getSelectionModel().selectedIndexProperty().addListener(listViewChangeListener));
-				// Scrollbar synchronicity
-				getScrollBars();
-				for (int i = 0; i < scrollBarList.size()-1; i++) {
-					scrollBarList.get(i).valueProperty().bindBidirectional(scrollBarList.get(i+1).valueProperty());
-				}
+				listView.getSelectionModel().selectedIndexProperty().addListener(listViewChangeListener);
 			} else {
-				listViews.forEach(lv -> lv.getSelectionModel().selectedIndexProperty().removeListener(listViewChangeListener));
-				for (int i = 0; i < scrollBarList.size()-1; i++) {
-					scrollBarList.get(i).valueProperty().unbindBidirectional(scrollBarList.get(i+1).valueProperty());
-				}
+				listView.getSelectionModel().selectedIndexProperty().removeListener(listViewChangeListener);
 			}
 		};
 	}
 
-	private ChangeListener<? super Number> createChangeListenerForListView() {
+	private ChangeListener<? super Number> createChangeListenerForListView(CheckBox firstCB, CheckBox secondCB) {
 		return (obs, o, n) -> {
 			int value = n.intValue();
-			listViews.forEach(lv -> scrollToEntry(lv, value));
+			scrollToEntry(firstCB, value);
+			scrollToEntry(secondCB, value);
 		};
 	}
 
-	private void scrollToEntry(ListView lv, int value) {
-		if (linkScrolling.isSelected()) {
+	private void scrollToEntry(CheckBox cb, int value) {
+		if (cb.isSelected()) {
+			ListView<String> lv = checkBoxListViewMap.get(cb);
 			lv.getSelectionModel().select(value);
 			lv.getFocusModel().focus(value);
 			lv.scrollTo(value);
@@ -138,7 +169,19 @@ public class TraceDiff extends VBox {
 		translateList(pTransitions, persistentList, maxSize);
 		translateList(cTransitions, currentList, maxSize);
 
+		setReplayed.setOnAction(e -> {
+			currentTrace.set(replayedOrLost);
+			this.getScene().getWindow().hide();
+		});
 		showAlert.setOnAction(e -> alert.showAlertAgain());
+		savePersistent.setOnAction(e -> {
+				Machine machine = injector.getInstance(CurrentProject.class).getCurrentMachine();
+						injector.getInstance(TraceFileHandler.class).save(persistent, machine,
+				injector.getInstance(MachineCreator.class).load(machine.getLocation()));});
+		setCurrent.setOnAction(e -> {
+			currentTrace.set(current);
+			this.getScene().getWindow().hide();
+		});
 	}
 
 	private void translateList(List<?> list, ListView<String> listView, int maxSize) {
@@ -184,13 +227,13 @@ public class TraceDiff extends VBox {
 		}
 
 		if (Transition.SETUP_CONSTANTS_NAME.equals(t.getName())
-				&& t.getDestination().getConstantValues(FormulaExpand.TRUNCATE) != null
-				&& !t.getDestination().getConstantValues(FormulaExpand.TRUNCATE).isEmpty()) {
-			t.getDestination().getConstantValues(FormulaExpand.TRUNCATE).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
+				&& t.getDestination().getConstantValues(FormulaExpand.EXPAND) != null
+				&& !t.getDestination().getConstantValues(FormulaExpand.EXPAND).isEmpty()) {
+			t.getDestination().getConstantValues(FormulaExpand.EXPAND).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
 		} else if (Transition.INITIALISE_MACHINE_NAME.equals(t.getName())
-				&& t.getDestination().getVariableValues(FormulaExpand.TRUNCATE) != null
-				&& !t.getDestination().getVariableValues(FormulaExpand.TRUNCATE).isEmpty()) {
-			t.getDestination().getVariableValues(FormulaExpand.TRUNCATE).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
+				&& t.getDestination().getVariableValues(FormulaExpand.EXPAND) != null
+				&& !t.getDestination().getVariableValues(FormulaExpand.EXPAND).isEmpty()) {
+			t.getDestination().getVariableValues(FormulaExpand.EXPAND).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
 		}
 
 		if (!args.isEmpty()) {
@@ -236,12 +279,19 @@ public class TraceDiff extends VBox {
 		if (alert.getTrigger().equals(TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW)) {
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
 			if (listBox.getChildren().contains(persistentBox)) {
+				persistent.setSelected(false);
 				listBox.getChildren().remove(persistentBox);
+			}
+			if (buttonBox.getChildren().contains(savePersistent)) {
+				buttonBox.getChildren().remove(savePersistent);
 			}
 		} else {
 			replayed.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
 			if (!listBox.getChildren().contains(persistentBox)) {
 				listBox.getChildren().add(persistentBox);
+			}
+			if (!buttonBox.getChildren().contains(savePersistent)) {
+				buttonBox.getChildren().add(savePersistent);
 			}
 		}
 	}
