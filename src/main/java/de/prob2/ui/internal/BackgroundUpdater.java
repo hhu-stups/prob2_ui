@@ -66,7 +66,7 @@ public final class BackgroundUpdater implements Executor {
 	@Override
 	public void execute(final Runnable command) {
 		synchronized (this.lock) {
-			this.lastFuture.cancel(false);
+			this.cancel(false);
 			this.lastFuture = this.executor.submit(() -> {
 				try {
 					Platform.runLater(() -> this.running.set(true));
@@ -76,6 +76,12 @@ public final class BackgroundUpdater implements Executor {
 				}
 			}, null);
 			Futures.addCallback(this.lastFuture, THROW_EXCEPTIONS_CALLBACK, MoreExecutors.directExecutor());
+		}
+	}
+	
+	public void cancel(final boolean mayInterruptIfRunning) {
+		synchronized (this.lock) {
+			this.lastFuture.cancel(mayInterruptIfRunning);
 		}
 	}
 	

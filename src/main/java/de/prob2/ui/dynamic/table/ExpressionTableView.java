@@ -3,24 +3,18 @@ package de.prob2.ui.dynamic.table;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.animator.command.GetAllTableCommands;
 import de.prob.animator.command.GetShortestTraceCommand;
-import de.prob.animator.command.GetTableForVisualizationCommand;
-import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
-import de.prob.exception.ProBError;
+import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.statespace.State;
-import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.MainView;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -46,14 +40,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Singleton
-public class ExpressionTableView extends DynamicCommandStage {
+public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
 
 	private static final class ValueItemRow extends TableRow<ObservableList<String>> {
 
@@ -115,8 +108,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@Inject
 	public ExpressionTableView(final Injector injector, final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
-							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle);
+							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+		super(preferences, currentTrace, currentProject, bundle, stopActions, "Expression Table Visualizer");
 		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
@@ -136,54 +129,21 @@ public class ExpressionTableView extends DynamicCommandStage {
 	}
 	
 	@Override
-	protected void fillCommands() {
-		super.fillCommands(new GetAllTableCommands(currentTrace.getCurrentState()));
+	protected List<TableVisualizationCommand> getCommandsInState(final State state) {
+		return TableVisualizationCommand.getAll(state);
 	}
 	
 	public void visualizeExpression(String expression) {
-		taFormula.setText(expression);
-		lvChoice.getSelectionModel().selectFirst();
-		visualize(lvChoice.getSelectionModel().getSelectedItem());
+		this.selectCommand("expr_as_table", expression);
 	}
 	
 	@Override
-	protected void visualize(DynamicCommandItem item) {
-		if(!item.isAvailable()) {
-			return;
-		}
-		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
-		interrupt();
-
-		Thread thread = new Thread(() -> {
-			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
-			try {
-				if(currentTrace.get() == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::reset);
-					currentThread.set(null);
-					return;
-				}
-				if(item.getArity() > 0) {
-					formulas.add(currentTrace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
-				}
-				State id = currentTrace.getCurrentState();
-				GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
-				currentTrace.getStateSpace().execute(cmd);
-				Platform.runLater(() -> {
-					reset();
-					currentTable.set(cmd.getTable());
-				});
-				currentThread.set(null);
-			} catch (ProBError | EvaluationException e) {
-				LOGGER.error("Table visualization failed", e);
-				currentThread.set(null);
-				Platform.runLater(() -> {
-					taErrors.setText(e.getMessage());
-					reset();
-				});
-			}
+	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
+		final TableData table = item.visualize(formulas);
+		Platform.runLater(() -> {
+			reset();
+			currentTable.set(table);
 		});
-		currentThread.set(thread);
-		thread.start();
 	}
 	
 	private void fillTable(TableData data) {
@@ -257,16 +217,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 
 			showSourceItem.setOnAction(e -> {
 				if(!line.isEmpty() && !column.isEmpty() && !path.isEmpty()) {
-					stageManager.getMainStage().toFront();
-					injector.getInstance(MainView.class).switchTabPane("beditorTab");
-
-					BEditorView bEditorView = injector.getInstance(BEditorView.class);
-					bEditorView.selectMachine(path.get(0));
-
-					BEditor bEditor = injector.getInstance(BEditor.class);
-					bEditor.requestFocus();
-					bEditor.moveTo(line.get(0), column.get(0));
-					bEditor.requestFollowCaret();
+					injector.getInstance(BEditorView.class).jumpToSource(path.get(0), line.get(0), column.get(0));
 				}
 			});
 		}
@@ -350,14 +301,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@FXML
 	private void editPreferences() {
-		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
+		TableVisualizationCommand currentItem = lvChoice.getSelectionModel().getSelectedItem();
 		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
 		preferences.show();
 	}
-
-	public void selectCommand(String command) {
-		DynamicCommandItem commandItem = lvChoice.getItems().stream().filter(item -> item.getCommand().equals(command)).collect(Collectors.toList()).get(0);
-		lvChoice.getSelectionModel().select(commandItem);
-	}
-	
 }

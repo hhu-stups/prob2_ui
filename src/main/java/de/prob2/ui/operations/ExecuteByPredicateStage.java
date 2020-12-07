@@ -2,6 +2,8 @@ package de.prob2.ui.operations;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import de.prob.animator.command.ExecuteOperationException;
+import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.model.classicalb.ClassicalBConstant;
@@ -94,21 +96,27 @@ public final class ExecuteByPredicateStage extends Stage {
 				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getPrettyName()));
 				
 				final Map<String, String> items = new LinkedHashMap<>();
-				if (to.getParameterValues().isEmpty()) {
-					for (final String name : to.getParameterNames()) {
-						items.put(name, "");
-					}
-				} else {
-					assert to.getParameterNames().size() == to.getParameterValues().size();
-					for (int i = 0; i < to.getParameterNames().size(); i++) {
-						items.put(to.getParameterNames().get(i), to.getParameterValues().get(i));
-					}
-				}
+				buildParameters(to.getParameterValues(), to.getParameterNames(), items);
+				buildParameters(to.getReturnParameterValues(), to.getReturnParameterNames(), items);
+
 				items.putAll(to.getConstants());
 				items.putAll(to.getVariables());
 				this.predicateBuilderView.setItems(items);
 			}
 		});
+	}
+
+	private void buildParameters(List<String> parameterValues, List<String> parameterNames, Map<String, String> items) {
+		if (parameterValues.isEmpty()) {
+			for (final String name : parameterNames) {
+				items.put(name, "");
+			}
+		} else {
+			assert parameterNames.size() == parameterValues.size();
+			for (int i = 0; i < parameterNames.size(); i++) {
+				items.put(parameterNames.get(i), parameterValues.get(i));
+			}
+		}
 	}
 	
 	public ObjectProperty<OperationItem> itemProperty() {
@@ -128,19 +136,33 @@ public final class ExecuteByPredicateStage extends Stage {
 		final List<Transition> transitions;
 		try {
 			transitions = this.currentTrace.getStateSpace().transitionFromPredicate(
-				this.currentTrace.getCurrentState(),
-				this.getItem().getName(),
-				this.predicateBuilderView.getPredicate(),
-				1
+					this.currentTrace.getCurrentState(),
+					this.getItem().getName(),
+					this.predicateBuilderView.getPredicate(),
+					1
 			);
-		} catch (IllegalArgumentException | ProBError | EvaluationException e) {
-			LOGGER.info("Execute by predicate failed", e);
-			lastFailedPredicate = this.predicateBuilderView.getPredicate();
-			executeFailedBox.setVisible(true);
-			String opName = this.getItem().getName();
-			if(Transition.INITIALISE_MACHINE_NAME.equals(opName)) {
-				visualizeButton.setDisable(true);
+		} catch (ExecuteOperationException e) {
+			if(e.getErrors().stream()
+					.noneMatch(error -> error.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
+				LOGGER.info("Execute by predicate failed", e);
+				lastFailedPredicate = this.predicateBuilderView.getPredicate();
+				executeFailedBox.setVisible(true);
+				String opName = this.getItem().getName();
+				if (Transition.INITIALISE_MACHINE_NAME.equals(opName)) {
+					visualizeButton.setDisable(true);
+				}
+			} else {
+				LOGGER.error("Execute by predicate failed", e);
+				Alert alert = stageManager.makeExceptionAlert(e, "operations.executeByPredicate.alerts.parseError.header", "operations.executeByPredicate.alerts.parseError.content");
+				alert.initOwner(this);
+				alert.showAndWait();
 			}
+			return;
+		} catch (IllegalArgumentException | ProBError | EvaluationException e) {
+			LOGGER.error("Execute by predicate failed", e);
+			Alert alert = stageManager.makeExceptionAlert(e, "operations.executeByPredicate.alerts.parseError.header", "operations.executeByPredicate.alerts.parseError.content");
+			alert.initOwner(this);
+			alert.showAndWait();
 			return;
 		}
 		assert transitions.size() == 1;
@@ -152,9 +174,9 @@ public final class ExecuteByPredicateStage extends Stage {
 	public void visualizePredicate() {
 		try {
 			DotView formulaStage = injector.getInstance(DotView.class);
+			formulaStage.show();
 			formulaStage.visualizeFormula(buildVisualizationPredicate());
 			this.close();
-			formulaStage.show();
 		} catch (EvaluationException | ProBError e) {
 			LOGGER.error("Could not visualize formula", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");

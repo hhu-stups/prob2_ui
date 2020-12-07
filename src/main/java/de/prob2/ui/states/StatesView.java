@@ -206,10 +206,9 @@ public final class StatesView extends StackPane {
 			row.getStyleClass().remove("changed");
 			row.setTooltip(null);
 			if (to != null) {
-				if (!to.getCurrentValue().equals(to.getPreviousValue())) {
+				if (!to.getCurrentValue().equals(to.getPreviousValue()) && currentTrace.getCurrentState().isInitialised()) {
 					row.getStyleClass().add("changed");
 				}
-
 				row.setTooltip(this.buildItemTooltip(to));
 			}
 		});
@@ -232,8 +231,8 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				DotView formulaStage = injector.getInstance(DotView.class);
-				formulaStage.visualizeFormula(row.getItem().getLabel());
 				formulaStage.show();
+				formulaStage.visualizeFormula(row.getItem().getLabel());
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
@@ -248,8 +247,8 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-				expressionTableView.visualizeExpression(row.getItem().getLabel());
 				expressionTableView.show();
+				expressionTableView.visualizeExpression(row.getItem().getLabel());
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
