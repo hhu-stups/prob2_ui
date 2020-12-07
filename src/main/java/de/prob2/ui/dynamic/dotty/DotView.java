@@ -148,7 +148,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		if (!item.isAvailable()) {
 			return;
 		}
-		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 
 		this.updater.execute(() -> {
@@ -159,7 +158,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 					Platform.runLater(this::reset);
 					return;
 				}
-				setUpSvgForDotCommand(trace, item, formulas);
+				setUpSvgForDotCommand(trace, item);
 				if(!Thread.currentThread().isInterrupted()) {
 					final byte[] svgData = new DotCall(this.dot)
 						.layoutEngine(this.dotEngine)
@@ -183,9 +182,12 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		});
 	}
 
-	private void setUpSvgForDotCommand(final Trace trace, final DotVisualizationCommand item, final List<IEvalElement> formulas) throws IOException, InterruptedException {
+	private void setUpSvgForDotCommand(final Trace trace, final DotVisualizationCommand item) throws IOException, InterruptedException {
+		final List<IEvalElement> formulas;
 		if (item.getArity() > 0) {
-			formulas.add(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
+			formulas = Collections.singletonList(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
+		} else {
+			formulas = Collections.emptyList();
 		}
 		
 		this.dot = trace.getStateSpace().getCurrentPreference("DOT");

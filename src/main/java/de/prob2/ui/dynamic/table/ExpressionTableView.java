@@ -146,7 +146,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		if(!item.isAvailable()) {
 			return;
 		}
-		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
 		interrupt();
 
 		this.updater.execute(() -> {
@@ -156,8 +155,11 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 					Platform.runLater(this::reset);
 					return;
 				}
+				final List<IEvalElement> formulas;
 				if(item.getArity() > 0) {
-					formulas.add(currentTrace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
+					formulas = Collections.singletonList(currentTrace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
+				} else {
+					formulas = Collections.emptyList();
 				}
 				final TableData table = item.visualize(formulas);
 				Platform.runLater(() -> {
