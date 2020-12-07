@@ -111,16 +111,24 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + accordion.getChildren().size()+ ")");
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
 		accordion.prefWidthProperty().bindBidirectional(typeII.prefWidthProperty());
+		if(accordion.getChildren().size()==0){
+			typeII.setCollapsible(false);
+		}
 
 		VBox accordion2 = setTypeIIAmbiguousConflicts();
 		typeIIPer.setContent(accordion2);
 		typeIIPer.textProperty().set(resourceBundle.getString("traceModification.alert.typeIIAmbiguous" ) + " (" + accordion2.getChildren().size()+ ")");
+		if(accordion2.getChildren().size()==0){
+			typeIIPer.setCollapsible(false);
+		}
 
 		VBox accordion3 = setTypeIIIConflicts_plain(traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase3II(),
 				traceModificationChecker.traceChecker.getOldOperationInfos());
 		typeIII.setContent(accordion3);
-		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + (accordion3.getChildren().size()-1)+ ")");
-
+		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + accordion3.getChildren().size() + ")");
+		if(accordion3.getChildren().size()==0){
+			typeIII.setCollapsible(false);
+		}
 
 
 	}
@@ -303,9 +311,16 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	VBox prepareColumn2(List<SimpleStringProperty> stuff){
 
 		List<Label> oldStuffFX = stuff.stream().map(entry -> {
-			Label result = new Label(entry.getName());
-			result.textProperty().bindBidirectional(entry);
-			return result;
+			if(entry != null)
+			{
+				Label result = new Label(entry.getName());
+				result.textProperty().bindBidirectional(entry);
+				return result;
+			}
+			else{
+				Label result = new Label("???");
+				return result;
+			}
 		}).collect(Collectors.toList());
 
 
@@ -486,10 +501,15 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		if(resultTypeIIIWithTransitions.isEmpty()) return new VBox();
 
+
 		Set<Map<String,  Map<String, String>>> typeIIIRefined = resultTypeIIIWithTransitions.entrySet().stream().findFirst().get().getValue().keySet();
 
+
 		if(typeIIIRefined.isEmpty()) return new VBox();
+
 		Map<String, Map<String, String>> sample = typeIIIRefined.stream().findFirst().get();
+
+		if(sample.isEmpty()) return new VBox();
 
 		VBox result = new VBox();
 
