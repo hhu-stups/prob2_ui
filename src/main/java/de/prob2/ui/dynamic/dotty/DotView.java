@@ -316,7 +316,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		preferences.show();
 	}
 
-	public void visualizeFormula(final Object formula) {
+	public void visualizeFormula(final String formula) {
 		taErrors.clear();
 		try {
 			DotVisualizationCommand choice = lvChoice.getItems().stream()
@@ -324,11 +324,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 					.collect(Collectors.toList())
 					.get(0);
 			statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
-			if(formula instanceof IEvalElement) {
-				taFormula.setText(((IEvalElement) formula).getCode());
-			} else {
-				taFormula.setText((String) formula);
-			}
+			taFormula.setText(formula);
 			lvChoice.getSelectionModel().select(choice);
 			visualize(choice);
 		} catch (EvaluationException | ProBError exception) {
