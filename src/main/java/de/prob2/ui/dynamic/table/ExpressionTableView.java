@@ -1,16 +1,27 @@
 package de.prob2.ui.dynamic.table;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.animator.command.GetAllTableCommands;
+
 import de.prob.animator.command.GetShortestTraceCommand;
-import de.prob.animator.command.GetTableForVisualizationCommand;
-import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
+import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.beditor.BEditor;
@@ -23,6 +34,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -37,23 +49,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 @Singleton
-public class ExpressionTableView extends DynamicCommandStage {
+public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
 
 	private static final class ValueItemRow extends TableRow<ObservableList<String>> {
 
@@ -136,8 +137,8 @@ public class ExpressionTableView extends DynamicCommandStage {
 	}
 	
 	@Override
-	protected void fillCommands() {
-		super.fillCommands(new GetAllTableCommands(currentTrace.getCurrentState()));
+	protected List<TableVisualizationCommand> getCommandsInState(final State state) {
+		return TableVisualizationCommand.getAll(state);
 	}
 	
 	public void visualizeExpression(String expression) {
@@ -147,7 +148,7 @@ public class ExpressionTableView extends DynamicCommandStage {
 	}
 	
 	@Override
-	protected void visualize(DynamicCommandItem item) {
+	protected void visualize(TableVisualizationCommand item) {
 		if(!item.isAvailable()) {
 			return;
 		}
@@ -165,12 +166,10 @@ public class ExpressionTableView extends DynamicCommandStage {
 				if(item.getArity() > 0) {
 					formulas.add(currentTrace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
 				}
-				State id = currentTrace.getCurrentState();
-				GetTableForVisualizationCommand cmd = new GetTableForVisualizationCommand(id, item, formulas);
-				currentTrace.getStateSpace().execute(cmd);
+				final TableData table = item.visualize(formulas);
 				Platform.runLater(() -> {
 					reset();
-					currentTable.set(cmd.getTable());
+					currentTable.set(table);
 				});
 				currentThread.set(null);
 			} catch (ProBError | EvaluationException e) {
@@ -350,13 +349,13 @@ public class ExpressionTableView extends DynamicCommandStage {
 	
 	@FXML
 	private void editPreferences() {
-		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
+		TableVisualizationCommand currentItem = lvChoice.getSelectionModel().getSelectedItem();
 		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
 		preferences.show();
 	}
 
 	public void selectCommand(String command) {
-		DynamicCommandItem commandItem = lvChoice.getItems().stream().filter(item -> item.getCommand().equals(command)).collect(Collectors.toList()).get(0);
+		TableVisualizationCommand commandItem = lvChoice.getItems().stream().filter(item -> item.getCommand().equals(command)).collect(Collectors.toList()).get(0);
 		lvChoice.getSelectionModel().select(commandItem);
 	}
 	

@@ -11,19 +11,22 @@ import java.util.Objects;
 public class VisBItem {
 	private String id;
 	private String attribute;
-	private String value;
-	public IEvalElement parsedFormula;
+	private String value; // B Formula to compute value of attribute for SVG object id
+	private Boolean optional; // if true then we ignore identifier not found errors and simply disable this item
+	public IEvalElement parsedFormula; // if different from null the formula has already been parsed
 
 	/**
 	 *
 	 * @param id this has to be the id used in the svg file to correspond with that svg element
 	 * @param attribute this has to be an actual svg attribute, that can be handled via {@link VisBParser}
-	 * @param value this has to be a valid value usable with the given attribute in string format
+	 * @param value this formula has to provide a valid value usable with the given attribute
+	 * @param optional true if this item is optional, i.e., will be ignored if the value formula contains unknown ids
 	 */
-	public VisBItem(String id, String attribute, String value) {
+	public VisBItem(String id, String attribute, String value, Boolean optional) {
 		this.id = id;
 		this.attribute = attribute.toLowerCase();
 		this.value = value;
+		this.optional = optional;
 	}
 
 	public String getId() {
@@ -36,6 +39,10 @@ public class VisBItem {
 
 	public String getValue() {
 		return value;
+	}
+
+	public Boolean itemIsOptional() {
+		return optional;
 	}
 	@Override
 	public String toString(){

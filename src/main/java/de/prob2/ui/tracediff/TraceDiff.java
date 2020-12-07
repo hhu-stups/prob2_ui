@@ -14,6 +14,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -30,8 +31,8 @@ import javafx.scene.layout.VBox;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -40,9 +41,9 @@ public class TraceDiff extends VBox {
 
 	@FXML private Label replayed;
 
-	@FXML private ListView<String> replayedList;
-	@FXML private ListView<String> persistentList;
-	@FXML private ListView<String> currentList;
+	@FXML private ListView<TraceDiffItem> replayedList;
+	@FXML private ListView<TraceDiffItem> persistentList;
+	@FXML private ListView<TraceDiffItem> currentList;
 
 	@FXML private Button showAlert;
 
@@ -51,10 +52,111 @@ public class TraceDiff extends VBox {
 	@FXML private HBox listBox;
 	@FXML private HBox buttonBox;
 
-	private ResourceBundle bundle;
+	private final ResourceBundle bundle;
 	private TraceReplayErrorAlert alert;
-	private ArrayList<ListView> listViews = new ArrayList();
-	private List<ScrollBar> scrollBarList = new ArrayList();
+	private ArrayList<ListView<TraceDiffItem>> listViews = new ArrayList<>();
+	private List<ScrollBar> scrollBarList = new ArrayList<>();
+	private static int minSize = -1;
+	private int maxSize = -1;
+	static HashMap<Integer, Integer> indexLinesMap = new HashMap<>();
+
+	static class TraceDiffList extends ArrayList<TraceDiffItem> {
+		TraceDiffList(List<?> list) {
+			for (int i = 0; i < list.size(); i++) {
+				String s = getRep(list.get(i));
+				this.add(new TraceDiffItem(i, s));
+				int lines = s == null? 0 : s.split("\n").length;
+				if (TraceDiff.indexLinesMap.get(i) == null || TraceDiff.indexLinesMap.get(i) < lines) {
+					TraceDiff.indexLinesMap.put(i,lines);
+				}
+			}
+		}
+
+		private String getRep(Object t) {
+			if (t instanceof Transition) {
+				return getRep((Transition) t);
+			} else if (t instanceof PersistentTransition) {
+				return getRep((PersistentTransition) t);
+			}
+			return null;
+		}
+
+		private String getRep(Transition t) {
+			LoadedMachine loadedMachine = t.getStateSpace().getLoadedMachine();
+			OperationInfo opInfo;
+			try {
+				opInfo = loadedMachine.getMachineOperationInfo(t.getName());
+			} catch (ProBError e) {
+				opInfo = null;
+			}
+			List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
+
+			StringBuilder stringBuilder = new StringBuilder(t.getPrettyName());
+
+			List<String> args = new ArrayList<>();
+			List<String> paramValues = t.getParameterValues();
+			if (paramNames.isEmpty()) {
+				args.addAll(paramValues);
+			} else if (paramValues.isEmpty()) {
+				args.addAll(paramNames);
+			} else if (paramNames.size() == paramValues.size()){
+				for (int i = 0; i<paramNames.size(); i++) {
+					args.add(paramNames.get(i) + '=' + paramValues.get(i));
+				}
+			}
+
+			if (Transition.SETUP_CONSTANTS_NAME.equals(t.getName())
+					&& t.getDestination().getConstantValues(FormulaExpand.TRUNCATE) != null
+					&& !t.getDestination().getConstantValues(FormulaExpand.TRUNCATE).isEmpty()) {
+				t.getDestination().getConstantValues(FormulaExpand.TRUNCATE).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
+			} else if (Transition.INITIALISE_MACHINE_NAME.equals(t.getName())
+					&& t.getDestination().getVariableValues(FormulaExpand.TRUNCATE) != null
+					&& !t.getDestination().getVariableValues(FormulaExpand.TRUNCATE).isEmpty()) {
+				t.getDestination().getVariableValues(FormulaExpand.TRUNCATE).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
+			}
+
+			if (!args.isEmpty()) {
+				stringBuilder.append("\n(");
+				stringBuilder.append(String.join(",\n", args));
+				stringBuilder.append(')');
+			}
+
+			if (t.getReturnValues() != null && !t.getReturnValues().isEmpty()) {
+				stringBuilder.append(" → ");
+				stringBuilder.append(String.join(",\n", t.getReturnValues()));
+			}
+
+			return stringBuilder.toString();
+		}
+
+		private String getRep(PersistentTransition t) {
+			final StringBuilder stringBuilder = new StringBuilder(Transition.prettifyName(t.getOperationName()));
+			boolean isArtificialTransition = Transition.isArtificialTransitionName(t.getOperationName());
+
+			List<String> args = new ArrayList<>();
+			if (t.getParameters()!=null && !t.getParameters().isEmpty()) {
+				t.getParameters().forEach((str1, str2) -> args.add(str1 + "=" + str2));
+			} else if (isArtificialTransition && t.getDestinationStateVariables() != null && !t.getDestinationStateVariables().isEmpty()) {
+				t.getDestinationStateVariables().forEach((str1, str2) -> args.add(str1 + ":=" + str2));
+			}
+
+			if (!args.isEmpty()) {
+				stringBuilder.append("\n(");
+				stringBuilder.append(String.join(",\n", args));
+				stringBuilder.append(')');
+			}
+
+			if (t.getOutputParameters() != null && !t.getOutputParameters().isEmpty()) {
+				stringBuilder.append(" → ");
+				stringBuilder.append(String.join(",\n", t.getOutputParameters().values()));
+			}
+			return stringBuilder.toString();
+		}
+
+		public boolean add(String s) {
+			return super.add(new TraceDiffItem(this.size(), s));
+		}
+	}
 
 	@Inject
 	private TraceDiff(StageManager stageManager, Injector injector) {
@@ -75,6 +177,13 @@ public class TraceDiff extends VBox {
 		// Arrow key and scrollbar synchronicity
 		ChangeListener<? super Number> listViewCL = createChangeListenerForListView();
 		linkScrolling.selectedProperty().addListener(createChangeListenerForCheckBox(listViewCL));
+
+		// Renew scrollbar list if stage was resized
+		Platform.runLater(() -> {
+			ChangeListener<? super Number> stageSizeChangelistener = (observable, oldValue, newValue) -> getScrollBars();
+			this.getScene().getWindow().heightProperty().addListener(stageSizeChangelistener);
+			this.getScene().getWindow().widthProperty().addListener(stageSizeChangelistener);
+		});
 	}
 
 	private void getScrollBars() {
@@ -113,7 +222,7 @@ public class TraceDiff extends VBox {
 		};
 	}
 
-	private void scrollToEntry(ListView lv, int value) {
+	private void scrollToEntry(ListView<TraceDiffItem> lv, int value) {
 		if (linkScrolling.isSelected()) {
 			lv.getSelectionModel().select(value);
 			lv.getFocusModel().focus(value);
@@ -132,103 +241,25 @@ public class TraceDiff extends VBox {
 		}
 		List<Transition> cTransitions = current.getTransitionList();
 
-		int maxSize = Math.max(Math.max(rTransitions.size(), pTransitions.size()), cTransitions.size());
+		maxSize = Math.max(rTransitions.size(), pTransitions.size());
+		minSize = Math.min(rTransitions.size(), pTransitions.size());
 
-		translateList(rTransitions, replayedList, maxSize);
-		translateList(pTransitions, persistentList, maxSize);
-		translateList(cTransitions, currentList, maxSize);
+		indexLinesMap.clear();
+		translateList(new TraceDiffList(rTransitions), replayedList);
+		translateList(new TraceDiffList(pTransitions), persistentList);
+		translateList(new TraceDiffList(cTransitions), currentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
 	}
 
-	private void translateList(List<?> list, ListView<String> listView, int maxSize) {
-		List<String> stringList = list.stream().map(this::getRep).collect(Collectors.toList());
+	private void translateList(TraceDiffList stringList, ListView<TraceDiffItem> listView) {
 		//Add "empty" entries to ensure same length (needed for synchronized scrolling)
 		while (stringList.size() < maxSize) {
 			stringList.add("");
 		}
+		// Mark faulty operation index red and following operation indices blue -> TraceDiffCell
+		listView.setCellFactory(param -> new TraceDiffCell());
 		listView.setItems(FXCollections.observableList(stringList));
-	}
-
-	private String getRep(Object t) {
-		if (t instanceof Transition) {
-			return getRep((Transition) t);
-		} else if (t instanceof PersistentTransition) {
-			return getRep((PersistentTransition) t);
-		}
-		return null;
-	}
-
-	private String getRep(Transition t) {
-		LoadedMachine loadedMachine = t.getStateSpace().getLoadedMachine();
-		OperationInfo opInfo;
-		try {
-			opInfo = loadedMachine.getMachineOperationInfo(t.getName());
-		} catch (ProBError e) {
-			opInfo = null;
-		}
-		List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
-
-		StringBuilder stringBuilder = new StringBuilder(t.getPrettyName());
-
-		List<String> args = new ArrayList<>();
-		List<String> paramValues = t.getParameterValues();
-		if (paramNames.isEmpty()) {
-			args.addAll(paramValues);
-		} else if (paramValues.isEmpty()) {
-			args.addAll(paramNames);
-		} else if (paramNames.size() == paramValues.size()){
-			for (int i = 0; i<paramNames.size(); i++) {
-				args.add(paramNames.get(i) + '=' + paramValues.get(i));
-			}
-		}
-
-		if (Transition.SETUP_CONSTANTS_NAME.equals(t.getName())
-				&& t.getDestination().getConstantValues(FormulaExpand.TRUNCATE) != null
-				&& !t.getDestination().getConstantValues(FormulaExpand.TRUNCATE).isEmpty()) {
-			t.getDestination().getConstantValues(FormulaExpand.TRUNCATE).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
-		} else if (Transition.INITIALISE_MACHINE_NAME.equals(t.getName())
-				&& t.getDestination().getVariableValues(FormulaExpand.TRUNCATE) != null
-				&& !t.getDestination().getVariableValues(FormulaExpand.TRUNCATE).isEmpty()) {
-			t.getDestination().getVariableValues(FormulaExpand.TRUNCATE).forEach((iEvalElement, abstractEvalResult) -> args.add(iEvalElement + ":=" + abstractEvalResult));
-		}
-
-		if (!args.isEmpty()) {
-			stringBuilder.append('(');
-			stringBuilder.append(String.join(", ", args));
-			stringBuilder.append(')');
-		}
-
-		if (t.getReturnValues() != null && !t.getReturnValues().isEmpty()) {
-			stringBuilder.append(" → ");
-			stringBuilder.append(String.join(", ", t.getReturnValues()));
-		}
-
-		return stringBuilder.toString();
-	}
-
-	private String getRep(PersistentTransition t) {
-		final StringBuilder stringBuilder = new StringBuilder(Transition.prettifyName(t.getOperationName()));
-		boolean isArtificialTransition = Transition.isArtificialTransitionName(t.getOperationName());
-
-		List<String> args = new ArrayList<>();
-		if (t.getParameters()!=null && !t.getParameters().isEmpty()) {
-			t.getParameters().forEach((str1, str2) -> args.add(str1 + "=" + str2));
-		} else if (isArtificialTransition && t.getDestinationStateVariables() != null && !t.getDestinationStateVariables().isEmpty()) {
-			t.getDestinationStateVariables().forEach((str1, str2) -> args.add(str1 + ":=" + str2));
-		}
-
-		if (!args.isEmpty()) {
-			stringBuilder.append('(');
-			stringBuilder.append(String.join(", ", args));
-			stringBuilder.append(')');
-		}
-
-		if (t.getOutputParameters() != null && !t.getOutputParameters().isEmpty()) {
-			stringBuilder.append(" → ");
-			stringBuilder.append(String.join(", ", t.getOutputParameters().values()));
-		}
-		return stringBuilder.toString();
 	}
 
 	void setAlert(TraceReplayErrorAlert alert) {
@@ -244,5 +275,9 @@ public class TraceDiff extends VBox {
 				listBox.getChildren().add(persistentBox);
 			}
 		}
+	}
+
+	static int getMinSize() {
+		return minSize;
 	}
 }
