@@ -107,6 +107,11 @@ public final class StageManager {
 		loader.setLocation(fxmlUrl);
 		loader.setRoot(controller);
 		loader.setController(controller);
+		if (controller instanceof Stage) {
+			((Stage) controller).initOwner(this.getMainStage());
+		} else if (controller instanceof Dialog<?>) {
+			((Dialog<?>) controller).initOwner(this.getMainStage());
+		}
 		try {
 			loader.load();
 		} catch (IOException e) {
@@ -333,6 +338,7 @@ public final class StageManager {
 		final ExceptionAlert alert = injector.getInstance(ExceptionAlert.class);
 		alert.setText(String.format(bundle.getString(contentBundleKey), contentParams));
 		alert.setException(exc);
+		this.register(alert);
 		return alert;
 	}
 

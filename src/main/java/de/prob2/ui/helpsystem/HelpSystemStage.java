@@ -18,6 +18,7 @@ public class HelpSystemStage extends Stage {
 		this.setScene(new Scene(help));
 		this.setMinWidth(640);
 		this.setMinHeight(480);
+		this.initOwner(stageManager.getMainStage());
 		stageManager.register(this, this.getClass().getName());
 	}
 }

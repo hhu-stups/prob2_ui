@@ -19,7 +19,7 @@ public class TraceDiffStage extends Stage {
 		this.traceDiff = injector.getInstance(TraceDiff.class);
 		Scene scene = new Scene(traceDiff);
 		this.setScene(scene);
-		this.initOwner(injector.getInstance(StageManager.class).getCurrent());
+		this.initOwner(injector.getInstance(StageManager.class).getMainStage());
 	}
 
 	public final void setLists(Trace replayed, PersistentTrace persistent, Trace current) {
