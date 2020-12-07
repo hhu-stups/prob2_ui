@@ -275,8 +275,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				throw new IllegalArgumentException("Visualization command does not take an argument: " + command);
 			}
 			taFormula.setText(formula);
+			visualize(choice);
 		}
-		visualize(choice);
 	}
 
 	public void selectCommand(final String command) {
