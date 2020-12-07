@@ -16,6 +16,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
+import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -54,6 +55,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -377,5 +379,17 @@ public class BEditorView extends BorderPane {
 
 	public void selectMachine(Path path) {
 		machineChoice.getSelectionModel().select(path);
+	}
+
+	public void jumpToSource(Path machinePath, int line, int column) {
+		stageManager.getMainStage().toFront();
+		injector.getInstance(MainView.class).switchTabPane("beditorTab");
+
+		this.selectMachine(machinePath);
+
+		BEditor bEditor = injector.getInstance(BEditor.class);
+		bEditor.requestFocus();
+		bEditor.moveTo(line, column);
+		bEditor.requestFollowCaret();
 	}
 }

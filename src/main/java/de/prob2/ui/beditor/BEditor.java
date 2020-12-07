@@ -170,7 +170,7 @@ public class BEditor extends CodeArea {
 	}
 
 	private int getClampedAbsolutePosition(final int paragraphIndex, final int columnIndex) {
-		if (paragraphIndex >= this.getParagraphs().size()) {
+		if (paragraphIndex >= this.getParagraphs().size() - 1) {
 			return this.getLength();
 		}
 		return Math.min(this.getAbsolutePosition(paragraphIndex, columnIndex), this.getLength());
