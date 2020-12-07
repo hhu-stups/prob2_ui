@@ -174,9 +174,9 @@ public final class ExecuteByPredicateStage extends Stage {
 	public void visualizePredicate() {
 		try {
 			DotView formulaStage = injector.getInstance(DotView.class);
+			formulaStage.show();
 			formulaStage.visualizeFormula(buildVisualizationPredicate());
 			this.close();
-			formulaStage.show();
 		} catch (EvaluationException | ProBError e) {
 			LOGGER.error("Could not visualize formula", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
