@@ -1,11 +1,9 @@
 package de.prob2.ui.dynamic.dotty;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -158,7 +156,17 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 					Platform.runLater(this::reset);
 					return;
 				}
-				setUpSvgForDotCommand(trace, item);
+				final List<IEvalElement> formulas;
+				if (item.getArity() > 0) {
+					formulas = Collections.singletonList(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
+				} else {
+					formulas = Collections.emptyList();
+				}
+				
+				this.dot = trace.getStateSpace().getCurrentPreference("DOT");
+				this.dotEngine = item.getPreferredDotLayoutEngine()
+					.orElseGet(() -> trace.getStateSpace().getCurrentPreference("DOT_ENGINE"));
+				this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
 				if(!Thread.currentThread().isInterrupted()) {
 					final byte[] svgData = new DotCall(this.dot)
 						.layoutEngine(this.dotEngine)
@@ -180,20 +188,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				});
 			}
 		});
-	}
-
-	private void setUpSvgForDotCommand(final Trace trace, final DotVisualizationCommand item) {
-		final List<IEvalElement> formulas;
-		if (item.getArity() > 0) {
-			formulas = Collections.singletonList(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
-		} else {
-			formulas = Collections.emptyList();
-		}
-		
-		this.dot = trace.getStateSpace().getCurrentPreference("DOT");
-		this.dotEngine = item.getPreferredDotLayoutEngine()
-			.orElseGet(() -> trace.getStateSpace().getCurrentPreference("DOT_ENGINE"));
-		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
 	}
 
 	private void loadGraph(final String svgContent) {
