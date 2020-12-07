@@ -1,10 +1,17 @@
 package de.prob2.ui.dynamic;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.DynamicCommandItem;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -24,6 +31,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends Stage {
 	private static final class DynamicCommandItemCell<T extends DynamicCommandItem> extends ListCell<T> {
@@ -46,6 +56,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 		}
 	}
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
 	@FXML
 	protected ListView<T> lvChoice;
@@ -212,7 +224,43 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected abstract void reset();
 	
-	protected abstract void visualize(T item);
+	protected void visualize(final T item) {
+		if (!item.isAvailable()) {
+			return;
+		}
+		interrupt();
+
+		this.updater.execute(() -> {
+			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
+			try {
+				final Trace trace = currentTrace.get();
+				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
+					Platform.runLater(this::reset);
+					return;
+				}
+				final List<IEvalElement> formulas;
+				if (item.getArity() > 0) {
+					formulas = Collections.singletonList(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
+				} else {
+					formulas = Collections.emptyList();
+				}
+				visualizeInternal(item, formulas);
+			} catch (CommandInterruptedException | InterruptedException e) {
+				LOGGER.info("Visualization interrupted", e);
+				Thread.currentThread().interrupt();
+				Platform.runLater(this::reset);
+			} catch (ProBError | EvaluationException e) {
+				LOGGER.error("Visualization failed", e);
+				Platform.runLater(() -> {
+					taErrors.setText(e.getMessage());
+					this.reset();
+					statusBar.setText("");
+				});
+			}
+		});
+	}
+	
+	protected abstract void visualizeInternal(final T item, final List<IEvalElement> formulas) throws InterruptedException;
 	
 	protected abstract List<T> getCommandsInState(final State state);
 

@@ -142,52 +142,19 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	@Override
-	protected void visualize(DotVisualizationCommand item) {
-		if (!item.isAvailable()) {
-			return;
+	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
+		this.dot = item.getState().getStateSpace().getCurrentPreference("DOT");
+		this.dotEngine = item.getPreferredDotLayoutEngine()
+			.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
+		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
+		if(!Thread.currentThread().isInterrupted()) {
+			final byte[] svgData = new DotCall(this.dot)
+				.layoutEngine(this.dotEngine)
+				.outputFormat(DotOutputFormat.SVG)
+				.input(this.currentDotContent.get())
+				.call();
+			loadGraph(new String(svgData, StandardCharsets.UTF_8));
 		}
-		interrupt();
-
-		this.updater.execute(() -> {
-			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
-			try {
-				Trace trace = currentTrace.get();
-				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::reset);
-					return;
-				}
-				final List<IEvalElement> formulas;
-				if (item.getArity() > 0) {
-					formulas = Collections.singletonList(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
-				} else {
-					formulas = Collections.emptyList();
-				}
-				
-				this.dot = trace.getStateSpace().getCurrentPreference("DOT");
-				this.dotEngine = item.getPreferredDotLayoutEngine()
-					.orElseGet(() -> trace.getStateSpace().getCurrentPreference("DOT_ENGINE"));
-				this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
-				if(!Thread.currentThread().isInterrupted()) {
-					final byte[] svgData = new DotCall(this.dot)
-						.layoutEngine(this.dotEngine)
-						.outputFormat(DotOutputFormat.SVG)
-						.input(this.currentDotContent.get())
-						.call();
-					loadGraph(new String(svgData, StandardCharsets.UTF_8));
-				}
-			} catch (CommandInterruptedException | InterruptedException e) {
-				LOGGER.info("Dot visualization interrupted", e);
-				Thread.currentThread().interrupt();
-				Platform.runLater(this::reset);
-			} catch (ProBError | EvaluationException e) {
-				LOGGER.error("Graph visualization failed", e);
-				Platform.runLater(() -> {
-					taErrors.setText(e.getMessage());
-					dotView.getEngine().loadContent("");
-					statusBar.setText("");
-				});
-			}
-		});
 	}
 
 	private void loadGraph(final String svgContent) {

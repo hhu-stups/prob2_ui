@@ -142,37 +142,11 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	@Override
-	protected void visualize(TableVisualizationCommand item) {
-		if(!item.isAvailable()) {
-			return;
-		}
-		interrupt();
-
-		this.updater.execute(() -> {
-			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
-			try {
-				if(currentTrace.get() == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::reset);
-					return;
-				}
-				final List<IEvalElement> formulas;
-				if(item.getArity() > 0) {
-					formulas = Collections.singletonList(currentTrace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
-				} else {
-					formulas = Collections.emptyList();
-				}
-				final TableData table = item.visualize(formulas);
-				Platform.runLater(() -> {
-					reset();
-					currentTable.set(table);
-				});
-			} catch (ProBError | EvaluationException e) {
-				LOGGER.error("Table visualization failed", e);
-				Platform.runLater(() -> {
-					taErrors.setText(e.getMessage());
-					reset();
-				});
-			}
+	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
+		final TableData table = item.visualize(formulas);
+		Platform.runLater(() -> {
+			reset();
+			currentTable.set(table);
 		});
 	}
 	
