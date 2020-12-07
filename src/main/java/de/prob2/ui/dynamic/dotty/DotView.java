@@ -321,8 +321,8 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		try {
 			DotVisualizationCommand choice = lvChoice.getItems().stream()
 					.filter(item -> "formula_tree".equals(item.getCommand()))
-					.collect(Collectors.toList())
-					.get(0);
+					.findAny()
+					.orElseThrow(() -> new AssertionError("Formula tree visualization command not found"));
 			statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
 			taFormula.setText(formula);
 			lvChoice.getSelectionModel().select(choice);
