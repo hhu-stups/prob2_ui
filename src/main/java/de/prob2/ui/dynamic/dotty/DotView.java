@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -317,13 +316,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	public void visualizeFormula(final String formula) {
-		DotVisualizationCommand choice = lvChoice.getItems().stream()
-				.filter(item -> "formula_tree".equals(item.getCommand()))
-				.findAny()
-				.orElseThrow(() -> new AssertionError("Formula tree visualization command not found"));
-		taFormula.setText(formula);
-		lvChoice.getSelectionModel().select(choice);
-		visualize(choice);
+		this.selectCommand("formula_tree", formula);
 	}
 
 }

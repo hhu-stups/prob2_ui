@@ -138,9 +138,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	public void visualizeExpression(String expression) {
-		taFormula.setText(expression);
-		lvChoice.getSelectionModel().selectFirst();
-		visualize(lvChoice.getSelectionModel().getSelectedItem());
+		this.selectCommand("expr_as_table", expression);
 	}
 	
 	@Override
@@ -335,10 +333,4 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
 		preferences.show();
 	}
-
-	public void selectCommand(String command) {
-		TableVisualizationCommand commandItem = lvChoice.getItems().stream().filter(item -> item.getCommand().equals(command)).collect(Collectors.toList()).get(0);
-		lvChoice.getSelectionModel().select(commandItem);
-	}
-	
 }

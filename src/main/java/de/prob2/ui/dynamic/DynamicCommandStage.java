@@ -216,4 +216,22 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected abstract List<T> getCommandsInState(final State state);
 
+	public void selectCommand(final String command, final String formula) {
+		final T choice = lvChoice.getItems().stream()
+			.filter(item -> command.equals(item.getCommand()))
+			.findAny()
+			.orElseThrow(() -> new IllegalArgumentException("Visualization command not found: " + command));
+		lvChoice.getSelectionModel().select(choice);
+		if (formula != null) {
+			if (choice.getArity() == 0) {
+				throw new IllegalArgumentException("Visualization command does not take an argument: " + command);
+			}
+			taFormula.setText(formula);
+		}
+		visualize(choice);
+	}
+
+	public void selectCommand(final String command) {
+		this.selectCommand(command, null);
+	}
 }
