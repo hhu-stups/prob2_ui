@@ -76,7 +76,7 @@ public class TraceModificationChecker {
 			persistentTraces.forEach(element -> {
 
 				String filename = Files.getNameWithoutExtension(path.toString());
-				String modified = filename + "_edited." + Files.getFileExtension(path.toString());
+				String modified = filename + "_edited_for_" + currentProject.getCurrentMachine().getName() +"." + Files.getFileExtension(path.toString());
 
 				Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
 
