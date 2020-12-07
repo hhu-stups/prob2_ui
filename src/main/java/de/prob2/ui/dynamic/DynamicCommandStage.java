@@ -96,11 +96,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected final ResourceBundle bundle;
 	
-	protected final StageManager stageManager;
-	
 	protected final BackgroundUpdater updater;
 	
-	protected DynamicCommandStage(final StageManager stageManager, final DynamicPreferencesStage preferences,
+	protected DynamicCommandStage(final DynamicPreferencesStage preferences,
 			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final StopActions stopActions, final String threadName) {
 		this.preferences = preferences;
 		this.preferences.initOwner(this);
@@ -109,7 +107,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
-		this.stageManager = stageManager;
 		this.updater = new BackgroundUpdater(threadName);
 		stopActions.add(this.updater::shutdownNow);
 	}

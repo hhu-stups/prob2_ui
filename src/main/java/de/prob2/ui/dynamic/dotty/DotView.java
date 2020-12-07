@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -12,16 +11,11 @@ import java.util.Set;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
@@ -74,6 +68,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	@FXML
 	private HelpButton helpButton;
 
+	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 
 	private String dot;
@@ -88,8 +83,9 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	@Inject
 	public DotView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle, stopActions, "Graph Visualizer");
+		super(preferences, currentTrace, currentProject, bundle, stopActions, "Graph Visualizer");
 		
+		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		
 		this.dot = null;
