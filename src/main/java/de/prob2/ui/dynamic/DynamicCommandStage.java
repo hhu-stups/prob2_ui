@@ -85,6 +85,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	@FXML
 	protected DynamicCommandStatusBar statusBar;
 	
+	// Used to remember the last selected item even when the list might be cleared temporarily,
+	// e. g. when reloading the current machine.
 	protected T lastItem;
 	
 	protected final DynamicPreferencesStage preferences;
