@@ -134,7 +134,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	public void visualizeExpression(String expression) {
-		this.selectCommand("expr_as_table", expression);
+		this.selectCommand(TableVisualizationCommand.EXPRESSION_AS_TABLE_NAME, expression);
 	}
 	
 	@Override
