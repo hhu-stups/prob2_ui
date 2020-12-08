@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.table;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -67,7 +68,8 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				this.itemBox.getChildren().add(lbProbability);
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(item.getProbability(), FormulaExpand.EXPAND);
+					// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+					AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(new ClassicalB(item.getProbability(), FormulaExpand.EXPAND));
 					Label lbProbabilityValue = new Label(String.format(bundle.getString("simulation.item.probabilityValue"), evalResult.toString()));
 					lbProbabilityValue.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbProbabilityValue);
@@ -97,7 +99,8 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
 					for (String key : evaluatedValues.keySet()) {
 						evaluatedValues.computeIfPresent(key, (k, v) -> {
-							AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(v, FormulaExpand.EXPAND);
+							// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+							AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(new ClassicalB(v, FormulaExpand.EXPAND));
 							return evalResult.toString();
 						});
 					}
@@ -114,7 +117,8 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				this.itemBox.getChildren().add(lbVariableValuesProbability);
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(item.getValuesProbability(), FormulaExpand.EXPAND);
+					// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+					AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(new ClassicalB(item.getValuesProbability(), FormulaExpand.EXPAND));
 					Label lbValuesProbability = new Label(String.format(bundle.getString("simulation.item.concreteValuesProbabilities"), evalResult.toString()));
 					lbValuesProbability.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbValuesProbability);

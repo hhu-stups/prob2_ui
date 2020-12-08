@@ -149,7 +149,8 @@ public class Simulator {
 					boolean endingTimeReached = config.getEndingTime() > 0 && time.get() >= config.getEndingTime();
 					boolean endingConditionReached = false;
 					if(!config.getEndingCondition().isEmpty()) {
-						AbstractEvalResult endingConditionEvalResult = finalState.eval(config.getEndingCondition(), FormulaExpand.EXPAND);
+						// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+						AbstractEvalResult endingConditionEvalResult = finalState.eval(new ClassicalB(config.getEndingCondition(), FormulaExpand.EXPAND));
 						endingConditionReached = "TRUE".equals(endingConditionEvalResult.toString());
 					}
 					if (endingTimeReached || endingConditionReached) {
@@ -187,7 +188,8 @@ public class Simulator {
 			trace = currentTrace.get();
 			StateSpace stateSpace = currentTrace.getStateSpace();
 			currentState = trace.getCurrentState();
-			AbstractEvalResult startingResult = currentState.eval(config.getStartingCondition(), FormulaExpand.EXPAND);
+			// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+			AbstractEvalResult startingResult = currentState.eval(new ClassicalB(config.getStartingCondition(), FormulaExpand.EXPAND));
 			// Model Checking for goal
 			/*if("FALSE".equals(startingResult.toString())) {
 				final IModelCheckListener mcListener = new IModelCheckListener() {
@@ -235,7 +237,8 @@ public class Simulator {
 
 		//Choose configuration for execution
 		for(VariableConfiguration config : choice) {
-			AbstractEvalResult probabilityResult = currentState.eval(config.getProbability(), FormulaExpand.EXPAND);
+			// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+			AbstractEvalResult probabilityResult = currentState.eval(new ClassicalB(config.getProbability(), FormulaExpand.EXPAND));
 			minimumProbability += Double.parseDouble(probabilityResult.toString());
 			chosenConfiguration = config;
 			if(minimumProbability > ranDouble) {
@@ -246,7 +249,8 @@ public class Simulator {
 		Map<String, String> chosenValues = chosenConfiguration.getValues();
 		List<String> conjuncts = new ArrayList<>();
 		for(String key : chosenValues.keySet()) {
-			AbstractEvalResult evalResult = currentState.eval(chosenValues.get(key), FormulaExpand.EXPAND);
+			// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+			AbstractEvalResult evalResult = currentState.eval(new ClassicalB(chosenValues.get(key), FormulaExpand.EXPAND));
 			conjuncts.add(key + " = " + evalResult.toString());
 		}
 		return String.join(" & ", conjuncts);
@@ -274,7 +278,8 @@ public class Simulator {
 
 		for(OperationConfiguration opConfig : nextOperations) {
 			if(!config.getEndingCondition().isEmpty()) {
-				AbstractEvalResult endingConditionEvalResult = newCurrentState.eval(config.getEndingCondition(), FormulaExpand.EXPAND);
+				// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+				AbstractEvalResult endingConditionEvalResult = newCurrentState.eval(new ClassicalB(config.getEndingCondition(), FormulaExpand.EXPAND));
 				if ("TRUE".equals(endingConditionEvalResult.toString())) {
 					return;
 				}
@@ -289,7 +294,8 @@ public class Simulator {
 
 			double ranDouble = Math.random();
 
-			AbstractEvalResult evalResult = newCurrentState.eval(opConfig.getProbability(), FormulaExpand.EXPAND);
+			// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+			AbstractEvalResult evalResult = newCurrentState.eval(new ClassicalB(opConfig.getProbability(), FormulaExpand.EXPAND));
 
 			//3. calculate probability for each operation whether it should be executed
 			if(Double.parseDouble(evalResult.toString()) > ranDouble) {
