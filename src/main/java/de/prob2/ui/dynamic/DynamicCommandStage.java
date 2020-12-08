@@ -196,7 +196,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	public void refresh() {
 		int index = lvChoice.getSelectionModel().getSelectedIndex();
 		final State currentState = currentTrace.getCurrentState();
-		if (currentState != null) {
+		if (currentState == null) {
+			lvChoice.getItems().clear();
+		} else {
 			lvChoice.getItems().setAll(this.getCommandsInState(currentState));
 		}
 		if (index == -1) {
