@@ -144,14 +144,13 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			preferences.setIncludedPreferenceNames(to.getRelevantPreferences());
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
-			if(lastItem != null && !lastItem.getCommand().equals(to.getCommand())) {
-				reset();
-			}
-			//only visualize if
-			//1. No formula is needed and command is changed or continuous update is selected
-			//2. Formula is needed and command is not changed and continuous update is selected
+			// Update the visualization automatically if possible.
+			// If the command selection changed and the new command requires a formula,
+			// clear the visualization and wait for the user to input one.
 			if (!needFormula || to.equals(lastItem)) {
 				visualize(to);
+			} else {
+				reset();
 			}
 			lastItem = to;
 		});
