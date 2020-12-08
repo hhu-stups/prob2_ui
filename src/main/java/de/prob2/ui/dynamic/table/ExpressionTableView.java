@@ -242,10 +242,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		contextMenuItems.add(jumpToStateItem);
 	}
 	
-	private void clearTable() {
-		pane.setContent(new TableView<>());
-	}
-	
 	private ObservableList<ObservableList<String>> buildData(List<List<String>> list) {
 		ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
 		for (List<String> row : list) {
@@ -294,7 +290,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Override
 	protected void reset() {
 		currentTable.set(null);
-		clearTable();
+		pane.setContent(new TableView<>());
 		statusBar.setText("");
 		statusBar.removeLabelStyle("warning");
 	}
