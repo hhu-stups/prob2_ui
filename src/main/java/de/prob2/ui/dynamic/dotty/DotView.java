@@ -275,7 +275,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	public void visualizeFormula(final String formula) {
-		this.selectCommand("formula_tree", formula);
+		this.selectCommand(DotVisualizationCommand.FORMULA_TREE_NAME, formula);
 	}
 
 }
