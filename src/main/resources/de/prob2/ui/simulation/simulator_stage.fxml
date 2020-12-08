@@ -4,6 +4,8 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.simulation.SimulatorStage?>
+<?import de.prob2.ui.sharedviews.Spacer?>
+
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
@@ -15,6 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.Label?>
+
 <fx:root title="Simulator" type="SimulatorStage" width="900" height="500" minHeight="500" minWidth="900" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -37,7 +40,9 @@
 										<Tooltip text="%simulation.file.open" />
 									</tooltip>
 								</Button>
-								<Button fx:id="btSimulate" styleClass="button-blue" text="Start" onAction="#simulate"/>
+								<Button fx:id="btSimulate" styleClass="button-blue" text="%simulation.button.start" onAction="#simulate"/>
+								<Spacer/>
+								<Label fx:id="lbTime"/>
 							</HBox>
 							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
 								<content>

@@ -21,7 +21,9 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingJobItem;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +50,7 @@ public class Simulator {
 
     private SimulationConfiguration config;
 
-    private int time;
+    private IntegerProperty time;
 
     private int interval;
 
@@ -72,6 +74,7 @@ public class Simulator {
 		this.injector = injector;
 		this.runningProperty = new SimpleBooleanProperty(false);
 		this.executingOperationProperty = new SimpleBooleanProperty(false);
+		this.time = new SimpleIntegerProperty(0);
 		this.listener = (observable, from, to) -> {
 			if(to != null) {
 				if (!to.getCurrentState().isInitialised()) {
@@ -93,7 +96,7 @@ public class Simulator {
         }
 		this.initialOperationToRemainingTime = new HashMap<>();
 		this.operationToRemainingTime = new HashMap<>();
-		this.time = 0;
+		this.time.set(0);
 		calculateInterval();
 	    initializeRemainingTime();
 	}
@@ -141,21 +144,24 @@ public class Simulator {
 				// Read trace and pass it through chooseOperation to avoid race condition
 				Trace trace = currentTrace.get();
 				State currentState = trace.getCurrentState();
+				State finalState = currentTrace.getCurrentState();
+				if(finalState.isInitialised()) {
+					boolean endingTimeReached = config.getEndingTime() > 0 && time.get() >= config.getEndingTime();
+					boolean endingConditionReached = false;
+					if(!config.getEndingCondition().isEmpty()) {
+						AbstractEvalResult endingConditionEvalResult = finalState.eval(config.getEndingCondition(), FormulaExpand.EXPAND);
+						endingConditionReached = "TRUE".equals(endingConditionEvalResult.toString());
+					}
+					if (endingTimeReached || endingConditionReached) {
+						this.cancel();
+						currentTrace.removeListener(listener);
+						executingOperationProperty.set(false);
+						return;
+					}
+				}
 				updateRemainingTime();
 				executeOperations(currentTrace, currentState, trace);
 				executingOperationProperty.set(false);
-				State finalState = currentTrace.getCurrentState();
-				if(finalState.isInitialised()) {
-					boolean endingTimeReached = config.getEndingTime() > 0 && time >= config.getEndingTime();
-					if(!config.getEndingCondition().isEmpty()) {
-						AbstractEvalResult endingConditionEvalResult = finalState.eval(config.getEndingCondition(), FormulaExpand.EXPAND);
-						boolean endingConditionReached = "TRUE".equals(endingConditionEvalResult.toString());
-						if (endingTimeReached || endingConditionReached) {
-							this.cancel();
-							currentTrace.removeListener(listener);
-						}
-					}
-				}
 			}
 		};
 		timer.scheduleAtFixedRate(task, 0, interval);
@@ -247,7 +253,7 @@ public class Simulator {
 	}
 
     public void updateRemainingTime() {
-		this.time += this.interval;
+		this.time.set(this.time.get() + this.interval);
 		for(String key : operationToRemainingTime.keySet()) {
 			operationToRemainingTime.computeIfPresent(key, (k, v) -> v - interval);
 		}
@@ -352,5 +358,9 @@ public class Simulator {
 
 	public SimulationConfiguration getConfig() {
 		return config;
+	}
+
+	public IntegerProperty timeProperty() {
+		return time;
 	}
 }

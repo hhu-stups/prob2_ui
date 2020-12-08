@@ -9,6 +9,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -16,11 +17,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -32,6 +36,9 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private Button btSimulate;
+
+	@FXML
+	private Label lbTime;
 
 	@FXML
 	private ListView<SimulationDebugItem> simulationDebugItems;
@@ -68,9 +75,9 @@ public class SimulatorStage extends Stage {
 	public void initialize() {
 		simulator.runningPropertyProperty().addListener((observable, from, to) -> {
 			if(to) {
-				btSimulate.setText("Stop");
+				btSimulate.setText(bundle.getString("simulation.button.stop"));
 			} else {
-				btSimulate.setText("Start");
+				btSimulate.setText(bundle.getString("simulation.button.start"));
 			}
 		});
 		btSimulate.disableProperty().bind(configurationPath.isNull());
@@ -81,6 +88,14 @@ public class SimulatorStage extends Stage {
 			configurationPath.set(null);
 			simulationDebugItems.getItems().clear();
 			simulationDebugItems.refresh();
+		});
+		this.simulator.timeProperty().addListener((observable, from, to) -> {
+			if(to.intValue() > 0) {
+				BigDecimal seconds = new BigDecimal(to.intValue()/1000.0f).setScale(2, RoundingMode.HALF_UP);
+				Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+			} else {
+				Platform.runLater(() -> lbTime.setText(""));
+			}
 		});
 	}
 
@@ -105,6 +120,7 @@ public class SimulatorStage extends Stage {
         if(path != null) {
             configurationPath.set(path);
             File configFile = path.toFile();
+			lbTime.setText("");
             simulator.initSimulator(configFile);
             loadSimulationItems();
         }
