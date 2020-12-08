@@ -1,16 +1,28 @@
 package de.prob2.ui.simulation;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.check.ConsistencyChecker;
+import de.prob.check.IModelCheckListener;
+import de.prob.check.IModelCheckingResult;
+import de.prob.check.ModelCheckingOptions;
+import de.prob.check.StateSpaceStats;
+import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingJobItem;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +44,11 @@ public class Simulator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Simulator.class);
 
+	private ChangeListener<Trace> listener;
+
     private SimulationConfiguration config;
+
+    private int time;
 
     private int interval;
 
@@ -44,15 +60,25 @@ public class Simulator {
 
 	private final CurrentTrace currentTrace;
 
+	private final Injector injector;
+
 	private final BooleanProperty runningProperty;
 
 	private final BooleanProperty executingOperationProperty;
 
 	@Inject
-	public Simulator(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
+	public Simulator(final CurrentTrace currentTrace, final Injector injector, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
+		this.injector = injector;
 		this.runningProperty = new SimpleBooleanProperty(false);
 		this.executingOperationProperty = new SimpleBooleanProperty(false);
+		this.listener = (observable, from, to) -> {
+			if(to != null) {
+				if (!to.getCurrentState().isInitialised()) {
+					setupBeforeSimulation();
+				}
+			}
+		};
         disablePropertyController.addDisableExpression(this.executingOperationProperty);
 	}
 
@@ -67,6 +93,7 @@ public class Simulator {
         }
 		this.initialOperationToRemainingTime = new HashMap<>();
 		this.operationToRemainingTime = new HashMap<>();
+		this.time = 0;
 		calculateInterval();
 	    initializeRemainingTime();
 	}
@@ -103,62 +130,95 @@ public class Simulator {
 	public void run() {
 		this.timer = new Timer();
 		runningProperty.set(true);
+		setupBeforeSimulation();
+
+		currentTrace.addListener(listener);
+
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
 				executingOperationProperty.set(true);
 				// Read trace and pass it through chooseOperation to avoid race condition
 				Trace trace = currentTrace.get();
+				State currentState = trace.getCurrentState();
 				updateRemainingTime();
-				execute(trace);
+				executeOperations(currentTrace, currentState, trace);
 				executingOperationProperty.set(false);
+				State finalState = currentTrace.getCurrentState();
+				if(finalState.isInitialised()) {
+					boolean endingTimeReached = config.getEndingTime() > 0 && time >= config.getEndingTime();
+					if(!config.getEndingCondition().isEmpty()) {
+						AbstractEvalResult endingConditionEvalResult = finalState.eval(config.getEndingCondition(), FormulaExpand.EXPAND);
+						boolean endingConditionReached = "TRUE".equals(endingConditionEvalResult.toString());
+						if (endingTimeReached || endingConditionReached) {
+							this.cancel();
+							currentTrace.removeListener(listener);
+						}
+					}
+				}
 			}
 		};
 		timer.scheduleAtFixedRate(task, 0, interval);
 	}
 
-	public void execute(Trace trace) {
+	private void setupBeforeSimulation() {
+		Trace trace = currentTrace.get();
 		State currentState = trace.getCurrentState();
-		// Pass trace through execute operations to avoid race condition
 		if(!currentState.isInitialised()) {
 			List<String> nextTransitions = trace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
 			if(nextTransitions.contains("$setup_constants")) {
-				currentTrace.set(executeSetupConstants(currentState, trace));
-			} else if(nextTransitions.contains("$initialise_machine")) {
-				currentTrace.set(executeInitialisation(currentState, trace));
+				currentTrace.set(executeBeforeInitialisation("$setup_constants", config.getSetupConfigurations(), currentState, trace));
 			}
-		} else {
-			executeOperations(currentTrace, currentState, trace);
+			trace = currentTrace.get();
+			currentState = trace.getCurrentState();
+			nextTransitions = trace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
+			if(nextTransitions.contains("$initialise_machine")) {
+				currentTrace.set(executeBeforeInitialisation("$initialise_machine", config.getSetupConfigurations(), currentState, trace));
+			}
 		}
-    }
 
-    private Trace executeSetupConstants(State currentState, Trace trace) {
-		List<VariableChoice> setupConfigs = config.getSetupConfigurations();
-		Transition nextTransition;
-		if(setupConfigs == null) {
-			nextTransition = currentState.findTransition("$setup_constants", "1=1");
-		} else {
-			String predicate = setupConfigs.stream()
-					.map(VariableChoice::getChoice)
-					.map(choice -> chooseVariableValues(currentState, choice))
-					.collect(Collectors.joining(" & "));
-			nextTransition = currentState.findTransition("$setup_constants", predicate);
+		if(!config.getStartingCondition().isEmpty()) {
+			trace = currentTrace.get();
+			StateSpace stateSpace = currentTrace.getStateSpace();
+			currentState = trace.getCurrentState();
+			AbstractEvalResult startingResult = currentState.eval(config.getStartingCondition(), FormulaExpand.EXPAND);
+			// Model Checking for goal
+			/*if("FALSE".equals(startingResult.toString())) {
+				final IModelCheckListener mcListener = new IModelCheckListener() {
+					@Override
+					public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
+
+					}
+
+					@Override
+					public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
+						if (result instanceof ITraceDescription) {
+							Trace newTrace = ((ITraceDescription) result).getTrace(stateSpace);
+							String firstID = newTrace.getTransitionList().get(0).getId()
+							currentTrace.set();
+						}
+					}
+				};
+				ConsistencyChecker checker = new ConsistencyChecker(stateSpace, new ModelCheckingOptions().breadthFirst(true).recheckExisting(true).checkGoal(true), new ClassicalB(config.getStartingCondition(), FormulaExpand.EXPAND), mcListener);
+				checker.call();
+			}*/
 		}
-		return trace.add(nextTransition);
+
 	}
 
-    private Trace executeInitialisation(State currentState, Trace trace) {
-		List<VariableChoice> initialisationConfigs = config.getInitialisationConfigurations();
-		Transition nextTransition;
-		if(initialisationConfigs == null) {
-			nextTransition = currentState.findTransition("$initialise_machine", "1=1");
+	private String joinPredicateFromConfig(State currentState, List<VariableChoice> configs) {
+		if(configs == null) {
+			return "1=1";
 		} else {
-			String predicate = initialisationConfigs.stream()
+			return configs.stream()
 					.map(VariableChoice::getChoice)
 					.map(choice -> chooseVariableValues(currentState, choice))
 					.collect(Collectors.joining(" & "));
-			nextTransition = currentState.findTransition("$initialise_machine", predicate);
 		}
+	}
+
+	private Trace executeBeforeInitialisation(String operation, List<VariableChoice> configs, State currentState, Trace trace) {
+		Transition nextTransition = currentState.findTransition(operation, joinPredicateFromConfig(currentState, configs));
 		return trace.add(nextTransition);
 	}
 
@@ -187,12 +247,11 @@ public class Simulator {
 	}
 
     public void updateRemainingTime() {
+		this.time += this.interval;
 		for(String key : operationToRemainingTime.keySet()) {
 			operationToRemainingTime.computeIfPresent(key, (k, v) -> v - interval);
 		}
 	}
-
-
 
 	private void executeOperations(CurrentTrace currentTrace, State currentState, Trace trace) {
 		//1. select operations where time <= 0
@@ -208,6 +267,12 @@ public class Simulator {
 		State newCurrentState = currentState;
 
 		for(OperationConfiguration opConfig : nextOperations) {
+			if(!config.getEndingCondition().isEmpty()) {
+				AbstractEvalResult endingConditionEvalResult = newCurrentState.eval(config.getEndingCondition(), FormulaExpand.EXPAND);
+				if ("TRUE".equals(endingConditionEvalResult.toString())) {
+					return;
+				}
+			}
 			String opName = opConfig.getOpName();
 			//time for next execution has been delayed by a previous transition
 			if(operationToRemainingTime.get(opName) > 0) {
@@ -273,6 +338,7 @@ public class Simulator {
 			timer.cancel();
 			timer = null;
 		}
+		currentTrace.removeListener(listener);
 		runningProperty.set(false);
 	}
 

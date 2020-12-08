@@ -21,6 +21,9 @@ public class SimulationFileHandler {
         JsonReader reader = new JsonReader(new FileReader(inputFile));
         JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
 
+		int endingTime = simulationFile.get("endingTime") == null ? -1 : simulationFile.get("endingTime").getAsInt();
+		String startingCondition = simulationFile.get("startingCondition") == null ? "" : simulationFile.get("startingCondition").getAsString();
+		String endingCondition = simulationFile.get("endingCondition") == null ? "" : simulationFile.get("endingCondition").getAsString();
         List<VariableChoice> setupConfigurations = simulationFile.get("setupConfigurations") == null ? null : buildVariableChoices(simulationFile.get("setupConfigurations").getAsJsonArray());
         List<VariableChoice> initialisationConfigurations = simulationFile.get("initialisationConfigurations") == null ? null : buildVariableChoices(simulationFile.get("initialisationConfigurations").getAsJsonArray());
 
@@ -28,7 +31,7 @@ public class SimulationFileHandler {
         JsonArray operationConfigurationsAsArray = simulationFile.get("operationsConfigurations").getAsJsonArray();
         List<OperationConfiguration> operationConfigurations = buildOperationConfigurations(operationConfigurationsAsArray);
 
-        return new SimulationConfiguration(setupConfigurations, initialisationConfigurations, operationConfigurations);
+        return new SimulationConfiguration(endingTime, startingCondition, endingCondition, setupConfigurations, initialisationConfigurations, operationConfigurations);
     }
 
     private static List<VariableChoice> buildVariableChoices(JsonArray jsonArray) {
