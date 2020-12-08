@@ -89,8 +89,16 @@ public class SimulatorStage extends Stage {
 			simulationDebugItems.getItems().clear();
 			simulationDebugItems.refresh();
 		});
+		this.simulator.runningPropertyProperty().addListener((observable, from, to) -> {
+			if(to || simulator.timeProperty().get() >= 0) {
+				BigDecimal seconds = new BigDecimal(simulator.timeProperty().get()/1000.0f).setScale(2, RoundingMode.HALF_UP);
+				Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+			} else {
+				Platform.runLater(() -> lbTime.setText(""));
+			}
+		});
 		this.simulator.timeProperty().addListener((observable, from, to) -> {
-			if(to.intValue() > 0) {
+			if(to.intValue() >= 0 || this.simulator.runningPropertyProperty().get()) {
 				BigDecimal seconds = new BigDecimal(to.intValue()/1000.0f).setScale(2, RoundingMode.HALF_UP);
 				Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 			} else {

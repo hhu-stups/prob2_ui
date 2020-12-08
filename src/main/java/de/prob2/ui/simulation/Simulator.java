@@ -158,13 +158,13 @@ public class Simulator {
 						executingOperationProperty.set(false);
 						return;
 					}
+					updateRemainingTime();
+					executeOperations(currentTrace, currentState, trace);
 				}
-				updateRemainingTime();
-				executeOperations(currentTrace, currentState, trace);
 				executingOperationProperty.set(false);
 			}
 		};
-		timer.scheduleAtFixedRate(task, 0, interval);
+		timer.scheduleAtFixedRate(task, interval, interval);
 	}
 
 	public AbstractEvalResult evaluateForSimulation(State state, String formula) {
