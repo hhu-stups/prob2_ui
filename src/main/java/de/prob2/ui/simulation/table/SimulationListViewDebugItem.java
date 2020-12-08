@@ -13,19 +13,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-public class SimulationListViewItem extends ListCell<SimulationItem> {
+public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 
 	@FXML
 	private VBox itemBox;
 
 
-	private SimulationItem item;
+	private SimulationDebugItem item;
 
 	private final CurrentTrace currentTrace;
 
 	private final ResourceBundle bundle;
 
-	public SimulationListViewItem(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public SimulationListViewDebugItem(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		stageManager.loadFXML(this,"simulation_list_view_item.fxml");
 		this.item = null;
 		this.currentTrace = currentTrace;
@@ -39,7 +39,7 @@ public class SimulationListViewItem extends ListCell<SimulationItem> {
 	}
 
 	@Override
-	protected void updateItem(final SimulationItem item, final boolean empty) {
+	protected void updateItem(final SimulationDebugItem item, final boolean empty) {
 		super.updateItem(item, empty);
 		this.item = item;
 		if(item != null) {

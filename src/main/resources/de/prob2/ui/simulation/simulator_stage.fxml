@@ -6,46 +6,47 @@
 <?import de.prob2.ui.simulation.SimulatorStage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.control.TableView?>
-
-<?import javafx.scene.control.ScrollPane?>
-
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.control.ListView?>
-<fx:root title="Simulator" type="SimulatorStage" width="700" height="300" minHeight="300" minWidth="700" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root title="Simulator" type="SimulatorStage" width="900" height="500" minHeight="500" minWidth="900" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<scene>
         <Scene stylesheets="@/prob.css">
-			<ScrollPane prefWidth="700" prefHeight="300" fitToHeight="true" fitToWidth="true">
-				<AnchorPane>
-					<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-						<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-							<padding>
-								<Insets left="5.0"/>
-							</padding>
-							<Button fx:id="loadConfigurationButton" onAction="#loadConfiguration">
-								<graphic>
-									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
-								</graphic>
-								<tooltip>
-									<Tooltip text="%simulation.file.open" />
-								</tooltip>
-							</Button>
-							<Button fx:id="btSimulate" styleClass="button-blue" text="Start" onAction="#simulate"/>
-						</HBox>
-						<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
-							<content>
-								<ListView fx:id="simulationItems" styleClass="list-view" />
-							</content>
-						</ScrollPane>
-					</VBox>
-				</AnchorPane>
+			<ScrollPane prefWidth="900" prefHeight="500" fitToHeight="true" fitToWidth="true">
+				<SplitPane dividerPositions="0.75" orientation="HORIZONTAL">
+					<AnchorPane>
+						<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+								<padding>
+									<Insets left="5.0"/>
+								</padding>
+								<Button fx:id="loadConfigurationButton" onAction="#loadConfiguration">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%simulation.file.open" />
+									</tooltip>
+								</Button>
+								<Button fx:id="btSimulate" styleClass="button-blue" text="Start" onAction="#simulate"/>
+							</HBox>
+							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
+								<content>
+									<ListView fx:id="simulationItems" styleClass="list-view" />
+								</content>
+							</ScrollPane>
+						</VBox>
+					</AnchorPane>
+					<ListView fx:id="simulationDebugItems" styleClass="list-view" />
+				</SplitPane>
 			</ScrollPane>
 		</Scene>
     </scene>

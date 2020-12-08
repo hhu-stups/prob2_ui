@@ -1,74 +1,26 @@
 package de.prob2.ui.simulation.table;
 
-import java.util.Map;
-
 public class SimulationItem {
 
-	private String opName;
+    // Standard: ending time, ending condition
+    // Timing: starting condition, ending time, ending condition
+    // Model Checking: ending time, ending condition
+    // Probabilistic Model Checking: ending time, ending condition
+    // Hypothesis test/Monte Carlo simulation: ending time, ending condition
+    // Trace replay: ending time, ending condition
 
-	private String time;
+    /*
+    add ending time and ending condition to configuration file
+    starting condition to start timer for timing - also part of configuration file to search for starting state of simulation
+    TIMING option has time value to be checked
+    */
 
-	private Map<String, Integer> delay;
+    public enum SimulationType {
+        STANDARD, TIMING, MODEL_CHECKING, PROBABILISTIC_MODEL_CHECKING, HYPOTHESIS_TEST, TRACE_REPLAY
+    }
 
-	private String priority;
+    private SimulationType type;
 
-	private String probability;
 
-	private String choiceID;
 
-	private Map<String, String> values;
-
-	private String valuesProbability;
-
-	public SimulationItem(String opName, String time, Map<String, Integer> delay, String priority, String probability,
-						  String choiceID, Map<String, String> values, String valuesProbability) {
-		this.opName = opName;
-		this.time = time;
-		this.delay = delay;
-		this.priority = priority;
-		this.probability = probability;
-		this.choiceID = choiceID;
-		this.values = values;
-		this.valuesProbability = valuesProbability;
-	}
-
-	public String getOpName() {
-		return opName;
-	}
-
-	public String getTime() {
-		return time;
-	}
-
-	public Map<String, Integer> getDelay() {
-		return delay;
-	}
-
-	public String getDelayAsString() {
-		return delay == null ? "" : delay.toString();
-	}
-
-	public String getPriority() {
-		return priority;
-	}
-
-	public String getProbability() {
-		return probability;
-	}
-
-	public String getChoiceID() {
-		return choiceID;
-	}
-
-	public Map<String, String> getValues() {
-		return values;
-	}
-
-	public String getValuesAsString() {
-		return values == null ? "" : values.toString();
-	}
-
-	public String getValuesProbability() {
-		return valuesProbability;
-	}
 }

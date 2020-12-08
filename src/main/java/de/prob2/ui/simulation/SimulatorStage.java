@@ -7,8 +7,8 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.simulation.table.SimulationListViewItem;
+import de.prob2.ui.simulation.table.SimulationDebugItem;
+import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -34,7 +34,7 @@ public class SimulatorStage extends Stage {
 	private Button btSimulate;
 
 	@FXML
-	private ListView<SimulationItem> simulationItems;
+	private ListView<SimulationDebugItem> simulationDebugItems;
 
 	private final StageManager stageManager;
 
@@ -75,12 +75,12 @@ public class SimulatorStage extends Stage {
 		});
 		btSimulate.disableProperty().bind(configurationPath.isNull());
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
-		this.simulationItems.setCellFactory(lv -> new SimulationListViewItem(stageManager, currentTrace, bundle));
-		this.currentTrace.addListener((observable, from, to) -> simulationItems.refresh());
+		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, currentTrace, bundle));
+		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			configurationPath.set(null);
-			simulationItems.getItems().clear();
-			simulationItems.refresh();
+			simulationDebugItems.getItems().clear();
+			simulationDebugItems.refresh();
 		});
 	}
 
@@ -112,13 +112,13 @@ public class SimulatorStage extends Stage {
 
     private void loadSimulationItems() {
 		SimulationConfiguration config = simulator.getConfig();
-		ObservableList<SimulationItem> observableList = FXCollections.observableArrayList();
+		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
 		if(config.getSetupConfigurations() != null) {
 			int setupID = 0;
 			for(VariableChoice choice : config.getSetupConfigurations()) {
 				for(VariableConfiguration variableConfiguration : choice.getChoice()) {
-					observableList.add(new SimulationItem("SETUP_CONSTANTS", "", null, "", "", String.valueOf(setupID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
+					observableList.add(new SimulationDebugItem("SETUP_CONSTANTS", "", null, "", "", String.valueOf(setupID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
 				}
 				setupID++;
 			}
@@ -128,7 +128,7 @@ public class SimulatorStage extends Stage {
 			int initialisationID = 0;
 			for(VariableChoice choice : config.getInitialisationConfigurations()) {
 				for(VariableConfiguration variableConfiguration : choice.getChoice()) {
-					observableList.add(new SimulationItem("INITIALISATION", "", null, "", "", String.valueOf(initialisationID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
+					observableList.add(new SimulationDebugItem("INITIALISATION", "", null, "", "", String.valueOf(initialisationID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
 				}
 				initialisationID++;
 			}
@@ -142,18 +142,18 @@ public class SimulatorStage extends Stage {
 			String priority = String.valueOf(opConfig.getPriority());
 			String probability = opConfig.getProbability();
 			if(opConfig.getVariableChoices() == null) {
-				observableList.add(new SimulationItem(opName, time, delay, priority, probability, "", null, ""));
+				observableList.add(new SimulationDebugItem(opName, time, delay, priority, probability, "", null, ""));
 			} else {
 				int variableID = 0;
 				for(VariableChoice choice : opConfig.getVariableChoices()) {
 					for(VariableConfiguration variableConfiguration : choice.getChoice()) {
-						observableList.add(new SimulationItem(opName, time, delay, priority, probability, String.valueOf(variableID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
+						observableList.add(new SimulationDebugItem(opName, time, delay, priority, probability, String.valueOf(variableID), variableConfiguration.getValues(), variableConfiguration.getProbability()));
 					}
 				}
 			}
 		}
 
-		simulationItems.setItems(observableList);
+		simulationDebugItems.setItems(observableList);
 	}
 
 }
