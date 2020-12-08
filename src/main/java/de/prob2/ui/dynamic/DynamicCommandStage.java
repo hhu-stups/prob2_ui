@@ -13,7 +13,6 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.BackgroundUpdater;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -114,7 +113,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	@FXML
 	protected void initialize() {
-		fillCommands();
+		this.refresh();
 		currentTrace.addListener((observable, from, to) -> {
 			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
 				return;
@@ -160,9 +159,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		currentTrace.addStatesCalculatedListener(newOps -> Platform.runLater(this::refresh));
 
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
-			fillCommands();
 			lvChoice.getSelectionModel().clearSelection();
 			this.lastItem = null;
+			this.refresh();
 			reset();
 		});
 		
@@ -188,14 +187,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
 	}
 	
-	protected void fillCommands() {
-		final State currentState = currentTrace.getCurrentState();
-		if (currentState == null) {
-			return;
-		}
-		lvChoice.getItems().setAll(this.getCommandsInState(currentState));
-	}
-	
 	@FXML
 	protected void cancel() {
 		currentTrace.getStateSpace().sendInterrupt();
@@ -204,7 +195,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	public void refresh() {
 		int index = lvChoice.getSelectionModel().getSelectedIndex();
-		fillCommands();
+		final State currentState = currentTrace.getCurrentState();
+		if (currentState != null) {
+			lvChoice.getItems().setAll(this.getCommandsInState(currentState));
+		}
 		if (index == -1) {
 			if(this.lastItem != null) {
 				lvChoice.getSelectionModel().select(this.lastItem);
