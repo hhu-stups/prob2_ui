@@ -5,6 +5,7 @@ import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.Simulator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -24,12 +25,15 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 
 	private final CurrentTrace currentTrace;
 
+	private final Simulator simulator;
+
 	private final ResourceBundle bundle;
 
-	public SimulationListViewDebugItem(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public SimulationListViewDebugItem(final StageManager stageManager, final CurrentTrace currentTrace, final Simulator simulator, final ResourceBundle bundle) {
 		stageManager.loadFXML(this,"simulation_list_view_item.fxml");
 		this.item = null;
 		this.currentTrace = currentTrace;
+		this.simulator = simulator;
 		this.bundle = bundle;
 	}
 
@@ -68,8 +72,7 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				this.itemBox.getChildren().add(lbProbability);
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
-					AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(new ClassicalB(item.getProbability(), FormulaExpand.EXPAND));
+					AbstractEvalResult evalResult = simulator.evaluateForSimulation(currentTrace.getCurrentState(), item.getProbability());
 					Label lbProbabilityValue = new Label(String.format(bundle.getString("simulation.item.probabilityValue"), evalResult.toString()));
 					lbProbabilityValue.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbProbabilityValue);
@@ -99,8 +102,7 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
 					for (String key : evaluatedValues.keySet()) {
 						evaluatedValues.computeIfPresent(key, (k, v) -> {
-							// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
-							AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(new ClassicalB(v, FormulaExpand.EXPAND));
+							AbstractEvalResult evalResult = simulator.evaluateForSimulation(currentTrace.getCurrentState(), v);
 							return evalResult.toString();
 						});
 					}
@@ -117,8 +119,7 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				this.itemBox.getChildren().add(lbVariableValuesProbability);
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
-					AbstractEvalResult evalResult = currentTrace.getCurrentState().eval(new ClassicalB(item.getValuesProbability(), FormulaExpand.EXPAND));
+					AbstractEvalResult evalResult = simulator.evaluateForSimulation(currentTrace.getCurrentState(), item.getValuesProbability());
 					Label lbValuesProbability = new Label(String.format(bundle.getString("simulation.item.concreteValuesProbabilities"), evalResult.toString()));
 					lbValuesProbability.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbValuesProbability);

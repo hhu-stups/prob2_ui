@@ -82,7 +82,7 @@ public class SimulatorStage extends Stage {
 		});
 		btSimulate.disableProperty().bind(configurationPath.isNull());
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
-		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, currentTrace, bundle));
+		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, currentTrace, simulator, bundle));
 		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			configurationPath.set(null);
