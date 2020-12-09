@@ -74,9 +74,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected Label lbDescription;
 
 	@FXML
-	protected ScrollPane pane;
-
-	@FXML
 	protected Button cancelButton;
 	
 	@FXML

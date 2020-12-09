@@ -36,6 +36,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -46,6 +47,9 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
+
+	@FXML
+	protected ScrollPane pane;
 
 	@FXML
 	private WebView dotView;
