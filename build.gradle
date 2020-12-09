@@ -5,7 +5,7 @@ import org.openjfx.gradle.JavaFXPlatform
 plugins {
 	id "com.github.johnrengelman.shadow" version "5.2.0"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
-	id "org.openjfx.javafxplugin" version "0.0.8" apply false
+	id "org.openjfx.javafxplugin" version "0.0.9" apply false
 }
 
 apply plugin: 'application'
