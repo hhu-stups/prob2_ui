@@ -1,9 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.plugins.ide.eclipse.model.AccessRule
+import org.openjfx.gradle.JavaFXPlatform
 
 plugins {
 	id "com.github.johnrengelman.shadow" version "5.2.0"
-	id "com.google.osdetector" version "1.6.2"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
 	id "org.openjfx.javafxplugin" version "0.0.8" apply false
 }
@@ -217,20 +217,19 @@ jar {
 }
 
 final probBinariesByOs = [
-	"windows": "win64",
-	"osx": "leopard64",
-	"linux": "linux64",
+	(JavaFXPlatform.WINDOWS): "win64",
+	(JavaFXPlatform.OSX): "leopard64",
+	(JavaFXPlatform.LINUX): "linux64",
 ].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
 
 shadowJar {
 	// Set the classifier depending on the current OS to make it clear that this jar is platform-specific.
-	// The mapping converts the OS names to the format used by the OpenJFX Maven artifacts (this isn't necessary, but it's more consistent this way).
-	archiveClassifier = ["windows": "win", "osx": "mac", "linux": "linux"][osdetector.os]
+	archiveClassifier = javafx.platform.classifier
 
 	// Exclude all probcli zips that are not for the current platform.
 	// It's safer to do this with an exclude rule that lists all resources that we know we don't want.
 	// This way nothing will break if ProB 2 adds new resources that shouldn't be excluded.
-	exclude(probBinariesByOs.findAll {k, v -> k != osdetector.os}.values())
+	exclude(probBinariesByOs.findAll {k, v -> k != javafx.platform}.values())
 }
 
 task multiPlatformShadowJar(type: ShadowJar) {
@@ -292,7 +291,7 @@ task jpackage(type: Exec) {
 		"--license-file", "LICENSE",
 	]
 
-	if (osdetector.os == "windows") {
+	if (javafx.platform == JavaFXPlatform.WINDOWS) {
 		args += [
 			"--icon", "src/main/deploy/package/windows/prob2-ui.ico",
 			"--win-dir-chooser",
@@ -301,11 +300,11 @@ task jpackage(type: Exec) {
 			"--win-menu-group", appName,
 			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
 		]
-	} else if (osdetector.os == "osx") {
+	} else if (javafx.platform == JavaFXPlatform.OSX) {
 		args += [
 			"--icon", "src/main/deploy/package/macosx/prob2-ui.icns"
 		]
-	} else if (osdetector.os == "linux") {
+	} else if (javafx.platform == JavaFXPlatform.LINUX) {
 		args += [
 			"--icon", "src/main/deploy/package/linux/prob2-ui.png",
 			"--linux-menu-group", appName,
