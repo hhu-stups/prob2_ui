@@ -94,6 +94,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private static final String VALUE_COLUMN_NAME = "VALUE";
 	
 	@FXML
+	private TableView<ObservableList<String>> tableView;
+	
+	@FXML
 	private Button saveButton;
 	
 	@FXML
@@ -148,8 +151,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	
 	private void fillTable(TableData data) {
 		List<String> header = data.getHeader();
-		TableView<ObservableList<String>> tableView = new TableView<>();
-		tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+		tableView.getColumns().clear();
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
 			final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
@@ -179,7 +181,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			});
 			return row;
 		});
-		pane.setContent(tableView);
 		taErrors.clear();
 	}
 
@@ -290,7 +291,8 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Override
 	protected void clearContent() {
 		currentTable.set(null);
-		pane.setContent(new TableView<>());
+		tableView.getItems().clear();
+		tableView.getColumns().clear();
 	}
 	
 	@FXML

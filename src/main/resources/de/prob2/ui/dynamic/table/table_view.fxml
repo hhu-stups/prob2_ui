@@ -15,6 +15,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+<?import javafx.scene.control.TableView?>
 <fx:root type="ExpressionTableView" title="%table.expressionTableView.stage.title" minWidth="800" minHeight="600" width="1600.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -58,7 +59,9 @@
 								</VBox>
 							</VBox>
 						</VBox>
-						<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border"/>
+						<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border">
+							<TableView fx:id="tableView"/>
+						</ScrollPane>
 					</SplitPane>
 				</center>
 				<bottom>
