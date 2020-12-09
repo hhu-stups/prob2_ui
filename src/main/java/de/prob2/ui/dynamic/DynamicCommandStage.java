@@ -150,7 +150,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			if (!needFormula || to.equals(lastItem)) {
 				visualize(to);
 			} else {
-				reset();
+				this.interrupt();
 			}
 			lastItem = to;
 		});
@@ -160,10 +160,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		currentTrace.addStatesCalculatedListener(newOps -> Platform.runLater(this::refresh));
 
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			this.interrupt();
 			lvChoice.getSelectionModel().clearSelection();
 			this.lastItem = null;
 			this.refresh();
-			reset();
 		});
 		
 		taFormula.setOnKeyPressed(e -> {
@@ -213,10 +213,16 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected void interrupt() {
 		this.updater.cancel(true);
-		reset();
+		this.clearLoadingStatus();
+		this.clearContent();
 	}
 	
-	protected abstract void reset();
+	protected void clearLoadingStatus() {
+		statusBar.setText("");
+		statusBar.removeLabelStyle("warning");
+	}
+	
+	protected abstract void clearContent();
 	
 	protected void visualize(final T item) {
 		if (!item.isAvailable()) {
@@ -229,7 +235,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			try {
 				final Trace trace = currentTrace.get();
 				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::reset);
+					Platform.runLater(this::clearLoadingStatus);
 					return;
 				}
 				final List<IEvalElement> formulas;
@@ -242,13 +248,12 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Visualization interrupted", e);
 				Thread.currentThread().interrupt();
-				Platform.runLater(this::reset);
+				Platform.runLater(this::clearLoadingStatus);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Visualization failed", e);
 				Platform.runLater(() -> {
 					taErrors.setText(e.getMessage());
-					this.reset();
-					statusBar.setText("");
+					this.clearLoadingStatus();
 				});
 			}
 		});

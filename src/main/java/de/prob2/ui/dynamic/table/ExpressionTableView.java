@@ -141,7 +141,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
 		final TableData table = item.visualize(formulas);
 		Platform.runLater(() -> {
-			reset();
+			this.clearLoadingStatus();
 			currentTable.set(table);
 		});
 	}
@@ -288,11 +288,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	@Override
-	protected void reset() {
+	protected void clearContent() {
 		currentTable.set(null);
 		pane.setContent(new TableView<>());
-		statusBar.setText("");
-		statusBar.removeLabelStyle("warning");
 	}
 	
 	@FXML

@@ -158,7 +158,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		Platform.runLater(() -> {
 			if (!thread.isInterrupted()) {
 				dotView.getEngine().loadContent("<center>" + svgContent + "</center>");
-				statusBar.setText("");
+				this.clearLoadingStatus();
 				taErrors.clear();
 			}
 		});
@@ -259,12 +259,11 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 	
 	@Override
-	protected void reset() {
+	protected void clearContent() {
 		this.dot = null;
 		this.dotEngine = null;
 		this.currentDotContent.set(null);
 		dotView.getEngine().loadContent("");
-		statusBar.setText("");
 	}
 	
 	@FXML
