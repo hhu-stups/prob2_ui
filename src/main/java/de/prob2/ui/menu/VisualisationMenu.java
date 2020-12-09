@@ -9,38 +9,22 @@ import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.visb.VisBStage;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutView;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
 @FXMLInjected
 @Singleton
 public class VisualisationMenu extends Menu {
-	@FXML
-	private MenuItem graphVisualization;
-	@FXML
-	private MenuItem tableVisualization;
-
 	private final Injector injector;
-	private final CurrentProject currentProject;
 
 	@Inject
-	public VisualisationMenu(final StageManager stageManager, final Injector injector,
-			final CurrentProject currentProject) {
-		this.currentProject = currentProject;
+	public VisualisationMenu(final StageManager stageManager, final Injector injector) {
 		this.injector = injector;
 		stageManager.loadFXML(this, "visualisationMenu.fxml");
-	}
-
-	@FXML
-	public void initialize() {
-		this.graphVisualization.disableProperty().bind(currentProject.currentMachineProperty().isNull());
-		this.tableVisualization.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 	}
 
 	@FXML
