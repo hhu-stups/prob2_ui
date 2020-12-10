@@ -25,7 +25,7 @@ public final class TraceReplayErrorAlert extends Alert {
 
 	@FXML
 	private Text error;
-	@FXML 
+	@FXML
 	private TextArea taError;
 
 	private final Injector injector;
@@ -40,7 +40,7 @@ public final class TraceReplayErrorAlert extends Alert {
 	private Trace attemptedReplayTrace = null;
 	private PersistentTrace storedTrace = null;
 	private Trace history = null;
-	
+
 	public TraceReplayErrorAlert(final Injector injector, final String contentBundleKey, Trigger trigger, final Object... contentParams) {
 		super(AlertType.ERROR);
 		this.injector = injector;
@@ -48,7 +48,7 @@ public final class TraceReplayErrorAlert extends Alert {
 		this.bundle = injector.getInstance(ResourceBundle.class);
 		this.text = String.format(bundle.getString(contentBundleKey), contentParams);
 		this.trigger = trigger;
-		
+
 		stageManager.loadFXML(this, "trace_replay_error_alert.fxml");
 	}
 
@@ -67,7 +67,7 @@ public final class TraceReplayErrorAlert extends Alert {
 	void setHistory(Trace history) {
 		this.history = history;
 	}
-	
+
 	@FXML
 	private void initialize() {
 		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
