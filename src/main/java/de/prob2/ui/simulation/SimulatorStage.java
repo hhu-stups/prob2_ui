@@ -1,13 +1,16 @@
 package de.prob2.ui.simulation;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
+import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -19,6 +22,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -38,7 +42,13 @@ public class SimulatorStage extends Stage {
 	private Button btSimulate;
 
 	@FXML
+	private Button btAddSimulation;
+
+	@FXML
 	private Label lbTime;
+
+	@FXML
+	private TableView<SimulationItem> simulationItems;
 
 	@FXML
 	private ListView<SimulationDebugItem> simulationDebugItems;
@@ -48,6 +58,8 @@ public class SimulatorStage extends Stage {
 	private final CurrentProject currentProject;
 
 	private final CurrentTrace currentTrace;
+
+	private final Injector injector;
 
 	private final Simulator simulator;
 
@@ -59,11 +71,12 @@ public class SimulatorStage extends Stage {
 
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-						  final Simulator simulator, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+						  final Injector injector, final Simulator simulator, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.injector = injector;
 	    this.simulator = simulator;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
@@ -82,6 +95,7 @@ public class SimulatorStage extends Stage {
 		});
 		btSimulate.disableProperty().bind(configurationPath.isNull());
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
+		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()));
 		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, currentTrace, simulator, bundle));
 		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -178,6 +192,12 @@ public class SimulatorStage extends Stage {
 		}
 
 		simulationDebugItems.setItems(observableList);
+	}
+
+	@FXML
+	public void addSimulation() {
+		injector.getInstance(SimulationChoosingStage.class).reset();
+		injector.getInstance(SimulationChoosingStage.class).showAndWait();
 	}
 
 }

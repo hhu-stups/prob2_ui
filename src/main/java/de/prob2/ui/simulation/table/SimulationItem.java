@@ -1,23 +1,31 @@
 package de.prob2.ui.simulation.table;
 
+import de.prob2.ui.verifications.Checked;
+
 public class SimulationItem {
 
-    // Timing: needs simulation with ending condition, user can check timing value (playable)
-	// Model Checking: uses B machine + simulation configuration to apply model checking on a reduced state space (counter-examples playable)
-	// Probabilistic Model Checking: Same as Model Checking, carries probability (counter-examples playable)
-	// Hypothesis Test: Number of Simulations, Store traces with result, Apply different kind of hypothesis test on results (playable)
-	// Trace Replay: requires a trace (playable)
+    private Checked checked;
 
-    /*
-    starting condition to start timer for timing - also part of configuration file to search for starting state of simulation
-    TIMING option has time value to be checked
-    */
+    private String configuration;
 
-    public enum SimulationType {
-        TIMING, MODEL_CHECKING, PROBABILISTIC_MODEL_CHECKING, HYPOTHESIS_TEST, TRACE_REPLAY
+    private String description;
+
+    private SimulationCheckingConfiguration simulationCheckingConfiguration;
+
+    public SimulationItem(SimulationCheckingConfiguration simulationCheckingConfiguration, String description) {
+        this.simulationCheckingConfiguration = simulationCheckingConfiguration;
+        this.description = description;
+        updateItem();
     }
 
-    private SimulationType type;
+    private void updateItem() {
+        this.checked = Checked.NOT_CHECKED;
+        this.configuration = simulationCheckingConfiguration.getConfiguration();
+    }
+
+
+
+
 
 
 
