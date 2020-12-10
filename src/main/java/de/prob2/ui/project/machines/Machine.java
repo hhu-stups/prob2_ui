@@ -14,6 +14,7 @@ import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
+import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -103,6 +104,7 @@ public class Machine implements DescriptionView.Describable {
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
+	private final ListProperty<SimulationItem> simulationItems;
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
@@ -119,6 +121,7 @@ public class Machine implements DescriptionView.Describable {
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
 		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
+		this.simulationItems = new SimpleListProperty<>(this, "simulationItems", FXCollections.observableArrayList());
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
@@ -136,6 +139,7 @@ public class Machine implements DescriptionView.Describable {
 		this.ltlPatterns = JsonManager.checkDeserialize(context, object, "ltlPatterns", new TypeToken<ListProperty<LTLPatternItem>>() {}.getType());
 		this.symbolicCheckingFormulas = JsonManager.checkDeserialize(context, object, "symbolicCheckingFormulas", new TypeToken<ListProperty<SymbolicCheckingFormulaItem>>() {}.getType());
 		this.symbolicAnimationFormulas = JsonManager.checkDeserialize(context, object, "symbolicAnimationFormulas", new TypeToken<ListProperty<SymbolicAnimationItem>>() {}.getType());
+		this.simulationItems = JsonManager.checkDeserialize(context, object, "simulationItems", new TypeToken<ListProperty<SimulationItem>>() {}.getType());
 		this.testCases = JsonManager.checkDeserialize(context, object, "testCases", new TypeToken<ListProperty<TestCaseGenerationItem>>() {}.getType());
 		this.traces = JsonManager.checkDeserialize(context, object, "traces", new TypeToken<SetProperty<Path>>() {}.getType());
 		this.modelcheckingItems = JsonManager.checkDeserialize(context, object, "modelcheckingItems", new TypeToken<ListProperty<ModelCheckingItem>>() {}.getType());
@@ -197,6 +201,7 @@ public class Machine implements DescriptionView.Describable {
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicCheckingFormulasProperty().addListener(changedListener);
 		this.symbolicAnimationFormulasProperty().addListener(changedListener);
+		this.simulationItemsProperty().addListener(changedListener);
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
@@ -243,6 +248,7 @@ public class Machine implements DescriptionView.Describable {
 		patternManager = new PatternManager();
 		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::reset);
 		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
+		simulationItems.forEach(SimulationItem::reset);
 		testCases.forEach(TestCaseGenerationItem::reset);
 		modelcheckingItems.forEach(ModelCheckingItem::reset);
 	}
@@ -350,7 +356,15 @@ public class Machine implements DescriptionView.Describable {
 	public List<SymbolicAnimationItem> getSymbolicAnimationFormulas() {
 		return symbolicAnimationFormulas.get();
 	}
-	
+
+	public ListProperty<SimulationItem> simulationItemsProperty() {
+		return simulationItems;
+	}
+
+	public List<SimulationItem> getSimulations() {
+		return simulationItems.get();
+	}
+
 	public ListProperty<TestCaseGenerationItem> testCasesProperty() {
 		return testCases;
 	}

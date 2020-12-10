@@ -26,7 +26,7 @@
 					</padding>
 					<Label text="%simulation.choice.text"/>
 					<HBox alignment="CENTER">
-						<ChoiceBox fx:id="cbChoice">
+						<ChoiceBox fx:id="simulationChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
 									<SimulationChoiceItem simulationType="TIMING"/>

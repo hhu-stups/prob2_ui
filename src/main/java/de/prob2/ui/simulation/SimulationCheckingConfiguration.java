@@ -1,6 +1,4 @@
-package de.prob2.ui.simulation.table;
-
-import de.prob2.ui.simulation.SimulationType;
+package de.prob2.ui.simulation;
 
 import java.util.ArrayList;
 import java.util.List;
