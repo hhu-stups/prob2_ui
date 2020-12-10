@@ -4,9 +4,8 @@ import com.google.inject.Injector;
 import com.sun.prism.shader.AlphaOne_LinearGradient_Loader;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
-import de.prob.check.tracereplay.check.Delta;
-import de.prob.check.tracereplay.check.PersistenceDelta;
-import de.prob.check.tracereplay.check.TraceCheckerUtils;
+import de.prob.check.tracereplay.check.*;
+import de.prob.model.classicalb.Operation;
 import de.prob.statespace.OperationInfo;
 import de.prob2.ui.internal.StageManager;
 import javafx.beans.property.SimpleStringProperty;
@@ -61,7 +60,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private BorderPane border;
 
 
-	public TraceModificationAlert(final Injector injector, final StageManager stageManager, TraceModificationChecker traceModificationChecker){
+	public TraceModificationAlert(final Injector injector, final StageManager stageManager, TraceModificationChecker traceModificationChecker, PersistentTrace oldTrace){
 		this.resourceBundle = injector.getInstance(ResourceBundle.class);
 		this.stageManager = stageManager;
 		this.traceModificationChecker = traceModificationChecker;
@@ -79,22 +78,20 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 		this.setResultConverter(param -> {
-
 			List<PersistentTransition> selectedTrace = traceModificationChecker.traceChecker.getTraceModifier()
 					.getChangelogPhase3II().get(selectedDelta).get(selectedMapping).stream()
 					.flatMap(delta -> delta.getNewTransitions().stream()).collect(Collectors.toList());
 
 			if(param.getButtonData() == ButtonBar.ButtonData.NO){
-				return Collections.singletonList(traceModificationChecker.traceChecker.getTrace());
+				return Collections.singletonList(oldTrace);
 			}else {
 				if(param.getButtonData() == ButtonBar.ButtonData.APPLY){
-					return  Arrays.asList(traceModificationChecker.traceChecker.getTrace(),
-							new PersistentTrace(traceModificationChecker.traceChecker.getTrace().getDescription(), selectedTrace));
+					return  Arrays.asList(oldTrace, new PersistentTrace(oldTrace.getDescription(), selectedTrace));
 				}else {
 					if(param.getButtonData() == ButtonBar.ButtonData.YES){
-						return Collections.singletonList(new PersistentTrace(traceModificationChecker.traceChecker.getTrace().getDescription(), selectedTrace));
+						return Collections.singletonList(new PersistentTrace(oldTrace.getDescription(), selectedTrace));
 					}else {
-						return Collections.singletonList(traceModificationChecker.traceChecker.getTrace());
+						return Collections.singletonList(oldTrace);
 					}
 				}
 			}
@@ -106,7 +103,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private void initialize(){
 		stageManager.register(this);
 
-		VBox accordion = setTypeIIConflicts();
+		IDeltaFinder deltaFinder = traceModificationChecker.traceChecker.getDeltaFinder();
+
+		VBox accordion = setTypeIIConflicts(deltaFinder.getResultTypeII(), deltaFinder.getResultTypeIIInit(), traceModificationChecker.traceChecker.getOldOperationInfos());
 		typeII.setContent(accordion);
 		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + accordion.getChildren().size()+ ")");
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
@@ -115,7 +114,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			typeII.setCollapsible(false);
 		}
 
-		VBox accordion2 = setTypeIIAmbiguousConflicts();
+		VBox accordion2 = setTypeIIAmbiguousConflicts(deltaFinder.getResultTypeIIWithCandidatesAsDeltaMap());
 		typeIIPer.setContent(accordion2);
 		typeIIPer.textProperty().set(resourceBundle.getString("traceModification.alert.typeIIAmbiguous" ) + " (" + accordion2.getChildren().size()+ ")");
 		if(accordion2.getChildren().size()==0){
@@ -125,8 +124,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		VBox accordion3 = setTypeIIIConflicts_plain(traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase3II(),
 				traceModificationChecker.traceChecker.getOldOperationInfos());
 		typeIII.setContent(accordion3);
-		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + accordion3.getChildren().size() + ")");
-		if(accordion3.getChildren().size()==0){
+		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + (accordion3.getChildren().size()-1) + ")");
+		if(accordion3.getChildren().size()==1){
+			typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + 0 + ")");
 			typeIII.setCollapsible(false);
 		}
 
@@ -134,29 +134,26 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-	private VBox setTypeIIConflicts(){
+	private VBox setTypeIIConflicts(Map<String, Map<String, String>> resultTypeII, Map<String, String> resultInit,
+									Map<String, OperationInfo> operationInfoMap){
 
-		Map<String, Map<String, String>> resultTypeII = traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeII();
-		Map<String, OperationInfo> operationInfoMap = traceModificationChecker.traceChecker.getOldOperationInfos();
-		Map<String, String> globalVars = traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeIIInit();
 
 		VBox result = new VBox();
 
-		if(traceModificationChecker.traceChecker.getTypeFinder().getInitIsTypeIorIICandidate()
-			&&!traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeIIInit().isEmpty()){
+		if(!resultInit.isEmpty()){
 			GridPane gridPane = new GridPane();
 
 
 			Label empty = new Label();
-			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
+			Label newL = new Label(resourceBundle.getString("traceModification.alert.new"));
 			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
 
 
 			registerRow(gridPane, empty, oldL, newL, 0);
 
 
-			registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.name")), prepareColumn(new ArrayList<>(globalVars.keySet())),
-					prepareColumn(new ArrayList<>(globalVars.values())), 1);
+			registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.name")), prepareColumn(new ArrayList<>(resultInit.keySet())),
+					prepareColumn(new ArrayList<>(resultInit.values())), 1);
 
 			TitledPane titledPane = new TitledPane(resourceBundle.getString("traceModification.alert.init"), gridPane);
 
@@ -171,8 +168,8 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-	public void generateLabelView(Map<String, Map<String, String>> resultTypeII,
-																		 Map<String, OperationInfo> operationInfoMap, VBox result){
+	public void generateLabelView(Map<String, Map<String, String>> resultTypeII, Map<String, OperationInfo> operationInfoMap,
+								  VBox result){
 
 
 		for(Map.Entry<String, Map<String, String>> entry : resultTypeII.entrySet()){
@@ -182,7 +179,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 			Label empty = new Label();
-			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
+			Label newL = new Label(resourceBundle.getString("traceModification.alert.new"));
 			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
 
 
@@ -243,7 +240,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 			Label empty = new Label();
-			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
+			Label newL = new Label(resourceBundle.getString("traceModification.alert.new"));
 			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
 
 
@@ -275,7 +272,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 						prepareColumn2(retractEntries2(operationInfo.getParameterNames(),partner)), row);
 			}
 
-			if(!operationInfo.getParameterNames().isEmpty()){
+			if(!operationInfo.getOutputParameterNames().isEmpty()){
 				registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.output")),
 						prepareColumn(operationInfo.getOutputParameterNames()),
 						prepareColumn2(retractEntries2(operationInfo.getOutputParameterNames(),partner)), row);
@@ -318,8 +315,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 				return result;
 			}
 			else{
-				Label result = new Label("???");
-				return result;
+				return new Label("???");
 			}
 		}).collect(Collectors.toList());
 
@@ -371,25 +367,20 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-	public VBox setTypeIIAmbiguousConflicts() {
+	public VBox setTypeIIAmbiguousConflicts(Map<String, List<Delta>> typeIIWithCandidates) {
 
 
-		Map<String, List<Delta>> resultTypeII = traceModificationChecker.traceChecker.getTypeIICandidates();
-		Map<Pair<String, String>, Delta> changeToDelta = resultTypeII.entrySet().stream().flatMap(entry -> entry.getValue().stream()
+		Map<Pair<String, String>, Delta> changeToDelta = typeIIWithCandidates.entrySet().stream().flatMap(entry -> entry.getValue().stream()
 						.map(delta -> new Pair<>(new Pair<>(delta.getOriginalName(), delta.getDeltaName()), delta)))
 				.collect(toMap(Pair::getKey, Pair::getValue));
 
 		Map<String, OperationInfo> operationInfoMap = traceModificationChecker.traceChecker.getOldOperationInfos();
 
-		Map<Set<Delta>, List<PersistentTransition>> changelogPhase2II = traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase2II();
-
 		final Set<Pair<String, String>> selected = new HashSet<>();
-
 
 		VBox result = new VBox();
 
-
-		for(Map.Entry<String, List<Delta>> entry : resultTypeII.entrySet()){
+		for(Map.Entry<String, List<Delta>> entry : typeIIWithCandidates.entrySet()){
 
 			StringProperty title = new SimpleStringProperty("Title");
 
@@ -401,7 +392,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			GridPane gridPane = new GridPane();
 
 			Label empty = new Label();
-			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
+			Label newL = new Label(resourceBundle.getString("traceModification.alert.new"));
 			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
 
 
@@ -544,44 +535,6 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		return result;
 	}
-
-
-
-	public VBox setTypeIVInitialisation(){
-		Map<String, Map<String, String>> resultTypeII = traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeII();
-		Map<String, OperationInfo> operationInfoMap = traceModificationChecker.traceChecker.getOldOperationInfos();
-		Map<String, String> globalVars = traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeIIInit();
-
-		VBox result = new VBox();
-
-		if(!traceModificationChecker.traceChecker.getTypeFinder().getInitIsTypeIorIICandidate() &&
-				!traceModificationChecker.traceChecker.getDeltaFinder().getResultTypeIIInit().isEmpty()){
-			int row = 0;
-			GridPane gridPane = new GridPane();
-
-
-			Label empty = new Label();
-			Label newL = new Label(resourceBundle.getString("traceModification.alert.current"));
-			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
-
-
-			row = registerRow(gridPane, empty, oldL, newL, row);
-
-
-			registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.name")), prepareColumn(new ArrayList<>(globalVars.keySet())),
-					prepareColumn(new ArrayList<>(globalVars.values())), row);
-
-			TitledPane titledPane = new TitledPane(resourceBundle.getString("traceModification.alert.init"), gridPane);
-
-
-			result.getChildren().add(titledPane);
-		}
-
-		return result;
-
-	}
-
-
 
 
 
