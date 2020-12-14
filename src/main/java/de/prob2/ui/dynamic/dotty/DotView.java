@@ -99,13 +99,10 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	private void initializeZooming() {
-		dotView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
-			@Override
-			public void onChanged(Change<? extends Node> c) {
-				Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
-				for (Node scrollBar : scrollBars) {
-					scrollBar.setStyle("-fx-opacity: 0.5;");
-				}
+		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>)c -> {
+			Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
+			for (Node scrollBar : scrollBars) {
+				scrollBar.setStyle("-fx-opacity: 0.5;");
 			}
 		});
 
