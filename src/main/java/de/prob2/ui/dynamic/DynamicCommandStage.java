@@ -24,7 +24,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
@@ -80,6 +79,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected Button editPreferencesButton;
 	
 	@FXML
+	protected Label placeholderLabel;
+	
+	@FXML
 	protected DynamicCommandStatusBar statusBar;
 	
 	// Used to remember the last selected item even when the list might be cleared temporarily,
@@ -130,6 +132,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		});
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			this.updatePlaceholderLabel();
 			if (to == null || currentTrace.get() == null || !this.isShowing()) {
 				return;
 			}
@@ -191,7 +194,30 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		interrupt();
 	}
 	
+	private void updatePlaceholderLabel() {
+		final String text;
+		if (currentTrace.get() == null) {
+			text = bundle.getString("common.noModelLoaded");
+		} else {
+			final T selectedItem = lvChoice.getSelectionModel().getSelectedItem();
+			if (selectedItem == null) {
+				text = bundle.getString("dynamic.placeholder.selectVisualization");
+			} else if (selectedItem.getArity() > 0) {
+				text = bundle.getString("dynamic.enterFormula.placeholder");
+			} else if (this.updater.isRunning()) {
+				text = bundle.getString("dynamic.placeholder.inProgress");
+			} else {
+				// The placeholder label shouldn't be seen by the user in this case,
+				// because the visualization content should be visible,
+				// but clear the text anyway just in case.
+				text = "";
+			}
+		}
+		placeholderLabel.setText(text);
+	}
+	
 	public void refresh() {
+		this.updatePlaceholderLabel();
 		int index = lvChoice.getSelectionModel().getSelectedIndex();
 		final State currentState = currentTrace.getCurrentState();
 		if (currentState == null) {
@@ -212,6 +238,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.updater.cancel(true);
 		this.clearLoadingStatus();
 		this.clearContent();
+		this.updatePlaceholderLabel();
 	}
 	
 	protected void clearLoadingStatus() {
@@ -228,7 +255,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		interrupt();
 
 		this.updater.execute(() -> {
-			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
+			Platform.runLater(() -> {
+				this.updatePlaceholderLabel();
+				statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
+			});
 			try {
 				final Trace trace = currentTrace.get();
 				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {

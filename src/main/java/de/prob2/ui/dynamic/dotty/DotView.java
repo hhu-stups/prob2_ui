@@ -1,7 +1,16 @@
 package de.prob2.ui.dynamic.dotty;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
@@ -15,31 +24,23 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollBar;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
 
 @Singleton
 public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
@@ -138,6 +139,8 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				dotView.getEngine().loadContent("<center>" + svgContent + "</center>");
 				this.clearLoadingStatus();
 				taErrors.clear();
+				placeholderLabel.setVisible(false);
+				dotView.setVisible(true);
 			}
 		});
 	}
@@ -241,6 +244,8 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		this.dotEngine = null;
 		this.currentDotContent.set(null);
 		dotView.getEngine().loadContent("");
+		dotView.setVisible(false);
+		placeholderLabel.setVisible(true);
 	}
 	
 	@FXML

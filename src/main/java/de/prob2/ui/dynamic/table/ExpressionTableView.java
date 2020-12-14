@@ -146,6 +146,8 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		Platform.runLater(() -> {
 			this.clearLoadingStatus();
 			currentTable.set(table);
+			placeholderLabel.setVisible(false);
+			tableView.setVisible(true);
 		});
 	}
 	
@@ -293,6 +295,8 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		currentTable.set(null);
 		tableView.getItems().clear();
 		tableView.getColumns().clear();
+		tableView.setVisible(false);
+		placeholderLabel.setVisible(true);
 	}
 	
 	@FXML

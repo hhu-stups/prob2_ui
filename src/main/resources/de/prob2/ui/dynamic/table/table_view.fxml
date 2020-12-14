@@ -13,6 +13,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <fx:root type="ExpressionTableView" title="%table.expressionTableView.stage.title" minWidth="800" minHeight="600" width="1600.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
@@ -58,7 +59,10 @@
 								</VBox>
 							</VBox>
 						</VBox>
-						<TableView fx:id="tableView"/>
+						<StackPane>
+							<Label fx:id="placeholderLabel"/>
+							<TableView fx:id="tableView" visible="false"/>
+						</StackPane>
 					</SplitPane>
 				</center>
 				<bottom>

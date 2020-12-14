@@ -12,12 +12,12 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.web.WebView?>
@@ -88,7 +88,10 @@
 									</graphic>
 								</Button>
 							</HBox>
-							<WebView fx:id="dotView" VBox.vgrow="ALWAYS"/>
+							<StackPane VBox.vgrow="ALWAYS">
+								<Label fx:id="placeholderLabel"/>
+								<WebView fx:id="dotView" visible="false"/>
+							</StackPane>
 						</VBox>
 					</SplitPane>
 				</center>
