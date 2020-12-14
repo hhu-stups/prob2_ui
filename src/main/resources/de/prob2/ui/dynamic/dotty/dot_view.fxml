@@ -76,7 +76,7 @@
 							</VBox>
 						</VBox>
 						<VBox>
-							<HBox alignment="TOP_RIGHT" styleClass="border" style="-fx-background-color: transparent;">
+							<HBox alignment="TOP_RIGHT" styleClass="border">
 								<Button fx:id="zoomInButton" onAction="#zoomIn">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
