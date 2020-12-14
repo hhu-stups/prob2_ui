@@ -76,11 +76,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private String dotEngine;
 	private final ObjectProperty<byte[]> currentDotContent;
 
-	private double oldMousePositionX = -1;
-	private double oldMousePositionY = -1;
-	private double dragFactor = 0.83;
-	
-
 	@Inject
 	public DotView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
@@ -117,21 +112,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	private void initializeZooming() {
-		dotView.setOnMouseMoved(e -> {
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseDragged(e -> {
-			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX) / (pane.getWidth() * dragFactor));
-			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY) / (pane.getHeight() * dragFactor));
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseMoved(e -> dotView.setCursor(Cursor.HAND));
-		dotView.setOnMouseDragged(e -> dotView.setCursor(Cursor.MOVE));
-
 		dotView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
 			@Override
 			public void onChanged(Change<? extends Node> c) {
@@ -250,7 +230,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	private void zoomByFactor(double factor) {
 		dotView.setZoom(dotView.getZoom() * factor);
-		dragFactor *= factor;
 	}
 
 	private void adjustScroll() {
