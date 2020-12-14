@@ -31,7 +31,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
@@ -75,11 +74,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private String dotEngine;
 	private final ObjectProperty<byte[]> currentDotContent;
 
-	private double oldMousePositionX = -1;
-	private double oldMousePositionY = -1;
-	private double dragFactor = 0.83;
-	
-
 	@Inject
 	public DotView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
@@ -101,35 +95,12 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		stageManager.setMacMenuBar(this, this.menuBar);
 		saveButton.disableProperty().bind(currentDotContent.isNull());
 		helpButton.setHelpContent("graphVisualisation", null);
-		initializeZooming();
-	}
-
-	private void initializeZooming() {
-		dotView.setOnMouseMoved(e -> {
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseDragged(e -> {
-			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX) / (pane.getWidth() * dragFactor));
-			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY) / (pane.getHeight() * dragFactor));
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseMoved(e -> dotView.setCursor(Cursor.HAND));
-		dotView.setOnMouseDragged(e -> dotView.setCursor(Cursor.MOVE));
-
-		dotView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
-			@Override
-			public void onChanged(Change<? extends Node> c) {
-				Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
-				for (Node scrollBar : scrollBars) {
-					scrollBar.setStyle("-fx-opacity: 0.5;");
-				}
+		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>)c -> {
+			Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
+			for (Node scrollBar : scrollBars) {
+				scrollBar.setStyle("-fx-opacity: 0.5;");
 			}
 		});
-
 	}
 
 	@Override
@@ -158,8 +129,10 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		Platform.runLater(() -> {
 			if (!thread.isInterrupted()) {
 				dotView.getEngine().loadContent("<center>" + svgContent + "</center>");
-				statusBar.setText("");
+				this.clearLoadingStatus();
 				taErrors.clear();
+				placeholderLabel.setVisible(false);
+				dotView.setVisible(true);
 			}
 		});
 	}
@@ -238,11 +211,10 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	private void zoomByFactor(double factor) {
 		dotView.setZoom(dotView.getZoom() * factor);
-		dragFactor *= factor;
 	}
 
 	private void adjustScroll() {
-		Set<Node> nodes = pane.lookupAll(".scroll-bar");
+		Set<Node> nodes = dotView.lookupAll(".scroll-bar");
 		double x = 0.0;
 		double y = 0.0;
 		for (final Node node : nodes) {
@@ -259,12 +231,13 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 	
 	@Override
-	protected void reset() {
+	protected void clearContent() {
 		this.dot = null;
 		this.dotEngine = null;
 		this.currentDotContent.set(null);
 		dotView.getEngine().loadContent("");
-		statusBar.setText("");
+		dotView.setVisible(false);
+		placeholderLabel.setVisible(true);
 	}
 	
 	@FXML

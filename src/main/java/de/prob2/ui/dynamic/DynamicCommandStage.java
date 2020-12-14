@@ -13,7 +13,6 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.BackgroundUpdater;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -25,7 +24,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
@@ -75,17 +73,19 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected Label lbDescription;
 
 	@FXML
-	protected ScrollPane pane;
-
-	@FXML
 	protected Button cancelButton;
 	
 	@FXML
 	protected Button editPreferencesButton;
 	
 	@FXML
+	protected Label placeholderLabel;
+	
+	@FXML
 	protected DynamicCommandStatusBar statusBar;
 	
+	// Used to remember the last selected item even when the list might be cleared temporarily,
+	// e. g. when reloading the current machine.
 	protected T lastItem;
 	
 	protected final DynamicPreferencesStage preferences;
@@ -114,7 +114,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	@FXML
 	protected void initialize() {
-		fillCommands();
+		this.refresh();
 		currentTrace.addListener((observable, from, to) -> {
 			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
 				return;
@@ -132,6 +132,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		});
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			this.updatePlaceholderLabel();
 			if (to == null || currentTrace.get() == null || !this.isShowing()) {
 				return;
 			}
@@ -143,14 +144,13 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			preferences.setIncludedPreferenceNames(to.getRelevantPreferences());
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
-			if(lastItem != null && !lastItem.getCommand().equals(to.getCommand())) {
-				reset();
-			}
-			//only visualize if
-			//1. No formula is needed and command is changed or continuous update is selected
-			//2. Formula is needed and command is not changed and continuous update is selected
+			// Update the visualization automatically if possible.
+			// If the command selection changed and the new command requires a formula,
+			// clear the visualization and wait for the user to input one.
 			if (!needFormula || to.equals(lastItem)) {
 				visualize(to);
+			} else {
+				this.interrupt();
 			}
 			lastItem = to;
 		});
@@ -160,10 +160,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		currentTrace.addStatesCalculatedListener(newOps -> Platform.runLater(this::refresh));
 
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
-			fillCommands();
+			this.interrupt();
 			lvChoice.getSelectionModel().clearSelection();
 			this.lastItem = null;
-			reset();
+			this.refresh();
 		});
 		
 		taFormula.setOnKeyPressed(e -> {
@@ -188,23 +188,43 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
 	}
 	
-	protected void fillCommands() {
-		final State currentState = currentTrace.getCurrentState();
-		if (currentState == null) {
-			return;
-		}
-		lvChoice.getItems().setAll(this.getCommandsInState(currentState));
-	}
-	
 	@FXML
 	protected void cancel() {
 		currentTrace.getStateSpace().sendInterrupt();
 		interrupt();
 	}
 	
+	private void updatePlaceholderLabel() {
+		final String text;
+		if (currentTrace.get() == null) {
+			text = bundle.getString("common.noModelLoaded");
+		} else {
+			final T selectedItem = lvChoice.getSelectionModel().getSelectedItem();
+			if (selectedItem == null) {
+				text = bundle.getString("dynamic.placeholder.selectVisualization");
+			} else if (selectedItem.getArity() > 0) {
+				text = bundle.getString("dynamic.enterFormula.placeholder");
+			} else if (this.updater.isRunning()) {
+				text = bundle.getString("dynamic.placeholder.inProgress");
+			} else {
+				// The placeholder label shouldn't be seen by the user in this case,
+				// because the visualization content should be visible,
+				// but clear the text anyway just in case.
+				text = "";
+			}
+		}
+		placeholderLabel.setText(text);
+	}
+	
 	public void refresh() {
+		this.updatePlaceholderLabel();
 		int index = lvChoice.getSelectionModel().getSelectedIndex();
-		fillCommands();
+		final State currentState = currentTrace.getCurrentState();
+		if (currentState == null) {
+			lvChoice.getItems().clear();
+		} else {
+			lvChoice.getItems().setAll(this.getCommandsInState(currentState));
+		}
 		if (index == -1) {
 			if(this.lastItem != null) {
 				lvChoice.getSelectionModel().select(this.lastItem);
@@ -216,10 +236,17 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected void interrupt() {
 		this.updater.cancel(true);
-		reset();
+		this.clearLoadingStatus();
+		this.clearContent();
+		this.updatePlaceholderLabel();
 	}
 	
-	protected abstract void reset();
+	protected void clearLoadingStatus() {
+		statusBar.setText("");
+		statusBar.removeLabelStyle("warning");
+	}
+	
+	protected abstract void clearContent();
 	
 	protected void visualize(final T item) {
 		if (!item.isAvailable()) {
@@ -228,11 +255,14 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		interrupt();
 
 		this.updater.execute(() -> {
-			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
+			Platform.runLater(() -> {
+				this.updatePlaceholderLabel();
+				statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
+			});
 			try {
 				final Trace trace = currentTrace.get();
 				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::reset);
+					Platform.runLater(this::clearLoadingStatus);
 					return;
 				}
 				final List<IEvalElement> formulas;
@@ -245,13 +275,12 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Visualization interrupted", e);
 				Thread.currentThread().interrupt();
-				Platform.runLater(this::reset);
+				Platform.runLater(this::clearLoadingStatus);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Visualization failed", e);
 				Platform.runLater(() -> {
 					taErrors.setText(e.getMessage());
-					this.reset();
-					statusBar.setText("");
+					this.clearLoadingStatus();
 				});
 			}
 		});

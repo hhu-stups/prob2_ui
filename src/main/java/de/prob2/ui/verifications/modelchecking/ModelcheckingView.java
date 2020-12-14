@@ -236,8 +236,8 @@ public final class ModelcheckingView extends ScrollPane {
 			if(newValue != null) {
 				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
 			} else {
-				tvItems.getItems().clear();
 				tvItems.itemsProperty().unbind();
+				tvItems.setItems(FXCollections.observableArrayList());
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);

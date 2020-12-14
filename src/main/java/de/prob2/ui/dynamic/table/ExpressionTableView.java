@@ -94,6 +94,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private static final String VALUE_COLUMN_NAME = "VALUE";
 	
 	@FXML
+	private TableView<ObservableList<String>> tableView;
+	
+	@FXML
 	private Button saveButton;
 	
 	@FXML
@@ -141,15 +144,16 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
 		final TableData table = item.visualize(formulas);
 		Platform.runLater(() -> {
-			reset();
+			this.clearLoadingStatus();
 			currentTable.set(table);
+			placeholderLabel.setVisible(false);
+			tableView.setVisible(true);
 		});
 	}
 	
 	private void fillTable(TableData data) {
 		List<String> header = data.getHeader();
-		TableView<ObservableList<String>> tableView = new TableView<>();
-		tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+		tableView.getColumns().clear();
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
 			final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
@@ -179,7 +183,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			});
 			return row;
 		});
-		pane.setContent(tableView);
 		taErrors.clear();
 	}
 
@@ -242,10 +245,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		contextMenuItems.add(jumpToStateItem);
 	}
 	
-	private void clearTable() {
-		pane.setContent(new TableView<>());
-	}
-	
 	private ObservableList<ObservableList<String>> buildData(List<List<String>> list) {
 		ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
 		for (List<String> row : list) {
@@ -292,11 +291,12 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	@Override
-	protected void reset() {
+	protected void clearContent() {
 		currentTable.set(null);
-		clearTable();
-		statusBar.setText("");
-		statusBar.removeLabelStyle("warning");
+		tableView.getItems().clear();
+		tableView.getColumns().clear();
+		tableView.setVisible(false);
+		placeholderLabel.setVisible(true);
 	}
 	
 	@FXML
