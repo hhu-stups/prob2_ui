@@ -95,17 +95,12 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		stageManager.setMacMenuBar(this, this.menuBar);
 		saveButton.disableProperty().bind(currentDotContent.isNull());
 		helpButton.setHelpContent("graphVisualisation", null);
-		initializeZooming();
-	}
-
-	private void initializeZooming() {
 		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>)c -> {
 			Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
 			for (Node scrollBar : scrollBars) {
 				scrollBar.setStyle("-fx-opacity: 0.5;");
 			}
 		});
-
 	}
 
 	@Override
