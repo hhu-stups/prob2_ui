@@ -95,17 +95,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		saveButton.disableProperty().bind(currentDotContent.isNull());
 		helpButton.setHelpContent("graphVisualisation", null);
 		initializeZooming();
-		taFormula.focusedProperty().addListener((observable, from, to) -> {
-			if(to) {
-				if(taFormula.getText().equals(bundle.getString("dotty.enterFormula.placeholder"))) {
-					taFormula.clear();
-				}
-			} else {
-				if(taFormula.getText().isEmpty()) {
-					taFormula.setText(bundle.getString("dotty.enterFormula.placeholder"));
-				}
-			}
-		});
 	}
 
 	private void initializeZooming() {

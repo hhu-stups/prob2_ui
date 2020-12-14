@@ -129,17 +129,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			}
 		});
 		saveButton.disableProperty().bind(currentTable.isNull());
-		taFormula.focusedProperty().addListener((observable, from, to) -> {
-			if(to) {
-				if(taFormula.getText().equals(bundle.getString("table.expressionTableView.enterFormula.placeholder"))) {
-					taFormula.clear();
-				}
-			} else {
-				if(taFormula.getText().isEmpty()) {
-					taFormula.setText(bundle.getString("table.expressionTableView.enterFormula.placeholder"));
-				}
-			}
-		});
 	}
 	
 	@Override
