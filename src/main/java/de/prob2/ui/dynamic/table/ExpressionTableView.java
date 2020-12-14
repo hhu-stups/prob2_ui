@@ -4,12 +4,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.command.GetShortestTraceCommand;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.animator.domainobjects.TableVisualizationCommand;
-import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
@@ -43,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
@@ -98,6 +94,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private static final String VALUE_COLUMN_NAME = "VALUE";
 	
 	@FXML
+	private TableView<ObservableList<String>> tableView;
+	
+	@FXML
 	private Button saveButton;
 	
 	@FXML
@@ -113,7 +112,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Inject
 	public ExpressionTableView(final Injector injector, final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
 							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle, stopActions, "Expression Table Visualizer");
+		super(preferences, currentTrace, currentProject, bundle, stopActions, "Expression Table Visualizer");
 		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
@@ -138,48 +137,21 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	public void visualizeExpression(String expression) {
-		taFormula.setText(expression);
-		lvChoice.getSelectionModel().selectFirst();
-		visualize(lvChoice.getSelectionModel().getSelectedItem());
+		this.selectCommand(TableVisualizationCommand.EXPRESSION_AS_TABLE_NAME, expression);
 	}
 	
 	@Override
-	protected void visualize(TableVisualizationCommand item) {
-		if(!item.isAvailable()) {
-			return;
-		}
-		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
-		interrupt();
-
-		this.updater.execute(() -> {
-			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
-			try {
-				if(currentTrace.get() == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::reset);
-					return;
-				}
-				if(item.getArity() > 0) {
-					formulas.add(currentTrace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
-				}
-				final TableData table = item.visualize(formulas);
-				Platform.runLater(() -> {
-					reset();
-					currentTable.set(table);
-				});
-			} catch (ProBError | EvaluationException e) {
-				LOGGER.error("Table visualization failed", e);
-				Platform.runLater(() -> {
-					taErrors.setText(e.getMessage());
-					reset();
-				});
-			}
+	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
+		final TableData table = item.visualize(formulas);
+		Platform.runLater(() -> {
+			this.clearLoadingStatus();
+			currentTable.set(table);
 		});
 	}
 	
 	private void fillTable(TableData data) {
 		List<String> header = data.getHeader();
-		TableView<ObservableList<String>> tableView = new TableView<>();
-		tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+		tableView.getColumns().clear();
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
 			final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
@@ -209,7 +181,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			});
 			return row;
 		});
-		pane.setContent(tableView);
 		taErrors.clear();
 	}
 
@@ -272,10 +243,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		contextMenuItems.add(jumpToStateItem);
 	}
 	
-	private void clearTable() {
-		pane.setContent(new TableView<>());
-	}
-	
 	private ObservableList<ObservableList<String>> buildData(List<List<String>> list) {
 		ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
 		for (List<String> row : list) {
@@ -322,11 +289,10 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	@Override
-	protected void reset() {
+	protected void clearContent() {
 		currentTable.set(null);
-		clearTable();
-		statusBar.setText("");
-		statusBar.removeLabelStyle("warning");
+		tableView.getItems().clear();
+		tableView.getColumns().clear();
 	}
 	
 	@FXML
@@ -335,10 +301,4 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
 		preferences.show();
 	}
-
-	public void selectCommand(String command) {
-		TableVisualizationCommand commandItem = lvChoice.getItems().stream().filter(item -> item.getCommand().equals(command)).collect(Collectors.toList()).get(0);
-		lvChoice.getSelectionModel().select(commandItem);
-	}
-	
 }
