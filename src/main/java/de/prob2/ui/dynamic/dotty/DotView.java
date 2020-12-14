@@ -46,9 +46,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
 
 	@FXML
-	protected ScrollPane pane;
-
-	@FXML
 	private WebView dotView;
 
 	@FXML
@@ -233,7 +230,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	private void adjustScroll() {
-		Set<Node> nodes = pane.lookupAll(".scroll-bar");
+		Set<Node> nodes = dotView.lookupAll(".scroll-bar");
 		double x = 0.0;
 		double y = 0.0;
 		for (final Node node : nodes) {

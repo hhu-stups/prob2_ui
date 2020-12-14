@@ -88,9 +88,7 @@
 									</graphic>
 								</Button>
 							</HBox>
-							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
-								<WebView fx:id="dotView"/>
-							</ScrollPane>
+							<WebView fx:id="dotView" styleClass="border" VBox.vgrow="ALWAYS"/>
 						</VBox>
 					</SplitPane>
 				</center>
