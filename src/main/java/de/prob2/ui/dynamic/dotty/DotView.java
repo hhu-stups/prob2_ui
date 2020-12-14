@@ -1,16 +1,7 @@
 package de.prob2.ui.dynamic.dotty;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
@@ -24,7 +15,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -40,9 +30,16 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 @Singleton
 public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
@@ -106,6 +103,17 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		saveButton.disableProperty().bind(currentDotContent.isNull());
 		helpButton.setHelpContent("graphVisualisation", null);
 		initializeZooming();
+		taFormula.focusedProperty().addListener((observable, from, to) -> {
+			if(to) {
+				if(taFormula.getText().equals(bundle.getString("dotty.enterFormula.placeholder"))) {
+					taFormula.clear();
+				}
+			} else {
+				if(taFormula.getText().isEmpty()) {
+					taFormula.setText(bundle.getString("dotty.enterFormula.placeholder"));
+				}
+			}
+		});
 	}
 
 	private void initializeZooming() {

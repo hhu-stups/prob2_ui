@@ -49,11 +49,11 @@
 								<VBox spacing="20.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 									<VBox alignment="CENTER">
 										<Label text="%table.expressionTableView.enterFormula" VBox.vgrow="NEVER"/>
-										<TextArea fx:id="taFormula" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
+										<TextArea fx:id="taFormula" text="%table.expressionTableView.enterFormula.placeholder" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8;"/>
 									</VBox>
 									<VBox alignment="CENTER">
 										<Label text="%dynamic.errors" VBox.vgrow="NEVER"/>
-										<TextArea editable="false" fx:id="taErrors" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
+										<TextArea editable="false" fx:id="taErrors" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8;"/>
 									</VBox>
 								</VBox>
 							</VBox>
