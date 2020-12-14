@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.configuration;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

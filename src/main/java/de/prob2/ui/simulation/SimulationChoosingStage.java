@@ -8,13 +8,17 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.inject.Inject;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class SimulationChoosingStage extends Stage {
@@ -25,10 +29,22 @@ public class SimulationChoosingStage extends Stage {
 	private Button btCheck;
 
 	@FXML
+    private HBox timeBox;
+
+	@FXML
+	private VBox monteCarloBox;
+
+	@FXML
 	private TextField tfTime;
 
 	@FXML
-	private VBox formulaInput;
+    private TextField tfSimulations;
+
+	@FXML
+    private TextField tfSteps;
+
+	@FXML
+	private VBox inputBox;
 
 	@FXML
 	private ChoiceBox<SimulationChoiceItem> simulationChoice;
@@ -40,6 +56,8 @@ public class SimulationChoosingStage extends Stage {
 	private final CurrentTrace currentTrace;
 
 	private final SimulationItemHandler simulationItemHandler;
+
+	private Path path;
 
 	@Inject
 	public SimulationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace,
@@ -54,11 +72,33 @@ public class SimulationChoosingStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		btAdd.setOnAction(e -> {
-			this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
-			this.close();
+        inputBox.visibleProperty().bind(simulationChoice.getSelectionModel().selectedItemProperty().isNotNull());
+        setCheckListeners();
+        simulationChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+            if(to == null) {
+                return;
+            }
+            changeGUIType(to.getSimulationType());
+            this.sizeToScene();
+        });
+        this.setOnShown(e -> {
+
+			File configFile = path.toFile();
 		});
 	}
+
+	private void setCheckListeners() {
+        btAdd.setOnAction(e -> {
+            this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
+            this.close();
+        });
+        btCheck.setOnAction(e -> {
+            final SimulationItem newItem = this.extractItem();
+            final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), newItem);
+            this.close();
+            this.simulationItemHandler.handleItem(existingItem.orElse(newItem), false);
+        });
+    }
 
 	private SimulationItem extractItem() {
 		return new SimulationItem(new SimulationCheckingConfiguration(this.extractType(), this.extractInformation()), "");
@@ -75,15 +115,16 @@ public class SimulationChoosingStage extends Stage {
 		Map<String, Object> information = new HashMap<>();
 		switch (simulationType) {
 			case TIMING:
-				information.put("time", Integer.parseInt(tfTime.getText()));
+				information.put("TIME", Integer.parseInt(tfTime.getText()));
 				break;
 			case MODEL_CHECKING:
 				break;
 			case PROBABILISTIC_MODEL_CHECKING:
 				//TODO
 				break;
-			case HYPOTHESIS_TEST:
-				//TODO
+            case MONTE_CARLO_SIMULATION:
+                information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
+                information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
 				break;
 			case TRACE_REPLAY:
 				//TODO
@@ -92,12 +133,40 @@ public class SimulationChoosingStage extends Stage {
 		return information;
 	}
 
+    private void changeGUIType(final SimulationType type) {
+        inputBox.getChildren().removeAll(timeBox, monteCarloBox);
+        switch (type) {
+            case TIMING:
+                inputBox.getChildren().add(0, timeBox);
+                break;
+            case MODEL_CHECKING:
+                break;
+            case PROBABILISTIC_MODEL_CHECKING:
+                //TODO
+                break;
+            case MONTE_CARLO_SIMULATION:
+                inputBox.getChildren().add(0, monteCarloBox);
+                break;
+            case TRACE_REPLAY:
+                //TODO
+                break;
+        }
+    }
+
 	@FXML
 	public void cancel() {
 		this.close();
 	}
 
 	public void reset() {
-
+        btAdd.setText(bundle.getString("common.buttons.add"));
+        btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
+        tfTime.clear();
 	}
+
+	public void setPath(Path path) {
+		this.path = path;
+		simulationItemHandler.setPath(path);
+	}
+
 }

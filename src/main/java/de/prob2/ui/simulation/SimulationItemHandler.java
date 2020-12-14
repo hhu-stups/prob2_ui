@@ -1,11 +1,16 @@
 package de.prob2.ui.simulation;
 
 import com.google.inject.Singleton;
+import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.check.SimulationHypothesisChecker;
+import de.prob2.ui.simulation.check.SimulationTimeChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.verifications.Checked;
 
 import javax.inject.Inject;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +18,8 @@ import java.util.Optional;
 public class SimulationItemHandler {
 
     private final CurrentTrace currentTrace;
+
+    private Path path;
 
     @Inject
     private SimulationItemHandler(final CurrentTrace currentTrace) {
@@ -32,10 +39,46 @@ public class SimulationItemHandler {
         return existingItem;
     }
 
-    public void handleTiming(SimulationItem item, boolean checkAll) {
-        //item.getSimulationConfiguration().
+    private void handleTiming(SimulationItem item, boolean checkAll) {
+        Trace trace = currentTrace.get();
+        SimulationTimeChecker timeChecker = new SimulationTimeChecker(trace, (int) item.getSimulationConfiguration().getField("TIME"));
+        timeChecker.initSimulator(path.toFile());
+        timeChecker.run();
+        SimulationTimeChecker.TimeCheckResult result = timeChecker.check();
+        switch (result) {
+            case SUCCESS:
+                item.setChecked(Checked.SUCCESS);
+                break;
+            case FAIL:
+                item.setChecked(Checked.FAIL);
+                break;
+            case NOT_FINISHED:
+                item.setChecked(Checked.NOT_CHECKED);
+                break;
+            default:
+                break;
+        }
+    }
 
-        // TODO: check Timing simulation
+    private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
+        Trace trace = currentTrace.get();
+        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(trace, (int) item.getSimulationConfiguration().getField("EXECUTIONS"), (int) item.getSimulationConfiguration().getField("STEPS_PER_EXECUTION"));
+        hypothesisChecker.initSimulator(path.toFile());
+        hypothesisChecker.run();
+        SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.check();
+        switch (result) {
+            case SUCCESS:
+                item.setChecked(Checked.SUCCESS);
+                break;
+            case FAIL:
+                item.setChecked(Checked.FAIL);
+                break;
+            case NOT_FINISHED:
+                item.setChecked(Checked.NOT_CHECKED);
+                break;
+            default:
+                break;
+        }
     }
 
     public void handleItem(SimulationItem item, boolean checkAll) {
@@ -46,12 +89,14 @@ public class SimulationItemHandler {
         SimulationType type = item.getType();
         switch(type) {
             case TIMING:
+                handleTiming(item, checkAll);
                 break;
             case MODEL_CHECKING:
                 break;
             case PROBABILISTIC_MODEL_CHECKING:
                 break;
-            case HYPOTHESIS_TEST:
+            case MONTE_CARLO_SIMULATION:
+                handleHypothesisTest(item, checkAll);
                 break;
             case TRACE_REPLAY:
                 break;
@@ -65,4 +110,7 @@ public class SimulationItemHandler {
         // TODO
     }
 
+    public void setPath(Path path) {
+        this.path = path;
+    }
 }

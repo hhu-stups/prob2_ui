@@ -4,6 +4,8 @@ import de.prob2.ui.simulation.SimulationCheckingConfiguration;
 import de.prob2.ui.simulation.SimulationType;
 import de.prob2.ui.verifications.Checked;
 
+import java.util.Objects;
+
 public class SimulationItem {
 
     private Checked checked;
@@ -25,6 +27,13 @@ public class SimulationItem {
         this.configuration = simulationCheckingConfiguration.getConfiguration();
     }
 
+    public void setChecked(Checked checked) {
+        this.checked = checked;
+    }
+
+    public Checked getChecked() {
+        return checked;
+    }
 
     public SimulationType getType() {
         return this.simulationCheckingConfiguration.getType();
@@ -40,6 +49,11 @@ public class SimulationItem {
 
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(configuration, description);
     }
 
     @Override

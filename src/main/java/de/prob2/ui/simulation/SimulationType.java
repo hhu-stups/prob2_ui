@@ -9,7 +9,7 @@ public enum SimulationType {
     // Trace Replay: requires a trace (playable)
 
     TIMING("Timing"), MODEL_CHECKING("Model Checking"), PROBABILISTIC_MODEL_CHECKING("Probabilistic Model Checking"),
-    HYPOTHESIS_TEST("Hypothesis Test"), TRACE_REPLAY("Trace Replay");
+    MONTE_CARLO_SIMULATION("Monte Carlo Simulation"), TRACE_REPLAY("Trace Replay");
 
     private String name;
 

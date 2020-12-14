@@ -9,20 +9,30 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.configuration.OperationConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.configuration.VariableChoice;
+import de.prob2.ui.simulation.configuration.VariableConfiguration;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -52,6 +62,15 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private ListView<SimulationDebugItem> simulationDebugItems;
+
+	@FXML
+	private TableColumn<SimulationItem, Checked> simulationStatusColumn;
+
+	@FXML
+	private TableColumn<SimulationItem, String> simulationTypeColumn;
+
+	@FXML
+	private TableColumn<SimulationItem, String> simulationDescriptionColumn;
 
 	private final StageManager stageManager;
 
@@ -97,6 +116,23 @@ public class SimulatorStage extends Stage {
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()));
 		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, currentTrace, simulator, bundle));
+
+		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			if(to != null) {
+				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
+			} else {
+				simulationItems.getItems().clear();
+				simulationItems.itemsProperty().unbind();
+			}
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
+
+		simulationStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		simulationTypeColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
+		simulationDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+
 		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			configurationPath.set(null);
@@ -196,8 +232,10 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	public void addSimulation() {
-		injector.getInstance(SimulationChoosingStage.class).reset();
-		injector.getInstance(SimulationChoosingStage.class).showAndWait();
+		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
+		choosingStage.reset();
+		choosingStage.setPath(configurationPath.get());
+		choosingStage.showAndWait();
 	}
 
 }
