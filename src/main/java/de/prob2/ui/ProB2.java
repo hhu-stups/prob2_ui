@@ -244,9 +244,9 @@ public class ProB2 extends Application {
 		pluginManager.start();
 
 		final Thread emptyStateSpaceLoader = new Thread(() -> {
-			injector.getInstance(MachineLoader.class).getEmptyStateSpace();
+			injector.getInstance(MachineLoader.class).preloadAnimators();
 
-		}, "Empty State Space Loader");
+		}, "Shared Animator Preloader");
 		this.stopActions.add(emptyStateSpaceLoader::interrupt);
 		emptyStateSpaceLoader.start();
 	}
