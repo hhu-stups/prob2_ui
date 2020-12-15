@@ -13,7 +13,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 @Singleton
-public class Simulator extends AbstractSimulator {
+public class Simulator extends ProbabilityBasedSimulator {
 
 	private ChangeListener<Trace> listener;
 

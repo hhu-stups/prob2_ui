@@ -106,7 +106,7 @@ public abstract class AbstractSimulator {
         return state.eval(new ClassicalB(formula, FormulaExpand.EXPAND));
     }
 
-    public Trace simulationStep(Trace trace) {
+    protected Trace simulationStep(Trace trace) {
         Trace newTrace = trace;
         State currentState = newTrace.getCurrentState();
         if(currentState.isInitialised()) {
@@ -145,26 +145,7 @@ public abstract class AbstractSimulator {
             StateSpace stateSpace = newTrace.getStateSpace();
             currentState = newTrace.getCurrentState();
             AbstractEvalResult startingResult = evaluateForSimulation(currentState, config.getStartingCondition());
-            // Model Checking for goal
-			/*if("FALSE".equals(startingResult.toString())) {
-				final IModelCheckListener mcListener = new IModelCheckListener() {
-					@Override
-					public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-
-					}
-
-					@Override
-					public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-						if (result instanceof ITraceDescription) {
-							Trace newTrace = ((ITraceDescription) result).getTrace(stateSpace);
-							String firstID = newTrace.getTransitionList().get(0).getId()
-							currentTrace.set();
-						}
-					}
-				};
-				ConsistencyChecker checker = new ConsistencyChecker(stateSpace, new ModelCheckingOptions().breadthFirst(true).recheckExisting(true).checkGoal(true), new ClassicalB(config.getStartingCondition(), FormulaExpand.EXPAND), mcListener);
-				checker.call();
-			}*/
+            // TODO: Model Checking for goal
         }
         return newTrace;
     }
@@ -193,9 +174,10 @@ public abstract class AbstractSimulator {
         return newTrace;
     }
 
-    private Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
+    protected abstract boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace);
 
-        State currentState = trace.getCurrentState();
+    protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
+
         String opName = opConfig.getOpName();
         //time for next execution has been delayed by a previous transition
         if(operationToRemainingTime.get(opName) > 0) {
@@ -204,22 +186,14 @@ public abstract class AbstractSimulator {
 
         operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
 
-        double ranDouble = Math.random();
-        AbstractEvalResult evalResult = evaluateForSimulation(currentState, opConfig.getProbability());
-
-        List<String> enabledOperations = trace.getNextTransitions().stream()
-                .map(Transition::getName)
-                .collect(Collectors.toList());
-
         Trace newTrace = trace;
-
+        State currentState = trace.getCurrentState();
 
         //check whether operation is executable and calculate probability whether it should be executed
-        if(Double.parseDouble(evalResult.toString()) > ranDouble && enabledOperations.contains(opName)) {
+        if(chooseNextOperation(opConfig, newTrace)) {
             List<VariableChoice> choices = opConfig.getVariableChoices();
 
             //execute operation and append to trace
-            boolean operationExecuted = false;
             if(choices == null) {
                 List<Transition> transitions = currentState.getTransitions().stream()
                         .filter(trans -> trans.getName().equals(opName))
@@ -227,7 +201,7 @@ public abstract class AbstractSimulator {
                 Random rand = new Random();
                 Transition transition = transitions.get(rand.nextInt(transitions.size()));
                 newTrace = newTrace.add(transition);
-                operationExecuted = true;
+                delayRemainingTime(opConfig);
             } else {
                 State finalCurrentState = trace.getCurrentState();
                 String predicate = choices.stream()
@@ -237,17 +211,20 @@ public abstract class AbstractSimulator {
                 if(finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, opName, predicate)) {
                     Transition transition = finalCurrentState.findTransition(opName, predicate);
                     newTrace = newTrace.add(transition);
-                    operationExecuted = true;
-                }
-            }
-            Map<String, Integer> delay = opConfig.getDelay();
-            if(operationExecuted && delay != null) {
-                for (String key : delay.keySet()) {
-                    operationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(v, delay.get(key)));
+                    delayRemainingTime(opConfig);
                 }
             }
         }
         return newTrace;
+    }
+
+    private void delayRemainingTime(OperationConfiguration opConfig) {
+        Map<String, Integer> delay = opConfig.getDelay();
+        if(delay != null) {
+            for (String key : delay.keySet()) {
+                operationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(v, delay.get(key)));
+            }
+        }
     }
 
     private String joinPredicateFromConfig(State currentState, List<VariableChoice> configs) {
