@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.DotCall;
@@ -75,9 +76,9 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private final ObjectProperty<byte[]> currentDotContent;
 
 	@Inject
-	public DotView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
+	public DotView(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
-		super(preferences, currentTrace, currentProject, bundle, stopActions, "Graph Visualizer");
+		super(preferencesStageProvider, currentTrace, currentProject, bundle, stopActions, "Graph Visualizer");
 		
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
