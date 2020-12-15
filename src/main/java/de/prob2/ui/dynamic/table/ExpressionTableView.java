@@ -119,6 +119,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	
 	private ObjectProperty<TableData> currentTable;
 
+	// Store header globally so that ValueItemRow always use the current header
 	private List<String> header;
 	
 	
@@ -165,6 +166,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	private void fillTable(TableData data) {
+		// Update header when table is updated
 		this.header = data.getHeader();
 		tableView.getColumns().clear();
 		for (int i = 0; i < header.size(); i++) {
@@ -177,6 +179,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			column.getStyleClass().add("alignment");
 		}
 		tableView.setItems(buildData(data.getRows()));
+
+		// Do not provide header to row factory as this would lead to the bug that the row factory always use the oldest headers
+		// Instead use header as a variable in ExpressionTableView that can be accessed by ValueItemRow
 		tableView.setRowFactory(table -> new ValueItemRow());
 		taErrors.clear();
 	}
