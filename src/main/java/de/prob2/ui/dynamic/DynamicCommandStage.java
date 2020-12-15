@@ -137,6 +137,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				return;
 			}
 			if (!to.isAvailable()) {
+				clearContent();
 				lbDescription.setText(String.join("\n", to.getDescription(), to.getAvailable()));
 			} else {
 				lbDescription.setText(to.getDescription());

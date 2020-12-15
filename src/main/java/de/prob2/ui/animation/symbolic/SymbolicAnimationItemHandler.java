@@ -25,9 +25,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 	private final SymbolicAnimationChecker symbolicChecker;
 
 	@Inject
-	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace,
-										   final SymbolicAnimationChecker symbolicChecker,
-										   final SymbolicAnimationResultHandler resultHandler) {
+	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace, final SymbolicAnimationChecker symbolicChecker) {
 		this.currentTrace = currentTrace;
 		this.symbolicChecker = symbolicChecker;
 	}
