@@ -48,13 +48,10 @@ import java.util.stream.Collectors;
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
 
-	private static final class ValueItemRow extends TableRow<ObservableList<String>> {
+	private final class ValueItemRow extends TableRow<ObservableList<String>> {
 
-		private final List<String> header;
-
-		private ValueItemRow(final List<String> header) {
+		private ValueItemRow() {
 			super();
-			this.header = header;
 			getStyleClass().add("expression-table-view-row");
 		}
 
@@ -63,6 +60,19 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll("true-val", "false-val");
 			if(item != null && !empty) {
+				List<MenuItem> contextMenuItems = new ArrayList<>();
+				this.setContextMenu(null);
+				if (header.contains(SOURCE_COLUMN_NAME)) {
+					handleSource(header, item, contextMenuItems);
+				}
+				if (header.contains(STATE_ID_COLUMN_NAME)) {
+					handleStateID(header, item, contextMenuItems);
+				}
+				if (!contextMenuItems.isEmpty()) {
+					ContextMenu contextMenu = new ContextMenu();
+					contextMenu.getItems().addAll(contextMenuItems);
+					this.setContextMenu(contextMenu);
+				}
 				if (header.contains(VALUE_COLUMN_NAME)) {
 					int indexOfValue = header.indexOf(VALUE_COLUMN_NAME);
 					String value = item.get(indexOfValue);
@@ -107,6 +117,8 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private final FileChooserManager fileChooserManager;
 	
 	private ObjectProperty<TableData> currentTable;
+
+	private List<String> header;
 	
 	
 	@Inject
@@ -152,7 +164,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	private void fillTable(TableData data) {
-		List<String> header = data.getHeader();
+		this.header = data.getHeader();
 		tableView.getColumns().clear();
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
@@ -164,25 +176,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			column.getStyleClass().add("alignment");
 		}
 		tableView.setItems(buildData(data.getRows()));
-		tableView.setRowFactory(table -> {
-			final ValueItemRow row = new ValueItemRow(header);
-			List<MenuItem> contextMenuItems = new ArrayList<>();
-			row.itemProperty().addListener((observable, from, to) -> {
-				row.setContextMenu(null);
-				if (header.contains(SOURCE_COLUMN_NAME)) {
-					handleSource(header, to, contextMenuItems);
-				}
-				if (header.contains(STATE_ID_COLUMN_NAME)) {
-					handleStateID(header, to, contextMenuItems);
-				}
-				if (!contextMenuItems.isEmpty() && to != null) {
-					ContextMenu contextMenu = new ContextMenu();
-					contextMenu.getItems().addAll(contextMenuItems);
-					row.setContextMenu(contextMenu);
-				}
-			});
-			return row;
-		});
+		tableView.setRowFactory(table -> new ValueItemRow());
 		taErrors.clear();
 	}
 
