@@ -226,7 +226,7 @@ public final class StatesView extends StackPane {
 			if (to != null) {
 				Trace trace = currentTrace.get();
 				boolean previousStateInitialised = trace.getCurrentState() != null && trace.getCurrentState().isInitialised() &&
-						trace.getPreviousState() != null && trace.getPreviousState().isInitialised();
+						trace.canGoBack() && trace.getPreviousState().isInitialised();
 				if (!to.getCurrentValue().equals(to.getPreviousValue()) && previousStateInitialised) {
 					row.getStyleClass().add("changed");
 				}
