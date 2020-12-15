@@ -252,7 +252,7 @@ public final class OperationsView extends VBox {
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			boolean showUnsatCoreButton = false;
 			if (to != null) {
-				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
+				final Set<Transition> operations = to.getNextTransitions();
 				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) ||
 						operations.stream().map(Transition::getName).collect(Collectors.toList()).contains(Transition.PARTIAL_SETUP_CONSTANTS_NAME)) {
 					showUnsatCoreButton = true;

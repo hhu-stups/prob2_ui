@@ -206,6 +206,10 @@ public class ProB2 extends Application {
 			});
 		}
 
+		final Thread sharedAnimatorPreloader = new Thread(() -> injector.getInstance(MachineLoader.class).preloadAnimators(), "Shared Animator Preloader");
+		this.stopActions.add(sharedAnimatorPreloader::interrupt);
+		sharedAnimatorPreloader.start();
+
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		currentProject.addListener((observable, from, to) -> this.updateTitle(primaryStage));
 		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
@@ -240,13 +244,6 @@ public class ProB2 extends Application {
 
 		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
 		pluginManager.start();
-
-		final Thread emptyStateSpaceLoader = new Thread(() -> {
-			injector.getInstance(MachineLoader.class).getEmptyStateSpace();
-
-		}, "Empty State Space Loader");
-		this.stopActions.add(emptyStateSpaceLoader::interrupt);
-		emptyStateSpaceLoader.start();
 	}
 
 	private void updateTitle(final Stage stage) {

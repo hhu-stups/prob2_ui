@@ -13,7 +13,7 @@
 <fx:root type="ViewCodeStage" minWidth="640" minHeight="480" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
-			<BorderPane stylesheets="@/prob.css" styleClass="dialog">
+			<BorderPane minWidth="640" minHeight="480" stylesheets="@/prob.css" styleClass="dialog">
 				<center>
 					<TextArea fx:id="codeTextArea" styleClass="code" editable="false" wrapText="true" minWidth="320" minHeight="240"/>
 				</center>

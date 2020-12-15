@@ -10,7 +10,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 
-<fx:root type="Stage" minWidth="600" minHeight="400" maxHeight="400" width="800" height="400" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
+<fx:root type="Stage" minWidth="600" minHeight="400" maxHeight="400" width="600" height="400" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
 	<scene>
 		<Scene>
 			<StackPane>

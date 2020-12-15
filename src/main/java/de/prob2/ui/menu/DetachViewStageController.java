@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+
 @Singleton
 public final class DetachViewStageController extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);

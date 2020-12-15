@@ -1,6 +1,8 @@
 package de.prob2.ui.symbolic;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -10,6 +12,7 @@ import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
 import javafx.fxml.FXML;
@@ -112,13 +115,13 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	protected void update() {
 		cbOperations.getItems().setAll(this.checkAllOperations);
 		cbOperations.getSelectionModel().select(this.checkAllOperations);
-		final Map<String, String> items = new LinkedHashMap<>();
+		final List<PredicateBuilderTableItem> items = new ArrayList<>();
 		if (currentTrace.get() != null) {
 			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
 			if (loadedMachine != null) {
 				cbOperations.getItems().addAll(loadedMachine.getOperationNames());
-				loadedMachine.getConstantNames().forEach(s -> items.put(s, ""));
-				loadedMachine.getVariableNames().forEach(s -> items.put(s, ""));
+				loadedMachine.getConstantNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.CONSTANT)));
+				loadedMachine.getVariableNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.VARIABLE)));
 			}
 		}
 		predicateBuilderView.setItems(items);
@@ -157,6 +160,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			default:
 				throw new AssertionError("Unhandled GUI type: " + guiType);
 		}
+		this.sizeToScene();
 	}
 	
 	protected String extractFormula() {

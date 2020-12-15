@@ -17,6 +17,7 @@ import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -31,6 +32,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -91,30 +93,35 @@ public final class ExecuteByPredicateStage extends Stage {
 		this.itemProperty().addListener((o, from, to) -> {
 			if (to == null) {
 				this.operationLabel.setText(null);
-				this.predicateBuilderView.setItems(Collections.emptyMap());
+				this.predicateBuilderView.setItems(new ArrayList<>());
 			} else {
 				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getPrettyName()));
 				
-				final Map<String, String> items = new LinkedHashMap<>();
-				buildParameters(to.getParameterValues(), to.getParameterNames(), items);
-				buildParameters(to.getReturnParameterValues(), to.getReturnParameterNames(), items);
+				final List<PredicateBuilderTableItem> items = new ArrayList<>();
+				buildParameters(to.getParameterValues(), to.getParameterNames(), items, PredicateBuilderTableItem.VariableType.INPUT);
+				buildParameters(to.getReturnParameterValues(), to.getReturnParameterNames(), items, PredicateBuilderTableItem.VariableType.OUTPUT);
 
-				items.putAll(to.getConstants());
-				items.putAll(to.getVariables());
+				for(Map.Entry<String, String> entry : to.getConstants().entrySet()) {
+					items.add(new PredicateBuilderTableItem(entry.getKey(), entry.getValue(), PredicateBuilderTableItem.VariableType.CONSTANT));
+				}
+
+				for(Map.Entry<String, String> entry : to.getVariables().entrySet()) {
+					items.add(new PredicateBuilderTableItem(entry.getKey(), entry.getValue(), PredicateBuilderTableItem.VariableType.VARIABLE));
+				}
 				this.predicateBuilderView.setItems(items);
 			}
 		});
 	}
 
-	private void buildParameters(List<String> parameterValues, List<String> parameterNames, Map<String, String> items) {
+	private void buildParameters(List<String> parameterValues, List<String> parameterNames, List<PredicateBuilderTableItem> items, PredicateBuilderTableItem.VariableType type) {
 		if (parameterValues.isEmpty()) {
 			for (final String name : parameterNames) {
-				items.put(name, "");
+				items.add(new PredicateBuilderTableItem(name, "", type));
 			}
 		} else {
 			assert parameterNames.size() == parameterValues.size();
 			for (int i = 0; i < parameterNames.size(); i++) {
-				items.put(parameterNames.get(i), parameterValues.get(i));
+				items.add(new PredicateBuilderTableItem(parameterNames.get(i), parameterValues.get(i), type));
 			}
 		}
 	}

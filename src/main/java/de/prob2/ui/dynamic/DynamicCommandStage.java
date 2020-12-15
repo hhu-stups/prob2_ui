@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.google.inject.Provider;
+
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -88,7 +90,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	// e. g. when reloading the current machine.
 	protected T lastItem;
 	
-	protected final DynamicPreferencesStage preferences;
+	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 	
 	protected final CurrentTrace currentTrace;
 	
@@ -98,12 +100,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected final BackgroundUpdater updater;
 	
-	protected DynamicCommandStage(final DynamicPreferencesStage preferences,
+	protected DynamicCommandStage(final Provider<DynamicPreferencesStage> preferencesStageProvider,
 			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final StopActions stopActions, final String threadName) {
-		this.preferences = preferences;
-		this.preferences.initOwner(this);
-		this.preferences.initModality(Modality.WINDOW_MODAL);
-		this.preferences.setToRefresh(this);
+		this.preferencesStageProvider = preferencesStageProvider;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
@@ -115,12 +114,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	@FXML
 	protected void initialize() {
 		this.refresh();
-		currentTrace.addListener((observable, from, to) -> {
-			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
-				return;
-			}
-			preferences.setIncludedPreferenceNames(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
-		});
 
 		this.showingProperty().addListener((observable, from, to) -> {
 			if(!from && to) {
@@ -141,13 +134,12 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} else {
 				lbDescription.setText(to.getDescription());
 			}
-			preferences.setIncludedPreferenceNames(to.getRelevantPreferences());
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
 			// Update the visualization automatically if possible.
 			// If the command selection changed and the new command requires a formula,
 			// clear the visualization and wait for the user to input one.
-			if (!needFormula || to.equals(lastItem)) {
+			if (to.isAvailable() && (!needFormula || to.equals(lastItem))) {
 				visualize(to);
 			} else {
 				this.interrupt();
@@ -186,6 +178,18 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			final T item = lvChoice.getSelectionModel().getSelectedItem();
 			return item == null || item.getRelevantPreferences().isEmpty();
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
+	}
+	
+	@FXML
+	private void editPreferences() {
+		final DynamicPreferencesStage preferences = this.preferencesStageProvider.get();
+		preferences.initOwner(this);
+		preferences.initModality(Modality.WINDOW_MODAL);
+		preferences.setToRefresh(this);
+		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
+		preferences.setIncludedPreferenceNames(currentItem.getRelevantPreferences());
+		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
+		preferences.show();
 	}
 	
 	@FXML

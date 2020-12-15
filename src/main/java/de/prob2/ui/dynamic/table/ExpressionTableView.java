@@ -2,6 +2,7 @@ package de.prob2.ui.dynamic.table;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import de.prob.animator.command.GetShortestTraceCommand;
 import de.prob.animator.domainobjects.IEvalElement;
@@ -48,13 +49,10 @@ import java.util.stream.Collectors;
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
 
-	private static final class ValueItemRow extends TableRow<ObservableList<String>> {
+	private final class ValueItemRow extends TableRow<ObservableList<String>> {
 
-		private final List<String> header;
-
-		private ValueItemRow(final List<String> header) {
+		private ValueItemRow() {
 			super();
-			this.header = header;
 			getStyleClass().add("expression-table-view-row");
 		}
 
@@ -63,6 +61,19 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll("true-val", "false-val");
 			if(item != null && !empty) {
+				List<MenuItem> contextMenuItems = new ArrayList<>();
+				this.setContextMenu(null);
+				if (header.contains(SOURCE_COLUMN_NAME)) {
+					handleSource(header, item, contextMenuItems);
+				}
+				if (header.contains(STATE_ID_COLUMN_NAME)) {
+					handleStateID(header, item, contextMenuItems);
+				}
+				if (!contextMenuItems.isEmpty()) {
+					ContextMenu contextMenu = new ContextMenu();
+					contextMenu.getItems().addAll(contextMenuItems);
+					this.setContextMenu(contextMenu);
+				}
 				if (header.contains(VALUE_COLUMN_NAME)) {
 					int indexOfValue = header.indexOf(VALUE_COLUMN_NAME);
 					String value = item.get(indexOfValue);
@@ -107,12 +118,15 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private final FileChooserManager fileChooserManager;
 	
 	private ObjectProperty<TableData> currentTable;
+
+	// Store header globally so that ValueItemRow always use the current header
+	private List<String> header;
 	
 	
 	@Inject
-	public ExpressionTableView(final Injector injector, final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
+	public ExpressionTableView(final Injector injector, final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
 							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
-		super(preferences, currentTrace, currentProject, bundle, stopActions, "Expression Table Visualizer");
+		super(preferencesStageProvider, currentTrace, currentProject, bundle, stopActions, "Expression Table Visualizer");
 		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
@@ -152,7 +166,8 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	private void fillTable(TableData data) {
-		List<String> header = data.getHeader();
+		// Update header when table is updated
+		this.header = data.getHeader();
 		tableView.getColumns().clear();
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
@@ -164,25 +179,10 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			column.getStyleClass().add("alignment");
 		}
 		tableView.setItems(buildData(data.getRows()));
-		tableView.setRowFactory(table -> {
-			final ValueItemRow row = new ValueItemRow(header);
-			List<MenuItem> contextMenuItems = new ArrayList<>();
-			row.itemProperty().addListener((observable, from, to) -> {
-				row.setContextMenu(null);
-				if (header.contains(SOURCE_COLUMN_NAME)) {
-					handleSource(header, to, contextMenuItems);
-				}
-				if (header.contains(STATE_ID_COLUMN_NAME)) {
-					handleStateID(header, to, contextMenuItems);
-				}
-				if (!contextMenuItems.isEmpty() && to != null) {
-					ContextMenu contextMenu = new ContextMenu();
-					contextMenu.getItems().addAll(contextMenuItems);
-					row.setContextMenu(contextMenu);
-				}
-			});
-			return row;
-		});
+
+		// Do not provide header to row factory as this would lead to the bug that the row factory always use the oldest headers
+		// Instead use header as a variable in ExpressionTableView that can be accessed by ValueItemRow
+		tableView.setRowFactory(table -> new ValueItemRow());
 		taErrors.clear();
 	}
 
@@ -297,12 +297,5 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		tableView.getColumns().clear();
 		tableView.setVisible(false);
 		placeholderLabel.setVisible(true);
-	}
-	
-	@FXML
-	private void editPreferences() {
-		TableVisualizationCommand currentItem = lvChoice.getSelectionModel().getSelectedItem();
-		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
-		preferences.show();
 	}
 }
