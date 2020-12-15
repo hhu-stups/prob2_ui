@@ -190,6 +190,13 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	}
 	
 	@FXML
+	private void editPreferences() {
+		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
+		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
+		preferences.show();
+	}
+	
+	@FXML
 	protected void cancel() {
 		currentTrace.getStateSpace().sendInterrupt();
 		interrupt();

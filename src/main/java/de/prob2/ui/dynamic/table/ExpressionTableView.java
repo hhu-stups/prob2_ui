@@ -298,11 +298,4 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		tableView.setVisible(false);
 		placeholderLabel.setVisible(true);
 	}
-	
-	@FXML
-	private void editPreferences() {
-		TableVisualizationCommand currentItem = lvChoice.getSelectionModel().getSelectedItem();
-		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
-		preferences.show();
-	}
 }

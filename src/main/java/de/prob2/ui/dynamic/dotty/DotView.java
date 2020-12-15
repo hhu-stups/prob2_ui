@@ -239,13 +239,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		dotView.setVisible(false);
 		placeholderLabel.setVisible(true);
 	}
-	
-	@FXML
-	private void editPreferences() {
-		DotVisualizationCommand currentItem = lvChoice.getSelectionModel().getSelectedItem();
-		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
-		preferences.show();
-	}
 
 	public void visualizeFormula(final String formula) {
 		this.selectCommand(DotVisualizationCommand.FORMULA_TREE_NAME, formula);
