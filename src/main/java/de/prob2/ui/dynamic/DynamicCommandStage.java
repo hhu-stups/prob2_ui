@@ -130,7 +130,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				return;
 			}
 			if (!to.isAvailable()) {
-				clearContent();
 				lbDescription.setText(String.join("\n", to.getDescription(), to.getAvailable()));
 			} else {
 				lbDescription.setText(to.getDescription());
@@ -140,7 +139,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			// Update the visualization automatically if possible.
 			// If the command selection changed and the new command requires a formula,
 			// clear the visualization and wait for the user to input one.
-			if (!needFormula || to.equals(lastItem)) {
+			if (to.isAvailable() && (!needFormula || to.equals(lastItem))) {
 				visualize(to);
 			} else {
 				this.interrupt();
