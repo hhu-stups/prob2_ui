@@ -1,9 +1,13 @@
 package de.prob2.ui.sharedviews;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
@@ -15,16 +19,19 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
+import org.pf4j.PluginWrapper;
 
 @FXMLInjected
 public final class PredicateBuilderView extends VBox {
-	private final class ValueCell extends TableCell<String, String> {
+	private final class ValueCell extends TableCell<PredicateBuilderTableItem, String> {
 		private ValueCell() {
 			super();
 		}
@@ -33,30 +40,34 @@ public final class PredicateBuilderView extends VBox {
 		protected void updateItem(final String item, final boolean empty) {
 			super.updateItem(item, empty);
 			
-			if (empty || item == null) {
+			if (empty || item == null || this.getTableRow() == null || this.getTableRow().getItem() == null) {
 				this.setGraphic(null);
 			} else {
-				final TextField textField = new TextField(items.get(item));
-				textField.textProperty().addListener((o, from, to) -> items.put(item, to));
+				PredicateBuilderTableItem tableItem = (PredicateBuilderTableItem) this.getTableRow().getItem();
+				final TextField textField = new TextField(tableItem.getValue());
+				textField.textProperty().addListener((o, from, to) -> tableItem.setValue(to));
 				this.setGraphic(textField);
 			}
 		}
 	}
 	
-	@FXML private TableView<String> table;
-	@FXML private TableColumn<String, String> nameColumn;
-	@FXML private TableColumn<String, String> valueColumn;
+	@FXML private TableView<PredicateBuilderTableItem> table;
+	@FXML private TableColumn<PredicateBuilderTableItem, String> nameColumn;
+	@FXML private TableColumn<PredicateBuilderTableItem, String> valueColumn;
+	@FXML private TableColumn<PredicateBuilderTableItem, String> typeColumn;
 	@FXML private TextField predicateField;
-	
+
+	private final ResourceBundle bundle;
 	private final ObjectProperty<Node> placeholder;
-	private final Map<String, String> items;
+	private final List<PredicateBuilderTableItem> items;
 	
 	@Inject
-	private PredicateBuilderView(final StageManager stageManager) {
+	private PredicateBuilderView(final StageManager stageManager, final ResourceBundle bundle) {
 		super();
-		
+
+		this.bundle = bundle;
 		this.placeholder = new SimpleObjectProperty<>(this, "placeholder", null);
-		this.items = new LinkedHashMap<>();
+		this.items = new ArrayList<>();
 		
 		stageManager.loadFXML(this, "predicate_builder_view.fxml");
 	}
@@ -64,9 +75,10 @@ public final class PredicateBuilderView extends VBox {
 	@FXML
 	private void initialize() {
 		this.table.placeholderProperty().bind(this.placeholderProperty());
-		this.nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue()));
-		this.valueColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue()));
-		this.valueColumn.setCellFactory(col -> this.new ValueCell());
+		this.nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getName()));
+		this.valueColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue()));
+		this.valueColumn.setCellFactory(param -> this.new ValueCell());
+		this.typeColumn.setCellValueFactory(features -> new SimpleStringProperty(bundle.getString(features.getValue().getType().getBundleKey())));
 	}
 	
 	public ObjectProperty<Node> placeholderProperty() {
@@ -81,19 +93,19 @@ public final class PredicateBuilderView extends VBox {
 		this.placeholderProperty().set(placeholder);
 	}
 	
-	public Map<String, String> getItems() {
-		return new LinkedHashMap<>(this.items);
+	public List<PredicateBuilderTableItem> getItems() {
+		return new ArrayList<>(this.items);
 	}
 	
-	public void setItems(final Map<String, String> items) {
+	public void setItems(final List<PredicateBuilderTableItem> items) {
 		this.items.clear();
-		this.items.putAll(items);
-		this.table.getItems().setAll(this.items.keySet());
+		this.items.addAll(items);
+		this.table.getItems().setAll(this.items);
 	}
 	
 	public void setFromPredicate(final String predicate) {
 		// Clear the values of all items without removing them from the map.
-		for (final Map.Entry<String, String> entry : this.items.entrySet()) {
+		for (final PredicateBuilderTableItem entry : this.items) {
 			entry.setValue("");
 		}
 		
@@ -103,12 +115,12 @@ public final class PredicateBuilderView extends VBox {
 			final String[] assignment = predicates[i].split("=");
 			final String lhs = assignment[0];
 			// Stop if this is not an assignment, the variable is unknown, or the variable already has a value.
-			if (assignment.length <= 1 || !this.items.containsKey(lhs) || !this.items.get(lhs).isEmpty()) {
+			if (assignment.length <= 1 || this.items.stream().anyMatch(item -> !item.getName().equals(lhs) || !item.getValue().isEmpty())) {
 				firstNonAssignment = i;
 				break;
 			}
 			final String rhs = assignment[1];
-			items.put(lhs, rhs);
+			items.stream().filter(item -> item.getName().equals(lhs)).collect(Collectors.toList()).get(0).setValue(rhs);
 		}
 		table.refresh();
 		// Store all remaining parts of the conjunction in the predicate field.
@@ -118,10 +130,8 @@ public final class PredicateBuilderView extends VBox {
 	public String getPredicate() {
 		final PredicateBuilder builder = new PredicateBuilder();
 		final Map<String, String> filteredItems = new LinkedHashMap<>();
-		this.items.forEach((k, v) -> {
-			if (!v.isEmpty()) {
-				filteredItems.put(k, v);
-			}
+		this.items.forEach(item -> {
+			filteredItems.put(item.getName(), item.getValue());
 		});
 		builder.addMap(filteredItems);
 		if (!this.predicateField.getText().isEmpty()) {
