@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
@@ -252,7 +253,7 @@ public final class OperationsView extends VBox {
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			boolean showUnsatCoreButton = false;
 			if (to != null) {
-				final Set<Transition> operations = to.getNextTransitions(true, FormulaExpand.TRUNCATE);
+				final Set<Transition> operations = to.getNextTransitions();
 				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) ||
 						operations.stream().map(Transition::getName).collect(Collectors.toList()).contains(Transition.PARTIAL_SETUP_CONSTANTS_NAME)) {
 					showUnsatCoreButton = true;
@@ -586,7 +587,7 @@ public final class OperationsView extends VBox {
 	@FXML
 	private void computeUnsatCore() {
 		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-		expressionTableView.selectCommand("unsat_core_properties");
+		expressionTableView.selectCommand(TableVisualizationCommand.UNSAT_CORE_PROPERTIES_NAME);
 		expressionTableView.show();
 		expressionTableView.toFront();
 	}

@@ -133,6 +133,17 @@ public class MachineLoader {
 		}
 		return this.emptyStateSpace;
 	}
+	
+	/**
+	 * Load the shared animators (probcli instances) used by the UI.
+	 * This method is used to load the animators in the background during UI startup,
+	 * so that the user can use the console or load machines more quickly
+	 * than if the animators were started on demand.
+	 */
+	public void preloadAnimators() {
+		this.getEmptyStateSpace();
+		this.getAnimator();
+	}
 
 	public void loadAsync(Machine machine, Map<String, String> pref) {
 		final Thread machineLoader = new Thread(() -> {

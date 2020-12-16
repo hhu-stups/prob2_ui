@@ -2,14 +2,12 @@ package de.prob2.ui.dynamic.table;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import de.prob.animator.command.GetShortestTraceCommand;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.animator.domainobjects.TableVisualizationCommand;
-import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
@@ -17,6 +15,7 @@ import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
@@ -42,7 +41,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
@@ -51,13 +49,10 @@ import java.util.stream.Collectors;
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
 
-	private static final class ValueItemRow extends TableRow<ObservableList<String>> {
+	private final class ValueItemRow extends TableRow<ObservableList<String>> {
 
-		private final List<String> header;
-
-		private ValueItemRow(final List<String> header) {
+		private ValueItemRow() {
 			super();
-			this.header = header;
 			getStyleClass().add("expression-table-view-row");
 		}
 
@@ -66,6 +61,19 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll("true-val", "false-val");
 			if(item != null && !empty) {
+				List<MenuItem> contextMenuItems = new ArrayList<>();
+				this.setContextMenu(null);
+				if (header.contains(SOURCE_COLUMN_NAME)) {
+					handleSource(header, item, contextMenuItems);
+				}
+				if (header.contains(STATE_ID_COLUMN_NAME)) {
+					handleStateID(header, item, contextMenuItems);
+				}
+				if (!contextMenuItems.isEmpty()) {
+					ContextMenu contextMenu = new ContextMenu();
+					contextMenu.getItems().addAll(contextMenuItems);
+					this.setContextMenu(contextMenu);
+				}
 				if (header.contains(VALUE_COLUMN_NAME)) {
 					int indexOfValue = header.indexOf(VALUE_COLUMN_NAME);
 					String value = item.get(indexOfValue);
@@ -97,6 +105,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private static final String VALUE_COLUMN_NAME = "VALUE";
 	
 	@FXML
+	private TableView<ObservableList<String>> tableView;
+	
+	@FXML
 	private Button saveButton;
 	
 	@FXML
@@ -107,12 +118,15 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private final FileChooserManager fileChooserManager;
 	
 	private ObjectProperty<TableData> currentTable;
+
+	// Store header globally so that ValueItemRow always use the current header
+	private List<String> header;
 	
 	
 	@Inject
-	public ExpressionTableView(final Injector injector, final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
-							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle);
+	public ExpressionTableView(final Injector injector, final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
+							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+		super(preferencesStageProvider, currentTrace, currentProject, bundle, stopActions, "Expression Table Visualizer");
 		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
@@ -137,53 +151,24 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	public void visualizeExpression(String expression) {
-		taFormula.setText(expression);
-		lvChoice.getSelectionModel().selectFirst();
-		visualize(lvChoice.getSelectionModel().getSelectedItem());
+		this.selectCommand(TableVisualizationCommand.EXPRESSION_AS_TABLE_NAME, expression);
 	}
 	
 	@Override
-	protected void visualize(TableVisualizationCommand item) {
-		if(!item.isAvailable()) {
-			return;
-		}
-		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
-		interrupt();
-
-		Thread thread = new Thread(() -> {
-			Platform.runLater(() -> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
-			try {
-				if(currentTrace.get() == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::reset);
-					currentThread.set(null);
-					return;
-				}
-				if(item.getArity() > 0) {
-					formulas.add(currentTrace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
-				}
-				final TableData table = item.visualize(formulas);
-				Platform.runLater(() -> {
-					reset();
-					currentTable.set(table);
-				});
-				currentThread.set(null);
-			} catch (ProBError | EvaluationException e) {
-				LOGGER.error("Table visualization failed", e);
-				currentThread.set(null);
-				Platform.runLater(() -> {
-					taErrors.setText(e.getMessage());
-					reset();
-				});
-			}
+	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
+		final TableData table = item.visualize(formulas);
+		Platform.runLater(() -> {
+			this.clearLoadingStatus();
+			currentTable.set(table);
+			placeholderLabel.setVisible(false);
+			tableView.setVisible(true);
 		});
-		currentThread.set(thread);
-		thread.start();
 	}
 	
 	private void fillTable(TableData data) {
-		List<String> header = data.getHeader();
-		TableView<ObservableList<String>> tableView = new TableView<>();
-		tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+		// Update header when table is updated
+		this.header = data.getHeader();
+		tableView.getColumns().clear();
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
 			final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
@@ -194,26 +179,10 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			column.getStyleClass().add("alignment");
 		}
 		tableView.setItems(buildData(data.getRows()));
-		tableView.setRowFactory(table -> {
-			final ValueItemRow row = new ValueItemRow(header);
-			List<MenuItem> contextMenuItems = new ArrayList<>();
-			row.itemProperty().addListener((observable, from, to) -> {
-				row.setContextMenu(null);
-				if (header.contains(SOURCE_COLUMN_NAME)) {
-					handleSource(header, to, contextMenuItems);
-				}
-				if (header.contains(STATE_ID_COLUMN_NAME)) {
-					handleStateID(header, to, contextMenuItems);
-				}
-				if (!contextMenuItems.isEmpty() && to != null) {
-					ContextMenu contextMenu = new ContextMenu();
-					contextMenu.getItems().addAll(contextMenuItems);
-					row.setContextMenu(contextMenu);
-				}
-			});
-			return row;
-		});
-		pane.setContent(tableView);
+
+		// Do not provide header to row factory as this would lead to the bug that the row factory always use the oldest headers
+		// Instead use header as a variable in ExpressionTableView that can be accessed by ValueItemRow
+		tableView.setRowFactory(table -> new ValueItemRow());
 		taErrors.clear();
 	}
 
@@ -276,10 +245,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		contextMenuItems.add(jumpToStateItem);
 	}
 	
-	private void clearTable() {
-		pane.setContent(new TableView<>());
-	}
-	
 	private ObservableList<ObservableList<String>> buildData(List<List<String>> list) {
 		ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
 		for (List<String> row : list) {
@@ -326,23 +291,11 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 	
 	@Override
-	protected void reset() {
+	protected void clearContent() {
 		currentTable.set(null);
-		clearTable();
-		statusBar.setText("");
-		statusBar.removeLabelStyle("warning");
+		tableView.getItems().clear();
+		tableView.getColumns().clear();
+		tableView.setVisible(false);
+		placeholderLabel.setVisible(true);
 	}
-	
-	@FXML
-	private void editPreferences() {
-		TableVisualizationCommand currentItem = lvChoice.getSelectionModel().getSelectedItem();
-		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
-		preferences.show();
-	}
-
-	public void selectCommand(String command) {
-		TableVisualizationCommand commandItem = lvChoice.getItems().stream().filter(item -> item.getCommand().equals(command)).collect(Collectors.toList()).get(0);
-		lvChoice.getSelectionModel().select(commandItem);
-	}
-	
 }

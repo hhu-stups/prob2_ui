@@ -83,6 +83,11 @@
 	-fx-opacity: 0.85;
 }
 
+.icon-green {
+	-fx-text-fill: -prob-aqua;
+	-fx-opacity: 0.85;
+}
+
 .icon-dark:hover, .menu-button:hover > .arrow-button > .arrow,
 .menu-button:hover .icon-dark {
 	-fx-opacity: 1.0;

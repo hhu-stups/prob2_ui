@@ -1,29 +1,39 @@
 package de.prob2.ui.dynamic;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.google.inject.Provider;
+
+import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.DynamicCommandItem;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
-import de.prob2.ui.internal.StageManager;
+import de.prob.statespace.Trace;
+import de.prob2.ui.internal.BackgroundUpdater;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends Stage {
 	private static final class DynamicCommandItemCell<T extends DynamicCommandItem> extends ListCell<T> {
@@ -47,6 +57,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		}
 	}
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
+	
 	@FXML
 	protected ListView<T> lvChoice;
 
@@ -63,20 +75,22 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected Label lbDescription;
 
 	@FXML
-	protected ScrollPane pane;
-
-	@FXML
 	protected Button cancelButton;
 	
 	@FXML
 	protected Button editPreferencesButton;
 	
 	@FXML
+	protected Label placeholderLabel;
+	
+	@FXML
 	protected DynamicCommandStatusBar statusBar;
 	
+	// Used to remember the last selected item even when the list might be cleared temporarily,
+	// e. g. when reloading the current machine.
 	protected T lastItem;
 	
-	protected final DynamicPreferencesStage preferences;
+	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 	
 	protected final CurrentTrace currentTrace;
 	
@@ -84,33 +98,22 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected final ResourceBundle bundle;
 	
-	protected final StageManager stageManager;
+	protected final BackgroundUpdater updater;
 	
-	protected final ObjectProperty<Thread> currentThread;
-	
-	protected DynamicCommandStage(final StageManager stageManager, final DynamicPreferencesStage preferences,
-			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle) {
-		this.preferences = preferences;
-		this.preferences.initOwner(this);
-		this.preferences.initModality(Modality.WINDOW_MODAL);
-		this.preferences.setToRefresh(this);
+	protected DynamicCommandStage(final Provider<DynamicPreferencesStage> preferencesStageProvider,
+			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final StopActions stopActions, final String threadName) {
+		this.preferencesStageProvider = preferencesStageProvider;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
-		this.stageManager = stageManager;
-		this.currentThread = new SimpleObjectProperty<>(this, "currentThread", null);
+		this.updater = new BackgroundUpdater(threadName);
+		stopActions.add(this.updater::shutdownNow);
 	}
 	
 	
 	@FXML
 	protected void initialize() {
-		fillCommands();
-		currentTrace.addListener((observable, from, to) -> {
-			if(to == null || lvChoice.getSelectionModel().getSelectedItem() == null) {
-				return;
-			}
-			preferences.setIncludedPreferenceNames(lvChoice.getSelectionModel().getSelectedItem().getRelevantPreferences());
-		});
+		this.refresh();
 
 		this.showingProperty().addListener((observable, from, to) -> {
 			if(!from && to) {
@@ -122,6 +125,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		});
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			this.updatePlaceholderLabel();
 			if (to == null || currentTrace.get() == null || !this.isShowing()) {
 				return;
 			}
@@ -130,30 +134,28 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} else {
 				lbDescription.setText(to.getDescription());
 			}
-			preferences.setIncludedPreferenceNames(to.getRelevantPreferences());
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
-			if(lastItem != null && !lastItem.getCommand().equals(to.getCommand())) {
-				reset();
-			}
-			//only visualize if
-			//1. No formula is needed and command is changed or continuous update is selected
-			//2. Formula is needed and command is not changed and continuous update is selected
-			if (!needFormula || to.equals(lastItem)) {
+			// Update the visualization automatically if possible.
+			// If the command selection changed and the new command requires a formula,
+			// clear the visualization and wait for the user to input one.
+			if (to.isAvailable() && (!needFormula || to.equals(lastItem))) {
 				visualize(to);
+			} else {
+				this.interrupt();
 			}
 			lastItem = to;
 		});
-		lvChoice.disableProperty().bind(currentThread.isNotNull().or(currentTrace.stateSpaceProperty().isNull()));
+		lvChoice.disableProperty().bind(this.updater.runningProperty().or(currentTrace.stateSpaceProperty().isNull()));
 
 		currentTrace.addListener((observable, from, to) -> refresh());
 		currentTrace.addStatesCalculatedListener(newOps -> Platform.runLater(this::refresh));
 
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
-			fillCommands();
+			this.interrupt();
 			lvChoice.getSelectionModel().clearSelection();
 			this.lastItem = null;
-			reset();
+			this.refresh();
 		});
 		
 		taFormula.setOnKeyPressed(e -> {
@@ -171,19 +173,23 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell<>());
-		cancelButton.disableProperty().bind(currentThread.isNull());
+		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
 		editPreferencesButton.disableProperty().bind(Bindings.createBooleanBinding(() -> {
 			final T item = lvChoice.getSelectionModel().getSelectedItem();
 			return item == null || item.getRelevantPreferences().isEmpty();
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
 	}
 	
-	protected void fillCommands() {
-		final State currentState = currentTrace.getCurrentState();
-		if (currentState == null) {
-			return;
-		}
-		lvChoice.getItems().setAll(this.getCommandsInState(currentState));
+	@FXML
+	private void editPreferences() {
+		final DynamicPreferencesStage preferences = this.preferencesStageProvider.get();
+		preferences.initOwner(this);
+		preferences.initModality(Modality.WINDOW_MODAL);
+		preferences.setToRefresh(this);
+		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
+		preferences.setIncludedPreferenceNames(currentItem.getRelevantPreferences());
+		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
+		preferences.show();
 	}
 	
 	@FXML
@@ -192,9 +198,37 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		interrupt();
 	}
 	
+	private void updatePlaceholderLabel() {
+		final String text;
+		if (currentTrace.get() == null) {
+			text = bundle.getString("common.noModelLoaded");
+		} else {
+			final T selectedItem = lvChoice.getSelectionModel().getSelectedItem();
+			if (selectedItem == null) {
+				text = bundle.getString("dynamic.placeholder.selectVisualization");
+			} else if (selectedItem.getArity() > 0) {
+				text = bundle.getString("dynamic.enterFormula.placeholder");
+			} else if (this.updater.isRunning()) {
+				text = bundle.getString("dynamic.placeholder.inProgress");
+			} else {
+				// The placeholder label shouldn't be seen by the user in this case,
+				// because the visualization content should be visible,
+				// but clear the text anyway just in case.
+				text = "";
+			}
+		}
+		placeholderLabel.setText(text);
+	}
+	
 	public void refresh() {
+		this.updatePlaceholderLabel();
 		int index = lvChoice.getSelectionModel().getSelectedIndex();
-		fillCommands();
+		final State currentState = currentTrace.getCurrentState();
+		if (currentState == null) {
+			lvChoice.getItems().clear();
+		} else {
+			lvChoice.getItems().setAll(this.getCommandsInState(currentState));
+		}
 		if (index == -1) {
 			if(this.lastItem != null) {
 				lvChoice.getSelectionModel().select(this.lastItem);
@@ -205,17 +239,77 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	}
 	
 	protected void interrupt() {
-		if (currentThread.get() != null) {
-			currentThread.get().interrupt();
-			currentThread.set(null);
-		}
-		reset();
+		this.updater.cancel(true);
+		this.clearLoadingStatus();
+		this.clearContent();
+		this.updatePlaceholderLabel();
 	}
 	
-	protected abstract void reset();
+	protected void clearLoadingStatus() {
+		statusBar.setText("");
+		statusBar.removeLabelStyle("warning");
+	}
 	
-	protected abstract void visualize(T item);
+	protected abstract void clearContent();
+	
+	protected void visualize(final T item) {
+		if (!item.isAvailable()) {
+			return;
+		}
+		interrupt();
+
+		this.updater.execute(() -> {
+			Platform.runLater(() -> {
+				this.updatePlaceholderLabel();
+				statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
+			});
+			try {
+				final Trace trace = currentTrace.get();
+				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
+					Platform.runLater(this::clearLoadingStatus);
+					return;
+				}
+				final List<IEvalElement> formulas;
+				if (item.getArity() > 0) {
+					formulas = Collections.singletonList(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
+				} else {
+					formulas = Collections.emptyList();
+				}
+				visualizeInternal(item, formulas);
+			} catch (CommandInterruptedException | InterruptedException e) {
+				LOGGER.info("Visualization interrupted", e);
+				Thread.currentThread().interrupt();
+				Platform.runLater(this::clearLoadingStatus);
+			} catch (ProBError | EvaluationException e) {
+				LOGGER.error("Visualization failed", e);
+				Platform.runLater(() -> {
+					taErrors.setText(e.getMessage());
+					this.clearLoadingStatus();
+				});
+			}
+		});
+	}
+	
+	protected abstract void visualizeInternal(final T item, final List<IEvalElement> formulas) throws InterruptedException;
 	
 	protected abstract List<T> getCommandsInState(final State state);
 
+	public void selectCommand(final String command, final String formula) {
+		final T choice = lvChoice.getItems().stream()
+			.filter(item -> command.equals(item.getCommand()))
+			.findAny()
+			.orElseThrow(() -> new IllegalArgumentException("Visualization command not found: " + command));
+		lvChoice.getSelectionModel().select(choice);
+		if (formula != null) {
+			if (choice.getArity() == 0) {
+				throw new IllegalArgumentException("Visualization command does not take an argument: " + command);
+			}
+			taFormula.setText(formula);
+			visualize(choice);
+		}
+	}
+
+	public void selectCommand(final String command) {
+		this.selectCommand(command, null);
+	}
 }

@@ -1,37 +1,28 @@
 package de.prob2.ui.dynamic.dotty;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.exception.ProBError;
-import de.prob.parser.BindingGenerator;
-import de.prob.prolog.term.PrologTerm;
 import de.prob.statespace.State;
-import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -41,7 +32,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
@@ -78,22 +68,19 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	@FXML
 	private HelpButton helpButton;
 
+	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 
 	private String dot;
 	private String dotEngine;
 	private final ObjectProperty<byte[]> currentDotContent;
 
-	private double oldMousePositionX = -1;
-	private double oldMousePositionY = -1;
-	private double dragFactor = 0.83;
-	
-
 	@Inject
-	public DotView(final StageManager stageManager, final DynamicPreferencesStage preferences, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
-		super(stageManager, preferences, currentTrace, currentProject, bundle);
+	public DotView(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
+			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+		super(preferencesStageProvider, currentTrace, currentProject, bundle, stopActions, "Graph Visualizer");
 		
+		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		
 		this.dot = null;
@@ -109,35 +96,12 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		stageManager.setMacMenuBar(this, this.menuBar);
 		saveButton.disableProperty().bind(currentDotContent.isNull());
 		helpButton.setHelpContent("graphVisualisation", null);
-		initializeZooming();
-	}
-
-	private void initializeZooming() {
-		dotView.setOnMouseMoved(e -> {
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseDragged(e -> {
-			pane.setHvalue(pane.getHvalue() + (-e.getSceneX() + oldMousePositionX) / (pane.getWidth() * dragFactor));
-			pane.setVvalue(pane.getVvalue() + (-e.getSceneY() + oldMousePositionY) / (pane.getHeight() * dragFactor));
-			oldMousePositionX = e.getSceneX();
-			oldMousePositionY = e.getSceneY();
-		});
-
-		dotView.setOnMouseMoved(e -> dotView.setCursor(Cursor.HAND));
-		dotView.setOnMouseDragged(e -> dotView.setCursor(Cursor.MOVE));
-
-		dotView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
-			@Override
-			public void onChanged(Change<? extends Node> c) {
-				Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
-				for (Node scrollBar : scrollBars) {
-					scrollBar.setStyle("-fx-opacity: 0.5;");
-				}
+		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>)c -> {
+			Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
+			for (Node scrollBar : scrollBars) {
+				scrollBar.setStyle("-fx-opacity: 0.5;");
 			}
 		});
-
 	}
 
 	@Override
@@ -146,58 +110,19 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	@Override
-	protected void visualize(DotVisualizationCommand item) {
-		if (!item.isAvailable()) {
-			return;
-		}
-		List<IEvalElement> formulas = Collections.synchronizedList(new ArrayList<>());
-		interrupt();
-
-		Thread thread = new Thread(() -> {
-			Platform.runLater(()-> statusBar.setText(bundle.getString("statusbar.loadStatus.loading")));
-			try {
-				Trace trace = currentTrace.get();
-				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::reset);
-					currentThread.set(null);
-					return;
-				}
-				setUpSvgForDotCommand(trace, item, formulas);
-				if(!Thread.currentThread().isInterrupted()) {
-					final byte[] svgData = new DotCall(this.dot)
-						.layoutEngine(this.dotEngine)
-						.outputFormat(DotOutputFormat.SVG)
-						.input(this.currentDotContent.get())
-						.call();
-					loadGraph(new String(svgData, StandardCharsets.UTF_8));
-				}
-			} catch (CommandInterruptedException | InterruptedException e) {
-				LOGGER.info("Dot visualization interrupted", e);
-				Thread.currentThread().interrupt();
-				Platform.runLater(this::reset);
-			} catch (IOException | UncheckedIOException | ProBError | EvaluationException e) {
-				LOGGER.error("Graph visualization failed", e);
-				currentThread.set(null);
-				Platform.runLater(() -> {
-					taErrors.setText(e.getMessage());
-					dotView.getEngine().loadContent("");
-					statusBar.setText("");
-				});
-			}
-		}, "Graph Visualizer");
-		currentThread.set(thread);
-		thread.start();
-	}
-
-	private void setUpSvgForDotCommand(final Trace trace, final DotVisualizationCommand item, final List<IEvalElement> formulas) throws IOException, InterruptedException {
-		if (item.getArity() > 0) {
-			formulas.add(trace.getModel().parseFormula(taFormula.getText(), FormulaExpand.EXPAND));
-		}
-		
-		this.dot = trace.getStateSpace().getCurrentPreference("DOT");
+	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
+		this.dot = item.getState().getStateSpace().getCurrentPreference("DOT");
 		this.dotEngine = item.getPreferredDotLayoutEngine()
-			.orElseGet(() -> trace.getStateSpace().getCurrentPreference("DOT_ENGINE"));
+			.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
 		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
+		if(!Thread.currentThread().isInterrupted()) {
+			final byte[] svgData = new DotCall(this.dot)
+				.layoutEngine(this.dotEngine)
+				.outputFormat(DotOutputFormat.SVG)
+				.input(this.currentDotContent.get())
+				.call();
+			loadGraph(new String(svgData, StandardCharsets.UTF_8));
+		}
 	}
 
 	private void loadGraph(final String svgContent) {
@@ -205,10 +130,11 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		Platform.runLater(() -> {
 			if (!thread.isInterrupted()) {
 				dotView.getEngine().loadContent("<center>" + svgContent + "</center>");
-				statusBar.setText("");
+				this.clearLoadingStatus();
 				taErrors.clear();
+				placeholderLabel.setVisible(false);
+				dotView.setVisible(true);
 			}
-			currentThread.set(null);
 		});
 	}
 	
@@ -286,11 +212,10 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	private void zoomByFactor(double factor) {
 		dotView.setZoom(dotView.getZoom() * factor);
-		dragFactor *= factor;
 	}
 
 	private void adjustScroll() {
-		Set<Node> nodes = pane.lookupAll(".scroll-bar");
+		Set<Node> nodes = dotView.lookupAll(".scroll-bar");
 		double x = 0.0;
 		double y = 0.0;
 		for (final Node node : nodes) {
@@ -307,45 +232,17 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 	
 	@Override
-	protected void reset() {
+	protected void clearContent() {
 		this.dot = null;
 		this.dotEngine = null;
 		this.currentDotContent.set(null);
 		dotView.getEngine().loadContent("");
-		statusBar.setText("");
-	}
-	
-	@FXML
-	private void editPreferences() {
-		DotVisualizationCommand currentItem = lvChoice.getSelectionModel().getSelectedItem();
-		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
-		preferences.show();
+		dotView.setVisible(false);
+		placeholderLabel.setVisible(true);
 	}
 
-	public void visualizeFormula(final Object formula) {
-		taErrors.clear();
-		Thread thread = new Thread(() -> {
-			try {
-				DotVisualizationCommand choice = lvChoice.getItems().stream()
-						.filter(item -> "formula_tree".equals(item.getCommand()))
-						.collect(Collectors.toList())
-						.get(0);
-				Platform.runLater(() -> {
-					statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
-					if(formula instanceof IEvalElement) {
-						taFormula.setText(((IEvalElement) formula).getCode());
-					} else {
-						taFormula.setText((String) formula);
-					}
-					lvChoice.getSelectionModel().select(choice);
-					visualize(choice);
-				});
-			} catch (EvaluationException | ProBError exception) {
-				Platform.runLater(() -> taErrors.setText(exception.getMessage()));
-			}
-		});
-		currentThread.set(thread);
-		thread.start();
+	public void visualizeFormula(final String formula) {
+		this.selectCommand(DotVisualizationCommand.FORMULA_TREE_NAME, formula);
 	}
 
 }

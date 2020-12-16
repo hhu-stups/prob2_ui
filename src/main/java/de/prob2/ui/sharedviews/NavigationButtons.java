@@ -1,13 +1,16 @@
 package de.prob2.ui.sharedviews;
 
 import com.google.inject.Inject;
-
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
@@ -31,10 +34,29 @@ public final class NavigationButtons extends HBox {
 
 	@FXML
 	private void initialize() {
+		BooleanBinding forwardExecutingNextOperationBinding = Bindings.createBooleanBinding(() -> currentTrace.get() != null && !currentTrace.get().canGoForward() && currentTrace.get().getNextTransitions().size() == 1, currentTrace);
+
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
 		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
-		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().and(forwardExecutingNextOperationBinding.not()));
 		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+
+		forwardExecutingNextOperationBinding.addListener((observable, from, to) -> {
+			Node graphic = forwardButton.getGraphic();
+			graphic.getStyleClass().clear();
+			Trace trace = currentTrace.get();
+			if(to) {
+				State currentState = trace.getCurrentState();
+				Transition transition = (Transition) trace.getNextTransitions().toArray()[0];
+				if(!currentState.getId().equals(transition.getDestination().getId())) {
+					graphic.getStyleClass().add("icon-green");
+				} else {
+					graphic.getStyleClass().add("icon-dark");
+				}
+			} else {
+				graphic.getStyleClass().add("icon-dark");
+			}
+		});
 	}
 
 	@FXML
@@ -57,7 +79,12 @@ public final class NavigationButtons extends HBox {
 	private void handleForwardButton() {
 		final Trace trace = currentTrace.get();
 		if (trace != null) {
-			currentTrace.set(trace.forward());
+			if(trace.canGoForward()) {
+				currentTrace.set(trace.forward());
+			} else {
+				Transition transition = (Transition) trace.getNextTransitions().toArray()[0];
+				currentTrace.set(trace.add(transition));
+			}
 		}
 	}
 

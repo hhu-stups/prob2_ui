@@ -17,7 +17,7 @@
 	<center>
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.3,0.7">
 			<SplitPane fx:id="verticalSP" dividerPositions="0.5" orientation="VERTICAL">
-				<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
+				<Accordion fx:id="leftAccordion1" expandedPane="$operationsTP">
 					<panes>
 						<TitledPane text="%common.views.operations" fx:id="operationsTP" id="operationsTP" collapsible="false">
 							<OperationsView/>
@@ -56,7 +56,8 @@
 	</top>
 	<fx:define>
 		<FXCollections fx:id="accordions" fx:factory="observableArrayList">
-			<fx:reference source="leftAccordion"/>
+			<fx:reference source="leftAccordion1"/>
+			<fx:reference source="leftAccordion2"/>
 			<fx:reference source="rightAccordion"/>
 		</FXCollections>
 	</fx:define>

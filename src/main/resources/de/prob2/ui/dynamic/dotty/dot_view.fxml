@@ -12,12 +12,12 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.web.WebView?>
@@ -65,18 +65,18 @@
 								<Label fx:id="lbDescription" prefHeight="100.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 								<VBox spacing="20.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 									<VBox alignment="CENTER">
-										<Label text="%dotty.enterFormula" VBox.vgrow="NEVER"/>
-										<TextArea fx:id="taFormula" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #e8e8e8;"/>
+										<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
+										<TextArea fx:id="taFormula" promptText="%dynamic.enterFormula.placeholder" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8;"/>
 									</VBox>
 									<VBox alignment="CENTER">
 										<Label text="%dynamic.errors" VBox.vgrow="NEVER"/>
-										<TextArea editable="false" fx:id="taErrors" style="-fx-control-inner-background: #e8e8e8;" VBox.vgrow="ALWAYS"/>
+										<TextArea editable="false" fx:id="taErrors" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8;"/>
 									</VBox>
 								</VBox>
 							</VBox>
 						</VBox>
 						<VBox>
-							<HBox alignment="TOP_RIGHT" style="-fx-background-color: transparent;">
+							<HBox alignment="TOP_RIGHT" styleClass="border">
 								<Button fx:id="zoomInButton" onAction="#zoomIn">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
@@ -88,9 +88,10 @@
 									</graphic>
 								</Button>
 							</HBox>
-							<ScrollPane fx:id="pane" fitToHeight="true" fitToWidth="true" styleClass="border" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
-								<WebView fx:id="dotView"/>
-							</ScrollPane>
+							<StackPane VBox.vgrow="ALWAYS">
+								<Label fx:id="placeholderLabel"/>
+								<WebView fx:id="dotView" visible="false"/>
+							</StackPane>
 						</VBox>
 					</SplitPane>
 				</center>

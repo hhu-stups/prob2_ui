@@ -1,8 +1,19 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -23,6 +34,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -32,6 +44,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
@@ -44,18 +57,11 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
+
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -66,6 +72,8 @@ public final class StatesView extends StackPane {
 	private TextField filterState;
 	@FXML
 	private HelpButton helpButton;
+	@FXML
+	private ToggleButton showExpandedFormulasButton;
 
 	@FXML
 	private TreeTableView<StateItem> tv;
@@ -126,9 +134,19 @@ public final class StatesView extends StackPane {
 	private void initialize() {
 		helpButton.setHelpContent("mainView.stateView", null);
 		
+		this.showExpandedFormulasButton.selectedProperty().addListener((o, from, to) -> {
+			final FontAwesome.Glyph glyph;
+			if (to) {
+				glyph = FontAwesome.Glyph.PLUS_SQUARE;
+			} else {
+				glyph = FontAwesome.Glyph.MINUS_SQUARE;
+			}
+			((Glyph)this.showExpandedFormulasButton.getGraphic()).setIcon(glyph);
+		});
+		
 		tv.setRowFactory(view -> initTableRow());
 
-		this.tvName.setCellFactory(col -> new NameCell());
+		this.tvName.setCellFactory(col -> new NameCell(this.showExpandedFormulasButton.selectedProperty()));
 		this.tvValue.setCellFactory(col -> new ValueCell(bundle));
 		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle));
 
@@ -206,7 +224,8 @@ public final class StatesView extends StackPane {
 			row.getStyleClass().remove("changed");
 			row.setTooltip(null);
 			if (to != null) {
-				if (!to.getCurrentValue().equals(to.getPreviousValue()) && currentTrace.getCurrentState().isInitialised()) {
+				final boolean previousStateInitialised = to.getPreviousState() != null && to.getPreviousState().isInitialised();
+				if (!to.getCurrentValue().equals(to.getPreviousValue()) && previousStateInitialised) {
 					row.getStyleClass().add("changed");
 				}
 				row.setTooltip(this.buildItemTooltip(to));
@@ -231,8 +250,8 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				DotView formulaStage = injector.getInstance(DotView.class);
-				formulaStage.visualizeFormula(row.getItem().getLabel());
 				formulaStage.show();
+				formulaStage.visualizeFormula(row.getItem().getLabel());
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
@@ -247,8 +266,8 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-				expressionTableView.visualizeExpression(row.getItem().getLabel());
 				expressionTableView.show();
+				expressionTableView.visualizeExpression(row.getItem().getLabel());
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");

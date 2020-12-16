@@ -9,7 +9,7 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
-import de.prob.animator.domainobjects.EventB;
+import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -25,9 +25,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 	private final SymbolicAnimationChecker symbolicChecker;
 
 	@Inject
-	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace,
-										   final SymbolicAnimationChecker symbolicChecker,
-										   final SymbolicAnimationResultHandler resultHandler) {
+	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace, final SymbolicAnimationChecker symbolicChecker) {
 		this.currentTrace = currentTrace;
 		this.symbolicChecker = symbolicChecker;
 	}
@@ -39,13 +37,13 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 
 	public void handleSequence(SymbolicAnimationItem item, boolean checkAll) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
-		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new EventB("true", FormulaExpand.EXPAND));
+		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new ClassicalB("1=1", FormulaExpand.EXPAND));
 		symbolicChecker.checkItem(item, cmd, currentTrace.getStateSpace(), checkAll);
 	}
 
 	public void findValidState(SymbolicAnimationItem item, boolean checkAll) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		FindStateCommand cmd = new FindStateCommand(stateSpace, new EventB(item.getCode(), FormulaExpand.EXPAND), true);
+		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode(), FormulaExpand.EXPAND), true);
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 

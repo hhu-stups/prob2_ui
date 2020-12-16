@@ -2,9 +2,17 @@ package de.prob2.ui.states;
 
 import de.prob.animator.domainobjects.BVisual2Value;
 
+import javafx.beans.binding.BooleanExpression;
 import javafx.scene.control.TreeTableCell;
 
 class NameCell extends TreeTableCell<StateItem, StateItem> {
+	private final BooleanExpression showExpandedFormula;
+	
+	NameCell(final BooleanExpression showExpandedFormula) {
+		this.showExpandedFormula = showExpandedFormula;
+		this.showExpandedFormula.addListener(o -> this.updateItem(this.getItem(), this.isEmpty()));
+	}
+	
 	@Override
 	protected void updateItem(final StateItem item, final boolean empty) {
 		super.updateItem(item, empty);
@@ -21,7 +29,8 @@ class NameCell extends TreeTableCell<StateItem, StateItem> {
 				String text = "[" + functorSymbol + "]";
 				// Display only the functor symbol if the item is expanded,
 				// because the other parts of the formula will be visible as its children.
-				if (!item.isExpanded()) {
+				// The user can also enable always displaying the full formula even when expanded.
+				if (this.showExpandedFormula.get() || !item.isExpanded()) {
 					text += " " + item.getLabel();
 				}
 				this.setText(text);

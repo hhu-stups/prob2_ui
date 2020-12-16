@@ -13,7 +13,10 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolicchecking.choice.title" resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+
+<fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolicchecking.choice.title"
+		 resizable="false"
+		 xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<TextField fx:id="tfFormula" VBox.vgrow="NEVER"/>
 		<ChoiceBox fx:id="cbOperations" VBox.vgrow="NEVER"/>
@@ -23,7 +26,7 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane styleClass="dialog">
-				<VBox spacing="10.0">
+				<VBox alignment="TOP_CENTER" spacing="10.0" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.bottomAnchor="0.0">
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>

@@ -12,7 +12,7 @@ import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.command.SymbolicModelcheckCommand;
-import de.prob.animator.domainobjects.EventB;
+import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
@@ -90,7 +90,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	}
 	
 	public void handleDeadlock(SymbolicCheckingFormulaItem item, boolean checkAll) {
-		IEvalElement constraint = new EventB(item.getCode(), FormulaExpand.EXPAND); 
+		IEvalElement constraint = new ClassicalB(item.getCode(), FormulaExpand.EXPAND);
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
 		symbolicChecker.checkItem(checker, item, checkAll);
 	}

@@ -59,8 +59,24 @@
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
 				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
                 <TableColumn fx:id="strategyColumn" minWidth="120.0" text="%verifications.common.columns.strategy" />
-				<TableColumn fx:id="nodesLimitColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.modelchecking.modelcheckingView.column.nodesLimit" />
-				<TableColumn fx:id="timeLimitColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}" text="%verifications.modelchecking.modelcheckingView.column.timeLimit" />
+				<TableColumn fx:id="nodesLimitColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}">
+					<graphic>
+						<Label text="%verifications.modelchecking.modelcheckingView.column.nodesLimit">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingView.column.hover.nodesLimit"/>
+							</tooltip>
+						</Label>
+					</graphic>
+				</TableColumn>
+				<TableColumn fx:id="timeLimitColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}">
+					<graphic>
+						<Label text="%verifications.modelchecking.modelcheckingView.column.timeLimit">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingView.column.hover.timeLimit"/>
+							</tooltip>
+						</Label>
+					</graphic>
+				</TableColumn>
 				<TableColumn fx:id="deadlockColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}">
 					<graphic>
 						<Label text="%verifications.modelchecking.modelcheckingView.column.deadlocks">
