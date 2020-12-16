@@ -23,14 +23,7 @@ final class MessageCell extends TreeTableCell<Object, Object> {
 			this.setText((String)item);
 			this.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
 			this.setGraphic(null);
-			// TODO Wrap text here to?
-			/*Text text = new Text((String) item);
-			text.wrappingWidthProperty().bind(this.getTableColumn().widthProperty());
-			this.setWrapText(true);
-			this.setGraphic(text);*/
 		} else if (item instanceof ErrorItem) {
-			/*this.setText(((ErrorItem)item).getMessage());
-			this.setTextOverrun(OverrunStyle.CENTER_ELLIPSIS);*/
 			this.setText(null);
 			Text text = new Text(((ErrorItem) item).getMessage());
 			text.wrappingWidthProperty().bind(this.getTableColumn().widthProperty().subtract(5));
