@@ -198,10 +198,12 @@ public abstract class AbstractSimulator {
                 List<Transition> transitions = currentState.getTransitions().stream()
                         .filter(trans -> trans.getName().equals(opName))
                         .collect(Collectors.toList());
-                Random rand = new Random();
-                Transition transition = transitions.get(rand.nextInt(transitions.size()));
-                newTrace = newTrace.add(transition);
-                delayRemainingTime(opConfig);
+                if(transitions.size() > 0) {
+                    Random rand = new Random();
+                    Transition transition = transitions.get(rand.nextInt(transitions.size()));
+                    newTrace = newTrace.add(transition);
+                    delayRemainingTime(opConfig);
+                }
             } else {
                 State finalCurrentState = trace.getCurrentState();
                 String predicate = choices.stream()

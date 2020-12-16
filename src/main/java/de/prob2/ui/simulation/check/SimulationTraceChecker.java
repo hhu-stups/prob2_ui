@@ -82,7 +82,9 @@ public class SimulationTraceChecker extends AbstractSimulator implements ITraceC
         String predicate = null;
 
         if(config == null) {
-            predicate = "1=1";
+            PredicateBuilder predicateBuilder = new PredicateBuilder();
+            buildPredicateFromTrace(predicateBuilder, persistentTransition);
+            predicate = predicateBuilder.toString();
         } else {
             for (VariableConfiguration config : choice) {
                 AbstractEvalResult probabilityResult = evaluateForSimulation(currentState, config.getProbability());
@@ -94,12 +96,7 @@ public class SimulationTraceChecker extends AbstractSimulator implements ITraceC
                         values.computeIfPresent(key, (k, v) -> evaluateForSimulation(currentState, values.get(key)).toString());
                     }
                     predicateBuilder.addMap(values);
-                    if (persistentTransition.getParameters() != null) {
-                        predicateBuilder.addMap(persistentTransition.getParameters());
-                    }
-                    if (persistentTransition.getDestinationStateVariables() != null) {
-                        predicateBuilder.addMap(persistentTransition.getDestinationStateVariables());
-                    }
+                    buildPredicateFromTrace(predicateBuilder, persistentTransition);
                     StateSpace stateSpace = currentState.getStateSpace();
                     final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.EXPAND);
                     final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
@@ -112,7 +109,6 @@ public class SimulationTraceChecker extends AbstractSimulator implements ITraceC
                     } catch (ExecuteOperationException e) {
                         System.out.println("TRACE REPLAY IN SIMULATION ERROR");
                     }
-
                 }
             }
         }
@@ -120,6 +116,15 @@ public class SimulationTraceChecker extends AbstractSimulator implements ITraceC
             result = TraceCheckResult.FAIL;
         }
         return predicate;
+    }
+
+    public void buildPredicateFromTrace(PredicateBuilder predicateBuilder, PersistentTransition persistentTransition) {
+        if (persistentTransition.getParameters() != null) {
+            predicateBuilder.addMap(persistentTransition.getParameters());
+        }
+        if (persistentTransition.getDestinationStateVariables() != null) {
+            predicateBuilder.addMap(persistentTransition.getDestinationStateVariables());
+        }
     }
 
     @Override
