@@ -1,22 +1,20 @@
 package de.prob2.ui.animation.tracereplay;
 
-import java.nio.file.Path;
-import java.util.Objects;
-
 import com.google.inject.Injector;
-
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
+import java.nio.file.Path;
+import java.util.Objects;
 
 public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
 	private final ObjectProperty<Checked> status;
@@ -125,7 +123,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		}
 	}
 
-	PersistentTrace getPersistentTrace() {
+	public PersistentTrace getPersistentTrace() {
 		return injector.getInstance(TraceFileHandler.class).load(this.getLocation());
 	}
 	

@@ -1,28 +1,169 @@
 package de.prob2.ui.simulation.check;
 
+import de.prob.animator.command.ExecuteOperationException;
+import de.prob.animator.command.GetOperationByPredicateCommand;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.check.tracereplay.ITraceChecker;
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.PersistentTransition;
+import de.prob.check.tracereplay.TraceReplay;
+import de.prob.formula.PredicateBuilder;
+import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.simulation.AbstractSimulator;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
+import de.prob2.ui.simulation.configuration.VariableChoice;
+import de.prob2.ui.simulation.configuration.VariableConfiguration;
 
-public class SimulationTraceChecker extends AbstractSimulator {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class SimulationTraceChecker extends AbstractSimulator implements ITraceChecker {
+
+    public enum TraceCheckResult {
+        NOT_FINISHED, SUCCESS, FAIL
+    }
 
     private final Trace trace;
 
-    public SimulationTraceChecker(Trace trace) {
+    private final ReplayTrace replayTrace;
+
+    private int counter;
+
+    private TraceCheckResult result;
+
+    public SimulationTraceChecker(Trace trace, ReplayTrace replayTrace) {
         this.trace = trace;
+        this.replayTrace = replayTrace;
+        this.counter = 0;
+        this.result = TraceCheckResult.NOT_FINISHED;
     }
 
     @Override
     public void run() {
-        Trace newTrace = setupBeforeSimulation(trace);
-        while(!finished) {
-            newTrace = simulationStep(newTrace);
+        try {
+            Trace newTrace = setupBeforeSimulation(trace);
+            while(!finished && counter < replayTrace.getPersistentTrace().getTransitionList().size()) {
+                newTrace = simulationStep(newTrace);
+            }
+        } catch (ExecuteOperationException e) {
+            System.out.println("TRACE REPLAY IN SIMULATION ERROR");
         }
     }
 
     @Override
     protected boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace) {
-        return false;
+        String opName = opConfig.getOpName();
+        State currentState = trace.getCurrentState();
+
+        AbstractEvalResult evalResult = evaluateForSimulation(currentState, opConfig.getProbability());
+
+        List<String> enabledOperations = trace.getNextTransitions().stream()
+                .map(Transition::getName)
+                .collect(Collectors.toList());
+        boolean equalsNextOperation = opConfig.getOpName().equals(replayTrace.getPersistentTrace().getTransitionList().get(counter).getOperationName());
+        double probability = Double.parseDouble(evalResult.toString());
+        return (Math.abs(probability - 1.0) < 0.0001 && !equalsNextOperation) || (equalsNextOperation &&  probability > 0.0) && enabledOperations.contains(opName);
     }
 
+    @Override
+    protected String chooseVariableValues(State currentState, List<VariableConfiguration> choice) {
+        PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
+        List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
+        PersistentTransition persistentTransition = transitionList.get(counter);
+
+        String predicate = null;
+
+        if(config == null) {
+            predicate = "1=1";
+        } else {
+            for (VariableConfiguration config : choice) {
+                AbstractEvalResult probabilityResult = evaluateForSimulation(currentState, config.getProbability());
+                double probability = Double.parseDouble(probabilityResult.toString());
+                if (probability > 0.0) {
+                    PredicateBuilder predicateBuilder = new PredicateBuilder();
+                    Map<String, String> values = new HashMap<>(config.getValues());
+                    for (String key : values.keySet()) {
+                        values.computeIfPresent(key, (k, v) -> evaluateForSimulation(currentState, values.get(key)).toString());
+                    }
+                    predicateBuilder.addMap(values);
+                    if (persistentTransition.getParameters() != null) {
+                        predicateBuilder.addMap(persistentTransition.getParameters());
+                    }
+                    if (persistentTransition.getDestinationStateVariables() != null) {
+                        predicateBuilder.addMap(persistentTransition.getDestinationStateVariables());
+                    }
+                    StateSpace stateSpace = currentState.getStateSpace();
+                    final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.EXPAND);
+                    final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
+                            currentState.getId(), persistentTransition.getOperationName(), pred, 1);
+                    try {
+                        stateSpace.execute(command);
+                        if(!command.hasErrors()) {
+                            predicate = predicateBuilder.toString();
+                        }
+                    } catch (ExecuteOperationException e) {
+                        System.out.println("TRACE REPLAY IN SIMULATION ERROR");
+                    }
+
+                }
+            }
+        }
+        if(predicate == null) {
+            result = TraceCheckResult.FAIL;
+        }
+        return predicate;
+    }
+
+    @Override
+    protected Trace executeBeforeInitialisation(String operation, List<VariableChoice> configs, State currentState, Trace trace) {
+        Trace res = super.executeBeforeInitialisation(operation, configs, currentState, trace);
+        if(res.getTransitionList().size() > trace.getTransitionList().size()) {
+            counter++;
+        }
+        return res;
+    }
+
+    @Override
+    protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
+        Trace res = super.executeOperation(opConfig, trace);
+        if(res.getTransitionList().size() > trace.getTransitionList().size()) {
+            counter++;
+        }
+        return res;
+    }
+
+    public TraceCheckResult check() {
+        if(counter == replayTrace.getPersistentTrace().getTransitionList().size()) {
+            this.result = TraceCheckResult.SUCCESS;
+        }
+        return result;
+    }
+
+    @Override
+    public void updateProgress(double value, Map<String, Object> replayInformation) {
+
+    }
+
+    @Override
+    public void setResult(boolean success, Map<String, Object> replayInformation) {
+
+    }
+
+    @Override
+    public void afterInterrupt() {
+
+    }
+
+    @Override
+    public void showError(TraceReplay.TraceReplayError errorType, Map<String, Object> replayInformation) {
+
+    }
 }

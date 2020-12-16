@@ -137,7 +137,7 @@ public abstract class AbstractSimulator {
             currentState = newTrace.getCurrentState();
             nextTransitions = newTrace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
             if(nextTransitions.contains("$initialise_machine")) {
-                newTrace = executeBeforeInitialisation("$initialise_machine", config.getSetupConfigurations(), currentState, newTrace);
+                newTrace = executeBeforeInitialisation("$initialise_machine", config.getInitialisationConfigurations(), currentState, newTrace);
             }
         }
 
@@ -238,34 +238,12 @@ public abstract class AbstractSimulator {
         }
     }
 
-    private Trace executeBeforeInitialisation(String operation, List<VariableChoice> configs, State currentState, Trace trace) {
+    protected Trace executeBeforeInitialisation(String operation, List<VariableChoice> configs, State currentState, Trace trace) {
         Transition nextTransition = currentState.findTransition(operation, joinPredicateFromConfig(currentState, configs));
         return trace.add(nextTransition);
     }
 
-    private String chooseVariableValues(State currentState, List<VariableConfiguration> choice) {
-        double ranDouble = Math.random();
-        double minimumProbability = 0.0;
-        VariableConfiguration chosenConfiguration = choice.get(0);
-
-        //Choose configuration for execution
-        for(VariableConfiguration config : choice) {
-            AbstractEvalResult probabilityResult = evaluateForSimulation(currentState, config.getProbability());
-            minimumProbability += Double.parseDouble(probabilityResult.toString());
-            chosenConfiguration = config;
-            if(minimumProbability > ranDouble) {
-                break;
-            }
-        }
-
-        Map<String, String> chosenValues = chosenConfiguration.getValues();
-        List<String> conjuncts = new ArrayList<>();
-        for(String key : chosenValues.keySet()) {
-            AbstractEvalResult evalResult = evaluateForSimulation(currentState, chosenValues.get(key));
-            conjuncts.add(key + " = " + evalResult.toString());
-        }
-        return String.join(" & ", conjuncts);
-    }
+    protected abstract String chooseVariableValues(State currentState, List<VariableConfiguration> choice);
 
     public SimulationConfiguration getConfig() {
         return config;

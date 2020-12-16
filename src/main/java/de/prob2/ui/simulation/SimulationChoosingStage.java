@@ -1,8 +1,11 @@
 package de.prob2.ui.simulation;
 
+import com.google.inject.Injector;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,14 +15,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class SimulationChoosingStage extends Stage {
 	@FXML
@@ -33,6 +37,12 @@ public class SimulationChoosingStage extends Stage {
 
 	@FXML
 	private VBox monteCarloBox;
+
+	@FXML
+	private HBox tracesBox;
+
+	@FXML
+	private ChoiceBox<ReplayTrace> cbTraces;
 
 	@FXML
 	private TextField tfTime;
@@ -49,6 +59,8 @@ public class SimulationChoosingStage extends Stage {
 	@FXML
 	private ChoiceBox<SimulationChoiceItem> simulationChoice;
 
+	private final Injector injector;
+
 	private final ResourceBundle bundle;
 
 	private final CurrentProject currentProject;
@@ -60,8 +72,9 @@ public class SimulationChoosingStage extends Stage {
 	private Path path;
 
 	@Inject
-	public SimulationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace,
+	public SimulationChoosingStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace,
 								   final SimulationItemHandler simulationItemHandler) {
+		this.injector = injector;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -81,9 +94,18 @@ public class SimulationChoosingStage extends Stage {
             changeGUIType(to.getSimulationType());
             this.sizeToScene();
         });
-        this.setOnShown(e -> {
+		cbTraces.setConverter(new StringConverter<ReplayTrace>() {
+			@Override
+			public String toString(ReplayTrace replayTrace) {
+				return replayTrace.getName();
+			}
 
-			File configFile = path.toFile();
+			@Override
+			public ReplayTrace fromString(String s) {
+				return cbTraces.getItems().stream()
+						.filter(t -> s.equals(t.getName()))
+						.collect(Collectors.toList()).get(0);
+			}
 		});
 	}
 
@@ -127,14 +149,18 @@ public class SimulationChoosingStage extends Stage {
                 information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
 				break;
 			case TRACE_REPLAY:
-				//TODO
+				information.put("TRACE", cbTraces.getValue());
 				break;
 		}
 		return information;
 	}
 
     private void changeGUIType(final SimulationType type) {
-        inputBox.getChildren().removeAll(timeBox, monteCarloBox);
+        inputBox.getChildren().removeAll(timeBox, monteCarloBox, tracesBox);
+        tfTime.clear();
+        tfSimulations.clear();
+        tfSteps.clear();
+        cbTraces.getItems().clear();
         switch (type) {
             case TIMING:
                 inputBox.getChildren().add(0, timeBox);
@@ -148,7 +174,8 @@ public class SimulationChoosingStage extends Stage {
                 inputBox.getChildren().add(0, monteCarloBox);
                 break;
             case TRACE_REPLAY:
-                //TODO
+            	cbTraces.getItems().addAll(injector.getInstance(TraceViewHandler.class).getTraces());
+            	inputBox.getChildren().add(0, tracesBox);
                 break;
         }
     }
@@ -162,6 +189,9 @@ public class SimulationChoosingStage extends Stage {
         btAdd.setText(bundle.getString("common.buttons.add"));
         btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
         tfTime.clear();
+        tfSimulations.clear();
+        tfSteps.clear();
+        cbTraces.getItems().clear();
 	}
 
 	public void setPath(Path path) {

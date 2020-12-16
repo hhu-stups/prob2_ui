@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+<?import javafx.scene.control.ListView?>
 <fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -29,6 +30,10 @@
 				<TextField fx:id="tfSteps" HBox.hgrow="NEVER"/>
 			</HBox>
 		</VBox>
+		<HBox fx:id="tracesBox" spacing="5.0">
+			<Label text="Traces:" />
+			<ChoiceBox fx:id="cbTraces"/>
+		</HBox>
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">

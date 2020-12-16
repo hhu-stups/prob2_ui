@@ -1,5 +1,7 @@
 package de.prob2.ui.simulation;
 
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,11 @@ public class SimulationCheckingConfiguration {
         List<String> configurations = new ArrayList<>();
         for(String key : information.keySet()) {
             Object obj = information.get(key);
-            configurations.add(key + " : " + obj.toString());
+            if(obj instanceof ReplayTrace) {
+                configurations.add(key + " : " + ((ReplayTrace) obj).getName());
+            } else {
+                configurations.add(key + " : " + obj.toString());
+            }
         }
         return String.join(", ", configurations);
     }

@@ -2,10 +2,12 @@ package de.prob2.ui.simulation;
 
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.check.SimulationTimeChecker;
+import de.prob2.ui.simulation.check.SimulationTraceChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 
@@ -81,6 +83,28 @@ public class SimulationItemHandler {
         }
     }
 
+    private void handleTraceReplay(SimulationItem item, boolean checkAll) {
+        Trace trace = currentTrace.get();
+        ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
+        SimulationTraceChecker traceChecker = new SimulationTraceChecker(trace, replayTrace);
+        traceChecker.initSimulator(path.toFile());
+        traceChecker.run();
+        SimulationTraceChecker.TraceCheckResult result = traceChecker.check();
+        switch (result) {
+            case SUCCESS:
+                item.setChecked(Checked.SUCCESS);
+                break;
+            case FAIL:
+                item.setChecked(Checked.FAIL);
+                break;
+            case NOT_FINISHED:
+                item.setChecked(Checked.NOT_CHECKED);
+                break;
+            default:
+                break;
+        }
+    }
+
     public void handleItem(SimulationItem item, boolean checkAll) {
         /*if(!item.selected()) {
             return;
@@ -99,6 +123,7 @@ public class SimulationItemHandler {
                 handleHypothesisTest(item, checkAll);
                 break;
             case TRACE_REPLAY:
+                handleTraceReplay(item, checkAll);
                 break;
             default:
                 break;
