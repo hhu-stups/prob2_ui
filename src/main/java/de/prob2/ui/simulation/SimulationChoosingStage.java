@@ -111,16 +111,49 @@ public class SimulationChoosingStage extends Stage {
 
 	private void setCheckListeners() {
         btAdd.setOnAction(e -> {
+			boolean validChoice = checkSelection();
+			if(!validChoice) {
+				return;
+			}
+			// TODO: Inform user
             this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
             this.close();
         });
         btCheck.setOnAction(e -> {
+        	boolean validChoice = checkSelection();
+        	if(!validChoice) {
+        		return;
+			}
+        	// TODO: Inform user
             final SimulationItem newItem = this.extractItem();
             final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), newItem);
             this.close();
             this.simulationItemHandler.handleItem(existingItem.orElse(newItem), false);
         });
     }
+
+    private boolean checkSelection() {
+		SimulationChoiceItem item = simulationChoice.getSelectionModel().getSelectedItem();
+		SimulationType type = item.getSimulationType();
+		switch (type) {
+			case TIMING:
+				return !tfTime.getText().isEmpty();
+			case TRACE_REPLAY:
+				return cbTraces.getSelectionModel().getSelectedItem() != null;
+			case MONTE_CARLO_SIMULATION:
+				return !(tfSteps.getText().isEmpty() && tfSimulations.getText().isEmpty());
+			case MODEL_CHECKING:
+				// TODO: Implement
+				break;
+			case PROBABILISTIC_MODEL_CHECKING:
+				// TODO: Implement
+				break;
+			default:
+				break;
+		}
+		return true;
+	}
+
 
 	private SimulationItem extractItem() {
 		return new SimulationItem(new SimulationCheckingConfiguration(this.extractType(), this.extractInformation()), "");
