@@ -3,6 +3,8 @@ package de.prob2.ui.simulation;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -28,9 +30,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
@@ -40,6 +45,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -47,6 +53,56 @@ import java.util.ResourceBundle;
 @FXMLInjected
 @Singleton
 public class SimulatorStage extends Stage {
+
+	private final class SimulationItemRow extends TableRow<SimulationItem> {
+
+		private SimulationItemRow() {
+			super();
+		}
+
+		@Override
+		protected void updateItem(final SimulationItem item, final boolean empty) {
+			super.updateItem(item, empty);
+			if(item != null && !empty) {
+				this.setContextMenu(null);
+				if(item.getType() == SimulationType.TRACE_REPLAY) {
+					ContextMenu contextMenu = new ContextMenu();
+					List<MenuItem> menuItems = FXCollections.observableArrayList();
+					MenuItem playItem = new MenuItem("Play");
+					Trace trace = new Trace(currentTrace.getStateSpace());
+
+					ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
+					TraceSimulator traceSimulator = new TraceSimulator(trace, replayTrace, currentTrace, injector.getInstance(DisablePropertyController.class));
+					traceSimulator.initSimulator(configurationPath.get().toFile());
+					traceSimulator.runningPropertyProperty().addListener((observable, from, to) -> {
+						if(to || simulator.timeProperty().get() >= 0) {
+							BigDecimal seconds = new BigDecimal(simulator.timeProperty().get()/1000.0f).setScale(2, RoundingMode.HALF_UP);
+							Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+						} else {
+							Platform.runLater(() -> lbTime.setText(""));
+						}
+					});
+					traceSimulator.timeProperty().addListener((observable, from, to) -> {
+						if(to.intValue() >= 0 || traceSimulator.runningPropertyProperty().get()) {
+							BigDecimal seconds = new BigDecimal(to.intValue()/1000.0f).setScale(2, RoundingMode.HALF_UP);
+							Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+						} else {
+							Platform.runLater(() -> lbTime.setText(""));
+						}
+					});
+					playItem.setOnAction(e -> {
+						trace.setExploreStateByDefault(false);
+						traceSimulator.run();
+						trace.setExploreStateByDefault(true);
+					});
+
+					menuItems.add(playItem);
+					contextMenu.getItems().addAll(menuItems);
+					this.setContextMenu(contextMenu);
+				}
+			}
+		}
+	}
 
 	@FXML
 	private Button btSimulate;
@@ -132,6 +188,8 @@ public class SimulatorStage extends Stage {
 		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		simulationTypeColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
 		simulationDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+
+		simulationItems.setRowFactory(table -> new SimulationItemRow());
 
 		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
