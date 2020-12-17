@@ -366,6 +366,7 @@ public class VisualisationController {
 		Scene visualisationScene = new Scene(new AnchorPane(visualisationContent));
 		visualizationStage = new Stage();
 		visualizationStage.setScene(visualisationScene);
+		visualizationStage.initOwner(stageManager.getMainStage());
 		stageManager.register(visualizationStage, null);
 		visualizationStage.setResizable(true);
 		visualizationStage.setTitle(visualisation.get().getName());

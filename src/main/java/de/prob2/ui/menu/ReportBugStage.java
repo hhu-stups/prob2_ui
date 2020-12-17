@@ -18,6 +18,7 @@ public class ReportBugStage extends Stage {
 		this.setScene(new Scene(webView));
 		this.setMinWidth(640);
 		this.setMinHeight(480);
+		this.initOwner(stageManager.getMainStage());
 		stageManager.register(this, this.getClass().getName());
 	}
 }
