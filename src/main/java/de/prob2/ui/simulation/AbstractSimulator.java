@@ -126,7 +126,7 @@ public abstract class AbstractSimulator {
         return newTrace;
     }
 
-    protected Trace setupBeforeSimulation(Trace trace) {
+    public Trace setupBeforeSimulation(Trace trace) {
         Trace newTrace = trace;
         State currentState = newTrace.getCurrentState();
         if(!currentState.isInitialised()) {

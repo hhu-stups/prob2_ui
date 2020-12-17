@@ -33,7 +33,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     protected int counter;
 
     public AbstractTraceSimulator(Trace trace, ReplayTrace replayTrace) {
-        this.trace = trace;
+        this.trace = new Trace(trace.getStateSpace());
         this.replayTrace = replayTrace;
         this.counter = 0;
     }

@@ -56,6 +56,10 @@ public class SimulatorStage extends Stage {
 
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
 
+		private ChangeListener<Boolean> traceSimulatorRunningListener;
+
+		private ChangeListener<Number> traceSimulatorTimeListener;
+
 		private SimulationItemRow() {
 			super();
 		}
@@ -72,26 +76,43 @@ public class SimulatorStage extends Stage {
 					Trace trace = new Trace(currentTrace.getStateSpace());
 
 					ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
-					TraceSimulator traceSimulator = new TraceSimulator(trace, replayTrace, currentTrace, injector.getInstance(DisablePropertyController.class));
+					TraceSimulator traceSimulator = new TraceSimulator(trace, replayTrace, injector.getInstance(Scheduler.class), currentTrace);
 					traceSimulator.initSimulator(configurationPath.get().toFile());
-					traceSimulator.runningPropertyProperty().addListener((observable, from, to) -> {
-						if(to || simulator.timeProperty().get() >= 0) {
-							BigDecimal seconds = new BigDecimal(simulator.timeProperty().get()/1000.0f).setScale(2, RoundingMode.HALF_UP);
+					traceSimulator.runningPropertyProperty().addListener(schedulerRunningListener);
+					traceSimulator.timeProperty().addListener(schedulerTimeListener);
+					traceSimulatorRunningListener = (observable, from, to) -> {
+						if(to || traceSimulator.timeProperty().get() >= 0) {
+							BigDecimal seconds = new BigDecimal(traceSimulator.timeProperty().get()/1000.0f).setScale(2, RoundingMode.HALF_UP);
 							Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 						} else {
 							Platform.runLater(() -> lbTime.setText(""));
 						}
-					});
-					traceSimulator.timeProperty().addListener((observable, from, to) -> {
+						if(traceSimulator.isFinished()) {
+							traceSimulator.runningPropertyProperty().removeListener(traceSimulatorRunningListener);
+							traceSimulator.timeProperty().removeListener(traceSimulatorTimeListener);
+							traceSimulator.runningPropertyProperty().removeListener(schedulerRunningListener);
+							traceSimulator.timeProperty().removeListener(schedulerTimeListener);
+							simulator.runningPropertyProperty().removeListener(traceSimulatorRunningListener);
+							simulator.timeProperty().removeListener(traceSimulatorTimeListener);
+						}
+					};
+					traceSimulatorTimeListener = (observable, from, to) -> {
 						if(to.intValue() >= 0 || traceSimulator.runningPropertyProperty().get()) {
 							BigDecimal seconds = new BigDecimal(to.intValue()/1000.0f).setScale(2, RoundingMode.HALF_UP);
 							Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 						} else {
 							Platform.runLater(() -> lbTime.setText(""));
 						}
-					});
+					};
+
+					traceSimulator.runningPropertyProperty().addListener(traceSimulatorRunningListener);
+					traceSimulator.timeProperty().addListener(traceSimulatorTimeListener);
+					simulator.runningPropertyProperty().addListener(traceSimulatorRunningListener);
+					simulator.timeProperty().addListener(traceSimulatorTimeListener);
+
 					playItem.setOnAction(e -> {
 						trace.setExploreStateByDefault(false);
+						injector.getInstance(Scheduler.class).setSimulator(traceSimulator);
 						traceSimulator.run();
 						trace.setExploreStateByDefault(true);
 					});
@@ -103,6 +124,8 @@ public class SimulatorStage extends Stage {
 			}
 		}
 	}
+
+
 
 	@FXML
 	private Button btSimulate;
@@ -144,6 +167,10 @@ public class SimulatorStage extends Stage {
 
     private final ObjectProperty<Path> configurationPath;
 
+    private ChangeListener<Boolean> schedulerRunningListener;
+
+    private ChangeListener<Number> schedulerTimeListener;
+
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final Simulator simulator, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
@@ -163,9 +190,9 @@ public class SimulatorStage extends Stage {
 	public void initialize() {
 		simulator.runningPropertyProperty().addListener((observable, from, to) -> {
 			if(to) {
-				btSimulate.setText(bundle.getString("simulation.button.stop"));
+				Platform.runLater(() -> btSimulate.setText(bundle.getString("simulation.button.stop")));
 			} else {
-				btSimulate.setText(bundle.getString("simulation.button.start"));
+				Platform.runLater(() -> btSimulate.setText(bundle.getString("simulation.button.start")));
 			}
 		});
 		btSimulate.disableProperty().bind(configurationPath.isNull());
@@ -197,28 +224,34 @@ public class SimulatorStage extends Stage {
 			simulationDebugItems.getItems().clear();
 			simulationDebugItems.refresh();
 		});
-		this.simulator.runningPropertyProperty().addListener((observable, from, to) -> {
+
+		schedulerRunningListener = (observable, from, to) -> {
 			if(to || simulator.timeProperty().get() >= 0) {
 				BigDecimal seconds = new BigDecimal(simulator.timeProperty().get()/1000.0f).setScale(2, RoundingMode.HALF_UP);
 				Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 			} else {
 				Platform.runLater(() -> lbTime.setText(""));
 			}
-		});
-		this.simulator.timeProperty().addListener((observable, from, to) -> {
+		};
+
+		schedulerTimeListener = (observable, from, to) -> {
 			if(to.intValue() >= 0 || this.simulator.runningPropertyProperty().get()) {
 				BigDecimal seconds = new BigDecimal(to.intValue()/1000.0f).setScale(2, RoundingMode.HALF_UP);
 				Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 			} else {
 				Platform.runLater(() -> lbTime.setText(""));
 			}
-		});
+		};
+
+		this.simulator.runningPropertyProperty().addListener(schedulerRunningListener);
+		this.simulator.timeProperty().addListener(schedulerTimeListener);
 	}
 
 
 	@FXML
 	public void simulate() {
 		if(!simulator.isRunning()) {
+			injector.getInstance(Scheduler.class).setSimulator(simulator);
 			simulator.run();
 		} else {
 			simulator.stop();
