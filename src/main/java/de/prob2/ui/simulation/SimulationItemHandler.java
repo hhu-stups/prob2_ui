@@ -5,9 +5,9 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.simulation.check.SimulationHypothesisChecker;
-import de.prob2.ui.simulation.check.SimulationTimeChecker;
-import de.prob2.ui.simulation.check.SimulationTraceChecker;
+import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
+import de.prob2.ui.simulation.simulators.check.SimulationTimeChecker;
+import de.prob2.ui.simulation.simulators.check.SimulationTraceChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 

@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.simulators;
 
 import de.prob.statespace.Trace;
 import javafx.beans.property.BooleanProperty;

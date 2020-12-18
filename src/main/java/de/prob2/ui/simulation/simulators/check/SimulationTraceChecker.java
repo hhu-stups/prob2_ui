@@ -1,10 +1,10 @@
-package de.prob2.ui.simulation.check;
+package de.prob2.ui.simulation.simulators.check;
 
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.check.tracereplay.ITraceChecker;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.simulation.AbstractTraceSimulator;
+import de.prob2.ui.simulation.simulators.AbstractTraceSimulator;
 
 public class SimulationTraceChecker extends AbstractTraceSimulator implements ITraceChecker {
 

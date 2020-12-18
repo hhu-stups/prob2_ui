@@ -24,7 +24,7 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.simulation.Simulator;
+import de.prob2.ui.simulation.simulators.Simulator;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.Event;

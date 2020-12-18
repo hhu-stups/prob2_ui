@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.simulators;
 
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
@@ -61,7 +61,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
 
         String predicate = null;
 
-        if(config == null) {
+        if(choice == null) {
             PredicateBuilder predicateBuilder = new PredicateBuilder();
             buildPredicateFromTrace(predicateBuilder, persistentTransition);
             predicate = predicateBuilder.toString();
@@ -96,6 +96,49 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
             this.finished = false;
         }
         return predicate;
+    }
+
+    @Override
+    public Trace executeNextOperation(OperationConfiguration opConfig, Trace trace) {
+        String opName = opConfig.getOpName();
+        List<VariableChoice> choices = opConfig.getVariableChoices();
+        State currentState = trace.getCurrentState();
+        Trace newTrace = trace;
+
+        PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
+        List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
+        PersistentTransition persistentTransition = transitionList.get(counter);
+
+        if(choices == null) {
+
+            List<Transition> transitions = currentState.getTransitions().stream()
+                    .filter(trans -> trans.getName().equals(opName) && opName.equals(persistentTransition.getOperationName()))
+                    .collect(Collectors.toList());
+            if(transitions.size() > 0) {
+                PredicateBuilder predicateBuilder = new PredicateBuilder();
+                buildPredicateFromTrace(predicateBuilder, persistentTransition);
+                StateSpace stateSpace = trace.getStateSpace();
+                final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.EXPAND);
+                final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
+                        currentState.getId(), persistentTransition.getOperationName(), pred, 1);
+
+                stateSpace.execute(command);
+                newTrace = newTrace.add(command.getNewTransitions().get(0));
+                delayRemainingTime(opConfig);
+            }
+        } else {
+            State finalCurrentState = newTrace.getCurrentState();
+            String predicate = choices.stream()
+                    .map(VariableChoice::getChoice)
+                    .map(choice -> chooseVariableValues(finalCurrentState, choice))
+                    .collect(Collectors.joining(" & "));
+            if(finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, opName, predicate)) {
+                Transition transition = finalCurrentState.findTransition(opName, predicate);
+                newTrace = newTrace.add(transition);
+                delayRemainingTime(opConfig);
+            }
+        }
+        return newTrace;
     }
 
     public void buildPredicateFromTrace(PredicateBuilder predicateBuilder, PersistentTransition persistentTransition) {

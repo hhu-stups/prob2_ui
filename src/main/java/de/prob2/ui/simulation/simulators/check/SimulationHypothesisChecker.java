@@ -1,15 +1,10 @@
-package de.prob2.ui.simulation.check;
+package de.prob2.ui.simulation.simulators.check;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.ProbabilityBasedSimulator;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
+import de.prob2.ui.simulation.simulators.ProbabilityBasedSimulator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SimulationHypothesisChecker extends ProbabilityBasedSimulator {
 
@@ -40,6 +35,7 @@ public class SimulationHypothesisChecker extends ProbabilityBasedSimulator {
     @Override
     public void run() {
         Trace startTrace = setupBeforeSimulation(trace);
+        startTrace.setExploreStateByDefault(false);
         for(int i = 0; i < numberExecutions; i++) {
             Trace newTrace = startTrace;
             int stepCounter = 0;
@@ -49,22 +45,10 @@ public class SimulationHypothesisChecker extends ProbabilityBasedSimulator {
                 stepCounter += nextTrace.getTransitionList().size() - newTrace.getTransitionList().size();
                 newTrace = nextTrace;
                 Trace addedTrace = newTrace.gotoPosition(newTrace.getTransitionList().size() - 1 - (stepCounter - numberStepsPerExecutions));
+                addedTrace.setExploreStateByDefault(true);
                 result.add(addedTrace);
             }
         }
-    }
-
-    protected boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace) {
-        String opName = opConfig.getOpName();
-        State currentState = trace.getCurrentState();
-
-        double ranDouble = Math.random();
-        AbstractEvalResult evalResult = evaluateForSimulation(currentState, opConfig.getProbability());
-
-        List<String> enabledOperations = trace.getNextTransitions().stream()
-                .map(Transition::getName)
-                .collect(Collectors.toList());
-        return Double.parseDouble(evalResult.toString()) > ranDouble && enabledOperations.contains(opName);
     }
 
     public HypothesisCheckResult check() {

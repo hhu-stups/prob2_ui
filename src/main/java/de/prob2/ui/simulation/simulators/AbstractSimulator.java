@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.simulators;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSimulator {
@@ -48,7 +47,7 @@ public abstract class AbstractSimulator {
         this.time = new SimpleIntegerProperty(0);
     }
 
-    protected void initSimulator(File configFile) {
+    public void initSimulator(File configFile) {
         this.config = null;
         try {
             this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
@@ -151,14 +150,10 @@ public abstract class AbstractSimulator {
     }
 
     protected Trace executeOperations(Trace trace) {
-        //select operations where time <= 0
+        //select operations where time <= 0 and sort after priority (less number means higher priority)
         List<OperationConfiguration> nextOperations = config.getOperationConfigurations().stream()
                 .filter(opConfig -> operationToRemainingTime.get(opConfig.getOpName()) <= 0)
-                .collect(Collectors.toList());
-
-
-        //sort operations after priority (less number means higher priority)
-        nextOperations.sort(Comparator.comparingInt(OperationConfiguration::getPriority));
+                .sorted(Comparator.comparingInt(OperationConfiguration::getPriority)).collect(Collectors.toList());
 
         Trace newTrace = trace;
 
@@ -187,40 +182,18 @@ public abstract class AbstractSimulator {
         operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
 
         Trace newTrace = trace;
-        State currentState = trace.getCurrentState();
 
         //check whether operation is executable and calculate probability whether it should be executed
         if(chooseNextOperation(opConfig, newTrace)) {
-            List<VariableChoice> choices = opConfig.getVariableChoices();
-
             //execute operation and append to trace
-            if(choices == null) {
-                List<Transition> transitions = currentState.getTransitions().stream()
-                        .filter(trans -> trans.getName().equals(opName))
-                        .collect(Collectors.toList());
-                if(transitions.size() > 0) {
-                    Random rand = new Random();
-                    Transition transition = transitions.get(rand.nextInt(transitions.size()));
-                    newTrace = newTrace.add(transition);
-                    delayRemainingTime(opConfig);
-                }
-            } else {
-                State finalCurrentState = trace.getCurrentState();
-                String predicate = choices.stream()
-                        .map(VariableChoice::getChoice)
-                        .map(choice -> chooseVariableValues(finalCurrentState, choice))
-                        .collect(Collectors.joining(" & "));
-                if(finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, opName, predicate)) {
-                    Transition transition = finalCurrentState.findTransition(opName, predicate);
-                    newTrace = newTrace.add(transition);
-                    delayRemainingTime(opConfig);
-                }
-            }
+            newTrace = executeNextOperation(opConfig, newTrace);
         }
         return newTrace;
     }
 
-    private void delayRemainingTime(OperationConfiguration opConfig) {
+    protected abstract Trace executeNextOperation(OperationConfiguration opConfig, Trace trace);
+
+    protected void delayRemainingTime(OperationConfiguration opConfig) {
         Map<String, Integer> delay = opConfig.getDelay();
         if(delay != null) {
             for (String key : delay.keySet()) {
