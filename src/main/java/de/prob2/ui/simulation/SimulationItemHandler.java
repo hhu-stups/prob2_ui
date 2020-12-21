@@ -6,6 +6,7 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
+import de.prob2.ui.simulation.simulators.check.SimulationModelChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationTimeChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationTraceChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -47,6 +48,26 @@ public class SimulationItemHandler {
         timeChecker.initSimulator(path.toFile());
         timeChecker.run();
         SimulationTimeChecker.TimeCheckResult result = timeChecker.check();
+        switch (result) {
+            case SUCCESS:
+                item.setChecked(Checked.SUCCESS);
+                break;
+            case FAIL:
+                item.setChecked(Checked.FAIL);
+                break;
+            case NOT_FINISHED:
+                item.setChecked(Checked.NOT_CHECKED);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void handleModelChecking(SimulationItem item, boolean checkAll) {
+        SimulationModelChecker modelChecker = new SimulationModelChecker(currentTrace.getStateSpace());
+        modelChecker.initSimulator(path.toFile());
+        modelChecker.check();
+        SimulationModelChecker.ModelCheckResult result = modelChecker.getResult();
         switch (result) {
             case SUCCESS:
                 item.setChecked(Checked.SUCCESS);
@@ -116,6 +137,7 @@ public class SimulationItemHandler {
                 handleTiming(item, checkAll);
                 break;
             case MODEL_CHECKING:
+                handleModelChecking(item, checkAll);
                 break;
             case PROBABILISTIC_MODEL_CHECKING:
                 break;

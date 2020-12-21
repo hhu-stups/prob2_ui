@@ -96,7 +96,7 @@ public abstract class AbstractSimulator {
     public void updateRemainingTime() {
         this.time.set(this.time.get() + this.interval);
         for(String key : operationToRemainingTime.keySet()) {
-            operationToRemainingTime.computeIfPresent(key, (k, v) -> v - interval);
+            operationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(0, v - interval));
         }
     }
 
@@ -110,11 +110,7 @@ public abstract class AbstractSimulator {
         State currentState = newTrace.getCurrentState();
         if(currentState.isInitialised()) {
             boolean endingTimeReached = config.getEndingTime() > 0 && time.get() >= config.getEndingTime();
-            boolean endingConditionReached = false;
-            if(!config.getEndingCondition().isEmpty()) {
-                AbstractEvalResult endingConditionEvalResult = evaluateForSimulation(currentState, config.getEndingCondition());
-                endingConditionReached = "TRUE".equals(endingConditionEvalResult.toString());
-            }
+            boolean endingConditionReached = endingConditionReached(newTrace);
             if (endingTimeReached || endingConditionReached) {
                 finishSimulation();
                 return newTrace;
@@ -158,15 +154,20 @@ public abstract class AbstractSimulator {
         Trace newTrace = trace;
 
         for(OperationConfiguration opConfig : nextOperations) {
-            if(!config.getEndingCondition().isEmpty()) {
-                AbstractEvalResult endingConditionEvalResult = evaluateForSimulation(newTrace.getCurrentState(), config.getEndingCondition());
-                if ("TRUE".equals(endingConditionEvalResult.toString())) {
-                    return newTrace;
-                }
+            if (endingConditionReached(newTrace)) {
+                break;
             }
             newTrace = executeOperation(opConfig, newTrace);
         }
         return newTrace;
+    }
+
+    private boolean endingConditionReached(Trace trace) {
+        if(!config.getEndingCondition().isEmpty()) {
+            AbstractEvalResult endingConditionEvalResult = evaluateForSimulation(trace.getCurrentState(), config.getEndingCondition());
+            return "TRUE".equals(endingConditionEvalResult.toString());
+        }
+        return false;
     }
 
     protected abstract boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace);

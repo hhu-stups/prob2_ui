@@ -39,6 +39,9 @@ public class SimulationCheckingConfiguration {
                 configurations.add(key + " : " + obj.toString());
             }
         }
-        return String.join(", ", configurations);
+        if(!configurations.isEmpty()) {
+            return String.join(", ", configurations);
+        }
+        return type.name();
     }
 }
