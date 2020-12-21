@@ -19,8 +19,9 @@ build:
 clean:
 	rm out.prop
 
-
-DMGFILE=build/distributions/ProB2-UI-1.0.1.dmg
+# version of ProB2UI without optional SNAPSHOT suffixes:
+PROB2UI_VERSION=1.0.1
+DMGFILE=build/distributions/ProB2-UI-$(PROB2UI_VERSION).dmg
 ZIP_FILE=build/distributions/ProB2-UI-ForNotarization.zip
 # app file available after mounting dmg; could be done by command-line command
 VOLUME=/Volumes/ProB2-UI/
@@ -43,7 +44,8 @@ $(APPFILE): $(DMGFILE)
 	@echo "Unmounting $(VOLUME)"
 	sudo hdiutil unmount $(VOLUME)
 
-VERSION=1.0.1-SNAPSHOT
+# Version which is used for JAR inside App:
+VERSION=$(PROB2UI_VERSION)-SNAPSHOT
 PROB2APP_CONTENTS = $(APPFILE)/Contents/
 JAR_TO_SIGN = $(BUILDDIR)jar-to-sign
 $(JAR_TO_SIGN): $(APPFILE)
@@ -58,14 +60,19 @@ CODESIGN = codesign --timestamp -f -s $(ADC_CERTIFICATE_NAME)
 SIGNREM = codesign --remove-signature
 macos_sign: $(JAR_TO_SIGN)
 	@echo "Step 3: Signing"
-	@echo "3a: Signing app binary"
-	@echo "3b: Signing Java and JavaFX dylibs inside unpacked JAR $(JAR_TO_SIGN)"
+	@echo "3a: Signing Java and JavaFX dylibs inside unpacked JAR $(JAR_TO_SIGN)"
 	for file in $(libs); do $(CODESIGNRT2) $(JAR_TO_SIGN)/$$file ; done
 	$(CODESIGNRT2) "$(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib"
+	make makejar
+	@echo "3c: Signing app binary"
 	$(CODESIGNRT2) "$(PROB2APP_CONTENTS)MacOS/ProB2-UI"
+makejar:
+	@echo "Step 3b: Repacking the JAR with signed components"
+	rm -f $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)-mac.jar
+	jar cvf $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)-mac.jar -C $(JAR_TO_SIGN)/ .
 
 check:
-	@echo "3c: Check signing"
+	@echo "4: Check signing"
 	codesign -dvvv $(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib
 	codesign -vv --deep-verify $(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib
 	codesign -d --entitlements :- $(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib
@@ -73,12 +80,8 @@ check:
 	for file in $(libs); do codesign -vv --deep-verify $(JAR_TO_SIGN)/$$file ; done
 	codesign -vv --deep-verify $(PROB2APP_CONTENTS)MacOS/ProB2-UI
 
-makejar:
-	@echo "Step 4: Repacking the JAR with signed components"
-	rm -f $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)-mac.jar
-	jar cvf $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)-mac.jar -C $(JAR_TO_SIGN)/ .
 
-$(ZIP_FILE):
+$(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/ProB2-UI
 	@echo "Step 5: Putting APP into a zipfile for Apple's notarization"
 	/usr/bin/ditto -c -k --keepParent "$(APPFILE)" "$(ZIP_FILE)"
 	
@@ -92,18 +95,18 @@ notarize-app: $(ZIP_FILE)
                --file $(ZIP_FILE)
 
 
-HASH=2dba0ae1-6cb8-4e7b-9e46-7d194ea56305
+HASH=ed62183a-08eb-41d6-a80d-9d82bba850b0
 info:
 	@echo "Step 6b: Obtaining information about a particular notarization request"
 	xcrun altool --notarization-info $(HASH) -u $(AC_USERNAME)
 
 staple-app:
-	@echo "Step 7: after successful notarization: Stapling the APP"
+	@echo "Step 7: after successful notarization: Stapling the APP $(APPFILE)"
 	xcrun stapler staple -v $(APPFILE)
 verify-app:
 	codesign -dvvv $(APPFILE)
 	codesign -vv --deep-verify $(APPFILE)
-	@echo "Step 8: check stapling of the APP"
+	@echo "Step 8: check stapling of the APP $(APPFILE)"
 	spctl --assess --type execute --verbose $(APPFILE)
 
 
