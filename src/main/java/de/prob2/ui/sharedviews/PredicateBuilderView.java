@@ -131,7 +131,9 @@ public final class PredicateBuilderView extends VBox {
 		final PredicateBuilder builder = new PredicateBuilder();
 		final Map<String, String> filteredItems = new LinkedHashMap<>();
 		this.items.forEach(item -> {
-			filteredItems.put(item.getName(), item.getValue());
+			if(!item.getValue().isEmpty()) {
+				filteredItems.put(item.getName(), item.getValue());
+			}
 		});
 		builder.addMap(filteredItems);
 		if (!this.predicateField.getText().isEmpty()) {
