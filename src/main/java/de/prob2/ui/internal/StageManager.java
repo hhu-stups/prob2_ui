@@ -1,31 +1,14 @@
 package de.prob2.ui.internal;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.WeakHashMap;
-
-import javax.annotation.Nullable;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
@@ -46,9 +29,22 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * This singleton provides common methods for creating and initializing views,
@@ -107,9 +103,7 @@ public final class StageManager {
 		loader.setLocation(fxmlUrl);
 		loader.setRoot(controller);
 		loader.setController(controller);
-		if (controller instanceof Stage) {
-			((Stage) controller).initOwner(this.getMainStage());
-		} else if (controller instanceof Dialog<?>) {
+		if (controller instanceof Dialog<?>) {
 			((Dialog<?>) controller).initOwner(this.getMainStage());
 		}
 		try {
