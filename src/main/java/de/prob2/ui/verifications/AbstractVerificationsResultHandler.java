@@ -1,10 +1,11 @@
 package de.prob2.ui.verifications;
 
-import java.util.ResourceBundle;
-
+import de.prob.animator.CommandInterruptedException;
 import de.prob.check.IModelCheckingResult;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
+
+import java.util.ResourceBundle;
 
 public abstract class AbstractVerificationsResultHandler extends AbstractResultHandler {
 	
@@ -38,8 +39,14 @@ public abstract class AbstractVerificationsResultHandler extends AbstractResultH
 						"common.result.message", ((IModelCheckingResult) result).getMessage());
 			}
 		} else if(isInterrupted(result)) {
-			return new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
-				"common.result.message", ((IModelCheckingResult) result).getMessage());
+			if(result instanceof CommandInterruptedException) {
+				return new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
+						"common.result.message", ((CommandInterruptedException) result).getMessage());
+			} else {
+				return new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
+						"common.result.message", ((IModelCheckingResult) result).getMessage());
+			}
+
 		} else {
 			return null;
 		}

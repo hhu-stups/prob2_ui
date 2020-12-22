@@ -1,5 +1,20 @@
 package de.prob2.ui.sharedviews;
 
+import com.google.inject.Inject;
+import de.prob.formula.PredicateBuilder;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.StageManager;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,26 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-
-import com.google.inject.Inject;
-
-import de.prob.formula.PredicateBuilder;
-import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.StageManager;
-
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.VBox;
-import org.pf4j.PluginWrapper;
 
 @FXMLInjected
 public final class PredicateBuilderView extends VBox {
