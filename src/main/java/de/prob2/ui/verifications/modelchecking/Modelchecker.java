@@ -22,8 +22,8 @@ import javafx.collections.FXCollections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -52,7 +52,7 @@ public class Modelchecker {
 		this.currentTrace = currentTrace;
 		this.statsView = statsView;
 		this.injector = injector;
-		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new HashSet<>()));
+		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new CopyOnWriteArraySet<>()));
 		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
 		stopActions.add(this.executor::shutdownNow);
 	}
