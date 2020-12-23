@@ -16,6 +16,7 @@ import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.VariableChoice;
 import de.prob2.ui.simulation.configuration.VariableConfiguration;
+import de.prob2.ui.simulation.simulators.AbstractSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.simulation.simulators.TraceSimulator;
@@ -48,20 +49,25 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 @FXMLInjected
 @Singleton
 public class SimulatorStage extends Stage {
 
+	private int time;
+
+	private Timer timer;
+
+	private AbstractSimulator lastSimulator;
+
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
-
-		private ChangeListener<Boolean> traceSimulatorRunningListener;
-
-		private ChangeListener<Number> traceSimulatorTimeListener;
 
 		private SimulationItemRow() {
 			super();
@@ -81,42 +87,12 @@ public class SimulatorStage extends Stage {
 					ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
 					TraceSimulator traceSimulator = new TraceSimulator(trace, replayTrace, injector.getInstance(Scheduler.class), currentTrace);
 					traceSimulator.initSimulator(configurationPath.get().toFile());
-					traceSimulator.runningPropertyProperty().addListener(schedulerRunningListener);
-					traceSimulator.timeProperty().addListener(schedulerTimeListener);
-					traceSimulatorRunningListener = (observable, from, to) -> {
-						if(to || traceSimulator.timeProperty().get() >= 0) {
-							BigDecimal seconds = new BigDecimal(traceSimulator.timeProperty().get()/1000.0f).setScale(2, RoundingMode.HALF_UP);
-							Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
-						} else {
-							Platform.runLater(() -> lbTime.setText(""));
-						}
-						if(traceSimulator.isFinished()) {
-							traceSimulator.runningPropertyProperty().removeListener(traceSimulatorRunningListener);
-							traceSimulator.timeProperty().removeListener(traceSimulatorTimeListener);
-							traceSimulator.runningPropertyProperty().removeListener(schedulerRunningListener);
-							traceSimulator.timeProperty().removeListener(schedulerTimeListener);
-							simulator.runningPropertyProperty().removeListener(traceSimulatorRunningListener);
-							simulator.timeProperty().removeListener(traceSimulatorTimeListener);
-						}
-					};
-					traceSimulatorTimeListener = (observable, from, to) -> {
-						if(to.intValue() >= 0 || traceSimulator.runningPropertyProperty().get()) {
-							BigDecimal seconds = new BigDecimal(to.intValue()/1000.0f).setScale(2, RoundingMode.HALF_UP);
-							Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
-						} else {
-							Platform.runLater(() -> lbTime.setText(""));
-						}
-					};
-
-					traceSimulator.runningPropertyProperty().addListener(traceSimulatorRunningListener);
-					traceSimulator.timeProperty().addListener(traceSimulatorTimeListener);
-					simulator.runningPropertyProperty().addListener(traceSimulatorRunningListener);
-					simulator.timeProperty().addListener(traceSimulatorTimeListener);
 
 					playItem.setOnAction(e -> {
 						trace.setExploreStateByDefault(false);
 						injector.getInstance(Scheduler.class).setSimulator(traceSimulator);
 						traceSimulator.run();
+						startTimer(traceSimulator);
 						trace.setExploreStateByDefault(true);
 					});
 
@@ -170,10 +146,6 @@ public class SimulatorStage extends Stage {
 
     private final ObjectProperty<Path> configurationPath;
 
-    private ChangeListener<Boolean> schedulerRunningListener;
-
-    private ChangeListener<Number> schedulerTimeListener;
-
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final Simulator simulator, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
@@ -183,9 +155,12 @@ public class SimulatorStage extends Stage {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 	    this.simulator = simulator;
+	    this.lastSimulator = simulator;
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
         this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
+        this.time = 0;
+        this.timer = new Timer();
 		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
 	}
 
@@ -227,27 +202,6 @@ public class SimulatorStage extends Stage {
 			simulationDebugItems.getItems().clear();
 			simulationDebugItems.refresh();
 		});
-
-		schedulerRunningListener = (observable, from, to) -> {
-			if(to || simulator.timeProperty().get() >= 0) {
-				BigDecimal seconds = new BigDecimal(simulator.timeProperty().get()/1000.0f).setScale(2, RoundingMode.HALF_UP);
-				Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
-			} else {
-				Platform.runLater(() -> lbTime.setText(""));
-			}
-		};
-
-		schedulerTimeListener = (observable, from, to) -> {
-			if(to.intValue() >= 0 || this.simulator.runningPropertyProperty().get()) {
-				BigDecimal seconds = new BigDecimal(to.intValue()/1000.0f).setScale(2, RoundingMode.HALF_UP);
-				Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
-			} else {
-				Platform.runLater(() -> lbTime.setText(""));
-			}
-		};
-
-		this.simulator.runningPropertyProperty().addListener(schedulerRunningListener);
-		this.simulator.timeProperty().addListener(schedulerTimeListener);
 	}
 
 
@@ -255,8 +209,16 @@ public class SimulatorStage extends Stage {
 	public void simulate() {
 		if(!simulator.isRunning()) {
 			injector.getInstance(Scheduler.class).setSimulator(simulator);
+			if(lastSimulator == null || !lastSimulator.equals(simulator)) {
+				this.time = 0;
+				simulator.initSimulator(configurationPath.get().toFile());
+			}
 			simulator.run();
+			startTimer(simulator);
 		} else {
+			cancelTimer();
+			simulator.updateRemainingTime(time - simulator.timeProperty().get());
+			simulator.updateDelay();
 			simulator.stop();
 		}
 	}
@@ -273,6 +235,7 @@ public class SimulatorStage extends Stage {
             configurationPath.set(path);
             File configFile = path.toFile();
 			lbTime.setText("");
+			this.time = 0;
             simulator.initSimulator(configFile);
             loadSimulationItems();
         }
@@ -330,6 +293,34 @@ public class SimulatorStage extends Stage {
 		choosingStage.reset();
 		choosingStage.setPath(configurationPath.get());
 		choosingStage.showAndWait();
+	}
+
+	private void startTimer(AbstractSimulator simulator) {
+		cancelTimer();
+		lastSimulator = simulator;
+		List<Boolean> firstStart = Arrays.asList(true);
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				if(firstStart.get(0)) {
+					time = simulator.timeProperty().get();
+					firstStart.set(0, false);
+				} else if(!simulator.isFinished()) {
+					time += 100;
+					BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(2, RoundingMode.HALF_UP);
+					Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+				}
+			}
+		};
+		this.timer = new Timer();
+		timer.scheduleAtFixedRate(task, 100, 100);
+	}
+
+	private void cancelTimer() {
+		if(timer != null) {
+			timer.cancel();
+			timer = null;
+		}
 	}
 
 }

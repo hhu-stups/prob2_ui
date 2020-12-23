@@ -24,20 +24,21 @@ public class TraceSimulator extends AbstractTraceSimulator implements IRealTimeS
     @Override
     public void run() {
         currentTrace.set(new Trace(currentTrace.getStateSpace()));
-        scheduler.run(interval);
+        scheduler.run();
     }
 
     @Override
     public void simulate() {
         scheduler.startSimulationStep();
         try {
-            if(!finished && counter < replayTrace.getPersistentTrace().getTransitionList().size()) {
+            if(!finished) {
                 // Read trace and pass it through chooseOperation to avoid race condition
                 Trace trace = currentTrace.get();
                 Trace newTrace = simulationStep(trace);
                 currentTrace.set(newTrace);
-            } else {
-                finishSimulation();
+                if(counter >= replayTrace.getPersistentTrace().getTransitionList().size()) {
+                    finishSimulation();
+                }
             }
         } catch (ExecuteOperationException e) {
             System.out.println("TRACE REPLAY IN SIMULATION ERROR");

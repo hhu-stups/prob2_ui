@@ -154,7 +154,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     protected Trace executeBeforeInitialisation(String operation, List<VariableChoice> configs, State currentState, Trace trace) {
         Trace res = super.executeBeforeInitialisation(operation, configs, currentState, trace);
         if(res.getTransitionList().size() > trace.getTransitionList().size()) {
-            counter++;
+            counter = res.getTransitionList().size();
         }
         return res;
     }
@@ -163,7 +163,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
         Trace res = super.executeOperation(opConfig, trace);
         if(res.getTransitionList().size() > trace.getTransitionList().size()) {
-            counter++;
+            counter = res.getTransitionList().size();
         }
         return res;
     }

@@ -13,4 +13,6 @@ public interface IRealTimeSimulator {
 
     boolean isRunning();
 
+    int getDelay();
+
 }

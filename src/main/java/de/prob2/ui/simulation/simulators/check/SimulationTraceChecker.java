@@ -21,10 +21,14 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
 
     @Override
     public void run() {
+        this.counter = 0;
         try {
             Trace newTrace = setupBeforeSimulation(trace);
-            while(!finished && counter < replayTrace.getPersistentTrace().getTransitionList().size()) {
+            while(!finished) {
                 newTrace = simulationStep(newTrace);
+                if(counter >= replayTrace.getPersistentTrace().getTransitionList().size()) {
+                    finishSimulation();
+                }
             }
         } catch (ExecuteOperationException e) {
             System.out.println("TRACE REPLAY IN SIMULATION ERROR");

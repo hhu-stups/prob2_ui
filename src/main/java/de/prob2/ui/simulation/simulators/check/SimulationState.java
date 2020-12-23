@@ -45,4 +45,5 @@ public class SimulationState {
     public Map<String, Integer> getOperationToRemainingTime() {
         return operationToRemainingTime;
     }
+
 }

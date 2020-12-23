@@ -9,17 +9,12 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 @Singleton
 public class Scheduler {
 
+    private Thread thread;
+
     private ChangeListener<Trace> listener;
-
-    private TimerTask task;
-
-    private Timer timer;
 
     private IRealTimeSimulator simulator;
 
@@ -46,20 +41,25 @@ public class Scheduler {
         disablePropertyController.addDisableExpression(this.executingOperationProperty);
     }
 
-    public void run(int interval) {
-        this.timer = new Timer();
+    public void run() {
         runningProperty.set(true);
         Trace trace = currentTrace.get();
         currentTrace.set(simulator.setupBeforeSimulation(trace));
         currentTrace.addListener(listener);
-
-        this.task = new TimerTask() {
-            @Override
-            public void run() {
-                simulator.simulate();
+        thread = new Thread(() -> {
+            while(simulator.isRunning()) {
+                try {
+                    Thread.sleep(simulator.getDelay());
+                    simulator.simulate();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(thread.isInterrupted()) {
+                    return;
+                }
             }
-        };
-        timer.scheduleAtFixedRate(task, interval, interval);
+        });
+        thread.start();
     }
 
     public void setSimulator(IRealTimeSimulator simulator) {
@@ -67,9 +67,8 @@ public class Scheduler {
     }
 
     public void stop() {
-        if(timer != null) {
-            timer.cancel();
-            timer = null;
+        if(thread != null) {
+            thread.interrupt();
         }
         currentTrace.removeListener(listener);
         runningProperty.set(false);
@@ -92,7 +91,6 @@ public class Scheduler {
     }
 
     public void finish() {
-        task.cancel();
         currentTrace.removeListener(listener);
         executingOperationProperty.set(false);
     }

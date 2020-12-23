@@ -19,12 +19,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSimulator {
@@ -35,7 +33,7 @@ public abstract class AbstractSimulator {
 
     protected IntegerProperty time;
 
-    protected int interval;
+    protected int delay;
 
     protected boolean finished;
 
@@ -60,29 +58,7 @@ public abstract class AbstractSimulator {
         this.operationToRemainingTime = new HashMap<>();
         this.time.set(0);
         this.finished = false;
-        calculateInterval();
         initializeRemainingTime();
-    }
-
-    private void calculateInterval() {
-        List<Integer> relevantTimes = new ArrayList<>(config.getOperationConfigurations().stream()
-                .map(OperationConfiguration::getTime)
-                .collect(Collectors.toList()));
-        for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
-            if(opConfig.getDelay() != null) {
-                relevantTimes.addAll(opConfig.getDelay().values());
-            }
-        }
-
-        Optional<Integer> result = relevantTimes.stream().reduce(AbstractSimulator::gcd);
-        result.ifPresent(integer -> interval = integer);
-    }
-
-    private static int gcd(int a, int b) {
-        if(b == 0) {
-            return a;
-        }
-        return gcd(b, a % b);
     }
 
     private void initializeRemainingTime() {
@@ -91,18 +67,23 @@ public abstract class AbstractSimulator {
                     operationToRemainingTime.put(config.getOpName(), config.getTime());
                     initialOperationToRemainingTime.put(config.getOpName(), config.getTime());
                 });
+        updateDelay();
     }
 
     public void updateRemainingTime() {
-        this.time.set(this.time.get() + this.interval);
+        updateRemainingTime(this.delay);
+    }
+
+    public void updateRemainingTime(int delay) {
+        this.time.set(this.time.get() + delay);
         for(String key : operationToRemainingTime.keySet()) {
-            operationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(0, v - interval));
+            operationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(0, v - delay));
         }
     }
 
     public AbstractEvalResult evaluateForSimulation(State state, String formula) {
         // Note: Rodin parser does not have IF-THEN-ELSE nor REAL
-        return state.eval(new ClassicalB(formula, FormulaExpand.EXPAND));
+        return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
     }
 
     protected Trace simulationStep(Trace trace) {
@@ -117,6 +98,7 @@ public abstract class AbstractSimulator {
             }
             updateRemainingTime();
             newTrace = executeOperations(newTrace);
+            updateDelay();
         }
         return newTrace;
     }
@@ -173,23 +155,13 @@ public abstract class AbstractSimulator {
     protected abstract boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace);
 
     protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
-
         String opName = opConfig.getOpName();
         //time for next execution has been delayed by a previous transition
         if(operationToRemainingTime.get(opName) > 0) {
             return trace;
         }
-
         operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
-
-        Trace newTrace = trace;
-
-        //check whether operation is executable and calculate probability whether it should be executed
-        if(chooseNextOperation(opConfig, newTrace)) {
-            //execute operation and append to trace
-            newTrace = executeNextOperation(opConfig, newTrace);
-        }
-        return newTrace;
+        return executeNextOperation(opConfig, trace);
     }
 
     protected abstract Trace executeNextOperation(OperationConfiguration opConfig, Trace trace);
@@ -235,4 +207,15 @@ public abstract class AbstractSimulator {
         this.finished = true;
     }
 
+    public int getDelay() {
+        return delay;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void updateDelay() {
+        this.delay = operationToRemainingTime.values().stream().reduce(Integer.MAX_VALUE, Math::min);
+    }
 }

@@ -23,7 +23,7 @@ public class Simulator extends ProbabilityBasedSimulator implements IRealTimeSim
 
 	@Override
 	public void run() {
-		scheduler.run(interval);
+		scheduler.run();
 	}
 
 	@FXML

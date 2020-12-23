@@ -13,7 +13,6 @@ import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.VariableChoice;
 import de.prob2.ui.simulation.configuration.VariableConfiguration;
-import de.prob2.ui.simulation.simulators.AbstractSimulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +26,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,7 +40,6 @@ public class SimulationModelChecker {
 
     private SimulationConfiguration config;
 
-    private int interval;
 
     private Map<String, Integer> initialOperationToRemainingTime;
 
@@ -65,29 +62,7 @@ public class SimulationModelChecker {
             return;
         }
         this.initialOperationToRemainingTime = new HashMap<>();
-        calculateInterval();
         initializeRemainingTime();
-    }
-
-    private void calculateInterval() {
-        List<Integer> relevantTimes = new ArrayList<>(config.getOperationConfigurations().stream()
-                .map(OperationConfiguration::getTime)
-                .collect(Collectors.toList()));
-        for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
-            if(opConfig.getDelay() != null) {
-                relevantTimes.addAll(opConfig.getDelay().values());
-            }
-        }
-
-        Optional<Integer> result = relevantTimes.stream().reduce(SimulationModelChecker::gcd);
-        result.ifPresent(integer -> interval = integer);
-    }
-
-    private static int gcd(int a, int b) {
-        if(b == 0) {
-            return a;
-        }
-        return gcd(b, a % b);
     }
 
     private void initializeRemainingTime() {
@@ -95,10 +70,10 @@ public class SimulationModelChecker {
                 .forEach(opConfig -> initialOperationToRemainingTime.put(opConfig.getOpName(), opConfig.getTime()));
     }
 
-    private Map<String, Integer> updateRemainingTime(Map<String, Integer> operationToRemainingTime) {
+    private Map<String, Integer> updateRemainingTime(Map<String, Integer> operationToRemainingTime, int delay) {
         Map<String, Integer> newOperationToRemainingTime = new HashMap<>(operationToRemainingTime);
         for(String key : newOperationToRemainingTime.keySet()) {
-            newOperationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(0, v - interval));
+            newOperationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(0, v - delay));
         }
         return newOperationToRemainingTime;
     }
@@ -118,43 +93,52 @@ public class SimulationModelChecker {
 
     public void check() {
         // TODO: Maybe consider time
-        int time = 0;
-        SimulationState root = new SimulationState(stateSpace.getRoot(), new HashMap<>(initialOperationToRemainingTime));
-        Queue<SimulationState> queue = new LinkedList<>();
-        queue.add(root);
+        Thread thread = new Thread(() -> {
+            try {
+                int time = 0;
+                stateSpace.startTransaction();
+                SimulationState root = new SimulationState(stateSpace.getRoot(), new HashMap<>(initialOperationToRemainingTime));
+                Queue<SimulationState> queue = new LinkedList<>();
+                queue.add(root);
 
-        Set<SimulationState> visitedStates = new HashSet<>();
-        visitedStates.add(root);
+                Set<SimulationState> visitedStates = new HashSet<>();
+                visitedStates.add(root);
 
-        ModelCheckResult result = ModelCheckResult.NOT_FINISHED;
+                ModelCheckResult result = ModelCheckResult.NOT_FINISHED;
 
-        while(!queue.isEmpty()) {
-            SimulationState nextState = queue.remove();
-            State currentState = nextState.getBState();
-            if(!currentState.isInvariantOk()) {
-                result = ModelCheckResult.FAIL;
-                break;
-            }
-            List<SimulationState> newSimulationStates = new ArrayList<>();
-            if(!currentState.isInitialised()) {
-                List<String> nextTransitions = currentState.getTransitions().stream().map(Transition::getName).collect(Collectors.toList());
-                if(nextTransitions.contains("$setup_constants")) {
-                    newSimulationStates = exploreBeforeInitialisation("$setup_constants", currentState, config.getSetupConfigurations());
-                } else if(nextTransitions.contains("$initialise_machine")) {
-                    newSimulationStates = exploreBeforeInitialisation("$initialise_machine", currentState, config.getInitialisationConfigurations());
+                while (!queue.isEmpty()) {
+                    SimulationState nextState = queue.remove();
+                    State currentState = nextState.getBState();
+                    if (!currentState.isInvariantOk()) {
+                        result = ModelCheckResult.FAIL;
+                        break;
+                    }
+                    List<SimulationState> newSimulationStates = new ArrayList<>();
+                    if (!currentState.isInitialised()) {
+                        List<String> nextTransitions = currentState.getTransitions().stream().map(Transition::getName).collect(Collectors.toList());
+                        if (nextTransitions.contains("$setup_constants")) {
+                            newSimulationStates = exploreBeforeInitialisation("$setup_constants", currentState, config.getSetupConfigurations());
+                        } else if (nextTransitions.contains("$initialise_machine")) {
+                            newSimulationStates = exploreBeforeInitialisation("$initialise_machine", currentState, config.getInitialisationConfigurations());
+                        }
+                    } else {
+                        newSimulationStates = exploreNextTimeStep(nextState, config.getOperationConfigurations());
+                    }
+                    queue.addAll(newSimulationStates.stream()
+                            .filter(state -> !visitedStates.contains(state))
+                            .collect(Collectors.toList()));
+                    visitedStates.addAll(newSimulationStates);
+                    System.out.println(visitedStates.size());
                 }
-            } else {
-                newSimulationStates = exploreNextTimeStep(nextState, config.getOperationConfigurations());
+
+                if (result == ModelCheckResult.NOT_FINISHED) {
+                    this.result = ModelCheckResult.SUCCESS;
+                }
+            } finally {
+                stateSpace.endTransaction();
             }
-            queue.addAll(newSimulationStates.stream()
-                    .filter(state -> !visitedStates.contains(state))
-                    .collect(Collectors.toList()));
-            visitedStates.addAll(newSimulationStates);
-            System.out.println(visitedStates.size());
-        }
-        if(result == ModelCheckResult.NOT_FINISHED) {
-            this.result = ModelCheckResult.SUCCESS;
-        }
+        });
+        thread.start();
     }
 
     private List<SimulationState> exploreBeforeInitialisation(String operationName, State state, List<VariableChoice> configurations) {
@@ -190,7 +174,8 @@ public class SimulationModelChecker {
 
     // TODO: Links to previous state to detect counterexamples in breadth-first
     private List<SimulationState> exploreNextTimeStep(SimulationState state, List<OperationConfiguration> opConfigurations) {
-        Map<String, Integer> newRemainingTime = updateRemainingTime(state.getOperationToRemainingTime());
+        int delay = state.getOperationToRemainingTime().values().stream().reduce(Integer.MAX_VALUE, Math::min);
+        Map<String, Integer> newRemainingTime = updateRemainingTime(state.getOperationToRemainingTime(), delay);
         State bState = state.getBState();
 
         List<SimulationState> tmpNewStates = new ArrayList<>();
