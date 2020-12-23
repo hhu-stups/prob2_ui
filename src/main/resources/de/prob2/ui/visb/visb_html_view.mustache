@@ -41,7 +41,9 @@
             $("#{{&eventID}}").hover(
                 function(ev) {
                     {{&enterAction}}
-                    $("#visb_debug_messages").text("{{&eventName}} " + ev.pageX + "," + ev.pageY);
+                    $("#visb_debug_messages").text("{{&eventName}} ");
+                    // comment in this line instead if you wish to see coordinates
+                    // $("#visb_debug_messages").text("{{&eventName}} " + ev.pageX + "," + ev.pageY);
                 },
                 function() { {{! function when leaving hover}}
                     {{&leaveAction}}
