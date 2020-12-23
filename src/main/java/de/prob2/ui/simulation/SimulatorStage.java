@@ -16,7 +16,7 @@ import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.VariableChoice;
 import de.prob2.ui.simulation.configuration.VariableConfiguration;
-import de.prob2.ui.simulation.simulators.AbstractSimulator;
+import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.simulation.simulators.TraceSimulator;
@@ -61,12 +61,6 @@ import java.util.TimerTask;
 @Singleton
 public class SimulatorStage extends Stage {
 
-	private int time;
-
-	private Timer timer;
-
-	private AbstractSimulator lastSimulator;
-
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
 
 		private SimulationItemRow() {
@@ -83,16 +77,16 @@ public class SimulatorStage extends Stage {
 					List<MenuItem> menuItems = FXCollections.observableArrayList();
 					MenuItem playItem = new MenuItem("Play");
 					Trace trace = new Trace(currentTrace.getStateSpace());
-
 					ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
 					TraceSimulator traceSimulator = new TraceSimulator(trace, replayTrace, injector.getInstance(Scheduler.class), currentTrace);
-					traceSimulator.initSimulator(configurationPath.get().toFile());
 
 					playItem.setOnAction(e -> {
+						if(traceSimulator.isRunning()) {
+							traceSimulator.stop();
+						}
+						traceSimulator.initSimulator(configurationPath.get().toFile());
 						trace.setExploreStateByDefault(false);
-						injector.getInstance(Scheduler.class).setSimulator(traceSimulator);
-						traceSimulator.run();
-						startTimer(traceSimulator);
+						simulate(traceSimulator);
 						trace.setExploreStateByDefault(true);
 					});
 
@@ -145,6 +139,12 @@ public class SimulatorStage extends Stage {
 	private final FileChooserManager fileChooserManager;
 
     private final ObjectProperty<Path> configurationPath;
+
+	private int time;
+
+	private Timer timer;
+
+	private IRealTimeSimulator lastSimulator;
 
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
@@ -207,6 +207,10 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	public void simulate() {
+		this.simulate(simulator);
+	}
+
+	private void simulate(IRealTimeSimulator simulator) {
 		if(!simulator.isRunning()) {
 			injector.getInstance(Scheduler.class).setSimulator(simulator);
 			if(lastSimulator == null || !lastSimulator.equals(simulator)) {
@@ -216,10 +220,10 @@ public class SimulatorStage extends Stage {
 			simulator.run();
 			startTimer(simulator);
 		} else {
-			cancelTimer();
 			simulator.updateRemainingTime(time - simulator.timeProperty().get());
 			simulator.updateDelay();
 			simulator.stop();
+			cancelTimer();
 		}
 	}
 
@@ -295,7 +299,7 @@ public class SimulatorStage extends Stage {
 		choosingStage.showAndWait();
 	}
 
-	private void startTimer(AbstractSimulator simulator) {
+	private void startTimer(IRealTimeSimulator simulator) {
 		cancelTimer();
 		lastSimulator = simulator;
 		List<Boolean> firstStart = Arrays.asList(true);
