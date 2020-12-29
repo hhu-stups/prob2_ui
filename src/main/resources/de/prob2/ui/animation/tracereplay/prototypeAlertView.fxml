@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.DialogPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.TextFlow?>
 <?import javafx.scene.control.Dialog?>
-
-
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.TilePane?>
+
 <fx:root type="Dialog" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane>
