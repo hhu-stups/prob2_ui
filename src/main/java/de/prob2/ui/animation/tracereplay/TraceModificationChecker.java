@@ -51,12 +51,29 @@ public class TraceModificationChecker {
 		if(java.nio.file.Files.exists(path) && newPath!=oldPath) {
 			traceChecker = new TraceChecker(persistentTrace.getTransitionList(),
 					new HashMap<>(traceJsonFile.getMachineOperationInfos()),
-					new HashMap<>(stateSpace.getLoadedMachine().getOperations()), new HashSet<>(traceJsonFile.getVariableNames()),
-					new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()), oldPath.toString(), newPath.toString(), injector);
+					new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
+					new HashSet<>(traceJsonFile.getVariableNames()),
+					new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
+					new HashSet<>(stateSpace.getLoadedMachine().getSetNames()),
+					new HashSet<>(stateSpace.getLoadedMachine().getConstantNames()),
+					oldPath.toString(),
+					newPath.toString(),
+					injector,
+					new MappingFactory(injector, stageManager));
 		}else {
+
 			traceChecker = new TraceChecker(persistentTrace.getTransitionList(),
+					new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
 					new HashMap<>(traceJsonFile.getMachineOperationInfos()),
-					new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()), newPath.toString(), injector);
+					new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
+					new HashSet<>(traceJsonFile.getVariableNames()),
+					new HashSet<>(stateSpace.getLoadedMachine().getSetNames()),
+					new HashSet<>(stateSpace.getLoadedMachine().getConstantNames()),
+					newPath.toString(),
+					injector,
+					new MappingFactory(injector, stageManager));
+
+
 		}
 
 	}
@@ -101,8 +118,7 @@ public class TraceModificationChecker {
 
 				result.add(saveAt);
 				try {
-					traceManager.save(saveAt,
-							traceJsonFile.changeTrace(element));
+					traceManager.save(saveAt, traceJsonFile.changeTrace(element));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
