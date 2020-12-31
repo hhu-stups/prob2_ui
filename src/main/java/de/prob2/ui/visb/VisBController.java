@@ -377,7 +377,7 @@ public class VisBController {
 	}
 
 	/**
-	 * Checks if on click functionality for the svg items can be added, yet. If not, nothing happens. If it can be added, the JQuery that is needed is build and executed via {@link VisBStage}.
+	 * Checks if on click functionality for the svg items can be added, yet. If not, nothing happens. If it can be added, the JQuery that is needed is built and executed via {@link VisBStage}.
 	 */
 	private List<VisBOnClickMustacheItem> generateOnClickItems(){
 		List<VisBOnClickMustacheItem> onClickItems = new ArrayList<>();
