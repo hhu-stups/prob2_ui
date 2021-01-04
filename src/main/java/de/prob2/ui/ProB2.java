@@ -1,24 +1,9 @@
 package de.prob2.ui;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import ch.qos.logback.classic.util.ContextInitializer;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
@@ -40,7 +25,6 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -52,7 +36,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -61,6 +44,19 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ProB2 extends Application {
 	private static final Path OLD_CONFIG_FILE_PATH = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
@@ -238,10 +234,12 @@ public class ProB2 extends Application {
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
 		primaryStage.show();
 
+		primaryStage.toFront();
+
+		//Persistent stages are moved to front
+
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
 		uiPersistence.open();
-
-		primaryStage.toFront();
 
 		this.openFilesFromCommandLine(stageManager, currentProject);
 
