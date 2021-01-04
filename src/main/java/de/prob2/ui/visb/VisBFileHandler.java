@@ -150,10 +150,10 @@ class VisBFileHandler {
 								}
 								// we could check that all arrays have same size; otherwise a pattern will not be replaced
 							}
-							addVisBEvent(visBEvents, repId, repEvent, repPreds, currentObj);
+							addVisBEvent(visBEvents, repId, repEvent, repPreds, currentObj,replaceArr);
 						}
 					} else { // no repititions have to be applied
-						addVisBEvent(visBEvents, id, eventS, predicates, currentObj);
+						addVisBEvent(visBEvents, id, eventS, predicates, currentObj,null);
 					}
 				}
 			} else if (!currentObj.has("id")){
@@ -163,6 +163,18 @@ class VisBFileHandler {
 				throw new VisBParseException("The event for " + id + " in your visualisation file has no \"event\" attribute.");
 			}
 		}
+	}
+	
+	// utility function to apply a replacement Array to replace %0, %1, ... in a string
+	private static String applyReplacement(String str, JsonArray replaceArr) {
+	    if (replaceArr==null) {return str;}
+		for(int i =0; i<replaceArr.size();i++) {
+				String thisVal = replaceArr.get(i).getAsString();
+				String pattern = "%"+i;
+				str = str.replace(pattern, thisVal);
+				System.out.println("Replaced "+pattern+" to "+thisVal+" in "+str);
+		}
+		return str;
 	}
 	
 	// utility to get attribute and throw exception if it does not exist
@@ -177,7 +189,8 @@ class VisBFileHandler {
 	// create the VisB Event, after assembling hover information
 	private static void addVisBEvent(List<VisBEvent> visBEvents,
 	                            String id, String eventS, List<String> predicates,
-	                            JsonObject currentObj) throws VisBParseException {
+	                            JsonObject currentObj,
+	                            JsonArray replaceArr) throws VisBParseException {
 	    
 		List<VisBHover> hovers = new ArrayList<>();
 		if(currentObj.has("hovers")){
@@ -186,14 +199,11 @@ class VisBFileHandler {
 			   JsonObject hv = jsonHovers.get(i).getAsJsonObject();
 		   
 			   String hoverID;
-			   String hoverAttr;
-			   String hoverEnter;
-			   String hoverLeave;
-			   hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
-			   hoverEnter = getAttrString(hv,"enter","hover within event "+id); // TO DO: apply replacements
-			   hoverLeave = getAttrString(hv,"leave","hover within event "+id); // ditto
+			   String hoverAttr = getAttrString(hv,"attr","hover within event "+ id);
+			   String hoverEnter = applyReplacement(getAttrString(hv,"enter","hover within event "+id),replaceArr);
+			   String hoverLeave = applyReplacement(getAttrString(hv,"leave","hover within event "+id),replaceArr);
 			   if(hv.has("id")) {
-			   		hoverID = getAttrString(hv,"id","hover within event "+id); // ditto
+			   		hoverID = applyReplacement(getAttrString(hv,"id","hover within event "+id),replaceArr);
 			   } else {
 			   		hoverID = id;
 			   }

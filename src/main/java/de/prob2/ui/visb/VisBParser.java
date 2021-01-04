@@ -29,6 +29,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBItem;
+import de.prob2.ui.visb.visbobjects.VisBHover;
 
 import javafx.scene.paint.Color;
 
@@ -67,14 +68,15 @@ public class VisBParser {
 		// get a list of parsed formulas:
 		List<IEvalElement> formulas = new ArrayList<>();
 		for(VisBItem visItem : visItems) {
-		    formulas.add(parseItemFormula(visItem));
+		    formulas.add(visItem.getParsedValueFormula(currentTrace));
 		}
 		try {
 			Map<IEvalElement, AbstractEvalResult> abstractEvalResults = evaluateItemFormulas(formulas);
 			for(VisBItem visItem : visItems){
-			    AbstractEvalResult abstractEvalResult = abstractEvalResults.get(parseItemFormula(visItem));
+			    AbstractEvalResult abstractEvalResult = 
+			                         abstractEvalResults.get(visItem.getParsedValueFormula(currentTrace));
 				String value = getValueFromResult(abstractEvalResult, visItem);
-				if (!value.equals("@visb-ignore")) {
+				if (!value.equals("@visb-ignore")) { // @visb-ignore means value is optional and could not be computed
 					String jQueryTemp = getJQueryFromInput(visItem.getId(), visItem.getAttribute(), value);
 					jQueryForChanges.append(jQueryTemp);
 				}
@@ -85,29 +87,7 @@ public class VisBParser {
 		return jQueryForChanges.toString();
 	}
 
-
-	/**
-	 * This idea originated from the BInterpreter in the ProB2-UI. In this method a new trace is constructed, on which the formulas, which have to be evaluated can be evaluated on.
-	 * @throws EvaluationException If evaluating formula on trace causes an Exception.
-	 */
-	private IEvalElement parseItemFormula(VisBItem visItem) throws VisBNestedException, ProBError {
-		String formulaToEval = visItem.getValue();
-		try {
-			if (visItem.parsedFormula != null) {
-			   return visItem.parsedFormula; // is already parsed
-			} else if(currentTrace.getModel() instanceof ClassicalBModel) {
-			   visItem.parsedFormula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
-			  // use parser associated with the current model, DEFINITIONS are accessible
-			} else {
-			   visItem.parsedFormula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
-			   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, cumbersome for VisB
-			}
-		} catch (EvaluationException e){
-			System.out.println("\nException for "+ visItem.getId() + "."+ visItem.getAttribute() + " : " + e);
-		    throw(new VisBNestedException("Exception parsing B formula for "+ visItem.getId() + "."+ visItem.getAttribute() + " : ",e));
-		}
-	    return visItem.parsedFormula;
-	}
+	
 	
 	/**
 	 * This method makes it not possible, to change the current trace. It was not needed, because the formulas were solely made for producing a value for a JQuery.
@@ -116,7 +96,6 @@ public class VisBParser {
 	 * @throws ProBError If a formula cannot correctly be evaluated.
 	 */
 	private Map<IEvalElement, AbstractEvalResult> evaluateItemFormulas(List<? extends IEvalElement> formulas) throws EvaluationException, ProBError {
-		//Take the current trace
 		Trace trace = currentTrace.get();
 		if (trace == null) {
 			trace = new Trace(machineLoader.getEmptyStateSpace());
