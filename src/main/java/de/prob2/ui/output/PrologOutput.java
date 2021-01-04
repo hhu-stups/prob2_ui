@@ -173,7 +173,9 @@ public class PrologOutput extends InlineCssTextArea {
 		this.setPrefWidth(Double.MAX_VALUE);
 		this.setWrapText(true);
 		this.setEditable(false);
+	}
 
+	public void start() {
 		PrologOutputAppender prologOutputAppender = new PrologOutputAppender(this);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 

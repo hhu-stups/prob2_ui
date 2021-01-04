@@ -1,11 +1,5 @@
 package de.prob2.ui.internal;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
@@ -15,14 +9,12 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.config.RuntimeOptions;
-import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
@@ -36,14 +28,18 @@ import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
 import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.BoundingBox;
 import javafx.util.BuilderFactory;
-
 import org.hildan.fxgson.FxGson;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -70,8 +66,6 @@ public class ProB2Module extends AbstractModule {
 		bind(RuntimeOptions.class).toInstance(this.runtimeOptions);
 
 		bind(MagicGraphI.class).to(MagicGraphFX.class);
-
-		bind(PrologOutput.class);
 	}
 
 	@Provides
