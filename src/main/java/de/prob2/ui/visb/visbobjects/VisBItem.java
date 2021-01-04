@@ -1,7 +1,7 @@
 package de.prob2.ui.visb.visbobjects;
 
-//import de.prob2.ui.visb.VisBParser;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob2.ui.visb.VisBParser;
 import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.exception.ProBError;
