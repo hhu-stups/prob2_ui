@@ -78,7 +78,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                     predicateBuilder.addMap(values);
                     buildPredicateFromTrace(predicateBuilder, persistentTransition);
                     StateSpace stateSpace = currentState.getStateSpace();
-                    final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.EXPAND);
+                    final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.TRUNCATE);
                     final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
                             currentState.getId(), persistentTransition.getOperationName(), pred, 1);
                     try {
@@ -118,7 +118,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                 PredicateBuilder predicateBuilder = new PredicateBuilder();
                 buildPredicateFromTrace(predicateBuilder, persistentTransition);
                 StateSpace stateSpace = trace.getStateSpace();
-                final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.EXPAND);
+                final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.TRUNCATE);
                 final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
                         currentState.getId(), persistentTransition.getOperationName(), pred, 1);
 

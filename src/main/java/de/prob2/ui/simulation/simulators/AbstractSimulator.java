@@ -41,6 +41,8 @@ public abstract class AbstractSimulator {
 
     protected Map<String, Integer> operationToRemainingTime;
 
+    protected List<OperationConfiguration> operationConfigurationsSorted;
+
     public AbstractSimulator() {
         this.time = new SimpleIntegerProperty(0);
     }
@@ -56,6 +58,10 @@ public abstract class AbstractSimulator {
         }
         this.initialOperationToRemainingTime = new HashMap<>();
         this.operationToRemainingTime = new HashMap<>();
+        // sort after priority
+        this.operationConfigurationsSorted = config.getOperationConfigurations().stream()
+                .sorted(Comparator.comparingInt(OperationConfiguration::getPriority))
+                .collect(Collectors.toList());
         this.time.set(0);
         this.finished = false;
         initializeRemainingTime();
@@ -128,14 +134,12 @@ public abstract class AbstractSimulator {
     }
 
     protected Trace executeOperations(Trace trace) {
-        //select operations where time <= 0 and sort after priority (less number means higher priority)
-        List<OperationConfiguration> nextOperations = config.getOperationConfigurations().stream()
-                .filter(opConfig -> operationToRemainingTime.get(opConfig.getOpName()) <= 0)
-                .sorted(Comparator.comparingInt(OperationConfiguration::getPriority)).collect(Collectors.toList());
-
         Trace newTrace = trace;
-
-        for(OperationConfiguration opConfig : nextOperations) {
+        for(OperationConfiguration opConfig : operationConfigurationsSorted) {
+            //select operations where time <= 0
+            if(operationToRemainingTime.get(opConfig.getOpName()) > 0) {
+                continue;
+            }
             if (endingConditionReached(newTrace)) {
                 break;
             }
@@ -156,10 +160,6 @@ public abstract class AbstractSimulator {
 
     protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
         String opName = opConfig.getOpName();
-        //time for next execution has been delayed by a previous transition
-        if(operationToRemainingTime.get(opName) > 0) {
-            return trace;
-        }
         operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
         return executeNextOperation(opConfig, trace);
     }

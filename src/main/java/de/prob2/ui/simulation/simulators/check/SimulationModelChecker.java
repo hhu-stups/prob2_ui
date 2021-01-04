@@ -43,6 +43,8 @@ public class SimulationModelChecker {
 
     private Map<String, Integer> initialOperationToRemainingTime;
 
+    private List<OperationConfiguration> operationConfigurationsSorted;
+
     private final StateSpace stateSpace;
 
     private ModelCheckResult result;
@@ -62,6 +64,10 @@ public class SimulationModelChecker {
             return;
         }
         this.initialOperationToRemainingTime = new HashMap<>();
+        // sort after priority
+        this.operationConfigurationsSorted = config.getOperationConfigurations().stream()
+                .sorted(Comparator.comparingInt(OperationConfiguration::getPriority))
+                .collect(Collectors.toList());
         initializeRemainingTime();
     }
 
@@ -95,8 +101,8 @@ public class SimulationModelChecker {
         // TODO: Maybe consider time
         Thread thread = new Thread(() -> {
             try {
-                int time = 0;
                 stateSpace.startTransaction();
+                int time = 0;
                 SimulationState root = new SimulationState(stateSpace.getRoot(), new HashMap<>(initialOperationToRemainingTime));
                 Queue<SimulationState> queue = new LinkedList<>();
                 queue.add(root);
@@ -162,7 +168,7 @@ public class SimulationModelChecker {
                 PredicateBuilder predicateBuilder = new PredicateBuilder();
                 predicateBuilder.addMap(allValues);
                 String predicate = predicateBuilder.toString();
-                GetOperationByPredicateCommand cmd = new GetOperationByPredicateCommand(stateSpace, state.getId(), operationName, new ClassicalB(predicate, FormulaExpand.EXPAND), 1);
+                GetOperationByPredicateCommand cmd = new GetOperationByPredicateCommand(stateSpace, state.getId(), operationName, new ClassicalB(predicate, FormulaExpand.TRUNCATE), 1);
                 stateSpace.execute(cmd);
                 if(!cmd.hasErrors()) {
                     newStates.add(new SimulationState(cmd.getNewTransitions().get(0).getDestination(), new HashMap<>(initialOperationToRemainingTime)));
@@ -181,12 +187,11 @@ public class SimulationModelChecker {
         List<SimulationState> tmpNewStates = new ArrayList<>();
         tmpNewStates.add(new SimulationState(bState, newRemainingTime));
 
-        List<OperationConfiguration> nextOperations = opConfigurations.stream()
-                .filter(opConfig -> newRemainingTime.get(opConfig.getOpName()) <= 0)
-                .sorted(Comparator.comparingInt(OperationConfiguration::getPriority)).collect(Collectors.toList());
-
-        for (OperationConfiguration opConfig : nextOperations) {
-            String opProbability = bState.eval(opConfig.getProbability(), FormulaExpand.EXPAND).toString();
+        for (OperationConfiguration opConfig : operationConfigurationsSorted) {
+            if(newRemainingTime.get(opConfig.getOpName()) > 0) {
+                continue;
+            }
+            String opProbability = bState.eval(opConfig.getProbability(), FormulaExpand.TRUNCATE).toString();
             if ("1.0".equals(opProbability)) {
                 //If probability is 1.0 then execute operation definitely
                 tmpNewStates = buildNewStates(opConfig, tmpNewStates, newRemainingTime, true);
@@ -246,7 +251,7 @@ public class SimulationModelChecker {
         List<List<VariableConfiguration>> newCombinations = new ArrayList<>();
         if(combinations.isEmpty()) {
             for(VariableConfiguration nextConfiguration : nextConfigurations) {
-                AbstractEvalResult evalResult = state.eval(nextConfiguration.getProbability(), FormulaExpand.EXPAND);
+                AbstractEvalResult evalResult = state.eval(nextConfiguration.getProbability(), FormulaExpand.TRUNCATE);
                 double probability = Double.parseDouble(evalResult.toString());
                 if(probability > 0.0) {
                     newCombinations.add(Collections.singletonList(nextConfiguration));
@@ -255,7 +260,7 @@ public class SimulationModelChecker {
         } else {
             for(List<VariableConfiguration> combination : combinations) {
                 for(VariableConfiguration nextConfiguration : nextConfigurations) {
-                    AbstractEvalResult evalResult = state.eval(nextConfiguration.getProbability(), FormulaExpand.EXPAND);
+                    AbstractEvalResult evalResult = state.eval(nextConfiguration.getProbability(), FormulaExpand.TRUNCATE);
                     double probability = Double.parseDouble(evalResult.toString());
                     if(probability > 0.0) {
                         List<VariableConfiguration> newCombination = new ArrayList<>(combination);

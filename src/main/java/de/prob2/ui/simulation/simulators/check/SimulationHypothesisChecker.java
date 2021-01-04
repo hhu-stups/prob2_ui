@@ -35,16 +35,18 @@ public class SimulationHypothesisChecker extends ProbabilityBasedSimulator {
     @Override
     public void run() {
         Thread thread = new Thread(() -> {
-            Trace startTrace = setupBeforeSimulation(trace);
+            Trace startTrace = trace;
             try {
                 startTrace.getStateSpace().startTransaction();
+                startTrace = setupBeforeSimulation(startTrace);
+                
                 for (int i = 0; i < numberExecutions; i++) {
                     Trace newTrace = startTrace;
                     int stepCounter = 0;
                     this.finished = false;
                     while (stepCounter < numberStepsPerExecutions && !finished) {
                         Trace nextTrace = simulationStep(newTrace);
-                        stepCounter += nextTrace.getTransitionList().size() - newTrace.getTransitionList().size();
+                        stepCounter = nextTrace.getTransitionList().size();
                         newTrace = nextTrace;
                         if(stepCounter >= numberStepsPerExecutions) {
                             Trace addedTrace = new Trace(newTrace.getStateSpace());

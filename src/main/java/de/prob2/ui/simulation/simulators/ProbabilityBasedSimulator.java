@@ -1,8 +1,13 @@
 package de.prob2.ui.simulation.simulators;
 
+import com.github.krukow.clj_lang.PersistentVector;
+import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.VariableChoice;
@@ -18,6 +23,8 @@ import java.util.stream.Collectors;
 public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
     private static final Map<String, Map<String, Double>> probabilityCache = new HashMap<>();
+
+    private static final Map<String, Map<String, List<Transition>>> transitionCache = new HashMap<>();
 
     @Override
     protected boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace) {
@@ -62,7 +69,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
         Map<String, String> chosenValues = chosenConfiguration.getValues();
         StringBuilder conjuncts = new StringBuilder();
-        for(Iterator<String> it = chosenValues.keySet().iterator(); it.hasNext(); ) {
+        for(Iterator<String> it = chosenValues.keySet().iterator(); it.hasNext();) {
             String next = it.next();
             AbstractEvalResult evalResult = evaluateForSimulation(currentState, chosenValues.get(next));
             conjuncts.append(next);
@@ -75,13 +82,24 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         return conjuncts.toString();
     }
 
+    private void loadTransitionsInCache(State currentState, String opName) {
+        String stateID = currentState.getId();
+        if(!transitionCache.containsKey(stateID)) {
+            transitionCache.put(stateID, new HashMap<>());
+        }
+        transitionCache.get(stateID).put(opName, currentState.getOutTransitions().stream()
+                .filter(trans -> trans.getName().equals(opName))
+                .collect(Collectors.toList()));
+    }
+
     @Override
     public Trace executeNextOperation(OperationConfiguration opConfig, Trace trace) {
         String opName = opConfig.getOpName();
         State currentState = trace.getCurrentState();
-        List<Transition> transitions = currentState.getTransitions().stream()
-                .filter(trans -> trans.getName().equals(opName))
-                .collect(Collectors.toList());
+        if(!transitionCache.containsKey(currentState.getId()) || !transitionCache.get(currentState.getId()).containsKey(opName)) {
+            loadTransitionsInCache(currentState, opName);
+        }
+        List<Transition> transitions = transitionCache.get(currentState.getId()).get(opName);
         //check whether operation is executable and calculate probability whether it should be executed
         if (transitions.isEmpty() || !chooseNextOperation(opConfig, trace)) {
             return trace;
@@ -91,19 +109,30 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         if(choices == null) {
             Random rand = new Random();
             Transition transition = transitions.get(rand.nextInt(transitions.size()));
-            newTrace = newTrace.add(transition);
+            newTrace = appendTrace(newTrace, transition);
             delayRemainingTime(opConfig);
         } else {
             State finalCurrentState = newTrace.getCurrentState();
             String predicate = choices.stream()
                     .map(choice -> chooseVariableValues(finalCurrentState, choice.getChoice()))
                     .collect(Collectors.joining(" & "));
-            if(finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, opName, predicate)) {
-                Transition transition = finalCurrentState.findTransition(opName, predicate);
-                newTrace = newTrace.add(transition);
+            final IEvalElement pred = newTrace.getModel().parseFormula(predicate, FormulaExpand.TRUNCATE);
+            final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(finalCurrentState.getStateSpace(), finalCurrentState.getId(), opName, pred, 1);
+            finalCurrentState.getStateSpace().execute(command);
+            if (!command.hasErrors()) {
+                Transition transition = command.getNewTransitions().get(0);
+                newTrace = appendTrace(newTrace, transition);
                 delayRemainingTime(opConfig);
             }
         }
         return newTrace;
+    }
+
+    public Trace appendTrace(Trace trace, Transition transition) {
+        TraceElement current = trace.getCurrent();
+        PersistentVector<Transition> transitionList = (PersistentVector<Transition>) trace.getTransitionList();
+        current = new TraceElement(transition, current);
+        transitionList = transitionList.assocN(transitionList.size(), transition);
+        return new Trace(trace.getStateSpace(), current, transitionList, trace.getUUID());
     }
 }
