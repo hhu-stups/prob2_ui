@@ -15,8 +15,6 @@ import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 import javafx.fxml.FXML;
 import netscape.javascript.JSObject;
 
-import java.util.stream.Collectors;
-
 public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	private final LTLPatternParser patternParser;
 	
@@ -47,6 +45,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			showErrors((LTLCheckingResultItem) item.getResultItem());
 		} else {
+			this.close();
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}
 	}
@@ -61,6 +60,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, result));
 			showErrors((LTLCheckingResultItem) result.getResultItem());
 		} else {
+			this.close();
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
 		}
 	}
