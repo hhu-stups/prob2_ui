@@ -1,12 +1,8 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import de.prob.check.CheckInterrupted;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
@@ -20,6 +16,10 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 @Singleton
 public class LTLResultHandler extends AbstractVerificationsResultHandler {
@@ -42,7 +42,7 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 	
 	@Override
 	protected boolean isInterrupted(final Object result) {
-		return result instanceof LTLNotYetFinished;
+		return result instanceof LTLNotYetFinished || result instanceof CheckInterrupted;
 	}
 	
 	@Override
