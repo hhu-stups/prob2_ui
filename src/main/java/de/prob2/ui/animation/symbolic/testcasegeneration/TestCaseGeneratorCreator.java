@@ -1,15 +1,14 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.inject.Inject;
-
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorMCDCSettings;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorOperationCoverageSettings;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestCaseGeneratorCreator {
 
@@ -32,13 +31,15 @@ public class TestCaseGeneratorCreator {
 	private ConstraintBasedTestCaseGenerator getMCDCTestCaseGenerator(ClassicalBModel bModel, TestCaseGenerationItem item) {
 		int depth = item.getMaxDepth();
 		int level = item.getMcdcLevel();
-		return new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorMCDCSettings(depth, level), new ArrayList<>());
+		// In the current version of ProB2 Kernel, it seems that there is a shift of the depth (greater 1)
+		return new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorMCDCSettings(depth - 1, level), new ArrayList<>());
 	}
 	
 	private ConstraintBasedTestCaseGenerator getCoveredOperationsTestCaseGenerator(ClassicalBModel bModel, TestCaseGenerationItem item) {
 		int depth = item.getMaxDepth();
 		final List<String> operations = item.getCoverageOperations();
-		return new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorOperationCoverageSettings(depth, operations), new ArrayList<>());
+		// In the current version of ProB2 Kernel, it seems that there is a shift of the depth (greater 1)
+		return new ConstraintBasedTestCaseGenerator(bModel, currentTrace.getStateSpace(), new TestCaseGeneratorOperationCoverageSettings(depth - 1, operations), new ArrayList<>());
 	}
 	
 }

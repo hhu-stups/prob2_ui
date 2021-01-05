@@ -17,11 +17,11 @@ public class TestCaseGenerationSettingsHandler {
 	}
 	
 	public boolean checkMCDCSettings(String level, String depth) {
-		return checkInteger(level) && checkInteger(depth);
+		return checkInteger(level) && checkInteger(depth) && Integer.parseInt(level) >= 0 && Integer.parseInt(depth) > 0;
 	}
 	
 	public boolean checkOperationCoverageSettings(List<String> operations, String depth) {
-		return !operations.isEmpty() && checkInteger(depth);
+		return !operations.isEmpty() && checkInteger(depth) && Integer.parseInt(depth) > 0;
 	}
 	
 	public boolean checkInteger(String str) {
