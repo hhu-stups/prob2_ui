@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -38,7 +39,13 @@ public final class PredicateBuilderView extends VBox {
 			if (empty || item == null || this.getTableRow() == null || this.getTableRow().getItem() == null) {
 				this.setGraphic(null);
 			} else {
-				PredicateBuilderTableItem tableItem = this.getTableRow().getItem();
+				// This assignment causes an unchecked conversion warning on Java 8 only,
+				// because the return type of TableCell.getTableRow in JavaFX 8
+				// is a raw TableRow without a type argument.
+				// Newer JavaFX versions have a better return type that doesn't cause warnings.
+				@SuppressWarnings({"unchecked", "RedundantSuppression"})
+				final TableRow<PredicateBuilderTableItem> tableRow = this.getTableRow();
+				final PredicateBuilderTableItem tableItem = tableRow.getItem();
 				final TextField textField = new TextField(tableItem.getValue());
 				textField.textProperty().addListener((o, from, to) -> tableItem.setValue(to));
 				this.setGraphic(textField);
