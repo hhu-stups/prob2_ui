@@ -58,7 +58,7 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		} else {
 			item.setCounterExample(null);
 		}
-		if(item.getChecked() == Checked.PARSE_ERROR) {
+		if(isParseError(result)) {
 			//errorMarkers contains errors, resultItem only contains errors from the exception
 			String errorMessage = errorMarkers.stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
 			if(errorMessage.isEmpty()) {
