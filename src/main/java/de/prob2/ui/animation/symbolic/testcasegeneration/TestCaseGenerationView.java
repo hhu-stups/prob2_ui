@@ -106,6 +106,7 @@ public class TestCaseGenerationView extends ScrollPane {
 				stage.setTraces(item.getTraceInformation());
 				stage.setUncoveredOperations(item.getUncoveredOperations());
 				stage.show();
+				stage.toFront();
 			});
 
 			Menu showStateItem = new Menu(bundle.getString("animation.testcase.view.contextMenu.showFoundPaths"));
