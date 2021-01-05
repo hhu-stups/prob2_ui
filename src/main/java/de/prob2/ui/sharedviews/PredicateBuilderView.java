@@ -38,7 +38,7 @@ public final class PredicateBuilderView extends VBox {
 			if (empty || item == null || this.getTableRow() == null || this.getTableRow().getItem() == null) {
 				this.setGraphic(null);
 			} else {
-				PredicateBuilderTableItem tableItem = (PredicateBuilderTableItem) this.getTableRow().getItem();
+				PredicateBuilderTableItem tableItem = this.getTableRow().getItem();
 				final TextField textField = new TextField(tableItem.getValue());
 				textField.textProperty().addListener((o, from, to) -> tableItem.setValue(to));
 				this.setGraphic(textField);
