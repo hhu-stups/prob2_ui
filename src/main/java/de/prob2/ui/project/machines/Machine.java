@@ -161,8 +161,12 @@ public class Machine implements DescriptionView.Describable {
 
 	private static Machine.MachineCheckingStatus combineMachineCheckingStatus(final List<? extends IExecutableItem> items) {
 		CheckingStatus status = combineCheckingStatus(items);
-		int numberSuccess = (int) items.stream().filter(item -> item.getChecked() == Checked.SUCCESS).count();
-		int numberTotal = items.size();
+		int numberSuccess = (int) items.stream()
+				.filter(item -> item.getChecked() == Checked.SUCCESS && item.selected())
+				.count();
+		int numberTotal = (int) items.stream()
+				.filter(IExecutableItem::selected)
+				.count();
 		return new MachineCheckingStatus(status, numberSuccess, numberTotal);
 	}
 	
