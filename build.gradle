@@ -297,7 +297,6 @@ task jpackage(type: Exec) {
 			"--icon", "src/main/deploy/package/windows/prob2-ui.ico",
 			"--win-dir-chooser",
 			"--win-menu",
-			"--win-menu-group", appName,
 			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
 		]
 	} else if (osdetector.os == "osx") {
