@@ -307,7 +307,10 @@ task jpackage(type: Exec) {
 	} else if (osdetector.os == "linux") {
 		args += [
 			"--icon", "src/main/deploy/package/linux/prob2-ui.png",
-			"--linux-menu-group", appName,
+			// This corresponds to the Categories key in the generated .desktop file.
+			// For a list of standard categories, see:
+			// https://specifications.freedesktop.org/menu-spec/latest/apa.html
+			"--linux-menu-group", "ComputerScience;Development;IDE;Java;Science;",
 			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
 		]
 	} else {
