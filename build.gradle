@@ -282,7 +282,7 @@ task jpackage(type: Exec) {
 		"--input", shadowJarFile.parent,
 		"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
 		'--main-class', mainClassName,
-		"--name", "ProB2-UI",
+		"--name", "ProB 2 UI",
 		// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
 		"--app-version", project.version.replaceAll(/-SNAPSHOT/, ""),
 		"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020",
