@@ -45,13 +45,11 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		@Override
 		protected void updateItem(final T item, final boolean empty) {
 			super.updateItem(item, empty);
-			this.getStyleClass().removeAll("dynamiccommandenabled", "dynamiccommanddisabled");
+			this.getStyleClass().removeAll("disabled");
 			if (item != null && !empty) {
 				setText(item.getName());
-				if (item.isAvailable()) {
-					getStyleClass().add("dynamiccommandenabled");
-				} else {
-					getStyleClass().add("dynamiccommanddisabled");
+				if (!item.isAvailable()) {
+					getStyleClass().add("disabled");
 				}
 			}
 		}

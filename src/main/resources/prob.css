@@ -842,11 +842,11 @@
 
 /* ================== DYNAMIC COMMAND VIEW ================= */
 
-.dynamic-command-cell.dynamiccommanddisabled {
+.dynamic-command-cell.disabled {
 	-fx-text-fill: darkgray;
 }
 
-.dynamic-command-cell.dynamiccommanddisabled:selected {
+.dynamic-command-cell.disabled:selected {
 	-fx-text-fill: lightgray;
 }
 
