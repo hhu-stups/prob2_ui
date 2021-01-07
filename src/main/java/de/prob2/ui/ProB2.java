@@ -252,22 +252,12 @@ public class ProB2 extends Application {
 
 	private void updateTitle(final Stage stage) {
 		final CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		final CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 
 		final StringBuilder title = new StringBuilder();
 
-		if (currentProject.getCurrentMachine() != null) {
-			title.append(currentProject.getCurrentMachine());
-			final Trace trace = currentTrace.get();
-			if (trace != null) {
-				final File modelFile = trace.getModel().getModelFile();
-				if (modelFile != null) {
-					title.append(" (");
-					title.append(modelFile.getName());
-					title.append(')');
-				}
-			}
-
+		final Machine currentMachine = currentProject.getCurrentMachine();
+		if (currentMachine != null) {
+			title.append(currentMachine.getLocation().getFileName());
 			title.append(" - ");
 		}
 
