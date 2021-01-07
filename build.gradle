@@ -298,7 +298,7 @@ task jpackage(type: Exec) {
 			"--icon", new File(jpackageIconsDir, "prob2-ui.ico"),
 			"--win-dir-chooser",
 			"--win-menu",
-			"--win-menu-group", '""', // Don't put start menu shortcut inside a directory
+			"--win-menu-group", "ProB 2 UI",
 			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
 			// The Windows application by default runs without a console,
 			// which makes it impossible to see stdout/stderr output
