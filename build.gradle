@@ -274,6 +274,7 @@ task jpackage(type: Exec) {
 	// Show jpackage --verbose output only if running Gradle with --info (or higher)
 	logging.captureStandardOutput(LogLevel.INFO)
 
+	final jpackageIconsDir = file("src/main/jpackage/icons")
 	final shadowJarFile = shadowJar.archiveFile.get().asFile
 	executable = "jpackage"
 	args = [
@@ -292,7 +293,7 @@ task jpackage(type: Exec) {
 
 	if (osdetector.os == "windows") {
 		args += [
-			"--icon", "src/main/deploy/package/windows/prob2-ui.ico",
+			"--icon", new File(jpackageIconsDir, "prob2-ui.ico"),
 			"--win-dir-chooser",
 			"--win-menu",
 			"--win-menu-group", '""', // Don't put start menu shortcut inside a directory
@@ -300,11 +301,11 @@ task jpackage(type: Exec) {
 		]
 	} else if (osdetector.os == "osx") {
 		args += [
-			"--icon", "src/main/deploy/package/macosx/prob2-ui.icns"
+			"--icon", new File(jpackageIconsDir, "prob2-ui.icns")
 		]
 	} else if (osdetector.os == "linux") {
 		args += [
-			"--icon", "src/main/deploy/package/linux/prob2-ui.png",
+			"--icon", new File(jpackageIconsDir, "prob2-ui.png"),
 			// This corresponds to the Categories key in the generated .desktop file.
 			// For a list of standard categories, see:
 			// https://specifications.freedesktop.org/menu-spec/latest/apa.html
