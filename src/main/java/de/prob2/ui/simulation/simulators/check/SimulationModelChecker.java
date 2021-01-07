@@ -1,28 +1,28 @@
 package de.prob2.ui.simulation.simulators.check;
 
 import de.prob.animator.command.GetOperationByPredicateCommand;
-import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
-import de.prob2.ui.simulation.configuration.VariableChoice;
-import de.prob2.ui.simulation.configuration.VariableConfiguration;
+import de.prob2.ui.simulation.simulators.SimulatorCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,18 +40,20 @@ public class SimulationModelChecker {
 
     private SimulationConfiguration config;
 
-
     private Map<String, Integer> initialOperationToRemainingTime;
 
     private List<OperationConfiguration> operationConfigurationsSorted;
 
     private final StateSpace stateSpace;
 
+    private final SimulatorCache cache;
+
     private ModelCheckResult result;
 
     public SimulationModelChecker(StateSpace stateSpace) {
         this.stateSpace = stateSpace;
         this.result = ModelCheckResult.NOT_FINISHED;
+        this.cache = new SimulatorCache();
     }
 
     public void initSimulator(File configFile) {
@@ -147,26 +149,18 @@ public class SimulationModelChecker {
         thread.start();
     }
 
-    private List<SimulationState> exploreBeforeInitialisation(String operationName, State state, List<VariableChoice> configurations) {
+    private List<SimulationState> exploreBeforeInitialisation(String operationName, State state, Map<String, Object> values) {
         List<SimulationState> newStates = new ArrayList<>();
-        if(configurations == null) {
+        if(values == null) {
             newStates = state.getTransitions().stream()
                     .map(Transition::getDestination)
                     .map(dest -> new SimulationState(dest, new HashMap<>(initialOperationToRemainingTime)))
                     .collect(Collectors.toList());
         } else {
-            List<List<VariableConfiguration>> combinations = new ArrayList<>();
-            for(VariableChoice choice : configurations) {
-                List<VariableConfiguration> varConfigurations = choice.getChoice();
-                combinations = buildNextCombinations(state, combinations, varConfigurations);
-            }
-            for(List<VariableConfiguration> combination : combinations) {
-                Map<String, String> allValues = new HashMap<>();
-                for(VariableConfiguration configuration : combination) {
-                    allValues.putAll(configuration.getValues());
-                }
+            List<Map<String, String>> combinations = buildValueCombinations(state, values);
+            for(Map<String, String> combination : combinations) {
                 PredicateBuilder predicateBuilder = new PredicateBuilder();
-                predicateBuilder.addMap(allValues);
+                predicateBuilder.addMap(combination);
                 String predicate = predicateBuilder.toString();
                 GetOperationByPredicateCommand cmd = new GetOperationByPredicateCommand(stateSpace, state.getId(), operationName, new ClassicalB(predicate, FormulaExpand.TRUNCATE), 1);
                 stateSpace.execute(cmd);
@@ -191,11 +185,16 @@ public class SimulationModelChecker {
             if(newRemainingTime.get(opConfig.getOpName()) > 0) {
                 continue;
             }
-            String opProbability = bState.eval(opConfig.getProbability(), FormulaExpand.TRUNCATE).toString();
-            if ("1.0".equals(opProbability)) {
+
+            double opProbability = cache.readProbabilityWithCaching(bState, opConfig);
+
+            boolean probabilityNearlyOne = Math.abs(opProbability - 1.0) < 0.0001;
+            boolean probabilityNearlyZero = opProbability < 0.0001;
+
+            if (probabilityNearlyOne) {
                 //If probability is 1.0 then execute operation definitely
                 tmpNewStates = buildNewStates(opConfig, tmpNewStates, newRemainingTime, true);
-            } else if (!"0.0".equals(opProbability)) {
+            } else if (!probabilityNearlyZero) {
                 //If probability is between 0.0 and 1.0 then add to branch where operation is executed, and where it is not executed
                 tmpNewStates = buildNewStates(opConfig, tmpNewStates, newRemainingTime, false);
             }
@@ -230,47 +229,65 @@ public class SimulationModelChecker {
                 continue;
             }
             State bState = state.getBState();
-
-            List<VariableChoice> variableChoices = opConfig.getVariableChoices();
-            // TODO: Handle parameters and non-determinism
-            Map<String, Integer> finalOperationToRemainingTime = delayRemainingTime(opConfig, finalRemainingTime);
-
-            List<Transition> transitions = bState.getTransitions().stream().filter(trans -> trans.getName().equals(opName)).collect(Collectors.toList());
+            Map<String, Object> values = opConfig.getVariableChoices();
+            List<Transition> transitions = cache.readTransitionsWithCaching(bState, opConfig);
             if(transitions.isEmpty()) {
                 newStates.add(state);
             } else {
-                transitions.stream()
-                        .map(Transition::getDestination)
-                        .forEach(succeedingState -> newStates.add(new SimulationState(succeedingState, finalOperationToRemainingTime)));
+                Map<String, Integer> finalOperationToRemainingTime = delayRemainingTime(opConfig, finalRemainingTime);
+                if(values == null) {
+                    for(Transition transition : transitions) {
+                        newStates.add(new SimulationState(transition.getDestination(), finalOperationToRemainingTime));
+                    }
+                } else {
+                    List<Map<String, String>> combinations = buildValueCombinations(bState, values);
+                    for (Map<String, String> combination : combinations) {
+                        PredicateBuilder predicateBuilder = new PredicateBuilder();
+                        predicateBuilder.addMap(combination);
+                        String predicate = predicateBuilder.toString();
+                        GetOperationByPredicateCommand cmd = new GetOperationByPredicateCommand(stateSpace, bState.getId(), opName, new ClassicalB(predicate, FormulaExpand.TRUNCATE), 1);
+                        stateSpace.execute(cmd);
+                        if (!cmd.hasErrors()) {
+                            newStates.add(new SimulationState(cmd.getNewTransitions().get(0).getDestination(), new HashMap<>(finalOperationToRemainingTime)));
+                        }
+                    }
+                }
             }
         }
         return newStates;
     }
 
-    private List<List<VariableConfiguration>> buildNextCombinations(State state, List<List<VariableConfiguration>> combinations, List<VariableConfiguration> nextConfigurations) {
-        List<List<VariableConfiguration>> newCombinations = new ArrayList<>();
-        if(combinations.isEmpty()) {
-            for(VariableConfiguration nextConfiguration : nextConfigurations) {
-                AbstractEvalResult evalResult = state.eval(nextConfiguration.getProbability(), FormulaExpand.TRUNCATE);
-                double probability = Double.parseDouble(evalResult.toString());
-                if(probability > 0.0) {
-                    newCombinations.add(Collections.singletonList(nextConfiguration));
-                }
+    protected List<Map<String, String>> buildValueCombinations(State currentState, Map<String, Object> values) {
+        List<Map<String, String>> result = new ArrayList<>();
+        for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
+            String key = it.next();
+            Object value = values.get(key);
+            List<String> valueList = new ArrayList<>();
+            if(value instanceof List) {
+                valueList = (List<String>) value;
+            } else if(value instanceof String) {
+                valueList = Arrays.asList((String) value);
             }
-        } else {
-            for(List<VariableConfiguration> combination : combinations) {
-                for(VariableConfiguration nextConfiguration : nextConfigurations) {
-                    AbstractEvalResult evalResult = state.eval(nextConfiguration.getProbability(), FormulaExpand.TRUNCATE);
-                    double probability = Double.parseDouble(evalResult.toString());
-                    if(probability > 0.0) {
-                        List<VariableConfiguration> newCombination = new ArrayList<>(combination);
-                        newCombination.add(nextConfiguration);
-                        newCombinations.add(newCombination);
+            if(result.isEmpty()) {
+                for(String element : valueList) {
+                    Map<String, String> initialMap = new HashMap<>();
+                    initialMap.put(key, SimulationHelperFunctions.evaluateForSimulation(currentState, element).toString());
+                    result.add(initialMap);
+                }
+            } else {
+                List<Map<String, String>> oldResult = result;
+                result = new ArrayList<>();
+                for(Map<String, String> map : oldResult) {
+                    for(String element : valueList) {
+                        Map<String, String> newMap = new HashMap<>(map);
+                        newMap.put(key, SimulationHelperFunctions.evaluateForSimulation(currentState, element).toString());
+                        result.add(newMap);
                     }
                 }
+
             }
         }
-        return newCombinations;
+        return result;
     }
 
     public ModelCheckResult getResult() {

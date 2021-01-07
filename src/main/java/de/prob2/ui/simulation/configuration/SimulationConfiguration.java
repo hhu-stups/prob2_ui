@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.configuration;
 
 import java.util.List;
+import java.util.Map;
 
 public class SimulationConfiguration {
 
@@ -10,13 +11,13 @@ public class SimulationConfiguration {
 
 	private String endingCondition;
 
-    private List<VariableChoice> setupConfigurations;
+    private Map<String, Object> setupConfigurations;
 
-    private List<VariableChoice> initialisationConfigurations;
+    private Map<String, Object> initialisationConfigurations;
 
     private List<OperationConfiguration> operationConfigurations;
 
-    public SimulationConfiguration(int endingTime, String startingCondition, String endingCondition, List<VariableChoice> setupConfigurations, List<VariableChoice> initialisationConfigurations, List<OperationConfiguration> operationConfigurations) {
+    public SimulationConfiguration(int endingTime, String startingCondition, String endingCondition, Map<String, Object> setupConfigurations, Map<String, Object> initialisationConfigurations, List<OperationConfiguration> operationConfigurations) {
         this.endingTime = endingTime;
         this.startingCondition = startingCondition;
         this.endingCondition = endingCondition;
@@ -37,11 +38,11 @@ public class SimulationConfiguration {
 		return endingCondition;
 	}
 
-	public List<VariableChoice> getSetupConfigurations() {
+	public Map<String, Object> getSetupConfigurations() {
         return setupConfigurations;
     }
 
-    public List<VariableChoice> getInitialisationConfigurations() {
+    public Map<String, Object> getInitialisationConfigurations() {
         return initialisationConfigurations;
     }
 

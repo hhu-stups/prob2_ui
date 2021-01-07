@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.configuration;
 
-import java.util.List;
 import java.util.Map;
 
 public class OperationConfiguration {
@@ -15,9 +14,9 @@ public class OperationConfiguration {
 
     private int priority;
 
-    private List<VariableChoice> variableChoices;
+    private Map<String, Object> variableChoices;
 
-    public OperationConfiguration(String opName, int time, Map<String, Integer> delay, String probability, int priority, List<VariableChoice> variableChoices) {
+    public OperationConfiguration(String opName, int time, Map<String, Integer> delay, String probability, int priority, Map<String, Object> variableChoices) {
         this.opName = opName;
         this.time = time;
         this.delay = delay;
@@ -46,7 +45,7 @@ public class OperationConfiguration {
         return priority;
     }
 
-    public List<VariableChoice> getVariableChoices() {
+    public Map<String, Object> getVariableChoices() {
         return variableChoices;
     }
 }

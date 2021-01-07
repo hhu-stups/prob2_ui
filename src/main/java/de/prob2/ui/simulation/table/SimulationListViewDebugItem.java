@@ -10,6 +10,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -83,45 +84,29 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				this.itemBox.getChildren().add(lbPriority);
 			}
 
-			if(!item.getChoiceID().isEmpty()) {
-				Label lbChoiceID = new Label(String.format(bundle.getString("simulation.item.choiceID"), item.getChoiceID()));
-				lbChoiceID.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbChoiceID);
-			}
-
 			if(!item.getValuesAsString().isEmpty()) {
 				Label lbVariableValues = new Label(String.format(bundle.getString("simulation.item.values"), item.getValuesAsString()));
 				lbVariableValues.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbVariableValues);
 
-				Map<String, String> values = item.getValues();
-				Map<String, String> evaluatedValues = new HashMap<>(values);
+				Map<String, Object> values = item.getValues();
+				Map<String, String> evaluatedValues = new HashMap<>();
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					for (String key : evaluatedValues.keySet()) {
-						evaluatedValues.computeIfPresent(key, (k, v) -> {
-							AbstractEvalResult evalResult = simulator.evaluateForSimulation(currentTrace.getCurrentState(), v);
-							return evalResult.toString();
-						});
+					for (String key : values.keySet()) {
+						Object value = values.get(key);
+						if(value instanceof List) {
+							// TODO
+						} else {
+							AbstractEvalResult evalResult = simulator.evaluateForSimulation(currentTrace.getCurrentState(), (String) values.get(key));
+							evaluatedValues.put(key, evalResult.toString());
+						}
 					}
 					Label lbEvaluatedValues = new Label(String.format(bundle.getString("simulation.item.concreteValues"), evaluatedValues.toString()));
 					lbEvaluatedValues.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbEvaluatedValues);
 				}
 
-			}
-
-			if(!item.getValuesProbability().isEmpty()) {
-				Label lbVariableValuesProbability = new Label(String.format(bundle.getString("simulation.item.valuesProbabilities"), item.getValuesProbability()));
-				lbVariableValuesProbability.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbVariableValuesProbability);
-
-				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					AbstractEvalResult evalResult = simulator.evaluateForSimulation(currentTrace.getCurrentState(), item.getValuesProbability());
-					Label lbValuesProbability = new Label(String.format(bundle.getString("simulation.item.concreteValuesProbabilities"), evalResult.toString()));
-					lbValuesProbability.getStyleClass().add("information");
-					this.itemBox.getChildren().add(lbValuesProbability);
-				}
 			}
 			this.setPrefHeight(itemBox.getChildren().size() * 20.0f);
 			this.setGraphic(this.itemBox);

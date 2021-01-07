@@ -14,22 +14,16 @@ public class SimulationDebugItem {
 
 	private String probability;
 
-	private String choiceID;
-
-	private Map<String, String> values;
-
-	private String valuesProbability;
+	private Map<String, Object> values;
 
 	public SimulationDebugItem(String opName, String time, Map<String, Integer> delay, String priority, String probability,
-							   String choiceID, Map<String, String> values, String valuesProbability) {
+							   Map<String, Object> values) {
 		this.opName = opName;
 		this.time = time;
 		this.delay = delay;
 		this.priority = priority;
 		this.probability = probability;
-		this.choiceID = choiceID;
 		this.values = values;
-		this.valuesProbability = valuesProbability;
 	}
 
 	public String getOpName() {
@@ -56,19 +50,11 @@ public class SimulationDebugItem {
 		return probability;
 	}
 
-	public String getChoiceID() {
-		return choiceID;
-	}
-
-	public Map<String, String> getValues() {
+	public Map<String, Object> getValues() {
 		return values;
 	}
 
 	public String getValuesAsString() {
 		return values == null ? "" : values.toString();
-	}
-
-	public String getValuesProbability() {
-		return valuesProbability;
 	}
 }

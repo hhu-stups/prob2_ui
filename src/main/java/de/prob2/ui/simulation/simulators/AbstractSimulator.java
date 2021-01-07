@@ -10,8 +10,6 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
-import de.prob2.ui.simulation.configuration.VariableChoice;
-import de.prob2.ui.simulation.configuration.VariableConfiguration;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import org.slf4j.Logger;
@@ -19,8 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,8 +44,11 @@ public abstract class AbstractSimulator {
 
     protected List<OperationConfiguration> operationConfigurationsSorted;
 
+    protected SimulatorCache cache;
+
     public AbstractSimulator() {
         this.time = new SimpleIntegerProperty(0);
+        this.cache = new SimulatorCache();
     }
 
     public void initSimulator(File configFile) {
@@ -175,23 +179,53 @@ public abstract class AbstractSimulator {
         }
     }
 
-    private String joinPredicateFromConfig(State currentState, List<VariableChoice> configs) {
-        if(configs == null) {
+    private String joinPredicateFromValues(State currentState, Map<String, Object> values) {
+        if(values == null) {
             return "1=1";
         } else {
-            return configs.stream()
-                    .map(VariableChoice::getChoice)
-                    .map(choice -> chooseVariableValues(currentState, choice))
-                    .collect(Collectors.joining(" & "));
+            return chooseVariableValues(currentState, values);
         }
     }
 
-    protected Trace executeBeforeInitialisation(String operation, List<VariableChoice> configs, State currentState, Trace trace) {
-        Transition nextTransition = currentState.findTransition(operation, joinPredicateFromConfig(currentState, configs));
+    protected Trace executeBeforeInitialisation(String operation, Map<String, Object> values, State currentState, Trace trace) {
+        Transition nextTransition = currentState.findTransition(operation, joinPredicateFromValues(currentState, values));
         return trace.add(nextTransition);
     }
 
-    protected abstract String chooseVariableValues(State currentState, List<VariableConfiguration> choice);
+    protected List<Map<String, String>> buildValueCombinations(State currentState, Map<String, Object> values) {
+        List<Map<String, String>> result = new ArrayList<>();
+        for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
+            String key = it.next();
+            Object value = values.get(key);
+            List<String> valueList = new ArrayList<>();
+            if(value instanceof List) {
+                valueList = (List<String>) value;
+            } else if(value instanceof String) {
+                valueList = Arrays.asList((String) value);
+            }
+            if(result.isEmpty()) {
+                for(String element : valueList) {
+                    Map<String, String> initialMap = new HashMap<>();
+                    initialMap.put(key, evaluateForSimulation(currentState, element).toString());
+                    result.add(initialMap);
+                }
+            } else {
+                List<Map<String, String>> oldResult = result;
+                result = new ArrayList<>();
+                for(Map<String, String> map : oldResult) {
+                    for(String element : valueList) {
+                        Map<String, String> newMap = new HashMap<>(map);
+                        newMap.put(key, evaluateForSimulation(currentState, element).toString());
+                        result.add(newMap);
+                    }
+                }
+
+            }
+        }
+        return result;
+    }
+
+    protected abstract String chooseVariableValues(State currentState, Map<String, Object> values);
 
     public SimulationConfiguration getConfig() {
         return config;

@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.configuration;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
@@ -24,8 +25,8 @@ public class SimulationFileHandler {
 		int endingTime = simulationFile.get("endingTime") == null ? -1 : simulationFile.get("endingTime").getAsInt();
 		String startingCondition = simulationFile.get("startingCondition") == null ? "" : simulationFile.get("startingCondition").getAsString();
 		String endingCondition = simulationFile.get("endingCondition") == null ? "" : simulationFile.get("endingCondition").getAsString();
-        List<VariableChoice> setupConfigurations = simulationFile.get("setupConfigurations") == null ? null : buildVariableChoices(simulationFile.get("setupConfigurations").getAsJsonArray());
-        List<VariableChoice> initialisationConfigurations = simulationFile.get("initialisationConfigurations") == null ? null : buildVariableChoices(simulationFile.get("initialisationConfigurations").getAsJsonArray());
+        Map<String, Object> setupConfigurations = simulationFile.get("setupConfigurations") == null ? null : buildVariableChoices(simulationFile.get("setupConfigurations").getAsJsonObject());
+        Map<String, Object> initialisationConfigurations = simulationFile.get("initialisationConfigurations") == null ? null : buildVariableChoices(simulationFile.get("initialisationConfigurations").getAsJsonObject());
 
 
         JsonArray operationConfigurationsAsArray = simulationFile.get("operationsConfigurations").getAsJsonArray();
@@ -34,35 +35,25 @@ public class SimulationFileHandler {
         return new SimulationConfiguration(endingTime, startingCondition, endingCondition, setupConfigurations, initialisationConfigurations, operationConfigurations);
     }
 
-    private static List<VariableChoice> buildVariableChoices(JsonArray jsonArray) {
-        List<VariableChoice> variableChoices = new ArrayList<>();
-        for(int i = 0; i < jsonArray.size(); i++) {
-            JsonObject jsonObject = (JsonObject) jsonArray.get(i);
-            JsonArray choiceAsArray = jsonObject.get("choice").getAsJsonArray();
-            variableChoices.add(buildVariableChoice(choiceAsArray));
+    private static Map<String, Object> buildVariableChoices(JsonObject jsonObject) {
+        Map<String, Object> values = new HashMap<>();
+        for(String key : jsonObject.keySet()) {
+            values.put(key, buildVariableExpression(jsonObject.get(key)));
         }
-        return variableChoices;
+        return values;
     }
 
-    private static VariableChoice buildVariableChoice(JsonArray jsonArray) {
-        List<VariableConfiguration> variableConfigurations = new ArrayList<>();
-        for(int i = 0; i < jsonArray.size(); i++) {
-            JsonObject jsonObject = (JsonObject) jsonArray.get(i);
-            variableConfigurations.add(buildVariableConfiguration(jsonObject));
+    private static Object buildVariableExpression(JsonElement jsonElement) {
+        if(jsonElement instanceof JsonArray) {
+            List<String> expressions = new ArrayList<>();
+            JsonArray jsonArray = jsonElement.getAsJsonArray();
+            for(int i = 0; i < jsonArray.size(); i++) {
+                expressions.add(jsonArray.get(i).getAsString());
+            }
+            return expressions;
+        } else {
+            return jsonElement.getAsString();
         }
-        return new VariableChoice(variableConfigurations);
-    }
-
-    private static VariableConfiguration buildVariableConfiguration(JsonObject jsonObject) {
-        JsonObject valuesObject = jsonObject.get("values").getAsJsonObject();
-        String probability = jsonObject.get("probability").getAsString();
-
-        Map<String, String> values = new HashMap<>();
-        for(String key : valuesObject.keySet()) {
-            values.put(key, valuesObject.get(key).getAsString());
-        }
-
-        return new VariableConfiguration(values, probability);
     }
 
     private static List<OperationConfiguration> buildOperationConfigurations(JsonArray operationConfigurationsAsArray) {
@@ -83,7 +74,7 @@ public class SimulationFileHandler {
                 }
             }
 
-            List<VariableChoice> variableChoices = jsonObject.get("variableChoices") == null ? null : buildVariableChoices(jsonObject.get("variableChoices").getAsJsonArray());
+            Map<String, Object> variableChoices = jsonObject.get("variableChoices") == null ? null : buildVariableChoices(jsonObject.get("variableChoices").getAsJsonObject());
             operationConfigurations.add(new OperationConfiguration(opName, opTime, delay, probability, priority, variableChoices));
         }
         return operationConfigurations;
