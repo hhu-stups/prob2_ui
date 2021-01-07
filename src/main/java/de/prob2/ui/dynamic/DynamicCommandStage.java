@@ -277,7 +277,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Visualization interrupted", e);
 				Thread.currentThread().interrupt();
-				Platform.runLater(this::clearLoadingStatus);
+				Platform.runLater(() -> {
+					this.clearLoadingStatus();
+					this.updatePlaceholderLabel();
+				});
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Visualization failed", e);
 				Platform.runLater(() -> {
