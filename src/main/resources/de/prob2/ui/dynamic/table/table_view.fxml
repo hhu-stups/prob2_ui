@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<fx:root type="ExpressionTableView" title="%table.expressionTableView.stage.title" minWidth="800" minHeight="600" width="1600.0" height="1000.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="ExpressionTableView" title="%table.expressionTableView.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -25,7 +25,7 @@
 		<Scene stylesheets="@/prob.css">
 			<BorderPane>
 				<center>
-					<SplitPane dividerPositions="0.4">
+					<SplitPane dividerPositions="0.35">
 						<VBox>
 							<ListView fx:id="lvChoice" VBox.vgrow="ALWAYS">
 								<placeholder>

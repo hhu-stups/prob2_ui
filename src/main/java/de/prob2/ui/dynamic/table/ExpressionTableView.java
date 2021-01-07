@@ -94,7 +94,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 
-	private static final double TABLE_DEFAULT_WIDTH = 800.0;
+	private static final double TABLE_DEFAULT_WIDTH = 700.0;
 	
 	private static final Pattern NEEDS_CSV_QUOTE_PATTERN = Pattern.compile("[,\"\n\r]");
 
