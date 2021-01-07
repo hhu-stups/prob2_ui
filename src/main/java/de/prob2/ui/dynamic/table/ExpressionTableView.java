@@ -94,7 +94,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 
-	private static final double TABLE_DEFAULT_WIDTH = 700.0;
+	private static final double MINIMUM_TABLE_COLUMN_WIDTH = 160.0;
 	
 	private static final Pattern NEEDS_CSV_QUOTE_PATTERN = Pattern.compile("[,\"\n\r]");
 
@@ -171,12 +171,16 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		// Update header when table is updated
 		this.header = data.getHeader();
 		tableView.getColumns().clear();
+		// All table columns get the same size initially (but they can be resized by the user).
+		// Make the table columns fill the current width of the table view exactly,
+		// unless that would make the columns too narrow.
+		final double columnWidth = Math.max(tableView.getWidth() / header.size(), MINIMUM_TABLE_COLUMN_WIDTH);
 		for (int i = 0; i < header.size(); i++) {
 			final int j = i;
 			final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
 			column.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().get(j)));
 			tableView.getColumns().add(column);
-			column.setPrefWidth(TABLE_DEFAULT_WIDTH/header.size());
+			column.setPrefWidth(columnWidth);
 			column.getStyleClass().add("expression-table-view-column");
 			column.getStyleClass().add("alignment");
 		}
