@@ -6,6 +6,7 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.CloseWindowMenuItem?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -64,14 +65,8 @@
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
 								<Label fx:id="lbDescription" prefHeight="100.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 								<VBox spacing="20.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-									<VBox alignment="CENTER">
-										<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
-										<TextArea fx:id="taFormula" promptText="%dynamic.enterFormula.placeholder" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8;"/>
-									</VBox>
-									<VBox alignment="CENTER">
-										<Label text="%dynamic.errors" VBox.vgrow="NEVER"/>
-										<TextArea editable="false" fx:id="taErrors" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8;"/>
-									</VBox>
+									<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
+									<TextArea fx:id="taFormula" promptText="%dynamic.enterFormula.placeholder" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8;"/>
 								</VBox>
 							</VBox>
 						</VBox>
@@ -90,6 +85,18 @@
 							</HBox>
 							<StackPane VBox.vgrow="ALWAYS">
 								<Label fx:id="placeholderLabel"/>
+								<BorderPane fx:id="errorsView" visible="false">
+									<top>
+										<Label text="%dynamic.errors">
+											<BorderPane.margin>
+												<Insets topRightBottomLeft="5.0"/>
+											</BorderPane.margin>
+										</Label>
+									</top>
+									<center>
+										<TextArea fx:id="taErrors" editable="false"/>
+									</center>
+								</BorderPane>
 								<WebView fx:id="dotView" visible="false"/>
 							</StackPane>
 						</VBox>

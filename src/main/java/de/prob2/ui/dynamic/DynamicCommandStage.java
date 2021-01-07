@@ -22,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -80,6 +81,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	@FXML
 	protected Label placeholderLabel;
+	
+	@FXML
+	protected Parent errorsView;
 	
 	@FXML
 	protected DynamicCommandStatusBar statusBar;
@@ -239,6 +243,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected void interrupt() {
 		this.updater.cancel(true);
 		this.clearLoadingStatus();
+		this.taErrors.clear();
+		this.errorsView.setVisible(false);
 		this.clearContent();
 		this.updatePlaceholderLabel();
 	}
@@ -285,7 +291,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				LOGGER.error("Visualization failed", e);
 				Platform.runLater(() -> {
 					taErrors.setText(e.getMessage());
+					errorsView.setVisible(true);
 					this.clearLoadingStatus();
+					placeholderLabel.setVisible(false);
 				});
 			}
 		});

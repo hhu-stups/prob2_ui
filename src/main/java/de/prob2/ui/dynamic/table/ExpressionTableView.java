@@ -161,6 +161,8 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			this.clearLoadingStatus();
 			currentTable.set(table);
 			placeholderLabel.setVisible(false);
+			taErrors.clear();
+			errorsView.setVisible(false);
 			tableView.setVisible(true);
 		});
 	}
@@ -183,7 +185,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		// Do not provide header to row factory as this would lead to the bug that the row factory always use the oldest headers
 		// Instead use header as a variable in ExpressionTableView that can be accessed by ValueItemRow
 		tableView.setRowFactory(table -> new ValueItemRow());
-		taErrors.clear();
 	}
 
 	private void handleSource(List<String> header, List<String> item, List<MenuItem> contextMenuItems) {
