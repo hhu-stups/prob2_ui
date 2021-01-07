@@ -65,7 +65,7 @@
 									</Label>
 								</top>
 								<center>
-									<TextArea fx:id="taErrors" editable="false"/>
+									<TextArea fx:id="taErrors" editable="false" wrapText="true"/>
 								</center>
 							</BorderPane>
 							<TableView fx:id="tableView" visible="false"/>

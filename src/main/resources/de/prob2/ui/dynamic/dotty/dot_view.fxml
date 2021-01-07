@@ -94,7 +94,7 @@
 										</Label>
 									</top>
 									<center>
-										<TextArea fx:id="taErrors" editable="false"/>
+										<TextArea fx:id="taErrors" editable="false" wrapText="true"/>
 									</center>
 								</BorderPane>
 								<WebView fx:id="dotView" visible="false"/>
