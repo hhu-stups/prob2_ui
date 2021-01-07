@@ -271,7 +271,7 @@ public class SimulationModelChecker {
             if(result.isEmpty()) {
                 for(String element : valueList) {
                     Map<String, String> initialMap = new HashMap<>();
-                    initialMap.put(key, SimulationHelperFunctions.evaluateForSimulation(currentState, element).toString());
+                    initialMap.put(key, cache.readValueWithCaching(currentState, element));
                     result.add(initialMap);
                 }
             } else {
@@ -280,7 +280,7 @@ public class SimulationModelChecker {
                 for(Map<String, String> map : oldResult) {
                     for(String element : valueList) {
                         Map<String, String> newMap = new HashMap<>(map);
-                        newMap.put(key, SimulationHelperFunctions.evaluateForSimulation(currentState, element).toString());
+                        newMap.put(key, cache.readValueWithCaching(currentState, element));
                         result.add(newMap);
                     }
                 }

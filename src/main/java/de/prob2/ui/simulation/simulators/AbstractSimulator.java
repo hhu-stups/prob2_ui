@@ -91,11 +91,6 @@ public abstract class AbstractSimulator {
         }
     }
 
-    public AbstractEvalResult evaluateForSimulation(State state, String formula) {
-        // Note: Rodin parser does not have IF-THEN-ELSE nor REAL
-        return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
-    }
-
     protected Trace simulationStep(Trace trace) {
         Trace newTrace = trace;
         State currentState = newTrace.getCurrentState();
@@ -131,7 +126,7 @@ public abstract class AbstractSimulator {
         if(!config.getStartingCondition().isEmpty()) {
             StateSpace stateSpace = newTrace.getStateSpace();
             currentState = newTrace.getCurrentState();
-            AbstractEvalResult startingResult = evaluateForSimulation(currentState, config.getStartingCondition());
+            String startingResult = cache.readValueWithCaching(currentState, config.getStartingCondition());
             // TODO: Model Checking for goal
         }
         return newTrace;
@@ -154,8 +149,8 @@ public abstract class AbstractSimulator {
 
     private boolean endingConditionReached(Trace trace) {
         if(!config.getEndingCondition().isEmpty()) {
-            AbstractEvalResult endingConditionEvalResult = evaluateForSimulation(trace.getCurrentState(), config.getEndingCondition());
-            return "TRUE".equals(endingConditionEvalResult.toString());
+            String endingConditionEvalResult = cache.readValueWithCaching(trace.getCurrentState(), config.getEndingCondition());
+            return "TRUE".equals(endingConditionEvalResult);
         }
         return false;
     }
@@ -206,7 +201,7 @@ public abstract class AbstractSimulator {
             if(result.isEmpty()) {
                 for(String element : valueList) {
                     Map<String, String> initialMap = new HashMap<>();
-                    initialMap.put(key, evaluateForSimulation(currentState, element).toString());
+                    initialMap.put(key, cache.readValueWithCaching(currentState, element));
                     result.add(initialMap);
                 }
             } else {
@@ -215,7 +210,7 @@ public abstract class AbstractSimulator {
                 for(Map<String, String> map : oldResult) {
                     for(String element : valueList) {
                         Map<String, String> newMap = new HashMap<>(map);
-                        newMap.put(key, evaluateForSimulation(currentState, element).toString());
+                        newMap.put(key, cache.readValueWithCaching(currentState, element));
                         result.add(newMap);
                     }
                 }

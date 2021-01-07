@@ -34,19 +34,19 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
             String key = it.next();
             Object value = values.get(key);
-            AbstractEvalResult evalResult = null;
+            String evalResult;
             if(value instanceof List) {
                 Random rand = new Random();
                 List<String> list = (List<String>) value;
                 String randomElement = list.get(rand.nextInt(list.size()));
-                evalResult = evaluateForSimulation(currentState, randomElement);
+                evalResult = cache.readValueWithCaching(currentState, randomElement);
             } else {
                 //Otherwise it is a String
-                evalResult = evaluateForSimulation(currentState, (String) value);
+                evalResult = cache.readValueWithCaching(currentState, (String) value);
             }
             conjuncts.append(key);
             conjuncts.append(" = ");
-            conjuncts.append(evalResult.toString());
+            conjuncts.append(evalResult);
             if(it.hasNext()) {
                 conjuncts.append(" & ");
             }

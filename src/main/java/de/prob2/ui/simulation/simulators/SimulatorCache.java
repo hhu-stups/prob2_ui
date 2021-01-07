@@ -15,6 +15,8 @@ public class SimulatorCache {
 
     private final Map<String, Map<String, Double>> probabilityCache = new HashMap<>();
 
+    private final Map<String, Map<String, String>> valuesCache = new HashMap<>();
+
     private final Map<String, Map<String, List<Transition>>> transitionCache = new HashMap<>();
 
     public double readProbabilityWithCaching(State bState, OperationConfiguration opConfig) {
@@ -37,6 +39,26 @@ public class SimulatorCache {
             probabilityCache.get(stateID).put(opName, opProbability);
         }
         return opProbability;
+    }
+
+    public String readValueWithCaching(State bState, String expression) {
+        String stateID = bState.getId();
+        String value;
+        if(valuesCache.containsKey(stateID)) {
+            if(valuesCache.get(stateID).containsKey(expression)) {
+                value = valuesCache.get(stateID).get(expression);
+            } else {
+                AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, expression);
+                value = evalResult.toString();
+                valuesCache.get(stateID).put(expression, value);
+            }
+        } else {
+            valuesCache.put(stateID, new HashMap<>());
+            AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, expression);
+            value = evalResult.toString();
+            valuesCache.get(stateID).put(expression, value);
+        }
+        return value;
     }
 
     private void loadTransitionsInCache(State currentState, String opName) {

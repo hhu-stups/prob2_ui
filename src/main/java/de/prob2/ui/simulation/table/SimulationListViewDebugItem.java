@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.table;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.simulators.Simulator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -71,7 +72,7 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				this.itemBox.getChildren().add(lbProbability);
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					AbstractEvalResult evalResult = simulator.evaluateForSimulation(currentTrace.getCurrentState(), item.getProbability());
+					AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), item.getProbability());
 					Label lbProbabilityValue = new Label(String.format(bundle.getString("simulation.item.probabilityValue"), evalResult.toString()));
 					lbProbabilityValue.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbProbabilityValue);
@@ -98,7 +99,7 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 						if(value instanceof List) {
 							// TODO
 						} else {
-							AbstractEvalResult evalResult = simulator.evaluateForSimulation(currentTrace.getCurrentState(), (String) values.get(key));
+							AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), (String) values.get(key));
 							evaluatedValues.put(key, evalResult.toString());
 						}
 					}
