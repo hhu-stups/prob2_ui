@@ -274,7 +274,9 @@ task jpackage(type: Exec) {
 	// Show jpackage --verbose output only if running Gradle with --info (or higher)
 	logging.captureStandardOutput(LogLevel.INFO)
 
-	final jpackageIconsDir = file("src/main/jpackage/icons")
+	final jpackageFilesDir = file("src/main/jpackage")
+	final jpackageIconsDir = new File(jpackageFilesDir, "icons")
+	final jpackageLaunchersDir = new File(jpackageFilesDir, "launchers")
 	final shadowJarFile = shadowJar.archiveFile.get().asFile
 	executable = "jpackage"
 	args = [
@@ -298,6 +300,16 @@ task jpackage(type: Exec) {
 			"--win-menu",
 			"--win-menu-group", '""', // Don't put start menu shortcut inside a directory
 			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
+			// The Windows application by default runs without a console,
+			// which makes it impossible to see stdout/stderr output
+			// (even when launched from an existing console window).
+			// There is an option to make the launcher a console application,
+			// which make stdout/stderr visible,
+			// but this also makes a console window appear when the application is launched from the GUI,
+			// which is usually not the desired behavior.
+			// So we leave the main launcher as a non-console application
+			// and add an alternative console launcher that can be used to see stdout/stderr output.
+			"--add-launcher", "ProB2-UI-console=" + new File(jpackageLaunchersDir, "windows_console.properties"),
 		]
 	} else if (osdetector.os == "osx") {
 		args += [
