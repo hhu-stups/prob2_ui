@@ -198,7 +198,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	private void updatePlaceholderLabel() {
 		final String text;
-		if (currentTrace.get() == null) {
+		if (this.updater.isRunning()) {
+			text = bundle.getString("dynamic.placeholder.inProgress");
+		} else if (currentTrace.get() == null) {
 			text = bundle.getString("common.noModelLoaded");
 		} else {
 			final T selectedItem = lvChoice.getSelectionModel().getSelectedItem();
@@ -206,8 +208,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				text = bundle.getString("dynamic.placeholder.selectVisualization");
 			} else if (selectedItem.getArity() > 0) {
 				text = bundle.getString("dynamic.enterFormula.placeholder");
-			} else if (this.updater.isRunning()) {
-				text = bundle.getString("dynamic.placeholder.inProgress");
 			} else {
 				// The placeholder label shouldn't be seen by the user in this case,
 				// because the visualization content should be visible,
