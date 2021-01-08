@@ -298,6 +298,13 @@ public class SimulatorStage extends Stage {
 				}
 			}
 		};
+		simulator.timeProperty().addListener((observable, from, to) -> {
+			if(!simulator.isFinished()) {
+				time = to.intValue();
+				BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(2, RoundingMode.HALF_UP);
+				Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+			}
+		});
 		this.timer = new Timer();
 		timer.scheduleAtFixedRate(task, 100, 100);
 	}
