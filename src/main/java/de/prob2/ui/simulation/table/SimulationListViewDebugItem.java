@@ -10,10 +10,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 
@@ -66,14 +68,17 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				this.itemBox.getChildren().add(lbDelay);
 			}
 
-			if(!item.getProbability().isEmpty()) {
+			if(!item.getProbabilityAsString().isEmpty()) {
 				Label lbProbability = new Label(String.format(bundle.getString("simulation.item.probability"), item.getProbability()));
 				lbProbability.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbProbability);
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), item.getProbability());
-					Label lbProbabilityValue = new Label(String.format(bundle.getString("simulation.item.probabilityValue"), evalResult.toString()));
+					String joindedProbability = item.getProbability().stream()
+							.map(probab -> SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), probab).toString())
+							.collect(Collectors.joining(", "));
+
+					Label lbProbabilityValue = new Label(String.format(bundle.getString("simulation.item.probabilityValue"), joindedProbability));
 					lbProbabilityValue.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbProbabilityValue);
 				}
@@ -90,20 +95,24 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				lbVariableValues.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbVariableValues);
 
-				Map<String, Object> values = item.getValues();
-				Map<String, String> evaluatedValues = new HashMap<>();
+				List<Map<String, Object>> valuesList = item.getValues();
+				List<Map<String, String>> evaluatedValuesList = new ArrayList<>();
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					for (String key : values.keySet()) {
-						Object value = values.get(key);
-						if(value instanceof List) {
-							// TODO
-						} else {
-							AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), (String) values.get(key));
-							evaluatedValues.put(key, evalResult.toString());
+					for(Map<String, Object> values : valuesList) {
+						Map<String, String> evaluatedValues = new HashMap<>();
+						for (String key : values.keySet()) {
+							Object value = values.get(key);
+							if(value instanceof List) {
+								// TODO
+							} else {
+								AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), (String) values.get(key));
+								evaluatedValues.put(key, evalResult.toString());
+							}
 						}
+						evaluatedValuesList.add(evaluatedValues);
 					}
-					Label lbEvaluatedValues = new Label(String.format(bundle.getString("simulation.item.concreteValues"), evaluatedValues.toString()));
+					Label lbEvaluatedValues = new Label(String.format(bundle.getString("simulation.item.concreteValues"), evaluatedValuesList.size() == 1 ? evaluatedValuesList.get(0).toString() : evaluatedValuesList.toString()));
 					lbEvaluatedValues.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbEvaluatedValues);
 				}

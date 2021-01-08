@@ -47,6 +47,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -248,20 +249,20 @@ public class SimulatorStage extends Stage {
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
 		if(config.getSetupConfigurations() != null) {
-			observableList.add(new SimulationDebugItem("SETUP_CONSTANTS", "", null, "", "", config.getSetupConfigurations()));
+			observableList.add(new SimulationDebugItem("SETUP_CONSTANTS", "", null, "", null, Arrays.asList(config.getSetupConfigurations())));
 		}
 
 		if(config.getInitialisationConfigurations() != null) {
-			observableList.add(new SimulationDebugItem("INITIALISATION", "", null, "", "", config.getInitialisationConfigurations()));
+			observableList.add(new SimulationDebugItem("INITIALISATION", "", null, "", null, Arrays.asList(config.getInitialisationConfigurations())));
 		}
 
 
 		for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
-			String opName = opConfig.getOpName();
+			String opName = String.join(", ", opConfig.getOpName());
 			String time = String.valueOf(opConfig.getTime());
-			Map<String, Integer> delay = opConfig.getDelay();
+			List<Map<String, Integer>> delay = opConfig.getDelay();
 			String priority = String.valueOf(opConfig.getPriority());
-			String probability = opConfig.getProbability();
+			List<String> probability = opConfig.getProbability();
 			if(opConfig.getVariableChoices() == null) {
 				observableList.add(new SimulationDebugItem(opName, time, delay, priority, probability, null));
 			} else {

@@ -19,22 +19,21 @@ public class SimulatorCache {
 
     private final Map<String, Map<String, List<Transition>>> transitionCache = new HashMap<>();
 
-    public double readProbabilityWithCaching(State bState, OperationConfiguration opConfig) {
+    public double readProbabilityWithCaching(State bState, String opName, String probability) {
         String stateID = bState.getId();
-        String opName = opConfig.getOpName();
 
         double opProbability;
         if(probabilityCache.containsKey(stateID)) {
             if(probabilityCache.get(stateID).containsKey(opName)) {
                 opProbability = probabilityCache.get(stateID).get(opName);
             } else {
-                AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, opConfig.getProbability());
+                AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, probability);
                 opProbability = Double.parseDouble(evalResult.toString());
                 probabilityCache.get(stateID).put(opName, opProbability);
             }
         } else {
             probabilityCache.put(stateID, new HashMap<>());
-            AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, opConfig.getProbability());
+            AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, probability);
             opProbability = Double.parseDouble(evalResult.toString());
             probabilityCache.get(stateID).put(opName, opProbability);
         }
@@ -71,9 +70,8 @@ public class SimulatorCache {
                 .collect(Collectors.toList()));
     }
 
-    public List<Transition> readTransitionsWithCaching(State bState, OperationConfiguration opConfig) {
+    public List<Transition> readTransitionsWithCaching(State bState, String opName) {
         String stateID = bState.getId();
-        String opName = opConfig.getOpName();
 
         if(!transitionCache.containsKey(stateID) || !transitionCache.get(stateID).containsKey(opName)) {
             loadTransitionsInCache(bState, opName);

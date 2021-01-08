@@ -60,21 +60,72 @@ public class SimulationFileHandler {
         List<OperationConfiguration> operationConfigurations = new ArrayList<>();
         for(int i = 0; i < operationConfigurationsAsArray.size(); i++) {
             JsonObject jsonObject = (JsonObject) operationConfigurationsAsArray.get(i);
-            String opName = jsonObject.get("opName").getAsString();
-            String probability = jsonObject.get("probability") == null ? "-1.0f" : jsonObject.get("probability").getAsString();
+            List<String> opName = new ArrayList<>();
+            List<String> probability = new ArrayList<>();
+            List<Map<String, Integer>> delay = null;
+
+            // operation name
+            if(jsonObject.get("opName").isJsonArray()) {
+                for(JsonElement op : jsonObject.get("opName").getAsJsonArray()) {
+                    opName.add(op.getAsString());
+                }
+            } else {
+                opName.add(jsonObject.get("opName").getAsString());
+            }
+
+            // probability
+            if(jsonObject.get("probability").isJsonArray()) {
+                for(JsonElement op : jsonObject.get("probability").getAsJsonArray()) {
+                    probability.add(op.getAsString());
+                }
+            } else {
+                probability.add(jsonObject.get("probability").getAsString());
+            }
+
+
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
             int opTime =  jsonObject.get("time") == null ? -1 : jsonObject.get("time").getAsInt();
 
-            JsonObject delayObject =  jsonObject.get("delay") == null ? null : jsonObject.get("delay").getAsJsonObject();
-            Map<String, Integer> delay = null;
-            if(delayObject != null) {
-                delay = new HashMap<>();
-                for (String key : delayObject.keySet()) {
-                    delay.put(key, delayObject.get(key).getAsInt());
+            // delay
+            if(jsonObject.get("delay") != null) {
+                delay = new ArrayList<>();
+                if(jsonObject.get("delay").isJsonArray()) {
+                    JsonArray delayArray = jsonObject.get("delay").getAsJsonArray();
+                    for(JsonElement delayElement : delayArray) {
+                        Map<String, Integer> delayMap = new HashMap<>();
+                        JsonObject delayObject = delayElement.getAsJsonObject();
+                        for (String key : delayObject.keySet()) {
+                            delayMap.put(key, delayObject.get(key).getAsInt());
+                        }
+                        delay.add(delayMap);
+                    }
+                } else {
+                    JsonObject delayObject = jsonObject.get("delay").getAsJsonObject();
+                    if(delayObject != null) {
+                        Map<String, Integer> delayMap = new HashMap<>();
+                        for (String key : delayObject.keySet()) {
+                            delayMap.put(key, delayObject.get(key).getAsInt());
+                        }
+                        delay.add(delayMap);
+                    }
+                }
+
+            }
+
+            // variable choices
+            List<Map<String, Object>> variableChoices = null;
+            if(jsonObject.get("variableChoices") != null) {
+                variableChoices = new ArrayList<>();
+                if(jsonObject.get("variableChoices") instanceof List) {
+                    JsonArray variableChoiceArray = jsonObject.get("variableChoices").getAsJsonArray();
+                    for(JsonElement variableChoiceElement : variableChoiceArray) {
+                        variableChoices.add(buildVariableChoices(variableChoiceElement.getAsJsonObject()));
+                    }
+                } else {
+                    variableChoices.add(buildVariableChoices(jsonObject.get("variableChoices").getAsJsonObject()));
                 }
             }
 
-            Map<String, Object> variableChoices = jsonObject.get("variableChoices") == null ? null : buildVariableChoices(jsonObject.get("variableChoices").getAsJsonObject());
             operationConfigurations.add(new OperationConfiguration(opName, opTime, delay, probability, priority, variableChoices));
         }
         return operationConfigurations;

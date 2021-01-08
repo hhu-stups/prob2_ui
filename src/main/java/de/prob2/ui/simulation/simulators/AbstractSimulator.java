@@ -1,8 +1,5 @@
 package de.prob2.ui.simulation.simulators;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -74,8 +71,10 @@ public abstract class AbstractSimulator {
     private void initializeRemainingTime() {
         config.getOperationConfigurations()
                 .forEach(config -> {
-                    operationToRemainingTime.put(config.getOpName(), config.getTime());
-                    initialOperationToRemainingTime.put(config.getOpName(), config.getTime());
+                    for(String op : config.getOpName()) {
+                        operationToRemainingTime.put(op, config.getTime());
+                        initialOperationToRemainingTime.put(op, config.getTime());
+                    }
                 });
         updateDelay();
     }
@@ -135,10 +134,6 @@ public abstract class AbstractSimulator {
     protected Trace executeOperations(Trace trace) {
         Trace newTrace = trace;
         for(OperationConfiguration opConfig : operationConfigurationsSorted) {
-            //select operations where time <= 0
-            if(operationToRemainingTime.get(opConfig.getOpName()) > 0) {
-                continue;
-            }
             if (endingConditionReached(newTrace)) {
                 break;
             }
@@ -155,18 +150,13 @@ public abstract class AbstractSimulator {
         return false;
     }
 
-    protected abstract boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace);
-
     protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
-        String opName = opConfig.getOpName();
-        operationToRemainingTime.computeIfPresent(opName, (k, v) -> initialOperationToRemainingTime.get(opName));
         return executeNextOperation(opConfig, trace);
     }
 
     protected abstract Trace executeNextOperation(OperationConfiguration opConfig, Trace trace);
 
-    protected void delayRemainingTime(OperationConfiguration opConfig) {
-        Map<String, Integer> delay = opConfig.getDelay();
+    protected void delayRemainingTime(Map<String, Integer> delay) {
         if(delay != null) {
             for (String key : delay.keySet()) {
                 operationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(v, delay.get(key)));

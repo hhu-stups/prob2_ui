@@ -40,21 +40,6 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    protected boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace) {
-        String opName = opConfig.getOpName();
-        State currentState = trace.getCurrentState();
-
-        double probability = cache.readProbabilityWithCaching(currentState, opConfig);
-
-        List<String> enabledOperations = trace.getNextTransitions().stream()
-                .map(Transition::getName)
-                .collect(Collectors.toList());
-        boolean equalsNextOperation = opConfig.getOpName().equals(replayTrace.getPersistentTrace().getTransitionList().get(counter).getOperationName());
-        return (Math.abs(probability - 1.0) < 0.0001 && !equalsNextOperation) || (equalsNextOperation &&  probability > 0.0) && enabledOperations.contains(opName);
-    }
-
-
-    @Override
     protected String chooseVariableValues(State currentState, Map<String, Object> values) {
         PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
         List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
@@ -95,23 +80,57 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
 
     @Override
     public Trace executeNextOperation(OperationConfiguration opConfig, Trace trace) {
-        String opName = opConfig.getOpName();
-        Map<String, Object> values = opConfig.getVariableChoices();
+        if(counter == replayTrace.getPersistentTrace().getTransitionList().size()) {
+            return trace;
+        }
+
         State currentState = trace.getCurrentState();
-        Trace newTrace = trace;
+        boolean execute = false;
+        String chosenOp = "";
+        Map<String, Object> values = null;
+        Map<String, Integer> delay = null;
+
+        //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
+        for(int i = 0; i < opConfig.getOpName().size(); i++) {
+            chosenOp = opConfig.getOpName().get(i);
+            double evalProbability = cache.readProbabilityWithCaching(currentState, chosenOp, opConfig.getProbability().get(i));
+            List<String> enabledOperations = trace.getNextTransitions().stream()
+                    .map(Transition::getName)
+                    .collect(Collectors.toList());
+            boolean equalsNextOperation = chosenOp.equals(replayTrace.getPersistentTrace().getTransitionList().get(counter).getOperationName());
+            boolean operationScheduled = operationToRemainingTime.get(chosenOp) == 0;
+            if(operationScheduled) {
+                final String finalChosenOp = chosenOp;
+                operationToRemainingTime.computeIfPresent(chosenOp, (k, v) -> initialOperationToRemainingTime.get(finalChosenOp));
+            }
+            boolean chooseOperation = operationScheduled && ((Math.abs(evalProbability - 1.0) < 0.0001 && !equalsNextOperation) || (equalsNextOperation && evalProbability > 0.0) && enabledOperations.contains(chosenOp));
+            // TODO: What if sum of scheduled operations has 100% probability and is not equal next operation in trace
+            if(chooseOperation) {
+                if(opConfig.getVariableChoices() != null) {
+                    values = opConfig.getVariableChoices().get(i);
+                }
+                if(opConfig.getDelay() != null) {
+                    delay = opConfig.getDelay().get(i);
+                }
+                execute = true;
+                break;
+            }
+        }
+        if(!execute) {
+            return trace;
+        }
+
 
         PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
         List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
         PersistentTransition persistentTransition = transitionList.get(counter);
 
-        if (!chooseNextOperation(opConfig, trace)) {
-            return trace;
-        }
+        Trace newTrace = trace;
 
         if(values == null) {
-
-            List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opConfig).stream()
-                    .filter(trans -> trans.getName().equals(opName) && opName.equals(persistentTransition.getOperationName()))
+            String finalChosenOp = chosenOp;
+            List<Transition> transitions = cache.readTransitionsWithCaching(currentState, finalChosenOp).stream()
+                    .filter(trans -> trans.getName().equals(finalChosenOp) && finalChosenOp.equals(persistentTransition.getOperationName()))
                     .collect(Collectors.toList());
             if(!transitions.isEmpty()) {
                 PredicateBuilder predicateBuilder = new PredicateBuilder();
@@ -122,15 +141,15 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                         currentState.getId(), persistentTransition.getOperationName(), pred, 1);
                 stateSpace.execute(command);
                 newTrace = newTrace.add(command.getNewTransitions().get(0));
-                delayRemainingTime(opConfig);
+                delayRemainingTime(delay);
             }
         } else {
             State finalCurrentState = newTrace.getCurrentState();
             String predicate = chooseVariableValues(finalCurrentState, values);
-            if(finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, opName, predicate)) {
-                Transition transition = finalCurrentState.findTransition(opName, predicate);
+            if(finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, chosenOp, predicate)) {
+                Transition transition = finalCurrentState.findTransition(chosenOp, predicate);
                 newTrace = newTrace.add(transition);
-                delayRemainingTime(opConfig);
+                delayRemainingTime(delay);
             }
         }
         return newTrace;

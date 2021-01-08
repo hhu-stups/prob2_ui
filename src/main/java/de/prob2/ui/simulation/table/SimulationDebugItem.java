@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.table;
 
+import java.util.List;
 import java.util.Map;
 
 public class SimulationDebugItem {
@@ -8,16 +9,16 @@ public class SimulationDebugItem {
 
 	private String time;
 
-	private Map<String, Integer> delay;
+	private List<Map<String, Integer>> delay;
 
 	private String priority;
 
-	private String probability;
+	private List<String> probability;
 
-	private Map<String, Object> values;
+	private List<Map<String, Object>> values;
 
-	public SimulationDebugItem(String opName, String time, Map<String, Integer> delay, String priority, String probability,
-							   Map<String, Object> values) {
+	public SimulationDebugItem(String opName, String time, List<Map<String, Integer>> delay, String priority, List<String> probability,
+							   List<Map<String, Object>> values) {
 		this.opName = opName;
 		this.time = time;
 		this.delay = delay;
@@ -34,7 +35,7 @@ public class SimulationDebugItem {
 		return time;
 	}
 
-	public Map<String, Integer> getDelay() {
+	public List<Map<String, Integer>> getDelay() {
 		return delay;
 	}
 
@@ -46,11 +47,15 @@ public class SimulationDebugItem {
 		return priority;
 	}
 
-	public String getProbability() {
+	public List<String> getProbability() {
 		return probability;
 	}
 
-	public Map<String, Object> getValues() {
+	public String getProbabilityAsString() {
+		return probability == null ? "" : probability.toString();
+	}
+
+	public List<Map<String, Object>> getValues() {
 		return values;
 	}
 

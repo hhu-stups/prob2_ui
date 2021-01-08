@@ -2,7 +2,6 @@ package de.prob2.ui.simulation.simulators;
 
 import com.github.krukow.clj_lang.PersistentVector;
 import de.prob.animator.command.GetOperationByPredicateCommand;
-import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
@@ -11,22 +10,14 @@ import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
-    @Override
-    protected boolean chooseNextOperation(OperationConfiguration opConfig, Trace trace) {
-        State currentState = trace.getCurrentState();
-        double ranDouble = Math.random();
-        double evalProbability = cache.readProbabilityWithCaching(currentState, opConfig);
-        return evalProbability > ranDouble;
-    }
+    private Random random = new Random(System.nanoTime());
 
     @Override
     public String chooseVariableValues(State currentState, Map<String, Object> values) {
@@ -36,9 +27,8 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
             Object value = values.get(key);
             String evalResult;
             if(value instanceof List) {
-                Random rand = new Random();
                 List<String> list = (List<String>) value;
-                String randomElement = list.get(rand.nextInt(list.size()));
+                String randomElement = list.get(random.nextInt(list.size()));
                 evalResult = cache.readValueWithCaching(currentState, randomElement);
             } else {
                 //Otherwise it is a String
@@ -56,30 +46,63 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
     @Override
     public Trace executeNextOperation(OperationConfiguration opConfig, Trace trace) {
-        String opName = opConfig.getOpName();
         State currentState = trace.getCurrentState();
-        List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opConfig);
-        //check whether operation is executable and calculate probability whether it should be executed
-        if (transitions.isEmpty() || !chooseNextOperation(opConfig, trace)) {
+        double probabilityMinimum = 0.0;
+        boolean execute = false;
+        String chosenOp = "";
+        Map<String, Object> values = null;
+        List<Transition> transitions = null;
+        Map<String, Integer> delay = null;
+        //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
+        for(int i = 0; i < opConfig.getOpName().size(); i++) {
+            chosenOp = opConfig.getOpName().get(i);
+            double evalProbability = cache.readProbabilityWithCaching(currentState, chosenOp, opConfig.getProbability().get(i));
+            double randomDouble = random.nextDouble();
+            boolean opScheduled = operationToRemainingTime.get(chosenOp) == 0;
+            if(opScheduled) {
+                final String finalChosenOp = chosenOp;
+                operationToRemainingTime.computeIfPresent(chosenOp, (k, v) -> initialOperationToRemainingTime.get(finalChosenOp));
+            }
+            if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
+                //select operation also only if time = 0
+                if(!opScheduled) {
+                    return trace;
+                }
+                // TODO: Refactor
+                transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
+                if (transitions.isEmpty()) {
+                    return trace;
+                }
+                if(opConfig.getVariableChoices() != null) {
+                    values = opConfig.getVariableChoices().get(i);
+                }
+                if(opConfig.getDelay() != null) {
+                    delay = opConfig.getDelay().get(i);
+                }
+                execute = true;
+                break;
+            }
+            probabilityMinimum += evalProbability;
+        }
+        if(!execute) {
             return trace;
         }
-        Map<String, Object> values = opConfig.getVariableChoices();
+
         Trace newTrace = trace;
         if(values == null) {
-            Random rand = new Random();
-            Transition transition = transitions.get(rand.nextInt(transitions.size()));
+            Transition transition = transitions.get(random.nextInt(transitions.size()));
             newTrace = appendTrace(newTrace, transition);
-            delayRemainingTime(opConfig);
+            delayRemainingTime(delay);
         } else {
             State finalCurrentState = newTrace.getCurrentState();
             String predicate = chooseVariableValues(finalCurrentState, values);
             final IEvalElement pred = newTrace.getModel().parseFormula(predicate, FormulaExpand.TRUNCATE);
-            final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(finalCurrentState.getStateSpace(), finalCurrentState.getId(), opName, pred, 1);
+            final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(finalCurrentState.getStateSpace(), finalCurrentState.getId(), chosenOp, pred, 1);
             finalCurrentState.getStateSpace().execute(command);
             if (!command.hasErrors()) {
                 Transition transition = command.getNewTransitions().get(0);
                 newTrace = appendTrace(newTrace, transition);
-                delayRemainingTime(opConfig);
+                delayRemainingTime(delay);
             }
         }
         return newTrace;
