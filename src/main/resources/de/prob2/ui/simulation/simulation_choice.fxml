@@ -48,8 +48,6 @@
 							<items>
 								<FXCollections fx:factory="observableArrayList">
 									<SimulationChoiceItem simulationType="TIMING"/>
-									<SimulationChoiceItem simulationType="MODEL_CHECKING"/>
-									<SimulationChoiceItem simulationType="PROBABILISTIC_MODEL_CHECKING"/>
 									<SimulationChoiceItem simulationType="MONTE_CARLO_SIMULATION"/>
 									<SimulationChoiceItem simulationType="TRACE_REPLAY"/>
 								</FXCollections>
