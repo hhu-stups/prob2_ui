@@ -63,7 +63,7 @@ import java.util.TimerTask;
 @FXMLInjected
 @Singleton
 public class SimulatorStage extends Stage {
-	
+
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
 
 		private SimulationItemRow() {
@@ -228,10 +228,11 @@ public class SimulatorStage extends Stage {
 		});
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			simulationItems.getItems().clear();
-			simulationItems.itemsProperty().unbind();
 			if(to != null) {
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
+			} else {
+				simulationItems.getItems().clear();
+				simulationItems.itemsProperty().unbind();
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);

@@ -3,18 +3,20 @@ package de.prob2.ui.simulation.table;
 import de.prob2.ui.simulation.SimulationCheckingConfiguration;
 import de.prob2.ui.simulation.SimulationType;
 import de.prob2.ui.verifications.Checked;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 import java.util.Objects;
 
 public class SimulationItem {
-
-    private Checked checked;
 
     private String configuration;
 
     private String description;
 
     private SimulationCheckingConfiguration simulationCheckingConfiguration;
+
+    private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
     public SimulationItem(SimulationCheckingConfiguration simulationCheckingConfiguration, String description) {
         this.simulationCheckingConfiguration = simulationCheckingConfiguration;
@@ -23,16 +25,19 @@ public class SimulationItem {
     }
 
     private void updateItem() {
-        this.checked = Checked.NOT_CHECKED;
         this.configuration = simulationCheckingConfiguration.getConfiguration();
     }
 
     public void setChecked(Checked checked) {
-        this.checked = checked;
+        this.checked.set(checked);
+    }
+
+    public ObjectProperty<Checked> checkedProperty() {
+        return checked;
     }
 
     public Checked getChecked() {
-        return checked;
+        return checked.get();
     }
 
     public SimulationType getType() {
