@@ -150,7 +150,7 @@ public class SimulatorStage extends Stage {
 	private TableColumn<SimulationItem, String> simulationTypeColumn;
 
 	@FXML
-	private TableColumn<SimulationItem, String> simulationDescriptionColumn;
+	private TableColumn<SimulationItem, String> simulationConfigurationColumn;
 
 	private final StageManager stageManager;
 
@@ -240,8 +240,8 @@ public class SimulatorStage extends Stage {
 
 		simulationStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		simulationTypeColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
-		simulationDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+		simulationTypeColumn.setCellValueFactory(new PropertyValueFactory<>("typeAsName"));
+		simulationConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
 
 		simulationItems.setRowFactory(table -> new SimulationItemRow());
 

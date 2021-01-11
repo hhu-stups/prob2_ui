@@ -72,8 +72,8 @@
 										</columnResizePolicy>
 										<columns>
 											<TableColumn fx:id="simulationStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-											<TableColumn fx:id="simulationTypeColumn" minWidth="80.0" text="%simulation.tableView.configuration" />
-											<TableColumn fx:id="simulationDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
+											<TableColumn fx:id="simulationTypeColumn" minWidth="140.0" maxWidth="140.0" text="%simulation.tableView.type" />
+											<TableColumn fx:id="simulationConfigurationColumn" minWidth="80.0" text="%simulation.tableView.configuration" />
 										</columns>
 										<placeholder>
 											<Label text="%simulation.tableView.noSimulation" />

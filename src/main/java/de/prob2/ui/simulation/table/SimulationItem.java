@@ -10,9 +10,9 @@ import java.util.Objects;
 
 public class SimulationItem {
 
-    private String configuration;
+    private SimulationType type;
 
-    private String description;
+    private String configuration;
 
     private SimulationCheckingConfiguration simulationCheckingConfiguration;
 
@@ -20,11 +20,11 @@ public class SimulationItem {
 
     public SimulationItem(SimulationCheckingConfiguration simulationCheckingConfiguration, String description) {
         this.simulationCheckingConfiguration = simulationCheckingConfiguration;
-        this.description = description;
         updateItem();
     }
 
     private void updateItem() {
+        this.type = simulationCheckingConfiguration.getType();
         this.configuration = simulationCheckingConfiguration.getConfiguration();
     }
 
@@ -40,8 +40,12 @@ public class SimulationItem {
         return checked.get();
     }
 
+    public String getTypeAsName() {
+        return type.getName();
+    }
+
     public SimulationType getType() {
-        return this.simulationCheckingConfiguration.getType();
+        return type;
     }
 
     public SimulationCheckingConfiguration getSimulationConfiguration() {
@@ -52,13 +56,9 @@ public class SimulationItem {
         return configuration;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hash(configuration, description);
+        return Objects.hash(type, configuration);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class SimulationItem {
             return false;
         }
         SimulationItem otherItem = (SimulationItem) obj;
-        return this.configuration.equals(otherItem.getConfiguration()) && this.description.equals(otherItem.getDescription());
+        return this.configuration.equals(otherItem.getConfiguration()) && this.type.equals(otherItem.getType());
     }
 
     public void reset() {
