@@ -41,7 +41,14 @@
 										<Tooltip text="%simulation.file.open" />
 									</tooltip>
 								</Button>
-								<Button fx:id="btSimulate" styleClass="button-blue" text="%simulation.button.start" onAction="#simulate"/>
+								<Button fx:id="btSimulate" onAction="#simulate">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%simulation.button.start" />
+									</tooltip>
+								</Button>
 								<Spacer/>
 								<NavigationButtons/>
 								<Spacer/>

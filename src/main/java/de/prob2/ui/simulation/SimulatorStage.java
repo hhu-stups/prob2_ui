@@ -9,6 +9,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
@@ -41,9 +42,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.controlsfx.glyphfont.FontAwesome;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -195,9 +198,15 @@ public class SimulatorStage extends Stage {
 	public void initialize() {
 		simulator.runningProperty().addListener((observable, from, to) -> {
 			if(to) {
-				Platform.runLater(() -> btSimulate.setText(bundle.getString("simulation.button.stop")));
+				Platform.runLater(() -> {
+					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PAUSE));
+					btSimulate.setTooltip(new Tooltip(bundle.getString("simulation.button.stop")));
+				});
 			} else {
-				Platform.runLater(() -> btSimulate.setText(bundle.getString("simulation.button.start")));
+				Platform.runLater(() -> {
+					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLAY));
+					btSimulate.setTooltip(new Tooltip(bundle.getString("simulation.button.start")));
+				});
 			}
 		});
 		btLoadConfiguration.disableProperty().bind(simulator.runningProperty());
