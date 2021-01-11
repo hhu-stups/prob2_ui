@@ -120,8 +120,11 @@ public class SimulationItemHandler {
             case TIMING:
                 handleTiming(item, checkAll);
                 break;
-            case MONTE_CARLO_SIMULATION:
+            case HYPOTHESIS_TEST:
                 handleHypothesisTest(item, checkAll);
+                break;
+            case ESTIMATION:
+                // TODO
                 break;
             case TRACE_REPLAY:
                 handleTraceReplay(item, checkAll);

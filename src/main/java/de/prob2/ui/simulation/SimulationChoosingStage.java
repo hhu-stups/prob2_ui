@@ -140,7 +140,9 @@ public class SimulationChoosingStage extends Stage {
 				return !tfTime.getText().isEmpty();
 			case TRACE_REPLAY:
 				return cbTraces.getSelectionModel().getSelectedItem() != null;
-			case MONTE_CARLO_SIMULATION:
+			case ESTIMATION:
+				// TODO
+			case HYPOTHESIS_TEST:
 				return !(tfSteps.getText().isEmpty() && tfSimulations.getText().isEmpty());
 			default:
 				break;
@@ -166,10 +168,13 @@ public class SimulationChoosingStage extends Stage {
 			case TIMING:
 				information.put("TIME", Integer.parseInt(tfTime.getText()));
 				break;
-            case MONTE_CARLO_SIMULATION:
+			case ESTIMATION:
+				// TODO
+			case HYPOTHESIS_TEST:
                 information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
                 information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
 				break;
+
 			case TRACE_REPLAY:
 				information.put("TRACE", cbTraces.getValue());
 				break;
@@ -187,7 +192,9 @@ public class SimulationChoosingStage extends Stage {
             case TIMING:
                 inputBox.getChildren().add(0, timeBox);
                 break;
-            case MONTE_CARLO_SIMULATION:
+			case ESTIMATION:
+				// TODO
+			case HYPOTHESIS_TEST:
                 inputBox.getChildren().add(0, monteCarloBox);
                 break;
             case TRACE_REPLAY:

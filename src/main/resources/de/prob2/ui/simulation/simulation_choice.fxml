@@ -48,7 +48,8 @@
 							<items>
 								<FXCollections fx:factory="observableArrayList">
 									<SimulationChoiceItem simulationType="TIMING"/>
-									<SimulationChoiceItem simulationType="MONTE_CARLO_SIMULATION"/>
+									<SimulationChoiceItem simulationType="HYPOTHESIS_TEST"/>
+									<SimulationChoiceItem simulationType="ESTIMATION"/>
 									<SimulationChoiceItem simulationType="TRACE_REPLAY"/>
 								</FXCollections>
 							</items>
