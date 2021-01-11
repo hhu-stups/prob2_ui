@@ -7,6 +7,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.simulators.Simulator;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
@@ -24,10 +25,13 @@ public final class NavigationButtons extends HBox {
 
 	private final CurrentTrace currentTrace;
 
+	private final Simulator simulator;
+
 	@Inject
-	private NavigationButtons(final StageManager stageManager, final CurrentTrace currentTrace) {
+	private NavigationButtons(final StageManager stageManager, final CurrentTrace currentTrace, final Simulator simulator) {
 		super();
 		this.currentTrace = currentTrace;
+		this.simulator = simulator;
 
 		stageManager.loadFXML(this, "navigation_buttons.fxml");
 	}
@@ -36,10 +40,11 @@ public final class NavigationButtons extends HBox {
 	private void initialize() {
 		BooleanBinding forwardExecutingNextOperationBinding = Bindings.createBooleanBinding(() -> currentTrace.get() != null && !currentTrace.get().canGoForward() && currentTrace.get().getNextTransitions().size() == 1, currentTrace);
 
-		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
-		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not());
-		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().and(forwardExecutingNextOperationBinding.not()));
-		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not());
+		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not().or(simulator.runningProperty()));
+		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not().or(simulator.runningProperty()));
+		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().and(forwardExecutingNextOperationBinding.not()).or(simulator.runningProperty()));
+		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().or(simulator.runningProperty()));
+		reloadButton.disableProperty().bind(simulator.runningProperty());
 
 		forwardExecutingNextOperationBinding.addListener((observable, from, to) -> {
 			Node graphic = forwardButton.getGraphic();

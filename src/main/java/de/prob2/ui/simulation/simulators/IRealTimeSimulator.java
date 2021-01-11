@@ -16,7 +16,7 @@ public interface IRealTimeSimulator {
 
     void run();
 
-    BooleanProperty runningPropertyProperty();
+    BooleanProperty runningProperty();
 
     boolean isRunning();
 
@@ -29,6 +29,8 @@ public interface IRealTimeSimulator {
     void stop();
 
     IntegerProperty timeProperty();
+
+    int getTime();
 
     boolean isFinished();
 

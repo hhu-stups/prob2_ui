@@ -47,7 +47,7 @@ public class TraceSimulator extends AbstractTraceSimulator implements IRealTimeS
     }
 
     @Override
-    public BooleanProperty runningPropertyProperty() {
+    public BooleanProperty runningProperty() {
         return scheduler.runningPropertyProperty();
     }
 

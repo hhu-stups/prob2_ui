@@ -57,15 +57,21 @@ public abstract class AbstractSimulator {
             //TODO: Implement alert
             return;
         }
+        resetSimulator();
+    }
+
+    public void resetSimulator() {
         this.initialOperationToRemainingTime = new HashMap<>();
         this.operationToRemainingTime = new HashMap<>();
-        // sort after priority
-        this.operationConfigurationsSorted = config.getOperationConfigurations().stream()
-                .sorted(Comparator.comparingInt(OperationConfiguration::getPriority))
-                .collect(Collectors.toList());
         this.time.set(0);
         this.finished = false;
-        initializeRemainingTime();
+        if(config != null) {
+            // sort after priority
+            this.operationConfigurationsSorted = config.getOperationConfigurations().stream()
+                    .sorted(Comparator.comparingInt(OperationConfiguration::getPriority))
+                    .collect(Collectors.toList());
+            initializeRemainingTime();
+        }
     }
 
     private void initializeRemainingTime() {
@@ -218,6 +224,10 @@ public abstract class AbstractSimulator {
 
     public IntegerProperty timeProperty() {
         return time;
+    }
+
+    public int getTime() {
+        return time.get();
     }
 
     protected abstract void run();

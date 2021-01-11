@@ -81,6 +81,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     @Override
     public Trace executeNextOperation(OperationConfiguration opConfig, Trace trace) {
         if(counter == replayTrace.getPersistentTrace().getTransitionList().size()) {
+            finishSimulation();
             return trace;
         }
 

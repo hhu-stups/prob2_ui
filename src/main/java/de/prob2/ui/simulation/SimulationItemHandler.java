@@ -41,6 +41,11 @@ public class SimulationItemHandler {
         return existingItem;
     }
 
+    public void removeItem(final Machine machine, SimulationItem item) {
+        final List<SimulationItem> items = this.getItems(machine);
+        items.remove(item);
+    }
+
     private void handleTiming(SimulationItem item, boolean checkAll) {
         Trace trace = currentTrace.get();
         SimulationTimeChecker timeChecker = new SimulationTimeChecker(trace, (int) item.getSimulationConfiguration().getField("TIME"));
@@ -105,7 +110,7 @@ public class SimulationItemHandler {
         }
     }
 
-    public void handleItem(SimulationItem item, boolean checkAll) {
+    public void checkItem(SimulationItem item, boolean checkAll) {
         /*if(!item.selected()) {
             return;
         }*/

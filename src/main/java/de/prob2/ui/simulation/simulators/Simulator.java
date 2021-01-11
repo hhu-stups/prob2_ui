@@ -42,7 +42,7 @@ public class Simulator extends ProbabilityBasedSimulator implements IRealTimeSim
 	}
 
 	@Override
-	public BooleanProperty runningPropertyProperty() {
+	public BooleanProperty runningProperty() {
 		return scheduler.runningPropertyProperty();
 	}
 
@@ -60,5 +60,10 @@ public class Simulator extends ProbabilityBasedSimulator implements IRealTimeSim
 	protected void finishSimulation() {
 		super.finishSimulation();
 		scheduler.finish();
+	}
+
+	public void resetSimulator() {
+		super.resetSimulator();
+		scheduler.stop();
 	}
 }
