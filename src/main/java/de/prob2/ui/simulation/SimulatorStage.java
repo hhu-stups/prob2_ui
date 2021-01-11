@@ -63,7 +63,7 @@ import java.util.TimerTask;
 @FXMLInjected
 @Singleton
 public class SimulatorStage extends Stage {
-
+	
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
 
 		private SimulationItemRow() {
@@ -95,24 +95,29 @@ public class SimulatorStage extends Stage {
 					}
 				});
 
-				if(item.getType() == SimulationType.TRACE_REPLAY) {
-					MenuItem playItem = new MenuItem(bundle.getString("simulation.contextMenu.play"));
-					Trace trace = new Trace(currentTrace.getStateSpace());
-					ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
-					TraceSimulator traceSimulator = new TraceSimulator(trace, replayTrace, injector.getInstance(Scheduler.class), currentTrace);
+				MenuItem playItem = new MenuItem(bundle.getString("simulation.contextMenu.play"));
 
-					playItem.setOnAction(e -> {
-						if(traceSimulator.isRunning()) {
-							traceSimulator.stop();
-						}
-						traceSimulator.initSimulator(configurationPath.get().toFile());
-						trace.setExploreStateByDefault(false);
-						simulate(traceSimulator);
-						trace.setExploreStateByDefault(true);
-					});
-
-					menuItems.add(playItem);
+				SimulationType type = item.getType();
+				switch (type) {
+					case TRACE_REPLAY:
+						playItem.setOnAction(e -> {
+							Trace trace = new Trace(currentTrace.getStateSpace());
+							ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
+							TraceSimulator traceSimulator = new TraceSimulator(trace, replayTrace, injector.getInstance(Scheduler.class), currentTrace);
+							if(traceSimulator.isRunning()) {
+								traceSimulator.stop();
+							}
+							traceSimulator.initSimulator(configurationPath.get().toFile());
+							trace.setExploreStateByDefault(false);
+							simulate(traceSimulator);
+							trace.setExploreStateByDefault(true);
+						});
+						break;
+					default:
+						playItem.setDisable(true);
+						break;
 				}
+				menuItems.add(playItem);
 				contextMenu.getItems().addAll(menuItems);
 				this.setContextMenu(contextMenu);
 			}
