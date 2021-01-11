@@ -63,6 +63,22 @@
 												text="%simulation.tooltips.addSimulation" />
 									</tooltip>
 								</Button>
+								<Button fx:id="openVisBButton" onAction="#openVisB">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="IMAGE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.openVisB" />
+									</tooltip>
+								</Button>
+								<Button fx:id="saveTraceButton" onAction="#saveTrace">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.saveTrace" />
+									</tooltip>
+								</Button>
 							</HBox>
 							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
 								<content>

@@ -168,7 +168,6 @@ public class VisBStage extends Stage {
 
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			openTraceSelectionButton.disableProperty().unbind();
-			openSimulationButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().unbind();
 			updateUIOnMachine(to);
 			loadVisBFileFromMachine(to);
@@ -178,7 +177,6 @@ public class VisBStage extends Stage {
 	private void updateUIOnMachine(Machine machine) {
 		final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
 		manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBPath.isNull()));
-		openSimulationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		if(machine != null) {
 			openTraceSelectionButton.disableProperty().bind(machine.tracesProperty().emptyProperty());
 		} else {

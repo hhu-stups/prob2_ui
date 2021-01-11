@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 
 public final class TraceReplayErrorAlert extends Alert {
 	public enum Trigger {
-		TRIGGER_VISB, TRIGGER_HISTORY_VIEW, TRIGGER_TRACE_CHECKER, TRIGGER_TRACE_REPLAY_VIEW
+		TRIGGER_VISB, TRIGGER_SIMULATOR, TRIGGER_HISTORY_VIEW, TRIGGER_TRACE_CHECKER, TRIGGER_TRACE_REPLAY_VIEW
 	}
 
 	@FXML
@@ -84,6 +84,7 @@ public final class TraceReplayErrorAlert extends Alert {
 			case TRIGGER_TRACE_REPLAY_VIEW:
 				this.getButtonTypes().add(ButtonType.CLOSE);
 				break;
+			case TRIGGER_SIMULATOR:
 			case TRIGGER_VISB:
 			case TRIGGER_HISTORY_VIEW:
 			case TRIGGER_TRACE_CHECKER:
@@ -97,6 +98,7 @@ public final class TraceReplayErrorAlert extends Alert {
 
 	public void setErrorMessage() {
 		switch (trigger) {
+			case TRIGGER_SIMULATOR:
 			case TRIGGER_VISB:
 			case TRIGGER_HISTORY_VIEW:
 				this.setHeaderText(bundle.getString("traceSave.buttons.saveTrace.error"));

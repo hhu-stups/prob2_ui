@@ -5,6 +5,8 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
+import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -26,6 +28,7 @@ import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.visb.VisBStage;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -136,6 +139,12 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private Label lbTime;
+
+	@FXML
+	private Button openVisBButton;
+
+	@FXML
+	private Button saveTraceButton;
 
 	@FXML
 	private TableView<SimulationItem> simulationItems;
@@ -390,6 +399,18 @@ public class SimulatorStage extends Stage {
 			timer.cancel();
 			timer = null;
 		}
+	}
+
+	@FXML
+	private void openVisB() {
+		VisBStage visBStage = injector.getInstance(VisBStage.class);
+		visBStage.show();
+		visBStage.toFront();
+	}
+
+	@FXML
+	public void saveTrace() {
+		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR);
 	}
 
 }
