@@ -23,15 +23,15 @@
         </HBox>
 		<VBox fx:id="monteCarloBox" spacing="5.0">
 			<HBox>
-				<Label text="Number Simulations:" />
+				<Label text="%simulation.choice.numberSimulations"/>
 				<TextField fx:id="tfSimulations" HBox.hgrow="NEVER"/>
 			</HBox>
 			<HBox>
-				<Label text="Number Steps per Simulation:" />
+				<Label text="%simulation.choice.stepsPerSimulation"/>
 				<TextField fx:id="tfSteps" HBox.hgrow="NEVER"/>
 			</HBox>
 			<HBox>
-				<Label text="Check:" />
+				<Label text="%simulation.choice.check" />
 				<ChoiceBox fx:id="checkingChoice">
 					<items>
 						<FXCollections fx:factory="observableArrayList">
@@ -44,7 +44,7 @@
 				</ChoiceBox>
 			</HBox>
 			<HBox>
-				<Label text="Hypothesis Check:" />
+				<Label text="%simulation.choice.hypothesis"/>
 				<ChoiceBox fx:id="hypothesisCheckingChoice">
 					<items>
 						<FXCollections fx:factory="observableArrayList">
@@ -55,9 +55,13 @@
 					</items>
 				</ChoiceBox>
 			</HBox>
+			<HBox>
+				<Label text="%simulation.choice.probability"/>
+				<TextField fx:id="tfProbability" HBox.hgrow="NEVER"/>
+			</HBox>
 		</VBox>
 		<HBox fx:id="tracesBox" spacing="5.0">
-			<Label text="Traces:" />
+			<Label text="%simulation.choice.traces"/>
 			<ChoiceBox fx:id="cbTraces"/>
 		</HBox>
 	</fx:define>
