@@ -1,30 +1,181 @@
 package de.prob2.ui.simulation.simulators.check;
 
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.simulators.ProbabilityBasedSimulator;
+import org.apache.commons.math3.analysis.function.Gaussian;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SimulationHypothesisChecker extends SimulationMonteCarlo {
+
+	public enum CheckingType {
+		ALL_INVARIANTS, INVARIANT, ALMOST_CERTAIN_PROPERTY, TIMING
+	}
+
+	public enum HypothesisCheckingType {
+		LEFT_TAILED, RIGHT_TAILED, TWO_TAILED
+	}
 
     public enum HypothesisCheckResult {
         NOT_FINISHED, SUCCESS, FAIL
     }
 
-    private double faultTolerance;
+    private final CheckingType type;
 
-    public SimulationHypothesisChecker(Trace trace, int numberExecutions, int numberStepsPerExecution) {
+	private final HypothesisCheckingType hypothesisCheckingType;
+
+    private final Map<String, Object> additionalInformation;
+
+    private int numberSuccess;
+
+    public SimulationHypothesisChecker(final Trace trace, final int numberExecutions, final int numberStepsPerExecution, final CheckingType type,
+									   final HypothesisCheckingType hypothesisCheckingType, final Map<String, Object> additionalInformation) {
         super(trace, numberExecutions, numberStepsPerExecution);
         //TODO
-        this.faultTolerance = 0.0;
+		this.hypothesisCheckingType = hypothesisCheckingType;
+		this.type = type;
+		this.additionalInformation = additionalInformation;
     }
 
+	@Override
+    public void checkTrace(Trace trace) {
+		switch (type) {
+			case ALL_INVARIANTS:
+				checkAllInvariants(trace);
+				break;
+			case INVARIANT:
+				checkInvariant(trace);
+				break;
+			case ALMOST_CERTAIN_PROPERTY:
+				// TODO
+				break;
+			case TIMING:
+				// TODO
+				break;
+			default:
+				break;
+		}
+	}
+
+	public void checkAllInvariants(Trace trace) {
+    	boolean invariantOk = true;
+    	for(Transition transition : trace.getTransitionList()) {
+			State destination = transition.getDestination();
+			if(!destination.isInvariantOk()) {
+				invariantOk = false;
+				break;
+			}
+		}
+    	if(invariantOk) {
+    		numberSuccess++;
+		}
+	}
+
+	public void checkInvariant(Trace trace) {
+		boolean invariantOk = true;
+		String invariant = (String) additionalInformation.get("INVARIANT");
+		for(Transition transition : trace.getTransitionList()) {
+			State destination = transition.getDestination();
+			AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
+			if("FALSE".equals(evalResult.toString())) {
+				invariantOk = false;
+				break;
+			}
+		}
+		if(invariantOk) {
+			numberSuccess++;
+		}
+	}
+
+	private HypothesisCheckResult checkTwoTailed() {
+		int n = resultingTraces.size();
+    	double p = (double) additionalInformation.get("PROBABILITY");
+    	double mu = Math.round(n * p);
+    	double sigma = Math.sqrt(n * p * (1 - p));
+		Gaussian gaussian = new Gaussian(mu, sigma);
+		double coverage = 0.0;
+
+		int range = 0;
+
+		for(int i = 1; i <= Math.ceil(mu/2); i++) {
+			if(100.0 - coverage < p) {
+				range = i;
+				break;
+			}
+			coverage = gaussian.value(mu + i) - gaussian.value(mu - i);
+		}
+		if(numberSuccess >= mu - range && numberSuccess <= mu + range) {
+			return HypothesisCheckResult.SUCCESS;
+		}
+		return HypothesisCheckResult.FAIL;
+	}
+
+	private HypothesisCheckResult checkLeftTailed() {
+		int n = resultingTraces.size();
+		double p = (double) additionalInformation.get("PROBABILITY");
+		double mu = Math.round(n * p);
+		double sigma = Math.sqrt(n * p * (1 - p));
+		Gaussian gaussian = new Gaussian(mu, sigma);
+		double coverage = 0.0;
+
+		int range = 0;
+
+		for(int i = 1; i <= mu; i++) {
+			if(100.0 - coverage < p) {
+				range = i;
+				break;
+			}
+			coverage = 100.0 - gaussian.value(mu - i);
+		}
+		// TODO: What if p < 50% ?
+		if(numberSuccess >= mu - range && numberSuccess <= n) {
+			return HypothesisCheckResult.SUCCESS;
+		}
+		return HypothesisCheckResult.FAIL;
+	}
+
+	private HypothesisCheckResult checkRightTailed() {
+		int n = resultingTraces.size();
+		double p = (double) additionalInformation.get("PROBABILITY");
+		double mu = Math.round(n * p);
+		double sigma = Math.sqrt(n * p * (1 - p));
+		Gaussian gaussian = new Gaussian(mu, sigma);
+		double coverage = 0.0;
+
+		int range = 0;
+
+		for(int i = 1; i <= mu; i++) {
+			if(100.0 - coverage < p) {
+				range = i;
+				break;
+			}
+			coverage = gaussian.value(mu + i);
+		}
+		// TODO: What if p < 50% ?
+		if(numberSuccess >= 0 && numberSuccess <= mu + range) {
+			return HypothesisCheckResult.SUCCESS;
+		}
+		return HypothesisCheckResult.FAIL;
+	}
+
     public HypothesisCheckResult check() {
-        // TODO do after run
-        // TODO Check hypothesis
-        // Distinguish fault tolerance for traces and for states
-        return HypothesisCheckResult.SUCCESS;
+    	switch (hypothesisCheckingType) {
+			case LEFT_TAILED:
+				return checkLeftTailed();
+			case RIGHT_TAILED:
+				return checkRightTailed();
+			case TWO_TAILED:
+				return checkTwoTailed();
+			default:
+				break;
+		}
+        return HypothesisCheckResult.NOT_FINISHED;
     }
 
 }

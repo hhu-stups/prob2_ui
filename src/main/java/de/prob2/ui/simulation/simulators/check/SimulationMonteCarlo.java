@@ -44,6 +44,7 @@ public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
                             Trace addedTrace = new Trace(newTrace.getStateSpace());
                             addedTrace.addTransitions(newTrace.getTransitionList().subList(0, numberStepsPerExecutions));
                             resultingTraces.add(addedTrace);
+                            checkTrace(addedTrace);
                         }
                     }
                 }
@@ -54,5 +55,9 @@ public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
         thread.start();
 
     }
+
+    public void checkTrace(Trace trace) {
+    	// Monte Carlo Simulation does not apply any checks on a trace. But classes inheriting from SimulationMonteCarlo might apply some checks
+	}
 
 }
