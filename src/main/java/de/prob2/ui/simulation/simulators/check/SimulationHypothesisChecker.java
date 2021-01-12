@@ -14,12 +14,38 @@ import java.util.Map;
 
 public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
+	// TODO: Think about moving this class in another file
 	public enum CheckingType {
-		ALL_INVARIANTS, INVARIANT, ALMOST_CERTAIN_PROPERTY, TIMING
+		ALL_INVARIANTS("All Invariants"),
+		INVARIANT("Invariant"),
+		ALMOST_CERTAIN_PROPERTY("Almost-certain property"),
+		TIMING("Timing");
+
+		private String name;
+
+		CheckingType(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
 	}
 
 	public enum HypothesisCheckingType {
-		LEFT_TAILED, RIGHT_TAILED, TWO_TAILED
+		LEFT_TAILED("Left-tailed hypothesis test"),
+		RIGHT_TAILED("Right-tailed hypothesis test"),
+		TWO_TAILED("Two-tailed hypothesis test");
+
+		private String name;
+
+		HypothesisCheckingType(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
 	}
 
     public enum HypothesisCheckResult {

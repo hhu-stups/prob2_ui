@@ -12,7 +12,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.control.ListView?>
+<?import de.prob2.ui.simulation.SimulationPropertyItem?>
+<?import de.prob2.ui.simulation.SimulationHypothesisChoiceItem?>
 <fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -28,6 +29,31 @@
 			<HBox>
 				<Label text="Number Steps per Simulation:" />
 				<TextField fx:id="tfSteps" HBox.hgrow="NEVER"/>
+			</HBox>
+			<HBox>
+				<Label text="Check:" />
+				<ChoiceBox fx:id="checkingChoice">
+					<items>
+						<FXCollections fx:factory="observableArrayList">
+							<SimulationPropertyItem checkingType="ALL_INVARIANTS"/>
+							<SimulationPropertyItem checkingType="INVARIANT"/>
+							<SimulationPropertyItem checkingType="ALMOST_CERTAIN_PROPERTY"/>
+							<SimulationPropertyItem checkingType="TIMING"/>
+						</FXCollections>
+					</items>
+				</ChoiceBox>
+			</HBox>
+			<HBox>
+				<Label text="Hypothesis Check:" />
+				<ChoiceBox fx:id="hypothesisCheckingChoice">
+					<items>
+						<FXCollections fx:factory="observableArrayList">
+							<SimulationHypothesisChoiceItem checkingType="LEFT_TAILED"/>
+							<SimulationHypothesisChoiceItem checkingType="RIGHT_TAILED"/>
+							<SimulationHypothesisChoiceItem checkingType="TWO_TAILED"/>
+						</FXCollections>
+					</items>
+				</ChoiceBox>
 			</HBox>
 		</VBox>
 		<HBox fx:id="tracesBox" spacing="5.0">
