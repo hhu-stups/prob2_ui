@@ -80,4 +80,7 @@ public class SimulatorCache {
         return transitionCache.get(bState.getId()).get(opName);
     }
 
+	public Map<String, Map<String, List<Transition>>> getTransitionCache() {
+		return transitionCache;
+	}
 }

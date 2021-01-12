@@ -55,7 +55,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 				checkInvariant(trace);
 				break;
 			case ALMOST_CERTAIN_PROPERTY:
-				// TODO
+				checkAlmostCertainProperty(trace);
 				break;
 			case TIMING:
 				// TODO
@@ -84,14 +84,39 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 		String invariant = (String) additionalInformation.get("INVARIANT");
 		for(Transition transition : trace.getTransitionList()) {
 			State destination = transition.getDestination();
-			AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
-			if("FALSE".equals(evalResult.toString())) {
-				invariantOk = false;
-				break;
+			if(destination.isInitialised()) {
+				AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
+				if ("FALSE".equals(evalResult.toString())) {
+					invariantOk = false;
+					break;
+				}
 			}
 		}
 		if(invariantOk) {
 			numberSuccess++;
+		}
+	}
+
+	public void checkAlmostCertainProperty(Trace trace) {
+    	String property = (String) additionalInformation.get("PROPERTY");
+    	for(Transition transition : trace.getTransitionList()) {
+    		State destination = transition.getDestination();
+    		if(destination.isInitialised()) {
+				AbstractEvalResult evalResult = destination.eval(property, FormulaExpand.TRUNCATE);
+				if("TRUE".equals(evalResult.toString())) {
+					List<Transition> transitions = destination.getOutTransitions();
+					String stateID = destination.getId();
+					//TODO: Implement some caching
+					boolean propertyOk = transitions.stream()
+							.map(Transition::getDestination)
+							.map(dest -> stateID.equals(dest.getId()))
+							.reduce(true, (e, a) -> e && a);
+					if(propertyOk) {
+						numberSuccess++;
+						break;
+					}
+				}
+			}
 		}
 	}
 
