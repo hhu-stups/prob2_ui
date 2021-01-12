@@ -62,6 +62,15 @@ public class SimulationChoosingStage extends Stage {
 	@FXML
 	private ChoiceBox<SimulationChoiceItem> simulationChoice;
 
+	@FXML
+	private ChoiceBox<SimulationPropertyItem> checkingChoice;
+
+	@FXML
+	private ChoiceBox<SimulationHypothesisChoiceItem> hypothesisCheckingChoice;
+
+	@FXML
+	private TextField tfProbability;
+
 	private final Injector injector;
 
 	private final ResourceBundle bundle;
@@ -146,6 +155,7 @@ public class SimulationChoosingStage extends Stage {
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
+				// TODO: Check integer
 				return !(tfSteps.getText().isEmpty() && tfSimulations.getText().isEmpty());
 			default:
 				break;
@@ -176,6 +186,9 @@ public class SimulationChoosingStage extends Stage {
 			case HYPOTHESIS_TEST:
                 information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
                 information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
+                information.put("CHECKING_TYPE", checkingChoice.getSelectionModel().getSelectedItem().getCheckingType());
+                information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());
+                information.put("PROBABILITY", Double.parseDouble(tfProbability.getText()));
 				break;
 
 			case TRACE_REPLAY:

@@ -10,6 +10,7 @@ import de.prob2.ui.simulation.simulators.check.SimulationTimeChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationTraceChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
+import javafx.application.Platform;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
@@ -81,21 +82,26 @@ public class SimulationItemHandler {
 
         SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(trace, executions, stepsPerExecution, checkingType, hypothesisCheckingType, probability, additionalInformation);
         hypothesisChecker.initSimulator(path.toFile());
-        hypothesisChecker.run();
-        SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.check();
-        switch (result) {
-            case SUCCESS:
-                item.setChecked(Checked.SUCCESS);
-                break;
-            case FAIL:
-                item.setChecked(Checked.FAIL);
-                break;
-            case NOT_FINISHED:
-                item.setChecked(Checked.NOT_CHECKED);
-                break;
-            default:
-                break;
-        }
+		Thread thread = new Thread(() -> {
+			hypothesisChecker.run();
+			SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.getResult();
+			Platform.runLater(() -> {
+				switch (result) {
+					case SUCCESS:
+						item.setChecked(Checked.SUCCESS);
+						break;
+					case FAIL:
+						item.setChecked(Checked.FAIL);
+						break;
+					case NOT_FINISHED:
+						item.setChecked(Checked.NOT_CHECKED);
+						break;
+					default:
+						break;
+				}
+			});
+		});
+		thread.start();
     }
 
     private void handleTraceReplay(SimulationItem item, boolean checkAll) {

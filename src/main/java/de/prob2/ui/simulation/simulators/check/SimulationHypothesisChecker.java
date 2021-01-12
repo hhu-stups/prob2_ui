@@ -62,6 +62,8 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
     private int numberSuccess;
 
+    private HypothesisCheckResult result;
+
     public SimulationHypothesisChecker(final Trace trace, final int numberExecutions, final int numberStepsPerExecution, final CheckingType type,
 									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final Map<String, Object> additionalInformation) {
         super(trace, numberExecutions, numberStepsPerExecution);
@@ -69,6 +71,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.additionalInformation = additionalInformation;
+		this.result = HypothesisCheckResult.NOT_FINISHED;
     }
 
 	@Override
@@ -217,18 +220,21 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 		return HypothesisCheckResult.FAIL;
 	}
 
-    public HypothesisCheckResult check() {
+    public void check() {
     	switch (hypothesisCheckingType) {
 			case LEFT_TAILED:
-				return checkLeftTailed();
+				this.result = checkLeftTailed();
 			case RIGHT_TAILED:
-				return checkRightTailed();
+				this.result = checkRightTailed();
 			case TWO_TAILED:
-				return checkTwoTailed();
+				this.result = checkTwoTailed();
 			default:
 				break;
 		}
-        return HypothesisCheckResult.NOT_FINISHED;
     }
 
+	public HypothesisCheckResult getResult() {
+    	System.out.println(result);
+		return result;
+	}
 }
