@@ -211,7 +211,11 @@ public final class ModelcheckingView extends ScrollPane {
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if (to != null) {
 				tvChecks.itemsProperty().bind(to.itemsProperty());
-				tvChecks.getSelectionModel().selectFirst();
+				if(to.getItems().isEmpty()) {
+					hideStats();
+				} else {
+					tvChecks.getSelectionModel().selectFirst();
+				}
 			} else {
 				tvChecks.itemsProperty().unbind();
 				// Because of the previous binding, the tvChecks items list is the same object as the job items list of one of the ModelcheckingItems.
