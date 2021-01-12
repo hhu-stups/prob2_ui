@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public abstract class Console extends StyleClassedTextArea {
 	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS, KeyCode.TAB, KeyCode.ALT);
 	
-	private static final String EMPTY_PROMPT = "> ";
+	private static final String EMPTY_PROMPT = ">";
 	
 	private final ResourceBundle bundle;
 	private final List<ConsoleInstruction> instructions;
@@ -68,7 +68,7 @@ public abstract class Console extends StyleClassedTextArea {
 			}
 			this.replace(this.getLineNumber(), 0, this.getLineNumber(), from.length(), to, this.getStyleAtPosition(this.getLineNumber(), 0));
 			if (caretPositionInInput != -1) {
-				this.moveTo(this.getLineNumber(), caretPositionInInput + to.length());
+				this.moveTo(this.getLineNumber(), caretPositionInInput + to.length() + 1);
 			}
 		});
 	}
@@ -240,7 +240,7 @@ public abstract class Console extends StyleClassedTextArea {
 		if (searchHandler.isActive()) {
 			String searchResult = searchHandler.getCurrentSearchResult();
 			this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
-			this.appendText((instructionLengthInLine > 1 ? EMPTY_PROMPT : prompt.get()) + searchResult);
+			this.appendText((instructionLengthInLine > 1 ? EMPTY_PROMPT : prompt.get()) + " " + searchResult);
 			this.moveTo(this.getLength());
 			charCounterInLine = searchResult.length();
 			currentPosInLine = charCounterInLine;
@@ -256,7 +256,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 	
 	public void reset() {
-		this.replaceText(header + '\n' + prompt.get());
+		this.replaceText(header + '\n' + prompt.get() + ' ');
 	}
 		
 	protected void handleEnter() {
@@ -279,7 +279,7 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 		if(endsWithNewline) {
 			instructionLengthInLine++;
-			this.appendText("\n" + EMPTY_PROMPT);
+			this.appendText("\n" + EMPTY_PROMPT + " ");
 			return;
 		}
 			
@@ -302,7 +302,7 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 		instructionLengthInLine = 1;
 		searchHandler.handleEnter();
-		this.appendText('\n' + prompt.get());
+		this.appendText('\n' + prompt.get() + ' ');
 		this.setStyle(getLineNumber(), Collections.emptyList());
 		goToLastPos();
 	}
@@ -421,14 +421,19 @@ public abstract class Console extends StyleClassedTextArea {
 		return this.getParagraph(this.getLineNumber()).getText();
 	}
 	
+	private int getCurrentLinePromptLength() {
+		final String currentLinePrompt = instructionLengthInLine > 1 ? EMPTY_PROMPT : this.getPrompt();
+		// Add 1 to the length, for the space character after the prompt string.
+		return currentLinePrompt.length() + 1;
+	}
+	
 	public int getInputStart() {
-		int length = instructionLengthInLine > 1 ? EMPTY_PROMPT.length() : this.getPrompt().length();
 		String line = this.getLine();
-		return this.getLineStart() + Math.min(line.length(), length);
+		return this.getLineStart() + Math.min(line.length(), this.getCurrentLinePromptLength());
 	}
 	
 	public String getInput() {
-		int length = instructionLengthInLine > 1 ? EMPTY_PROMPT.length() : this.getPrompt().length();
+		int length = this.getCurrentLinePromptLength();
 		String line = this.getLine();
 		return line.length() <= length ? "" : this.getLine().substring(length);
 	}
