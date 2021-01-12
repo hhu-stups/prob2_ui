@@ -149,7 +149,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 		}
 	}
 
-	private HypothesisCheckResult checkTwoTailed() {
+	private void checkTwoTailed() {
 		int n = resultingTraces.size();
 		double p = probability;
     	double mu = Math.round(n * p);
@@ -166,13 +166,15 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 			}
 			coverage = gaussian.value(mu + i) - gaussian.value(mu - i);
 		}
-		if(numberSuccess >= mu - range && numberSuccess <= mu + range) {
-			return HypothesisCheckResult.SUCCESS;
+		int numberFailed = n - numberSuccess;
+		if(numberFailed >= mu - range && numberFailed <= mu + range) {
+			this.result = HypothesisCheckResult.SUCCESS;
+		} else {
+			this.result = HypothesisCheckResult.FAIL;
 		}
-		return HypothesisCheckResult.FAIL;
 	}
 
-	private HypothesisCheckResult checkLeftTailed() {
+	private void checkLeftTailed() {
 		int n = resultingTraces.size();
 		double p = probability;
 		double mu = Math.round(n * p);
@@ -190,16 +192,18 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 			coverage = 100.0 - gaussian.value(mu - i);
 		}
 		// TODO: What if p < 50% ?
-		if(numberSuccess >= mu - range && numberSuccess <= n) {
-			return HypothesisCheckResult.SUCCESS;
+		int numberFailed = n - numberSuccess;
+		if(numberFailed >= mu - range && numberFailed <= n) {
+			this.result = HypothesisCheckResult.SUCCESS;
+		} else {
+			this.result = HypothesisCheckResult.FAIL;
 		}
-		return HypothesisCheckResult.FAIL;
 	}
 
-	private HypothesisCheckResult checkRightTailed() {
+	private void checkRightTailed() {
 		int n = resultingTraces.size();
 		double p = probability;
-		double mu = Math.round(n * p);
+		int mu = (int) Math.round(n * p);
 		double sigma = Math.sqrt(n * p * (1 - p));
 		Gaussian gaussian = new Gaussian(mu, sigma);
 		double coverage = 0.0;
@@ -214,27 +218,31 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 			coverage = gaussian.value(mu + i);
 		}
 		// TODO: What if p < 50% ?
-		if(numberSuccess >= 0 && numberSuccess <= mu + range) {
-			return HypothesisCheckResult.SUCCESS;
+		int numberFailed = n - numberSuccess;
+		if(numberFailed >= 0 && numberFailed <= mu + range) {
+			this.result = HypothesisCheckResult.SUCCESS;
+		} else {
+			this.result = HypothesisCheckResult.FAIL;
 		}
-		return HypothesisCheckResult.FAIL;
 	}
 
     public void check() {
     	switch (hypothesisCheckingType) {
 			case LEFT_TAILED:
-				this.result = checkLeftTailed();
+				checkLeftTailed();
+				break;
 			case RIGHT_TAILED:
-				this.result = checkRightTailed();
+				checkRightTailed();
+				break;
 			case TWO_TAILED:
-				this.result = checkTwoTailed();
+				checkTwoTailed();
+				break;
 			default:
 				break;
 		}
     }
 
 	public HypothesisCheckResult getResult() {
-    	System.out.println(result);
 		return result;
 	}
 }
