@@ -30,16 +30,18 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
 	private final HypothesisCheckingType hypothesisCheckingType;
 
+	private final double probability;
+
     private final Map<String, Object> additionalInformation;
 
     private int numberSuccess;
 
     public SimulationHypothesisChecker(final Trace trace, final int numberExecutions, final int numberStepsPerExecution, final CheckingType type,
-									   final HypothesisCheckingType hypothesisCheckingType, final Map<String, Object> additionalInformation) {
+									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final Map<String, Object> additionalInformation) {
         super(trace, numberExecutions, numberStepsPerExecution);
-        //TODO
-		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.type = type;
+		this.hypothesisCheckingType = hypothesisCheckingType;
+		this.probability = probability;
 		this.additionalInformation = additionalInformation;
     }
 
@@ -95,7 +97,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
 	private HypothesisCheckResult checkTwoTailed() {
 		int n = resultingTraces.size();
-    	double p = (double) additionalInformation.get("PROBABILITY");
+		double p = probability;
     	double mu = Math.round(n * p);
     	double sigma = Math.sqrt(n * p * (1 - p));
 		Gaussian gaussian = new Gaussian(mu, sigma);
@@ -118,7 +120,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
 	private HypothesisCheckResult checkLeftTailed() {
 		int n = resultingTraces.size();
-		double p = (double) additionalInformation.get("PROBABILITY");
+		double p = probability;
 		double mu = Math.round(n * p);
 		double sigma = Math.sqrt(n * p * (1 - p));
 		Gaussian gaussian = new Gaussian(mu, sigma);
@@ -142,7 +144,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
 	private HypothesisCheckResult checkRightTailed() {
 		int n = resultingTraces.size();
-		double p = (double) additionalInformation.get("PROBABILITY");
+		double p = probability;
 		double mu = Math.round(n * p);
 		double sigma = Math.sqrt(n * p * (1 - p));
 		Gaussian gaussian = new Gaussian(mu, sigma);

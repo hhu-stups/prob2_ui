@@ -13,7 +13,9 @@ import de.prob2.ui.verifications.Checked;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Singleton
@@ -69,7 +71,15 @@ public class SimulationItemHandler {
 
     private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
         Trace trace = currentTrace.get();
-        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(trace, (int) item.getSimulationConfiguration().getField("EXECUTIONS"), (int) item.getSimulationConfiguration().getField("STEPS_PER_EXECUTION"));
+
+        int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
+		int stepsPerExecution = (int) item.getSimulationConfiguration().getField("STEPS_PER_EXECUTION");
+		SimulationHypothesisChecker.CheckingType checkingType = (SimulationHypothesisChecker.CheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
+		SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getSimulationConfiguration().getField("HYPOTHESIS_CHECKING_TYPE");
+		double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
+		Map<String, Object> additionalInformation = new HashMap<>();
+
+        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(trace, executions, stepsPerExecution, checkingType, hypothesisCheckingType, probability, additionalInformation);
         hypothesisChecker.initSimulator(path.toFile());
         hypothesisChecker.run();
         SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.check();
