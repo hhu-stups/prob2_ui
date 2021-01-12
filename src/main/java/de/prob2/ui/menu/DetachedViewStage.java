@@ -26,7 +26,6 @@ final class DetachedViewStage extends Stage {
 		final String persistenceID = DetachViewStageController.PERSISTENCE_ID_PREFIX + this.getDetachedView().getClass().getName();
 		this.setMinWidth(detachedView.minWidth(-1));
 		this.setMinHeight(detachedView.minHeight(-1));
-		this.initOwner(stageManager.getMainStage());
 		stageManager.register(this, persistenceID);
 		this.titleProperty().bind(sourceTitledPane.textProperty());
 		
