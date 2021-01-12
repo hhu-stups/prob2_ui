@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.simulation.SimulationChoiceItem?>
-<?import de.prob2.ui.simulation.SimulationChoosingStage?>
+<?import de.prob2.ui.simulation.choice.SimulationChoiceItem?>
+<?import de.prob2.ui.simulation.choice.SimulationChoosingStage?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -12,8 +12,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import de.prob2.ui.simulation.SimulationPropertyItem?>
-<?import de.prob2.ui.simulation.SimulationHypothesisChoiceItem?>
+<?import de.prob2.ui.simulation.choice.SimulationPropertyItem?>
+<?import de.prob2.ui.simulation.choice.SimulationHypothesisChoiceItem?>
 <fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
 		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>

@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.choice;
 
 import com.google.inject.Injector;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -6,6 +6,9 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceViewHandler;
+import de.prob2.ui.simulation.SimulationCheckingConfiguration;
+import de.prob2.ui.simulation.SimulationItemHandler;
+import de.prob2.ui.simulation.SimulationType;
 import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
