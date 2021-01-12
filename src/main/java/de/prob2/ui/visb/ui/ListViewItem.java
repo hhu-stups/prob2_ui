@@ -65,8 +65,9 @@ public class ListViewItem extends ListCell<VisBItem> {
 			this.lbID.setText(visBItem.getId());
 			this.lbExpression.setText(String.format(bundle.getString("visb.item.expression"), visBItem.getValue()));
 			this.lbAttribute.setText(String.format(bundle.getString("visb.item.attribute"), visBItem.getAttribute()));
-			if(visBItem.parsedFormula != null && currentTrace.isNotNull().get() && currentTrace.getCurrentState() != null) {
-				AbstractEvalResult result = currentTrace.getCurrentState().eval(visBItem.parsedFormula);
+			if(visBItem.getParsedFormula() != null && currentTrace.isNotNull().get() &&
+			   currentTrace.getCurrentState() != null) {
+				AbstractEvalResult result = currentTrace.getCurrentState().eval(visBItem.getParsedFormula());
 				this.lbValue.setText(String.format(bundle.getString("visb.item.value"), result.toString()));
 			} else {
 				this.lbValue.setText("");

@@ -15,6 +15,7 @@ import de.prob2.ui.internal.ConfigFile;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -45,7 +46,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -235,35 +236,30 @@ public class ProB2 extends Application {
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
 		primaryStage.show();
 
+		primaryStage.toFront();
+
+		//Persistent stages are moved to front
+
 		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
 		uiPersistence.open();
-
-		primaryStage.toFront();
 
 		this.openFilesFromCommandLine(stageManager, currentProject);
 
 		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
 		pluginManager.start();
+
+		PrologOutput prologOutput = injector.getInstance(PrologOutput.class);
+		prologOutput.start();
 	}
 
 	private void updateTitle(final Stage stage) {
 		final CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		final CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 
 		final StringBuilder title = new StringBuilder();
 
-		if (currentProject.getCurrentMachine() != null) {
-			title.append(currentProject.getCurrentMachine());
-			final Trace trace = currentTrace.get();
-			if (trace != null) {
-				final File modelFile = trace.getModel().getModelFile();
-				if (modelFile != null) {
-					title.append(" (");
-					title.append(modelFile.getName());
-					title.append(')');
-				}
-			}
-
+		final Machine currentMachine = currentProject.getCurrentMachine();
+		if (currentMachine != null) {
+			title.append(currentMachine.getLocation().getFileName());
 			title.append(" - ");
 		}
 

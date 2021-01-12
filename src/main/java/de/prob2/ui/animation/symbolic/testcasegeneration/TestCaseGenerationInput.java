@@ -1,22 +1,20 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.List;
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
+
+import java.util.List;
+import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -198,21 +196,23 @@ public class TestCaseGenerationInput extends VBox {
 	
 	private void setChangeListeners(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler, TestCaseGenerationChoosingStage stage) {
 		btAdd.setOnAction(e -> {
+			//Close stage first so that it does not need to wait for possible Alerts
+			stage.close();
 			if(updateItem(item, stage)) {
 				addItem();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
-			stage.close();
 		});
 		
 		btCheck.setOnAction(e-> {
+			//Close stage first so that it does not need to wait for possible Alerts
+			stage.close();
 			if(updateItem(item, stage)) {
 				checkItem();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
-			stage.close();
 		});
 	}
 		

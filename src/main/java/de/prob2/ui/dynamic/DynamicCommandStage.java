@@ -22,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -45,13 +46,11 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		@Override
 		protected void updateItem(final T item, final boolean empty) {
 			super.updateItem(item, empty);
-			this.getStyleClass().removeAll("dynamiccommandenabled", "dynamiccommanddisabled");
+			this.getStyleClass().removeAll("disabled");
 			if (item != null && !empty) {
 				setText(item.getName());
-				if (item.isAvailable()) {
-					getStyleClass().add("dynamiccommandenabled");
-				} else {
-					getStyleClass().add("dynamiccommanddisabled");
+				if (!item.isAvailable()) {
+					getStyleClass().add("disabled");
 				}
 			}
 		}
@@ -82,6 +81,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	@FXML
 	protected Label placeholderLabel;
+	
+	@FXML
+	protected Parent errorsView;
 	
 	@FXML
 	protected DynamicCommandStatusBar statusBar;
@@ -200,7 +202,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	private void updatePlaceholderLabel() {
 		final String text;
-		if (currentTrace.get() == null) {
+		if (this.updater.isRunning()) {
+			text = bundle.getString("dynamic.placeholder.inProgress");
+		} else if (currentTrace.get() == null) {
 			text = bundle.getString("common.noModelLoaded");
 		} else {
 			final T selectedItem = lvChoice.getSelectionModel().getSelectedItem();
@@ -208,8 +212,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				text = bundle.getString("dynamic.placeholder.selectVisualization");
 			} else if (selectedItem.getArity() > 0) {
 				text = bundle.getString("dynamic.enterFormula.placeholder");
-			} else if (this.updater.isRunning()) {
-				text = bundle.getString("dynamic.placeholder.inProgress");
 			} else {
 				// The placeholder label shouldn't be seen by the user in this case,
 				// because the visualization content should be visible,
@@ -241,6 +243,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected void interrupt() {
 		this.updater.cancel(true);
 		this.clearLoadingStatus();
+		this.taErrors.clear();
+		this.errorsView.setVisible(false);
 		this.clearContent();
 		this.updatePlaceholderLabel();
 	}
@@ -279,12 +283,17 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Visualization interrupted", e);
 				Thread.currentThread().interrupt();
-				Platform.runLater(this::clearLoadingStatus);
+				Platform.runLater(() -> {
+					this.clearLoadingStatus();
+					this.updatePlaceholderLabel();
+				});
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Visualization failed", e);
 				Platform.runLater(() -> {
 					taErrors.setText(e.getMessage());
+					errorsView.setVisible(true);
 					this.clearLoadingStatus();
+					placeholderLabel.setVisible(false);
 				});
 			}
 		});

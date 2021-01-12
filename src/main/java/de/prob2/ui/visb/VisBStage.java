@@ -172,6 +172,7 @@ public class VisBStage extends Stage {
 			updateUIOnMachine(to);
 			loadVisBFileFromMachine(to);
 		});
+		injector.getInstance(VisBDebugStage.class).initOwner(this);
 	}
 
 	private void updateUIOnMachine(Machine machine) {
@@ -436,7 +437,6 @@ public class VisBStage extends Stage {
 
 	@FXML
 	public void showVisBItemsAndEvents() {
-		injector.getInstance(VisBDebugStage.class).initOwner(this);
 		injector.getInstance(VisBDebugStage.class).show();
 	}
 

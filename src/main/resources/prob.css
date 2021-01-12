@@ -841,35 +841,13 @@
 }
 
 /* ================== DYNAMIC COMMAND VIEW ================= */
-.dynamic-command-cell {
-	-fx-cell-size: 1.8em;
+
+.dynamic-command-cell.disabled {
+	-fx-text-fill: darkgray;
 }
 
-.dynamic-command-cell.dynamiccommandenabled {
-	-fx-font-family: ARIAL;
-	-fx-fill: white;
-	-fx-text-fill: -prob-aqua;
-}
-
-.dynamic-command-cell.dynamiccommandenabled:selected:hover {
-	-fx-text-fill: white;
-}
-
-.dynamic-command-cell.dynamiccommanddisabled {
-	-fx-font-family: ARIAL;
-	-fx-fill: white;
-	-fx-text-fill: -prob-orange;
-}
-
-.dynamic-command-cell:selected {
-	-fx-background-color: -prob-grey-50;
-	-fx-fill: -prob-grey-50;
-	-fx-text-fill: white;
-}
-
-.dynamic-command-cell:selected:hover {
-	-fx-background-color: -prob-grey;
-	-fx-text-fill: white;
+.dynamic-command-cell.disabled:selected {
+	-fx-text-fill: lightgray;
 }
 
 /* ================== TRACE INFORMATION VIEW ================= */

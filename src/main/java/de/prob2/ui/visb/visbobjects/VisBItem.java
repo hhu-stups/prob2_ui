@@ -1,7 +1,15 @@
 package de.prob2.ui.visb.visbobjects;
 
-import de.prob2.ui.visb.VisBParser;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob2.ui.visb.VisBParser;
+import de.prob2.ui.visb.exceptions.VisBNestedException;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.exception.ProBError;
+import de.prob.statespace.Trace;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.ClassicalB;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob.animator.domainobjects.FormulaExpand;
 
 import java.util.Objects;
 
@@ -13,7 +21,7 @@ public class VisBItem {
 	private String attribute;
 	private String value; // B Formula to compute value of attribute for SVG object id
 	private Boolean optional; // if true then we ignore identifier not found errors and simply disable this item
-	public IEvalElement parsedFormula; // if different from null the formula has already been parsed
+	private IEvalElement parsedFormula; // if different from null the formula has already been parsed
 
 	/**
 	 *
@@ -44,6 +52,34 @@ public class VisBItem {
 	public Boolean itemIsOptional() {
 		return optional;
 	}
+	public IEvalElement getParsedFormula() {
+	 // getter which does not require CurrentTrace; but cannot parse on demand
+		return parsedFormula;
+	}
+	
+	/**
+	 * parse the formula of VisBItem and store parsed formula in parsedFormula attribute
+	 */
+	public IEvalElement getParsedValueFormula(CurrentTrace currentTrace) throws VisBNestedException, ProBError {
+		String formulaToEval = this.getValue();
+		try {
+			if (this.parsedFormula != null) {
+			   return this.parsedFormula; // is already parsed
+			} else if(currentTrace.getModel() instanceof ClassicalBModel) {
+			   this.parsedFormula = currentTrace.getModel().parseFormula(formulaToEval, FormulaExpand.EXPAND);
+			  // use parser associated with the current model, DEFINITIONS are accessible
+			} else {
+			   this.parsedFormula = new ClassicalB(formulaToEval, FormulaExpand.EXPAND); // use classicalB parser
+			   // Note: Rodin parser does not have IF-THEN-ELSE nor STRING manipulation, cumbersome for VisB
+			}
+		} catch (EvaluationException e){
+			System.out.println("\nException for "+ this.getId() + "."+ this.getAttribute() + " : " + e);
+		    throw(new VisBNestedException("Exception parsing B formula for VisB item "+ this.getId() + "."+ this.getAttribute() + " : ",e));
+		}
+	    return this.parsedFormula;
+	}
+	
+	
 	@Override
 	public String toString(){
 		return "{ID: " + this.id +", ATTRIBUTE: "+this.attribute+", VALUE: "+this.value+"} ";

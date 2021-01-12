@@ -18,14 +18,21 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.Bounds;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.event.MouseOverTextEvent;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +42,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -45,6 +54,9 @@ import java.util.stream.Collectors;
 @Singleton
 @FXMLInjected
 public class BEditor extends CodeArea {
+
+	private static final Set<KeyCode> REST = EnumSet.of(KeyCode.ESCAPE, KeyCode.SCROLL_LOCK, KeyCode.PAUSE, KeyCode.NUM_LOCK, KeyCode.INSERT, KeyCode.CONTEXT_MENU, KeyCode.CAPS);
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditor.class);
 
 	private static final Map<ErrorItem.Type, String> ERROR_STYLE_CLASSES;
@@ -84,11 +96,11 @@ public class BEditor extends CodeArea {
 		final ContextMenu contextMenu = new ContextMenu();
 
 		final MenuItem undoItem = new MenuItem(bundle.getString("common.contextMenu.undo"));
-		undoItem.setOnAction(e -> this.getUndoManager().undo());
+		undoItem.setOnAction(e -> this.undo());
 		contextMenu.getItems().add(undoItem);
 
 		final MenuItem redoItem = new MenuItem(bundle.getString("common.contextMenu.redo"));
-		redoItem.setOnAction(e -> this.getUndoManager().redo());
+		redoItem.setOnAction(e -> this.redo());
 		contextMenu.getItems().add(redoItem);
 
 		final MenuItem cutItem = new MenuItem(bundle.getString("common.contextMenu.cut"));
@@ -161,6 +173,72 @@ public class BEditor extends CodeArea {
 		fontSize.fontSizeProperty().addListener((observable, from, to) ->
 				this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
 		);
+
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(), this::keyPressed));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyTyped(), this::keyTyped));
+
+		// GUI-style shortcuts, these should use the Shortcut key (i. e. Command on Mac, Control on other systems).
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.SHORTCUT_DOWN), e -> this.copy()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.V, KeyCombination.SHORTCUT_DOWN), e-> this.paste()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.X, KeyCombination.SHORTCUT_DOWN), e-> this.cut()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.A, KeyCombination.SHORTCUT_DOWN), e-> this.selectAll()));
+
+		// Do not handle undo and redo here as KeyCode.Z is confused with KeyCode.Y on German keyboard
+
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE), e -> this.handleDelete()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE), e -> this.handleBackspace()));
+
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP, KeyCombination.SHIFT_DOWN), this::handleUp));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN, KeyCombination.SHIFT_DOWN), this::handleDown));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.LEFT, KeyCombination.SHIFT_DOWN), this::handleLeft));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.RIGHT, KeyCombination.SHIFT_DOWN), this::handleRight));
+
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), this::handleUp));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), this::handleDown));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.LEFT), this::handleLeft));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.RIGHT), this::handleRight));
+
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), this::handleUp));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), this::handleDown));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.LEFT), this::handleLeft));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.RIGHT), this::handleRight));
+
+	}
+
+	protected boolean handleUndoRedo(KeyEvent e) {
+		boolean zIsPressed = e.getText().equals("Z") || e.getText().equals("z");
+		if(zIsPressed) {
+			if(e.isShortcutDown()) {
+				if (e.isShiftDown()) {
+					redo();
+					return true;
+				} else {
+					undo();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	protected void keyTyped(KeyEvent e) {
+		//Handle this key pressed. Otherwise chars cannot be handled which are typed in using Shortcut or Control
+	}
+
+	protected void keyPressed(KeyEvent e) {
+		if(handleUndoRedo(e)) {
+			return;
+		}
+		if (REST.contains(e.getCode())) {
+			return;
+		}
+		if (!e.getCode().isFunctionKey() && !e.getCode().isMediaKey() && !e.getCode().isModifierKey() &&
+			!e.isControlDown() && !e.isMetaDown() && !e.getText().isEmpty()) {
+			if(!this.getSelectedText().isEmpty()) {
+				this.deleteText(this.getSelection());
+			}
+			this.insertText(this.getCaretPosition(), e.getText());
+		}
 	}
 
 	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
@@ -237,6 +315,122 @@ public class BEditor extends CodeArea {
 			// Do not highlight unknown languages.
 			return StyleSpans.singleton(Collections.emptySet(), text.length());
 		}
+	}
+
+	protected void updateRangeUpLeft(KeyEvent e, int newCaret) {
+		if(e.isShiftDown()) {
+			IndexRange range = this.getSelection();
+			if(newCaret < range.getStart()) {
+				this.selectRange(range.getEnd(), newCaret);
+			} else {
+				this.selectRange(range.getStart(), newCaret);
+			}
+		} else {
+			this.moveTo(newCaret);
+		}
+	}
+
+	protected void updateRangeDownRight(KeyEvent e, int newCaret) {
+		if(e.isShiftDown()) {
+			IndexRange range = this.getSelection();
+			if(newCaret > range.getEnd()) {
+				this.selectRange(range.getStart(), newCaret);
+			} else {
+				this.selectRange(range.getEnd(), newCaret);
+			}
+		} else {
+			this.moveTo(newCaret);
+		}
+	}
+
+	protected void handleUp(KeyEvent e) {
+		if(this.getCaretPosition() == 0) {
+			return;
+		}
+		int lineNumber = Math.max(0, this.getCurrentParagraph() - 1);
+		int newCaret = getAbsolutePosition(lineNumber, lineNumber == 0 ? 0 : Math.min(this.getParagraphs().get(lineNumber).length(), this.getCaretColumn()));
+		if(!this.getSelectedText().isEmpty() && !e.isShiftDown()) {
+			this.deselect();
+			this.moveTo(newCaret);
+		} else {
+			updateRangeUpLeft(e, newCaret);
+		}
+		requestFollowCaret(); //This forces the text area to scroll. Other functions do not implement the require effects.
+	}
+
+	protected void handleDown(KeyEvent e) {
+		if(this.getCaretPosition() == this.getText().length()) {
+			return;
+		}
+		int lineNumber = Math.min(this.getParagraphs().size() - 1, this.getCurrentParagraph() + 1);
+		int newCaret = getAbsolutePosition(lineNumber, lineNumber == this.getParagraphs().size() - 1 ? this.getParagraphs().get(lineNumber).length() : Math.min(this.getParagraphs().get(lineNumber).length(), this.getCaretColumn()));
+		if(!this.getSelectedText().isEmpty() && !e.isShiftDown()) {
+			this.deselect();
+			this.moveTo(newCaret);
+		} else {
+			updateRangeDownRight(e, newCaret);
+		}
+		requestFollowCaret(); //This forces the text area to scroll. Other functions do not implement the require effects.
+	}
+
+	protected void handleLeft(KeyEvent e) {
+		int caret = this.getCaretPosition();
+		if(caret == 0) {
+			return;
+		}
+		int newCaret = Math.max(0, caret - 1);
+		if(!this.getSelectedText().isEmpty() && !e.isShiftDown()) {
+			IndexRange range = this.getSelection();
+			this.deselect();
+			this.moveTo(Math.min(range.getStart(), range.getEnd()) - 1);
+		} else {
+			updateRangeUpLeft(e, newCaret);
+		}
+		requestFollowCaret(); //This forces the text area to scroll. Other functions do not implement the require effects.
+	}
+
+	protected void handleRight(KeyEvent e) {
+		int caret = this.getCaretPosition();
+		if(caret == this.getText().length()) {
+			return;
+		}
+		int newCaret = Math.min(this.getText().length(), caret + 1);
+		if(!this.getSelectedText().isEmpty() && !e.isShiftDown()) {
+			IndexRange range = this.getSelection();
+			this.deselect();
+			this.moveTo(Math.max(range.getStart(), range.getEnd()) + 1);
+		} else {
+			updateRangeDownRight(e, newCaret);
+		}
+		requestFollowCaret(); //This forces the text area to scroll. Other functions do not implement the require effects.
+	}
+
+	protected void handleDelete() {
+		if(this.getSelectedText().isEmpty()) {
+			this.deleteNextChar();
+		}	else {
+			this.deleteText(this.getSelection());
+		}
+	}
+
+	protected void handleBackspace() {
+		if(this.getSelectedText().isEmpty()) {
+			this.deletePreviousChar();
+		}	else {
+			this.deleteText(this.getSelection());
+		}
+	}
+
+	public int getLineNumber() {
+		return this.getParagraphs().size()-1;
+	}
+
+	public void undo() {
+		this.getUndoManager().undo();
+	}
+
+	public void redo() {
+		this.getUndoManager().redo();
 	}
 
 	public void clearHistory() {

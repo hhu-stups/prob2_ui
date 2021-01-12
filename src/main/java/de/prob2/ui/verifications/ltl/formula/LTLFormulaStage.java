@@ -1,9 +1,6 @@
 package de.prob2.ui.verifications.ltl.formula;
 
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
-
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -14,10 +11,8 @@ import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-
 import netscape.javascript.JSObject;
 
 public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
@@ -60,6 +55,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
 		} else {
+			this.close();
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
 	}
@@ -72,6 +68,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, result));
 			formulaChecker.checkFormula(result, this);
 		} else {
+			this.close();
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
 	}

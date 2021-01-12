@@ -1,19 +1,8 @@
 package de.prob2.ui.states;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -34,7 +23,6 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -57,11 +45,20 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -246,11 +243,14 @@ public final class StatesView extends StackPane {
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
 				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionGraph"));
-		visualizeExpressionAsGraphItem.disableProperty().bind(row.itemProperty().isNull());
+		//visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(
+		//		() -> row.getItem() == null || !(row.getItem().getFormula().getId()), row.itemProperty())
+		//		.or(currentTrace.currentStateProperty().initializedProperty().not()));
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				DotView formulaStage = injector.getInstance(DotView.class);
 				formulaStage.show();
+				formulaStage.toFront();
 				formulaStage.visualizeFormula(row.getItem().getLabel());
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -267,6 +267,7 @@ public final class StatesView extends StackPane {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
 				expressionTableView.show();
+				expressionTableView.toFront();
 				expressionTableView.visualizeExpression(row.getItem().getLabel());
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);

@@ -93,6 +93,7 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	public void setEvents() {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.mouseClicked(MouseButton.PRIMARY), e -> this.mouseClicked()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyTyped(), this::keyTyped));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(), this::keyPressed));
 		
 		// GUI-style shortcuts, these should use the Shortcut key (i. e. Command on Mac, Control on other systems).
@@ -192,6 +193,10 @@ public abstract class Console extends StyleClassedTextArea {
 			handleInsertChar(e);
 		}
 	}
+
+	protected void keyTyped(KeyEvent e) {
+		//Handle this key pressed. Otherwise chars cannot be handled which are typed in using Shortcut or Control
+	}
 	
 	private void handleInsertChar(KeyEvent e) {
 		if (this.getLength() - this.getCaretPosition() > charCounterInLine) {
@@ -200,6 +205,7 @@ public abstract class Console extends StyleClassedTextArea {
 		if (e.isControlDown() || e.isMetaDown() || e.getText().isEmpty()) {
 			return;
 		}
+		this.insertText(this.getCaretPosition(), e.getText());
 		charCounterInLine++;
 		currentPosInLine++;
 		posInList = instructions.size() - 1;
