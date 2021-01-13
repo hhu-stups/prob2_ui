@@ -18,18 +18,6 @@
 		 resizable="false" maxWidth="400.0" maxHeight="400.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 
-		<Label fx:id="lbMonteCarloTime" text="%simulation.choice.time" />
-		<TextField fx:id="tfMonteCarloTime" VBox.vgrow="NEVER"/>
-
-		<Label fx:id="lbSteps" text="%simulation.choice.stepsPerSimulation"/>
-		<TextField fx:id="tfSteps"/>
-
-		<Label fx:id="lbEndingPredicate" text="%simulation.choice.endingPredicate"/>
-		<TextField fx:id="tfEndingPredicate"/>
-
-		<Label fx:id="lbEndingTime" text="%simulation.choice.endingTime"/>
-		<TextField fx:id="tfEndingTime"/>
-
         <HBox fx:id="timeBox" spacing="5.0">
             <Label fx:id="lbTime" text="%simulation.choice.time" />
 		    <TextField fx:id="tfTime" VBox.vgrow="NEVER"/>
