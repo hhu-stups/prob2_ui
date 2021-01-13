@@ -6,6 +6,8 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.simulation.simulators.AbstractTraceSimulator;
 
+import java.util.Map;
+
 public class SimulationTraceChecker extends AbstractTraceSimulator implements ITraceChecker {
 
     public enum TraceCheckResult {
@@ -14,9 +16,12 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
 
     private TraceCheckResult result;
 
-    public SimulationTraceChecker(Trace trace, ReplayTrace replayTrace) {
+    private Map<String, Object> additionalInformation;
+
+    public SimulationTraceChecker(Trace trace, ReplayTrace replayTrace, Map<String, Object> additionalInformation) {
         super(trace, replayTrace);
         this.result = TraceCheckResult.NOT_FINISHED;
+        this.additionalInformation = additionalInformation;
     }
 
     @Override
@@ -26,7 +31,7 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
             Trace newTrace = setupBeforeSimulation(trace);
             while(!finished) {
                 newTrace = simulationStep(newTrace);
-                if(counter >= replayTrace.getPersistentTrace().getTransitionList().size()) {
+                if(endingConditionReached(newTrace)) {
                     finishSimulation();
                 }
             }
@@ -37,7 +42,14 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
 
     public TraceCheckResult check() {
         if(counter == replayTrace.getPersistentTrace().getTransitionList().size()) {
-            this.result = TraceCheckResult.SUCCESS;
+            if(additionalInformation.containsKey("TIME")) {
+                int time = (int) additionalInformation.get("TIME");
+                this.result = this.time.get() <= time ? TraceCheckResult.SUCCESS : TraceCheckResult.FAIL;
+                System.out.println(this.time.get());
+                System.out.println("TIME");
+            } else {
+                this.result = TraceCheckResult.SUCCESS;
+            }
         } else {
             this.result = TraceCheckResult.FAIL;
         }

@@ -99,7 +99,11 @@ public class SimulationItemHandler {
     private void handleTraceReplay(SimulationItem item, boolean checkAll) {
         Trace trace = currentTrace.get();
         ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
-        SimulationTraceChecker traceChecker = new SimulationTraceChecker(trace, replayTrace);
+        Map<String, Object> additionalInformation = new HashMap<>();
+        if(item.getSimulationConfiguration().containsField("TIME")) {
+            additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
+        }
+        SimulationTraceChecker traceChecker = new SimulationTraceChecker(trace, replayTrace, additionalInformation);
         traceChecker.initSimulator(path.toFile());
         traceChecker.run();
         SimulationTraceChecker.TraceCheckResult result = traceChecker.check();
