@@ -243,9 +243,7 @@ public final class StatesView extends StackPane {
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
 				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionGraph"));
-		//visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(
-		//		() -> row.getItem() == null || !(row.getItem().getFormula().getId()), row.itemProperty())
-		//		.or(currentTrace.currentStateProperty().initializedProperty().not()));
+		visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(() -> row.getItem() == null || row.getItem().getType() == ExpandedFormula.FormulaType.OTHER || row.getItem().getCurrentValue() instanceof BVisual2Value.Inactive, row.itemProperty()));
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				DotView formulaStage = injector.getInstance(DotView.class);
@@ -262,7 +260,7 @@ public final class StatesView extends StackPane {
 
 		final MenuItem visualizeExpressionAsTableItem = new MenuItem(
 				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionTable"));
-		visualizeExpressionAsTableItem.disableProperty().bind(row.itemProperty().isNull());
+		visualizeExpressionAsTableItem.disableProperty().bind(Bindings.createBooleanBinding(() -> row.getItem() == null || row.getItem().getType() == ExpandedFormula.FormulaType.OTHER || row.getItem().getCurrentValue() instanceof BVisual2Value.Inactive, row.itemProperty()));
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
