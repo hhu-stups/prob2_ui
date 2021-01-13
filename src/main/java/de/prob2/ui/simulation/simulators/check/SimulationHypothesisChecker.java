@@ -56,7 +56,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
     }
 
 	@Override
-    public void checkTrace(Trace trace) {
+    public void checkTrace(Trace trace, int time) {
 		switch (type) {
 			case ALL_INVARIANTS:
 				checkAllInvariants(trace);
@@ -68,7 +68,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 				checkAlmostCertainProperty(trace);
 				break;
 			case TIMING:
-				// TODO
+				checkTiming(time);
 				break;
 			default:
 				break;
@@ -222,6 +222,13 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 			this.result = HypothesisCheckResult.SUCCESS;
 		} else {
 			this.result = HypothesisCheckResult.FAIL;
+		}
+	}
+
+	public void checkTiming(int time) {
+		int maximumTime = (int) additionalInformation.get("TIME");
+		if(time <= maximumTime) {
+			numberSuccess++;
 		}
 	}
 

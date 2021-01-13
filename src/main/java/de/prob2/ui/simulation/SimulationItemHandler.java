@@ -82,6 +82,10 @@ public class SimulationItemHandler {
 		double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
 		Map<String, Object> additionalInformation = new HashMap<>();
 
+		if(item.getSimulationConfiguration().containsField("TIME")) {
+		    additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
+        }
+
         SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(trace, executions, stepsPerExecution, checkingType, hypothesisCheckingType, probability, additionalInformation);
         hypothesisChecker.initSimulator(path.toFile());
 		Thread thread = new Thread(() -> {

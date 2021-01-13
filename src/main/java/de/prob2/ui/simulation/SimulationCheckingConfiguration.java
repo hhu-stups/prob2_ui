@@ -26,6 +26,10 @@ public class SimulationCheckingConfiguration {
         return information;
     }
 
+    public boolean containsField(String key) {
+        return information.containsKey(key);
+    }
+
     public Object getField(String key) {
         return information.get(key);
     }
