@@ -8,6 +8,22 @@ import java.util.List;
 
 public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
 
+	public enum EndingType {
+		NUMBER_STEPS("Number Steps"),
+		ENDING_PREDICATE("Ending Predicate"),
+		ENDING_TIME("Ending Time");
+
+		private String name;
+
+		EndingType(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
     protected List<Trace> resultingTraces;
 
     protected Trace trace;

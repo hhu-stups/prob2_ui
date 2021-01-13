@@ -64,7 +64,22 @@ public class SimulationChoosingStage extends Stage {
     private TextField tfSimulations;
 
 	@FXML
-    private TextField tfSteps;
+	private Label lbSteps;
+
+	@FXML
+	private TextField tfSteps;
+
+	@FXML
+	private Label lbEndingPredicate;
+
+	@FXML
+	private TextField tfEndingPredicate;
+
+	@FXML
+	private Label lbEndingTime;
+
+	@FXML
+	private TextField tfEndingTime;
 
 	@FXML
 	private VBox inputBox;
@@ -74,6 +89,9 @@ public class SimulationChoosingStage extends Stage {
 
 	@FXML
 	private ChoiceBox<SimulationPropertyItem> checkingChoice;
+
+	@FXML
+	private ChoiceBox<SimulationEndingItem> endingChoice;
 
 	@FXML
 	private ChoiceBox<SimulationHypothesisChoiceItem> hypothesisCheckingChoice;
@@ -117,14 +135,38 @@ public class SimulationChoosingStage extends Stage {
             this.sizeToScene();
         });
 
+		endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			monteCarloBox.getChildren().removeAll(lbSteps, tfSteps, lbEndingPredicate, tfEndingPredicate, lbEndingTime, tfEndingTime);
+			if(to != null) {
+				switch (to.getEndingType()) {
+					case NUMBER_STEPS:
+						monteCarloBox.add(lbSteps, 1, 3);
+						monteCarloBox.add(tfSteps, 2, 3);
+						break;
+					case ENDING_PREDICATE:
+						monteCarloBox.add(lbEndingPredicate, 1, 3);
+						monteCarloBox.add(tfEndingPredicate, 2, 3);
+						break;
+					case ENDING_TIME:
+						monteCarloBox.add(lbEndingTime, 1, 3);
+						monteCarloBox.add(tfEndingTime, 2, 3);
+						break;
+					default:
+						break;
+				}
+			}
+			this.sizeToScene();
+		});
+
         checkingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
         	if(to != null && to.getCheckingType() == SimulationCheckingType.TIMING) {
-				monteCarloBox.add(lbMonteCarloTime, 1, 7);
-				monteCarloBox.add(tfMonteCarloTime, 2, 7);
+				monteCarloBox.add(lbMonteCarloTime, 1, 8);
+				monteCarloBox.add(tfMonteCarloTime, 2, 8);
 			} else {
         		monteCarloBox.getChildren().remove(lbMonteCarloTime);
         		monteCarloBox.getChildren().remove(tfMonteCarloTime);
 			}
+			this.sizeToScene();
 		});
 
 		cbTraces.setConverter(new StringConverter<ReplayTrace>() {
