@@ -164,7 +164,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 				range = i;
 				break;
 			}
-			coverage = gaussian.value(mu + i) - gaussian.value(mu - i);
+			coverage = gaussian.value(mu + i + 0.5) - gaussian.value(mu - i - 0.5);
 		}
 		int numberFailed = n - numberSuccess;
 		if(numberFailed >= mu - range && numberFailed <= mu + range) {
@@ -189,7 +189,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 				range = i;
 				break;
 			}
-			coverage = 100.0 - gaussian.value(mu - i);
+			coverage = 100.0 - gaussian.value(mu - i - 0.5);
 		}
 		// TODO: What if p < 50% ?
 		int numberFailed = n - numberSuccess;
@@ -215,7 +215,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 				range = i;
 				break;
 			}
-			coverage = gaussian.value(mu + i);
+			coverage = gaussian.value(mu + i + 0.5);
 		}
 		// TODO: What if p < 50% ?
 		int numberFailed = n - numberSuccess;
