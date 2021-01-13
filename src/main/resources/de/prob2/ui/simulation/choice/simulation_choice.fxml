@@ -14,52 +14,55 @@
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.simulation.choice.SimulationPropertyItem?>
 <?import de.prob2.ui.simulation.choice.SimulationHypothesisChoiceItem?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
-		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+		 resizable="false" minWidth="400.0" maxWidth="400.0" minHeight="400.0" maxHeight="400.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
+
+		<Label fx:id="lbMonteCarloTime" text="%simulation.choice.time" />
+		<TextField fx:id="tfMonteCarloTime" VBox.vgrow="NEVER"/>
+
         <HBox fx:id="timeBox" spacing="5.0">
-            <Label text="Time:" />
+            <Label fx:id="lbTime" text="%simulation.choice.time" />
 		    <TextField fx:id="tfTime" VBox.vgrow="NEVER"/>
         </HBox>
-		<VBox fx:id="monteCarloBox" spacing="5.0">
-			<HBox>
-				<Label text="%simulation.choice.numberSimulations"/>
-				<TextField fx:id="tfSimulations" HBox.hgrow="NEVER"/>
-			</HBox>
-			<HBox>
-				<Label text="%simulation.choice.stepsPerSimulation"/>
-				<TextField fx:id="tfSteps" HBox.hgrow="NEVER"/>
-			</HBox>
-			<HBox>
-				<Label text="%simulation.choice.check" />
-				<ChoiceBox fx:id="checkingChoice">
-					<items>
-						<FXCollections fx:factory="observableArrayList">
-							<SimulationPropertyItem checkingType="ALL_INVARIANTS"/>
-							<SimulationPropertyItem checkingType="INVARIANT"/>
-							<SimulationPropertyItem checkingType="ALMOST_CERTAIN_PROPERTY"/>
-							<SimulationPropertyItem checkingType="TIMING"/>
-						</FXCollections>
-					</items>
-				</ChoiceBox>
-			</HBox>
-			<HBox>
-				<Label text="%simulation.choice.hypothesis"/>
-				<ChoiceBox fx:id="hypothesisCheckingChoice">
-					<items>
-						<FXCollections fx:factory="observableArrayList">
-							<SimulationHypothesisChoiceItem checkingType="LEFT_TAILED"/>
-							<SimulationHypothesisChoiceItem checkingType="RIGHT_TAILED"/>
-							<SimulationHypothesisChoiceItem checkingType="TWO_TAILED"/>
-						</FXCollections>
-					</items>
-				</ChoiceBox>
-			</HBox>
-			<HBox>
-				<Label text="%simulation.choice.probability"/>
-				<TextField fx:id="tfProbability" HBox.hgrow="NEVER"/>
-			</HBox>
-		</VBox>
+		<GridPane fx:id="monteCarloBox" hgap="5.0" vgap="5.0" alignment="CENTER">
+			<columnConstraints>
+				<ColumnConstraints hgrow="ALWAYS" />
+			</columnConstraints>
+			<Label text="%simulation.choice.numberSimulations" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+			<TextField fx:id="tfSimulations" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+
+			<Label text="%simulation.choice.stepsPerSimulation" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+			<TextField fx:id="tfSteps" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+
+			<Label text="%simulation.choice.check" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+			<ChoiceBox fx:id="checkingChoice" GridPane.rowIndex="3" GridPane.columnIndex="2">
+				<items>
+					<FXCollections fx:factory="observableArrayList">
+						<SimulationPropertyItem checkingType="ALL_INVARIANTS"/>
+						<SimulationPropertyItem checkingType="INVARIANT"/>
+						<SimulationPropertyItem checkingType="ALMOST_CERTAIN_PROPERTY"/>
+						<SimulationPropertyItem checkingType="TIMING"/>
+					</FXCollections>
+				</items>
+			</ChoiceBox>
+
+			<Label text="%simulation.choice.hypothesis" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+			<ChoiceBox fx:id="hypothesisCheckingChoice" GridPane.rowIndex="4" GridPane.columnIndex="2">
+				<items>
+					<FXCollections fx:factory="observableArrayList">
+						<SimulationHypothesisChoiceItem checkingType="LEFT_TAILED"/>
+						<SimulationHypothesisChoiceItem checkingType="RIGHT_TAILED"/>
+						<SimulationHypothesisChoiceItem checkingType="TWO_TAILED"/>
+					</FXCollections>
+				</items>
+			</ChoiceBox>
+
+			<Label text="%simulation.choice.probability" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+			<TextField fx:id="tfProbability" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
+		</GridPane>
 		<HBox fx:id="tracesBox" spacing="5.0">
 			<Label text="%simulation.choice.traces"/>
 			<ChoiceBox fx:id="cbTraces"/>
@@ -68,7 +71,7 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane styleClass="dialog">
-				<VBox spacing="10.0">
+				<VBox spacing="10.0" alignment="TOP_CENTER" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.bottomAnchor="0.0">
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>

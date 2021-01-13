@@ -12,7 +12,9 @@ import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -38,7 +40,7 @@ public class SimulationChoosingStage extends Stage {
     private HBox timeBox;
 
 	@FXML
-	private VBox monteCarloBox;
+	private GridPane monteCarloBox;
 
 	@FXML
 	private HBox tracesBox;
@@ -47,7 +49,16 @@ public class SimulationChoosingStage extends Stage {
 	private ChoiceBox<ReplayTrace> cbTraces;
 
 	@FXML
+	private Label lbTime;
+
+	@FXML
 	private TextField tfTime;
+
+	@FXML
+	private Label lbMonteCarloTime;
+
+	@FXML
+	private TextField tfMonteCarloTime;
 
 	@FXML
     private TextField tfSimulations;
@@ -105,6 +116,17 @@ public class SimulationChoosingStage extends Stage {
             changeGUIType(to.getSimulationType());
             this.sizeToScene();
         });
+
+        checkingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+        	if(to != null && to.getCheckingType() == SimulationCheckingType.TIMING) {
+				monteCarloBox.add(lbMonteCarloTime, 1, 7);
+				monteCarloBox.add(tfMonteCarloTime, 2, 7);
+			} else {
+        		monteCarloBox.getChildren().remove(lbMonteCarloTime);
+        		monteCarloBox.getChildren().remove(tfMonteCarloTime);
+			}
+		});
+
 		cbTraces.setConverter(new StringConverter<ReplayTrace>() {
 			@Override
 			public String toString(ReplayTrace replayTrace) {
@@ -188,8 +210,11 @@ public class SimulationChoosingStage extends Stage {
                 information.put("CHECKING_TYPE", checkingChoice.getSelectionModel().getSelectedItem().getCheckingType());
                 information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());
                 information.put("PROBABILITY", Double.parseDouble(tfProbability.getText()));
+				SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
+                if(checkingChoiceItem != null && checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
+					information.put("TIME", Integer.parseInt(tfMonteCarloTime.getText()));
+				}
 				break;
-
 			case TRACE_REPLAY:
 				information.put("TRACE", cbTraces.getValue());
 				break;
