@@ -105,6 +105,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 	}
 
 	public void checkAlmostCertainProperty(Trace trace) {
+    	// TODO: Fix Property
     	String property = (String) additionalInformation.get("PROPERTY");
     	for(Transition transition : trace.getTransitionList()) {
     		State destination = transition.getDestination();

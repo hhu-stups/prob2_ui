@@ -16,7 +16,7 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
 
     private TraceCheckResult result;
 
-    private Map<String, Object> additionalInformation;
+    private final Map<String, Object> additionalInformation;
 
     public SimulationTraceChecker(Trace trace, ReplayTrace replayTrace, Map<String, Object> additionalInformation) {
         super(trace, replayTrace);
