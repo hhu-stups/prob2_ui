@@ -5,32 +5,13 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.simulators.ProbabilityBasedSimulator;
+import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import org.apache.commons.math3.analysis.function.Gaussian;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class SimulationHypothesisChecker extends SimulationMonteCarlo {
-
-	// TODO: Think about moving this class in another file
-	public enum CheckingType {
-		ALL_INVARIANTS("All Invariants"),
-		INVARIANT("Invariant"),
-		ALMOST_CERTAIN_PROPERTY("Almost-certain property"),
-		TIMING("Timing");
-
-		private String name;
-
-		CheckingType(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
 
 	public enum HypothesisCheckingType {
 		LEFT_TAILED("Left-tailed hypothesis test"),
@@ -52,7 +33,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
         NOT_FINISHED, SUCCESS, FAIL
     }
 
-    private final CheckingType type;
+    private final SimulationCheckingType type;
 
 	private final HypothesisCheckingType hypothesisCheckingType;
 
@@ -64,7 +45,7 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
     private HypothesisCheckResult result;
 
-    public SimulationHypothesisChecker(final Trace trace, final int numberExecutions, final int numberStepsPerExecution, final CheckingType type,
+    public SimulationHypothesisChecker(final Trace trace, final int numberExecutions, final int numberStepsPerExecution, final SimulationCheckingType type,
 									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final Map<String, Object> additionalInformation) {
         super(trace, numberExecutions, numberStepsPerExecution);
 		this.type = type;
@@ -184,14 +165,23 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
 		int range = 0;
 
-		for(int i = 1; i <= mu; i++) {
-			if(100.0 - coverage < p) {
-				range = i;
-				break;
+		if(p >= 0.5) {
+			for (int i = 1; i <= mu; i++) {
+				if (100.0 - coverage < p) {
+					range = i;
+					break;
+				}
+				coverage = 100.0 - gaussian.value(mu - i - 0.5);
 			}
-			coverage = 100.0 - gaussian.value(mu - i - 0.5);
+		} else {
+			for (int i = 1; i <= mu; i++) {
+				if (100.0 - coverage >= p) {
+					range = i;
+					break;
+				}
+				coverage = 100.0 - gaussian.value(mu + i - 0.5);
+			}
 		}
-		// TODO: What if p < 50% ?
 		int numberFailed = n - numberSuccess;
 		if(numberFailed >= mu - range && numberFailed <= n) {
 			this.result = HypothesisCheckResult.SUCCESS;
@@ -210,14 +200,23 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
 		int range = 0;
 
-		for(int i = 1; i <= mu; i++) {
-			if(100.0 - coverage < p) {
-				range = i;
-				break;
+		if(p >= 0.5) {
+			for (int i = 1; i <= mu; i++) {
+				if (100.0 - coverage < p) {
+					range = i;
+					break;
+				}
+				coverage = gaussian.value(mu + i + 0.5);
 			}
-			coverage = gaussian.value(mu + i + 0.5);
+		} else {
+			for (int i = 1; i <= mu; i++) {
+				if (100.0 - coverage >= p) {
+					range = i;
+					break;
+				}
+				coverage = gaussian.value(mu - i + 0.5);
+			}
 		}
-		// TODO: What if p < 50% ?
 		int numberFailed = n - numberSuccess;
 		if(numberFailed >= 0 && numberFailed <= mu + range) {
 			this.result = HypothesisCheckResult.SUCCESS;

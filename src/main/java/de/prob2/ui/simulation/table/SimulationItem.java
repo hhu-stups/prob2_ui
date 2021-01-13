@@ -1,7 +1,7 @@
 package de.prob2.ui.simulation.table;
 
 import de.prob2.ui.simulation.SimulationCheckingConfiguration;
-import de.prob2.ui.simulation.SimulationType;
+import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.verifications.Checked;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

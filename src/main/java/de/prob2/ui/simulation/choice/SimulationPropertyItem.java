@@ -5,9 +5,9 @@ import javafx.beans.NamedArg;
 
 public class SimulationPropertyItem {
 
-	private SimulationHypothesisChecker.CheckingType checkingType;
+	private SimulationCheckingType checkingType;
 
-	public SimulationPropertyItem(@NamedArg("checkingType") SimulationHypothesisChecker.CheckingType checkingType) {
+	public SimulationPropertyItem(@NamedArg("checkingType") SimulationCheckingType checkingType) {
 		this.checkingType = checkingType;
 	}
 
@@ -16,7 +16,7 @@ public class SimulationPropertyItem {
 		return checkingType.getName();
 	}
 
-	public SimulationHypothesisChecker.CheckingType getCheckingType() {
+	public SimulationCheckingType getCheckingType() {
 		return checkingType;
 	}
 

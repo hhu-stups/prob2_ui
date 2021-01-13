@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.choice;
 
 public enum SimulationType {
 

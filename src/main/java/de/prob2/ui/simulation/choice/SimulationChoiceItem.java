@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.choice;
 
-import de.prob2.ui.simulation.SimulationType;
 import javafx.beans.NamedArg;
 
 public class SimulationChoiceItem {

@@ -5,6 +5,8 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationTimeChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationTraceChecker;
@@ -75,7 +77,7 @@ public class SimulationItemHandler {
 
         int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
 		int stepsPerExecution = (int) item.getSimulationConfiguration().getField("STEPS_PER_EXECUTION");
-		SimulationHypothesisChecker.CheckingType checkingType = (SimulationHypothesisChecker.CheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
+		SimulationCheckingType checkingType = (SimulationCheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
 		SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getSimulationConfiguration().getField("HYPOTHESIS_CHECKING_TYPE");
 		double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
 		Map<String, Object> additionalInformation = new HashMap<>();

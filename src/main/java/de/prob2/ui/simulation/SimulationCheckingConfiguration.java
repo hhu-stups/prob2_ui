@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation;
 
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.simulation.choice.SimulationType;
 
 import java.util.ArrayList;
 import java.util.List;
