@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.simulation.choice.SimulationTraceChoice?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+
+<?import javafx.scene.control.CheckBox?>
+<fx:root type="SimulationTraceChoice" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<Label fx:id="lbTime" text="%simulation.choice.time"/>
+		<TextField fx:id="tfTime"/>
+	</fx:define>
+	<columnConstraints>
+		<ColumnConstraints hgrow="ALWAYS" />
+	</columnConstraints>
+
+	<Label text="%simulation.choice.traces" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="cbTraces" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+
+	<CheckBox text="%simulation.choice.checkTime" fx:id="cbTime" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+</fx:root>

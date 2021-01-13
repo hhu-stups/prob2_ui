@@ -8,7 +8,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
-import de.prob2.ui.simulation.simulators.check.SimulationTimeChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationTraceChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
@@ -49,27 +48,6 @@ public class SimulationItemHandler {
     public void removeItem(final Machine machine, SimulationItem item) {
         final List<SimulationItem> items = this.getItems(machine);
         items.remove(item);
-    }
-
-    private void handleTiming(SimulationItem item, boolean checkAll) {
-        Trace trace = currentTrace.get();
-        SimulationTimeChecker timeChecker = new SimulationTimeChecker(trace, (int) item.getSimulationConfiguration().getField("TIME"));
-        timeChecker.initSimulator(path.toFile());
-        timeChecker.run();
-        SimulationTimeChecker.TimeCheckResult result = timeChecker.check();
-        switch (result) {
-            case SUCCESS:
-                item.setChecked(Checked.SUCCESS);
-                break;
-            case FAIL:
-                item.setChecked(Checked.FAIL);
-                break;
-            case NOT_FINISHED:
-                item.setChecked(Checked.NOT_CHECKED);
-                break;
-            default:
-                break;
-        }
     }
 
     private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
@@ -147,9 +125,6 @@ public class SimulationItemHandler {
         // TODO
         SimulationType type = item.getType();
         switch(type) {
-            case TIMING:
-                handleTiming(item, checkAll);
-                break;
             case HYPOTHESIS_TEST:
                 handleHypothesisTest(item, checkAll);
                 break;

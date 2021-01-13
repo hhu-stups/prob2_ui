@@ -44,16 +44,7 @@ public class SimulationChoosingStage extends Stage {
 	private SimulationHypothesisChoice simulationHypothesisChoice;
 
 	@FXML
-	private HBox tracesBox;
-
-	@FXML
-	private ChoiceBox<ReplayTrace> cbTraces;
-
-	@FXML
-	private Label lbTime;
-
-	@FXML
-	private TextField tfTime;
+	private SimulationTraceChoice tracesChoice;
 
 	@FXML
 	private VBox inputBox;
@@ -93,21 +84,8 @@ public class SimulationChoosingStage extends Stage {
             changeGUIType(to.getSimulationType());
             this.sizeToScene();
         });
-
-		cbTraces.setConverter(new StringConverter<ReplayTrace>() {
-			@Override
-			public String toString(ReplayTrace replayTrace) {
-				return replayTrace.getName();
-			}
-
-			@Override
-			public ReplayTrace fromString(String s) {
-				return cbTraces.getItems().stream()
-						.filter(t -> s.equals(t.getName()))
-						.collect(Collectors.toList()).get(0);
-			}
-		});
 		simulationHypothesisChoice.setSimulationChoosingStage(this);
+		tracesChoice.setSimulationChoosingStage(this);
 	}
 
 	private void setCheckListeners() {
@@ -137,10 +115,8 @@ public class SimulationChoosingStage extends Stage {
 		SimulationChoiceItem item = simulationChoice.getSelectionModel().getSelectedItem();
 		SimulationType type = item.getSimulationType();
 		switch (type) {
-			case TIMING:
-				return !tfTime.getText().isEmpty();
 			case TRACE_REPLAY:
-				return cbTraces.getSelectionModel().getSelectedItem() != null;
+				return tracesChoice.checkSelection();
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
@@ -167,39 +143,31 @@ public class SimulationChoosingStage extends Stage {
 		SimulationType simulationType = item.getSimulationType();
 		Map<String, Object> information = new HashMap<>();
 		switch (simulationType) {
-			case TIMING:
-				information.put("TIME", Integer.parseInt(tfTime.getText()));
-				break;
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
 				information = simulationHypothesisChoice.extractInformation();
 				break;
 			case TRACE_REPLAY:
-				information.put("TRACE", cbTraces.getValue());
+				information = tracesChoice.extractInformation();
 				break;
 		}
 		return information;
 	}
 
     private void changeGUIType(final SimulationType type) {
-        inputBox.getChildren().removeAll(timeBox, simulationHypothesisChoice, tracesBox);
-        tfTime.clear();
+        inputBox.getChildren().removeAll(timeBox, simulationHypothesisChoice, tracesChoice);
 		simulationHypothesisChoice.clear();
-
-        cbTraces.getItems().clear();
+		tracesChoice.clear();
         switch (type) {
-            case TIMING:
-                inputBox.getChildren().add(0, timeBox);
-                break;
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
                 inputBox.getChildren().add(0, simulationHypothesisChoice);
                 break;
             case TRACE_REPLAY:
-            	cbTraces.getItems().addAll(injector.getInstance(TraceViewHandler.class).getTraces());
-            	inputBox.getChildren().add(0, tracesBox);
+            	tracesChoice.updateTraces(injector.getInstance(TraceViewHandler.class).getTraces());
+            	inputBox.getChildren().add(0, tracesChoice);
                 break;
         }
     }
@@ -212,9 +180,8 @@ public class SimulationChoosingStage extends Stage {
 	public void reset() {
         btAdd.setText(bundle.getString("common.buttons.add"));
         btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
-        tfTime.clear();
+        tracesChoice.clear();
 		simulationHypothesisChoice.clear();
-        cbTraces.getItems().clear();
 	}
 
 	public void setPath(Path path) {
