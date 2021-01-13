@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+
 public class SimulationChoosingStage extends Stage {
 	@FXML
 	private Button btAdd;
@@ -40,7 +41,7 @@ public class SimulationChoosingStage extends Stage {
     private HBox timeBox;
 
 	@FXML
-	private GridPane monteCarloBox;
+	private SimulationHypothesisChoice simulationHypothesisChoice;
 
 	@FXML
 	private HBox tracesBox;
@@ -55,49 +56,10 @@ public class SimulationChoosingStage extends Stage {
 	private TextField tfTime;
 
 	@FXML
-	private Label lbMonteCarloTime;
-
-	@FXML
-	private TextField tfMonteCarloTime;
-
-	@FXML
-    private TextField tfSimulations;
-
-	@FXML
-	private Label lbSteps;
-
-	@FXML
-	private TextField tfSteps;
-
-	@FXML
-	private Label lbEndingPredicate;
-
-	@FXML
-	private TextField tfEndingPredicate;
-
-	@FXML
-	private Label lbEndingTime;
-
-	@FXML
-	private TextField tfEndingTime;
-
-	@FXML
 	private VBox inputBox;
 
 	@FXML
 	private ChoiceBox<SimulationChoiceItem> simulationChoice;
-
-	@FXML
-	private ChoiceBox<SimulationPropertyItem> checkingChoice;
-
-	@FXML
-	private ChoiceBox<SimulationEndingItem> endingChoice;
-
-	@FXML
-	private ChoiceBox<SimulationHypothesisChoiceItem> hypothesisCheckingChoice;
-
-	@FXML
-	private TextField tfProbability;
 
 	private final Injector injector;
 
@@ -105,19 +67,16 @@ public class SimulationChoosingStage extends Stage {
 
 	private final CurrentProject currentProject;
 
-	private final CurrentTrace currentTrace;
-
 	private final SimulationItemHandler simulationItemHandler;
 
 	private Path path;
 
 	@Inject
-	public SimulationChoosingStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace,
+	public SimulationChoosingStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, final CurrentProject currentProject,
 								   final SimulationItemHandler simulationItemHandler) {
 		this.injector = injector;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
-		this.currentTrace = currentTrace;
 		this.simulationItemHandler = simulationItemHandler;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "simulation_choice.fxml");
@@ -135,40 +94,6 @@ public class SimulationChoosingStage extends Stage {
             this.sizeToScene();
         });
 
-		endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			monteCarloBox.getChildren().removeAll(lbSteps, tfSteps, lbEndingPredicate, tfEndingPredicate, lbEndingTime, tfEndingTime);
-			if(to != null) {
-				switch (to.getEndingType()) {
-					case NUMBER_STEPS:
-						monteCarloBox.add(lbSteps, 1, 3);
-						monteCarloBox.add(tfSteps, 2, 3);
-						break;
-					case ENDING_PREDICATE:
-						monteCarloBox.add(lbEndingPredicate, 1, 3);
-						monteCarloBox.add(tfEndingPredicate, 2, 3);
-						break;
-					case ENDING_TIME:
-						monteCarloBox.add(lbEndingTime, 1, 3);
-						monteCarloBox.add(tfEndingTime, 2, 3);
-						break;
-					default:
-						break;
-				}
-			}
-			this.sizeToScene();
-		});
-
-        checkingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-        	if(to != null && to.getCheckingType() == SimulationCheckingType.TIMING) {
-				monteCarloBox.add(lbMonteCarloTime, 1, 8);
-				monteCarloBox.add(tfMonteCarloTime, 2, 8);
-			} else {
-        		monteCarloBox.getChildren().remove(lbMonteCarloTime);
-        		monteCarloBox.getChildren().remove(tfMonteCarloTime);
-			}
-			this.sizeToScene();
-		});
-
 		cbTraces.setConverter(new StringConverter<ReplayTrace>() {
 			@Override
 			public String toString(ReplayTrace replayTrace) {
@@ -182,6 +107,7 @@ public class SimulationChoosingStage extends Stage {
 						.collect(Collectors.toList()).get(0);
 			}
 		});
+		simulationHypothesisChoice.setSimulationChoosingStage(this);
 	}
 
 	private void setCheckListeners() {
@@ -219,7 +145,7 @@ public class SimulationChoosingStage extends Stage {
 				// TODO
 			case HYPOTHESIS_TEST:
 				// TODO: Check integer
-				return !(tfSteps.getText().isEmpty() && tfSimulations.getText().isEmpty());
+				return simulationHypothesisChoice.checkSelection();
 			default:
 				break;
 		}
@@ -247,34 +173,7 @@ public class SimulationChoosingStage extends Stage {
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
-                information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
-
-                SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
-				if(endingItem != null) {
-					switch(endingItem.getEndingType()) {
-						case NUMBER_STEPS:
-							information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
-							break;
-						case ENDING_PREDICATE:
-							information.put("ENDING_PREDICATE", tfEndingPredicate.getText());
-							break;
-						case ENDING_TIME:
-							information.put("ENDING_TIME", Integer.parseInt(tfEndingTime.getText()));
-							break;
-						default:
-							break;
-					}
-				}
-
-				information.put("CHECKING_TYPE", checkingChoice.getSelectionModel().getSelectedItem().getCheckingType());
-				information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());
-				information.put("PROBABILITY", Double.parseDouble(tfProbability.getText()));
-
-                SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
-                if(checkingChoiceItem != null && checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
-					information.put("TIME", Integer.parseInt(tfMonteCarloTime.getText()));
-				}
-
+				information = simulationHypothesisChoice.extractInformation();
 				break;
 			case TRACE_REPLAY:
 				information.put("TRACE", cbTraces.getValue());
@@ -284,10 +183,10 @@ public class SimulationChoosingStage extends Stage {
 	}
 
     private void changeGUIType(final SimulationType type) {
-        inputBox.getChildren().removeAll(timeBox, monteCarloBox, tracesBox);
+        inputBox.getChildren().removeAll(timeBox, simulationHypothesisChoice, tracesBox);
         tfTime.clear();
-        tfSimulations.clear();
-        tfSteps.clear();
+		simulationHypothesisChoice.clear();
+
         cbTraces.getItems().clear();
         switch (type) {
             case TIMING:
@@ -296,7 +195,7 @@ public class SimulationChoosingStage extends Stage {
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
-                inputBox.getChildren().add(0, monteCarloBox);
+                inputBox.getChildren().add(0, simulationHypothesisChoice);
                 break;
             case TRACE_REPLAY:
             	cbTraces.getItems().addAll(injector.getInstance(TraceViewHandler.class).getTraces());
@@ -314,8 +213,7 @@ public class SimulationChoosingStage extends Stage {
         btAdd.setText(bundle.getString("common.buttons.add"));
         btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
         tfTime.clear();
-        tfSimulations.clear();
-        tfSteps.clear();
+		simulationHypothesisChoice.clear();
         cbTraces.getItems().clear();
 	}
 
