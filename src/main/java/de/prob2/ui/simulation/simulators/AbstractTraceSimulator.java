@@ -2,7 +2,6 @@ package de.prob2.ui.simulation.simulators;
 
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
-import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.tracereplay.ITraceChecker;
@@ -17,10 +16,6 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -80,11 +75,6 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
 
     @Override
     public Trace executeNextOperation(OperationConfiguration opConfig, Trace trace) {
-        if(counter == replayTrace.getPersistentTrace().getTransitionList().size()) {
-            finishSimulation();
-            return trace;
-        }
-
         State currentState = trace.getCurrentState();
         boolean execute = false;
         String chosenOp = "";
@@ -181,6 +171,11 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
             counter = res.getTransitionList().size();
         }
         return res;
+    }
+
+    @Override
+    public boolean endingConditionReached(Trace trace) {
+        return counter == replayTrace.getPersistentTrace().getTransitionList().size();
     }
 
     @Override

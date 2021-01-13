@@ -1,10 +1,14 @@
 package de.prob2.ui.simulation.simulators.check;
 
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.simulation.simulators.ProbabilityBasedSimulator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
 
@@ -30,36 +34,49 @@ public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
 
     protected int numberExecutions;
 
-    protected int numberStepsPerExecutions;
+    protected Map<String, Object> additionalInformation;
 
-    public SimulationMonteCarlo(Trace trace, int numberExecutions, int numberStepsPerExecution) {
+    public SimulationMonteCarlo(Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
         super();
         this.resultingTraces = new ArrayList<>();
         this.trace = trace;
         this.numberExecutions = numberExecutions;
-        this.numberStepsPerExecutions = numberStepsPerExecution;
+        this.additionalInformation = additionalInformation;
     }
+
+    @Override
+    public boolean endingConditionReached(Trace trace) {
+		if(additionalInformation.containsKey("STEPS_PER_EXECUTION")) {
+			int stepsPerExecution = (int) additionalInformation.get("STEPS_PER_EXECUTION");
+			return stepCounter >= stepsPerExecution;
+		} else if(additionalInformation.containsKey("ENDING_PREDICATE")) {
+			String predicate = (String) additionalInformation.get("ENDING_PREDICATE");
+			State state = trace.getCurrentState();
+			String evalResult = cache.readValueWithCaching(state, predicate);
+			return "TRUE".equals(evalResult);
+		} else if(additionalInformation.containsKey("ENDING_TIME")) {
+			int endingTime = (int) additionalInformation.get("ENDING_TIME");
+			return endingTime >= time.get();
+		}
+		return false;
+	}
 
     @Override
     public void run() {
 		Trace startTrace = trace;
+
 		try {
 			startTrace.getStateSpace().startTransaction();
 			startTrace = setupBeforeSimulation(startTrace);
 
 			for (int i = 0; i < numberExecutions; i++) {
 				Trace newTrace = startTrace;
-				int stepCounter = 0;
 				this.finished = false;
-				while (stepCounter < numberStepsPerExecutions && !finished) {
-					Trace nextTrace = simulationStep(newTrace);
-					stepCounter = nextTrace.getTransitionList().size();
-					newTrace = nextTrace;
-					if(stepCounter >= numberStepsPerExecutions || finished) {
-						Trace addedTrace = new Trace(newTrace.getStateSpace());
-						addedTrace.addTransitions(newTrace.getTransitionList().subList(0, numberStepsPerExecutions));
-						resultingTraces.add(addedTrace);
-						checkTrace(addedTrace, time.get());
+				while (!endingConditionReached(newTrace)) {
+					newTrace = simulationStep(newTrace);
+					if(endingConditionReached(newTrace)) {
+						resultingTraces.add(newTrace);
+						checkTrace(newTrace, time.get());
 						resetSimulator();
 					}
 				}

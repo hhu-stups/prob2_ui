@@ -75,18 +75,26 @@ public class SimulationItemHandler {
     private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
         Trace trace = currentTrace.get();
 
+        Map<String, Object> additionalInformation = new HashMap<>();
+
         int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
-		int stepsPerExecution = (int) item.getSimulationConfiguration().getField("STEPS_PER_EXECUTION");
+        if(item.getSimulationConfiguration().containsField("STEPS_PER_EXECUTION")) {
+            additionalInformation.put("STEPS_PER_EXECUTION", item.getSimulationConfiguration().getField("STEPS_PER_EXECUTION"));
+        } else if(item.getSimulationConfiguration().containsField("ENDING_PREDICATE")) {
+            additionalInformation.put("ENDING_PREDICATE", item.getSimulationConfiguration().getField("ENDING_PREDICATE"));
+        } else if(item.getSimulationConfiguration().containsField("ENDING_TIME")) {
+            additionalInformation.put("ENDING_TIME", item.getSimulationConfiguration().getField("ENDING_TIME"));
+        }
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
 		SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getSimulationConfiguration().getField("HYPOTHESIS_CHECKING_TYPE");
 		double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
-		Map<String, Object> additionalInformation = new HashMap<>();
+
 
 		if(item.getSimulationConfiguration().containsField("TIME")) {
 		    additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
         }
 
-        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(trace, executions, stepsPerExecution, checkingType, hypothesisCheckingType, probability, additionalInformation);
+        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(trace, executions, checkingType, hypothesisCheckingType, probability, additionalInformation);
         hypothesisChecker.initSimulator(path.toFile());
 		Thread thread = new Thread(() -> {
 			hypothesisChecker.run();

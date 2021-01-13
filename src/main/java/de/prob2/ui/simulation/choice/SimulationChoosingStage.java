@@ -248,14 +248,33 @@ public class SimulationChoosingStage extends Stage {
 				// TODO
 			case HYPOTHESIS_TEST:
                 information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
-                information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
-                information.put("CHECKING_TYPE", checkingChoice.getSelectionModel().getSelectedItem().getCheckingType());
-                information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());
-                information.put("PROBABILITY", Double.parseDouble(tfProbability.getText()));
-				SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
+
+                SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
+				if(endingItem != null) {
+					switch(endingItem.getEndingType()) {
+						case NUMBER_STEPS:
+							information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
+							break;
+						case ENDING_PREDICATE:
+							information.put("ENDING_PREDICATE", tfEndingPredicate.getText());
+							break;
+						case ENDING_TIME:
+							information.put("ENDING_TIME", Integer.parseInt(tfEndingTime.getText()));
+							break;
+						default:
+							break;
+					}
+				}
+
+				information.put("CHECKING_TYPE", checkingChoice.getSelectionModel().getSelectedItem().getCheckingType());
+				information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());
+				information.put("PROBABILITY", Double.parseDouble(tfProbability.getText()));
+
+                SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
                 if(checkingChoiceItem != null && checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
 					information.put("TIME", Integer.parseInt(tfMonteCarloTime.getText()));
 				}
+
 				break;
 			case TRACE_REPLAY:
 				information.put("TRACE", cbTraces.getValue());

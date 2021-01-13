@@ -105,6 +105,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
                 delayRemainingTime(delay);
             }
         }
+        stepCounter = newTrace.getTransitionList().size();
         return newTrace;
     }
 
@@ -114,5 +115,11 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         current = new TraceElement(transition, current);
         transitionList = transitionList.assocN(transitionList.size(), transition);
         return new Trace(trace.getStateSpace(), current, transitionList, trace.getUUID());
+    }
+
+    @Override
+    public boolean endingConditionReached(Trace trace) {
+        // TODO: Implementation simulation with ending condition without Monte Carlo simulation
+        return false;
     }
 }

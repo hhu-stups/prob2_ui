@@ -1,7 +1,6 @@
 package de.prob2.ui.simulation.simulators;
 
 import de.prob.statespace.State;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
@@ -32,6 +31,8 @@ public abstract class AbstractSimulator {
     protected IntegerProperty time;
 
     protected int delay;
+
+    protected int stepCounter;
 
     protected boolean finished;
 
@@ -100,10 +101,7 @@ public abstract class AbstractSimulator {
         Trace newTrace = trace;
         State currentState = newTrace.getCurrentState();
         if(currentState.isInitialised()) {
-            boolean endingTimeReached = config.getEndingTime() > 0 && time.get() >= config.getEndingTime();
-            boolean endingConditionReached = endingConditionReached(newTrace);
-            if (endingTimeReached || endingConditionReached) {
-                finishSimulation();
+            if(endingConditionReached(newTrace)) {
                 return newTrace;
             }
             updateRemainingTime();
@@ -127,13 +125,7 @@ public abstract class AbstractSimulator {
                 newTrace = executeBeforeInitialisation("$initialise_machine", config.getInitialisationConfigurations(), currentState, newTrace);
             }
         }
-
-        if(!config.getStartingCondition().isEmpty()) {
-            StateSpace stateSpace = newTrace.getStateSpace();
-            currentState = newTrace.getCurrentState();
-            String startingResult = cache.readValueWithCaching(currentState, config.getStartingCondition());
-            // TODO: Model Checking for goal
-        }
+        stepCounter = newTrace.getTransitionList().size();
         return newTrace;
     }
 
@@ -148,13 +140,7 @@ public abstract class AbstractSimulator {
         return newTrace;
     }
 
-    private boolean endingConditionReached(Trace trace) {
-        if(!config.getEndingCondition().isEmpty()) {
-            String endingConditionEvalResult = cache.readValueWithCaching(trace.getCurrentState(), config.getEndingCondition());
-            return "TRUE".equals(endingConditionEvalResult);
-        }
-        return false;
-    }
+    public abstract boolean endingConditionReached(Trace trace);
 
     protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
         return executeNextOperation(opConfig, trace);

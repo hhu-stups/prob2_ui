@@ -2,10 +2,12 @@ package de.prob2.ui.simulation.simulators.check;
 
 import de.prob.statespace.Trace;
 
+import java.util.Map;
+
 public class SimulationEstimator extends SimulationMonteCarlo {
 
-    public SimulationEstimator(Trace trace, int numberExecutions, int numberStepsPerExecution) {
-        super(trace, numberExecutions, numberStepsPerExecution);
+    public SimulationEstimator(Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
+        super(trace, numberExecutions, additionalInformation);
         //TODO
     }
 

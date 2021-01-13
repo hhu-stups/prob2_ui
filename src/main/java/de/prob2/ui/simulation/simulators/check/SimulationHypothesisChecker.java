@@ -39,19 +39,16 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
 	private final double probability;
 
-    private final Map<String, Object> additionalInformation;
-
     private int numberSuccess;
 
     private HypothesisCheckResult result;
 
-    public SimulationHypothesisChecker(final Trace trace, final int numberExecutions, final int numberStepsPerExecution, final SimulationCheckingType type,
+    public SimulationHypothesisChecker(final Trace trace, final int numberExecutions, final SimulationCheckingType type,
 									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final Map<String, Object> additionalInformation) {
-        super(trace, numberExecutions, numberStepsPerExecution);
+        super(trace, numberExecutions, additionalInformation);
 		this.type = type;
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
-		this.additionalInformation = additionalInformation;
 		this.result = HypothesisCheckResult.NOT_FINISHED;
     }
 
