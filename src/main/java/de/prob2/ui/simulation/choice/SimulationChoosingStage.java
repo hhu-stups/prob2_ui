@@ -135,7 +135,7 @@ public class SimulationChoosingStage extends Stage {
 
 
 	private SimulationItem extractItem() {
-		return new SimulationItem(new SimulationCheckingConfiguration(this.extractType(), this.extractInformation()), "");
+		return new SimulationItem(new SimulationCheckingConfiguration(this.extractType(), this.extractInformation()));
 	}
 
 	private SimulationType extractType() {

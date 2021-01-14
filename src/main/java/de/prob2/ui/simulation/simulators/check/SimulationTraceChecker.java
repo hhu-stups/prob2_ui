@@ -18,10 +18,13 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
 
     private final Map<String, Object> additionalInformation;
 
+    private Trace resultingTrace;
+
     public SimulationTraceChecker(Trace trace, ReplayTrace replayTrace, Map<String, Object> additionalInformation) {
         super(trace, replayTrace);
         this.result = TraceCheckResult.NOT_FINISHED;
         this.additionalInformation = additionalInformation;
+        this.resultingTrace = null;
     }
 
     @Override
@@ -35,6 +38,7 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
                     finishSimulation();
                 }
             }
+            this.resultingTrace = newTrace;
         } catch (ExecuteOperationException e) {
             System.out.println("TRACE REPLAY IN SIMULATION ERROR");
         }
@@ -45,8 +49,6 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
             if(additionalInformation.containsKey("TIME")) {
                 int time = (int) additionalInformation.get("TIME");
                 this.result = this.time.get() <= time ? TraceCheckResult.SUCCESS : TraceCheckResult.FAIL;
-                System.out.println(this.time.get());
-                System.out.println("TIME");
             } else {
                 this.result = TraceCheckResult.SUCCESS;
             }
@@ -54,5 +56,9 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
             this.result = TraceCheckResult.FAIL;
         }
         return result;
+    }
+
+    public Trace getResultingTrace() {
+        return resultingTrace;
     }
 }

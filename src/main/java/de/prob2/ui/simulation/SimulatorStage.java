@@ -122,6 +122,15 @@ public class SimulatorStage extends Stage {
 						break;
 				}
 				menuItems.add(playItem);
+
+				MenuItem showTraces = new MenuItem(bundle.getString("simulation.contextMenu.showTraces"));
+				showTraces.setOnAction(e -> {
+					SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
+					tracesView.setItems(item.getTraces());
+					tracesView.show();
+				});
+				menuItems.add(showTraces);
+
 				contextMenu.getItems().addAll(menuItems);
 				this.setContextMenu(contextMenu);
 			}

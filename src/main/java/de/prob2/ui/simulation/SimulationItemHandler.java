@@ -16,6 +16,7 @@ import javafx.application.Platform;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,7 @@ public class SimulationItemHandler {
         Thread thread = new Thread(() -> {
             monteCarlo.run();
             List<Trace> resultingTraces = monteCarlo.getResultingTraces();
+            item.setTraces(resultingTraces);
             Platform.runLater(() -> {
                 if(resultingTraces.size() == executions) {
                     item.setChecked(Checked.SUCCESS);
@@ -101,6 +103,7 @@ public class SimulationItemHandler {
 		Thread thread = new Thread(() -> {
 			hypothesisChecker.run();
 			SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.getResult();
+			item.setTraces(hypothesisChecker.getResultingTraces());
 			Platform.runLater(() -> {
 				switch (result) {
 					case SUCCESS:
@@ -131,6 +134,7 @@ public class SimulationItemHandler {
         traceChecker.initSimulator(path.toFile());
         traceChecker.run();
         SimulationTraceChecker.TraceCheckResult result = traceChecker.check();
+        item.setTraces(Arrays.asList(traceChecker.getResultingTrace()));
         switch (result) {
             case SUCCESS:
                 item.setChecked(Checked.SUCCESS);

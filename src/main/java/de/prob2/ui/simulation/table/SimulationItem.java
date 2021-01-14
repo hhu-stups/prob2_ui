@@ -1,11 +1,14 @@
 package de.prob2.ui.simulation.table;
 
+import de.prob.statespace.Trace;
 import de.prob2.ui.simulation.SimulationCheckingConfiguration;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.verifications.Checked;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class SimulationItem {
@@ -18,8 +21,11 @@ public class SimulationItem {
 
     private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
-    public SimulationItem(SimulationCheckingConfiguration simulationCheckingConfiguration, String description) {
+    private transient List<Trace> traces;
+
+    public SimulationItem(SimulationCheckingConfiguration simulationCheckingConfiguration) {
         this.simulationCheckingConfiguration = simulationCheckingConfiguration;
+        this.traces = new ArrayList<>();
         updateItem();
     }
 
@@ -72,5 +78,13 @@ public class SimulationItem {
 
     public void reset() {
         // TODO
+    }
+
+    public void setTraces(List<Trace> traces) {
+        this.traces = traces;
+    }
+
+    public List<Trace> getTraces() {
+        return traces;
     }
 }
