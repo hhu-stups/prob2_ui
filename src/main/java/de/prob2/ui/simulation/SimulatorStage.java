@@ -407,9 +407,9 @@ public class SimulatorStage extends Stage {
 					time = simulator.timeProperty().get();
 					firstStart.set(0, false);
 				} else if(!simulator.isFinished()) {
-					if(time < simulator.getTime() + simulator.getDelay()) {
+					if(time + 100 < simulator.getTime() + simulator.getDelay()) {
 						time += 100;
-						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(2, RoundingMode.HALF_UP);
+						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 						Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 					}
 				}
@@ -421,7 +421,7 @@ public class SimulatorStage extends Stage {
 				if(time == 0) {
 					Platform.runLater(() -> lbTime.setText(""));
 				} else {
-					BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(2, RoundingMode.HALF_UP);
+					BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 					Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 				}
 			}
