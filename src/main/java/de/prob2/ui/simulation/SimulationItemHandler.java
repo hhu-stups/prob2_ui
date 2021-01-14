@@ -8,6 +8,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
+import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
 import de.prob2.ui.simulation.simulators.check.SimulationTraceChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
@@ -50,12 +51,8 @@ public class SimulationItemHandler {
         items.remove(item);
     }
 
-    private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
-        Trace trace = currentTrace.get();
-
+    private Map<String, Object> extractAdditionalInformation(SimulationItem item) {
         Map<String, Object> additionalInformation = new HashMap<>();
-
-        int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
         if(item.getSimulationConfiguration().containsField("STEPS_PER_EXECUTION")) {
             additionalInformation.put("STEPS_PER_EXECUTION", item.getSimulationConfiguration().getField("STEPS_PER_EXECUTION"));
         } else if(item.getSimulationConfiguration().containsField("ENDING_PREDICATE")) {
@@ -63,6 +60,33 @@ public class SimulationItemHandler {
         } else if(item.getSimulationConfiguration().containsField("ENDING_TIME")) {
             additionalInformation.put("ENDING_TIME", item.getSimulationConfiguration().getField("ENDING_TIME"));
         }
+        return additionalInformation;
+    }
+
+    private void handleMonteCarloSimulation(SimulationItem item, boolean checkAll) {
+        Trace trace = currentTrace.get();
+        int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
+        Map<String, Object> additionalInformation = extractAdditionalInformation(item);
+        SimulationMonteCarlo monteCarlo = new SimulationMonteCarlo(trace, executions, additionalInformation);
+        monteCarlo.initSimulator(path.toFile());
+        Thread thread = new Thread(() -> {
+            monteCarlo.run();
+            List<Trace> resultingTraces = monteCarlo.getResultingTraces();
+            Platform.runLater(() -> {
+                if(resultingTraces.size() == executions) {
+                    item.setChecked(Checked.SUCCESS);
+                } else {
+                    item.setChecked(Checked.FAIL);
+                }
+            });
+        });
+        thread.start();
+    }
+
+    private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
+        Trace trace = currentTrace.get();
+        int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
+        Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
 		SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getSimulationConfiguration().getField("HYPOTHESIS_CHECKING_TYPE");
 		double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
@@ -129,6 +153,9 @@ public class SimulationItemHandler {
         // TODO
         SimulationType type = item.getType();
         switch(type) {
+            case MONTE_CARLO_SIMULATION:
+                handleMonteCarloSimulation(item, checkAll);
+                break;
             case HYPOTHESIS_TEST:
                 handleHypothesisTest(item, checkAll);
                 break;

@@ -41,6 +41,9 @@ public class SimulationChoosingStage extends Stage {
     private HBox timeBox;
 
 	@FXML
+	private SimulationMonteCarloChoice simulationMonteCarloChoice;
+
+	@FXML
 	private SimulationHypothesisChoice simulationHypothesisChoice;
 
 	@FXML
@@ -84,6 +87,7 @@ public class SimulationChoosingStage extends Stage {
             changeGUIType(to.getSimulationType());
             this.sizeToScene();
         });
+		simulationMonteCarloChoice.setSimulationChoosingStage(this);
 		simulationHypothesisChoice.setSimulationChoosingStage(this);
 		tracesChoice.setSimulationChoosingStage(this);
 	}
@@ -115,13 +119,14 @@ public class SimulationChoosingStage extends Stage {
 		SimulationChoiceItem item = simulationChoice.getSelectionModel().getSelectedItem();
 		SimulationType type = item.getSimulationType();
 		switch (type) {
-			case TRACE_REPLAY:
-				return tracesChoice.checkSelection();
+			case MONTE_CARLO_SIMULATION:
+				return simulationMonteCarloChoice.checkSelection();
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
-				// TODO: Check integer
 				return simulationHypothesisChoice.checkSelection();
+			case TRACE_REPLAY:
+				return tracesChoice.checkSelection();
 			default:
 				break;
 		}
@@ -143,6 +148,9 @@ public class SimulationChoosingStage extends Stage {
 		SimulationType simulationType = item.getSimulationType();
 		Map<String, Object> information = new HashMap<>();
 		switch (simulationType) {
+			case MONTE_CARLO_SIMULATION:
+				information = simulationMonteCarloChoice.extractInformation();
+				break;
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
@@ -160,6 +168,9 @@ public class SimulationChoosingStage extends Stage {
 		simulationHypothesisChoice.clear();
 		tracesChoice.clear();
         switch (type) {
+			case MONTE_CARLO_SIMULATION:
+				inputBox.getChildren().add(0, simulationMonteCarloChoice);
+				break;
 			case ESTIMATION:
 				// TODO
 			case HYPOTHESIS_TEST:
@@ -180,8 +191,9 @@ public class SimulationChoosingStage extends Stage {
 	public void reset() {
         btAdd.setText(bundle.getString("common.buttons.add"));
         btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
-        tracesChoice.clear();
+        simulationMonteCarloChoice.clear();
 		simulationHypothesisChoice.clear();
+        tracesChoice.clear();
 	}
 
 	public void setPath(Path path) {

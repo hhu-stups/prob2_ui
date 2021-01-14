@@ -66,6 +66,7 @@ public abstract class AbstractSimulator {
         this.operationToRemainingTime = new HashMap<>();
         this.time.set(0);
         this.finished = false;
+        this.stepCounter = 0;
         if(config != null) {
             // sort after priority
             this.operationConfigurationsSorted = config.getOperationConfigurations().stream()

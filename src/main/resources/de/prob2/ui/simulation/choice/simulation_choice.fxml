@@ -15,6 +15,7 @@
 <?import de.prob2.ui.simulation.choice.SimulationHypothesisChoice?>
 <?import de.prob2.ui.simulation.choice.SimulationTraceChoice?>
 
+<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice?>
 <fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
 		 resizable="false" maxWidth="400.0" maxHeight="400.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -23,6 +24,7 @@
             <Label fx:id="lbTime" text="%simulation.choice.time" />
 		    <TextField fx:id="tfTime" VBox.vgrow="NEVER"/>
         </HBox>
+		<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
 		<SimulationHypothesisChoice fx:id="simulationHypothesisChoice"/>
 		<SimulationTraceChoice fx:id="tracesChoice"/>
 		<HBox fx:id="tracesBox" spacing="5.0">
@@ -42,6 +44,7 @@
 						<ChoiceBox fx:id="simulationChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
+									<SimulationChoiceItem simulationType="MONTE_CARLO_SIMULATION"/>
 									<SimulationChoiceItem simulationType="HYPOTHESIS_TEST"/>
 									<SimulationChoiceItem simulationType="ESTIMATION"/>
 									<SimulationChoiceItem simulationType="TRACE_REPLAY"/>

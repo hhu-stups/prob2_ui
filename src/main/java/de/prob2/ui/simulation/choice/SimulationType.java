@@ -2,10 +2,7 @@ package de.prob2.ui.simulation.choice;
 
 public enum SimulationType {
 
-    // Hypothesis Test: Number of Simulations, Store traces with result, Apply different kind of hypothesis test
-    // Estimation: Number of Simulations, Store traces with result, Apply different kind of estimations
-    // Trace Replay: requires a trace (playable)
-
+    MONTE_CARLO_SIMULATION("Monte Carlo Simulation"),
     HYPOTHESIS_TEST("Hypothesis Test"),
     ESTIMATION("Estimation"),
     TRACE_REPLAY("Trace Replay");

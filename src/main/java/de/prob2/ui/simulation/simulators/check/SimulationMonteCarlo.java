@@ -1,7 +1,6 @@
 package de.prob2.ui.simulation.simulators.check;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.FormulaExpand;
+
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.simulation.simulators.ProbabilityBasedSimulator;
@@ -74,12 +73,10 @@ public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
 				this.finished = false;
 				while (!endingConditionReached(newTrace)) {
 					newTrace = simulationStep(newTrace);
-					if(endingConditionReached(newTrace)) {
-						resultingTraces.add(newTrace);
-						checkTrace(newTrace, time.get());
-						resetSimulator();
-					}
 				}
+				resultingTraces.add(newTrace);
+				checkTrace(newTrace, time.get());
+				resetSimulator();
 			}
 			check();
 		} finally {
@@ -93,6 +90,10 @@ public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
 
     public void checkTrace(Trace trace, int time) {
     	// Monte Carlo Simulation does not apply any checks on a trace. But classes inheriting from SimulationMonteCarlo might apply some checks
+	}
+
+	public List<Trace> getResultingTraces() {
+		return resultingTraces;
 	}
 
 }
