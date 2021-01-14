@@ -13,6 +13,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
@@ -36,6 +37,7 @@ import java.util.stream.Stream;
 public class TraceFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
+	public static final String SIMULATION_TRACE_PREFIX = "Simulation_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
@@ -99,6 +101,48 @@ public class TraceFileHandler {
 				}
 			}
 		});
+	}
+
+	public void save(SimulationItem item, Machine machine) {
+		List<PersistentTrace> traces = item.getTraces().stream()
+				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
+				.collect(Collectors.toList());
+		final DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"));
+		final Path path = this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+		if (path == null) {
+			return;
+		}
+
+		try {
+			try (final Stream<Path> children = Files.list(path)) {
+				if (children.anyMatch(p -> p.getFileName().toString().startsWith(SIMULATION_TRACE_PREFIX))) {
+					// Directory already contains test case trace - ask if the user really wants to save here.
+					final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
+					if (!selected.isPresent() || selected.get() != ButtonType.YES) {
+						return;
+					}
+				}
+			}
+
+			int numberGeneratedTraces = traces.size();
+			//Starts counting with 1 in the file name
+			for(int i = 1; i <= numberGeneratedTraces; i++) {
+				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + ".prob2trace");
+				String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
+				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
+				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
+						.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+						.withModelName(machine.getName())
+						.withCreator(createdBy)
+						.build();
+				jsonManager.writeToFile(traceFilePath, traces.get(i-1), metadata);
+				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
+			}
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
+			return;
+		}
 	}
 
 	public void save(TestCaseGenerationItem item, Machine machine) {

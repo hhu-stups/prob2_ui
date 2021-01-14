@@ -4,7 +4,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
@@ -130,6 +132,15 @@ public class SimulatorStage extends Stage {
 					tracesView.show();
 				});
 				menuItems.add(showTraces);
+
+				MenuItem saveTraces = new MenuItem(bundle.getString("simulation.contextMenu.saveGeneratedTraces"));
+				saveTraces.setOnAction(e -> {
+					TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
+					if (currentTrace.get() != null) {
+						traceSaver.save(item, currentProject.getCurrentMachine());
+					}
+				});
+				menuItems.add(saveTraces);
 
 				contextMenu.getItems().addAll(menuItems);
 				this.setContextMenu(contextMenu);
