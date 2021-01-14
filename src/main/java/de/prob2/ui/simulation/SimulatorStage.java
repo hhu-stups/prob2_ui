@@ -126,14 +126,21 @@ public class SimulatorStage extends Stage {
 				menuItems.add(playItem);
 
 				MenuItem showTraces = new MenuItem(bundle.getString("simulation.contextMenu.showTraces"));
+				showTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
 				showTraces.setOnAction(e -> {
-					SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
-					tracesView.setItems(item.getTraces());
-					tracesView.show();
+					if(item.getTraces().size() == 1) {
+						currentTrace.set(item.getTraces().get(0));
+					} else {
+						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
+						tracesView.setItems(item.getTraces());
+						tracesView.show();
+					}
 				});
 				menuItems.add(showTraces);
 
 				MenuItem saveTraces = new MenuItem(bundle.getString("simulation.contextMenu.saveGeneratedTraces"));
+				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
+						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null || this.itemProperty().get().getType() == SimulationType.TRACE_REPLAY,this.itemProperty())));
 				saveTraces.setOnAction(e -> {
 					TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 					if (currentTrace.get() != null) {

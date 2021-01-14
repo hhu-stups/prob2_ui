@@ -4,8 +4,11 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.simulation.SimulationCheckingConfiguration;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.verifications.Checked;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +24,11 @@ public class SimulationItem {
 
     private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
-    private transient List<Trace> traces;
+    private transient ListProperty<Trace> traces;
 
     public SimulationItem(SimulationCheckingConfiguration simulationCheckingConfiguration) {
         this.simulationCheckingConfiguration = simulationCheckingConfiguration;
-        this.traces = new ArrayList<>();
+        this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
         updateItem();
     }
 
@@ -81,10 +84,14 @@ public class SimulationItem {
     }
 
     public void setTraces(List<Trace> traces) {
-        this.traces = traces;
+        this.traces.setAll(traces);
+    }
+
+    public ListProperty<Trace> tracesProperty() {
+        return traces;
     }
 
     public List<Trace> getTraces() {
-        return traces;
+        return traces.get();
     }
 }
