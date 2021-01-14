@@ -24,19 +24,24 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
 
     protected final Trace trace;
 
-    protected final ReplayTrace replayTrace;
+    protected final PersistentTrace persistentTrace;
 
     protected int counter;
 
     public AbstractTraceSimulator(Trace trace, ReplayTrace replayTrace) {
         this.trace = new Trace(trace.getStateSpace());
-        this.replayTrace = replayTrace;
+        this.persistentTrace = replayTrace.getPersistentTrace();
+        this.counter = 0;
+    }
+
+    public AbstractTraceSimulator(Trace trace, PersistentTrace persistentTrace) {
+        this.trace = new Trace(trace.getStateSpace());
+        this.persistentTrace = persistentTrace;
         this.counter = 0;
     }
 
     @Override
     protected String chooseVariableValues(State currentState, Map<String, Object> values) {
-        PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
         List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
         PersistentTransition persistentTransition = transitionList.get(counter);
 
@@ -88,7 +93,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
             List<String> enabledOperations = trace.getNextTransitions().stream()
                     .map(Transition::getName)
                     .collect(Collectors.toList());
-            boolean equalsNextOperation = chosenOp.equals(replayTrace.getPersistentTrace().getTransitionList().get(counter).getOperationName());
+            boolean equalsNextOperation = chosenOp.equals(persistentTrace.getTransitionList().get(counter).getOperationName());
             boolean operationScheduled = operationToRemainingTime.get(chosenOp) == 0;
             if(operationScheduled) {
                 final String finalChosenOp = chosenOp;
@@ -112,7 +117,6 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
         }
 
 
-        PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
         List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
         PersistentTransition persistentTransition = transitionList.get(counter);
 
@@ -175,7 +179,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
 
     @Override
     public boolean endingConditionReached(Trace trace) {
-        return counter == replayTrace.getPersistentTrace().getTransitionList().size();
+        return counter == persistentTrace.getTransitionList().size();
     }
 
     @Override

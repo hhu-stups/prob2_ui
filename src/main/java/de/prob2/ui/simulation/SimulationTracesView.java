@@ -3,6 +3,7 @@ package de.prob2.ui.simulation;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -12,6 +13,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.TraceViewHandler;
+import de.prob2.ui.simulation.simulators.Scheduler;
+import de.prob2.ui.simulation.simulators.TraceSimulator;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,6 +34,7 @@ import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -69,11 +73,15 @@ public class SimulationTracesView extends Stage {
 
 	private final CurrentTrace currentTrace;
 	private final ResourceBundle bundle;
+	private final Injector injector;
+
+	private SimulatorStage simulatorStage;
 
 	@Inject
-	public SimulationTracesView(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public SimulationTracesView(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
+		this.injector = injector;
 		stageManager.loadFXML(this, "simulation_generated_traces.fxml");
 	}
 
@@ -101,9 +109,9 @@ public class SimulationTracesView extends Stage {
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<SimulationTraceItem> row = new TableRow<>();
 
-            final MenuItem loadTraceItem = new MenuItem(bundle.getString("simulation.contextMenu.loadTrace"));
+			final MenuItem loadTraceItem = new MenuItem(bundle.getString("simulation.contextMenu.loadTrace"));
 
-            loadTraceItem.setOnAction(e -> {
+			loadTraceItem.setOnAction(e -> {
 				SimulationTraceItem item = row.getItem();
 				if(item == null) {
 					return;
@@ -111,10 +119,25 @@ public class SimulationTracesView extends Stage {
 				this.currentTrace.set(item.getTrace());
 			});
 
+			final MenuItem playTraceItem = new MenuItem(bundle.getString("simulation.contextMenu.play"));
+
+			playTraceItem.setOnAction(e -> {
+				Trace trace = new Trace(currentTrace.getStateSpace());
+				PersistentTrace persistentTrace = new PersistentTrace(row.getItem().getTrace(), row.getItem().getTrace().getCurrent().getIndex() + 1);
+				TraceSimulator traceSimulator = new TraceSimulator(trace, persistentTrace, injector.getInstance(Scheduler.class), currentTrace);
+				if(traceSimulator.isRunning()) {
+					traceSimulator.stop();
+				}
+				simulatorStage.initSimulator(traceSimulator);
+				trace.setExploreStateByDefault(false);
+				simulatorStage.simulate(traceSimulator);
+				trace.setExploreStateByDefault(true);
+			});
+
             row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(loadTraceItem)));
+					.otherwise(new ContextMenu(loadTraceItem, playTraceItem)));
 
 			row.setOnMouseClicked(event -> {
 				SimulationTraceItem item = row.getItem();
@@ -128,6 +151,10 @@ public class SimulationTracesView extends Stage {
 
 			return row;
 		});
+	}
+
+	public void setSimulatorStage(final SimulatorStage simulatorStage) {
+		this.simulatorStage = simulatorStage;
 	}
 
     public void refresh() {

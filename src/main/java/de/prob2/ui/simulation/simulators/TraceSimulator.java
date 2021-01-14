@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.simulators;
 
 import com.google.inject.Singleton;
 import de.prob.animator.command.ExecuteOperationException;
+import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -21,6 +22,12 @@ public class TraceSimulator extends AbstractTraceSimulator implements IRealTimeS
         this.currentTrace = currentTrace;
     }
 
+    public TraceSimulator(Trace trace, PersistentTrace persistentTrace, final Scheduler scheduler, final CurrentTrace currentTrace) {
+        super(trace, persistentTrace);
+        this.scheduler = scheduler;
+        this.currentTrace = currentTrace;
+    }
+
     @Override
     public void run() {
         currentTrace.set(new Trace(currentTrace.getStateSpace()));
@@ -36,7 +43,7 @@ public class TraceSimulator extends AbstractTraceSimulator implements IRealTimeS
                 Trace trace = currentTrace.get();
                 Trace newTrace = simulationStep(trace);
                 currentTrace.set(newTrace);
-                if(counter >= replayTrace.getPersistentTrace().getTransitionList().size()) {
+                if(counter >= persistentTrace.getTransitionList().size()) {
                     finishSimulation();
                 }
             }

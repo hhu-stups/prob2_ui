@@ -45,7 +45,7 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
     }
 
     public TraceCheckResult check() {
-        if(counter == replayTrace.getPersistentTrace().getTransitionList().size()) {
+        if(counter == persistentTrace.getTransitionList().size()) {
             if(additionalInformation.containsKey("TIME")) {
                 int time = (int) additionalInformation.get("TIME");
                 this.result = this.time.get() <= time ? TraceCheckResult.SUCCESS : TraceCheckResult.FAIL;

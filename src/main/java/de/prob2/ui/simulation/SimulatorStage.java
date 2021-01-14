@@ -72,8 +72,11 @@ public class SimulatorStage extends Stage {
 
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
 
-		private SimulationItemRow() {
+		private SimulatorStage simulatorStage;
+
+		private SimulationItemRow(SimulatorStage simulatorStage) {
 			super();
+			this.simulatorStage = simulatorStage;
 		}
 
 		@Override
@@ -132,6 +135,7 @@ public class SimulatorStage extends Stage {
 						currentTrace.set(item.getTraces().get(0));
 					} else {
 						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
+						tracesView.setSimulatorStage(simulatorStage);
 						tracesView.setItems(item.getTraces());
 						tracesView.show();
 					}
@@ -280,7 +284,7 @@ public class SimulatorStage extends Stage {
 		simulationTypeColumn.setCellValueFactory(new PropertyValueFactory<>("typeAsName"));
 		simulationConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
 
-		simulationItems.setRowFactory(table -> new SimulationItemRow());
+		simulationItems.setRowFactory(table -> new SimulationItemRow(this));
 
 		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
@@ -296,7 +300,7 @@ public class SimulatorStage extends Stage {
 		this.simulate(simulator);
 	}
 
-	private void simulate(IRealTimeSimulator simulator) {
+	public void simulate(IRealTimeSimulator simulator) {
 		if(!simulator.isRunning()) {
 			runSimulator(simulator);
 		} else {
@@ -315,6 +319,10 @@ public class SimulatorStage extends Stage {
 			simulator.run();
 			startTimer(simulator);
 		}
+	}
+
+	public void initSimulator(IRealTimeSimulator simulator) {
+		simulator.initSimulator(configurationPath.get().toFile());
 	}
 
 	private void stopSimulator(IRealTimeSimulator simulator) {
