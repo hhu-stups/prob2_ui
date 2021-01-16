@@ -3,12 +3,16 @@ package de.prob2.ui.animation.tracereplay;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.Map;
 
 public class TraceSaver {
 
@@ -17,6 +21,8 @@ public class TraceSaver {
     private final CurrentTrace currentTrace;
 
     private final CurrentProject currentProject;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TraceSaver.class);
 
     @Inject
     public TraceSaver(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject) {
@@ -34,8 +40,10 @@ public class TraceSaver {
                         new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1),
                         currentProject.getCurrentMachine(),
 						currentTrace.getStateSpace().getLoadedMachine());
-            } catch (Exception e) {
-                TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
+            }
+            catch (Exception e) {
+				LOGGER.error("", e);
+            	TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
                 alert.initOwner(window);
                 alert.setAttemptedReplayOrLostTrace(possiblyLostTrace);
                 alert.setErrorMessage();
