@@ -1,16 +1,13 @@
 package de.prob2.ui.animation.tracereplay;
 
 import com.google.inject.Injector;
-import com.sun.prism.shader.AlphaOne_LinearGradient_Loader;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.check.*;
-import de.prob.model.classicalb.Operation;
 import de.prob.statespace.OperationInfo;
 import de.prob2.ui.internal.StageManager;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
+import javafx.beans.property.*;
+import javafx.collections.*;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -28,18 +25,15 @@ import static java.util.stream.Collectors.*;
 
 public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
-
 	private final ResourceBundle resourceBundle;
 	private final StageManager stageManager;
 	private final TraceModificationChecker traceModificationChecker;
-	Set<Delta> selectedDelta = emptySet();
-	Map<String, Map<String, String>> selectedMapping = emptyMap();
-
-
+	ObservableSet<Delta> selectedDelta = FXCollections.observableSet();
+	ObservableMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> selectedMapping = FXCollections.observableHashMap();
+	Set<String> typeIVCandidates;
 
 	@FXML
 	private TextFlow textFlow;
-
 
 	@FXML
 	private TitledPane typeII;
@@ -64,6 +58,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		this.resourceBundle = injector.getInstance(ResourceBundle.class);
 		this.stageManager = stageManager;
 		this.traceModificationChecker = traceModificationChecker;
+		this.typeIVCandidates = traceModificationChecker.traceChecker.getTypeFinder().getTypeIV();
 		stageManager.loadFXML(this, "prototypeAlertView.fxml");
 
 		ButtonType buttonTypeI = new ButtonType(resourceBundle.getString("traceModification.alert.button.current"), ButtonBar.ButtonData.NO);
@@ -74,12 +69,11 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		this.setHeaderText(resourceBundle.getString("traceModification.alert.header.text"));
 		this.getDialogPane().getButtonTypes().addAll(buttonTypeI, buttonTypeB, buttonTypeN);
 
-
-
-
 		this.setResultConverter(param -> {
+			Set<Delta> deltaHelper = new HashSet<>(selectedDelta);
+			HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> mappingHelper = new HashMap<>(selectedMapping);
 			List<PersistentTransition> selectedTrace = traceModificationChecker.traceChecker.getTraceModifier()
-					.getChangelogPhase3II().get(selectedDelta).get(selectedMapping).stream()
+					.getChangelogPhase3II().get(deltaHelper).get(mappingHelper).stream()
 					.flatMap(delta -> delta.getNewTransitions().stream()).collect(toList());
 
 			if(param.getButtonData() == ButtonBar.ButtonData.NO){
@@ -121,14 +115,24 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			typeIIPer.setCollapsible(false);
 		}
 
-		VBox accordion3 = setTypeIIIConflicts_2(traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase3II(),
+		VBox accordion3 = setTypeIIIConflicts(traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase3II(),
 				traceModificationChecker.traceChecker.getOldOperationInfos(),
 				traceModificationChecker.traceChecker.getNewOperationInfos());
 		typeIII.setContent(accordion3);
 		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + (accordion3.getChildren().size()-1) + ")");
-		if(accordion3.getChildren().size()==1){
+		if(accordion3.getChildren().size() == 0){
 			typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + 0 + ")");
 			typeIII.setCollapsible(false);
+		}
+
+
+		VBox accordion4 = createTypeIVMapping(
+				traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase4(),
+				traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase3II());
+		typeIV.setContent(accordion4);
+		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + accordion4.getChildren().size() + ")");
+		if(accordion4.getChildren().size()==0){
+			typeIV.setCollapsible(false);
 		}
 
 
@@ -286,19 +290,6 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		return partnerIsProperty;
 	}
 
-	/*
-	private static List<Pair<String, String>> preparePairs(Set<String> wildCards, Set<String> voidCards, Map<String, String> mapping){
-		List<Pair<String, String>> cleanedMap = mapping.entrySet().stream()
-				.filter(entry -> !entry.getValue().equals(entry.getKey()))
-				.map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
-				.collect(toList());
-
-		List<Pair<String, String>> wildCardsAsPair = wildCards.stream().map(entry -> new Pair<>("???", entry)).collect(toList());
-		List<Pair<String, String>> voidCardsAsPair = voidCards.stream().map(entry -> new Pair<>(entry, "void")).collect(toList());
-
-		return  Stream.of(cleanedMap, wildCardsAsPair, voidCardsAsPair).flatMap(Collection::stream).collect(toList());
-	}*/
-
 
 	int registerRow(GridPane gridPane, Node label, Node oldB, Node newB, int row){
 		gridPane.add(label, 0, row);
@@ -348,20 +339,6 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		Node[] elements = new Node[oldStuffFX.size()];
 		oldStuffFX.toArray(elements);
-
-		return new VBox(elements);
-	}
-
-
-	VBox prepareFlexibleColumn(List<StringProperty> stuff){
-		List<Label> labels = stuff.stream().map(stringProperty -> {
-			Label result = new Label();
-			result.textProperty().bindBidirectional(stringProperty);
-			return result;
-		}).collect(toList());
-
-		Node[] elements = new Node[labels.size()];
-		labels.toArray(elements);
 
 		return new VBox(elements);
 	}
@@ -466,12 +443,15 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 				changeToDelta.get(key).getOutputParameters().forEach((key1, value) -> mapOutput.get(key1).set(value));
 
-				selectedDelta = selected.stream().map(changeToDelta::get).collect(Collectors.toSet());
+				selectedDelta.clear();
+				selectedDelta.addAll(selected.stream().map(changeToDelta::get).collect(Collectors.toSet()));
 
 			});
 
 			choiceBox.getSelectionModel().selectFirst();
-
+			Set<Delta> selectedDeltaPre = new HashSet<>();
+			selectedDeltaPre.addAll(selected.stream().map(changeToDelta::get).collect(Collectors.toSet()));
+			selectedDelta.addAll(selectedDeltaPre);
 
 			TitledPane titledPane = new TitledPane("", gridPane);
 			titledPane.textProperty().bindBidirectional(title);
@@ -498,79 +478,28 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-
-
-	public VBox setTypeIIIConflicts_plain(Map<Set<Delta>, Map<Map<String, Map<String, String>>, List<PersistenceDelta>>> resultTypeIIIWithTransitions,
-										  Map<String, OperationInfo> operationInfoMap){
-
-
-		if(resultTypeIIIWithTransitions.isEmpty()) return new VBox();
-
-
-		Set<Map<String,  Map<String, String>>> typeIIIRefined = resultTypeIIIWithTransitions.entrySet().stream().findFirst().get().getValue().keySet();
-
-
-		if(typeIIIRefined.isEmpty()) return new VBox();
-
-		Map<String, Map<String, String>> sample = typeIIIRefined.stream().findFirst().get();
-
-		if(sample.isEmpty()) return new VBox();
-
-		VBox result = new VBox();
-
-		Map<String, Map<String, Map<String, String>>> namesToOptions =new HashMap<>();
-
-		int i = 1;
-		for(Map<String, Map<String, String>> entry : typeIIIRefined){
-			namesToOptions.put("Option " + i, entry);
-			i++;
-		}
-
-		ChoiceBox<String> options = new ChoiceBox<>(FXCollections.observableArrayList(namesToOptions.keySet()));
-
-		result.getChildren().add(options);
-
-
-		Map<String, Map<String, SimpleStringProperty>> propertyMapping = generateLabelViewForTypeIII(sample, operationInfoMap, result);
-
-		options.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-
-			Map<String, Map<String, String>> newMapping = namesToOptions.get(newValue);
-
-			newMapping.forEach((operation, mapping) -> mapping.forEach((oldId, newId) -> propertyMapping.get(operation).get(oldId).set(newId)));
-
-			selectedMapping = newMapping;
-
-		});
-
-		options.getSelectionModel().selectFirst();
-
-		return result;
-	}
-
-
-	public VBox setTypeIIIConflicts_2(Map<Set<Delta>, Map<Map<String, Map<String, String>>, List<PersistenceDelta>>> resultTypeIIIWithTransitions,
-										  Map<String, OperationInfo> newInfo, Map<String, OperationInfo> oldInfo){
+	public VBox setTypeIIIConflicts(Map<Set<Delta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, List<PersistenceDelta>>> resultTypeIIIWithTransitions,
+									Map<String, OperationInfo> oldInfo, Map<String, OperationInfo> newInfo){
 
 
 		if(resultTypeIIIWithTransitions.isEmpty()) return new VBox();
 
 
-		Set<Map<String,  Map<String, String>>> typeIIIRefined = resultTypeIIIWithTransitions.entrySet().stream().findFirst().get().getValue().keySet();
+		Set<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>> typeIIIRefined = resultTypeIIIWithTransitions.entrySet().stream().findFirst().get().getValue().keySet();
 
 
 		if(typeIIIRefined.isEmpty()) return new VBox();
 
-		Map<String, Map<String, String>> sample = typeIIIRefined.stream().findFirst().get();
+		Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>> sample = typeIIIRefined.stream().findFirst().get();
 
 		if(sample.isEmpty()) return new VBox();
 
 		VBox result = new VBox();
 
-		Map<String, Map<String, Map<String, String>>> namesToOptions =new HashMap<>();
+		Map<String, Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>> namesToOptions =new HashMap<>();
 
 		int i = 1;
-		for(Map<String, Map<String, String>> entry : typeIIIRefined){
+		for(Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>> entry : typeIIIRefined){
 			namesToOptions.put("Option " + i, entry);
 			i++;
 		}
@@ -585,24 +514,27 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		options.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 
-			Map<String, Map<String, String>> newMapping = namesToOptions.get(newValue);
+			Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>> newMapping = namesToOptions.get(newValue);
 
 			createVBox(newMapping, oldInfo, newInfo, inner);
 
-			selectedMapping = newMapping;
+			selectedMapping.clear();
+			selectedMapping.putAll(newMapping);
+
 
 		});
 
 		options.getSelectionModel().selectFirst();
+		selectedMapping.putAll(namesToOptions.get(options.getValue()));
 
 		return result;
 	}
 
 
 
-	public void createVBox(Map<String, Map<String, String>> resultTypeIII,
-								   Map<String, OperationInfo> oldOperations,
-								   Map<String, OperationInfo> newOperations, VBox result){
+	public void createVBox(Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>> resultTypeIII,
+						   Map<String, OperationInfo> oldOperations,
+						   Map<String, OperationInfo> newOperations, VBox result){
 
 		result.getChildren().clear();
 		for(String operationMapping : resultTypeIII.keySet()){
@@ -614,33 +546,41 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		//Again Pass by reference
 	}
 
-	public TitledPane createGridPane(Map<String, String> mappings, OperationInfo oldIds, OperationInfo newIds, String name){
+	public TitledPane createGridPane(Map<TraceExplorer.MappingNames, Map<String, String>> mappings,
+									 OperationInfo oldIds,
+									 OperationInfo newIds,
+									 String name){
 
 		GridPane gridPane = new GridPane();
+
+		Map<TraceExplorer.MappingNames, List<String>> oldSplitted = TraceExplorer.fillMapping(oldIds);
+		Map<TraceExplorer.MappingNames, List<String>> newSplitted = TraceExplorer.fillMapping(newIds);
+
+		int row = 0;
 
 		Label empty = new Label();
 		Label newL = new Label(resourceBundle.getString("traceModification.alert.new"));
 		Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
+		row = registerRow(gridPane, empty, oldL, newL, row);
+
+		Map<TraceExplorer.MappingNames, String> mappingsNamesToBundleNames = new HashMap<>();
+		mappingsNamesToBundleNames.put(TraceExplorer.MappingNames.VARIABLES_MODIFIED, resourceBundle.getString("traceModification.alert.variables.modified"));
+		mappingsNamesToBundleNames.put(TraceExplorer.MappingNames.VARIABLES_READ, resourceBundle.getString("traceModification.alert.variables.read"));
+		mappingsNamesToBundleNames.put(TraceExplorer.MappingNames.INPUT_PARAMETERS, resourceBundle.getString("traceModification.alert.input"));
+		mappingsNamesToBundleNames.put(TraceExplorer.MappingNames.OUTPUT_PARAMETERS, resourceBundle.getString("traceModification.alert.output"));
 
 
-		registerRow(gridPane, empty, oldL, newL, 0);
-		List<String> oldVars = oldIds.getAllVariables();
-		List<String> newVars = newIds.getAllVariables();
-		fillGridPane(mappings, oldVars, newVars, resourceBundle.getString("traceModification.alert.variables"),1, gridPane);
-
-		List<String> oldIn = oldIds.getParameterNames();
-		List<String> newIn = newIds.getParameterNames();
-		fillGridPane(mappings, oldIn, newIn, resourceBundle.getString("traceModification.alert.input"),2, gridPane);
-
-		List<String> oldOut = oldIds.getOutputParameterNames();
-		List<String> newOut = newIds.getOutputParameterNames();
-		fillGridPane(mappings, oldOut, newOut, resourceBundle.getString("traceModification.alert.output"),3, gridPane);
+		for(Map.Entry<TraceExplorer.MappingNames, Map<String, String>> entry : mappings.entrySet()){
+				List<String> oldVars = oldSplitted.get(entry.getKey());
+				List<String> newVars = newSplitted.get(entry.getKey());
+				row = fillGridPane(entry.getValue(), oldVars, newVars, mappingsNamesToBundleNames.get(entry.getKey()),row, gridPane);
+		}
 
 		return new TitledPane(name, gridPane);
 	}
 
 
-	public void fillGridPane(Map<String, String> mappings, List<String> oldIds , List<String> newIds, String labelTitle, int row, GridPane gridPane){
+	public int fillGridPane(Map<String, String> mappings, List<String> oldIds , List<String> newIds, String labelTitle, int row, GridPane gridPane){
 
 		Map<String, String> cleanedMapping = mappings.entrySet()
 				.stream()
@@ -648,13 +588,17 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 
-		Set<String> voidCards = oldIds.stream().filter(entry -> !mappings.containsKey(entry)).collect(toSet());
-		Set<String> voidCardsVars = voidCards.stream().filter(element -> !oldIds.contains(element)).collect(Collectors.toSet());
-		Set<String> dummyVoidCards = IntStream.range(0, voidCardsVars.size()).mapToObj(element -> "void").collect(Collectors.toSet());
+		Set<String> voidCards = oldIds.stream()
+				.filter(entry -> !mappings.containsKey(entry))
+	//			.filter(element -> !oldIds.contains(element))
+				.collect(Collectors.toSet());
+		Set<String> dummyVoidCards = IntStream.range(0, voidCards.size()).mapToObj(element -> "void").collect(Collectors.toSet());
 
-		Set<String> wildCard = oldIds.stream().filter(entry -> !mappings.containsValue(entry)).collect(toSet());
-		Set<String> wildCardsVars = wildCard.stream().filter(element -> !newIds.contains(element)).collect(Collectors.toSet());
-		Set<String> dummyWildCards = IntStream.range(0, wildCardsVars.size()).mapToObj(element -> "???").collect(Collectors.toSet());
+		Set<String> wildCards = newIds.stream()
+				.filter(entry -> !mappings.containsValue(entry))
+	//			.filter(element -> !newIds.contains(element))
+				.collect(Collectors.toSet());
+		Set<String> dummyWildCards = IntStream.range(0, wildCards.size()).mapToObj(element -> "???").collect(Collectors.toSet());
 
 
 		Map<String, String> mappingKeysVar =
@@ -664,8 +608,8 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 
-		List<Label> oldLabels = createLabel(Stream.of(voidCardsVars, dummyWildCards, mappingKeysVar.keySet()).flatMap(Collection::stream).collect(toList()));
-		List<Label> newLabels = createLabel(Stream.of(dummyVoidCards, wildCardsVars, mappingKeysVar.values()).flatMap(Collection::stream).collect(toList()));
+		List<Label> oldLabels = createLabel(Stream.of(voidCards, dummyWildCards, mappingKeysVar.keySet()).flatMap(Collection::stream).collect(toList()));
+		List<Label> newLabels = createLabel(Stream.of(dummyVoidCards, wildCards, mappingKeysVar.values()).flatMap(Collection::stream).collect(toList()));
 
 		if(oldLabels.size()!= 0)
 		{
@@ -678,10 +622,127 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			registerRow(gridPane, new Label(labelTitle), oldBox, newBox, row);
 		}
 
+		row++;
+
+		return row;
 		//GridPane is pass by reference...
 	}
 
-	//private static void fillGridPane()
+	public VBox createTypeIVMapping(Map<Set<Delta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, Map<String, TraceAnalyser.AnalyserResult>>> typeIVResults,
+									Map<Set<Delta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, List<PersistenceDelta>>> resultTypeIIIWithTransitions){
+
+		VBox result = new VBox();
+
+		Set<Delta> accessCollection = new HashSet<>(selectedDelta);
+		HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> accessMap = new HashMap<>(selectedMapping);
+
+		Map<String, TraceAnalyser.AnalyserResult> penis = typeIVResults.get(accessCollection).get(accessMap);
+		List<PersistenceDelta> vagina = resultTypeIIIWithTransitions.get(accessCollection).get(accessMap);
+
+		result.getChildren().add(createTypeIVView(penis, vagina));
+
+		selectedDelta.addListener((SetChangeListener<Delta>) change -> {
+			if(change.wasAdded()){
+				Set<Delta> accessCollectionHelper = new HashSet<>(change.getSet());
+				Map<String, TraceAnalyser.AnalyserResult> currentlySelectedTypeIV = typeIVResults.get(accessCollectionHelper).get(selectedMapping);
+				List<PersistenceDelta> selectedTrace = resultTypeIIIWithTransitions.get(accessCollectionHelper).get(selectedMapping);
+
+				result.getChildren().clear();
+				result.getChildren().add(createTypeIVView(currentlySelectedTypeIV, selectedTrace));
+			}
+		});
+
+		selectedMapping.addListener((MapChangeListener<String, Map<TraceExplorer.MappingNames,Map<String, String>>>) change -> {
+			if(change.wasAdded()){
+				HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> accessMapHelper = new HashMap<>(change.getMap());
+
+				Map<String, TraceAnalyser.AnalyserResult> currentlySelectedTypeIV = typeIVResults.get(selectedDelta).get(accessMapHelper);
+				List<PersistenceDelta> selectedTrace = resultTypeIIIWithTransitions.get(selectedDelta).get(accessMapHelper);
+
+				result.getChildren().clear();
+				result.getChildren().add(createTypeIVView(currentlySelectedTypeIV, selectedTrace));
+			}
+		});
+
+
+
+
+		return result;
+	}
+
+	private static GridPane createTypeIVView(Map<String, TraceAnalyser.AnalyserResult> currentlySelectedTypeIV, List<PersistenceDelta> selectedTrace){
+		GridPane inner = new GridPane();
+
+		ColumnConstraints column = new ColumnConstraints();
+		column.setPercentWidth(15);
+		inner.getColumnConstraints().add(column);
+
+		ColumnConstraints column2 = new ColumnConstraints();
+		column2.setPercentWidth(70);
+		inner.getColumnConstraints().add(column2);
+
+		ColumnConstraints column3 = new ColumnConstraints();
+		column3.setPercentWidth(15);
+		inner.getColumnConstraints().add(column3);
+
+
+		int row = 0;
+		for(String candidate : currentlySelectedTypeIV.keySet()){
+			switch (currentlySelectedTypeIV.get(candidate)){
+				case Straight:
+					Label left = new Label(candidate);
+					inner.add(left, 0, row);
+					String partnerStraight = TraceAnalyser.calculateStraight(singleton(candidate), selectedTrace).get(candidate);
+					Label rightStraight = new Label(partnerStraight);
+					inner.add(new Label("is mapped to"), 1, row);
+					inner.add(rightStraight, 2, row);
+					break;
+				case Mixed:
+					Label leftMixed = new Label(candidate);
+					inner.add(leftMixed, 0, row);
+					Label rightMixed = new Label("different operations were treated as intermediate operation");
+					inner.add(new Label("is mapped to different operations"), 1, row);
+					inner.add(rightMixed, 2, row);
+					break;
+				case Removed:
+					Label leftRemoved = new Label(candidate);
+					inner.add(leftRemoved, 0, row);
+					Label rightRemoved = new Label("This operation was removed - the trace is no longer replayable");
+					inner.add(rightRemoved, 1, row);
+					break;
+				case Intermediate:
+					Label leftIntermediate = new Label(candidate);
+					inner.add(leftIntermediate, 0, row);
+					List<String> partnerIntermediate = TraceAnalyser.calculateIntermediate(singleton(candidate), selectedTrace).get(candidate);
+					inner.add(new Label("the operation has a new operation executed before"), 1, row);
+					Label rightIntermediate1 = new Label(partnerIntermediate.get(0));
+					Label rightIntermediate2 = new Label(partnerIntermediate.get(1));
+					VBox intermediate = new VBox();
+					intermediate.getChildren().add(rightIntermediate1);
+					intermediate.getChildren().add(rightIntermediate2);
+					inner.add(intermediate, 2, row);
+					break;
+				case MixedNames:
+					Label leftMixedNames = new Label(candidate);
+					inner.add(leftMixedNames,  0, row);
+					Label rightMixedNames = new Label("The operation was substituted by different other operations");
+					inner.add(rightMixedNames, 1, row);
+					List<String> partnerIntermediate2 = TraceAnalyser.calculateIntermediate(singleton(candidate), selectedTrace).get(candidate);
+
+					Label rightMixedNames1 = new Label(partnerIntermediate2.get(0));
+					Label rightMixedNames2 = new Label(partnerIntermediate2.get(1));
+					VBox mixedNames = new VBox();
+					mixedNames.getChildren().add(rightMixedNames1);
+					mixedNames.getChildren().add(rightMixedNames2);
+					inner.add(mixedNames, 2, row);
+					break;
+			}
+
+			row++;
+		}
+		return inner;
+	}
+
 
 	private static List<Label> createLabel(Collection<String> collection){
 		return collection.stream().map(Label::new).collect(toList());
