@@ -590,13 +590,11 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		Set<String> voidCards = oldIds.stream()
 				.filter(entry -> !mappings.containsKey(entry))
-	//			.filter(element -> !oldIds.contains(element))
 				.collect(Collectors.toSet());
 		Set<String> dummyVoidCards = IntStream.range(0, voidCards.size()).mapToObj(element -> "void").collect(Collectors.toSet());
 
 		Set<String> wildCards = newIds.stream()
 				.filter(entry -> !mappings.containsValue(entry))
-	//			.filter(element -> !newIds.contains(element))
 				.collect(Collectors.toSet());
 		Set<String> dummyWildCards = IntStream.range(0, wildCards.size()).mapToObj(element -> "???").collect(Collectors.toSet());
 
@@ -674,15 +672,15 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		GridPane inner = new GridPane();
 
 		ColumnConstraints column = new ColumnConstraints();
-		column.setPercentWidth(15);
+		column.setPercentWidth(30);
 		inner.getColumnConstraints().add(column);
 
 		ColumnConstraints column2 = new ColumnConstraints();
-		column2.setPercentWidth(70);
+		column2.setPercentWidth(40);
 		inner.getColumnConstraints().add(column2);
 
 		ColumnConstraints column3 = new ColumnConstraints();
-		column3.setPercentWidth(15);
+		column3.setPercentWidth(30);
 		inner.getColumnConstraints().add(column3);
 
 
@@ -700,7 +698,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 				case Mixed:
 					Label leftMixed = new Label(candidate);
 					inner.add(leftMixed, 0, row);
-					Label rightMixed = new Label("different operations were treated as intermediate operation");
+					Label rightMixed = new Label("different operations were treated\n as intermediate operation");
 					inner.add(new Label("is mapped to different operations"), 1, row);
 					inner.add(rightMixed, 2, row);
 					break;
