@@ -200,7 +200,10 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			List<Integer> line = new ArrayList<>();
 			List<Integer> column = new ArrayList<>();
 			List<Path> path = new ArrayList<>();
-			if(source.startsWith(" at line ")) {
+			if (source.isEmpty()) {
+				// No source location - just disable the item and don't attempt to parse anything.
+				showSourceItem.setDisable(true);
+			} else if (source.startsWith(" at line ")) {
 				String[] sourceSplitted = source.replaceFirst(" at line ", "").split(" \\- ");
 				start = sourceSplitted[0].split(":");
 				line.add(Integer.parseInt(start[0]) - 1);
