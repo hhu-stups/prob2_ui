@@ -161,6 +161,7 @@ public class ProB2 extends Application {
 		final Scene loadingScene = new Scene(new BorderPane(loadingImageView));
 		primaryStage.setScene(loadingScene);
 		primaryStage.setTitle("Loading ProB 2.0...");
+		primaryStage.getIcons().add(StageManager.ICON);
 		primaryStage.show();
 
 		new Thread(() -> {
