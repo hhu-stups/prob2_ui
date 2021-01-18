@@ -219,8 +219,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				path.add(Paths.get(new File(pathAsString).toURI()));
 			} else {
 				showSourceItem.setDisable(true);
-				statusBar.setText(bundle.getString("dynamic.tableview.jumpToState.notPossible"));
-				statusBar.setLabelStyle("warning");
+				LOGGER.warn("Could not parse source location from string in table visualization source column - Show Source will be disabled for this row: {}", source);
 			}
 
 			showSourceItem.setOnAction(e -> {
