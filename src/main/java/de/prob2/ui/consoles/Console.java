@@ -68,7 +68,7 @@ public abstract class Console extends StyleClassedTextArea {
 			}
 			this.replace(this.getLineNumber(), 0, this.getLineNumber(), from.length(), to, this.getStyleAtPosition(this.getLineNumber(), 0));
 			if (caretPositionInInput != -1) {
-				this.moveTo(this.getLineNumber(), caretPositionInInput + to.length() + 1);
+				this.moveTo(this.getLineNumber(), caretPositionInInput + to.length());
 			}
 		});
 	}
