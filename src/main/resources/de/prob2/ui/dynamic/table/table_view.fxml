@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.dynamic.DynamicCommandStatusBar?>
 <?import de.prob2.ui.dynamic.table.ExpressionTableView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
@@ -72,9 +71,6 @@
 						</StackPane>
 					</SplitPane>
 				</center>
-				<bottom>
-					<DynamicCommandStatusBar fx:id="statusBar"/>
-				</bottom>
 			</BorderPane>
 		</Scene>
 	</scene>

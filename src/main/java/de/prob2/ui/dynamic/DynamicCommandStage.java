@@ -85,9 +85,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	@FXML
 	protected Parent errorsView;
 	
-	@FXML
-	protected DynamicCommandStatusBar statusBar;
-	
 	// Used to remember the last selected item even when the list might be cleared temporarily,
 	// e. g. when reloading the current machine.
 	protected T lastItem;
@@ -242,16 +239,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected void interrupt() {
 		this.updater.cancel(true);
-		this.clearLoadingStatus();
 		this.taErrors.clear();
 		this.errorsView.setVisible(false);
 		this.clearContent();
 		this.updatePlaceholderLabel();
-	}
-	
-	protected void clearLoadingStatus() {
-		statusBar.setText("");
-		statusBar.removeLabelStyle("warning");
 	}
 	
 	protected abstract void clearContent();
@@ -263,14 +254,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		interrupt();
 
 		this.updater.execute(() -> {
-			Platform.runLater(() -> {
-				this.updatePlaceholderLabel();
-				statusBar.setText(bundle.getString("statusbar.loadStatus.loading"));
-			});
+			Platform.runLater(this::updatePlaceholderLabel);
 			try {
 				final Trace trace = currentTrace.get();
 				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
-					Platform.runLater(this::clearLoadingStatus);
 					return;
 				}
 				final List<IEvalElement> formulas;
@@ -283,16 +270,12 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Visualization interrupted", e);
 				Thread.currentThread().interrupt();
-				Platform.runLater(() -> {
-					this.clearLoadingStatus();
-					this.updatePlaceholderLabel();
-				});
+				Platform.runLater(this::updatePlaceholderLabel);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Visualization failed", e);
 				Platform.runLater(() -> {
 					taErrors.setText(e.getMessage());
 					errorsView.setVisible(true);
-					this.clearLoadingStatus();
 					placeholderLabel.setVisible(false);
 				});
 			}

@@ -158,7 +158,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
 		final TableData table = item.visualize(formulas);
 		Platform.runLater(() -> {
-			this.clearLoadingStatus();
 			currentTable.set(table);
 			placeholderLabel.setVisible(false);
 			taErrors.clear();
