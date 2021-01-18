@@ -68,7 +68,7 @@
 						</Label>
 					</graphic>
 				</TableColumn>
-				<TableColumn fx:id="timeLimitColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}">
+				<TableColumn fx:id="timeLimitColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}">
 					<graphic>
 						<Label text="%verifications.modelchecking.modelcheckingView.column.timeLimit">
 							<tooltip>
@@ -122,7 +122,7 @@
 						</Label>
 					</graphic>
 				</TableColumn>
-				<TableColumn fx:id="stopAtFullCoverageColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 3}" maxWidth="${fontSize.fontSize * 3}">
+				<TableColumn fx:id="stopAtFullCoverageColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}">
 					<graphic>
 						<Label text="%verifications.modelchecking.modelcheckingView.column.stopFullCoverage">
 							<tooltip>
