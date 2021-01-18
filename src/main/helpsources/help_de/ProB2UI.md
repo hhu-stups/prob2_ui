@@ -37,7 +37,7 @@ Dieses Untermenü erlaubt es die Schrift- und Buttongröße in dem ProB2 JavaFX 
 
 ![Visualisierungsmenü](../screenshots/Menu/Visualisation.png)
 
-Das Visualisierungsuntermenü stellt verschiedene Formen der Visualisierung zur Verfügung. Man kann eine Formel eingeben und als [Graph](Hauptansicht/Graphvisualisierung einer Formel.md) oder [Tabelle](Hauptansicht/Tabellenvisualisierung einer Formel.md) visualisieren lassen, sich das [Zeitdiagramm](Zeitdiagramm.md) anschauen oder einen Blick auf die [Graphvisualisierung](Graphvisualisierung.md) werfen.
+Das Visualisierungsuntermenü stellt verschiedene Formen der Visualisierung zur Verfügung. Man kann eine Formel eingeben und als [Graph](Hauptansicht/Graphvisualisierung%20einer%20Formel.md) oder [Tabelle](Hauptansicht/Tabellenvisualisierung%20einer%20Formel.md) visualisieren lassen, sich das [Zeitdiagramm](Zeitdiagramm.md) anschauen oder einen Blick auf die [Graphvisualisierung](Graphvisualisierung.md) werfen.
 
 ![Weitere-Optionen-Menü](../screenshots/Menu/Advanced.png)
 
@@ -45,7 +45,7 @@ Dieses Untermenü stellt eine Groovy-Konsole zur Verfügung und erlaubt es Plugi
 
 ![Fenster-Menü](../screenshots/Menu/Window.png)
 
-Das Fensteruntermenü erlaubt es Perspektiven zu ändern und [Komponenten abzutrennen](Abtrennen von Komponenten.md). Dieses UI bringt 3 verschiedene voreingestellte Perspektiven. Es ist erlaubt [eigene Perspektiven](Perspektiven.md) zu nutzen, indem man eine FXML-Datei, die die Ansichten enthält, zur Verfügung stellt, aber man sollte sich dabei bewusst sein, dass das die Fähigkeit Komponenten abzutrennen zerstören kann. Dieses Menü erlaubt es auch das ProB2UI zu schließen.
+Das Fensteruntermenü erlaubt es Perspektiven zu ändern und [Komponenten abzutrennen](Abtrennen%20von%20Komponenten.md). Dieses UI bringt 3 verschiedene voreingestellte Perspektiven. Es ist erlaubt [eigene Perspektiven](Perspektiven.md) zu nutzen, indem man eine FXML-Datei, die die Ansichten enthält, zur Verfügung stellt, aber man sollte sich dabei bewusst sein, dass das die Fähigkeit Komponenten abzutrennen zerstören kann. Dieses Menü erlaubt es auch das ProB2UI zu schließen.
 
 ![Hilfemenü](../screenshots/Menu/Help.png)
 
