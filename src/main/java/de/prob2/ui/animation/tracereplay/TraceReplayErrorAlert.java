@@ -86,9 +86,12 @@ public final class TraceReplayErrorAlert extends Alert {
 				break;
 			case TRIGGER_VISB:
 			case TRIGGER_HISTORY_VIEW:
-			case TRIGGER_TRACE_CHECKER:
 				this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
 				this.getButtonTypes().addAll(ButtonType.YES, this.showTraceDiff, ButtonType.NO);
+				break;
+			case TRIGGER_TRACE_CHECKER:
+				this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
+				this.getButtonTypes().addAll(this.showTraceDiff, ButtonType.CLOSE);
 				break;
 			default:
 				// Trigger has not been added yet.
