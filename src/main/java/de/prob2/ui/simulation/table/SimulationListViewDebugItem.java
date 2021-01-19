@@ -56,16 +56,10 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 			lbOpName.getStyleClass().add("name");
 			this.itemBox.getChildren().add(lbOpName);
 
-			if(!item.getTime().isEmpty()) {
-				Label lbTime = new Label(String.format(bundle.getString("simulation.item.time"), item.getTime()));
-				lbTime.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbTime);
-			}
-
-			if(!item.getDelayAsString().isEmpty()) {
-				Label lbDelay = new Label(String.format(bundle.getString("simulation.item.delay"), item.getDelay()));
-				lbDelay.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbDelay);
+			if(!item.getActivationAsString().isEmpty()) {
+				Label lbActivation = new Label(String.format(bundle.getString("simulation.item.delay"), item.getActivation()));
+				lbActivation.getStyleClass().add("information");
+				this.itemBox.getChildren().add(lbActivation);
 			}
 
 			if(!item.getProbabilityAsString().isEmpty()) {

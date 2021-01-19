@@ -52,19 +52,21 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         String chosenOp = "";
         Map<String, Object> values = null;
         List<Transition> transitions = null;
-        Map<String, Integer> delay = null;
+        Map<String, Integer> activation = null;
         //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
-        for(int i = 0; i < opConfig.getOpName().size(); i++) {
+		double randomDouble = random.nextDouble();
+		for(int i = 0; i < opConfig.getOpName().size(); i++) {
             chosenOp = opConfig.getOpName().get(i);
             double evalProbability = cache.readProbabilityWithCaching(currentState, chosenOp, opConfig.getProbability().get(i));
-            double randomDouble = random.nextDouble();
-            boolean opScheduled = operationToRemainingTime.get(chosenOp) == 0;
+
+
+            boolean opScheduled = operationToActivationTimes.get(chosenOp).contains(0);
             if(opScheduled) {
                 final String finalChosenOp = chosenOp;
-                operationToRemainingTime.computeIfPresent(chosenOp, (k, v) -> initialOperationToRemainingTime.get(finalChosenOp));
+				operationToActivationTimes.get(chosenOp).remove(new Integer(0));
             }
             if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
-                //select operation also only if time = 0
+                //select operation only if its time is 0
                 if(!opScheduled) {
                     return trace;
                 }
@@ -76,8 +78,8 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
                 if(opConfig.getVariableChoices() != null) {
                     values = opConfig.getVariableChoices().get(i);
                 }
-                if(opConfig.getDelay() != null) {
-                    delay = opConfig.getDelay().get(i);
+                if(opConfig.getActivation() != null) {
+                    activation = opConfig.getActivation().get(i);
                 }
                 execute = true;
                 break;
@@ -92,7 +94,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         if(values == null) {
             Transition transition = transitions.get(random.nextInt(transitions.size()));
             newTrace = appendTrace(newTrace, transition);
-            delayRemainingTime(delay);
+			activateOperations(activation);
         } else {
             State finalCurrentState = newTrace.getCurrentState();
             String predicate = chooseVariableValues(finalCurrentState, values);
@@ -102,7 +104,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
             if (!command.hasErrors()) {
                 Transition transition = command.getNewTransitions().get(0);
                 newTrace = appendTrace(newTrace, transition);
-                delayRemainingTime(delay);
+				activateOperations(activation);
             }
         }
         stepCounter = newTrace.getTransitionList().size();

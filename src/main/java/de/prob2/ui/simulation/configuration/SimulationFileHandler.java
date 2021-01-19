@@ -22,14 +22,10 @@ public class SimulationFileHandler {
         JsonReader reader = new JsonReader(new FileReader(inputFile));
         JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
 
-        Map<String, Object> setupConfigurations = simulationFile.get("setupConfigurations") == null ? null : buildVariableChoices(simulationFile.get("setupConfigurations").getAsJsonObject());
-        Map<String, Object> initialisationConfigurations = simulationFile.get("initialisationConfigurations") == null ? null : buildVariableChoices(simulationFile.get("initialisationConfigurations").getAsJsonObject());
-
-
         JsonArray operationConfigurationsAsArray = simulationFile.get("operationsConfigurations").getAsJsonArray();
         List<OperationConfiguration> operationConfigurations = buildOperationConfigurations(operationConfigurationsAsArray);
 
-        return new SimulationConfiguration(setupConfigurations, initialisationConfigurations, operationConfigurations);
+        return new SimulationConfiguration(operationConfigurations);
     }
 
     private static Map<String, Object> buildVariableChoices(JsonObject jsonObject) {
@@ -59,7 +55,7 @@ public class SimulationFileHandler {
             JsonObject jsonObject = (JsonObject) operationConfigurationsAsArray.get(i);
             List<String> opName = new ArrayList<>();
             List<String> probability = new ArrayList<>();
-            List<Map<String, Integer>> delay = null;
+            List<Map<String, Integer>> activation = null;
 
             // operation name
             if(jsonObject.get("opName").isJsonArray()) {
@@ -81,29 +77,28 @@ public class SimulationFileHandler {
 
 
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
-            int opTime =  jsonObject.get("time") == null ? -1 : jsonObject.get("time").getAsInt();
 
             // delay
-            if(jsonObject.get("delay") != null) {
-                delay = new ArrayList<>();
-                if(jsonObject.get("delay").isJsonArray()) {
-                    JsonArray delayArray = jsonObject.get("delay").getAsJsonArray();
-                    for(JsonElement delayElement : delayArray) {
-                        Map<String, Integer> delayMap = new HashMap<>();
-                        JsonObject delayObject = delayElement.getAsJsonObject();
-                        for (String key : delayObject.keySet()) {
-                            delayMap.put(key, delayObject.get(key).getAsInt());
+            if(jsonObject.get("activation") != null) {
+                activation = new ArrayList<>();
+                if(jsonObject.get("activation").isJsonArray()) {
+                    JsonArray activationArray = jsonObject.get("activation").getAsJsonArray();
+                    for(JsonElement activationElement : activationArray) {
+                        Map<String, Integer> activationMap = new HashMap<>();
+                        JsonObject activationObject = activationElement.getAsJsonObject();
+                        for (String key : activationObject.keySet()) {
+							activationMap.put(key, activationObject.get(key).getAsInt());
                         }
-                        delay.add(delayMap);
+                        activation.add(activationMap);
                     }
                 } else {
-                    JsonObject delayObject = jsonObject.get("delay").getAsJsonObject();
-                    if(delayObject != null) {
-                        Map<String, Integer> delayMap = new HashMap<>();
-                        for (String key : delayObject.keySet()) {
-                            delayMap.put(key, delayObject.get(key).getAsInt());
+                    JsonObject activationObject = jsonObject.get("activation").getAsJsonObject();
+                    if(activationObject != null) {
+                        Map<String, Integer> activationMap = new HashMap<>();
+                        for (String key : activationObject.keySet()) {
+							activationMap.put(key, activationObject.get(key).getAsInt());
                         }
-                        delay.add(delayMap);
+                        activation.add(activationMap);
                     }
                 }
 
@@ -123,7 +118,7 @@ public class SimulationFileHandler {
                 }
             }
 
-            operationConfigurations.add(new OperationConfiguration(opName, opTime, delay, probability, priority, variableChoices));
+            operationConfigurations.add(new OperationConfiguration(opName, activation, probability, priority, variableChoices));
         }
         return operationConfigurations;
     }

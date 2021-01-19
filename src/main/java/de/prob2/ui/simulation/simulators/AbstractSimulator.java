@@ -36,9 +36,7 @@ public abstract class AbstractSimulator {
 
     protected boolean finished;
 
-    protected Map<String, Integer> initialOperationToRemainingTime;
-
-    protected Map<String, Integer> operationToRemainingTime;
+    protected Map<String, List<Integer>> operationToActivationTimes;
 
     protected List<OperationConfiguration> operationConfigurationsSorted;
 
@@ -62,8 +60,7 @@ public abstract class AbstractSimulator {
     }
 
     public void resetSimulator() {
-        this.initialOperationToRemainingTime = new HashMap<>();
-        this.operationToRemainingTime = new HashMap<>();
+        this.operationToActivationTimes = new HashMap<>();
         this.time.set(0);
         this.finished = false;
         this.stepCounter = 0;
@@ -80,8 +77,7 @@ public abstract class AbstractSimulator {
         config.getOperationConfigurations()
                 .forEach(config -> {
                     for(String op : config.getOpName()) {
-                        operationToRemainingTime.put(op, config.getTime());
-                        initialOperationToRemainingTime.put(op, config.getTime());
+						operationToActivationTimes.put(op, new ArrayList<>());
                     }
                 });
         updateDelay();
@@ -93,8 +89,8 @@ public abstract class AbstractSimulator {
 
     public void updateRemainingTime(int delay) {
         this.time.set(this.time.get() + delay);
-        for(String key : operationToRemainingTime.keySet()) {
-            operationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(0, v - delay));
+        for(String key : operationToActivationTimes.keySet()) {
+			operationToActivationTimes.computeIfPresent(key, (k, v) -> operationToActivationTimes.get(key).stream().map(time -> time - delay).collect(Collectors.toList()));
         }
     }
 
@@ -118,12 +114,12 @@ public abstract class AbstractSimulator {
         if(!currentState.isInitialised()) {
             List<String> nextTransitions = trace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
             if(nextTransitions.contains("$setup_constants")) {
-                newTrace = executeBeforeInitialisation("$setup_constants", config.getSetupConfigurations(), currentState, newTrace);
+                newTrace = executeBeforeInitialisation("$setup_constants", config.getOperationConfigurations(), currentState, newTrace);
             }
             currentState = newTrace.getCurrentState();
             nextTransitions = newTrace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
             if(nextTransitions.contains("$initialise_machine")) {
-                newTrace = executeBeforeInitialisation("$initialise_machine", config.getInitialisationConfigurations(), currentState, newTrace);
+                newTrace = executeBeforeInitialisation("$initialise_machine", config.getOperationConfigurations(), currentState, newTrace);
             }
         }
         stepCounter = newTrace.getTransitionList().size();
@@ -149,10 +145,10 @@ public abstract class AbstractSimulator {
 
     protected abstract Trace executeNextOperation(OperationConfiguration opConfig, Trace trace);
 
-    protected void delayRemainingTime(Map<String, Integer> delay) {
-        if(delay != null) {
-            for (String key : delay.keySet()) {
-                operationToRemainingTime.computeIfPresent(key, (k, v) -> Math.max(v, delay.get(key)));
+    protected void activateOperations(Map<String, Integer> activation) {
+        if(activation != null) {
+            for (String key : activation.keySet()) {
+				operationToActivationTimes.get(key).add(activation.get(key));
             }
         }
     }
@@ -165,8 +161,23 @@ public abstract class AbstractSimulator {
         }
     }
 
-    protected Trace executeBeforeInitialisation(String operation, Map<String, Object> values, State currentState, Trace trace) {
-        Transition nextTransition = currentState.findTransition(operation, joinPredicateFromValues(currentState, values));
+    protected Trace executeBeforeInitialisation(String operation, List<OperationConfiguration> opConfigurations, State currentState, Trace trace) {
+    	List<OperationConfiguration> opConfigs = opConfigurations.stream()
+				.filter(config -> operation.equals(config.getOpName().get(0)))
+				.collect(Collectors.toList());
+    	String predicate = "";
+    	if(opConfigs.isEmpty()) {
+    		predicate = "1=1";
+		} else {
+    		if(opConfigs.get(0).getVariableChoices() == null) {
+    			predicate = "1=1";
+			} else {
+				predicate = joinPredicateFromValues(currentState, opConfigs.get(0).getVariableChoices().get(0));
+			}
+			activateOperations(opConfigs.get(0).getActivation().get(0));
+		}
+    	updateDelay();
+        Transition nextTransition = currentState.findTransition(operation, predicate);
         return trace.add(nextTransition);
     }
 
@@ -232,6 +243,14 @@ public abstract class AbstractSimulator {
     }
 
     public void updateDelay() {
-        this.delay = operationToRemainingTime.values().stream().reduce(Integer.MAX_VALUE, Math::min);
+    	int delay = Integer.MAX_VALUE;
+    	for(List<Integer> times : operationToActivationTimes.values()) {
+    		for(int time : times) {
+    			if(time < delay) {
+    				delay = time;
+				}
+			}
+		}
+    	this.delay = delay;
     }
 }

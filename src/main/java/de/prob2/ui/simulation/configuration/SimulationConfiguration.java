@@ -5,25 +5,10 @@ import java.util.Map;
 
 public class SimulationConfiguration {
 
-    private Map<String, Object> setupConfigurations;
-
-    private Map<String, Object> initialisationConfigurations;
-
     private List<OperationConfiguration> operationConfigurations;
 
-    public SimulationConfiguration(Map<String, Object> setupConfigurations, Map<String, Object> initialisationConfigurations, List<OperationConfiguration> operationConfigurations) {
-    	this.setupConfigurations = setupConfigurations;
-        this.initialisationConfigurations = initialisationConfigurations;
+    public SimulationConfiguration(List<OperationConfiguration> operationConfigurations) {
         this.operationConfigurations = operationConfigurations;
-    }
-
-
-	public Map<String, Object> getSetupConfigurations() {
-        return setupConfigurations;
-    }
-
-    public Map<String, Object> getInitialisationConfigurations() {
-        return initialisationConfigurations;
     }
 
     public List<OperationConfiguration> getOperationConfigurations() {

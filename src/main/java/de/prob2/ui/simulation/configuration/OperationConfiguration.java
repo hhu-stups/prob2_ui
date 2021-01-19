@@ -7,9 +7,7 @@ public class OperationConfiguration {
 
     private List<String> opName;
 
-    private int time;
-
-    private List<Map<String, Integer>> delay;
+    private List<Map<String, Integer>> activation;
 
     private List<String> probability;
 
@@ -17,11 +15,10 @@ public class OperationConfiguration {
 
     private List<Map<String, Object>> variableChoices;
 
-    public OperationConfiguration(List<String> opName, int time, List<Map<String, Integer>> delay, List<String> probability,
+    public OperationConfiguration(List<String> opName, List<Map<String, Integer>> activation, List<String> probability,
                                   int priority, List<Map<String, Object>> variableChoices) {
         this.opName = opName;
-        this.time = time;
-        this.delay = delay;
+        this.activation = activation;
         this.probability = probability;
         this.priority = priority;
         this.variableChoices = variableChoices;
@@ -31,12 +28,8 @@ public class OperationConfiguration {
         return opName;
     }
 
-    public int getTime() {
-        return time;
-    }
-
-    public List<Map<String, Integer>> getDelay() {
-        return delay;
+    public List<Map<String, Integer>> getActivation() {
+        return activation;
     }
 
     public List<String> getProbability() {

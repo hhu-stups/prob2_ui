@@ -84,7 +84,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
         boolean execute = false;
         String chosenOp = "";
         Map<String, Object> values = null;
-        Map<String, Integer> delay = null;
+        Map<String, Integer> activation = null;
 
         //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
         for(int i = 0; i < opConfig.getOpName().size(); i++) {
@@ -94,19 +94,20 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                     .map(Transition::getName)
                     .collect(Collectors.toList());
             boolean equalsNextOperation = chosenOp.equals(persistentTrace.getTransitionList().get(counter).getOperationName());
-            boolean operationScheduled = operationToRemainingTime.get(chosenOp) == 0;
-            if(operationScheduled) {
-                final String finalChosenOp = chosenOp;
-                operationToRemainingTime.computeIfPresent(chosenOp, (k, v) -> initialOperationToRemainingTime.get(finalChosenOp));
-            }
+
+			boolean operationScheduled = operationToActivationTimes.get(chosenOp).contains(0);
+			if(operationScheduled) {
+				final String finalChosenOp = chosenOp;
+				operationToActivationTimes.get(chosenOp).remove(new Integer(0));
+			}
             boolean chooseOperation = operationScheduled && ((Math.abs(evalProbability - 1.0) < 0.0001 && !equalsNextOperation) || (equalsNextOperation && evalProbability > 0.0) && enabledOperations.contains(chosenOp));
             // TODO: What if sum of scheduled operations has 100% probability and is not equal next operation in trace
             if(chooseOperation) {
                 if(opConfig.getVariableChoices() != null) {
                     values = opConfig.getVariableChoices().get(i);
                 }
-                if(opConfig.getDelay() != null) {
-                    delay = opConfig.getDelay().get(i);
+                if(opConfig.getActivation() != null) {
+					activation = opConfig.getActivation().get(i);
                 }
                 execute = true;
                 break;
@@ -136,7 +137,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                         currentState.getId(), persistentTransition.getOperationName(), pred, 1);
                 stateSpace.execute(command);
                 newTrace = newTrace.add(command.getNewTransitions().get(0));
-                delayRemainingTime(delay);
+				activateOperations(activation);
             }
         } else {
             State finalCurrentState = newTrace.getCurrentState();
@@ -144,7 +145,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
             if(finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, chosenOp, predicate)) {
                 Transition transition = finalCurrentState.findTransition(chosenOp, predicate);
                 newTrace = newTrace.add(transition);
-                delayRemainingTime(delay);
+                activateOperations(activation);
             }
         }
         return newTrace;
@@ -160,8 +161,8 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    protected Trace executeBeforeInitialisation(String operation, Map<String, Object> values, State currentState, Trace trace) {
-        Trace res = super.executeBeforeInitialisation(operation, values, currentState, trace);
+    protected Trace executeBeforeInitialisation(String operation, List<OperationConfiguration> opConfigurations, State currentState, Trace trace) {
+        Trace res = super.executeBeforeInitialisation(operation, opConfigurations, currentState, trace);
         if(res.getTransitionList().size() > trace.getTransitionList().size()) {
             counter = res.getTransitionList().size();
         }

@@ -363,25 +363,15 @@ public class SimulatorStage extends Stage {
 		SimulationConfiguration config = simulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
-		if(config.getSetupConfigurations() != null) {
-			observableList.add(new SimulationDebugItem("SETUP_CONSTANTS", "", null, "", null, Arrays.asList(config.getSetupConfigurations())));
-		}
-
-		if(config.getInitialisationConfigurations() != null) {
-			observableList.add(new SimulationDebugItem("INITIALISATION", "", null, "", null, Arrays.asList(config.getInitialisationConfigurations())));
-		}
-
-
 		for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
 			String opName = String.join(", ", opConfig.getOpName());
-			String time = String.valueOf(opConfig.getTime());
-			List<Map<String, Integer>> delay = opConfig.getDelay();
+			List<Map<String, Integer>> activation = opConfig.getActivation();
 			String priority = String.valueOf(opConfig.getPriority());
 			List<String> probability = opConfig.getProbability();
 			if(opConfig.getVariableChoices() == null) {
-				observableList.add(new SimulationDebugItem(opName, time, delay, priority, probability, null));
+				observableList.add(new SimulationDebugItem(opName, activation, priority, probability, null));
 			} else {
-				observableList.add(new SimulationDebugItem(opName, time, delay, priority, probability, opConfig.getVariableChoices()));
+				observableList.add(new SimulationDebugItem(opName, activation, priority, probability, opConfig.getVariableChoices()));
 			}
 		}
 

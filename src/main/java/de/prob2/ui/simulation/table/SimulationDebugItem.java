@@ -7,9 +7,7 @@ public class SimulationDebugItem {
 
 	private String opName;
 
-	private String time;
-
-	private List<Map<String, Integer>> delay;
+	private List<Map<String, Integer>> activation;
 
 	private String priority;
 
@@ -17,11 +15,10 @@ public class SimulationDebugItem {
 
 	private List<Map<String, Object>> values;
 
-	public SimulationDebugItem(String opName, String time, List<Map<String, Integer>> delay, String priority, List<String> probability,
+	public SimulationDebugItem(String opName, List<Map<String, Integer>> activation, String priority, List<String> probability,
 							   List<Map<String, Object>> values) {
 		this.opName = opName;
-		this.time = time;
-		this.delay = delay;
+		this.activation = activation;
 		this.priority = priority;
 		this.probability = probability;
 		this.values = values;
@@ -31,16 +28,12 @@ public class SimulationDebugItem {
 		return opName;
 	}
 
-	public String getTime() {
-		return time;
+	public List<Map<String, Integer>> getActivation() {
+		return activation;
 	}
 
-	public List<Map<String, Integer>> getDelay() {
-		return delay;
-	}
-
-	public String getDelayAsString() {
-		return delay == null ? "" : delay.toString();
+	public String getActivationAsString() {
+		return activation == null ? "" : activation.toString();
 	}
 
 	public String getPriority() {
