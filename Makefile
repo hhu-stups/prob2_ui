@@ -1,4 +1,4 @@
-PROB2_HOME=~/prob_prolog/ 
+PROB2_HOME=$(HOME)/git_root/prob_prolog/ 
 
 run-with-my-probcli:
 	./gradlew -PprobHome=$(PROB2_HOME) run
