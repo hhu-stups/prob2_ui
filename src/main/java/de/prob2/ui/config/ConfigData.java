@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.operations.OperationsView;
 
@@ -38,6 +39,7 @@ public final class ConfigData extends BasicConfigData {
 	public Map<String, String> globalPreferences;
 	public Path pluginDirectory;
 	public Map<FileChooserManager.Kind, Path> fileChooserInitialDirectories;
+	public ErrorItem.Type errorLevel;
 	
 	ConfigData() {}
 }

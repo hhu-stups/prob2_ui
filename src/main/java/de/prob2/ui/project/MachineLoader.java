@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
@@ -12,6 +13,7 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.ReusableAnimator;
 import de.prob.animator.command.GetVersionCommand;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.model.eventb.translate.EventBFileNotFoundException;
@@ -22,6 +24,7 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.error.WarningAlert;
+import de.prob2.ui.internal.ErrorDisplayFilter;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.preferences.GlobalPreferences;
@@ -46,6 +49,7 @@ public class MachineLoader {
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
+	private final ErrorDisplayFilter errorDisplayFilter;
 	private final StatusBar statusBar;
 	private final StopActions stopActions;
 	private final Injector injector;
@@ -62,6 +66,7 @@ public class MachineLoader {
 		final StageManager stageManager,
 		final CurrentTrace currentTrace,
 		final GlobalPreferences globalPreferences,
+		final ErrorDisplayFilter errorDisplayFilter,
 		final StatusBar statusBar,
 		final StopActions stopActions,
 		final Injector injector
@@ -70,6 +75,7 @@ public class MachineLoader {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
+		this.errorDisplayFilter = errorDisplayFilter;
 		this.statusBar = statusBar;
 		this.stopActions = stopActions;
 		this.injector = injector;
@@ -110,11 +116,16 @@ public class MachineLoader {
 	}
 
 	private void initStateSpace(final StateSpace stateSpace, final Map<String, String> preferences) {
-		stateSpace.addWarningListener(warnings -> Platform.runLater(() -> {
-			final WarningAlert alert = injector.getInstance(WarningAlert.class);
-			alert.getWarnings().setAll(warnings);
-			alert.show();
-		}));
+		stateSpace.addWarningListener(warnings -> {
+			final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
+			if (!filteredWarnings.isEmpty()) {
+				Platform.runLater(() -> {
+					final WarningAlert alert = injector.getInstance(WarningAlert.class);
+					alert.getWarnings().setAll(filteredWarnings);
+					alert.show();
+				});
+			}
+		});
 		stateSpace.changePreferences(preferences);
 	}
 

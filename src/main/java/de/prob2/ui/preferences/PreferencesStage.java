@@ -3,6 +3,8 @@ package de.prob2.ui.preferences;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -11,12 +13,14 @@ import java.util.ResourceBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.ErrorDisplayFilter;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.persistence.UIState;
@@ -56,6 +60,16 @@ public final class PreferencesStage extends Stage {
 		new Locale("ru"),
 	};
 
+	private static final Map<ErrorItem.Type, String> ERROR_LEVEL_DESCRIPTION_KEYS;
+	static {
+		final Map<ErrorItem.Type, String> errorLevelDescriptionKeys = new EnumMap<>(ErrorItem.Type.class);
+		errorLevelDescriptionKeys.put(ErrorItem.Type.ERROR, "preferences.stage.tabs.general.errorLevels.error");
+		errorLevelDescriptionKeys.put(ErrorItem.Type.WARNING, "preferences.stage.tabs.general.errorLevels.warning");
+		errorLevelDescriptionKeys.put(ErrorItem.Type.MESSAGE, "preferences.stage.tabs.general.errorLevels.message");
+		ERROR_LEVEL_DESCRIPTION_KEYS = Collections.unmodifiableMap(errorLevelDescriptionKeys);
+	}
+
+	@FXML private ChoiceBox<ErrorItem.Type> errorLevelChoiceBox;
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
 	@FXML private TextField defaultLocationField;
 	@FXML private ChoiceBox<Locale> localeOverrideBox;
@@ -69,6 +83,7 @@ public final class PreferencesStage extends Stage {
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
+	private final ErrorDisplayFilter errorDisplayFilter;
 	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;
 	private final UIState uiState;
@@ -81,6 +96,7 @@ public final class PreferencesStage extends Stage {
 		final StageManager stageManager,
 		final FileChooserManager fileChooserManager,
 		final ResourceBundle bundle,
+		final ErrorDisplayFilter errorDisplayFilter,
 		final ProjectManager projectManager,
 		final CurrentProject currentProject,
 		final UIState uiState,
@@ -92,6 +108,7 @@ public final class PreferencesStage extends Stage {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
+		this.errorDisplayFilter = errorDisplayFilter;
 		this.projectManager = projectManager;
 		this.currentProject = currentProject;
 		this.uiState = uiState;
@@ -105,7 +122,24 @@ public final class PreferencesStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		// General	
+		// General
+		this.errorLevelChoiceBox.getItems().setAll(ErrorItem.Type.values());
+		Collections.reverse(this.errorLevelChoiceBox.getItems());
+		// Require at least ErrorItem.Type.ERROR to be always visible.
+		this.errorLevelChoiceBox.getItems().remove(ErrorItem.Type.INTERNAL_ERROR);
+		this.errorLevelChoiceBox.valueProperty().bindBidirectional(this.errorDisplayFilter.errorLevelProperty());
+		this.errorLevelChoiceBox.setConverter(new StringConverter<ErrorItem.Type>() {
+			@Override
+			public String toString(final ErrorItem.Type object) {
+				return bundle.getString(ERROR_LEVEL_DESCRIPTION_KEYS.get(object));
+			}
+			
+			@Override
+			public ErrorItem.Type fromString(final String string) {
+				throw new UnsupportedOperationException("Conversion from String to ErrorItem.Type not supported");
+			}
+		});
+		
 		final SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 50);
 		
 		// bindBidirectional doesn't work properly here, don't ask why

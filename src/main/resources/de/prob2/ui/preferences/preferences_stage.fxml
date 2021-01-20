@@ -30,6 +30,10 @@
 								<Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
 							</padding>
 							<HBox spacing="10.0" alignment="CENTER_LEFT">
+								<Label text="%preferences.stage.tabs.general.label.errorLevel"/>
+								<ChoiceBox fx:id="errorLevelChoiceBox"/>
+							</HBox>
+							<HBox spacing="10.0" alignment="CENTER_LEFT">
 								<Label text="%preferences.stage.tabs.general.label.recentProjectsLimit"/>
 								<Spinner fx:id="recentProjectsCountSpinner"/>
 							</HBox>
