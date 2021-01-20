@@ -38,6 +38,8 @@ public abstract class AbstractSimulator {
 
     protected Map<String, List<Integer>> operationToActivationTimes;
 
+    protected Map<String, OperationConfiguration.ActivationKind> operationToActivationKind;
+
     protected List<OperationConfiguration> operationConfigurationsSorted;
 
     protected SimulatorCache cache;
@@ -61,6 +63,7 @@ public abstract class AbstractSimulator {
 
     public void resetSimulator() {
         this.operationToActivationTimes = new HashMap<>();
+        this.operationToActivationKind = new HashMap<>();
         this.time.set(0);
         this.finished = false;
         this.stepCounter = 0;
@@ -78,6 +81,7 @@ public abstract class AbstractSimulator {
                 .forEach(config -> {
                     for(String op : config.getOpName()) {
 						operationToActivationTimes.put(op, new ArrayList<>());
+                        operationToActivationKind.put(op, config.getActivationKind());
                     }
                 });
         updateDelay();
@@ -148,7 +152,24 @@ public abstract class AbstractSimulator {
     protected void activateOperations(Map<String, Integer> activation) {
         if(activation != null) {
             for (String key : activation.keySet()) {
-				operationToActivationTimes.get(key).add(activation.get(key));
+                List<Integer> activationTimes = operationToActivationTimes.get(key);
+                OperationConfiguration.ActivationKind activationKind = operationToActivationKind.get(key);
+                if(activationKind == OperationConfiguration.ActivationKind.MULTI) {
+                    activationTimes.add(activation.get(key));
+                } else {
+                    if(activationTimes.isEmpty()) {
+                        activationTimes.add(activation.get(key));
+                    } else {
+                        Integer otherActivationTime = activationTimes.get(0);
+                        if(activationKind == OperationConfiguration.ActivationKind.SINGLE_MAX) {
+                            activationTimes.clear();
+                            activationTimes.add(Math.max(otherActivationTime, activation.get(key)));
+                        } else if(activationKind == OperationConfiguration.ActivationKind.SINGLE_MIN) {
+                            activationTimes.clear();
+                            activationTimes.add(Math.min(otherActivationTime, activation.get(key)));
+                        }
+                    }
+                }
             }
         }
     }

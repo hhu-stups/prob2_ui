@@ -104,6 +104,15 @@ public class SimulationFileHandler {
 
             }
 
+            OperationConfiguration.ActivationKind activationKind = OperationConfiguration.ActivationKind.MULTI;
+            if(jsonObject.get("activationKind") == null || "multi".equals(jsonObject.get("activationKind").getAsString())) {
+                activationKind = OperationConfiguration.ActivationKind.MULTI;
+            } else if("single:max".equals(jsonObject.get("activationKind").getAsString())) {
+                activationKind = OperationConfiguration.ActivationKind.SINGLE_MAX;
+            } else if("single:min".equals(jsonObject.get("activationKind").getAsString())) {
+                activationKind = OperationConfiguration.ActivationKind.SINGLE_MIN;
+            }
+
             // variable choices
             List<Map<String, Object>> variableChoices = null;
             if(jsonObject.get("variableChoices") != null) {
@@ -118,7 +127,7 @@ public class SimulationFileHandler {
                 }
             }
 
-            operationConfigurations.add(new OperationConfiguration(opName, activation, probability, priority, variableChoices));
+            operationConfigurations.add(new OperationConfiguration(opName, activation, activationKind, probability, priority, variableChoices));
         }
         return operationConfigurations;
     }
