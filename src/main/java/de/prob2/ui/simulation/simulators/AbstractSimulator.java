@@ -174,7 +174,9 @@ public abstract class AbstractSimulator {
 			} else {
 				predicate = joinPredicateFromValues(currentState, opConfigs.get(0).getVariableChoices().get(0));
 			}
-			activateOperations(opConfigs.get(0).getActivation().get(0));
+    		if(opConfigs.get(0).getActivation() != null) {
+                activateOperations(opConfigs.get(0).getActivation().get(0));
+            }
 		}
     	updateDelay();
         Transition nextTransition = currentState.findTransition(operation, predicate);

@@ -55,6 +55,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         Map<String, Integer> activation = null;
         //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
 		double randomDouble = random.nextDouble();
+
 		for(int i = 0; i < opConfig.getOpName().size(); i++) {
             chosenOp = opConfig.getOpName().get(i);
             double evalProbability = cache.readProbabilityWithCaching(currentState, chosenOp, opConfig.getProbability().get(i));
@@ -62,27 +63,21 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
             boolean opScheduled = operationToActivationTimes.get(chosenOp).contains(0);
             if(opScheduled) {
-                final String finalChosenOp = chosenOp;
 				operationToActivationTimes.get(chosenOp).remove(new Integer(0));
             }
             if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
                 //select operation only if its time is 0
-                if(!opScheduled) {
-                    return trace;
-                }
                 // TODO: Refactor
                 transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
-                if (transitions.isEmpty()) {
-                    return trace;
+                if(opScheduled && !transitions.isEmpty()) {
+                    if(opConfig.getVariableChoices() != null) {
+                        values = opConfig.getVariableChoices().get(i);
+                    }
+                    if(opConfig.getActivation() != null) {
+                        activation = opConfig.getActivation().get(i);
+                    }
+                    execute = true;
                 }
-                if(opConfig.getVariableChoices() != null) {
-                    values = opConfig.getVariableChoices().get(i);
-                }
-                if(opConfig.getActivation() != null) {
-                    activation = opConfig.getActivation().get(i);
-                }
-                execute = true;
-                break;
             }
             probabilityMinimum += evalProbability;
         }
