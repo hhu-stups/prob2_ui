@@ -116,7 +116,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
     @Override
     public boolean endingConditionReached(Trace trace) {
-        // TODO: Implementation simulation with ending condition without Monte Carlo simulation
+        // TODO: Implement simulation with ending condition without Monte Carlo simulation
         return false;
     }
 }
