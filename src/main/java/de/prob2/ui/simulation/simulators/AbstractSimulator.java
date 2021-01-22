@@ -3,7 +3,8 @@ package de.prob2.ui.simulation.simulators;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
+import de.prob2.ui.simulation.configuration.ProbabilisticConfiguration;
+import de.prob2.ui.simulation.configuration.TimingConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import javafx.beans.property.IntegerProperty;
@@ -38,9 +39,11 @@ public abstract class AbstractSimulator {
 
     protected Map<String, List<Integer>> operationToActivationTimes;
 
-    protected Map<String, OperationConfiguration.ActivationKind> operationToActivationKind;
+    protected Map<String, TimingConfiguration.ActivationKind> operationToActivationKind;
 
-    protected List<OperationConfiguration> operationConfigurationsSorted;
+    protected List<TimingConfiguration> timingConfigurationsSorted;
+
+    protected Map<String, ProbabilisticConfiguration> probabilisticConfiguration;
 
     protected SimulatorCache cache;
 
@@ -64,26 +67,26 @@ public abstract class AbstractSimulator {
     public void resetSimulator() {
         this.operationToActivationTimes = new HashMap<>();
         this.operationToActivationKind = new HashMap<>();
+        this.probabilisticConfiguration = new HashMap<>();
         this.time.set(0);
         this.finished = false;
         this.stepCounter = 0;
         if(config != null) {
             // sort after priority
-            this.operationConfigurationsSorted = config.getOperationConfigurations().stream()
-                    .sorted(Comparator.comparingInt(OperationConfiguration::getPriority))
+            this.timingConfigurationsSorted = config.getTimingConfigurations().stream()
+                    .sorted(Comparator.comparingInt(TimingConfiguration::getPriority))
                     .collect(Collectors.toList());
             initializeRemainingTime();
         }
     }
 
     private void initializeRemainingTime() {
-        config.getOperationConfigurations()
+        config.getTimingConfigurations()
                 .forEach(config -> {
-                    for(String op : config.getOpName()) {
-						operationToActivationTimes.put(op, new ArrayList<>());
-                        operationToActivationKind.put(op, config.getActivationKind());
-                    }
+                    operationToActivationTimes.put(config.getOpName(), new ArrayList<>());
+                    operationToActivationKind.put(config.getOpName(), config.getActivationKind());
                 });
+        config.getProbabilisticConfigurations().forEach(config -> probabilisticConfiguration.put(config.getOpName(), config));
         updateDelay();
     }
 
@@ -118,12 +121,12 @@ public abstract class AbstractSimulator {
         if(!currentState.isInitialised()) {
             List<String> nextTransitions = trace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
             if(nextTransitions.contains("$setup_constants")) {
-                newTrace = executeBeforeInitialisation("$setup_constants", config.getOperationConfigurations(), currentState, newTrace);
+                newTrace = executeBeforeInitialisation("$setup_constants", config.getTimingConfigurations(), currentState, newTrace);
             }
             currentState = newTrace.getCurrentState();
             nextTransitions = newTrace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
             if(nextTransitions.contains("$initialise_machine")) {
-                newTrace = executeBeforeInitialisation("$initialise_machine", config.getOperationConfigurations(), currentState, newTrace);
+                newTrace = executeBeforeInitialisation("$initialise_machine", config.getTimingConfigurations(), currentState, newTrace);
             }
         }
         stepCounter = newTrace.getTransitionList().size();
@@ -132,7 +135,7 @@ public abstract class AbstractSimulator {
 
     protected Trace executeOperations(Trace trace) {
         Trace newTrace = trace;
-        for(OperationConfiguration opConfig : operationConfigurationsSorted) {
+        for(TimingConfiguration opConfig : timingConfigurationsSorted) {
             if (endingConditionReached(newTrace)) {
                 break;
             }
@@ -143,28 +146,28 @@ public abstract class AbstractSimulator {
 
     public abstract boolean endingConditionReached(Trace trace);
 
-    protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
+    protected Trace executeOperation(TimingConfiguration opConfig, Trace trace) {
         return executeNextOperation(opConfig, trace);
     }
 
-    protected abstract Trace executeNextOperation(OperationConfiguration opConfig, Trace trace);
+    protected abstract Trace executeNextOperation(TimingConfiguration opConfig, Trace trace);
 
     protected void activateOperations(Map<String, Integer> activation) {
         if(activation != null) {
             for (String key : activation.keySet()) {
                 List<Integer> activationTimes = operationToActivationTimes.get(key);
-                OperationConfiguration.ActivationKind activationKind = operationToActivationKind.get(key);
-                if(activationKind == OperationConfiguration.ActivationKind.MULTI) {
+                TimingConfiguration.ActivationKind activationKind = operationToActivationKind.get(key);
+                if(activationKind == TimingConfiguration.ActivationKind.MULTI) {
                     activationTimes.add(activation.get(key));
                 } else {
                     if(activationTimes.isEmpty()) {
                         activationTimes.add(activation.get(key));
                     } else {
                         Integer otherActivationTime = activationTimes.get(0);
-                        if(activationKind == OperationConfiguration.ActivationKind.SINGLE_MAX) {
+                        if(activationKind == TimingConfiguration.ActivationKind.SINGLE_MAX) {
                             activationTimes.clear();
                             activationTimes.add(Math.max(otherActivationTime, activation.get(key)));
-                        } else if(activationKind == OperationConfiguration.ActivationKind.SINGLE_MIN) {
+                        } else if(activationKind == TimingConfiguration.ActivationKind.SINGLE_MIN) {
                             activationTimes.clear();
                             activationTimes.add(Math.min(otherActivationTime, activation.get(key)));
                         }
@@ -182,9 +185,9 @@ public abstract class AbstractSimulator {
         }
     }
 
-    protected Trace executeBeforeInitialisation(String operation, List<OperationConfiguration> opConfigurations, State currentState, Trace trace) {
-    	List<OperationConfiguration> opConfigs = opConfigurations.stream()
-				.filter(config -> operation.equals(config.getOpName().get(0)))
+    protected Trace executeBeforeInitialisation(String operation, List<TimingConfiguration> opConfigurations, State currentState, Trace trace) {
+    	List<TimingConfiguration> opConfigs = opConfigurations.stream()
+				.filter(config -> operation.equals(config.getOpName()))
 				.collect(Collectors.toList());
     	String predicate = "";
     	if(opConfigs.isEmpty()) {
@@ -193,48 +196,15 @@ public abstract class AbstractSimulator {
     		if(opConfigs.get(0).getVariableChoices() == null) {
     			predicate = "1=1";
 			} else {
-				predicate = joinPredicateFromValues(currentState, opConfigs.get(0).getVariableChoices().get(0));
+				predicate = joinPredicateFromValues(currentState, opConfigs.get(0).getVariableChoices());
 			}
     		if(opConfigs.get(0).getActivation() != null) {
-                activateOperations(opConfigs.get(0).getActivation().get(0));
+                activateOperations(opConfigs.get(0).getActivation());
             }
 		}
     	updateDelay();
         Transition nextTransition = currentState.findTransition(operation, predicate);
         return trace.add(nextTransition);
-    }
-
-    protected List<Map<String, String>> buildValueCombinations(State currentState, Map<String, Object> values) {
-        List<Map<String, String>> result = new ArrayList<>();
-        for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
-            String key = it.next();
-            Object value = values.get(key);
-            List<String> valueList = new ArrayList<>();
-            if(value instanceof List) {
-                valueList = (List<String>) value;
-            } else if(value instanceof String) {
-                valueList = Arrays.asList((String) value);
-            }
-            if(result.isEmpty()) {
-                for(String element : valueList) {
-                    Map<String, String> initialMap = new HashMap<>();
-                    initialMap.put(key, cache.readValueWithCaching(currentState, element));
-                    result.add(initialMap);
-                }
-            } else {
-                List<Map<String, String>> oldResult = result;
-                result = new ArrayList<>();
-                for(Map<String, String> map : oldResult) {
-                    for(String element : valueList) {
-                        Map<String, String> newMap = new HashMap<>(map);
-                        newMap.put(key, cache.readValueWithCaching(currentState, element));
-                        result.add(newMap);
-                    }
-                }
-
-            }
-        }
-        return result;
     }
 
     protected abstract String chooseVariableValues(State currentState, Map<String, Object> values);

@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
@@ -20,7 +19,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
+import de.prob2.ui.simulation.configuration.TimingConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
@@ -364,15 +363,16 @@ public class SimulatorStage extends Stage {
 		SimulationConfiguration config = simulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
-		for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
+		for(TimingConfiguration opConfig : config.getTimingConfigurations()) {
 			String opName = String.join(", ", opConfig.getOpName());
-			List<Map<String, Integer>> activation = opConfig.getActivation();
+			Map<String, Integer> activation = opConfig.getActivation();
 			String priority = String.valueOf(opConfig.getPriority());
-			List<String> probability = opConfig.getProbability();
+			// TODO
+			//List<String> probability = opConfig.getProbability();
 			if(opConfig.getVariableChoices() == null) {
-				observableList.add(new SimulationDebugItem(opName, activation, priority, probability, null));
+				observableList.add(new SimulationDebugItem(opName, activation, priority, new ArrayList<>(), null));
 			} else {
-				observableList.add(new SimulationDebugItem(opName, activation, priority, probability, opConfig.getVariableChoices()));
+				observableList.add(new SimulationDebugItem(opName, activation, priority, new ArrayList<>(), null));
 			}
 		}
 

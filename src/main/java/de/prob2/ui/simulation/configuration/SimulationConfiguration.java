@@ -1,17 +1,23 @@
 package de.prob2.ui.simulation.configuration;
 
 import java.util.List;
-import java.util.Map;
 
 public class SimulationConfiguration {
 
-    private List<OperationConfiguration> operationConfigurations;
+    private List<TimingConfiguration> timingConfigurations;
 
-    public SimulationConfiguration(List<OperationConfiguration> operationConfigurations) {
-        this.operationConfigurations = operationConfigurations;
+    private List<ProbabilisticConfiguration> probabilisticConfigurations;
+
+    public SimulationConfiguration(List<TimingConfiguration> timingConfigurations, List<ProbabilisticConfiguration> probabilisticConfigurations) {
+        this.timingConfigurations = timingConfigurations;
+        this.probabilisticConfigurations = probabilisticConfigurations;
     }
 
-    public List<OperationConfiguration> getOperationConfigurations() {
-        return operationConfigurations;
+    public List<TimingConfiguration> getTimingConfigurations() {
+        return timingConfigurations;
+    }
+
+    public List<ProbabilisticConfiguration> getProbabilisticConfigurations() {
+        return probabilisticConfigurations;
     }
 }

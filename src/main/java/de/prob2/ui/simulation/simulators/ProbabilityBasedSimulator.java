@@ -8,8 +8,10 @@ import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
+import de.prob2.ui.simulation.configuration.ProbabilisticConfiguration;
+import de.prob2.ui.simulation.configuration.TimingConfiguration;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,48 +46,78 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         return conjuncts.toString();
     }
 
-    @Override
-    public Trace executeNextOperation(OperationConfiguration opConfig, Trace trace) {
-        State currentState = trace.getCurrentState();
-        double probabilityMinimum = 0.0;
-        boolean execute = false;
-        String chosenOp = "";
+    public Map<String, Object> chooseProbabilistic(String opName, State currentState) {
         Map<String, Object> values = null;
-        List<Transition> transitions = null;
-        Map<String, Integer> activation = null;
-        //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
-		double randomDouble = random.nextDouble();
+        ProbabilisticConfiguration opConfig = probabilisticConfiguration.get(opName);
 
-		for(int i = 0; i < opConfig.getOpName().size(); i++) {
-            chosenOp = opConfig.getOpName().get(i);
-            double evalProbability = cache.readProbabilityWithCaching(currentState, chosenOp, opConfig.getProbability().get(i));
+        if(opConfig == null) {
+            return values;
+        }
 
-
-            boolean opScheduled = operationToActivationTimes.get(chosenOp).contains(0);
-            if(opScheduled) {
-				operationToActivationTimes.get(chosenOp).remove(new Integer(0));
+        Object probability = opConfig.getProbability();
+        //choose between non-deterministic assigned variables
+        if(probability instanceof String) {
+            if("uniform".equals(probability.toString())) {
+                return null;
             }
-            if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
-                //select operation only if its time is 0
-                // TODO: Refactor
-                transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
-                if(opScheduled && !transitions.isEmpty()) {
-                    if(opConfig.getVariableChoices() != null) {
-                        values = opConfig.getVariableChoices().get(i);
+        } else {
+            Map<String, Object> probabilityMap = (Map<String, Object>) probability;
+            values = new HashMap<>();
+            for(String variable : probabilityMap.keySet()) {
+                // TODO: cache probability
+                double probabilityMinimum = 0.0;
+                Object probabilityValue = probabilityMap.get(variable);
+                Map<String, String> probabilityValueMap = (Map<String, String>) probabilityValue;
+                double randomDouble = random.nextDouble();
+                for(String value : probabilityValueMap.keySet()) {
+                    String valueProbability = probabilityValueMap.get(value);
+                    double evalProbability = Double.parseDouble(currentState.eval(valueProbability, FormulaExpand.TRUNCATE).toString());
+                    if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
+                        String evalValue = currentState.eval(value, FormulaExpand.TRUNCATE).toString();
+                        values.put(variable, evalValue);
                     }
-                    if(opConfig.getActivation() != null) {
-                        activation = opConfig.getActivation().get(i);
-                    }
-                    execute = true;
+                    probabilityMinimum += evalProbability;
                 }
             }
-            probabilityMinimum += evalProbability;
         }
+
+        return values;
+    }
+
+    @Override
+    public Trace executeNextOperation(TimingConfiguration timingConfig, Trace trace) {
+        State currentState = trace.getCurrentState();
+        boolean execute = false;
+        String chosenOp = timingConfig.getOpName();
+        Map<String, Integer> activation = null;
+
+        boolean opScheduled = operationToActivationTimes.get(chosenOp).contains(0);
+        if(opScheduled) {
+            operationToActivationTimes.get(chosenOp).remove(new Integer(0));
+        }
+
+        //select operation only if its time is 0
+        List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
+        // TODO
+        String additionalGuards = timingConfig.getAdditionalGuards();
+        String additionalGuardsResult = "TRUE";
+        if(additionalGuards != null) {
+            additionalGuardsResult = currentState.eval(additionalGuards, FormulaExpand.TRUNCATE).toString();
+        }
+        if(opScheduled && !transitions.isEmpty() && "TRUE".equals(additionalGuardsResult)) {
+            if(timingConfig.getActivation() != null) {
+                activation = timingConfig.getActivation();
+            }
+            execute = true;
+        }
+
         if(!execute) {
             return trace;
         }
 
         Trace newTrace = trace;
+        Map<String, Object> values = chooseProbabilistic(chosenOp, currentState);
+
         if(values == null) {
             Transition transition = transitions.get(random.nextInt(transitions.size()));
             newTrace = appendTrace(newTrace, transition);

@@ -4,7 +4,6 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.HashMap;
 import java.util.List;
