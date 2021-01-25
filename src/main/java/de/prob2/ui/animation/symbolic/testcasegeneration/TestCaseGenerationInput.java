@@ -65,11 +65,11 @@ public class TestCaseGenerationInput extends VBox {
 	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationChoosingStage choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
-		int maxDepth = Integer.parseInt(testCaseGenerationSettingsHandler.extractDepth(choosingStage, mcdcInputView, operationCoverageInputView));
+		int maxDepth = testCaseGenerationSettingsHandler.extractDepth(choosingStage, mcdcInputView, operationCoverageInputView);
 		boolean valid = testCaseGenerationSettingsHandler.isValid(choosingStage, mcdcInputView, operationCoverageInputView);
 		TestCaseGenerationItem newItem;
 		if (type == TestCaseGenerationType.MCDC) {
-			newItem = new TestCaseGenerationItem(maxDepth, Integer.parseInt(mcdcInputView.getLevel()));
+			newItem = new TestCaseGenerationItem(maxDepth, mcdcInputView.getLevel());
 		} else if (type == TestCaseGenerationType.COVERED_OPERATIONS) {
 			newItem = new TestCaseGenerationItem(maxDepth, operationCoverageInputView.getOperations());
 		} else {
@@ -121,7 +121,7 @@ public class TestCaseGenerationInput extends VBox {
 				if(!testCaseGenerationSettingsHandler.checkMCDCSettings(mcdcInputView.getLevel(), mcdcInputView.getDepth())) {
 					return;
 				}
-				item = new TestCaseGenerationItem(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()));
+				item = new TestCaseGenerationItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
 				testCaseGenerationFormulaHandler.generateTestCases(item);
 				break;
 			}
@@ -129,7 +129,7 @@ public class TestCaseGenerationInput extends VBox {
 				if(!testCaseGenerationSettingsHandler.checkOperationCoverageSettings(operationCoverageInputView.getOperations(), operationCoverageInputView.getDepth())) {
 					return;
 				}
-				item = new TestCaseGenerationItem(Integer.parseInt(operationCoverageInputView.getDepth()), operationCoverageInputView.getOperations());
+				item = new TestCaseGenerationItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
 				testCaseGenerationFormulaHandler.generateTestCases(item);
 				break;
 			}
@@ -151,7 +151,7 @@ public class TestCaseGenerationInput extends VBox {
 					alert.showAndWait();
 					return;
 				}
-				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(mcdcInputView.getDepth()), Integer.parseInt(mcdcInputView.getLevel()));
+				testCaseGenerationFormulaHandler.addItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
 				break;
 			}
 			case COVERED_OPERATIONS: {
@@ -164,7 +164,7 @@ public class TestCaseGenerationInput extends VBox {
 					alert.showAndWait();
 					return;
 				}
-				if(!testCaseGenerationSettingsHandler.checkInteger(operationCoverageInputView.getDepth())) {
+				if(operationCoverageInputView.getDepth() <= 0) {
 					final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
 							"animation.alerts.testcasegeneration.invalid",
 							"animation.alerts.testcasegeneration.coveredoperations.invalid");
@@ -172,7 +172,7 @@ public class TestCaseGenerationInput extends VBox {
 					alert.showAndWait();
 					return;
 				}
-				testCaseGenerationFormulaHandler.addItem(Integer.parseInt(operationCoverageInputView.getDepth()), operations);
+				testCaseGenerationFormulaHandler.addItem(operationCoverageInputView.getDepth(), operations);
 				break;
 			}
 			default:

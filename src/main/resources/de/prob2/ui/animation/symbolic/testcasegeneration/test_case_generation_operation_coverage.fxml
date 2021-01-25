@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView?>
-
 <fx:root type="OperationCoverageInputView" stylesheets="@/prob.css" spacing="5.0" xmlns:fx="http://javafx.com/fxml/1">
 	<TableView fx:id="tvOperations" minHeight="80.0" prefHeight="160.0" VBox.vgrow="ALWAYS">
 		<columns>
@@ -19,7 +18,7 @@
 		</columnResizePolicy>
 	</TableView>
 	<HBox spacing="10.0">
-		<Label text="%animation.testcase.depth" labelFor="$depthField" VBox.vgrow="NEVER"/>
-		<TextField fx:id="depthField" VBox.vgrow="NEVER"/>
+		<Label text="%animation.testcase.depth" labelFor="$depthSpinner" VBox.vgrow="NEVER"/>
+		<Spinner fx:id="depthSpinner" VBox.vgrow="NEVER"/>
 	</HBox>
 </fx:root>

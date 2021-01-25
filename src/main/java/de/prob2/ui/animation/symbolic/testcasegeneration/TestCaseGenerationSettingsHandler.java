@@ -1,8 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class TestCaseGenerationSettingsHandler {
 
@@ -16,24 +14,15 @@ public class TestCaseGenerationSettingsHandler {
 		return valid;
 	}
 	
-	public boolean checkMCDCSettings(String level, String depth) {
-		return checkInteger(level) && checkInteger(depth) && Integer.parseInt(level) >= 0 && Integer.parseInt(depth) > 0;
+	public boolean checkMCDCSettings(int level, int depth) {
+		return level >= 0 && depth > 0;
 	}
 	
-	public boolean checkOperationCoverageSettings(List<String> operations, String depth) {
-		return !operations.isEmpty() && checkInteger(depth) && Integer.parseInt(depth) > 0;
+	public boolean checkOperationCoverageSettings(List<String> operations, int depth) {
+		return !operations.isEmpty() && depth > 0;
 	}
 	
-	public boolean checkInteger(String str) {
-		try {
-			Integer.parseInt(str);
-		} catch(NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
-	
-	public String extractDepth(TestCaseGenerationChoosingStage choosingStage, MCDCInputView mcdcInputView, OperationCoverageInputView operationCoverageInputView) {
+	public int extractDepth(TestCaseGenerationChoosingStage choosingStage, MCDCInputView mcdcInputView, OperationCoverageInputView operationCoverageInputView) {
 		if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
 			return mcdcInputView.getDepth();
 		} else {
