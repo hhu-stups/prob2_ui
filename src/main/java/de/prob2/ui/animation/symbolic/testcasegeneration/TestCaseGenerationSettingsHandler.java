@@ -9,13 +9,4 @@ public class TestCaseGenerationSettingsHandler {
 			return true;
 		}
 	}
-	
-	public int extractDepth(TestCaseGenerationChoosingStage choosingStage, MCDCInputView mcdcInputView, OperationCoverageInputView operationCoverageInputView) {
-		if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
-			return mcdcInputView.getDepth();
-		} else {
-			return operationCoverageInputView.getDepth();
-		}
-	}
-	
 }

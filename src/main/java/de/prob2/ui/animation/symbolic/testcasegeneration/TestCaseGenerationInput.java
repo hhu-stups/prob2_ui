@@ -65,13 +65,12 @@ public class TestCaseGenerationInput extends VBox {
 	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationChoosingStage choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
-		int maxDepth = testCaseGenerationSettingsHandler.extractDepth(choosingStage, mcdcInputView, operationCoverageInputView);
 		boolean valid = testCaseGenerationSettingsHandler.isValid(choosingStage, operationCoverageInputView);
 		TestCaseGenerationItem newItem;
 		if (type == TestCaseGenerationType.MCDC) {
-			newItem = new TestCaseGenerationItem(maxDepth, mcdcInputView.getLevel());
+			newItem = new TestCaseGenerationItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
 		} else if (type == TestCaseGenerationType.COVERED_OPERATIONS) {
-			newItem = new TestCaseGenerationItem(maxDepth, operationCoverageInputView.getOperations());
+			newItem = new TestCaseGenerationItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
 		} else {
 			throw new AssertionError("Unhandled type: " + type);
 		}
