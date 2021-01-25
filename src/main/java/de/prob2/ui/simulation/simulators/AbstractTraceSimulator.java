@@ -14,6 +14,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.TimingConfiguration;
 
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
         State currentState = trace.getCurrentState();
         boolean execute = false;
         Map<String, Object> values = null;
-        Map<String, Integer> activation = null;
+        Map<String, ActivationConfiguration> activationConfiguration = null;
 
         //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
         String chosenOp = timingConfig.getOpName();
@@ -95,58 +96,55 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
         List<String> enabledOperations = trace.getNextTransitions().stream()
                 .map(Transition::getName)
                 .collect(Collectors.toList());
-        boolean equalsNextOperation = chosenOp.equals(persistentTrace.getTransitionList().get(counter).getOperationName());
-
-        boolean operationScheduled = operationToActivationTimes.get(chosenOp).contains(0);
-        if(operationScheduled) {
-            final String finalChosenOp = chosenOp;
-            operationToActivationTimes.get(chosenOp).remove(new Integer(0));
-        }
-        //boolean chooseOperation = operationScheduled && ((Math.abs(evalProbability - 1.0) < 0.0001 && !equalsNextOperation) || (equalsNextOperation && evalProbability > 0.0) && enabledOperations.contains(chosenOp));
-
-        // TODO: What if sum of scheduled operations has 100% probability and is not equal next operation in trace
-        if(operationScheduled) {
-            if(timingConfig.getVariableChoices() != null) {
-                values = timingConfig.getVariableChoices();
-            }
-            if(timingConfig.getActivation() != null) {
-                activation = timingConfig.getActivation();
-            }
-            execute = true;
-        }
-        if(!execute) {
-            return trace;
-        }
-
-
-        List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
-        PersistentTransition persistentTransition = transitionList.get(counter);
+        List<Activation> activationForOperation = operationToActivation.get(chosenOp);
+        List<Activation> activationForOperationCopy = new ArrayList<>(operationToActivation.get(chosenOp));
 
         Trace newTrace = trace;
-
-        if(values == null) {
-            String finalChosenOp = chosenOp;
-            List<Transition> transitions = cache.readTransitionsWithCaching(currentState, finalChosenOp).stream()
-                    .filter(trans -> trans.getName().equals(finalChosenOp) && finalChosenOp.equals(persistentTransition.getOperationName()))
-                    .collect(Collectors.toList());
-            if(!transitions.isEmpty()) {
-                PredicateBuilder predicateBuilder = new PredicateBuilder();
-                buildPredicateFromTrace(predicateBuilder, persistentTransition);
-                StateSpace stateSpace = trace.getStateSpace();
-                final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.TRUNCATE);
-                final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
-                        currentState.getId(), persistentTransition.getOperationName(), pred, 1);
-                stateSpace.execute(command);
-                newTrace = newTrace.add(command.getNewTransitions().get(0));
-				activateOperations(activation);
+        for(Activation activation : activationForOperationCopy) {
+            if(activation.getTime() > 0) {
+                break;
             }
-        } else {
-            State finalCurrentState = newTrace.getCurrentState();
-            String predicate = chooseVariableValues(finalCurrentState, values);
-            if(finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, chosenOp, predicate)) {
-                Transition transition = finalCurrentState.findTransition(chosenOp, predicate);
-                newTrace = newTrace.add(transition);
-                activateOperations(activation);
+            activationForOperation.remove(activation);
+
+            // TODO: What if sum of scheduled operations has 100% probability and is not equal next operation in trace
+            if (timingConfig.getVariableChoices() != null) {
+                values = timingConfig.getVariableChoices();
+            }
+            if (timingConfig.getActivation() != null) {
+                activationConfiguration = timingConfig.getActivation();
+            }
+            if (!enabledOperations.contains(chosenOp)) {
+                return trace;
+            }
+
+
+            List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
+            PersistentTransition persistentTransition = transitionList.get(counter);
+
+            if (values == null) {
+                String finalChosenOp = chosenOp;
+                List<Transition> transitions = cache.readTransitionsWithCaching(currentState, finalChosenOp).stream()
+                        .filter(trans -> trans.getName().equals(finalChosenOp) && finalChosenOp.equals(persistentTransition.getOperationName()))
+                        .collect(Collectors.toList());
+                if (!transitions.isEmpty()) {
+                    PredicateBuilder predicateBuilder = new PredicateBuilder();
+                    buildPredicateFromTrace(predicateBuilder, persistentTransition);
+                    StateSpace stateSpace = trace.getStateSpace();
+                    final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.TRUNCATE);
+                    final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
+                            currentState.getId(), persistentTransition.getOperationName(), pred, 1);
+                    stateSpace.execute(command);
+                    newTrace = newTrace.add(command.getNewTransitions().get(0));
+                    activateOperations(activationConfiguration);
+                }
+            } else {
+                State finalCurrentState = newTrace.getCurrentState();
+                String predicate = chooseVariableValues(finalCurrentState, values);
+                if (finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, chosenOp, predicate)) {
+                    Transition transition = finalCurrentState.findTransition(chosenOp, predicate);
+                    newTrace = newTrace.add(transition);
+                    activateOperations(activationConfiguration);
+                }
             }
         }
         return newTrace;

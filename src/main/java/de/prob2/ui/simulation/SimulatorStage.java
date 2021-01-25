@@ -19,8 +19,10 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.TimingConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.simulators.Activation;
 import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -365,14 +367,14 @@ public class SimulatorStage extends Stage {
 
 		for(TimingConfiguration opConfig : config.getTimingConfigurations()) {
 			String opName = String.join(", ", opConfig.getOpName());
-			Map<String, Integer> activation = opConfig.getActivation();
+			Map<String, ActivationConfiguration> activationConfiguration = opConfig.getActivation();
 			String priority = String.valueOf(opConfig.getPriority());
 			// TODO
 			//List<String> probability = opConfig.getProbability();
 			if(opConfig.getVariableChoices() == null) {
-				observableList.add(new SimulationDebugItem(opName, activation, priority, new ArrayList<>(), null));
+				observableList.add(new SimulationDebugItem(opName, new ArrayList<>(), priority, new ArrayList<>(), null));
 			} else {
-				observableList.add(new SimulationDebugItem(opName, activation, priority, new ArrayList<>(), null));
+				observableList.add(new SimulationDebugItem(opName, new ArrayList<>(), priority, new ArrayList<>(), null));
 			}
 		}
 

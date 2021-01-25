@@ -3,7 +3,7 @@ package de.prob2.ui.simulation.simulators;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.configuration.ProbabilisticConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.TimingConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
@@ -15,10 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,13 +35,11 @@ public abstract class AbstractSimulator {
 
     protected boolean finished;
 
-    protected Map<String, List<Integer>> operationToActivationTimes;
+    protected Map<String, List<Activation>> operationToActivation;
 
     protected Map<String, TimingConfiguration.ActivationKind> operationToActivationKind;
 
     protected List<TimingConfiguration> timingConfigurationsSorted;
-
-    protected Map<String, ProbabilisticConfiguration> probabilisticConfiguration;
 
     protected SimulatorCache cache;
 
@@ -65,9 +61,8 @@ public abstract class AbstractSimulator {
     }
 
     public void resetSimulator() {
-        this.operationToActivationTimes = new HashMap<>();
+        this.operationToActivation = new HashMap<>();
         this.operationToActivationKind = new HashMap<>();
-        this.probabilisticConfiguration = new HashMap<>();
         this.time.set(0);
         this.finished = false;
         this.stepCounter = 0;
@@ -83,10 +78,9 @@ public abstract class AbstractSimulator {
     private void initializeRemainingTime() {
         config.getTimingConfigurations()
                 .forEach(config -> {
-                    operationToActivationTimes.put(config.getOpName(), new ArrayList<>());
+                    operationToActivation.put(config.getOpName(), new ArrayList<>());
                     operationToActivationKind.put(config.getOpName(), config.getActivationKind());
                 });
-        config.getProbabilisticConfigurations().forEach(config -> probabilisticConfiguration.put(config.getOpName(), config));
         updateDelay();
     }
 
@@ -96,8 +90,10 @@ public abstract class AbstractSimulator {
 
     public void updateRemainingTime(int delay) {
         this.time.set(this.time.get() + delay);
-        for(String key : operationToActivationTimes.keySet()) {
-			operationToActivationTimes.computeIfPresent(key, (k, v) -> operationToActivationTimes.get(key).stream().map(time -> time - delay).collect(Collectors.toList()));
+        for(String key : operationToActivation.keySet()) {
+            for(Activation activation : operationToActivation.get(key)) {
+                activation.decreaseTime(delay);
+            }
         }
     }
 
@@ -152,24 +148,44 @@ public abstract class AbstractSimulator {
 
     protected abstract Trace executeNextOperation(TimingConfiguration opConfig, Trace trace);
 
-    protected void activateOperations(Map<String, Integer> activation) {
+    protected void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
+        if(activationsForOperation.isEmpty()) {
+            activationsForOperation.add(activation);
+            return;
+        }
+        int insertionIndex = 0;
+        while(insertionIndex < activationsForOperation.size() &&
+              activation.getTime() >= activationsForOperation.get(insertionIndex).getTime()) {
+            insertionIndex++;
+        }
+        activationsForOperation.add(insertionIndex, activation);
+    }
+
+    protected void activateOperations(Map<String, ActivationConfiguration> activation) {
         if(activation != null) {
             for (String key : activation.keySet()) {
-                List<Integer> activationTimes = operationToActivationTimes.get(key);
+                List<Activation> activationsForOperation = operationToActivation.get(key);
                 TimingConfiguration.ActivationKind activationKind = operationToActivationKind.get(key);
+                // TODO: Add parameters to activations
+                ActivationConfiguration activationConfiguration = activation.get(key);
                 if(activationKind == TimingConfiguration.ActivationKind.MULTI) {
-                    activationTimes.add(activation.get(key));
+                    activateMultiOperations(activationsForOperation, new Activation(activationConfiguration));
                 } else {
-                    if(activationTimes.isEmpty()) {
-                        activationTimes.add(activation.get(key));
+                    if(activationsForOperation.isEmpty()) {
+                        activationsForOperation.add(new Activation(activationConfiguration));
                     } else {
-                        Integer otherActivationTime = activationTimes.get(0);
+                        Activation activationForOperation = activationsForOperation.get(0);
+                        int otherActivationTime = activationForOperation.getTime();
                         if(activationKind == TimingConfiguration.ActivationKind.SINGLE_MAX) {
-                            activationTimes.clear();
-                            activationTimes.add(Math.max(otherActivationTime, activation.get(key)));
+                            if(activationConfiguration.getTime() > otherActivationTime) {
+                                activationsForOperation.clear();
+                                activationsForOperation.add(new Activation(activationConfiguration));
+                            }
                         } else if(activationKind == TimingConfiguration.ActivationKind.SINGLE_MIN) {
-                            activationTimes.clear();
-                            activationTimes.add(Math.min(otherActivationTime, activation.get(key)));
+                            if(activationConfiguration.getTime() < otherActivationTime) {
+                                activationsForOperation.clear();
+                                activationsForOperation.add(new Activation(activationConfiguration));
+                            }
                         }
                     }
                 }
@@ -237,10 +253,10 @@ public abstract class AbstractSimulator {
 
     public void updateDelay() {
     	int delay = Integer.MAX_VALUE;
-    	for(List<Integer> times : operationToActivationTimes.values()) {
-    		for(int time : times) {
-    			if(time < delay) {
-    				delay = time;
+    	for(List<Activation> activations : operationToActivation.values()) {
+    		for(Activation activation : activations) {
+    			if(activation.getTime() < delay) {
+    				delay = activation.getTime();
 				}
 			}
 		}

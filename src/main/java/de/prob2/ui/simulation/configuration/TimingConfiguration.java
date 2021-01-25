@@ -1,17 +1,17 @@
 package de.prob2.ui.simulation.configuration;
 
-import java.util.List;
+
 import java.util.Map;
 
 public class TimingConfiguration {
 
-    public static enum ActivationKind {
+    public enum ActivationKind {
         SINGLE, SINGLE_MIN, SINGLE_MAX, MULTI
     }
 
     private String opName;
 
-    private Map<String, Integer> activation;
+    private Map<String, ActivationConfiguration> activation;
 
     private ActivationKind activationKind;
 
@@ -21,7 +21,7 @@ public class TimingConfiguration {
 
     private Map<String, Object> variableChoices;
 
-    public TimingConfiguration(String opName, Map<String, Integer> activation, ActivationKind activationKind,
+    public TimingConfiguration(String opName, Map<String, ActivationConfiguration> activation, ActivationKind activationKind,
                                String additionalGuards, int priority, Map<String, Object> variableChoices) {
         this.opName = opName;
         this.activation = activation;
@@ -35,7 +35,7 @@ public class TimingConfiguration {
         return opName;
     }
 
-    public Map<String, Integer> getActivation() {
+    public Map<String, ActivationConfiguration> getActivation() {
         return activation;
     }
 

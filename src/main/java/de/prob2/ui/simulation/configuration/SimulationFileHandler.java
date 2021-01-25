@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
+import de.prob2.ui.simulation.simulators.Activation;
 
 import java.io.File;
 import java.io.FileReader;
@@ -22,14 +23,15 @@ public class SimulationFileHandler {
         JsonReader reader = new JsonReader(new FileReader(inputFile));
         JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
 
-        JsonArray timingConfigurationsAsArray = simulationFile.get("timingConfigurations").getAsJsonArray();
-        List<ProbabilisticConfiguration> probabilisticConfigurations = new ArrayList<>();
-        if(simulationFile.get("probabilisticConfigurations") != null) {
-            JsonArray probabilisticConfigurationsAsArray = simulationFile.get("probabilisticConfigurations").getAsJsonArray();
-            probabilisticConfigurations = buildProbabilisticConfiguration(probabilisticConfigurationsAsArray);
+        Map<String, ActivationConfiguration> activationConfigurations = new HashMap<>();
+        if(simulationFile.get("activations") != null) {
+            JsonObject activationConfigurationsAsObject = simulationFile.get("activations").getAsJsonObject();
+            activationConfigurations = buildActivationConfigurations(activationConfigurationsAsObject);
         }
-        List<TimingConfiguration> timingConfigurations = buildTimingConfigurations(timingConfigurationsAsArray);
-        return new SimulationConfiguration(timingConfigurations, probabilisticConfigurations);
+
+        JsonArray timingConfigurationsAsArray = simulationFile.get("timingConfigurations").getAsJsonArray();
+        List<TimingConfiguration> timingConfigurations = buildTimingConfigurations(activationConfigurations, timingConfigurationsAsArray);
+        return new SimulationConfiguration(activationConfigurations, timingConfigurations);
     }
 
     private static Map<String, Object> buildVariableChoices(JsonObject jsonObject) {
@@ -53,12 +55,40 @@ public class SimulationFileHandler {
         }
     }
 
-    private static List<TimingConfiguration> buildTimingConfigurations(JsonArray timingConfigurationsAsArray) {
+    private static Map<String, ActivationConfiguration> buildActivationConfigurations(JsonObject activationConfigurationsAsObject) {
+        Map<String, ActivationConfiguration> activationConfigurations = new HashMap<>();
+
+        for(String activationName : activationConfigurationsAsObject.keySet()) {
+            JsonObject activationAsObject = activationConfigurationsAsObject.getAsJsonObject(activationName);
+            int time = activationAsObject.get("time").getAsInt();
+            JsonElement probabilityAsElement = activationAsObject.get("probability");
+            if(probabilityAsElement.isJsonPrimitive()) {
+                activationConfigurations.put(activationName, new ActivationConfiguration(time, probabilityAsElement.getAsString()));
+            } else {
+                JsonObject probabilityObject = probabilityAsElement.getAsJsonObject();
+                Map<String, Object> probabilityMap = new HashMap<>();
+                JsonObject probabilityVariableObject = probabilityObject.getAsJsonObject();
+
+                for (String variable : probabilityVariableObject.keySet()) {
+                    JsonObject probabilityValueObject = probabilityVariableObject.get(variable).getAsJsonObject();
+                    Map<String, String> probabilityValueMap = new HashMap<>();
+                    for (String parameter : probabilityValueObject.keySet()) {
+                        probabilityValueMap.put(parameter, probabilityValueObject.get(parameter).getAsString());
+                    }
+                    probabilityMap.put(variable, probabilityValueMap);
+                }
+                activationConfigurations.put(activationName, new ActivationConfiguration(time, probabilityMap));
+            }
+        }
+        return activationConfigurations;
+    }
+
+    private static List<TimingConfiguration> buildTimingConfigurations(Map<String, ActivationConfiguration> activationConfigurations, JsonArray timingConfigurationsAsArray) {
         List<TimingConfiguration> timingConfigurations = new ArrayList<>();
         for(int i = 0; i < timingConfigurationsAsArray.size(); i++) {
             JsonObject jsonObject = (JsonObject) timingConfigurationsAsArray.get(i);
             String opName = jsonObject.get("opName").getAsString();
-            Map<String, Integer> activation = null;
+            Map<String, ActivationConfiguration> activation = null;
             String additionalGuards = jsonObject.get("additionalGuards") == null ? null : jsonObject.get("additionalGuards").getAsString();
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
 
@@ -68,7 +98,14 @@ public class SimulationFileHandler {
                 JsonObject activationObject = jsonObject.get("activation").getAsJsonObject();
                 if(activationObject != null) {
                     for (String key : activationObject.keySet()) {
-                        activation.put(key, activationObject.get(key).getAsInt());
+                        // TODO: Implement explicit definition of activation with object
+                        String activationConfigurationAsString = activationObject.get(key).getAsString();
+                        if(activationConfigurationAsString.startsWith("$")) {
+                            activation.put(key, activationConfigurations.get(activationConfigurationAsString.substring(1)));
+                        } else {
+                            activation.put(key, new ActivationConfiguration(Integer.parseInt(activationConfigurationAsString), null));
+                        }
+
                     }
                 }
             }
@@ -91,33 +128,6 @@ public class SimulationFileHandler {
             timingConfigurations.add(new TimingConfiguration(opName, activation, activationKind, additionalGuards, priority, variableChoices));
         }
         return timingConfigurations;
-    }
-
-    private static List<ProbabilisticConfiguration> buildProbabilisticConfiguration(JsonArray probabilisticConfigurationsAsArray) {
-        List<ProbabilisticConfiguration> probabilisticConfigurations = new ArrayList<>();
-        Object probability = null;
-        for(int i = 0; i < probabilisticConfigurationsAsArray.size(); i++) {
-            JsonObject jsonObject = (JsonObject) probabilisticConfigurationsAsArray.get(i);
-            String opName = jsonObject.get("opName").getAsString();
-            if(jsonObject.get("probability").isJsonPrimitive()) {
-                probabilisticConfigurations.add(new ProbabilisticConfiguration(opName, jsonObject.get("probability").getAsString()));
-            } else {
-                JsonObject probabilityObject = jsonObject.get("probability").getAsJsonObject();
-                Map<String, Object> probabilityMap = new HashMap<>();
-                JsonObject probabilityVariableObject = probabilityObject.getAsJsonObject();
-
-                for (String variable : probabilityVariableObject.keySet()) {
-                    JsonObject probabilityValueObject = probabilityVariableObject.get(variable).getAsJsonObject();
-                    Map<String, String> probabilityValueMap = new HashMap<>();
-                    for (String parameter : probabilityValueObject.keySet()) {
-                        probabilityValueMap.put(parameter, probabilityValueObject.get(parameter).getAsString());
-                    }
-                    probabilityMap.put(variable, probabilityValueMap);
-                }
-                probabilisticConfigurations.add(new ProbabilisticConfiguration(opName, probabilityMap));
-            }
-        }
-        return probabilisticConfigurations;
     }
 
 

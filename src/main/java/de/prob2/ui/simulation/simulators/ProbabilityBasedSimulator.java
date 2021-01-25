@@ -8,9 +8,10 @@ import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.configuration.ProbabilisticConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.TimingConfiguration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,15 +47,13 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         return conjuncts.toString();
     }
 
-    public Map<String, Object> chooseProbabilistic(String opName, State currentState) {
+    public Map<String, Object> chooseProbabilistic(Activation activation, State currentState) {
         Map<String, Object> values = null;
-        ProbabilisticConfiguration opConfig = probabilisticConfiguration.get(opName);
 
-        if(opConfig == null) {
+        Object probability = activation.getProbability();
+        if(probability == null) {
             return values;
         }
-
-        Object probability = opConfig.getProbability();
         //choose between non-deterministic assigned variables
         if(probability instanceof String) {
             if("uniform".equals(probability.toString())) {
@@ -87,51 +86,57 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     @Override
     public Trace executeNextOperation(TimingConfiguration timingConfig, Trace trace) {
         State currentState = trace.getCurrentState();
-        boolean execute = false;
         String chosenOp = timingConfig.getOpName();
-        Map<String, Integer> activation = null;
+        Map<String, ActivationConfiguration> activationConfiguration = null;
 
-        boolean opScheduled = operationToActivationTimes.get(chosenOp).contains(0);
-        if(opScheduled) {
-            operationToActivationTimes.get(chosenOp).remove(new Integer(0));
-        }
-
-        //select operation only if its time is 0
         List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
-        // TODO
-        String additionalGuards = timingConfig.getAdditionalGuards();
-        String additionalGuardsResult = "TRUE";
-        if(additionalGuards != null) {
-            additionalGuardsResult = currentState.eval(additionalGuards, FormulaExpand.TRUNCATE).toString();
-        }
-        if(opScheduled && !transitions.isEmpty() && "TRUE".equals(additionalGuardsResult)) {
-            if(timingConfig.getActivation() != null) {
-                activation = timingConfig.getActivation();
-            }
-            execute = true;
-        }
 
-        if(!execute) {
-            return trace;
-        }
+        List<Activation> activationForOperation = operationToActivation.get(chosenOp);
+        List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
 
         Trace newTrace = trace;
-        Map<String, Object> values = chooseProbabilistic(chosenOp, currentState);
+        for(Activation activation : activationForOperationCopy) {
+            //select operation only if its time is 0
+            if(activation.getTime() > 0) {
+                break;
+            }
+            activationForOperation.remove(activation);
 
-        if(values == null) {
-            Transition transition = transitions.get(random.nextInt(transitions.size()));
-            newTrace = appendTrace(newTrace, transition);
-			activateOperations(activation);
-        } else {
-            State finalCurrentState = newTrace.getCurrentState();
-            String predicate = chooseVariableValues(finalCurrentState, values);
-            final IEvalElement pred = newTrace.getModel().parseFormula(predicate, FormulaExpand.TRUNCATE);
-            final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(finalCurrentState.getStateSpace(), finalCurrentState.getId(), chosenOp, pred, 1);
-            finalCurrentState.getStateSpace().execute(command);
-            if (!command.hasErrors()) {
-                Transition transition = command.getNewTransitions().get(0);
+            // TODO
+            String additionalGuards = timingConfig.getAdditionalGuards();
+            String additionalGuardsResult = "TRUE";
+            if (additionalGuards != null) {
+                additionalGuardsResult = currentState.eval(additionalGuards, FormulaExpand.TRUNCATE).toString();
+            }
+            boolean execute = false;
+            if (!transitions.isEmpty() && "TRUE".equals(additionalGuardsResult)) {
+                if (timingConfig.getActivation() != null) {
+                    activationConfiguration = timingConfig.getActivation();
+                }
+                execute = true;
+            }
+
+            if (!execute) {
+                continue;
+            }
+
+            Map<String, Object> values = chooseProbabilistic(activation, currentState);
+
+            if (values == null) {
+                Transition transition = transitions.get(random.nextInt(transitions.size()));
                 newTrace = appendTrace(newTrace, transition);
-				activateOperations(activation);
+                activateOperations(activationConfiguration);
+            } else {
+                State finalCurrentState = newTrace.getCurrentState();
+                String predicate = chooseVariableValues(finalCurrentState, values);
+                final IEvalElement pred = newTrace.getModel().parseFormula(predicate, FormulaExpand.TRUNCATE);
+                final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(finalCurrentState.getStateSpace(), finalCurrentState.getId(), chosenOp, pred, 1);
+                finalCurrentState.getStateSpace().execute(command);
+                if (!command.hasErrors()) {
+                    Transition transition = command.getNewTransitions().get(0);
+                    newTrace = appendTrace(newTrace, transition);
+                    activateOperations(activationConfiguration);
+                }
             }
         }
         stepCounter = newTrace.getTransitionList().size();
