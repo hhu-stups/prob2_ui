@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +108,7 @@ public class SimulationFileHandler {
         for(int i = 0; i < timingConfigurationsAsArray.size(); i++) {
             JsonObject jsonObject = (JsonObject) timingConfigurationsAsArray.get(i);
             String opName = jsonObject.get("opName").getAsString();
-            Map<String, ActivationConfiguration> activation = null;
+            Map<String, List<ActivationConfiguration>> activation = null;
             String additionalGuards = jsonObject.get("additionalGuards") == null ? null : jsonObject.get("additionalGuards").getAsString();
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
 
@@ -117,12 +118,28 @@ public class SimulationFileHandler {
                 JsonObject activationObject = jsonObject.get("activation").getAsJsonObject();
                 if(activationObject != null) {
                     for (String key : activationObject.keySet()) {
-                        // TODO: Implement explicit definition of activation with object
-                        String activationConfigurationAsString = activationObject.get(key).getAsString();
-                        if(activationConfigurationAsString.startsWith("$")) {
-                            activation.put(key, activationConfigurations.get(activationConfigurationAsString.substring(1)));
+
+                        JsonElement activationElement = activationObject.get(key);
+                        // TODO: Refactor
+                        if(activationElement.isJsonArray()) {
+                            List<ActivationConfiguration> activations = new ArrayList<>();
+                            for(int j = 0; j < activationElement.getAsJsonArray().size(); j++) {
+                                String activationConfigurationAsString = activationElement.getAsJsonArray().get(j).getAsString();
+                                if (activationConfigurationAsString.startsWith("$")) {
+                                    activations.add(activationConfigurations.get(activationConfigurationAsString.substring(1)));
+                                } else {
+                                    activations.add(new ActivationConfiguration(Integer.parseInt(activationConfigurationAsString), null, null));
+                                }
+                            }
+                            activation.put(key, activations);
                         } else {
-                            activation.put(key, new ActivationConfiguration(Integer.parseInt(activationConfigurationAsString), null, null));
+                            // TODO: Implement explicit definition of activation with object
+                            String activationConfigurationAsString = activationElement.getAsString();
+                            if (activationConfigurationAsString.startsWith("$")) {
+                                activation.put(key, Arrays.asList(activationConfigurations.get(activationConfigurationAsString.substring(1))));
+                            } else {
+                                activation.put(key, Arrays.asList(new ActivationConfiguration(Integer.parseInt(activationConfigurationAsString), null, null)));
+                            }
                         }
 
                     }

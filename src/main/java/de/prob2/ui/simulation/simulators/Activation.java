@@ -2,16 +2,20 @@ package de.prob2.ui.simulation.simulators;
 
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class Activation {
 
     private int time;
 
+    private Map<String, String> parameters;
+
     private Object probability;
 
     public Activation(ActivationConfiguration activationConfiguration) {
         this.time = activationConfiguration.getTime();
+        this.parameters = activationConfiguration.getParameters();
         this.probability = activationConfiguration.getProbability();
     }
 
@@ -21,6 +25,10 @@ public class Activation {
 
     public int getTime() {
         return time;
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 
     public Object getProbability() {

@@ -367,7 +367,7 @@ public class SimulatorStage extends Stage {
 
 		for(TimingConfiguration opConfig : config.getTimingConfigurations()) {
 			String opName = String.join(", ", opConfig.getOpName());
-			Map<String, ActivationConfiguration> activationConfiguration = opConfig.getActivation();
+			Map<String, List<ActivationConfiguration>> activationConfiguration = opConfig.getActivation();
 			String priority = String.valueOf(opConfig.getPriority());
 			// TODO
 			//List<String> probability = opConfig.getProbability();

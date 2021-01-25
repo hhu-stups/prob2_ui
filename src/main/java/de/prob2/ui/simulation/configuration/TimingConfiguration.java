@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.configuration;
 
 
+import java.util.List;
 import java.util.Map;
 
 public class TimingConfiguration {
@@ -11,7 +12,7 @@ public class TimingConfiguration {
 
     private String opName;
 
-    private Map<String, ActivationConfiguration> activation;
+    private Map<String, List<ActivationConfiguration>> activation;
 
     private ActivationKind activationKind;
 
@@ -21,7 +22,7 @@ public class TimingConfiguration {
 
     private Map<String, Object> variableChoices;
 
-    public TimingConfiguration(String opName, Map<String, ActivationConfiguration> activation, ActivationKind activationKind,
+    public TimingConfiguration(String opName, Map<String, List<ActivationConfiguration>> activation, ActivationKind activationKind,
                                String additionalGuards, int priority, Map<String, Object> variableChoices) {
         this.opName = opName;
         this.activation = activation;
@@ -35,7 +36,7 @@ public class TimingConfiguration {
         return opName;
     }
 
-    public Map<String, ActivationConfiguration> getActivation() {
+    public Map<String, List<ActivationConfiguration>> getActivation() {
         return activation;
     }
 

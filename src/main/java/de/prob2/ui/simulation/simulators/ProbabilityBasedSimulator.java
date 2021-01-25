@@ -87,7 +87,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     public Trace executeNextOperation(TimingConfiguration timingConfig, Trace trace) {
         State currentState = trace.getCurrentState();
         String chosenOp = timingConfig.getOpName();
-        Map<String, ActivationConfiguration> activationConfiguration = null;
+        Map<String, List<ActivationConfiguration>> activationConfiguration = null;
 
         List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
 
@@ -119,6 +119,8 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
             if (!execute) {
                 continue;
             }
+
+            // TODO: Implement handling of parameters
 
             Map<String, Object> values = chooseProbabilistic(activation, currentState);
 

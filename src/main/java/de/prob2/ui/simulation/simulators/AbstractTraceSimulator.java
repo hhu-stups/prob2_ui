@@ -88,7 +88,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
         State currentState = trace.getCurrentState();
         boolean execute = false;
         Map<String, Object> values = null;
-        Map<String, ActivationConfiguration> activationConfiguration = null;
+        Map<String, List<ActivationConfiguration>> activationConfiguration = null;
 
         //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
         String chosenOp = timingConfig.getOpName();

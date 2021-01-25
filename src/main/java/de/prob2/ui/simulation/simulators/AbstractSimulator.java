@@ -161,30 +161,32 @@ public abstract class AbstractSimulator {
         activationsForOperation.add(insertionIndex, activation);
     }
 
-    protected void activateOperations(Map<String, ActivationConfiguration> activation) {
+    protected void activateOperations(Map<String, List<ActivationConfiguration>> activation) {
         if(activation != null) {
             for (String key : activation.keySet()) {
                 List<Activation> activationsForOperation = operationToActivation.get(key);
                 TimingConfiguration.ActivationKind activationKind = operationToActivationKind.get(key);
                 // TODO: Add parameters to activations
-                ActivationConfiguration activationConfiguration = activation.get(key);
-                if(activationKind == TimingConfiguration.ActivationKind.MULTI) {
-                    activateMultiOperations(activationsForOperation, new Activation(activationConfiguration));
-                } else {
-                    if(activationsForOperation.isEmpty()) {
-                        activationsForOperation.add(new Activation(activationConfiguration));
+                List<ActivationConfiguration> activationConfigurations = activation.get(key);
+                for (ActivationConfiguration activationConfiguration : activationConfigurations) {
+                    if (activationKind == TimingConfiguration.ActivationKind.MULTI) {
+                        activateMultiOperations(activationsForOperation, new Activation(activationConfiguration));
                     } else {
-                        Activation activationForOperation = activationsForOperation.get(0);
-                        int otherActivationTime = activationForOperation.getTime();
-                        if(activationKind == TimingConfiguration.ActivationKind.SINGLE_MAX) {
-                            if(activationConfiguration.getTime() > otherActivationTime) {
-                                activationsForOperation.clear();
-                                activationsForOperation.add(new Activation(activationConfiguration));
-                            }
-                        } else if(activationKind == TimingConfiguration.ActivationKind.SINGLE_MIN) {
-                            if(activationConfiguration.getTime() < otherActivationTime) {
-                                activationsForOperation.clear();
-                                activationsForOperation.add(new Activation(activationConfiguration));
+                        if (activationsForOperation.isEmpty()) {
+                            activationsForOperation.add(new Activation(activationConfiguration));
+                        } else {
+                            Activation activationForOperation = activationsForOperation.get(0);
+                            int otherActivationTime = activationForOperation.getTime();
+                            if (activationKind == TimingConfiguration.ActivationKind.SINGLE_MAX) {
+                                if (activationConfiguration.getTime() > otherActivationTime) {
+                                    activationsForOperation.clear();
+                                    activationsForOperation.add(new Activation(activationConfiguration));
+                                }
+                            } else if (activationKind == TimingConfiguration.ActivationKind.SINGLE_MIN) {
+                                if (activationConfiguration.getTime() < otherActivationTime) {
+                                    activationsForOperation.clear();
+                                    activationsForOperation.add(new Activation(activationConfiguration));
+                                }
                             }
                         }
                     }
