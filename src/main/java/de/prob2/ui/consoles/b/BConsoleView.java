@@ -6,6 +6,7 @@ import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.CSPModel;
 import de.prob.model.representation.XTLModel;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -24,6 +25,7 @@ public class BConsoleView extends VBox {
 	@FXML private ResourceBundle bundle;
 	@FXML private BConsole bConsole;
 	@FXML private Label languageLabel;
+	@FXML private HelpButton helpButton;
 	
 	@Inject
 	private BConsoleView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
@@ -64,6 +66,7 @@ public class BConsoleView extends VBox {
 				this.bConsole.setPrompt(prompt);
 			});
 		});
+		helpButton.setHelpContent("mainView.bconsole", null);
 	}
 	
 	@FXML
