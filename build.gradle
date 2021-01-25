@@ -12,7 +12,7 @@ apply plugin: 'application'
 apply plugin: 'eclipse'
 
 project.group = "de.hhu.stups"
-project.version = "1.0.1-SNAPSHOT"
+project.version = "1.1.0"
 
 if (project != rootProject) {
 	throw new GradleException(
