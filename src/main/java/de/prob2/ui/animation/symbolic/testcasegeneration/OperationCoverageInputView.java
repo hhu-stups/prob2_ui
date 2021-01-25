@@ -89,6 +89,7 @@ public class OperationCoverageInputView extends VBox {
 		operationColumn.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.update(to));
 		this.update(currentTrace.getStateSpace());
+		this.reset();
 	}
 
 	private void update(final StateSpace to) {
@@ -112,7 +113,7 @@ public class OperationCoverageInputView extends VBox {
 	}
 
 	public void reset() {
-		depthField.clear();
+		depthField.setText("5");
 	}
 
 	public void setItem(TestCaseGenerationItem item) {

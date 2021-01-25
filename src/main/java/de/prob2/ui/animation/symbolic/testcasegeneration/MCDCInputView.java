@@ -24,6 +24,11 @@ public class MCDCInputView extends VBox {
 		stageManager.loadFXML(this, "test_case_generation_mcdc.fxml");
 	}
 
+	@FXML
+	private void initialize() {
+		this.reset();
+	}
+
 	public String getLevel() {
 		return levelField.getText();
 	}
@@ -33,8 +38,8 @@ public class MCDCInputView extends VBox {
 	}
 
 	public void reset() {
-		levelField.clear();
-		depthField.clear();
+		levelField.setText("2");
+		depthField.setText("5");
 	}
 
 	public void setItem(TestCaseGenerationItem item) {
