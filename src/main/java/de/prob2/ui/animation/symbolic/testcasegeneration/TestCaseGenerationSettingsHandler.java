@@ -33,18 +33,6 @@ public class TestCaseGenerationSettingsHandler {
 		return true;
 	}
 	
-	public Map<String, Object> extractAdditionalInformation(TestCaseGenerationChoosingStage choosingStage, MCDCInputView mcdcInputView, OperationCoverageInputView operationCoverageInputView) {
-		Map<String, Object> additionalInformation = new HashMap<>();
-		if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
-			String level = mcdcInputView.getLevel();
-			additionalInformation.put("level", level);
-		} else if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS) {
-			List<String> operations = operationCoverageInputView.getOperations();
-			additionalInformation.put("operations", operations);
-		}
-		return additionalInformation;
-	}
-	
 	public String extractDepth(TestCaseGenerationChoosingStage choosingStage, MCDCInputView mcdcInputView, OperationCoverageInputView operationCoverageInputView) {
 		if(choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
 			return mcdcInputView.getDepth();
