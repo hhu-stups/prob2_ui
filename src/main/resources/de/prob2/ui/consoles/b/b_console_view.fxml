@@ -9,8 +9,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="400.0" maxWidth="Infinity"
-	maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
+		 maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -21,6 +22,7 @@
 		<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
 			<Button onAction="#handleClear" text="%consoles.b.toolbar.clear"
 				styleClass="button-blue" />
+			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 		</HBox>
 		<VBox.margin>
 			<Insets top="2" bottom="2" />

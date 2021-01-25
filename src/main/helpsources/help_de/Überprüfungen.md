@@ -1,5 +1,3 @@
-# Überprüfungsansicht
-
 Die Überprüfungsansicht liefert 3 verschiedene Methoden eine Maschine zu testen:
 
 * Model-Checking,

@@ -1,4 +1,3 @@
-# Internal Machine Editor
 ![Editor](../../screenshots/Main%20View/Editor.png)
 The internal machine editor allows you to edit and save the current loaded machine as well as to open the machine in an external editor.
 

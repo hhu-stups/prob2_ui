@@ -1,5 +1,3 @@
-# Project View
-
 If no machine or no project has been opened, the Project View will allow you to create a project. If you choose to open a machine without having a project, a default project will be created.
 
 The Project View contains several tabs:

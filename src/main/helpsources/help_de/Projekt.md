@@ -1,5 +1,3 @@
-# Projektansicht
-
 Wenn keine Maschine oder kein Projekt geöffnet wurde, erlaubt es die Projektansicht ein Projekt anzulegen. Wenn man sich entschließt, eine Maschine ohne bestehendes Projekt zu öffnen, wird ein Standardprojekt angelegt.
 
 Die Projektansicht enthält diverse Tabs:

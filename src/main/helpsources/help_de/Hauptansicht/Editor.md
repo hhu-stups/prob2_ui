@@ -1,4 +1,3 @@
-# Interner Maschineneditor
 ![Editor](../../screenshots/Main%20View/Editor.png)
 Mit dem internen Maschineneditor kann man die gerade geladene Maschine editieren und speichern sowie die Maschine in einem externen Editor öffnen.
 

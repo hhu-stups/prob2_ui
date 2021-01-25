@@ -1,5 +1,3 @@
-# Building Own Perspectives
-
 The Window submenu allows you to change perspectives as well as to use your own perspectives. This is the whole FXML code used for the default perspective. 
 
 ```XML

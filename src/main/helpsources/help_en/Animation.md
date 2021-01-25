@@ -1,7 +1,8 @@
-# Animation View
 The Animation View is divided in two sections: Trace Replay and Symbolic Animation.
 ## <a id="Trace"> Trace Replay </a>
+
 ![Trace](../screenshots/Animation/Replay.png)
+
 With this tab you can add and load traces of machines.
 
 By hitting the check button every selected trace will be executed and checked without rewriting your current history of operations. The x button will cancel an ongoing execution of a trace. The folder button allows you to add traces. The questionsmark button will open the help page regarding Trace Replay.
@@ -12,6 +13,7 @@ If errors occurr, you can inspect them by clicking right and selecting Show Erro
 
 You can remove traces by clicking right and select Delete Trace.
 ## <a id="Symbolic"> Symbolic Animation </a> 
+
 ![Symbolic](../screenshots/Animation/Symbolic.png)
 
 In Symbolic Animation you can use animation commands such as `sequence`, `find valid state` and symbolic test case
