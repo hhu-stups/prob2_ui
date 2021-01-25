@@ -61,9 +61,26 @@ public class SimulationFileHandler {
         for(String activationName : activationConfigurationsAsObject.keySet()) {
             JsonObject activationAsObject = activationConfigurationsAsObject.getAsJsonObject(activationName);
             int time = activationAsObject.get("time").getAsInt();
+
+            JsonElement parametersAsElement = activationAsObject.get("parameters");
+            Map<String, String> parameters;
+            if(parametersAsElement == null) {
+                parameters = null;
+            } else {
+                parameters = new HashMap<>();
+                JsonObject parametersAsObject = parametersAsElement.getAsJsonObject();
+                for (String parameter : parametersAsObject.keySet()) {
+                    String parameterValue = parametersAsObject.get(parameter).getAsString();
+                    parameters.put(parameter, parameterValue);
+                }
+            }
+
             JsonElement probabilityAsElement = activationAsObject.get("probability");
-            if(probabilityAsElement.isJsonPrimitive()) {
-                activationConfigurations.put(activationName, new ActivationConfiguration(time, probabilityAsElement.getAsString()));
+            Object probability;
+            if(probabilityAsElement == null) {
+                probability = null;
+            } else if(probabilityAsElement.isJsonPrimitive()) {
+                probability = probabilityAsElement.getAsString();
             } else {
                 JsonObject probabilityObject = probabilityAsElement.getAsJsonObject();
                 Map<String, Object> probabilityMap = new HashMap<>();
@@ -77,8 +94,10 @@ public class SimulationFileHandler {
                     }
                     probabilityMap.put(variable, probabilityValueMap);
                 }
-                activationConfigurations.put(activationName, new ActivationConfiguration(time, probabilityMap));
+                probability = probabilityMap;
             }
+
+            activationConfigurations.put(activationName, new ActivationConfiguration(time, parameters, probability));
         }
         return activationConfigurations;
     }
@@ -103,7 +122,7 @@ public class SimulationFileHandler {
                         if(activationConfigurationAsString.startsWith("$")) {
                             activation.put(key, activationConfigurations.get(activationConfigurationAsString.substring(1)));
                         } else {
-                            activation.put(key, new ActivationConfiguration(Integer.parseInt(activationConfigurationAsString), null));
+                            activation.put(key, new ActivationConfiguration(Integer.parseInt(activationConfigurationAsString), null, null));
                         }
 
                     }
