@@ -2,12 +2,15 @@ package de.prob2.ui.error;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
+import de.prob2.ui.internal.ErrorDisplayFilter;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.binding.Bindings;
@@ -28,16 +31,18 @@ public final class ExceptionAlert extends Alert {
 	@FXML private TextArea stackTraceTextArea;
 	
 	private final StageManager stageManager;
+	private final ErrorDisplayFilter errorDisplayFilter;
 	private final ResourceBundle bundle;
 	private final StringProperty text;
 	private final ObjectProperty<Throwable> exception;
 	private final StringProperty exceptionMessage;
 	
 	@Inject
-	private ExceptionAlert(final StageManager stageManager, final ResourceBundle bundle) {
+	private ExceptionAlert(final StageManager stageManager, final ErrorDisplayFilter errorDisplayFilter, final ResourceBundle bundle) {
 		super(Alert.AlertType.NONE); // Alert type is set in FXML
 		
 		this.stageManager = stageManager;
+		this.errorDisplayFilter = errorDisplayFilter;
 		this.bundle = bundle;
 		
 		this.text = new SimpleStringProperty(this, "text", null);
@@ -79,7 +84,8 @@ public final class ExceptionAlert extends Alert {
 			this.contentVBox.getChildren().remove(this.proBErrorTable);
 			if (proBError != null && proBError.getErrors() != null) {
 				this.contentVBox.getChildren().add(this.proBErrorTable);
-				this.proBErrorTable.getErrorItems().setAll(proBError.getErrors());
+				final List<ErrorItem> filteredErrors = this.errorDisplayFilter.filterErrors(proBError.getErrors());
+				this.proBErrorTable.getErrorItems().setAll(filteredErrors);
 			}
 		});
 	}

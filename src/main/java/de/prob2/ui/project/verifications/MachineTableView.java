@@ -37,6 +37,7 @@ public class MachineTableView extends TableView<Machine> {
 			graphic.getStyleClass().removeAll("unknown", "successful", "failed", "none");
 			if (empty || item == null) {
 				graphic.setVisible(false);
+				this.setText("");
 			} else {
 				graphic.setVisible(true);
 				final String styleClass;

@@ -77,6 +77,10 @@ public final class StateItem {
 		return this.getStructure().getRodinLabels();
 	}
 
+	public ExpandedFormula.FormulaType getType() {
+		return this.getStructure().getType();
+	}
+
 	public BVisual2Value getCurrentValue() {
 		if (this.currentValue == null) {
 			this.currentValue = this.evaluator.evaluate(this.getFormula(), this.getCurrentState());

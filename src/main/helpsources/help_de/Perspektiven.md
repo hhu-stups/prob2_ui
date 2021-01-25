@@ -1,5 +1,3 @@
-# Eigene Perspektiven erstellen
-
 Das Fenster-Submenü erlaubt es Perspektiven zu ändern sowie eigenen Perspektiven zu nutzen. Dies ist der ganze FXML-Code, der in der voreingestellten Perspektive genutzt wird.
 
 ```XML

@@ -64,7 +64,7 @@ public final class StageManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
 
 	private static final String STYLESHEET = "prob.css";
-	private static final Image ICON = new Image(StageManager.class.getResource("/de/prob2/ui/ProB_Icon.png").toExternalForm());
+	public static final Image ICON = new Image(StageManager.class.getResource("/de/prob2/ui/ProB_Icon.png").toExternalForm());
 
 	private final Injector injector;
 	private final MenuToolkit menuToolkit;

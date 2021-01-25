@@ -2,6 +2,8 @@ package de.prob2.ui.menu;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
+import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -40,9 +42,7 @@ public class HelpMenu extends Menu {
 
 	@FXML
 	private void handleReportBug() {
-		final Stage reportBugStage = injector.getInstance(ReportBugStage.class);
-		reportBugStage.show();
-		reportBugStage.toFront();
+		injector.getInstance(ProB2.class).getHostServices().showDocument("https://github.com/hhu-stups/prob-issues/issues/new/choose");
 	}
 
 	MenuItem getAboutItem() {

@@ -17,12 +17,16 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
 public class ModelcheckingStage extends Stage {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingStage.class);
 
 	private static final int INITIAL_NODES_LIMIT = 500000;
 
@@ -99,6 +103,25 @@ public class ModelcheckingStage extends Stage {
 		this.nodesLimit.visibleProperty().bind(chooseNodesLimit.selectedProperty());
 		this.timeLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_TIME_LIMIT, INITIAL_TIME_STEP));
 		this.timeLimit.visibleProperty().bind(chooseTimeLimit.selectedProperty());
+
+		this.nodesLimit.getEditor().textProperty().addListener((observable, from, to) -> {
+			try {
+				nodesLimit.getValueFactory().setValue(Integer.parseInt(to));
+			} catch (NumberFormatException e) {
+				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.invalidInput");
+				alert.initOwner(this);
+				alert.showAndWait();
+			}
+		});
+		this.timeLimit.getEditor().textProperty().addListener((observable, from, to) -> {
+			try {
+				timeLimit.getValueFactory().setValue(Integer.parseInt(to));
+			} catch (NumberFormatException e) {
+				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.invalidInput");
+				alert.initOwner(this);
+				alert.showAndWait();;
+			}
+		});
 	}
 
 	@FXML

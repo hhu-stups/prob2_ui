@@ -16,9 +16,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
@@ -74,7 +75,7 @@ public class OperationCoverageInputView extends VBox {
 	private TableColumn<OperationTableItem, String> operationColumn;
 
 	@FXML
-	private TextField depthField;
+	private Spinner<Integer> depthSpinner;
 
 	@Inject
 	private OperationCoverageInputView(final StageManager stageManager, final CurrentTrace currentTrace) {
@@ -89,6 +90,8 @@ public class OperationCoverageInputView extends VBox {
 		operationColumn.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.update(to));
 		this.update(currentTrace.getStateSpace());
+		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
+		this.reset();
 	}
 
 	private void update(final StateSpace to) {
@@ -107,15 +110,15 @@ public class OperationCoverageInputView extends VBox {
 				.collect(Collectors.toList());
 	}
 
-	public String getDepth() {
-		return depthField.getText();
+	public int getDepth() {
+		return depthSpinner.getValue();
 	}
 
 	public void reset() {
-		depthField.clear();
+		depthSpinner.getValueFactory().setValue(5);
 	}
 
 	public void setItem(TestCaseGenerationItem item) {
-		depthField.setText(String.valueOf(item.getMaxDepth()));
+		depthSpinner.getValueFactory().setValue(item.getMaxDepth());
 	}
 }

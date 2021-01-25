@@ -1,5 +1,3 @@
-# Verification View
-
 The Verification View provides 3 different methods to test a machine:
 
 * Modelchecking,

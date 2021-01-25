@@ -6,17 +6,18 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.VBox;
 
 @FXMLInjected
 public class MCDCInputView extends VBox {
 
 	@FXML
-	private TextField levelField;
+	private Spinner<Integer> levelSpinner;
 
 	@FXML
-	private TextField depthField;
+	private Spinner<Integer> depthSpinner;
 
 	@Inject
 	private MCDCInputView(final StageManager stageManager) {
@@ -24,22 +25,29 @@ public class MCDCInputView extends VBox {
 		stageManager.loadFXML(this, "test_case_generation_mcdc.fxml");
 	}
 
-	public String getLevel() {
-		return levelField.getText();
+	@FXML
+	private void initialize() {
+		levelSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
+		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
+		this.reset();
 	}
 
-	public String getDepth() {
-		return depthField.getText();
+	public int getLevel() {
+		return levelSpinner.getValue();
+	}
+
+	public int getDepth() {
+		return depthSpinner.getValue();
 	}
 
 	public void reset() {
-		levelField.clear();
-		depthField.clear();
+		levelSpinner.getValueFactory().setValue(2);
+		depthSpinner.getValueFactory().setValue(5);
 	}
 
 	public void setItem(TestCaseGenerationItem item) {
-		levelField.setText(String.valueOf(item.getMcdcLevel()));
-		depthField.setText(String.valueOf(item.getMaxDepth()));
+		levelSpinner.getValueFactory().setValue(item.getMcdcLevel());
+		depthSpinner.getValueFactory().setValue(item.getMaxDepth());
 	}
 
 }

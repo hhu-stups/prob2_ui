@@ -136,7 +136,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Override
 	protected void initialize() {
 		super.initialize();
-		helpButton.setHelpContent("mainView.formulaTableVisualisation", null);
+		helpButton.setHelpContent("formulaTableVisualisation", null);
 		currentTable.addListener((observable, from, to) -> {
 			if(to != null) {
 				fillTable(to);
@@ -158,7 +158,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
 		final TableData table = item.visualize(formulas);
 		Platform.runLater(() -> {
-			this.clearLoadingStatus();
 			currentTable.set(table);
 			placeholderLabel.setVisible(false);
 			taErrors.clear();
@@ -197,36 +196,45 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		if(item != null) {
 			String source = item.get(indexOfSource);
 			String[] start;
-			List<Integer> line = new ArrayList<>();
-			List<Integer> column = new ArrayList<>();
-			List<Path> path = new ArrayList<>();
-			if(source.startsWith(" at line ")) {
+			final int line;
+			final int column;
+			final Path path;
+			if (source.isEmpty()) {
+				// No source location - just disable the item and don't attempt to parse anything.
+				showSourceItem.setDisable(true);
+				line = -1;
+				column = -1;
+				path = null;
+			} else if (source.startsWith(" at line ")) {
 				String[] sourceSplitted = source.replaceFirst(" at line ", "").split(" \\- ");
 				start = sourceSplitted[0].split(":");
-				line.add(Integer.parseInt(start[0]) - 1);
-				column.add(Integer.parseInt(start[1]));
-				path.add(currentTrace.getModel().getModelFile().toPath());
+				line = Integer.parseInt(start[0]) - 1;
+				column = Integer.parseInt(start[1]);
+				path = currentTrace.getModel().getModelFile().toPath();
 			} else if(source.startsWith("Line: ")) {
 				source = source.replaceFirst("Line: ", "");
 				int nextWhiteSpaceIndex = source.indexOf(" ");
-				line.add(Integer.parseInt(source.substring(0, nextWhiteSpaceIndex)) - 1);
+				line = Integer.parseInt(source.substring(0, nextWhiteSpaceIndex)) - 1;
 				source = source.substring(nextWhiteSpaceIndex + 1);
 				source = source.replaceFirst("Column: ", "");
 				nextWhiteSpaceIndex = source.indexOf(" ");
-				column.add(Integer.parseInt(source.substring(0, nextWhiteSpaceIndex)));
+				column = Integer.parseInt(source.substring(0, nextWhiteSpaceIndex));
 				int fileIndex = source.indexOf("file: ");
 				String pathAsString = source.substring(fileIndex + 6);
-				path.add(Paths.get(new File(pathAsString).toURI()));
+				path = Paths.get(new File(pathAsString).toURI());
 			} else {
 				showSourceItem.setDisable(true);
-				statusBar.setText(bundle.getString("dynamic.tableview.jumpToState.notPossible"));
-				statusBar.setLabelStyle("warning");
+				line = -1;
+				column = -1;
+				path = null;
+				LOGGER.warn("Could not parse source location from string in table visualization source column - Show Source will be disabled for this row: {}", source);
 			}
 
 			showSourceItem.setOnAction(e -> {
-				if(!line.isEmpty() && !column.isEmpty() && !path.isEmpty()) {
-					injector.getInstance(BEditorView.class).jumpToSource(path.get(0), line.get(0), column.get(0));
-				}
+				assert line != -1;
+				assert column != -1;
+				assert path != null;
+				injector.getInstance(BEditorView.class).jumpToSource(path, line, column);
 			});
 		}
 

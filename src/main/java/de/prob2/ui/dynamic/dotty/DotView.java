@@ -130,7 +130,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		Platform.runLater(() -> {
 			if (!thread.isInterrupted()) {
 				dotView.getEngine().loadContent("<center>" + svgContent + "</center>");
-				this.clearLoadingStatus();
 				placeholderLabel.setVisible(false);
 				taErrors.clear();
 				errorsView.setVisible(false);

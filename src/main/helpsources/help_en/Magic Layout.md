@@ -1,5 +1,3 @@
-# Magic Layout
-
 <img src="../screenshots/MagicLayout.png" alt="Magic Layout View"
 	title="Magic Layout View Screenshot" width="750" />
 

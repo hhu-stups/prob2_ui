@@ -71,8 +71,6 @@ public class PluginMenuStage extends Stage {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "plugin_menu_stage.fxml", this.getClass().getName());
-		initModality(Modality.NONE);
-		initOwner(stageManager.getMainStage());
 	}
 
 	@FXML

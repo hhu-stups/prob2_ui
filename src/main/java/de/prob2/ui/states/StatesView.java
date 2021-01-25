@@ -7,6 +7,7 @@ import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
+import de.prob.animator.domainobjects.ExpandedFormula.FormulaType;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
@@ -51,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,6 +65,11 @@ import java.util.stream.Collectors;
 @FXMLInjected
 @Singleton
 public final class StatesView extends StackPane {
+
+	private static final List<String> TOP_LEVEL_PREDICATES = Arrays.asList("inv", "axioms");
+
+	private static final String TOP_LEVEL_OPERATIONS_ID = "guards_top_level";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatesView.class);
 
 	@FXML
@@ -123,7 +130,6 @@ public final class StatesView extends StackPane {
 				return evaluateFormulaWithCaching(formula, state);
 			}
 		};
-
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
 
@@ -214,6 +220,44 @@ public final class StatesView extends StackPane {
 		}
 	}
 
+	private String getFormulaForVisualization(StateItem item) {
+		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(currentTrace.getStateSpace());
+		final List<List<ExpandedFormula>> topLevelOperations = topLevel.stream()
+				.filter(formula -> TOP_LEVEL_OPERATIONS_ID.equals(formula.expandStructure().getFormula().getId()))
+				.map(formula -> formula.expandStructure().getChildren())
+				.collect(Collectors.toList());
+
+
+		String formulaID = item.getFormula().getId();
+		if(TOP_LEVEL_PREDICATES.contains(formulaID)) {
+			if (item.getSubformulas().isEmpty()) {
+				return "1=1";
+			} else {
+				return item.getSubformulas().stream()
+						.map(formula -> formula.expandStructureNonrecursive().getLabel())
+						.collect(Collectors.joining(" & "));
+			}
+		} else {
+			// TODO: Quantify parameters of operations
+			if(!topLevelOperations.isEmpty()) {
+				List<ExpandedFormula> operationsFormulas = topLevelOperations.get(0);
+
+				for(ExpandedFormula op : operationsFormulas) {
+					if(formulaID.equals(op.getFormula().getId())) {
+						if (op.getSubformulas().isEmpty()) {
+							return "1=1";
+						} else {
+							return item.getSubformulas().stream()
+									.map(formula -> formula.expandStructureNonrecursive().getLabel())
+									.collect(Collectors.joining(" & "));
+						}
+					}
+				}
+			}
+		}
+		return item.getLabel();
+	}
+
 	private TreeTableRow<StateItem> initTableRow() {
 		final TreeTableRow<StateItem> row = new TreeTableRow<>();
 
@@ -243,15 +287,15 @@ public final class StatesView extends StackPane {
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
 				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionGraph"));
-		//visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(
-		//		() -> row.getItem() == null || !(row.getItem().getFormula().getId()), row.itemProperty())
-		//		.or(currentTrace.currentStateProperty().initializedProperty().not()));
+		visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(() -> row.getItem() == null || row.getItem().getType() == ExpandedFormula.FormulaType.OTHER ||
+				row.getItem().getCurrentValue() instanceof BVisual2Value.Inactive, row.itemProperty()));
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
+				String visualizedFormula = getFormulaForVisualization(row.getItem());
 				DotView formulaStage = injector.getInstance(DotView.class);
 				formulaStage.show();
 				formulaStage.toFront();
-				formulaStage.visualizeFormula(row.getItem().getLabel());
+				formulaStage.visualizeFormula(visualizedFormula);
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
@@ -262,13 +306,18 @@ public final class StatesView extends StackPane {
 
 		final MenuItem visualizeExpressionAsTableItem = new MenuItem(
 				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionTable"));
-		visualizeExpressionAsTableItem.disableProperty().bind(row.itemProperty().isNull());
+		visualizeExpressionAsTableItem.disableProperty().bind(Bindings.createBooleanBinding(() -> row.getItem() == null || row.getItem().getType() == ExpandedFormula.FormulaType.OTHER ||
+				row.getItem().getCurrentValue() instanceof BVisual2Value.Inactive, row.itemProperty()));
 		visualizeExpressionAsTableItem.setOnAction(event -> {
 			try {
+				String visualizedFormula = getFormulaForVisualization(row.getItem());
+				if(FormulaType.PREDICATE == row.getItem().getFormula().expandStructureNonrecursive().getType()) {
+					visualizedFormula = String.format("bool(%s)", visualizedFormula);
+				}
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
 				expressionTableView.show();
 				expressionTableView.toFront();
-				expressionTableView.visualizeExpression(row.getItem().getLabel());
+				expressionTableView.visualizeExpression(visualizedFormula);
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");

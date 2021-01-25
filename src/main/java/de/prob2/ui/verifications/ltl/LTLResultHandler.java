@@ -16,6 +16,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
 import java.util.List;
 import java.util.ResourceBundle;
@@ -72,11 +73,17 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 	
 	public void handlePatternResult(LTLParseListener parseListener, AbstractCheckableItem item) {
 		CheckingResultItem resultItem;
-		if(parseListener.getErrorMarkers().isEmpty()) {
+		// Empty Patterns do not have parse errors which is a little bit confusing
+		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
 			resultItem = new LTLCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully", "verifications.result.patternParsedSuccessfully");
 		} else {
+			String msg;
 			List<LTLMarker> errorMarkers = parseListener.getErrorMarkers();
-			final String msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
+			if(item.getCode().isEmpty()) {
+				msg = bundle.getString("verifications.ltl.pattern.empty");
+			} else {
+				msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
+			}
 			resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header",
 					"common.result.message", msg);
 		}
