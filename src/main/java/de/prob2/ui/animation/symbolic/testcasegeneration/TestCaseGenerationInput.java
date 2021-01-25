@@ -23,8 +23,6 @@ public class TestCaseGenerationInput extends VBox {
 	
 	private final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler;
 	
-	private final TestCaseGenerationSettingsHandler testCaseGenerationSettingsHandler;
-	
 	@FXML
 	private Button btAdd;
 	
@@ -47,13 +45,12 @@ public class TestCaseGenerationInput extends VBox {
 	
 	@Inject
 	private TestCaseGenerationInput(final StageManager stageManager, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
-			final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler, final TestCaseGenerationSettingsHandler testCaseGenerationSettingsHandler) {
+			final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.bundle = bundle;
 		this.testCaseGenerationFormulaHandler = testCaseGenerationFormulaHandler;
-		this.testCaseGenerationSettingsHandler = testCaseGenerationSettingsHandler;
 		stageManager.loadFXML(this, "test_case_generation_input.fxml");
 	}
 	
@@ -62,10 +59,18 @@ public class TestCaseGenerationInput extends VBox {
 		setCheckListeners();
 	}
 	
+	private boolean isValid(TestCaseGenerationChoosingStage choosingStage) {
+		if (choosingStage.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS) {
+			return !this.operationCoverageInputView.getOperations().isEmpty();
+		} else {
+			return true;
+		}
+	}
+	
 	private boolean updateItem(TestCaseGenerationItem item, TestCaseGenerationChoosingStage choosingStage) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		TestCaseGenerationType type = choosingStage.getTestCaseGenerationType();
-		boolean valid = testCaseGenerationSettingsHandler.isValid(choosingStage, operationCoverageInputView);
+		boolean valid = isValid(choosingStage);
 		TestCaseGenerationItem newItem;
 		if (type == TestCaseGenerationType.MCDC) {
 			newItem = new TestCaseGenerationItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
