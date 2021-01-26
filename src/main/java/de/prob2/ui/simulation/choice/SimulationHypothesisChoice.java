@@ -51,13 +51,14 @@ public class SimulationHypothesisChoice extends SimulationMonteCarloChoice {
 
     public Map<String, Object> extractInformation() {
         Map<String, Object> information = super.extractInformation();
+        SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
 
-        information.put("CHECKING_TYPE", checkingChoice.getSelectionModel().getSelectedItem().getCheckingType());
+        information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
         information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());
         information.put("PROBABILITY", Double.parseDouble(tfProbability.getText()));
 
-        SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
-        if(checkingChoiceItem != null && checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
+
+        if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
             information.put("TIME", Integer.parseInt(tfMonteCarloTime.getText()));
         }
         return information;

@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class SimulationCheckingConfiguration {
 
-    private SimulationType type;
+    private final SimulationType type;
 
-    private Map<String, Object> information;
+    private final Map<String, Object> information;
 
     public SimulationCheckingConfiguration(SimulationType type, Map<String, Object> information) {
         this.type = type;
