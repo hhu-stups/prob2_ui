@@ -15,7 +15,7 @@ We also offer a traditional executable jar file that can be run on any system wi
 
 
 Compared to ProB Tcl/Tk this UI has the following new features:
- - visualsation of models using the SVG-based plugin VisB
+ - visualisation of models using the SVG-based plugin VisB
  - project management, i.e., a set of specifications can be grouped in a project,
    where you can also store machine specific preferences and verification tasks
  - can save multiple traces and replay them individually or batched
