@@ -1,0 +1,27 @@
+=======================================
+            ProB JavaFX UI
+=======================================
+
+We are happy to announce version 1.1.0 of the new JavaFX-based UI of the animator and model checker ProB.
+This UI is available for download at (along with a notarized version for macOS):
+    https://www3.hhu.de/stups/prob/index.php/Download#ProB2_UI_using_Java_FX
+
+
+Compared to ProB Tcl/Tk this UI can:
+ - directly load Rodin models from Rodin workspaces (without having to export them within Rodin)
+ - visualize models using the SVG-based plugin VisB
+ - has project management features, i.e., a set of specifications can be grouped in a project,
+   where you can also store machine specific preferences and verification tasks
+ - save multiple traces and replay them individually or batched
+ - the ability to store various verification tasks (model checking, LTL model checking,
+   symbolic model checking, trace replay, ...)
+ - MC/DC test case generation
+ 
+ Version 1.1.0:
+ - now contains VisB directly in the application, VisB has been extended considerably
+   now supporting hovers, more attributes, better debugging and error feedback, ...
+ -
+
+Best regards,
+The ProB team
+https://www3.hhu.de/stups/prob/index.php/Team
