@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1" type="Dialog" resizable="true">
+	<dialogPane>
+		<DialogPane>
+			<content>
+				<HBox>
+					<Accordion fx:id="globalView" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+							   minWidth="-Infinity" prefHeight="631.0" prefWidth="602.0">
+						<panes>
+							<TitledPane animated="false" expanded="false" text="Operation Level Options">
+								<Accordion fx:id="operationView"/>
+							</TitledPane>
+						</panes>
+					</Accordion>
+				</HBox>
+			</content>
+		</DialogPane>
+	</dialogPane>
+</fx:root>
