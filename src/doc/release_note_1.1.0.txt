@@ -15,12 +15,21 @@ Compared to ProB Tcl/Tk this UI can:
  - save multiple traces and replay them individually or batched
  - the ability to store various verification tasks (model checking, LTL model checking,
    symbolic model checking, trace replay, ...)
+ - apply model checking with time and state limit  
  - MC/DC test case generation
  
  Version 1.1.0:
  - now contains VisB directly in the application, VisB has been extended considerably
    now supporting hovers, more attributes, better debugging and error feedback, ...
- -
+ - supports model checking with time and state limit
+ - improved feedback for model checking (progress bar, memory usage)
+ - improved feedback for trace replay
+ - supports well-definedness Checking (as symbolic model checking)
+ - improved test case generation view with ability to save generated traces
+ - supports static analysis on machine
+ - supports exporting Dot View as .dot, .png, and .pdf
+ - contains Prolog Output Console for debugging
+ - supports syntax highlighting for TLA, CSP, Alloy, XTL, and Z
 
 Best regards,
 The ProB team
