@@ -3,8 +3,15 @@
 =======================================
 
 We are happy to announce version 1.1.0 of the new JavaFX-based UI of the animator and model checker ProB.
-This UI is available for download at (along with a notarized version for macOS):
+This UI is available for download at:
     https://www3.hhu.de/stups/prob/index.php/Download#ProB2_UI_using_Java_FX
+As of version 1.1.0, we provide native installers for the following platforms:
+ - Windows (tested on Windows 10 20H2)
+ - macOS (notarized for macOS 10.15 and 11, but also works on older versions),
+ - Debian-based Linux (Debian, Ubuntu, Linux Mint, etc.).
+ 
+These installers include a Java runtime, so they do not require Java to be installed first.
+We also offer a traditional executable jar file that can be run on any system with Java 8 or later installed.
 
 
 Compared to ProB Tcl/Tk this UI has the following new features:
