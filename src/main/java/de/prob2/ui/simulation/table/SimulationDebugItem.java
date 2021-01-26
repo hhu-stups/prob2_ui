@@ -1,26 +1,32 @@
 package de.prob2.ui.simulation.table;
 
+import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.TimingConfiguration;
+
 import java.util.List;
 import java.util.Map;
 
 public class SimulationDebugItem {
 
-	private String opName;
+	private final String opName;
 
-	private List<Map<String, Integer>> activation;
+	private final Map<String, List<ActivationConfiguration>> activation;
 
-	private String priority;
+	private final TimingConfiguration.ActivationKind activationKind;
 
-	private List<String> probability;
+	private final String additionalGuards;
 
-	private List<Map<String, Object>> values;
+	private final String priority;
 
-	public SimulationDebugItem(String opName, List<Map<String, Integer>> activation, String priority, List<String> probability,
-							   List<Map<String, Object>> values) {
+	private final Map<String, Object> values;
+
+	public SimulationDebugItem(String opName, Map<String, List<ActivationConfiguration>> activation, TimingConfiguration.ActivationKind activationKind,
+							   String additionalGuards, String priority, Map<String, Object> values) {
 		this.opName = opName;
 		this.activation = activation;
+		this.activationKind = activationKind;
+		this.additionalGuards = additionalGuards;
 		this.priority = priority;
-		this.probability = probability;
 		this.values = values;
 	}
 
@@ -28,7 +34,7 @@ public class SimulationDebugItem {
 		return opName;
 	}
 
-	public List<Map<String, Integer>> getActivation() {
+	public Map<String, List<ActivationConfiguration>> getActivation() {
 		return activation;
 	}
 
@@ -36,19 +42,19 @@ public class SimulationDebugItem {
 		return activation == null ? "" : activation.toString();
 	}
 
+	public TimingConfiguration.ActivationKind getActivationKind() {
+		return activationKind;
+	}
+
+	public String getAdditionalGuards() {
+		return additionalGuards;
+	}
+
 	public String getPriority() {
 		return priority;
 	}
 
-	public List<String> getProbability() {
-		return probability;
-	}
-
-	public String getProbabilityAsString() {
-		return probability == null ? "" : probability.toString();
-	}
-
-	public List<Map<String, Object>> getValues() {
+	public Map<String, Object> getValues() {
 		return values;
 	}
 

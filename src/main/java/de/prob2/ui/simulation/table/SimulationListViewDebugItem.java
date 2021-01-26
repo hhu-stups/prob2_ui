@@ -56,27 +56,24 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 			lbOpName.getStyleClass().add("name");
 			this.itemBox.getChildren().add(lbOpName);
 
+			if(item.getAdditionalGuards() != null) {
+				Label lbAdditionalGuards = new Label(String.format(bundle.getString("simulation.item.additionalGuards"), item.getAdditionalGuards()));
+				lbAdditionalGuards.getStyleClass().add("information");
+				this.itemBox.getChildren().add(lbAdditionalGuards);
+			}
+
+			// TODO: Evaluated value of additional guard
+
 			if(!item.getActivationAsString().isEmpty()) {
-				Label lbActivation = new Label(String.format(bundle.getString("simulation.item.delay"), item.getActivation()));
+				Label lbActivation = new Label(String.format(bundle.getString("simulation.item.activation"), item.getActivation()));
 				lbActivation.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbActivation);
 			}
 
-			if(!item.getProbabilityAsString().isEmpty()) {
-				Label lbProbability = new Label(String.format(bundle.getString("simulation.item.probability"), item.getProbability()));
-				lbProbability.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbProbability);
+			Label lbActivationKind = new Label(String.format(bundle.getString("simulation.item.activationKind"), item.getActivationKind()));
+			lbActivationKind.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbActivationKind);
 
-				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					String joindedProbability = item.getProbability().stream()
-							.map(probab -> SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), probab).toString())
-							.collect(Collectors.joining(", "));
-
-					Label lbProbabilityValue = new Label(String.format(bundle.getString("simulation.item.probabilityValue"), joindedProbability));
-					lbProbabilityValue.getStyleClass().add("information");
-					this.itemBox.getChildren().add(lbProbabilityValue);
-				}
-			}
 
 			if(!item.getPriority().isEmpty()) {
 				Label lbPriority = new Label(String.format(bundle.getString("simulation.item.priority"), item.getPriority()));
@@ -89,24 +86,15 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				lbVariableValues.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbVariableValues);
 
-				List<Map<String, Object>> valuesList = item.getValues();
-				List<Map<String, String>> evaluatedValuesList = new ArrayList<>();
+				Map<String, Object> values = item.getValues();
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					for(Map<String, Object> values : valuesList) {
-						Map<String, String> evaluatedValues = new HashMap<>();
-						for (String key : values.keySet()) {
-							Object value = values.get(key);
-							if(value instanceof List) {
-								// TODO
-							} else {
-								AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), (String) values.get(key));
-								evaluatedValues.put(key, evalResult.toString());
-							}
-						}
-						evaluatedValuesList.add(evaluatedValues);
+					Map<String, String> evaluatedValues = new HashMap<>();
+					for (String key : values.keySet()) {
+						AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), (String) values.get(key));
+						evaluatedValues.put(key, evalResult.toString());
 					}
-					Label lbEvaluatedValues = new Label(String.format(bundle.getString("simulation.item.concreteValues"), evaluatedValuesList.size() == 1 ? evaluatedValuesList.get(0).toString() : evaluatedValuesList.toString()));
+					Label lbEvaluatedValues = new Label(String.format(bundle.getString("simulation.item.concreteValues"), evaluatedValues.toString()));
 					lbEvaluatedValues.getStyleClass().add("information");
 					this.itemBox.getChildren().add(lbEvaluatedValues);
 				}

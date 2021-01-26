@@ -61,6 +61,7 @@ import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -366,16 +367,13 @@ public class SimulatorStage extends Stage {
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
 		for(TimingConfiguration opConfig : config.getTimingConfigurations()) {
-			String opName = String.join(", ", opConfig.getOpName());
+			String opName = opConfig.getOpName();
+			String additionalGuards = opConfig.getAdditionalGuards();
 			Map<String, List<ActivationConfiguration>> activationConfiguration = opConfig.getActivation();
+			TimingConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
 			String priority = String.valueOf(opConfig.getPriority());
-			// TODO
-			//List<String> probability = opConfig.getProbability();
-			if(opConfig.getVariableChoices() == null) {
-				observableList.add(new SimulationDebugItem(opName, new ArrayList<>(), priority, new ArrayList<>(), null));
-			} else {
-				observableList.add(new SimulationDebugItem(opName, new ArrayList<>(), priority, new ArrayList<>(), null));
-			}
+			Map<String, Object> variableChoices = opConfig.getVariableChoices();
+			observableList.add(new SimulationDebugItem(opName, activationConfiguration, activationKind, additionalGuards, priority, variableChoices));
 		}
 
 		simulationDebugItems.setItems(observableList);
@@ -392,7 +390,7 @@ public class SimulatorStage extends Stage {
 	private void startTimer(IRealTimeSimulator simulator) {
 		cancelTimer();
 		lastSimulator.set(simulator);
-		List<Boolean> firstStart = Arrays.asList(true);
+		List<Boolean> firstStart = new ArrayList<>(Collections.singletonList(true));
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
