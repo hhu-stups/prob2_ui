@@ -1,0 +1,53 @@
+=======================================
+            ProB JavaFX UI
+=======================================
+
+We are happy to announce version 1.1.0 of the new JavaFX-based UI of the animator and model checker ProB.
+This UI is available for download at:
+    https://www3.hhu.de/stups/prob/index.php/Download#ProB2_UI_using_Java_FX
+As of version 1.1.0, we provide native installers for the following platforms:
+ - Windows (tested on Windows 10 20H2)
+ - macOS (notarized for macOS 10.15 and 11, but also works on older versions),
+ - Debian-based Linux (Debian, Ubuntu, Linux Mint, etc.).
+ 
+These installers include a Java runtime, so they do not require Java to be installed first.
+We also offer a traditional executable jar file that can be run on any system with Java 8 or later installed.
+
+
+Compared to ProB Tcl/Tk this UI has the following new features:
+ - visualisation of models using the SVG-based plugin VisB
+ - project management, i.e., a set of specifications can be grouped in a project,
+   where you can also store machine specific preferences and verification tasks
+ - can save multiple traces and replay them individually or batched
+ - the ability to store various verification tasks (model checking, LTL model checking,
+   symbolic model checking, trace replay, ...) and re-check them
+ - apply model checking with time and state limit
+ - directly load Rodin models from Rodin workspaces (without having to export them within Rodin)
+ - an integrated view for all dot-based graph visualisations
+   (state space, machine hierarchy, formulas, projection diagrams, ...)
+ - an integrated view to access all table based statistics (MC/DC coverage,...)
+ - MC/DC test case generation
+ 
+ Version 1.1.0:
+ - now contains VisB directly in the application, VisB has been extended considerably
+   now supporting hovers, more attributes, better debugging and error feedback, ...
+ - supports model checking with time and state limit
+ - improved feedback for model checking (progress bar, memory usage)
+ - improved feedback for trace replay
+ - supports well-definedness checking (as an option under symbolic model checking)
+ - improved test case generation view with ability to save generated traces
+ - supports static analysis on machine
+ - supports exporting graphs from graph visualization view as .dot, .png, and .pdf
+ - added table visualization options for jumping to state IDs and source code locations
+ - improved state view that supports expanding formulas
+ - improved error feedback in the animator, especially when the machine could not be initialized
+ - improved highlighting of errors in editor
+ - added option to control warning detail level - can disable warnings or enable additional messages
+ - contains Prolog Output Console for debugging
+ - supports syntax highlighting for TLA, CSP, Alloy, XTL, and Z
+ - fixed Z support on macOS and Linux
+ - improved performance in various places, especially on startup, when switching machines, and when large machines are loaded
+
+Best regards,
+The ProB team
+https://www3.hhu.de/stups/prob/index.php/Team

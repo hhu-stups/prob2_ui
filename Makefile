@@ -20,12 +20,13 @@ clean:
 	rm out.prop
 
 # version of ProB2UI without optional SNAPSHOT suffixes:
-PROB2UI_VERSION=1.0.1
-DMGFILE=build/distributions/ProB2-UI-$(PROB2UI_VERSION).dmg
+PROB2UI_VERSION=1.1.0
+DMGPROB2=ProB\ 2\ UI
+DMGFILE=build/distributions/$(DMGPROB2)-$(PROB2UI_VERSION).dmg
 ZIP_FILE=build/distributions/ProB2-UI-ForNotarization.zip
 # app file available after mounting dmg; could be done by command-line command
-VOLUME=/Volumes/ProB2-UI/
-DMGAPPFILE=$(VOLUME)ProB2-UI.app
+VOLUME=/Volumes/$(DMGPROB2)/
+DMGAPPFILE=$(VOLUME)$(DMGPROB2).app
 BUILDDIR=build/distributions/
 APPFILE=$(BUILDDIR)ProB2-UI.app
 AC_USERNAME = "EMAIL FOR SIGNING <---------------------- REPLACE"
@@ -37,19 +38,22 @@ $(DMGFILE): build.gradle src/main/java/de/prob2/ui/*.java src/main/java/de/prob2
 	./gradlew jpackage
 
 $(APPFILE): $(DMGFILE)
-	@echo "Step 1 after running make build: Mounting the DMG"
+	@echo "Step 1 after running make gradlew jpackage: Mounting the DMG"
 	sudo hdiutil attach $(DMGFILE)
-	@echo "Copying APP to build/distributions"
-	cp -R $(DMGAPPFILE) $(BUILDDIR)
+	@echo "Copying APP ($DMGAPPFILE) to $(BUILDDIR)"
+	cp -R $(DMGAPPFILE) $(APPFILE)
 	@echo "Unmounting $(VOLUME)"
 	sudo hdiutil unmount $(VOLUME)
 
 # Version which is used for JAR inside App:
-VERSION=$(PROB2UI_VERSION)-SNAPSHOT
+#VERSION=$(PROB2UI_VERSION)-SNAPSHOT
+VERSION=$(PROB2UI_VERSION)
 PROB2APP_CONTENTS = $(APPFILE)/Contents/
 JAR_TO_SIGN = $(BUILDDIR)jar-to-sign
 $(JAR_TO_SIGN): $(APPFILE)
-	@echo "Step2: Unpacking JAR in APP so that we can sign the components"
+	@echo "Step 2: Unpacking JAR in APP so that we can sign the components"
+	#unzip -l $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)-mac.jar
+	@echo " Unpacking to $(JAR_TO_SIGN)"
 	unzip $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)-mac.jar -d $(JAR_TO_SIGN)
 
 libs=libjavafx_iio.dylib libjfxmedia_avf.dylib libglib-lite.dylib libglib-lite.dylib libfxplugins.dylib libglass.dylib libjavafx_font.dylib libgstreamer-lite.dylib libjfxwebkit.dylib libprism_common.dylib libprism_es2.dylib libdecora_sse.dylib libjfxmedia.dylib libprism_sw.dylib
@@ -65,7 +69,7 @@ macos_sign: $(JAR_TO_SIGN)
 	$(CODESIGNRT2) "$(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib"
 	make makejar
 	@echo "3c: Signing app binary"
-	$(CODESIGNRT2) "$(PROB2APP_CONTENTS)MacOS/ProB2-UI"
+	$(CODESIGNRT2) $(PROB2APP_CONTENTS)MacOS/$(DMGPROB2)
 makejar:
 	@echo "Step 3b: Repacking the JAR with signed components"
 	rm -f $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)-mac.jar
@@ -78,14 +82,14 @@ check:
 	codesign -d --entitlements :- $(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib
 	@echo "Check signing of Java and JavaFX dylibs"
 	for file in $(libs); do codesign -vv --deep-verify $(JAR_TO_SIGN)/$$file ; done
-	codesign -vv --deep-verify $(PROB2APP_CONTENTS)MacOS/ProB2-UI
+	codesign -vv --deep-verify $(PROB2APP_CONTENTS)MacOS/$(DMGPROB2)
 
 
-$(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/ProB2-UI
+$(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(DMGPROB2)
 	@echo "Step 5: Putting APP into a zipfile for Apple's notarization"
-	/usr/bin/ditto -c -k --keepParent "$(APPFILE)" "$(ZIP_FILE)"
+	/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
 	
-NOTVERS = 1.10.0-final
+NOTVERS = 1.10.2-final
 notarize-app: $(ZIP_FILE)
 	@echo "Step 6: Sending Notarization request to Apple for APP"
 	xcrun altool --notarize-app\
@@ -95,7 +99,7 @@ notarize-app: $(ZIP_FILE)
                --file $(ZIP_FILE)
 
 
-HASH=ed62183a-08eb-41d6-a80d-9d82bba850b0
+HASH=8c9fbaca-bdda-494d-928e-cab7ecd1adbb
 info:
 	@echo "Step 6b: Obtaining information about a particular notarization request"
 	xcrun altool --notarization-info $(HASH) -u $(AC_USERNAME)
@@ -108,6 +112,7 @@ verify-app:
 	codesign -vv --deep-verify $(APPFILE)
 	@echo "Step 8: check stapling of the APP $(APPFILE)"
 	spctl --assess --type execute --verbose $(APPFILE)
+	@echo "Step 9: You can now zip and upload $(APPFILE) to the download area /stupshome/stups/downloads/prob2/ProB2-UI-$(PROB2UI_VERSION)-notarized.zip"
 
 
 
