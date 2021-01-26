@@ -24,7 +24,7 @@ Compared to ProB Tcl/Tk this UI can:
  - supports model checking with time and state limit
  - improved feedback for model checking (progress bar, memory usage)
  - improved feedback for trace replay
- - supports well-definedness Checking (as symbolic model checking)
+ - supports well-definedness checking (as symbolic model checking)
  - improved test case generation view with ability to save generated traces
  - supports static analysis on machine
  - supports exporting Dot View as .dot, .png, and .pdf
