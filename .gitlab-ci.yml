@@ -106,6 +106,9 @@ test:jdk-14-windows64:
 
 distributions:
   stage: deploy
+  only: 
+    - master@stups/prob/prob2_ui
+    - develop@stups/prob/prob2_ui
   image: debian:stable-slim
   before_script:
     - apt-get update
