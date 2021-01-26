@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.configuration;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class ActivationConfiguration {
 
@@ -27,4 +28,8 @@ public class ActivationConfiguration {
         return probability;
     }
 
+    @Override
+    public String toString() {
+        return String.format("ActivationConfiguration{time=%s, parameters=%s, probability=%s}", time, parameters, probability);
+    }
 }
