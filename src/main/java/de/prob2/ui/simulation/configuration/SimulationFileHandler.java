@@ -53,7 +53,7 @@ public class SimulationFileHandler {
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
             Map<String, List<ActivationConfiguration>> activation = buildActivation(activationConfigurations, jsonObject.get("activation"));
             TimingConfiguration.ActivationKind activationKind = buildActivationKind(jsonObject.get("activationKind"));
-            Map<String, Object> variableChoices = buildVariableChoices(jsonObject.get("variableChoices"));
+            Map<String, String> variableChoices = buildVariableChoices(jsonObject.get("variableChoices"));
             timingConfigurations.add(new TimingConfiguration(opName, activation, activationKind, additionalGuards, priority, variableChoices));
         }
         return timingConfigurations;
@@ -144,29 +144,16 @@ public class SimulationFileHandler {
         return activationKind;
     }
 
-    private static Map<String, Object> buildVariableChoices(JsonElement jsonElement) {
-        Map<String, Object> variableChoices = null;
+    private static Map<String, String> buildVariableChoices(JsonElement jsonElement) {
+        Map<String, String> variableChoices = null;
         if(jsonElement != null) {
             variableChoices = new HashMap<>();
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             for(String key : jsonObject.keySet()) {
-                variableChoices.put(key, buildVariableExpression(jsonObject.get(key)));
+                variableChoices.put(key, jsonObject.get(key).getAsString());
             }
         }
         return variableChoices;
     }
-
-    private static Object buildVariableExpression(JsonElement jsonElement) {
-        if(jsonElement instanceof JsonArray) {
-            List<String> expressions = new ArrayList<>();
-            JsonArray jsonArray = jsonElement.getAsJsonArray();
-            for(int i = 0; i < jsonArray.size(); i++) {
-                expressions.add(jsonArray.get(i).getAsString());
-            }
-            return expressions;
-        }
-        return jsonElement.getAsString();
-    }
-
 
 }

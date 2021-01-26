@@ -18,10 +18,10 @@ public class SimulationDebugItem {
 
 	private final String priority;
 
-	private final Map<String, Object> values;
+	private final Map<String, String> values;
 
 	public SimulationDebugItem(String opName, Map<String, List<ActivationConfiguration>> activation, TimingConfiguration.ActivationKind activationKind,
-							   String additionalGuards, String priority, Map<String, Object> values) {
+							   String additionalGuards, String priority, Map<String, String> values) {
 		this.opName = opName;
 		this.activation = activation;
 		this.activationKind = activationKind;
@@ -54,7 +54,7 @@ public class SimulationDebugItem {
 		return priority;
 	}
 
-	public Map<String, Object> getValues() {
+	public Map<String, String> getValues() {
 		return values;
 	}
 

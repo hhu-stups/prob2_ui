@@ -23,20 +23,12 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     private Random random = new Random(System.nanoTime());
 
     @Override
-    public String chooseVariableValues(State currentState, Map<String, Object> values) {
+    public String chooseVariableValues(State currentState, Map<String, String> values) {
         StringBuilder conjuncts = new StringBuilder();
         for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
             String key = it.next();
-            Object value = values.get(key);
-            String evalResult;
-            if(value instanceof List) {
-                List<String> list = (List<String>) value;
-                String randomElement = list.get(random.nextInt(list.size()));
-                evalResult = cache.readValueWithCaching(currentState, randomElement);
-            } else {
-                //Otherwise it is a String
-                evalResult = cache.readValueWithCaching(currentState, (String) value);
-            }
+            String value = values.get(key);
+            String evalResult  = cache.readValueWithCaching(currentState, value);
             conjuncts.append(key);
             conjuncts.append(" = ");
             conjuncts.append(evalResult);
@@ -47,8 +39,8 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         return conjuncts.toString();
     }
 
-    public Map<String, Object> chooseProbabilistic(Activation activation, State currentState) {
-        Map<String, Object> values = null;
+    public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
+        Map<String, String> values = null;
 
         Object probability = activation.getProbability();
         if(probability == null) {
@@ -104,10 +96,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
             // TODO
             String additionalGuards = timingConfig.getAdditionalGuards();
-            String additionalGuardsResult = "TRUE";
-            if (additionalGuards != null) {
-                additionalGuardsResult = currentState.eval(additionalGuards, FormulaExpand.TRUNCATE).toString();
-            }
+            String additionalGuardsResult = additionalGuards == null ? "TRUE" : currentState.eval(additionalGuards, FormulaExpand.TRUNCATE).toString();;
             boolean execute = false;
             if (!transitions.isEmpty() && "TRUE".equals(additionalGuardsResult)) {
                 if (timingConfig.getActivation() != null) {
@@ -122,7 +111,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
             // TODO: Implement handling of parameters
 
-            Map<String, Object> values = chooseProbabilistic(activation, currentState);
+            Map<String, String> values = chooseProbabilistic(activation, currentState);
 
             if (values == null) {
                 Transition transition = transitions.get(random.nextInt(transitions.size()));

@@ -372,7 +372,7 @@ public class SimulatorStage extends Stage {
 			Map<String, List<ActivationConfiguration>> activationConfiguration = opConfig.getActivation();
 			TimingConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
 			String priority = String.valueOf(opConfig.getPriority());
-			Map<String, Object> variableChoices = opConfig.getVariableChoices();
+			Map<String, String> variableChoices = opConfig.getVariableChoices();
 			observableList.add(new SimulationDebugItem(opName, activationConfiguration, activationKind, additionalGuards, priority, variableChoices));
 		}
 

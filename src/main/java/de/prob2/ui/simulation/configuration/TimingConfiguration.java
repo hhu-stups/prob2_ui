@@ -20,10 +20,10 @@ public class TimingConfiguration {
 
     private int priority;
 
-    private Map<String, Object> variableChoices;
+    private Map<String, String> variableChoices;
 
     public TimingConfiguration(String opName, Map<String, List<ActivationConfiguration>> activation, ActivationKind activationKind,
-                               String additionalGuards, int priority, Map<String, Object> variableChoices) {
+                               String additionalGuards, int priority, Map<String, String> variableChoices) {
         this.opName = opName;
         this.activation = activation;
         this.activationKind = activationKind;
@@ -52,7 +52,7 @@ public class TimingConfiguration {
         return priority;
     }
 
-    public Map<String, Object> getVariableChoices() {
+    public Map<String, String> getVariableChoices() {
         return variableChoices;
     }
 }

@@ -46,7 +46,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    protected String chooseVariableValues(State currentState, Map<String, Object> values) {
+    protected String chooseVariableValues(State currentState, Map<String, String> values) {
         List<PersistentTransition> transitionList = persistentTrace.getTransitionList();
         PersistentTransition persistentTransition = transitionList.get(counter);
 
@@ -57,24 +57,21 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
             buildPredicateFromTrace(predicateBuilder, persistentTransition);
             predicate = predicateBuilder.toString();
         } else {
-            List<Map<String, String>> valueCombinations = buildValueCombinations(currentState, values);
-            for(Map<String, String> combination : valueCombinations) {
-                PredicateBuilder predicateBuilder = new PredicateBuilder();
-                buildPredicateFromTrace(predicateBuilder, persistentTransition);
-                predicateBuilder.addMap(combination);
+            PredicateBuilder predicateBuilder = new PredicateBuilder();
+            buildPredicateFromTrace(predicateBuilder, persistentTransition);
+            predicateBuilder.addMap(values);
 
-                StateSpace stateSpace = currentState.getStateSpace();
-                final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.TRUNCATE);
-                final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
-                        currentState.getId(), persistentTransition.getOperationName(), pred, 1);
-                try {
-                    stateSpace.execute(command);
-                    if(!command.hasErrors()) {
-                        predicate = predicateBuilder.toString();
-                    }
-                } catch (ExecuteOperationException e) {
-                    continue;
+            StateSpace stateSpace = currentState.getStateSpace();
+            final IEvalElement pred = stateSpace.getModel().parseFormula(predicateBuilder.toString(), FormulaExpand.TRUNCATE);
+            final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
+                    currentState.getId(), persistentTransition.getOperationName(), pred, 1);
+            try {
+                stateSpace.execute(command);
+                if(!command.hasErrors()) {
+                    predicate = predicateBuilder.toString();
                 }
+            } catch (ExecuteOperationException e) {
+                //
             }
         }
         if(predicate == null) {
@@ -86,8 +83,8 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     @Override
     public Trace executeNextOperation(TimingConfiguration timingConfig, Trace trace) {
         State currentState = trace.getCurrentState();
-        boolean execute = false;
-        Map<String, Object> values = null;
+        //boolean execute = false;
+        Map<String, String> values = null;
         Map<String, List<ActivationConfiguration>> activationConfiguration = null;
 
         //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
@@ -157,39 +154,6 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
         if (persistentTransition.getDestinationStateVariables() != null) {
             predicateBuilder.addMap(persistentTransition.getDestinationStateVariables());
         }
-    }
-
-    protected List<Map<String, String>> buildValueCombinations(State currentState, Map<String, Object> values) {
-        List<Map<String, String>> result = new ArrayList<>();
-        for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
-            String key = it.next();
-            Object value = values.get(key);
-            List<String> valueList = new ArrayList<>();
-            if(value instanceof List) {
-                valueList = (List<String>) value;
-            } else if(value instanceof String) {
-                valueList = Arrays.asList((String) value);
-            }
-            if(result.isEmpty()) {
-                for(String element : valueList) {
-                    Map<String, String> initialMap = new HashMap<>();
-                    initialMap.put(key, cache.readValueWithCaching(currentState, element));
-                    result.add(initialMap);
-                }
-            } else {
-                List<Map<String, String>> oldResult = result;
-                result = new ArrayList<>();
-                for(Map<String, String> map : oldResult) {
-                    for(String element : valueList) {
-                        Map<String, String> newMap = new HashMap<>(map);
-                        newMap.put(key, cache.readValueWithCaching(currentState, element));
-                        result.add(newMap);
-                    }
-                }
-
-            }
-        }
-        return result;
     }
 
     @Override

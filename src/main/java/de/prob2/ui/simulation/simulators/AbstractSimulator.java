@@ -204,7 +204,7 @@ public abstract class AbstractSimulator {
 
 
 
-    private String joinPredicateFromValues(State currentState, Map<String, Object> values) {
+    private String joinPredicateFromValues(State currentState, Map<String, String> values) {
         if(values == null) {
             return "1=1";
         } else {
@@ -227,7 +227,7 @@ public abstract class AbstractSimulator {
         return trace.add(nextTransition);
     }
 
-    protected abstract String chooseVariableValues(State currentState, Map<String, Object> values);
+    protected abstract String chooseVariableValues(State currentState, Map<String, String> values);
 
     public SimulationConfiguration getConfig() {
         return config;

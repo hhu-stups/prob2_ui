@@ -83,7 +83,7 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				lbVariableValues.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbVariableValues);
 
-				Map<String, Object> values = item.getValues();
+				Map<String, String> values = item.getValues();
 
 				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
 					Map<String, String> evaluatedValues = new HashMap<>();
