@@ -34,12 +34,19 @@ Compared to ProB Tcl/Tk this UI has the following new features:
  - supports model checking with time and state limit
  - improved feedback for model checking (progress bar, memory usage)
  - improved feedback for trace replay
- - supports well-definedness checking (as symbolic model checking)
+ - supports well-definedness checking (as an option under symbolic model checking)
  - improved test case generation view with ability to save generated traces
  - supports static analysis on machine
- - supports exporting Dot View as .dot, .png, and .pdf
+ - supports exporting graphs from graph visualization view as .dot, .png, and .pdf
+ - added table visualization options for jumping to state IDs and source code locations
+ - improved state view that supports expanding formulas
+ - improved error feedback in the animator, especially when the machine could not be initialized
+ - improved highlighting of errors in editor
+ - added option to control warning detail level - can disable warnings or enable additional messages
  - contains Prolog Output Console for debugging
  - supports syntax highlighting for TLA, CSP, Alloy, XTL, and Z
+ - fixed Z support on macOS and Linux
+ - improved performance in various places, especially on startup, when switching machines, and when large machines are loaded
 
 Best regards,
 The ProB team
