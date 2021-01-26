@@ -149,10 +149,6 @@ public abstract class AbstractSimulator {
     protected abstract Trace executeNextOperation(TimingConfiguration opConfig, Trace trace);
 
     protected void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
-        if(activationsForOperation.isEmpty()) {
-            activationsForOperation.add(activation);
-            return;
-        }
         int insertionIndex = 0;
         while(insertionIndex < activationsForOperation.size() &&
               activation.getTime() >= activationsForOperation.get(insertionIndex).getTime()) {
@@ -164,36 +160,49 @@ public abstract class AbstractSimulator {
     protected void activateOperations(Map<String, List<ActivationConfiguration>> activation) {
         if(activation != null) {
             for (String key : activation.keySet()) {
+                // TODO: Add parameters to activations
                 List<Activation> activationsForOperation = operationToActivation.get(key);
                 TimingConfiguration.ActivationKind activationKind = operationToActivationKind.get(key);
-                // TODO: Add parameters to activations
                 List<ActivationConfiguration> activationConfigurations = activation.get(key);
-                for (ActivationConfiguration activationConfiguration : activationConfigurations) {
-                    if (activationKind == TimingConfiguration.ActivationKind.MULTI) {
-                        activateMultiOperations(activationsForOperation, new Activation(activationConfiguration));
-                    } else {
-                        if (activationsForOperation.isEmpty()) {
-                            activationsForOperation.add(new Activation(activationConfiguration));
-                        } else {
-                            Activation activationForOperation = activationsForOperation.get(0);
-                            int otherActivationTime = activationForOperation.getTime();
-                            if (activationKind == TimingConfiguration.ActivationKind.SINGLE_MAX) {
-                                if (activationConfiguration.getTime() > otherActivationTime) {
-                                    activationsForOperation.clear();
-                                    activationsForOperation.add(new Activation(activationConfiguration));
-                                }
-                            } else if (activationKind == TimingConfiguration.ActivationKind.SINGLE_MIN) {
-                                if (activationConfiguration.getTime() < otherActivationTime) {
-                                    activationsForOperation.clear();
-                                    activationsForOperation.add(new Activation(activationConfiguration));
-                                }
-                            }
-                        }
-                    }
-                }
+                activationConfigurations.forEach(activationConfiguration -> activateOperation(activationKind, activationsForOperation, activationConfiguration));
             }
         }
     }
+
+    private void activateOperation(TimingConfiguration.ActivationKind activationKind, List<Activation> activationsForOperation, ActivationConfiguration activationConfiguration) {
+        if(activationsForOperation.isEmpty()) {
+            activationsForOperation.add(new Activation(activationConfiguration));
+        } else {
+            switch (activationKind) {
+                case MULTI:
+                    activateMultiOperations(activationsForOperation, new Activation(activationConfiguration));
+                    break;
+                case SINGLE_MIN: {
+                    Activation activationForOperation = activationsForOperation.get(0);
+                    int otherActivationTime = activationForOperation.getTime();
+                    if (activationConfiguration.getTime() < otherActivationTime) {
+                        activationsForOperation.clear();
+                        activationsForOperation.add(new Activation(activationConfiguration));
+                    }
+                    break;
+                }
+                case SINGLE_MAX: {
+                    Activation activationForOperation = activationsForOperation.get(0);
+                    int otherActivationTime = activationForOperation.getTime();
+                    if (activationConfiguration.getTime() > otherActivationTime) {
+                        activationsForOperation.clear();
+                        activationsForOperation.add(new Activation(activationConfiguration));
+                    }
+                    break;
+                }
+                case SINGLE:
+                default:
+                    break;
+            }
+        }
+    }
+
+
 
     private String joinPredicateFromValues(State currentState, Map<String, Object> values) {
         if(values == null) {
@@ -207,18 +216,11 @@ public abstract class AbstractSimulator {
     	List<TimingConfiguration> opConfigs = opConfigurations.stream()
 				.filter(config -> operation.equals(config.getOpName()))
 				.collect(Collectors.toList());
-    	String predicate = "";
-    	if(opConfigs.isEmpty()) {
-    		predicate = "1=1";
-		} else {
-    		if(opConfigs.get(0).getVariableChoices() == null) {
-    			predicate = "1=1";
-			} else {
-				predicate = joinPredicateFromValues(currentState, opConfigs.get(0).getVariableChoices());
-			}
-    		if(opConfigs.get(0).getActivation() != null) {
-                activateOperations(opConfigs.get(0).getActivation());
-            }
+    	String predicate = "1=1";
+    	if(!opConfigs.isEmpty()) {
+    	    TimingConfiguration opConfig = opConfigs.get(0);
+            predicate = joinPredicateFromValues(currentState, opConfig.getVariableChoices());
+            activateOperations(opConfig.getActivation());
 		}
     	updateDelay();
         Transition nextTransition = currentState.findTransition(operation, predicate);
