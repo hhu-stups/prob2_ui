@@ -7,15 +7,18 @@ This UI is available for download at (along with a notarized version for macOS):
     https://www3.hhu.de/stups/prob/index.php/Download#ProB2_UI_using_Java_FX
 
 
-Compared to ProB Tcl/Tk this UI can:
- - directly load Rodin models from Rodin workspaces (without having to export them within Rodin)
- - visualize models using the SVG-based plugin VisB
- - has project management features, i.e., a set of specifications can be grouped in a project,
+Compared to ProB Tcl/Tk this UI has the following new features:
+ - visualsation of models using the SVG-based plugin VisB
+ - project management, i.e., a set of specifications can be grouped in a project,
    where you can also store machine specific preferences and verification tasks
- - save multiple traces and replay them individually or batched
+ - can save multiple traces and replay them individually or batched
  - the ability to store various verification tasks (model checking, LTL model checking,
-   symbolic model checking, trace replay, ...)
- - apply model checking with time and state limit  
+   symbolic model checking, trace replay, ...) and re-check them
+ - apply model checking with time and state limit
+ - directly load Rodin models from Rodin workspaces (without having to export them within Rodin)
+ - an integrated view for all dot-based graph visualisations
+   (state space, machine hierarchy, formulas, projection diagrams, ...)
+ - an integrated view to access all table based statistics (MC/DC coverage,...)
  - MC/DC test case generation
  
  Version 1.1.0:
