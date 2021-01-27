@@ -78,9 +78,9 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
                 double randomDouble = random.nextDouble();
                 for(String value : probabilityValueMap.keySet()) {
                     String valueProbability = probabilityValueMap.get(value);
-                    double evalProbability = Double.parseDouble(currentState.eval(valueProbability, FormulaExpand.TRUNCATE).toString());
+                    double evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, valueProbability));
                     if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
-                        String evalValue = currentState.eval(value, FormulaExpand.TRUNCATE).toString();
+                        String evalValue = cache.readValueWithCaching(currentState, value);
                         values.put(variable, evalValue);
                     }
                     probabilityMinimum += evalProbability;
@@ -92,8 +92,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     }
 
     private boolean shouldExecuteNextOperation(State state, List<Transition> transitions, String additionalGuards) {
-        // TODO: Cache expression evaluation
-        String additionalGuardsResult = additionalGuards == null ? "TRUE" : state.eval(additionalGuards, FormulaExpand.TRUNCATE).toString();
+        String additionalGuardsResult = additionalGuards == null ? "TRUE" : cache.readValueWithCaching(state, additionalGuards);
         if (transitions.isEmpty() || "FALSE".equals(additionalGuardsResult)) {
             return false;
         }

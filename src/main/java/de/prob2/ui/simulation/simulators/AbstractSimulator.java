@@ -212,14 +212,13 @@ public abstract class AbstractSimulator {
     }
 
     protected String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
-        // TODO: cache expression
         String newExpression;
         if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
             newExpression = expression;
         } else {
             newExpression = String.format("LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
         }
-        return state.eval(newExpression, FormulaExpand.TRUNCATE).toString();
+        return cache.readValueWithCaching(state, newExpression);
     }
 
 
