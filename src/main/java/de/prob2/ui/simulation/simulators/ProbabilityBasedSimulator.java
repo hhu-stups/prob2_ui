@@ -13,10 +13,12 @@ import de.prob2.ui.simulation.configuration.TimingConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
@@ -38,6 +40,21 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         }
         return conjuncts.toString();
     }
+
+    public Map<String, String> chooseParameters(Activation activation, State currentState) {
+        Map<String, String> parameters = activation.getParameters();
+        if(parameters == null) {
+            return null;
+        }
+        Map<String, String> values = new HashMap<>();
+        Set<String> parametersAsString = parameters.keySet();
+        for(String parameter : parameters.keySet()) {
+            String value = evaluateWithParameters(currentState, parameters.get(parameter), parametersAsString, activation.getFiringTransitionParametersPredicate());
+            values.put(parameter, value);
+        }
+        return values;
+    }
+
 
     public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
         Map<String, String> values = null;
@@ -84,6 +101,20 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         return true;
     }
 
+    private Map<String, String> mergeValues(Map<String, String> values1, Map<String, String> values2) {
+        if(values1 == null) {
+            return values2;
+        }
+
+        if(values2 == null) {
+            return values1;
+        }
+
+        Map<String, String> newValues = new HashMap<>(values1);
+        newValues.putAll(values2);
+        return newValues;
+    }
+
     @Override
     public Trace executeNextOperation(TimingConfiguration timingConfig, Trace trace) {
         String chosenOp = timingConfig.getOpName();
@@ -106,14 +137,14 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
             if (!shouldExecuteNextOperation(currentState, transitions, additionalGuards)) {
                 continue;
             }
-
-            // TODO: Implement handling of parameters
-            Map<String, String> values = chooseProbabilistic(activation, currentState);
+            Map<String, String> values = mergeValues(chooseProbabilistic(activation, currentState), chooseParameters(activation, currentState));
 
             if (values == null) {
+                // TODO: uniform, refactor
                 Transition transition = transitions.get(random.nextInt(transitions.size()));
                 newTrace = appendTrace(newTrace, transition);
-                activateOperations(activationConfiguration);
+                Set<String> parametersAsString = activation.getParameters() == null ? new HashSet<>() : activation.getParameters().keySet();
+                activateOperations(newTrace.getCurrentState(), activationConfiguration, parametersAsString, transition.getParameterPredicate());
             } else {
                 State finalCurrentState = newTrace.getCurrentState();
                 String predicate = chooseVariableValues(finalCurrentState, values);
@@ -123,7 +154,8 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
                 if (!command.hasErrors()) {
                     Transition transition = command.getNewTransitions().get(0);
                     newTrace = appendTrace(newTrace, transition);
-                    activateOperations(activationConfiguration);
+                    Set<String> parametersAsString = activation.getParameters() == null ? new HashSet<>() : activation.getParameters().keySet();
+                    activateOperations(newTrace.getCurrentState(), activationConfiguration, parametersAsString, transition.getParameterPredicate());
                 }
             }
         }

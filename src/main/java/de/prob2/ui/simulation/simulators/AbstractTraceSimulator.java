@@ -20,9 +20,11 @@ import de.prob2.ui.simulation.configuration.TimingConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractTraceSimulator extends AbstractSimulator implements ITraceChecker {
@@ -132,8 +134,10 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                     final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(stateSpace,
                             currentState.getId(), persistentTransition.getOperationName(), pred, 1);
                     stateSpace.execute(command);
-                    newTrace = newTrace.add(command.getNewTransitions().get(0));
-                    activateOperations(activationConfiguration);
+                    Transition transition = command.getNewTransitions().get(0);
+                    newTrace = newTrace.add(transition);
+                    Set<String> parametersAsString = activation.getParameters() == null ? new HashSet<>() : activation.getParameters().keySet();
+                    activateOperations(newTrace.getCurrentState(), activationConfiguration, parametersAsString, transition.getParameterPredicate());
                 }
             } else {
                 State finalCurrentState = newTrace.getCurrentState();
@@ -141,7 +145,8 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                 if (finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, chosenOp, predicate)) {
                     Transition transition = finalCurrentState.findTransition(chosenOp, predicate);
                     newTrace = newTrace.add(transition);
-                    activateOperations(activationConfiguration);
+                    Set<String> parametersAsString = activation.getParameters() == null ? new HashSet<>() : activation.getParameters().keySet();
+                    activateOperations(newTrace.getCurrentState(), activationConfiguration, parametersAsString, transition.getParameterPredicate());
                 }
             }
         }

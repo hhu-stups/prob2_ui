@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.simulators;
 
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -17,8 +18,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSimulator {
@@ -157,41 +160,47 @@ public abstract class AbstractSimulator {
         activationsForOperation.add(insertionIndex, activation);
     }
 
-    protected void activateOperations(Map<String, List<ActivationConfiguration>> activation) {
+    protected void activateOperations(State state, Map<String, List<ActivationConfiguration>> activation, Set<String> parametersAsString, String parameterPredicates) {
         if(activation != null) {
             for (String key : activation.keySet()) {
                 // TODO: Add parameters to activations
                 List<Activation> activationsForOperation = operationToActivation.get(key);
                 TimingConfiguration.ActivationKind activationKind = operationToActivationKind.get(key);
                 List<ActivationConfiguration> activationConfigurations = activation.get(key);
-                activationConfigurations.forEach(activationConfiguration -> activateOperation(activationKind, activationsForOperation, activationConfiguration));
+                activationConfigurations.forEach(activationConfiguration -> activateOperation(state, activationKind, activationsForOperation, activationConfiguration, parametersAsString, parameterPredicates));
             }
         }
     }
 
-    private void activateOperation(TimingConfiguration.ActivationKind activationKind, List<Activation> activationsForOperation, ActivationConfiguration activationConfiguration) {
+    private void activateOperation(State state, TimingConfiguration.ActivationKind activationKind, List<Activation> activationsForOperation, ActivationConfiguration activationConfiguration,
+                                   Set<String> parametersAsString, String parameterPredicates) {
+        String time = activationConfiguration.getTime();
+        Map<String, String> parameters = activationConfiguration.getParameters();
+        Object probability = activationConfiguration.getProbability();
+        int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates));
+
         if(activationsForOperation.isEmpty()) {
-            activationsForOperation.add(new Activation(activationConfiguration));
+            activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parameterPredicates));
         } else {
             switch (activationKind) {
                 case MULTI:
-                    activateMultiOperations(activationsForOperation, new Activation(activationConfiguration));
+                    activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, parameters, probability, parameterPredicates));
                     break;
                 case SINGLE_MIN: {
                     Activation activationForOperation = activationsForOperation.get(0);
                     int otherActivationTime = activationForOperation.getTime();
-                    if (activationConfiguration.getTime() < otherActivationTime) {
+                    if (evaluatedTime < otherActivationTime) {
                         activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(activationConfiguration));
+                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parameterPredicates));
                     }
                     break;
                 }
                 case SINGLE_MAX: {
                     Activation activationForOperation = activationsForOperation.get(0);
                     int otherActivationTime = activationForOperation.getTime();
-                    if (activationConfiguration.getTime() > otherActivationTime) {
+                    if (evaluatedTime > otherActivationTime) {
                         activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(activationConfiguration));
+                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parameterPredicates));
                     }
                     break;
                 }
@@ -202,6 +211,16 @@ public abstract class AbstractSimulator {
         }
     }
 
+    protected String evaluateWithParameters(State state, String expression, Set<String> parametersAsString, String parameterPredicate) {
+        // TODO: cache expression
+        String newExpression;
+        if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
+            newExpression = expression;
+        } else {
+            newExpression = String.format("LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+        }
+        return state.eval(newExpression, FormulaExpand.TRUNCATE).toString();
+    }
 
 
     private String joinPredicateFromValues(State currentState, Map<String, String> values) {
@@ -220,7 +239,7 @@ public abstract class AbstractSimulator {
     	if(!opConfigs.isEmpty()) {
     	    TimingConfiguration opConfig = opConfigs.get(0);
             predicate = joinPredicateFromValues(currentState, opConfig.getVariableChoices());
-            activateOperations(opConfig.getActivation());
+            activateOperations(currentState, opConfig.getActivation(), new HashSet<>(), "1=1");
 		}
     	updateDelay();
         Transition nextTransition = currentState.findTransition(operation, predicate);

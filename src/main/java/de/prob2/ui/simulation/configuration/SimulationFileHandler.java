@@ -34,7 +34,7 @@ public class SimulationFileHandler {
             JsonObject activationConfigurationsAsObject = jsonElement.getAsJsonObject();
             for (String activationName : activationConfigurationsAsObject.keySet()) {
                 JsonObject activationAsObject = activationConfigurationsAsObject.getAsJsonObject(activationName);
-                int time = activationAsObject.get("time").getAsInt();
+                String time = activationAsObject.get("time").getAsString();
                 Map<String, String> parameters = buildParameters(activationAsObject.get("parameters"));
                 Object probability = buildProbability(activationAsObject.get("probability"));
                 activationConfigurations.put(activationName, new ActivationConfiguration(time, parameters, probability));
@@ -128,7 +128,7 @@ public class SimulationFileHandler {
         if (activationConfigurationAsString.startsWith("$")) {
             return activationConfigurations.get(activationConfigurationAsString.substring(1));
         }
-        return new ActivationConfiguration(Integer.parseInt(activationConfigurationAsString), null, null);
+        return new ActivationConfiguration(activationConfigurationAsString, null, null);
     }
 
 

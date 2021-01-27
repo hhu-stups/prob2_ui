@@ -1,7 +1,5 @@
 package de.prob2.ui.simulation.simulators;
 
-import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-
 import java.util.Map;
 import java.util.Objects;
 
@@ -13,10 +11,13 @@ public class Activation {
 
     private Object probability;
 
-    public Activation(ActivationConfiguration activationConfiguration) {
-        this.time = activationConfiguration.getTime();
-        this.parameters = activationConfiguration.getParameters();
-        this.probability = activationConfiguration.getProbability();
+    private String firingTransitionParametersPredicate;
+
+    public Activation(int time, Map<String, String> parameters, Object probability, String firingTransitionParametersPredicate) {
+        this.time = time;
+        this.parameters = parameters;
+        this.probability = probability;
+        this.firingTransitionParametersPredicate = firingTransitionParametersPredicate;
     }
 
     public void decreaseTime(int delta) {
@@ -35,21 +36,25 @@ public class Activation {
         return probability;
     }
 
+    public String getFiringTransitionParametersPredicate() {
+        return firingTransitionParametersPredicate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Activation that = (Activation) o;
-        return time == that.time && Objects.equals(probability, that.probability);
+        return time == that.time && Objects.equals(probability, that.probability) && Objects.equals(firingTransitionParametersPredicate, that.firingTransitionParametersPredicate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(time, probability);
+        return Objects.hash(time, probability, firingTransitionParametersPredicate);
     }
 
     @Override
     public String toString() {
-        return String.format("Activation{time = %s, probability = %s}", time, probability);
+        return String.format("Activation{time = %s, probability = %s, firingTransitionParametersPredicate = %s}", time, probability, firingTransitionParametersPredicate);
     }
 }
