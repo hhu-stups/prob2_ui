@@ -18,15 +18,17 @@ Compared to ProB Tcl/Tk this UI has the following new features:
  - visualisation of models using the SVG-based plugin VisB
  - project management, i.e., a set of specifications can be grouped in a project,
    where you can also store machine specific preferences and verification tasks
- - can save multiple traces and replay them individually or batched
+ - saving multiple traces and replay them individually or batched
  - the ability to store various verification tasks (model checking, LTL model checking,
    symbolic model checking, trace replay, ...) and re-check them
- - apply model checking with time and state limit
  - directly load Rodin models from Rodin workspaces (without having to export them within Rodin)
  - an integrated view for all dot-based graph visualisations
-   (state space, machine hierarchy, formulas, projection diagrams, ...)
- - an integrated view to access all table based statistics (MC/DC coverage,...)
- - MC/DC test case generation
+   (state space, machine hierarchy, formulas, projection diagrams, enabling graphs, 
+   event refinement hierarchy, ...)
+ - an integrated view to access all table based statistics
+   (event coverage, MC/DC coverage, read-write matrices, WD POs, ...)
+ - symbolic MC/DC test case generation
+ - a multi-language interface, currently providing English, French, German and Russian
  
  Version 1.1.0:
  - now contains VisB directly in the application, VisB has been extended considerably
