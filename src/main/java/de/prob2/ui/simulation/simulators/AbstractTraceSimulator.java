@@ -136,8 +136,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                     stateSpace.execute(command);
                     Transition transition = command.getNewTransitions().get(0);
                     newTrace = newTrace.add(transition);
-                    Set<String> parametersAsString = activation.getParameters() == null ? new HashSet<>() : activation.getParameters().keySet();
-                    activateOperations(newTrace.getCurrentState(), activationConfiguration, parametersAsString, transition.getParameterPredicate());
+                    activateOperations(newTrace.getCurrentState(), activationConfiguration, transition.getParameterNames(), transition.getParameterPredicate());
                 }
             } else {
                 State finalCurrentState = newTrace.getCurrentState();
@@ -145,8 +144,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                 if (finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, chosenOp, predicate)) {
                     Transition transition = finalCurrentState.findTransition(chosenOp, predicate);
                     newTrace = newTrace.add(transition);
-                    Set<String> parametersAsString = activation.getParameters() == null ? new HashSet<>() : activation.getParameters().keySet();
-                    activateOperations(newTrace.getCurrentState(), activationConfiguration, parametersAsString, transition.getParameterPredicate());
+                    activateOperations(newTrace.getCurrentState(), activationConfiguration, transition.getParameterNames(), transition.getParameterPredicate());
                 }
             }
         }

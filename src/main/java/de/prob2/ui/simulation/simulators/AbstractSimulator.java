@@ -160,7 +160,7 @@ public abstract class AbstractSimulator {
         activationsForOperation.add(insertionIndex, activation);
     }
 
-    protected void activateOperations(State state, Map<String, List<ActivationConfiguration>> activation, Set<String> parametersAsString, String parameterPredicates) {
+    protected void activateOperations(State state, Map<String, List<ActivationConfiguration>> activation, List<String> parametersAsString, String parameterPredicates) {
         if(activation != null) {
             for (String key : activation.keySet()) {
                 // TODO: Add parameters to activations
@@ -173,25 +173,25 @@ public abstract class AbstractSimulator {
     }
 
     private void activateOperation(State state, TimingConfiguration.ActivationKind activationKind, List<Activation> activationsForOperation, ActivationConfiguration activationConfiguration,
-                                   Set<String> parametersAsString, String parameterPredicates) {
+                                   List<String> parametersAsString, String parameterPredicates) {
         String time = activationConfiguration.getTime();
         Map<String, String> parameters = activationConfiguration.getParameters();
         Object probability = activationConfiguration.getProbability();
         int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates));
 
         if(activationsForOperation.isEmpty()) {
-            activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parameterPredicates));
+            activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
         } else {
             switch (activationKind) {
                 case MULTI:
-                    activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, parameters, probability, parameterPredicates));
+                    activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
                     break;
                 case SINGLE_MIN: {
                     Activation activationForOperation = activationsForOperation.get(0);
                     int otherActivationTime = activationForOperation.getTime();
                     if (evaluatedTime < otherActivationTime) {
                         activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parameterPredicates));
+                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
                     }
                     break;
                 }
@@ -200,7 +200,7 @@ public abstract class AbstractSimulator {
                     int otherActivationTime = activationForOperation.getTime();
                     if (evaluatedTime > otherActivationTime) {
                         activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parameterPredicates));
+                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
                     }
                     break;
                 }
@@ -211,7 +211,7 @@ public abstract class AbstractSimulator {
         }
     }
 
-    protected String evaluateWithParameters(State state, String expression, Set<String> parametersAsString, String parameterPredicate) {
+    protected String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
         // TODO: cache expression
         String newExpression;
         if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
@@ -239,7 +239,7 @@ public abstract class AbstractSimulator {
     	if(!opConfigs.isEmpty()) {
     	    TimingConfiguration opConfig = opConfigs.get(0);
             predicate = joinPredicateFromValues(currentState, opConfig.getVariableChoices());
-            activateOperations(currentState, opConfig.getActivation(), new HashSet<>(), "1=1");
+            activateOperations(currentState, opConfig.getActivation(), new ArrayList<>(), "1=1");
 		}
     	updateDelay();
         Transition nextTransition = currentState.findTransition(operation, predicate);

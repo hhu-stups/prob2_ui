@@ -47,9 +47,8 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
             return null;
         }
         Map<String, String> values = new HashMap<>();
-        Set<String> parametersAsString = parameters.keySet();
         for(String parameter : parameters.keySet()) {
-            String value = evaluateWithParameters(currentState, parameters.get(parameter), parametersAsString, activation.getFiringTransitionParametersPredicate());
+            String value = evaluateWithParameters(currentState, parameters.get(parameter), activation.getFiringTransitionParameters(), activation.getFiringTransitionParametersPredicate());
             values.put(parameter, value);
         }
         return values;
@@ -132,7 +131,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
             }
             activationForOperation.remove(activation);
 
-            State currentState = trace.getCurrentState();
+            State currentState = newTrace.getCurrentState();
             List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
             if (!shouldExecuteNextOperation(currentState, transitions, additionalGuards)) {
                 continue;
@@ -143,8 +142,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
                 // TODO: uniform, refactor
                 Transition transition = transitions.get(random.nextInt(transitions.size()));
                 newTrace = appendTrace(newTrace, transition);
-                Set<String> parametersAsString = activation.getParameters() == null ? new HashSet<>() : activation.getParameters().keySet();
-                activateOperations(newTrace.getCurrentState(), activationConfiguration, parametersAsString, transition.getParameterPredicate());
+                activateOperations(newTrace.getCurrentState(), activationConfiguration, transition.getParameterNames(), transition.getParameterPredicate());
             } else {
                 State finalCurrentState = newTrace.getCurrentState();
                 String predicate = chooseVariableValues(finalCurrentState, values);
@@ -154,8 +152,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
                 if (!command.hasErrors()) {
                     Transition transition = command.getNewTransitions().get(0);
                     newTrace = appendTrace(newTrace, transition);
-                    Set<String> parametersAsString = activation.getParameters() == null ? new HashSet<>() : activation.getParameters().keySet();
-                    activateOperations(newTrace.getCurrentState(), activationConfiguration, parametersAsString, transition.getParameterPredicate());
+                    activateOperations(newTrace.getCurrentState(), activationConfiguration, transition.getParameterNames(), transition.getParameterPredicate());
                 }
             }
         }
