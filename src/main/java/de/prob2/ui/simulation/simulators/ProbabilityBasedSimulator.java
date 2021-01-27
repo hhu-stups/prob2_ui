@@ -75,13 +75,20 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         return values;
     }
 
+    private boolean shouldExecuteNextOperation(State state, List<Transition> transitions, String additionalGuards) {
+        // TODO: Cache expression evaluation
+        String additionalGuardsResult = additionalGuards == null ? "TRUE" : state.eval(additionalGuards, FormulaExpand.TRUNCATE).toString();
+        if (transitions.isEmpty() || "FALSE".equals(additionalGuardsResult)) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public Trace executeNextOperation(TimingConfiguration timingConfig, Trace trace) {
-        State currentState = trace.getCurrentState();
         String chosenOp = timingConfig.getOpName();
-        Map<String, List<ActivationConfiguration>> activationConfiguration = null;
-
-        List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
+        String additionalGuards = timingConfig.getAdditionalGuards();
+        Map<String, List<ActivationConfiguration>> activationConfiguration = timingConfig.getActivation();
 
         List<Activation> activationForOperation = operationToActivation.get(chosenOp);
         List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
@@ -94,23 +101,13 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
             }
             activationForOperation.remove(activation);
 
-            // TODO
-            String additionalGuards = timingConfig.getAdditionalGuards();
-            String additionalGuardsResult = additionalGuards == null ? "TRUE" : currentState.eval(additionalGuards, FormulaExpand.TRUNCATE).toString();;
-            boolean execute = false;
-            if (!transitions.isEmpty() && "TRUE".equals(additionalGuardsResult)) {
-                if (timingConfig.getActivation() != null) {
-                    activationConfiguration = timingConfig.getActivation();
-                }
-                execute = true;
-            }
-
-            if (!execute) {
+            State currentState = trace.getCurrentState();
+            List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
+            if (!shouldExecuteNextOperation(currentState, transitions, additionalGuards)) {
                 continue;
             }
 
             // TODO: Implement handling of parameters
-
             Map<String, String> values = chooseProbabilistic(activation, currentState);
 
             if (values == null) {

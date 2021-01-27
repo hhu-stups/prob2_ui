@@ -96,6 +96,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
         List<Activation> activationForOperation = operationToActivation.get(chosenOp);
         List<Activation> activationForOperationCopy = new ArrayList<>(operationToActivation.get(chosenOp));
 
+        // TODO: Re-implement Trace Replay with new timing and probabilistic behavior
         Trace newTrace = trace;
         for(Activation activation : activationForOperationCopy) {
             if(activation.getTime() > 0) {
