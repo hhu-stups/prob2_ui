@@ -108,14 +108,11 @@ public class SimulationFileHandler {
                     if(activationElement.isJsonArray()) {
                         List<ActivationConfiguration> activations = new ArrayList<>();
                         for(int j = 0; j < activationElement.getAsJsonArray().size(); j++) {
-                            String activationConfigurationAsString = activationElement.getAsJsonArray().get(j).getAsString();
-                            activations.add(buildActivationConfiguration(activationConfigurationAsString, activationConfigurations));
+                            activations.add(buildActivationConfiguration(activationElement.getAsJsonArray().get(j), activationConfigurations));
                         }
                         activation.put(key, activations);
                     } else {
-                        // TODO: Implement explicit definition of activation with object
-                        String activationConfigurationAsString = activationElement.getAsString();
-                        activation.put(key, Collections.singletonList(buildActivationConfiguration(activationConfigurationAsString, activationConfigurations)));
+                        activation.put(key, Collections.singletonList(buildActivationConfiguration(activationElement, activationConfigurations)));
                     }
                 }
             }
@@ -123,11 +120,20 @@ public class SimulationFileHandler {
         return activation;
     }
 
-    private static ActivationConfiguration buildActivationConfiguration(String activationConfigurationAsString, Map<String, ActivationConfiguration> activationConfigurations) {
-        if (activationConfigurationAsString.startsWith("$")) {
-            return activationConfigurations.get(activationConfigurationAsString.substring(1));
-        }
-        return new ActivationConfiguration(activationConfigurationAsString, null, null);
+    private static ActivationConfiguration buildActivationConfiguration(JsonElement activationElement, Map<String, ActivationConfiguration> activationConfigurations) {
+        if(activationElement.isJsonPrimitive()) {
+			String activationConfigurationAsString = activationElement.getAsString();
+			if (activationConfigurationAsString.startsWith("$")) {
+				return activationConfigurations.get(activationConfigurationAsString.substring(1));
+			}
+			return new ActivationConfiguration(activationConfigurationAsString, null, null);
+		} else {
+			JsonObject activationAsObject = activationElement.getAsJsonObject();
+			String time = activationAsObject.get("time").getAsString();
+			Map<String, String> parameters = buildParameters(activationAsObject.get("parameters"));
+			Object probability = buildProbability(activationAsObject.get("probability"));
+			return new ActivationConfiguration(time, parameters, probability);
+		}
     }
 
 
