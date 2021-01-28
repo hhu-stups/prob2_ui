@@ -24,15 +24,15 @@ public class SimulationConfigurationChecker {
     }
 
     public void check() {
-        checkVariableChoices();
+        checkDestinationState();
         checkActivationConfigurations();
     }
 
-    private void checkVariableChoices() {
+    private void checkDestinationState() {
         simulationConfiguration.getOperationConfigurations().stream()
                 .filter(operationConfiguration -> !"$initialise_machine".equals(operationConfiguration.getOpName()) && !"$setup_constants".equals(operationConfiguration.getOpName()))
-                .filter(operationConfiguration -> operationConfiguration.getVariableChoices() != null)
-                .forEach(operationConfiguration -> errors.add(new ConfigurationCheckingError(String.format("Field variableChoices is not allowed for operation: %s", operationConfiguration.getOpName()))));
+                .filter(operationConfiguration -> operationConfiguration.getDestState() != null)
+                .forEach(operationConfiguration -> errors.add(new ConfigurationCheckingError(String.format("Field destState is not allowed for operation: %s", operationConfiguration.getOpName()))));
     }
 
     private void checkActivationConfigurations() {

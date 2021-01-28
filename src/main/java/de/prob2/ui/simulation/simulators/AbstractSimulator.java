@@ -253,7 +253,7 @@ public abstract class AbstractSimulator {
     	String predicate = "1=1";
     	if(!opConfigs.isEmpty()) {
     	    OperationConfiguration opConfig = opConfigs.get(0);
-            predicate = joinPredicateFromValues(currentState, opConfig.getVariableChoices());
+            predicate = joinPredicateFromValues(currentState, opConfig.getDestState());
             activateOperations(currentState, opConfig.getActivation(), new ArrayList<>(), "1=1");
 		}
     	updateDelay();

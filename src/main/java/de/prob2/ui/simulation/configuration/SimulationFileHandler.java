@@ -52,8 +52,8 @@ public class SimulationFileHandler {
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
             Map<String, List<ActivationConfiguration>> activation = buildActivation(activationConfigurations, jsonObject.get("activation"));
             OperationConfiguration.ActivationKind activationKind = buildActivationKind(jsonObject.get("activationKind"));
-            Map<String, String> variableChoices = buildVariableChoices(jsonObject.get("variableChoices"));
-            operationConfigurations.add(new OperationConfiguration(opName, activation, activationKind, additionalGuards, priority, variableChoices));
+            Map<String, String> destState = buildDestinationState(jsonObject.get("destState"));
+            operationConfigurations.add(new OperationConfiguration(opName, activation, activationKind, additionalGuards, priority, destState));
         }
         return operationConfigurations;
     }
@@ -143,16 +143,16 @@ public class SimulationFileHandler {
         return activationKind;
     }
 
-    private static Map<String, String> buildVariableChoices(JsonElement jsonElement) {
-        Map<String, String> variableChoices = null;
+    private static Map<String, String> buildDestinationState(JsonElement jsonElement) {
+        Map<String, String> destState = null;
         if(jsonElement != null) {
-            variableChoices = new HashMap<>();
+			destState = new HashMap<>();
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             for(String key : jsonObject.keySet()) {
-                variableChoices.put(key, jsonObject.get(key).getAsString());
+				destState.put(key, jsonObject.get(key).getAsString());
             }
         }
-        return variableChoices;
+        return destState;
     }
 
 }

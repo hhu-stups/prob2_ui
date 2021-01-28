@@ -20,16 +20,16 @@ public class OperationConfiguration {
 
     private int priority;
 
-    private Map<String, String> variableChoices;
+    private Map<String, String> destState;
 
     public OperationConfiguration(String opName, Map<String, List<ActivationConfiguration>> activation, ActivationKind activationKind,
-								  String additionalGuards, int priority, Map<String, String> variableChoices) {
+								  String additionalGuards, int priority, Map<String, String> destState) {
         this.opName = opName;
         this.activation = activation;
         this.activationKind = activationKind;
         this.additionalGuards = additionalGuards;
         this.priority = priority;
-        this.variableChoices = variableChoices;
+        this.destState = destState;
     }
 
     public String getOpName() {
@@ -52,7 +52,7 @@ public class OperationConfiguration {
         return priority;
     }
 
-    public Map<String, String> getVariableChoices() {
-        return variableChoices;
+    public Map<String, String> getDestState() {
+        return destState;
     }
 }

@@ -105,8 +105,8 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
             activationForOperation.remove(activation);
 
             // TODO: What if sum of scheduled operations has 100% probability and is not equal next operation in trace
-            if (timingConfig.getVariableChoices() != null) {
-                values = timingConfig.getVariableChoices();
+            if (timingConfig.getDestState() != null) {
+                values = timingConfig.getDestState();
             }
             if (timingConfig.getActivation() != null) {
                 activationConfiguration = timingConfig.getActivation();
