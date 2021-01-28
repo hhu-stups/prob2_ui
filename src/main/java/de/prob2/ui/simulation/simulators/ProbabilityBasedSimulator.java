@@ -10,7 +10,7 @@ import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.TimingConfiguration;
+import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,7 +116,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     }
 
     @Override
-    public Trace executeNextOperation(TimingConfiguration timingConfig, Trace trace) {
+    public Trace executeNextOperation(OperationConfiguration timingConfig, Trace trace) {
         String chosenOp = timingConfig.getOpName();
         String additionalGuards = timingConfig.getAdditionalGuards();
         Map<String, List<ActivationConfiguration>> activationConfiguration = timingConfig.getActivation();

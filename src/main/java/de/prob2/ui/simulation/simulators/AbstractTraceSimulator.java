@@ -16,7 +16,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.TimingConfiguration;
+import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +81,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    public Trace executeNextOperation(TimingConfiguration timingConfig, Trace trace) {
+    public Trace executeNextOperation(OperationConfiguration timingConfig, Trace trace) {
         State currentState = trace.getCurrentState();
         //boolean execute = false;
         Map<String, String> values = null;
@@ -159,7 +159,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    protected Trace executeBeforeInitialisation(String operation, List<TimingConfiguration> opConfigurations, State currentState, Trace trace) {
+    protected Trace executeBeforeInitialisation(String operation, List<OperationConfiguration> opConfigurations, State currentState, Trace trace) {
         Trace res = super.executeBeforeInitialisation(operation, opConfigurations, currentState, trace);
         if(res.getTransitionList().size() > trace.getTransitionList().size()) {
             counter = res.getTransitionList().size();
@@ -168,7 +168,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    protected Trace executeOperation(TimingConfiguration opConfig, Trace trace) {
+    protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
         Trace res = super.executeOperation(opConfig, trace);
         if(res.getTransitionList().size() > trace.getTransitionList().size()) {
             counter = res.getTransitionList().size();

@@ -20,10 +20,8 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.TimingConfiguration;
+import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
-import de.prob2.ui.simulation.simulators.AbstractSimulator;
-import de.prob2.ui.simulation.simulators.Activation;
 import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -61,7 +59,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -367,11 +364,11 @@ public class SimulatorStage extends Stage {
 		SimulationConfiguration config = simulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
-		for(TimingConfiguration opConfig : config.getTimingConfigurations()) {
+		for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
 			String opName = opConfig.getOpName();
 			String additionalGuards = opConfig.getAdditionalGuards();
 			Map<String, List<ActivationConfiguration>> activationConfiguration = opConfig.getActivation();
-			TimingConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
+			OperationConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
 			String priority = String.valueOf(opConfig.getPriority());
 			Map<String, String> variableChoices = opConfig.getVariableChoices();
 			observableList.add(new SimulationDebugItem(opName, activationConfiguration, activationKind, additionalGuards, priority, variableChoices));

@@ -29,15 +29,15 @@ public class SimulationConfigurationChecker {
     }
 
     private void checkVariableChoices() {
-        simulationConfiguration.getTimingConfigurations().stream()
-                .filter(timingConfiguration -> !"$initialise_machine".equals(timingConfiguration.getOpName()) && !"$setup_constants".equals(timingConfiguration.getOpName()))
-                .filter(timingConfiguration -> timingConfiguration.getVariableChoices() != null)
-                .forEach(timingConfiguration -> errors.add(new ConfigurationCheckingError(String.format("Field variableChoices is not allowed for operation: %s", timingConfiguration.getOpName()))));
+        simulationConfiguration.getOperationConfigurations().stream()
+                .filter(operationConfiguration -> !"$initialise_machine".equals(operationConfiguration.getOpName()) && !"$setup_constants".equals(operationConfiguration.getOpName()))
+                .filter(operationConfiguration -> operationConfiguration.getVariableChoices() != null)
+                .forEach(operationConfiguration -> errors.add(new ConfigurationCheckingError(String.format("Field variableChoices is not allowed for operation: %s", operationConfiguration.getOpName()))));
     }
 
     private void checkActivationConfigurations() {
-    	for(TimingConfiguration timingConfiguration : simulationConfiguration.getTimingConfigurations()) {
-    		Map<String, List<ActivationConfiguration>> activation = timingConfiguration.getActivation();
+    	for(OperationConfiguration operationConfiguration : simulationConfiguration.getOperationConfigurations()) {
+    		Map<String, List<ActivationConfiguration>> activation = operationConfiguration.getActivation();
     		if(activation != null) {
 				for (String activatedOp : activation.keySet()) {
 					activation.get(activatedOp).forEach(activationForOp -> checkActivationConfiguration(activatedOp, activationForOp));

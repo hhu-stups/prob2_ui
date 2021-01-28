@@ -6,13 +6,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
-import de.prob2.ui.simulation.simulators.Activation;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +23,8 @@ public class SimulationFileHandler {
         JsonReader reader = new JsonReader(new FileReader(inputFile));
         JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
         Map<String, ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
-        List<TimingConfiguration> timingConfigurations = buildTimingConfigurations(activationConfigurations, simulationFile.get("timingConfigurations"));
-        return new SimulationConfiguration(timingConfigurations);
+        List<OperationConfiguration> operationConfigurations = buildOperationConfigurations(activationConfigurations, simulationFile.get("operationConfigurations"));
+        return new SimulationConfiguration(operationConfigurations);
     }
 
     private static Map<String, ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
@@ -44,20 +42,20 @@ public class SimulationFileHandler {
         return activationConfigurations;
     }
 
-    private static List<TimingConfiguration> buildTimingConfigurations(Map<String, ActivationConfiguration> activationConfigurations, JsonElement jsonElement) {
-        JsonArray timingConfigurationsAsArray = jsonElement.getAsJsonArray();
-        List<TimingConfiguration> timingConfigurations = new ArrayList<>();
-        for(int i = 0; i < timingConfigurationsAsArray.size(); i++) {
-            JsonObject jsonObject = (JsonObject) timingConfigurationsAsArray.get(i);
+    private static List<OperationConfiguration> buildOperationConfigurations(Map<String, ActivationConfiguration> activationConfigurations, JsonElement jsonElement) {
+        JsonArray operationConfigurationsAsArray = jsonElement.getAsJsonArray();
+        List<OperationConfiguration> operationConfigurations = new ArrayList<>();
+        for(int i = 0; i < operationConfigurationsAsArray.size(); i++) {
+            JsonObject jsonObject = (JsonObject) operationConfigurationsAsArray.get(i);
             String opName = jsonObject.get("opName").getAsString();
             String additionalGuards = jsonObject.get("additionalGuards") == null ? null : jsonObject.get("additionalGuards").getAsString();
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
             Map<String, List<ActivationConfiguration>> activation = buildActivation(activationConfigurations, jsonObject.get("activation"));
-            TimingConfiguration.ActivationKind activationKind = buildActivationKind(jsonObject.get("activationKind"));
+            OperationConfiguration.ActivationKind activationKind = buildActivationKind(jsonObject.get("activationKind"));
             Map<String, String> variableChoices = buildVariableChoices(jsonObject.get("variableChoices"));
-            timingConfigurations.add(new TimingConfiguration(opName, activation, activationKind, additionalGuards, priority, variableChoices));
+            operationConfigurations.add(new OperationConfiguration(opName, activation, activationKind, additionalGuards, priority, variableChoices));
         }
-        return timingConfigurations;
+        return operationConfigurations;
     }
 
     private static Map<String, String> buildParameters(JsonElement jsonElement) {
@@ -133,14 +131,14 @@ public class SimulationFileHandler {
     }
 
 
-    private static TimingConfiguration.ActivationKind buildActivationKind(JsonElement jsonElement) {
-        TimingConfiguration.ActivationKind activationKind = TimingConfiguration.ActivationKind.MULTI;
+    private static OperationConfiguration.ActivationKind buildActivationKind(JsonElement jsonElement) {
+        OperationConfiguration.ActivationKind activationKind = OperationConfiguration.ActivationKind.MULTI;
         if(jsonElement == null || "multi".equals(jsonElement.getAsString())) {
-            activationKind = TimingConfiguration.ActivationKind.MULTI;
+            activationKind = OperationConfiguration.ActivationKind.MULTI;
         } else if("single:max".equals(jsonElement.getAsString())) {
-            activationKind = TimingConfiguration.ActivationKind.SINGLE_MAX;
+            activationKind = OperationConfiguration.ActivationKind.SINGLE_MAX;
         } else if("single:min".equals(jsonElement.getAsString())) {
-            activationKind = TimingConfiguration.ActivationKind.SINGLE_MIN;
+            activationKind = OperationConfiguration.ActivationKind.SINGLE_MIN;
         }
         return activationKind;
     }

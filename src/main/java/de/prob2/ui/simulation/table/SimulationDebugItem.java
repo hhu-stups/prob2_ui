@@ -1,7 +1,7 @@
 package de.prob2.ui.simulation.table;
 
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.TimingConfiguration;
+import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ public class SimulationDebugItem {
 
 	private final Map<String, List<ActivationConfiguration>> activation;
 
-	private final TimingConfiguration.ActivationKind activationKind;
+	private final OperationConfiguration.ActivationKind activationKind;
 
 	private final String additionalGuards;
 
@@ -20,7 +20,7 @@ public class SimulationDebugItem {
 
 	private final Map<String, String> values;
 
-	public SimulationDebugItem(String opName, Map<String, List<ActivationConfiguration>> activation, TimingConfiguration.ActivationKind activationKind,
+	public SimulationDebugItem(String opName, Map<String, List<ActivationConfiguration>> activation, OperationConfiguration.ActivationKind activationKind,
 							   String additionalGuards, String priority, Map<String, String> values) {
 		this.opName = opName;
 		this.activation = activation;
@@ -42,7 +42,7 @@ public class SimulationDebugItem {
 		return activation == null ? "" : activation.toString();
 	}
 
-	public TimingConfiguration.ActivationKind getActivationKind() {
+	public OperationConfiguration.ActivationKind getActivationKind() {
 		return activationKind;
 	}
 
