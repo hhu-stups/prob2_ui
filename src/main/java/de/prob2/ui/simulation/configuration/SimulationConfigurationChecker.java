@@ -62,8 +62,8 @@ public class SimulationConfigurationChecker {
 				operationVariables.addAll(opInfo.getParameterNames());
 				if(operationVariables.isEmpty())
 
-				if (activationForOp.getParameters() != null && activationForOp.getParameters().keySet() != operationVariables) {
-					errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover all operations", activatedOp)));
+				if (activationForOp.getParameters() != null && (!activationForOp.getParameters().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activationForOp.getParameters().keySet()))) {
+					errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
 				}
 			}
 		} else if(probability instanceof String) {
@@ -96,8 +96,8 @@ public class SimulationConfigurationChecker {
 
 
 				// Check whether given variables cover all non-deterministic variables and parameters of the operation
-				if (operationVariables != configurationVariables) {
-					errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover all operations", activatedOp)));
+				if (!operationVariables.containsAll(configurationVariables) || !configurationVariables.containsAll(operationVariables)) {
+					errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
 				}
 
 			}
