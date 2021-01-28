@@ -5,6 +5,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import org.apache.commons.math3.analysis.function.Gaussian;
 
@@ -43,9 +44,9 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 
     private HypothesisCheckResult result;
 
-    public SimulationHypothesisChecker(final Trace trace, final int numberExecutions, final SimulationCheckingType type,
+    public SimulationHypothesisChecker(final CurrentTrace currentTrace, final Trace trace, final int numberExecutions, final SimulationCheckingType type,
 									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final Map<String, Object> additionalInformation) {
-        super(trace, numberExecutions, additionalInformation);
+        super(currentTrace, trace, numberExecutions, additionalInformation);
 		this.type = type;
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;

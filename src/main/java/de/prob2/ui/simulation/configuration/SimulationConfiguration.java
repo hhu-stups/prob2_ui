@@ -5,17 +5,10 @@ import java.util.Map;
 
 public class SimulationConfiguration {
 
-    private Map<String, ActivationConfiguration> activationConfigurations;
+    private final List<TimingConfiguration> timingConfigurations;
 
-    private List<TimingConfiguration> timingConfigurations;
-
-    public SimulationConfiguration(Map<String, ActivationConfiguration> activationConfigurations, List<TimingConfiguration> timingConfigurations) {
-        this.activationConfigurations = activationConfigurations;
+    public SimulationConfiguration(List<TimingConfiguration> timingConfigurations) {
         this.timingConfigurations = timingConfigurations;
-    }
-
-    public Map<String, ActivationConfiguration> getActivationConfigurations() {
-        return activationConfigurations;
     }
 
     public List<TimingConfiguration> getTimingConfigurations() {

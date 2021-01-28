@@ -15,8 +15,8 @@ public class Simulator extends ProbabilityBasedSimulator implements IRealTimeSim
 	private final CurrentTrace currentTrace;
 
 	@Inject
-	public Simulator(final Scheduler scheduler, final CurrentTrace currentTrace) {
-		super();
+	public Simulator(final CurrentTrace currentTrace, final Scheduler scheduler) {
+		super(currentTrace);
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 	}

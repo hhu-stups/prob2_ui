@@ -1,13 +1,14 @@
 package de.prob2.ui.simulation.simulators.check;
 
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob.statespace.Trace;
 
 import java.util.Map;
 
 public class SimulationEstimator extends SimulationMonteCarlo {
 
-    public SimulationEstimator(Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
-        super(trace, numberExecutions, additionalInformation);
+    public SimulationEstimator(final CurrentTrace currentTrace, Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
+        super(currentTrace, trace, numberExecutions, additionalInformation);
         //TODO
     }
 

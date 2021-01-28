@@ -124,7 +124,7 @@ public class SimulationTracesView extends Stage {
 			playTraceItem.setOnAction(e -> {
 				Trace trace = new Trace(currentTrace.getStateSpace());
 				PersistentTrace persistentTrace = new PersistentTrace(row.getItem().getTrace(), row.getItem().getTrace().getCurrent().getIndex() + 1);
-				TraceSimulator traceSimulator = new TraceSimulator(trace, persistentTrace, injector.getInstance(Scheduler.class), currentTrace);
+				TraceSimulator traceSimulator = new TraceSimulator(currentTrace, injector.getInstance(Scheduler.class), trace, persistentTrace);
 				if(traceSimulator.isRunning()) {
 					traceSimulator.stop();
 				}

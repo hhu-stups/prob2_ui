@@ -1,14 +1,16 @@
 package de.prob2.ui.simulation.simulators;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.simulation.configuration.ConfigurationCheckingError;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 
 import java.io.File;
+import java.io.IOException;
 
 public interface IRealTimeSimulator {
 
-    void initSimulator(File file);
+    void initSimulator(File file) throws IOException, ConfigurationCheckingError;
 
     void simulate();
 

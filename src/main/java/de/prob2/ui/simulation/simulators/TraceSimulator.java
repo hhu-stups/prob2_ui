@@ -16,14 +16,14 @@ public class TraceSimulator extends AbstractTraceSimulator implements IRealTimeS
 
     private final CurrentTrace currentTrace;
 
-    public TraceSimulator(Trace trace, ReplayTrace replayTrace, final Scheduler scheduler, final CurrentTrace currentTrace) {
-        super(trace, replayTrace);
+    public TraceSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, Trace trace, ReplayTrace replayTrace) {
+        super(currentTrace, trace, replayTrace);
         this.scheduler = scheduler;
         this.currentTrace = currentTrace;
     }
 
-    public TraceSimulator(Trace trace, PersistentTrace persistentTrace, final Scheduler scheduler, final CurrentTrace currentTrace) {
-        super(trace, persistentTrace);
+    public TraceSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, Trace trace, PersistentTrace persistentTrace) {
+        super(currentTrace, trace, persistentTrace);
         this.scheduler = scheduler;
         this.currentTrace = currentTrace;
     }

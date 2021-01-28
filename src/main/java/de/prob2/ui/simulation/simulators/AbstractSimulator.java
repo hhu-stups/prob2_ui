@@ -1,15 +1,19 @@
 package de.prob2.ui.simulation.simulators;
 
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.State;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.ConfigurationCheckingError;
+import de.prob2.ui.simulation.configuration.SimulationConfigurationChecker;
 import de.prob2.ui.simulation.configuration.TimingConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,15 +22,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSimulator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSimulator.class);
 
     protected SimulationConfiguration config;
 
@@ -46,22 +46,40 @@ public abstract class AbstractSimulator {
 
     protected SimulatorCache cache;
 
-    public AbstractSimulator() {
+    protected final CurrentTrace currentTrace;
+
+    protected ChangeListener<? super Trace> traceListener = null;
+
+    public AbstractSimulator(final CurrentTrace currentTrace) {
+    	this.currentTrace = currentTrace;
         this.time = new SimpleIntegerProperty(0);
         this.cache = new SimulatorCache();
+        this.traceListener = (observable, from, to) -> {
+			if(config != null && to != null && to.getStateSpace() != null) {
+				checkConfiguration(to.getStateSpace());
+				currentTrace.removeListener(traceListener);
+			}
+		};
     }
 
-    public void initSimulator(File configFile) {
-        this.config = null;
-        try {
-            this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
-        } catch (IOException e) {
-            LOGGER.debug("Tried to load simulation configuration file");
-            //TODO: Implement alert
-            return;
-        }
+
+    public void initSimulator(File configFile) throws IOException {
+        this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
+        if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
+        	checkConfiguration(currentTrace.getStateSpace());
+		} else {
+			currentTrace.addListener(traceListener);
+		}
         resetSimulator();
     }
+
+    protected void checkConfiguration(StateSpace stateSpace) throws RuntimeException {
+		SimulationConfigurationChecker simulationConfigurationChecker = new SimulationConfigurationChecker(stateSpace, this.config);
+		simulationConfigurationChecker.check();
+		if(!simulationConfigurationChecker.getErrors().isEmpty()) {
+			throw new RuntimeException(simulationConfigurationChecker.getErrors().stream().map(Throwable::getMessage).collect(Collectors.joining("\n")));
+		}
+	}
 
     public void resetSimulator() {
         this.operationToActivation = new HashMap<>();
@@ -75,6 +93,7 @@ public abstract class AbstractSimulator {
                     .sorted(Comparator.comparingInt(TimingConfiguration::getPriority))
                     .collect(Collectors.toList());
             initializeRemainingTime();
+            currentTrace.removeListener(traceListener);
         }
     }
 

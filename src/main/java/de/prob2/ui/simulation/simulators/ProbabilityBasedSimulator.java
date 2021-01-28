@@ -8,23 +8,26 @@ import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.TimingConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
     private Random random = new Random(System.nanoTime());
 
-    @Override
+	public ProbabilityBasedSimulator(final CurrentTrace currentTrace) {
+		super(currentTrace);
+	}
+
+	@Override
     public String chooseVariableValues(State currentState, Map<String, String> values) {
         StringBuilder conjuncts = new StringBuilder();
         for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
@@ -68,10 +71,9 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
                 return null;
             }
         } else {
-            Map<String, Object> probabilityMap = (Map<String, Object>) probability;
+            Map<String, Map<String, String>> probabilityMap = (Map<String, Map<String, String>>) probability;
             values = new HashMap<>();
             for(String variable : probabilityMap.keySet()) {
-                // TODO: cache probability
                 double probabilityMinimum = 0.0;
                 Object probabilityValue = probabilityMap.get(variable);
                 Map<String, String> probabilityValueMap = (Map<String, String>) probabilityValue;

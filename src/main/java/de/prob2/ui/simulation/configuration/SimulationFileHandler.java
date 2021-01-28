@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class SimulationFileHandler {
         JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
         Map<String, ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
         List<TimingConfiguration> timingConfigurations = buildTimingConfigurations(activationConfigurations, simulationFile.get("timingConfigurations"));
-        return new SimulationConfiguration(activationConfigurations, timingConfigurations);
+        return new SimulationConfiguration(timingConfigurations);
     }
 
     private static Map<String, ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
@@ -82,7 +83,7 @@ public class SimulationFileHandler {
             probability = jsonElement.getAsString();
         } else {
             JsonObject probabilityObject = jsonElement.getAsJsonObject();
-            Map<String, Object> probabilityMap = new HashMap<>();
+            Map<String, Map<String, String>> probabilityMap = new HashMap<>();
             JsonObject probabilityVariableObject = probabilityObject.getAsJsonObject();
 
             for (String variable : probabilityVariableObject.keySet()) {
@@ -116,7 +117,7 @@ public class SimulationFileHandler {
                     } else {
                         // TODO: Implement explicit definition of activation with object
                         String activationConfigurationAsString = activationElement.getAsString();
-                        activation.put(key, Arrays.asList(buildActivationConfiguration(activationConfigurationAsString, activationConfigurations)));
+                        activation.put(key, Collections.singletonList(buildActivationConfiguration(activationConfigurationAsString, activationConfigurations)));
                     }
                 }
             }

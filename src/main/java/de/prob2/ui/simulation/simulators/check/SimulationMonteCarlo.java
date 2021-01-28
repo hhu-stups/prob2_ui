@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.simulators.check;
 
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.simulators.ProbabilityBasedSimulator;
 
 import java.util.ArrayList;
@@ -35,8 +36,8 @@ public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
 
     protected Map<String, Object> additionalInformation;
 
-    public SimulationMonteCarlo(Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
-        super();
+    public SimulationMonteCarlo(final CurrentTrace currentTrace, Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
+        super(currentTrace);
         this.resultingTraces = new ArrayList<>();
         this.trace = trace;
         this.numberExecutions = numberExecutions;

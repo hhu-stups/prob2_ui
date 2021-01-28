@@ -14,17 +14,13 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.TimingConfiguration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractTraceSimulator extends AbstractSimulator implements ITraceChecker {
@@ -35,13 +31,15 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
 
     protected int counter;
 
-    public AbstractTraceSimulator(Trace trace, ReplayTrace replayTrace) {
+    public AbstractTraceSimulator(final CurrentTrace currentTrace, Trace trace, ReplayTrace replayTrace) {
+    	super(currentTrace);
         this.trace = new Trace(trace.getStateSpace());
         this.persistentTrace = replayTrace.getPersistentTrace();
         this.counter = 0;
     }
 
-    public AbstractTraceSimulator(Trace trace, PersistentTrace persistentTrace) {
+    public AbstractTraceSimulator(final CurrentTrace currentTrace, Trace trace, PersistentTrace persistentTrace) {
+    	super(currentTrace);
         this.trace = new Trace(trace.getStateSpace());
         this.persistentTrace = persistentTrace;
         this.counter = 0;
