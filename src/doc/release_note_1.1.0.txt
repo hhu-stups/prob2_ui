@@ -1,9 +1,9 @@
 =======================================
-            ProB JavaFX UI
+            ProB2-UI (JavaFX)
 =======================================
 
 We are happy to announce version 1.1.0 of the new JavaFX-based UI of the animator and model checker ProB.
-This UI is available for download at:
+This user interface is available for download at:
     https://www3.hhu.de/stups/prob/index.php/Download#ProB2_UI_using_Java_FX
 As of version 1.1.0, we provide native installers for the following platforms:
  - Windows (tested on Windows 10 20H2)
