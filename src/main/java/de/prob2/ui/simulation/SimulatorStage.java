@@ -20,6 +20,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
@@ -367,7 +368,7 @@ public class SimulatorStage extends Stage {
 		for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
 			String opName = opConfig.getOpName();
 			String additionalGuards = opConfig.getAdditionalGuards();
-			Map<String, List<ActivationConfiguration>> activationConfiguration = opConfig.getActivation();
+			List<ActivationConfiguration> activationConfiguration = opConfig.getActivation();
 			OperationConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
 			String priority = String.valueOf(opConfig.getPriority());
 			Map<String, String> destState = opConfig.getDestState();

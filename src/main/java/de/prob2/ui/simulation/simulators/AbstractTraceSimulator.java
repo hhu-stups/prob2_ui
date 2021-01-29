@@ -16,6 +16,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
         State currentState = trace.getCurrentState();
         //boolean execute = false;
         Map<String, String> values = null;
-        Map<String, List<ActivationConfiguration>> activationConfiguration = null;
+        List<ActivationConfiguration> activationConfiguration = null;
 
         //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
         String chosenOp = timingConfig.getOpName();
@@ -134,7 +135,8 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                     stateSpace.execute(command);
                     Transition transition = command.getNewTransitions().get(0);
                     newTrace = newTrace.add(transition);
-                    activateOperations(newTrace.getCurrentState(), activationConfiguration, transition.getParameterNames(), transition.getParameterPredicate());
+                    // TODO: Implement directed (regarding probability) activate operations
+                    //activateOperations(newTrace.getCurrentState(), activationConfiguration, transition.getParameterNames(), transition.getParameterPredicate());
                 }
             } else {
                 State finalCurrentState = newTrace.getCurrentState();
@@ -142,11 +144,17 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                 if (finalCurrentState.getStateSpace().isValidOperation(finalCurrentState, chosenOp, predicate)) {
                     Transition transition = finalCurrentState.findTransition(chosenOp, predicate);
                     newTrace = newTrace.add(transition);
-                    activateOperations(newTrace.getCurrentState(), activationConfiguration, transition.getParameterNames(), transition.getParameterPredicate());
+                    // TODO: Implement directed (regarding probability) activate operations
+                    //activateOperations(newTrace.getCurrentState(), activationConfiguration, transition.getParameterNames(), transition.getParameterPredicate());
                 }
             }
         }
         return newTrace;
+    }
+
+    @Override
+    protected void activateOperations(State state, List<ActivationConfiguration> activation, List<String> parametersAsString, String parameterPredicates) {
+        // TODO: Implement directed (regarding probability) activate operations
     }
 
     public void buildPredicateFromTrace(PredicateBuilder predicateBuilder, PersistentTransition persistentTransition) {

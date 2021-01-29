@@ -37,17 +37,22 @@ public class SimulationConfigurationChecker {
 
     private void checkActivationConfigurations() {
     	for(OperationConfiguration operationConfiguration : simulationConfiguration.getOperationConfigurations()) {
-    		Map<String, List<ActivationConfiguration>> activation = operationConfiguration.getActivation();
-    		if(activation != null) {
-				for (String activatedOp : activation.keySet()) {
-					activation.get(activatedOp).forEach(activationForOp -> checkActivationConfiguration(activatedOp, activationForOp));
-				}
+    		List<ActivationConfiguration> activations = operationConfiguration.getActivation();
+			if(activations != null) {
+				activations.forEach(this::checkActivationConfiguration);
 			}
 		}
 	}
 
-	private void checkActivationConfiguration(String activatedOp, ActivationConfiguration activationForOp) {
-		Object probability = activationForOp.getProbability();
+	private void checkActivationConfiguration(ActivationConfiguration activation) {
+    	if(activation instanceof ActivationOperationConfiguration) {
+    		checkActivationOperationConfiguration((ActivationOperationConfiguration) activation);
+		}
+	}
+
+	private void checkActivationOperationConfiguration(ActivationOperationConfiguration activation) {
+		Object probability = activation.getProbability();
+		String activatedOp = activation.getOpName();
 		if(probability == null) {
 
 			//Check whether given operation name exists
@@ -62,7 +67,7 @@ public class SimulationConfigurationChecker {
 				operationVariables.addAll(opInfo.getParameterNames());
 				if(operationVariables.isEmpty())
 
-				if (activationForOp.getParameters() != null && (!activationForOp.getParameters().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activationForOp.getParameters().keySet()))) {
+				if (activation.getParameters() != null && (!activation.getParameters().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activation.getParameters().keySet()))) {
 					errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
 				}
 			}
@@ -86,10 +91,10 @@ public class SimulationConfigurationChecker {
 				Map<String, Map<String, String>> probabilityAsMap = (Map<String, Map<String, String>>) probability;
 				Set<String> configurationVariables = new HashSet<>();
 				configurationVariables.addAll(probabilityAsMap.keySet());
-				if (activationForOp.getParameters() != null) {
-					configurationVariables.addAll(activationForOp.getParameters().keySet());
+				if (activation.getParameters() != null) {
+					configurationVariables.addAll(activation.getParameters().keySet());
 					// Check whether fixed variables, and those for probabilistic choice are disjunct
-					if (activationForOp.getParameters().keySet().stream().anyMatch(probabilityAsMap::containsKey)) {
+					if (activation.getParameters().keySet().stream().anyMatch(probabilityAsMap::containsKey)) {
 						errors.add(new ConfigurationCheckingError(String.format("Fixed variables and those defined for probabilistic choice for operation %s must be disjunct", activatedOp)));
 					}
 				}

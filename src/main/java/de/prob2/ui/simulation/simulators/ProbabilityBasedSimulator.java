@@ -9,7 +9,9 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.ArrayList;
@@ -119,7 +121,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     public Trace executeNextOperation(OperationConfiguration timingConfig, Trace trace) {
         String chosenOp = timingConfig.getOpName();
         String additionalGuards = timingConfig.getAdditionalGuards();
-        Map<String, List<ActivationConfiguration>> activationConfiguration = timingConfig.getActivation();
+        List<ActivationConfiguration> activationConfiguration = timingConfig.getActivation();
 
         List<Activation> activationForOperation = operationToActivation.get(chosenOp);
         List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
@@ -159,6 +161,86 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         }
         stepCounter = newTrace.getTransitionList().size();
         return newTrace;
+    }
+
+    protected void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
+        int insertionIndex = 0;
+        while(insertionIndex < activationsForOperation.size() &&
+                activation.getTime() >= activationsForOperation.get(insertionIndex).getTime()) {
+            insertionIndex++;
+        }
+        activationsForOperation.add(insertionIndex, activation);
+    }
+
+    @Override
+    public void activateOperations(State state, List<ActivationConfiguration> activation, List<String> parametersAsString, String parameterPredicates) {
+        if(activation != null) {
+            activation.forEach(activationConfiguration -> handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates));
+        }
+    }
+
+    private void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
+        if(activationConfiguration instanceof ActivationChoiceConfiguration) {
+            chooseOperation(state, (ActivationChoiceConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
+        } else if(activationConfiguration instanceof ActivationOperationConfiguration) {
+            activateOperation(state, (ActivationOperationConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
+        }
+    }
+
+    private void chooseOperation(State state, ActivationChoiceConfiguration activationChoiceConfiguration,
+                                 List<String> parametersAsString, String parameterPredicates) {
+        double probabilityMinimum = 0.0;
+        double randomDouble = random.nextDouble();
+        for(int i = 0; i < activationChoiceConfiguration.getActivations().size(); i++) {
+            ActivationConfiguration activationConfiguration = activationChoiceConfiguration.getActivations().get(i);
+            double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, activationChoiceConfiguration.getProbability().get(i)));
+            if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
+                handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
+                break;
+            }
+            probabilityMinimum += evalProbability;
+        }
+    }
+
+    private void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration,
+                                   List<String> parametersAsString, String parameterPredicates) {
+        List<Activation> activationsForOperation = operationToActivation.get(activationOperationConfiguration.getOpName());
+        OperationConfiguration.ActivationKind activationKind = operationToActivationKind.get(activationOperationConfiguration.getOpName());
+        String time = activationOperationConfiguration.getTime();
+        Map<String, String> parameters = activationOperationConfiguration.getParameters();
+        Object probability = activationOperationConfiguration.getProbability();
+        int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates));
+
+        if(activationsForOperation.isEmpty()) {
+            activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
+        } else {
+            switch (activationKind) {
+                case MULTI:
+                    activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
+                    break;
+                case SINGLE_MIN: {
+                    Activation activationForOperation = activationsForOperation.get(0);
+                    int otherActivationTime = activationForOperation.getTime();
+                    if (evaluatedTime < otherActivationTime) {
+                        activationsForOperation.clear();
+                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
+                    }
+                    break;
+                }
+                case SINGLE_MAX: {
+                    Activation activationForOperation = activationsForOperation.get(0);
+                    int otherActivationTime = activationForOperation.getTime();
+                    if (evaluatedTime > otherActivationTime) {
+                        activationsForOperation.clear();
+                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
+                    }
+                    break;
+                }
+                case SINGLE:
+                default:
+                    break;
+            }
+        }
     }
 
     public Trace appendTrace(Trace trace, Transition transition) {

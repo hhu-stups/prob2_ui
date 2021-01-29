@@ -5,7 +5,9 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfigurationChecker;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
@@ -167,66 +169,6 @@ public abstract class AbstractSimulator {
 
     protected abstract Trace executeNextOperation(OperationConfiguration opConfig, Trace trace);
 
-    protected void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
-        int insertionIndex = 0;
-        while(insertionIndex < activationsForOperation.size() &&
-              activation.getTime() >= activationsForOperation.get(insertionIndex).getTime()) {
-            insertionIndex++;
-        }
-        activationsForOperation.add(insertionIndex, activation);
-    }
-
-    protected void activateOperations(State state, Map<String, List<ActivationConfiguration>> activation, List<String> parametersAsString, String parameterPredicates) {
-        if(activation != null) {
-            for (String key : activation.keySet()) {
-                // TODO: Add parameters to activations
-                List<Activation> activationsForOperation = operationToActivation.get(key);
-                OperationConfiguration.ActivationKind activationKind = operationToActivationKind.get(key);
-                List<ActivationConfiguration> activationConfigurations = activation.get(key);
-                activationConfigurations.forEach(activationConfiguration -> activateOperation(state, activationKind, activationsForOperation, activationConfiguration, parametersAsString, parameterPredicates));
-            }
-        }
-    }
-
-    private void activateOperation(State state, OperationConfiguration.ActivationKind activationKind, List<Activation> activationsForOperation, ActivationConfiguration activationConfiguration,
-								   List<String> parametersAsString, String parameterPredicates) {
-        String time = activationConfiguration.getTime();
-        Map<String, String> parameters = activationConfiguration.getParameters();
-        Object probability = activationConfiguration.getProbability();
-        int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates));
-
-        if(activationsForOperation.isEmpty()) {
-            activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
-        } else {
-            switch (activationKind) {
-                case MULTI:
-                    activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
-                    break;
-                case SINGLE_MIN: {
-                    Activation activationForOperation = activationsForOperation.get(0);
-                    int otherActivationTime = activationForOperation.getTime();
-                    if (evaluatedTime < otherActivationTime) {
-                        activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
-                    }
-                    break;
-                }
-                case SINGLE_MAX: {
-                    Activation activationForOperation = activationsForOperation.get(0);
-                    int otherActivationTime = activationForOperation.getTime();
-                    if (evaluatedTime > otherActivationTime) {
-                        activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
-                    }
-                    break;
-                }
-                case SINGLE:
-                default:
-                    break;
-            }
-        }
-    }
-
     protected String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
         String newExpression;
         if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
@@ -260,6 +202,8 @@ public abstract class AbstractSimulator {
         Transition nextTransition = currentState.findTransition(operation, predicate);
         return trace.add(nextTransition);
     }
+
+    protected abstract void activateOperations(State state, List<ActivationConfiguration> activation, List<String> parametersAsString, String parameterPredicates);
 
     protected abstract String chooseVariableValues(State currentState, Map<String, String> values);
 

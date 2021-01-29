@@ -12,7 +12,7 @@ public class OperationConfiguration {
 
     private String opName;
 
-    private Map<String, List<ActivationConfiguration>> activation;
+    private List<ActivationConfiguration> activation;
 
     private ActivationKind activationKind;
 
@@ -22,8 +22,8 @@ public class OperationConfiguration {
 
     private Map<String, String> destState;
 
-    public OperationConfiguration(String opName, Map<String, List<ActivationConfiguration>> activation, ActivationKind activationKind,
-								  String additionalGuards, int priority, Map<String, String> destState) {
+    public OperationConfiguration(String opName, List<ActivationConfiguration> activation, ActivationKind activationKind,
+                                  String additionalGuards, int priority, Map<String, String> destState) {
         this.opName = opName;
         this.activation = activation;
         this.activationKind = activationKind;
@@ -36,7 +36,7 @@ public class OperationConfiguration {
         return opName;
     }
 
-    public Map<String, List<ActivationConfiguration>> getActivation() {
+    public List<ActivationConfiguration> getActivation() {
         return activation;
     }
 
