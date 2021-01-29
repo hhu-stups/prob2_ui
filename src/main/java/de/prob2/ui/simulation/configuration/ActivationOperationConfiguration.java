@@ -57,6 +57,6 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     @Override
     public String toString() {
-        return String.format("ActivationOperationConfiguration{opName=%s, time=%s, parameters=%s, probability=%s}", opName, time, parameters, probability);
+        return String.format("ActivationOperationConfiguration{opName=%s, time=%s, additionalGuards=%s, activationKind=%s, parameters=%s, probability=%s}", opName, time, additionalGuards, activationKind, parameters, probability);
     }
 }
