@@ -4,9 +4,9 @@ import java.util.List;
 
 public class ActivationChoiceConfiguration extends ActivationConfiguration {
 
-    private List<ActivationConfiguration> activations;
+    private final List<ActivationConfiguration> activations;
 
-    private List<String> probability;
+    private final List<String> probability;
 
     public ActivationChoiceConfiguration(List<ActivationConfiguration> activations, List<String> probability) {
         super();

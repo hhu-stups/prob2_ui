@@ -8,17 +8,17 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         SINGLE, SINGLE_MIN, SINGLE_MAX, MULTI
     }
 
-    private String opName;
+    private final String opName;
 
-    private String time;
+    private final String time;
 
-    private String additionalGuards;
+    private final String additionalGuards;
 
-    private ActivationKind activationKind;
+    private final ActivationKind activationKind;
 
-    private Map<String, String> parameters;
+    private final Map<String, String> parameters;
 
-    private Object probability;
+    private final Object probability;
 
     public ActivationOperationConfiguration(String opName, String time, String additionalGuards, ActivationKind activationKind,
                                             Map<String, String> parameters, Object probability) {

@@ -10,17 +10,17 @@ public class Activation {
 
     private int time;
 
-    private String additionalGuards;
+    private final String additionalGuards;
 
-    private ActivationOperationConfiguration.ActivationKind activationKind;
+    private final ActivationOperationConfiguration.ActivationKind activationKind;
 
-    private Map<String, String> parameters;
+    private final Map<String, String> parameters;
 
-    private Object probability;
+    private final Object probability;
 
-    private List<String> firingTransitionParameters;
+    private final List<String> firingTransitionParameters;
 
-    private String firingTransitionParametersPredicate;
+    private final String firingTransitionParametersPredicate;
 
     public Activation(int time, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
                       Map<String, String> parameters, Object probability, List<String> firingTransitionParameters, String firingTransitionParametersPredicate) {

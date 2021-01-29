@@ -6,13 +6,13 @@ import java.util.Map;
 
 public class OperationConfiguration {
 
-    private String opName;
+    private final String opName;
 
-    private List<ActivationConfiguration> activation;
+    private final List<ActivationConfiguration> activation;
 
-    private int priority;
+    private final int priority;
 
-    private Map<String, String> destState;
+    private final Map<String, String> destState;
 
     public OperationConfiguration(String opName, List<ActivationConfiguration> activation, int priority, Map<String, String> destState) {
         this.opName = opName;
