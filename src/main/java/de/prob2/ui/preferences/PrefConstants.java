@@ -32,6 +32,18 @@ final class PrefConstants {
 			"invtrapez",
 			"doubleoctagon",
 			"egg",
+			"box3d",
+			"cds",
+			"component",
+			"cylinder",
+			"folder",
+			"note",
+			"star",
+			"tab",
+			"larrow",
+			"rarrow",
+			"lpromoter",
+			"rpromoter",
 		});
 		validTypeValues.put("por", new String[] {
 			"off",
