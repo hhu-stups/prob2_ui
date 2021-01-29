@@ -57,6 +57,40 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     @Override
     public String toString() {
-        return String.format("ActivationOperationConfiguration{opName=%s, time=%s, additionalGuards=%s, activationKind=%s, parameters=%s, probability=%s}", opName, time, additionalGuards, activationKind, parameters, probability);
+        StringBuilder sb = new StringBuilder();
+        sb.append("ActivationOperationConfiguration(");
+        sb.append("opName");
+        sb.append("=");
+        sb.append(opName);
+        sb.append(", ");
+        sb.append("time");
+        sb.append("=");
+        sb.append(time);
+        sb.append(", ");
+        if(additionalGuards != null) {
+            sb.append("additionalGuards");
+            sb.append("=");
+            sb.append(additionalGuards);
+            sb.append(", ");
+        }
+        sb.append("activationKind");
+        sb.append("=");
+        sb.append(activationKind);
+
+        if(parameters != null) {
+            sb.append(", ");
+            sb.append("parameters");
+            sb.append("=");
+            sb.append(parameters);
+            sb.append(", ");
+        }
+        if(probability != null) {
+            sb.append(", ");
+            sb.append("probability");
+            sb.append("=");
+            sb.append(probability);
+        }
+        sb.append(")");
+        return sb.toString();
     }
 }

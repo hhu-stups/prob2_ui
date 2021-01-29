@@ -24,6 +24,16 @@ public class ActivationChoiceConfiguration extends ActivationConfiguration {
 
     @Override
     public String toString() {
-        return String.format("ActivationChoiceActivation{activations=%s, probability=%s}", activations, probability);
+        StringBuilder sb = new StringBuilder();
+        sb.append("ActivationChoiceActivation(");
+        sb.append("activations");
+        sb.append("=");
+        sb.append(activations);
+        sb.append(", ");
+        sb.append("probability");
+        sb.append("=");
+        sb.append(probability);
+        sb.append(")");
+        return sb.toString();
     }
 }

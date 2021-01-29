@@ -99,7 +99,7 @@
 							</ScrollPane>
 						</VBox>
 					</AnchorPane>
-					<ListView fx:id="simulationDebugItems" styleClass="list-view" />
+					<ListView fx:id="simulationDebugItems" styleClass="list-view"/>
 				</SplitPane>
 			</ScrollPane>
 		</Scene>
