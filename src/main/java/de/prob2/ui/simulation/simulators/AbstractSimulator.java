@@ -5,9 +5,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfigurationChecker;
 import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
@@ -38,8 +36,6 @@ public abstract class AbstractSimulator {
     protected boolean finished;
 
     protected Map<String, List<Activation>> operationToActivation;
-
-    protected Map<String, OperationConfiguration.ActivationKind> operationToActivationKind;
 
     protected List<OperationConfiguration> operationConfigurationsSorted;
 
@@ -82,7 +78,6 @@ public abstract class AbstractSimulator {
 
     public void resetSimulator() {
         this.operationToActivation = new HashMap<>();
-        this.operationToActivationKind = new HashMap<>();
         this.time.set(0);
         this.finished = false;
         this.stepCounter = 0;
@@ -97,11 +92,7 @@ public abstract class AbstractSimulator {
     }
 
     private void initializeRemainingTime() {
-        config.getOperationConfigurations()
-                .forEach(config -> {
-                    operationToActivation.put(config.getOpName(), new ArrayList<>());
-                    operationToActivationKind.put(config.getOpName(), config.getActivationKind());
-                });
+        config.getOperationConfigurations().forEach(config -> operationToActivation.put(config.getOpName(), new ArrayList<>()));
         updateDelay();
     }
 

@@ -4,18 +4,29 @@ import java.util.Map;
 
 public class ActivationOperationConfiguration extends ActivationConfiguration {
 
+    public enum ActivationKind {
+        SINGLE, SINGLE_MIN, SINGLE_MAX, MULTI
+    }
+
     private String opName;
 
     private String time;
+
+    private String additionalGuards;
+
+    private ActivationKind activationKind;
 
     private Map<String, String> parameters;
 
     private Object probability;
 
-    public ActivationOperationConfiguration(String opName, String time, Map<String, String> parameters, Object probability) {
+    public ActivationOperationConfiguration(String opName, String time, String additionalGuards, ActivationKind activationKind,
+                                            Map<String, String> parameters, Object probability) {
         super();
         this.opName = opName;
         this.time = time;
+        this.additionalGuards = additionalGuards;
+        this.activationKind = activationKind;
         this.parameters = parameters;
         this.probability = probability;
     }
@@ -26,6 +37,14 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     public String getTime() {
         return time;
+    }
+
+    public String getAdditionalGuards() {
+        return additionalGuards;
+    }
+
+    public ActivationKind getActivationKind() {
+        return activationKind;
     }
 
     public Map<String, String> getParameters() {

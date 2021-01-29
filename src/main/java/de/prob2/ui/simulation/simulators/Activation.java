@@ -1,26 +1,32 @@
 package de.prob2.ui.simulation.simulators;
 
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 public class Activation {
 
     private int time;
 
+    private String additionalGuards;
+
+    private ActivationOperationConfiguration.ActivationKind activationKind;
+
     private Map<String, String> parameters;
 
     private Object probability;
-
-    //TODO: Maybe add firing operation
 
     private List<String> firingTransitionParameters;
 
     private String firingTransitionParametersPredicate;
 
-    public Activation(int time, Map<String, String> parameters, Object probability, List<String> firingTransitionParameters, String firingTransitionParametersPredicate) {
+    public Activation(int time, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
+                      Map<String, String> parameters, Object probability, List<String> firingTransitionParameters, String firingTransitionParametersPredicate) {
         this.time = time;
+        this.additionalGuards = additionalGuards;
+        this.activationKind = activationKind;
         this.parameters = parameters;
         this.probability = probability;
         this.firingTransitionParameters = firingTransitionParameters;
@@ -33,6 +39,14 @@ public class Activation {
 
     public int getTime() {
         return time;
+    }
+
+    public String getAdditionalGuards() {
+        return additionalGuards;
+    }
+
+    public ActivationOperationConfiguration.ActivationKind getActivationKind() {
+        return activationKind;
     }
 
     public Map<String, String> getParameters() {
@@ -56,16 +70,16 @@ public class Activation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Activation that = (Activation) o;
-        return time == that.time && Objects.equals(probability, that.probability) && Objects.equals(firingTransitionParameters, that.firingTransitionParameters) && Objects.equals(firingTransitionParametersPredicate, that.firingTransitionParametersPredicate);
+        return time == that.time && Objects.equals(additionalGuards, that.additionalGuards) && activationKind == that.activationKind && Objects.equals(probability, that.probability) && Objects.equals(firingTransitionParameters, that.firingTransitionParameters) && Objects.equals(firingTransitionParametersPredicate, that.firingTransitionParametersPredicate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(time, probability, firingTransitionParameters, firingTransitionParametersPredicate);
+        return Objects.hash(time, additionalGuards, activationKind, probability, firingTransitionParameters, firingTransitionParametersPredicate);
     }
 
     @Override
     public String toString() {
-        return String.format("Activation{time = %s, probability = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s}", time, probability, firingTransitionParameters, firingTransitionParametersPredicate);
+        return String.format("Activation{time = %s, probability = %s, additionalGuards = %s, activationKind = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s}", time, probability, additionalGuards, activationKind, firingTransitionParameters, firingTransitionParametersPredicate);
     }
 }

@@ -13,20 +13,14 @@ public class SimulationDebugItem {
 
 	private final List<ActivationConfiguration> activation;
 
-	private final OperationConfiguration.ActivationKind activationKind;
-
-	private final String additionalGuards;
-
 	private final String priority;
 
 	private final Map<String, String> values;
 
-	public SimulationDebugItem(String opName, List<ActivationConfiguration> activation, OperationConfiguration.ActivationKind activationKind,
-							   String additionalGuards, String priority, Map<String, String> values) {
+	public SimulationDebugItem(String opName, List<ActivationConfiguration> activation,
+							   String priority, Map<String, String> values) {
 		this.opName = opName;
 		this.activation = activation;
-		this.activationKind = activationKind;
-		this.additionalGuards = additionalGuards;
 		this.priority = priority;
 		this.values = values;
 	}
@@ -41,14 +35,6 @@ public class SimulationDebugItem {
 
 	public String getActivationAsString() {
 		return activation == null ? "" : activation.toString();
-	}
-
-	public OperationConfiguration.ActivationKind getActivationKind() {
-		return activationKind;
-	}
-
-	public String getAdditionalGuards() {
-		return additionalGuards;
 	}
 
 	public String getPriority() {

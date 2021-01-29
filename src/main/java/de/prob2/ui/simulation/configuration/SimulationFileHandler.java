@@ -60,9 +60,11 @@ public class SimulationFileHandler {
             JsonObject activationAsObject = activationElement.getAsJsonObject();
             String opName = activationAsObject.get("opName").getAsString();
             String time = activationAsObject.get("time").getAsString();
+            String additionalGuards = activationAsObject.get("additionalGuards") == null ? null : activationAsObject.get("additionalGuards").getAsString();
+            ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
             Map<String, String> parameters = buildParameters(activationAsObject.get("parameters"));
             Object probability = buildProbability(activationAsObject.get("probability"));
-            return new ActivationOperationConfiguration(opName, time, parameters, probability);
+            return new ActivationOperationConfiguration(opName, time, additionalGuards, activationKind, parameters, probability);
         }
     }
 
@@ -73,12 +75,10 @@ public class SimulationFileHandler {
         for(int i = 0; i < operationConfigurationsAsArray.size(); i++) {
             JsonObject jsonObject = (JsonObject) operationConfigurationsAsArray.get(i);
             String opName = jsonObject.get("opName").getAsString();
-            String additionalGuards = jsonObject.get("additionalGuards") == null ? null : jsonObject.get("additionalGuards").getAsString();
             int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
             List<ActivationConfiguration> activation = buildActivation(activationConfigurations, jsonObject.get("activation"));
-            OperationConfiguration.ActivationKind activationKind = buildActivationKind(jsonObject.get("activationKind"));
             Map<String, String> destState = buildDestinationState(jsonObject.get("destState"));
-            operationConfigurations.add(new OperationConfiguration(opName, activation, activationKind, additionalGuards, priority, destState));
+            operationConfigurations.add(new OperationConfiguration(opName, activation, priority, destState));
         }
         return operationConfigurations;
     }
@@ -138,14 +138,14 @@ public class SimulationFileHandler {
     }
 
 
-    private static OperationConfiguration.ActivationKind buildActivationKind(JsonElement jsonElement) {
-        OperationConfiguration.ActivationKind activationKind = OperationConfiguration.ActivationKind.MULTI;
+    private static ActivationOperationConfiguration.ActivationKind buildActivationKind(JsonElement jsonElement) {
+        ActivationOperationConfiguration.ActivationKind activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
         if(jsonElement == null || "multi".equals(jsonElement.getAsString())) {
-            activationKind = OperationConfiguration.ActivationKind.MULTI;
+            activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
         } else if("single:max".equals(jsonElement.getAsString())) {
-            activationKind = OperationConfiguration.ActivationKind.SINGLE_MAX;
+            activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE_MAX;
         } else if("single:min".equals(jsonElement.getAsString())) {
-            activationKind = OperationConfiguration.ActivationKind.SINGLE_MIN;
+            activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE_MIN;
         }
         return activationKind;
     }

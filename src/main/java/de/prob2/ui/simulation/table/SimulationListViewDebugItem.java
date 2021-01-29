@@ -4,18 +4,14 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
-import de.prob2.ui.simulation.simulators.Simulator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 
@@ -53,12 +49,6 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 			lbOpName.getStyleClass().add("name");
 			this.itemBox.getChildren().add(lbOpName);
 
-			if(item.getAdditionalGuards() != null) {
-				Label lbAdditionalGuards = new Label(String.format(bundle.getString("simulation.item.additionalGuards"), item.getAdditionalGuards()));
-				lbAdditionalGuards.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbAdditionalGuards);
-			}
-
 			// TODO: Evaluated value of additional guard
 
 			if(!item.getActivationAsString().isEmpty()) {
@@ -66,11 +56,6 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 				lbActivation.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbActivation);
 			}
-
-			Label lbActivationKind = new Label(String.format(bundle.getString("simulation.item.activationKind"), item.getActivationKind()));
-			lbActivationKind.getStyleClass().add("information");
-			this.itemBox.getChildren().add(lbActivationKind);
-
 
 			if(!item.getPriority().isEmpty()) {
 				Label lbPriority = new Label(String.format(bundle.getString("simulation.item.priority"), item.getPriority()));

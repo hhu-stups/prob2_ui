@@ -120,7 +120,6 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     @Override
     public Trace executeNextOperation(OperationConfiguration timingConfig, Trace trace) {
         String chosenOp = timingConfig.getOpName();
-        String additionalGuards = timingConfig.getAdditionalGuards();
         List<ActivationConfiguration> activationConfiguration = timingConfig.getActivation();
 
         List<Activation> activationForOperation = operationToActivation.get(chosenOp);
@@ -136,7 +135,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
             State currentState = newTrace.getCurrentState();
             List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
-            if (!shouldExecuteNextOperation(currentState, transitions, additionalGuards)) {
+            if (!shouldExecuteNextOperation(currentState, transitions, activation.getAdditionalGuards())) {
                 continue;
             }
             Map<String, String> values = mergeValues(chooseProbabilistic(activation, currentState), chooseParameters(activation, currentState));
@@ -205,25 +204,26 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     private void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration,
                                    List<String> parametersAsString, String parameterPredicates) {
         List<Activation> activationsForOperation = operationToActivation.get(activationOperationConfiguration.getOpName());
-        OperationConfiguration.ActivationKind activationKind = operationToActivationKind.get(activationOperationConfiguration.getOpName());
         String time = activationOperationConfiguration.getTime();
+        ActivationOperationConfiguration.ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
+        String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
         Map<String, String> parameters = activationOperationConfiguration.getParameters();
         Object probability = activationOperationConfiguration.getProbability();
         int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates));
 
         if(activationsForOperation.isEmpty()) {
-            activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
+            activationsForOperation.add(new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
         } else {
             switch (activationKind) {
                 case MULTI:
-                    activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
+                    activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
                     break;
                 case SINGLE_MIN: {
                     Activation activationForOperation = activationsForOperation.get(0);
                     int otherActivationTime = activationForOperation.getTime();
                     if (evaluatedTime < otherActivationTime) {
                         activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
+                        activationsForOperation.add(new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
                     }
                     break;
                 }
@@ -232,7 +232,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
                     int otherActivationTime = activationForOperation.getTime();
                     if (evaluatedTime > otherActivationTime) {
                         activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(evaluatedTime, parameters, probability, parametersAsString, parameterPredicates));
+                        activationsForOperation.add(new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
                     }
                     break;
                 }
