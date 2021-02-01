@@ -1,8 +1,6 @@
 package de.prob2.ui.simulation.table;
 
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.List;
 import java.util.Map;

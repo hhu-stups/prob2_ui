@@ -4,17 +4,17 @@ import java.util.List;
 
 public class ActivationChoiceConfiguration extends ActivationConfiguration {
 
-    private final List<ActivationConfiguration> activations;
+    private final List<String> activations;
 
     private final List<String> probability;
 
-    public ActivationChoiceConfiguration(List<ActivationConfiguration> activations, List<String> probability) {
-        super();
+    public ActivationChoiceConfiguration(String id, List<String> activations, List<String> probability) {
+        super(id);
         this.activations = activations;
         this.probability = probability;
     }
 
-    public List<ActivationConfiguration> getActivations() {
+    public List<String> getActivations() {
         return activations;
     }
 
@@ -26,6 +26,10 @@ public class ActivationChoiceConfiguration extends ActivationConfiguration {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ActivationChoiceActivation(");
+        sb.append("id");
+        sb.append("=");
+        sb.append(id);
+        sb.append(", ");
         sb.append("activations");
         sb.append("=");
         sb.append(activations);

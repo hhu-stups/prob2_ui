@@ -22,65 +22,49 @@ public class SimulationFileHandler {
         Gson gson = new Gson();
         JsonReader reader = new JsonReader(new FileReader(inputFile));
         JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
-        Map<String, ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
-        List<OperationConfiguration> operationConfigurations = buildOperationConfigurations(activationConfigurations, simulationFile.get("operationConfigurations"));
-        return new SimulationConfiguration(operationConfigurations);
+        List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
+        return new SimulationConfiguration(activationConfigurations);
     }
 
-    private static Map<String, ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
-        Map<String, ActivationConfiguration> activationConfigurations = new HashMap<>();
-        if(jsonElement != null) {
-            JsonObject activationConfigurationsAsObject = jsonElement.getAsJsonObject();
-            for (String activationName : activationConfigurationsAsObject.keySet()) {
-                JsonElement activationElement = activationConfigurationsAsObject.get(activationName);
-                ActivationConfiguration activationConfiguration = buildActivationConfiguration(activationElement, activationConfigurations);
-                activationConfigurations.put(activationName, activationConfiguration);
-            }
+    private static List<ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
+        List<ActivationConfiguration> activationConfigurations = new ArrayList<>();
+        JsonArray activationConfigurationsAsArray = jsonElement.getAsJsonArray();
+        for (JsonElement activationElement : activationConfigurationsAsArray) {
+            ActivationConfiguration activationConfiguration = buildActivationConfiguration(activationElement);
+            activationConfigurations.add(activationConfiguration);
         }
         return activationConfigurations;
     }
 
-    private static ActivationConfiguration buildActivationConfiguration(JsonElement activationElement, Map<String, ActivationConfiguration> activationConfigurations) {
-        if(activationElement.isJsonPrimitive()) {
-            String activationConfigurationAsString = activationElement.getAsString();
-            assert activationConfigurationAsString.startsWith("$");
-            return activationConfigurations.get(activationConfigurationAsString.substring(1));
-        } else if(activationElement.getAsJsonObject().has("activations")) {
-            JsonArray activationsArray = activationElement.getAsJsonObject().getAsJsonArray("activations");
-            JsonArray probabilityArray = activationElement.getAsJsonObject().getAsJsonArray("probability");
+    private static ActivationConfiguration buildActivationConfiguration(JsonElement activationElement) {
+        if(activationElement.getAsJsonObject().has("activations")) {
+            JsonObject activationAsObject = activationElement.getAsJsonObject();
+            String id = activationAsObject.get("id").getAsString();
+            JsonArray activationsArray = activationAsObject.getAsJsonArray("activations");
+            JsonArray probabilityArray = activationAsObject.getAsJsonArray("probability");
             assert(activationsArray.size() == probabilityArray.size());
-            List<ActivationConfiguration> activations = new ArrayList<>();
+            List<String> activations = new ArrayList<>();
             List<String> probability = new ArrayList<>();
             for(int i = 0; i < activationsArray.size(); i++) {
-                activations.add(buildActivationConfiguration(activationsArray.get(i), activationConfigurations));
+                activations.add(activationsArray.get(i).getAsString());
                 probability.add(probabilityArray.get(i).getAsString());
             }
-            return new ActivationChoiceConfiguration(activations, probability);
+            return new ActivationChoiceConfiguration(id, activations, probability);
         } else {
             JsonObject activationAsObject = activationElement.getAsJsonObject();
-            String opName = activationAsObject.get("opName").getAsString();
-            String time = activationAsObject.get("time").getAsString();
+            String id = activationAsObject.get("id").getAsString();
+            String opName = activationAsObject.get("op").getAsString();
+
+            int priority = activationAsObject.get("priority") == null ? 0 : activationAsObject.get("priority").getAsInt();
+            List<String> activation = buildActivation(activationAsObject.get("activation"));
+
+            String time = activationAsObject.get("time") == null ? "0" : activationAsObject.get("time").getAsString();
             String additionalGuards = activationAsObject.get("additionalGuards") == null ? null : activationAsObject.get("additionalGuards").getAsString();
             ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
             Map<String, String> parameters = buildParameters(activationAsObject.get("parameters"));
             Object probability = buildProbability(activationAsObject.get("probability"));
-            return new ActivationOperationConfiguration(opName, time, additionalGuards, activationKind, parameters, probability);
+            return new ActivationOperationConfiguration(id, opName, time, priority, additionalGuards, activationKind, parameters, probability, activation);
         }
-    }
-
-
-    private static List<OperationConfiguration> buildOperationConfigurations(Map<String, ActivationConfiguration> activationConfigurations, JsonElement jsonElement) {
-        JsonArray operationConfigurationsAsArray = jsonElement.getAsJsonArray();
-        List<OperationConfiguration> operationConfigurations = new ArrayList<>();
-        for(int i = 0; i < operationConfigurationsAsArray.size(); i++) {
-            JsonObject jsonObject = (JsonObject) operationConfigurationsAsArray.get(i);
-            String opName = jsonObject.get("opName").getAsString();
-            int priority = jsonObject.get("priority") == null ? 0 : jsonObject.get("priority").getAsInt();
-            List<ActivationConfiguration> activation = buildActivation(activationConfigurations, jsonObject.get("activation"));
-            Map<String, String> destState = buildDestinationState(jsonObject.get("destState"));
-            operationConfigurations.add(new OperationConfiguration(opName, activation, priority, destState));
-        }
-        return operationConfigurations;
     }
 
     private static Map<String, String> buildParameters(JsonElement jsonElement) {
@@ -122,16 +106,16 @@ public class SimulationFileHandler {
         return probability;
     }
 
-    private static List<ActivationConfiguration> buildActivation(Map<String, ActivationConfiguration> activationConfigurations, JsonElement jsonElement) {
-        List<ActivationConfiguration> activations = null;
+    private static List<String> buildActivation(JsonElement jsonElement) {
+        List<String> activations = null;
         if(jsonElement != null) {
             activations = new ArrayList<>();
             if(jsonElement.isJsonArray()) {
                 for(int j = 0; j < jsonElement.getAsJsonArray().size(); j++) {
-                    activations.add(buildActivationConfiguration(jsonElement.getAsJsonArray().get(j), activationConfigurations));
+                    activations.add(jsonElement.getAsJsonArray().get(j).getAsString());
                 }
             } else {
-                activations.addAll(Collections.singletonList(buildActivationConfiguration(jsonElement, activationConfigurations)));
+                activations.addAll(Collections.singletonList(jsonElement.getAsString()));
             }
         }
         return activations;

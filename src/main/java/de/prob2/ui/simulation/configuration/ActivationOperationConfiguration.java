@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.configuration;
 
+import java.util.List;
 import java.util.Map;
 
 public class ActivationOperationConfiguration extends ActivationConfiguration {
@@ -12,6 +13,8 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     private final String time;
 
+    private final int priority;
+
     private final String additionalGuards;
 
     private final ActivationKind activationKind;
@@ -20,15 +23,19 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     private final Object probability;
 
-    public ActivationOperationConfiguration(String opName, String time, String additionalGuards, ActivationKind activationKind,
-                                            Map<String, String> parameters, Object probability) {
-        super();
+    private final List<String> activation;
+
+    public ActivationOperationConfiguration(String id, String opName, String time, int priority, String additionalGuards, ActivationKind activationKind,
+                                            Map<String, String> parameters, Object probability, List<String> activation) {
+        super(id);
         this.opName = opName;
         this.time = time;
+        this.priority = priority;
         this.additionalGuards = additionalGuards;
         this.activationKind = activationKind;
         this.parameters = parameters;
         this.probability = probability;
+        this.activation = activation;
     }
 
     public String getOpName() {
@@ -37,6 +44,10 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     public String getTime() {
         return time;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 
     public String getAdditionalGuards() {
@@ -55,10 +66,18 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         return probability;
     }
 
+    public List<String> getActivation() {
+        return activation;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ActivationOperationConfiguration(");
+        sb.append("id");
+        sb.append("=");
+        sb.append(id);
+        sb.append(", ");
         sb.append("opName");
         sb.append("=");
         sb.append(opName);
@@ -66,6 +85,10 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         sb.append("time");
         sb.append("=");
         sb.append(time);
+        sb.append(", ");
+        sb.append("priority");
+        sb.append("=");
+        sb.append(priority);
         sb.append(", ");
         if(additionalGuards != null) {
             sb.append("additionalGuards");
@@ -89,6 +112,13 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
             sb.append("probability");
             sb.append("=");
             sb.append(probability);
+            sb.append(", ");
+        }
+        if(activation != null) {
+            sb.append(", ");
+            sb.append("activation");
+            sb.append("=");
+            sb.append(activation);
         }
         sb.append(")");
         return sb.toString();

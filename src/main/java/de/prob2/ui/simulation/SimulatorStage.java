@@ -20,7 +20,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
@@ -364,13 +363,14 @@ public class SimulatorStage extends Stage {
 		SimulationConfiguration config = simulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
-		for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
+		// TODO
+		/*for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
 			String opName = opConfig.getOpName();
 			List<ActivationConfiguration> activationConfiguration = opConfig.getActivation();
 			String priority = String.valueOf(opConfig.getPriority());
 			Map<String, String> destState = opConfig.getDestState();
 			observableList.add(new SimulationDebugItem(opName, activationConfiguration, priority, destState));
-		}
+		}*/
 
 		simulationDebugItems.setItems(observableList);
 	}

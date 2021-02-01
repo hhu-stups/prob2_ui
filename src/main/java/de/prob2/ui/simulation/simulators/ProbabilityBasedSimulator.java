@@ -12,7 +12,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
@@ -118,11 +118,12 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
     }
 
     @Override
-    public Trace executeNextOperation(OperationConfiguration timingConfig, Trace trace) {
-        String chosenOp = timingConfig.getOpName();
-        List<ActivationConfiguration> activationConfiguration = timingConfig.getActivation();
+    public Trace executeNextOperation(ActivationOperationConfiguration timingConfig, Trace trace) {
+        String id = timingConfig.getId();
+	    String chosenOp = timingConfig.getOpName();
+        List<String> activationConfiguration = timingConfig.getActivation();
 
-        List<Activation> activationForOperation = operationToActivation.get(chosenOp);
+        List<Activation> activationForOperation = configurationToActivation.get(id);
         List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
 
         Trace newTrace = trace;
@@ -171,15 +172,54 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         activationsForOperation.add(insertionIndex, activation);
     }
 
+    protected void activateSingleOperations(String id, String opName, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
+	    Set<String> activationsForOperation = operationToActivations.get(opName);
+	    int evaluatedTime = activation.getTime();
+
+	    for(String activationId : activationsForOperation) {
+            List<Activation> activationsForId = configurationToActivation.get(activationId);
+            if(activationsForId.isEmpty()) {
+                continue;
+            }
+	        switch(activationKind) {
+                case SINGLE_MIN: {
+                    Activation activationForId = activationsForId.get(0);
+                    int otherActivationTime = activationForId.getTime();
+                    if (evaluatedTime < otherActivationTime) {
+                        activationsForId.clear();
+                        configurationToActivation.get(id).add(activation);
+                        return;
+                    }
+                    break;
+                }
+                case SINGLE_MAX: {
+                    Activation activationForId = activationsForId.get(0);
+                    int otherActivationTime = activationForId.getTime();
+                    if (evaluatedTime > otherActivationTime) {
+                        activationsForId.clear();
+                        configurationToActivation.get(id).add(activation);
+                        return;
+                    }
+                    break;
+                }
+                case SINGLE:
+                    return;
+                default:
+                    break;
+            }
+        }
+        configurationToActivation.get(id).add(activation);
+    }
+
     @Override
-    public void activateOperations(State state, List<ActivationConfiguration> activation, List<String> parametersAsString, String parameterPredicates) {
+    public void activateOperations(State state, List<String> activation, List<String> parametersAsString, String parameterPredicates) {
         if(activation != null) {
-            activation.forEach(activationConfiguration -> handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates));
+            activation.forEach(activationConfiguration -> handleOperationConfiguration(state, activationConfigurationMap.get(activationConfiguration), parametersAsString, parameterPredicates));
         }
     }
 
     private void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
-        if(activationConfiguration instanceof ActivationChoiceConfiguration) {
+	    if(activationConfiguration instanceof ActivationChoiceConfiguration) {
             chooseOperation(state, (ActivationChoiceConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
         } else if(activationConfiguration instanceof ActivationOperationConfiguration) {
             activateOperation(state, (ActivationOperationConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
@@ -191,7 +231,7 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         double probabilityMinimum = 0.0;
         double randomDouble = random.nextDouble();
         for(int i = 0; i < activationChoiceConfiguration.getActivations().size(); i++) {
-            ActivationConfiguration activationConfiguration = activationChoiceConfiguration.getActivations().get(i);
+            ActivationConfiguration activationConfiguration = activationConfigurationMap.get(activationChoiceConfiguration.getActivations().get(i));;
             double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, activationChoiceConfiguration.getProbability().get(i)));
             if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
                 handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
@@ -203,7 +243,12 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
 
     private void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration,
                                    List<String> parametersAsString, String parameterPredicates) {
-        List<Activation> activationsForOperation = operationToActivation.get(activationOperationConfiguration.getOpName());
+        List<Activation> activationsForOperation = configurationToActivation.get(activationOperationConfiguration.getId());
+        if(activationsForOperation == null) {
+            return;
+        }
+        String id = activationOperationConfiguration.getId();
+        String opName = activationOperationConfiguration.getOpName();
         String time = activationOperationConfiguration.getTime();
         ActivationOperationConfiguration.ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
         String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
@@ -211,35 +256,15 @@ public abstract class ProbabilityBasedSimulator extends AbstractSimulator {
         Object probability = activationOperationConfiguration.getProbability();
         int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates));
 
-        if(activationsForOperation.isEmpty()) {
-            activationsForOperation.add(new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
-        } else {
-            switch (activationKind) {
-                case MULTI:
-                    activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
-                    break;
-                case SINGLE_MIN: {
-                    Activation activationForOperation = activationsForOperation.get(0);
-                    int otherActivationTime = activationForOperation.getTime();
-                    if (evaluatedTime < otherActivationTime) {
-                        activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
-                    }
-                    break;
-                }
-                case SINGLE_MAX: {
-                    Activation activationForOperation = activationsForOperation.get(0);
-                    int otherActivationTime = activationForOperation.getTime();
-                    if (evaluatedTime > otherActivationTime) {
-                        activationsForOperation.clear();
-                        activationsForOperation.add(new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
-                    }
-                    break;
-                }
-                case SINGLE:
-                default:
-                    break;
-            }
+        switch (activationKind) {
+            case MULTI:
+                activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+                break;
+            case SINGLE:
+            case SINGLE_MAX:
+            case SINGLE_MIN:
+                activateSingleOperations(id, opName, activationKind, new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+                break;
         }
     }
 

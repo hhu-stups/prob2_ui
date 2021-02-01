@@ -17,7 +17,6 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.OperationConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,20 +81,21 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    public Trace executeNextOperation(OperationConfiguration timingConfig, Trace trace) {
+    public Trace executeNextOperation(ActivationOperationConfiguration timingConfig, Trace trace) {
         State currentState = trace.getCurrentState();
         //boolean execute = false;
         Map<String, String> values = null;
-        List<ActivationConfiguration> activationConfiguration = null;
+        List<String> activationConfiguration = null;
 
         //check whether operation is executable and decide based on sampled value between 0 and 1 and calculated probability whether it should be executed
+        String id = timingConfig.getId();
         String chosenOp = timingConfig.getOpName();
         //double evalProbability = cache.readProbabilityWithCaching(currentState, chosenOp, opConfig.getProbability().get(i));
         List<String> enabledOperations = trace.getNextTransitions().stream()
                 .map(Transition::getName)
                 .collect(Collectors.toList());
-        List<Activation> activationForOperation = operationToActivation.get(chosenOp);
-        List<Activation> activationForOperationCopy = new ArrayList<>(operationToActivation.get(chosenOp));
+        List<Activation> activationForOperation = configurationToActivation.get(id);
+        List<Activation> activationForOperationCopy = new ArrayList<>(configurationToActivation.get(id));
 
         // TODO: Re-implement Trace Replay with new timing and probabilistic behavior
         Trace newTrace = trace;
@@ -106,8 +106,8 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
             activationForOperation.remove(activation);
 
             // TODO: What if sum of scheduled operations has 100% probability and is not equal next operation in trace
-            if (timingConfig.getDestState() != null) {
-                values = timingConfig.getDestState();
+            if (timingConfig.getParameters()!= null) {
+                values = timingConfig.getParameters();
             }
             if (timingConfig.getActivation() != null) {
                 activationConfiguration = timingConfig.getActivation();
@@ -153,7 +153,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    protected void activateOperations(State state, List<ActivationConfiguration> activation, List<String> parametersAsString, String parameterPredicates) {
+    protected void activateOperations(State state, List<String> activation, List<String> parametersAsString, String parameterPredicates) {
         // TODO: Implement directed (regarding probability) activate operations
     }
 
@@ -167,8 +167,8 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    protected Trace executeBeforeInitialisation(String operation, List<OperationConfiguration> opConfigurations, State currentState, Trace trace) {
-        Trace res = super.executeBeforeInitialisation(operation, opConfigurations, currentState, trace);
+    protected Trace executeBeforeInitialisation(String operation, State currentState, Trace trace) {
+        Trace res = super.executeBeforeInitialisation(operation, currentState, trace);
         if(res.getTransitionList().size() > trace.getTransitionList().size()) {
             counter = res.getTransitionList().size();
         }
@@ -176,7 +176,7 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
     }
 
     @Override
-    protected Trace executeOperation(OperationConfiguration opConfig, Trace trace) {
+    protected Trace executeOperation(ActivationOperationConfiguration opConfig, Trace trace) {
         Trace res = super.executeOperation(opConfig, trace);
         if(res.getTransitionList().size() > trace.getTransitionList().size()) {
             counter = res.getTransitionList().size();

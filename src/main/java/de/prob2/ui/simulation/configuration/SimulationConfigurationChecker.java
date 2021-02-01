@@ -24,35 +24,23 @@ public class SimulationConfigurationChecker {
     }
 
     public void check() {
-        checkDestinationState();
         checkActivationConfigurations();
     }
 
-    private void checkDestinationState() {
-        simulationConfiguration.getOperationConfigurations().stream()
-                .filter(operationConfiguration -> !"$initialise_machine".equals(operationConfiguration.getOpName()) && !"$setup_constants".equals(operationConfiguration.getOpName()))
-                .filter(operationConfiguration -> operationConfiguration.getDestState() != null)
-                .forEach(operationConfiguration -> errors.add(new ConfigurationCheckingError(String.format("Field destState is not allowed for operation: %s", operationConfiguration.getOpName()))));
-    }
-
     private void checkActivationConfigurations() {
-    	for(OperationConfiguration operationConfiguration : simulationConfiguration.getOperationConfigurations()) {
-    		List<ActivationConfiguration> activations = operationConfiguration.getActivation();
-			if(activations != null) {
-				activations.forEach(this::checkActivationConfiguration);
+    	for(ActivationConfiguration activationConfiguration : simulationConfiguration.getActivationConfigurations()) {
+    		if(activationConfiguration instanceof ActivationOperationConfiguration) {
+				this.checkActivationOperationConfiguration((ActivationOperationConfiguration) activationConfiguration);
 			}
-		}
-	}
-
-	private void checkActivationConfiguration(ActivationConfiguration activation) {
-    	if(activation instanceof ActivationOperationConfiguration) {
-    		checkActivationOperationConfiguration((ActivationOperationConfiguration) activation);
 		}
 	}
 
 	private void checkActivationOperationConfiguration(ActivationOperationConfiguration activation) {
 		Object probability = activation.getProbability();
 		String activatedOp = activation.getOpName();
+		if("$initialise_machine".equals(activatedOp) || "$setup_constants".equals(activatedOp)) {
+			return;
+		}
 		if(probability == null) {
 
 			//Check whether given operation name exists
