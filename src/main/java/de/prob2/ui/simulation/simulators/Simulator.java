@@ -51,17 +51,6 @@ public class Simulator extends ProbabilityBasedSimulator implements IRealTimeSim
 		return scheduler.isRunning();
 	}
 
-	public boolean isFinished() {
-		return finished;
-	}
-
-
-	@Override
-	protected void finishSimulation() {
-		super.finishSimulation();
-		scheduler.finish();
-	}
-
 	public void resetSimulator() {
 		super.resetSimulator();
 		scheduler.stop();

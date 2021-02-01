@@ -393,7 +393,7 @@ public class SimulatorStage extends Stage {
 				if(firstStart.get(0)) {
 					time = simulator.timeProperty().get();
 					firstStart.set(0, false);
-				} else if(!simulator.isFinished()) {
+				} else if(!simulator.endingConditionReached(currentTrace.get())) {
 					if(time + 100 < simulator.getTime() + simulator.getDelay()) {
 						time += 100;
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
@@ -403,7 +403,7 @@ public class SimulatorStage extends Stage {
 			}
 		};
 		simulator.timeProperty().addListener((observable, from, to) -> {
-			if(!simulator.isFinished()) {
+			if(!simulator.endingConditionReached(currentTrace.get())) {
 				time = to.intValue();
 				if(time == 0) {
 					Platform.runLater(() -> lbTime.setText(""));

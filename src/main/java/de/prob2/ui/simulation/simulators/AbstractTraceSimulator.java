@@ -74,9 +74,6 @@ public abstract class AbstractTraceSimulator extends AbstractSimulator implement
                 //
             }
         }
-        if(predicate == null) {
-            this.finished = false;
-        }
         return predicate;
     }
 

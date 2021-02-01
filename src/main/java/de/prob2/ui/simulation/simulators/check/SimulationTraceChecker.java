@@ -33,11 +33,8 @@ public class SimulationTraceChecker extends AbstractTraceSimulator implements IT
         this.counter = 0;
         try {
             Trace newTrace = setupBeforeSimulation(trace);
-            while(!finished) {
+            while(!endingConditionReached(newTrace)) {
                 newTrace = simulationStep(newTrace);
-                if(endingConditionReached(newTrace)) {
-                    finishSimulation();
-                }
             }
             this.resultingTrace = newTrace;
         } catch (ExecuteOperationException e) {

@@ -35,8 +35,6 @@ public abstract class AbstractSimulator {
 
     protected int stepCounter;
 
-    protected boolean finished;
-
     protected Map<String, List<Activation>> configurationToActivation;
 
     protected List<ActivationOperationConfiguration> activationConfigurationsSorted;
@@ -85,7 +83,6 @@ public abstract class AbstractSimulator {
     public void resetSimulator() {
         this.configurationToActivation = new HashMap<>();
         this.time.set(0);
-        this.finished = false;
         this.stepCounter = 0;
         if(config != null) {
             // sort after priority
@@ -238,16 +235,8 @@ public abstract class AbstractSimulator {
 
     protected abstract void run();
 
-    protected void finishSimulation() {
-        this.finished = true;
-    }
-
     public int getDelay() {
         return delay;
-    }
-
-    public boolean isFinished() {
-        return finished;
     }
 
     public void updateDelay() {

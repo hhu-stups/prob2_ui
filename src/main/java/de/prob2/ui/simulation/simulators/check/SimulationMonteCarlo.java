@@ -70,7 +70,6 @@ public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
 
 			for (int i = 0; i < numberExecutions; i++) {
 				Trace newTrace = setupBeforeSimulation(startTrace);;
-				this.finished = false;
 				while (!endingConditionReached(newTrace)) {
 					newTrace = simulationStep(newTrace);
 				}

@@ -34,6 +34,6 @@ public interface IRealTimeSimulator {
 
     int getTime();
 
-    boolean isFinished();
+    boolean endingConditionReached(Trace trace);
 
 }

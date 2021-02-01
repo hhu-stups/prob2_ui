@@ -38,14 +38,11 @@ public class TraceSimulator extends AbstractTraceSimulator implements IRealTimeS
     public void simulate() {
         scheduler.startSimulationStep();
         try {
-            if(!finished) {
+            if(counter < persistentTrace.getTransitionList().size()) {
                 // Read trace and pass it through chooseOperation to avoid race condition
                 Trace trace = currentTrace.get();
                 Trace newTrace = simulationStep(trace);
                 currentTrace.set(newTrace);
-                if(counter >= persistentTrace.getTransitionList().size()) {
-                    finishSimulation();
-                }
             }
         } catch (ExecuteOperationException e) {
             System.out.println("TRACE REPLAY IN SIMULATION ERROR");
@@ -63,10 +60,6 @@ public class TraceSimulator extends AbstractTraceSimulator implements IRealTimeS
         return scheduler.isRunning();
     }
 
-    public boolean isFinished() {
-        return finished;
-    }
-
     @FXML
     public void stop() {
         scheduler.stop();
@@ -76,13 +69,6 @@ public class TraceSimulator extends AbstractTraceSimulator implements IRealTimeS
     private void reset() {
         this.time.set(0);
         this.counter = 0;
-    }
-
-    @Override
-    protected void finishSimulation() {
-        super.finishSimulation();
-        scheduler.stop();
-        reset();
     }
 
 }
