@@ -12,13 +12,19 @@
 
         function changeAttribute(id, attribute, value){
             $(document).ready(function(){
-                if(attribute=="text") {
-                    $(id).text(value);
+                var obj = document.getElementById(id);
+                if (obj == null) {
+                    console.log("Unknown SVG id " + id + " for attribute " + attribute);
+                    var list = document.getElementById('visb_error_messages').getElementsByTagName('ul')[0];
+                    console.log("list =" + list);
+                    var entry = document.createElement('li');
+                    entry.appendChild(document.createTextNode("Unknown SVG id '" + id + "' for attribute " + attribute));
+                    list.appendChild(entry);
+                } else if(attribute=="text") {
+                    obj.textContent = value;
                 } else {
-                    $(id).attr(attribute, value);
+                    obj.setAttribute(attribute, value);
                 }
-                {{! Provide warning alert if an SVG object id cannot be found:}}
-                checkSvgId(id,attribute);
             });
         }
 

@@ -406,7 +406,7 @@ public class VisBParser {
 			"\' cannot be parsed for the attribute \'"+ attr+
 			"\'. Check the VisB help section for supported values.");
 		}
-		return buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString(attr), wrapAsString(value));
+		return buildInvocation("changeAttribute", wrapAsString(id), wrapAsString(attr), wrapAsString(value));
 	}
 
 	/**
