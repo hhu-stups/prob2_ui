@@ -159,6 +159,165 @@ public abstract class Simulator {
         return newValues;
     }
 
+    public void initSimulator(File configFile) throws IOException {
+        this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
+        if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
+            checkConfiguration(currentTrace.getStateSpace());
+        } else {
+            currentTrace.addListener(traceListener);
+        }
+        resetSimulator();
+    }
+
+    protected void checkConfiguration(StateSpace stateSpace) throws RuntimeException {
+        SimulationConfigurationChecker simulationConfigurationChecker = new SimulationConfigurationChecker(stateSpace, this.config);
+        simulationConfigurationChecker.check();
+        if(!simulationConfigurationChecker.getErrors().isEmpty()) {
+            throw new RuntimeException(simulationConfigurationChecker.getErrors().stream().map(Throwable::getMessage).collect(Collectors.joining("\n")));
+        }
+    }
+
+    public void resetSimulator() {
+        this.configurationToActivation = new HashMap<>();
+        this.time.set(0);
+        this.stepCounter = 0;
+        if(config != null) {
+            // sort after priority
+            this.activationConfigurationsSorted = config.getActivationConfigurations().stream()
+                    .filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
+                    .map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
+                    .sorted(Comparator.comparingInt(ActivationOperationConfiguration::getPriority))
+                    .collect(Collectors.toList());
+            activationConfigurationMap = new HashMap<>();
+            config.getActivationConfigurations().forEach(activationConfiguration -> activationConfigurationMap.put(activationConfiguration.getId(), activationConfiguration));
+            operationToActivations = new HashMap<>();
+            config.getActivationConfigurations().stream()
+                    .filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
+                    .map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
+                    .forEach(activationConfiguration -> {
+                        String opName = activationConfiguration.getOpName();
+                        if(!operationToActivations.containsKey(opName)) {
+                            operationToActivations.put(opName, new HashSet<>());
+                        }
+                        operationToActivations.get(opName).add(activationConfiguration.getId());
+                    });
+            initializeRemainingTime();
+            currentTrace.removeListener(traceListener);
+        }
+    }
+
+    private void initializeRemainingTime() {
+        activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
+        updateDelay();
+    }
+
+    public void updateRemainingTime() {
+        updateRemainingTime(this.delay);
+    }
+
+    public void updateRemainingTime(int delay) {
+        this.time.set(this.time.get() + delay);
+        for(String key : configurationToActivation.keySet()) {
+            for(Activation activation : configurationToActivation.get(key)) {
+                activation.decreaseTime(delay);
+            }
+        }
+    }
+
+    public void updateDelay() {
+        int delay = Integer.MAX_VALUE;
+        for(List<Activation> activations : configurationToActivation.values()) {
+            for(Activation activation : activations) {
+                if(activation.getTime() < delay) {
+                    delay = activation.getTime();
+                }
+            }
+        }
+        this.delay = delay;
+    }
+
+    protected Trace simulationStep(Trace trace) {
+        Trace newTrace = trace;
+        State currentState = newTrace.getCurrentState();
+        if(currentState.isInitialised()) {
+            if(endingConditionReached(newTrace)) {
+                return newTrace;
+            }
+            updateRemainingTime();
+            newTrace = executeOperations(newTrace);
+            updateDelay();
+        }
+        return newTrace;
+    }
+
+    public Trace setupBeforeSimulation(Trace trace) {
+        Trace newTrace = trace;
+        State currentState = newTrace.getCurrentState();
+        if(!currentState.isInitialised()) {
+            List<String> nextTransitions = trace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
+            if(nextTransitions.contains("$setup_constants")) {
+                newTrace = executeBeforeInitialisation("$setup_constants", currentState, newTrace);
+            }
+            currentState = newTrace.getCurrentState();
+            nextTransitions = newTrace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
+            if(nextTransitions.contains("$initialise_machine")) {
+                newTrace = executeBeforeInitialisation("$initialise_machine", currentState, newTrace);
+            }
+        }
+        stepCounter = newTrace.getTransitionList().size();
+        return newTrace;
+    }
+
+    protected Trace executeOperations(Trace trace) {
+        Trace newTrace = trace;
+        for(ActivationOperationConfiguration opConfig : activationConfigurationsSorted) {
+            if (endingConditionReached(newTrace)) {
+                break;
+            }
+            newTrace = executeOperation(opConfig, newTrace);
+        }
+        return newTrace;
+    }
+
+    protected String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
+        String newExpression;
+        if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
+            newExpression = expression;
+        } else {
+            newExpression = String.format("LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+        }
+        return cache.readValueWithCaching(state, newExpression);
+    }
+
+
+    private String joinPredicateFromValues(State currentState, Map<String, String> values) {
+        if(values == null) {
+            return "1=1";
+        } else {
+            return chooseVariableValues(currentState, values);
+        }
+    }
+
+    protected Trace executeBeforeInitialisation(String operation, State currentState, Trace trace) {
+        List<ActivationOperationConfiguration> actConfigs = activationConfigurationsSorted.stream()
+                .filter(config -> operation.equals(config.getOpName()))
+                .collect(Collectors.toList());
+        String predicate = "1=1";
+        Trace newTrace = trace;
+        if(!actConfigs.isEmpty()) {
+            ActivationOperationConfiguration actConfig = actConfigs.get(0);
+            predicate = joinPredicateFromValues(currentState, actConfig.getParameters());
+            Transition nextTransition = currentState.findTransition(operation, predicate);
+            newTrace = trace.add(nextTransition);
+            activateOperations(newTrace.getCurrentState(), actConfig.getActivation(), new ArrayList<>(), "1=1");
+        } else {
+            Transition nextTransition = currentState.findTransition(operation, predicate);
+            newTrace = trace.add(nextTransition);
+        }
+        updateDelay();
+        return newTrace;
+    }
+
     public Trace executeOperation(ActivationOperationConfiguration timingConfig, Trace trace) {
         String id = timingConfig.getId();
 	    String chosenOp = timingConfig.getOpName();
@@ -320,153 +479,6 @@ public abstract class Simulator {
         return false;
     }
 
-    public void initSimulator(File configFile) throws IOException {
-        this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
-        if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
-            checkConfiguration(currentTrace.getStateSpace());
-        } else {
-            currentTrace.addListener(traceListener);
-        }
-        resetSimulator();
-    }
-
-    protected void checkConfiguration(StateSpace stateSpace) throws RuntimeException {
-        SimulationConfigurationChecker simulationConfigurationChecker = new SimulationConfigurationChecker(stateSpace, this.config);
-        simulationConfigurationChecker.check();
-        if(!simulationConfigurationChecker.getErrors().isEmpty()) {
-            throw new RuntimeException(simulationConfigurationChecker.getErrors().stream().map(Throwable::getMessage).collect(Collectors.joining("\n")));
-        }
-    }
-
-    public void resetSimulator() {
-        this.configurationToActivation = new HashMap<>();
-        this.time.set(0);
-        this.stepCounter = 0;
-        if(config != null) {
-            // sort after priority
-            this.activationConfigurationsSorted = config.getActivationConfigurations().stream()
-                    .filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
-                    .map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
-                    .sorted(Comparator.comparingInt(ActivationOperationConfiguration::getPriority))
-                    .collect(Collectors.toList());
-            activationConfigurationMap = new HashMap<>();
-            config.getActivationConfigurations().forEach(activationConfiguration -> activationConfigurationMap.put(activationConfiguration.getId(), activationConfiguration));
-            operationToActivations = new HashMap<>();
-            config.getActivationConfigurations().stream()
-                    .filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
-                    .map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
-                    .forEach(activationConfiguration -> {
-                        String opName = activationConfiguration.getOpName();
-                        if(!operationToActivations.containsKey(opName)) {
-                            operationToActivations.put(opName, new HashSet<>());
-                        }
-                        operationToActivations.get(opName).add(activationConfiguration.getId());
-                    });
-            initializeRemainingTime();
-            currentTrace.removeListener(traceListener);
-        }
-    }
-
-    private void initializeRemainingTime() {
-        activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
-        updateDelay();
-    }
-
-    public void updateRemainingTime() {
-        updateRemainingTime(this.delay);
-    }
-
-    public void updateRemainingTime(int delay) {
-        this.time.set(this.time.get() + delay);
-        for(String key : configurationToActivation.keySet()) {
-            for(Activation activation : configurationToActivation.get(key)) {
-                activation.decreaseTime(delay);
-            }
-        }
-    }
-
-    protected Trace simulationStep(Trace trace) {
-        Trace newTrace = trace;
-        State currentState = newTrace.getCurrentState();
-        if(currentState.isInitialised()) {
-            if(endingConditionReached(newTrace)) {
-                return newTrace;
-            }
-            updateRemainingTime();
-            newTrace = executeOperations(newTrace);
-            updateDelay();
-        }
-        return newTrace;
-    }
-
-    public Trace setupBeforeSimulation(Trace trace) {
-        Trace newTrace = trace;
-        State currentState = newTrace.getCurrentState();
-        if(!currentState.isInitialised()) {
-            List<String> nextTransitions = trace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
-            if(nextTransitions.contains("$setup_constants")) {
-                newTrace = executeBeforeInitialisation("$setup_constants", currentState, newTrace);
-            }
-            currentState = newTrace.getCurrentState();
-            nextTransitions = newTrace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
-            if(nextTransitions.contains("$initialise_machine")) {
-                newTrace = executeBeforeInitialisation("$initialise_machine", currentState, newTrace);
-            }
-        }
-        stepCounter = newTrace.getTransitionList().size();
-        return newTrace;
-    }
-
-    protected Trace executeOperations(Trace trace) {
-        Trace newTrace = trace;
-        for(ActivationOperationConfiguration opConfig : activationConfigurationsSorted) {
-            if (endingConditionReached(newTrace)) {
-                break;
-            }
-            newTrace = executeOperation(opConfig, newTrace);
-        }
-        return newTrace;
-    }
-
-    protected String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
-        String newExpression;
-        if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
-            newExpression = expression;
-        } else {
-            newExpression = String.format("LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
-        }
-        return cache.readValueWithCaching(state, newExpression);
-    }
-
-
-    private String joinPredicateFromValues(State currentState, Map<String, String> values) {
-        if(values == null) {
-            return "1=1";
-        } else {
-            return chooseVariableValues(currentState, values);
-        }
-    }
-
-    protected Trace executeBeforeInitialisation(String operation, State currentState, Trace trace) {
-        List<ActivationOperationConfiguration> actConfigs = activationConfigurationsSorted.stream()
-                .filter(config -> operation.equals(config.getOpName()))
-                .collect(Collectors.toList());
-        String predicate = "1=1";
-        Trace newTrace = trace;
-        if(!actConfigs.isEmpty()) {
-            ActivationOperationConfiguration actConfig = actConfigs.get(0);
-            predicate = joinPredicateFromValues(currentState, actConfig.getParameters());
-            Transition nextTransition = currentState.findTransition(operation, predicate);
-            newTrace = trace.add(nextTransition);
-            activateOperations(newTrace.getCurrentState(), actConfig.getActivation(), new ArrayList<>(), "1=1");
-        } else {
-            Transition nextTransition = currentState.findTransition(operation, predicate);
-            newTrace = trace.add(nextTransition);
-        }
-        updateDelay();
-        return newTrace;
-    }
-
     public SimulationConfiguration getConfig() {
         return config;
     }
@@ -485,15 +497,4 @@ public abstract class Simulator {
         return delay;
     }
 
-    public void updateDelay() {
-        int delay = Integer.MAX_VALUE;
-        for(List<Activation> activations : configurationToActivation.values()) {
-            for(Activation activation : activations) {
-                if(activation.getTime() < delay) {
-                    delay = activation.getTime();
-                }
-            }
-        }
-        this.delay = delay;
-    }
 }
