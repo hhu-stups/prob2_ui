@@ -209,7 +209,7 @@ public class VisBParser {
 			case "dx":
 			case "dy":
 				//Checking for length - list
-				checkValue = value.matches("^(" + length_per + " )+$");
+				checkValue = checkNumber(value) || value.matches("^(" + length_per + " )+$");
 				break;
 			case "fill":
 				//Checking for color
