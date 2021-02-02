@@ -6,25 +6,18 @@ import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.sharedviews.DescriptionView;
-import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.simulators.Scheduler;
-import de.prob2.ui.simulation.simulators.TraceSimulator;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -34,7 +27,6 @@ import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -122,7 +114,7 @@ public class SimulationTracesView extends Stage {
 			final MenuItem playTraceItem = new MenuItem(bundle.getString("simulation.contextMenu.play"));
 
 			playTraceItem.setOnAction(e -> {
-				Trace trace = new Trace(currentTrace.getStateSpace());
+				/*Trace trace = new Trace(currentTrace.getStateSpace());
 				PersistentTrace persistentTrace = new PersistentTrace(row.getItem().getTrace(), row.getItem().getTrace().getCurrent().getIndex() + 1);
 				TraceSimulator traceSimulator = new TraceSimulator(currentTrace, injector.getInstance(Scheduler.class), trace, persistentTrace);
 				if(traceSimulator.isRunning()) {
@@ -131,7 +123,8 @@ public class SimulationTracesView extends Stage {
 				simulatorStage.initSimulator(traceSimulator);
 				trace.setExploreStateByDefault(false);
 				simulatorStage.simulate(traceSimulator);
-				trace.setExploreStateByDefault(true);
+				trace.setExploreStateByDefault(true);*/
+				// TODO: Trace Replay as a special kind of simulation
 			});
 
             row.contextMenuProperty().bind(

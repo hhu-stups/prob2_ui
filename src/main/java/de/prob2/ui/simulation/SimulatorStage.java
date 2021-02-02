@@ -19,12 +19,10 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
-import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.Simulator;
-import de.prob2.ui.simulation.simulators.TraceSimulator;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
@@ -60,7 +58,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -110,7 +107,7 @@ public class SimulatorStage extends Stage {
 				switch (type) {
 					case TRACE_REPLAY:
 						playItem.setOnAction(e -> {
-							Trace trace = new Trace(currentTrace.getStateSpace());
+							/*Trace trace = new Trace(currentTrace.getStateSpace());
 							ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
 							TraceSimulator traceSimulator = new TraceSimulator(currentTrace, injector.getInstance(Scheduler.class), trace, replayTrace);
 							if(traceSimulator.isRunning()) {
@@ -119,7 +116,8 @@ public class SimulatorStage extends Stage {
 							SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), (IRealTimeSimulator) traceSimulator, configurationPath.get().toFile());
 							trace.setExploreStateByDefault(false);
 							simulate(traceSimulator);
-							trace.setExploreStateByDefault(true);
+							trace.setExploreStateByDefault(true);*/
+							// TODO: Trace Replay as a special kind of simulation
 						});
 						break;
 					default:

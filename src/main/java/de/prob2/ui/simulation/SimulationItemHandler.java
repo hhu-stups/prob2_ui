@@ -3,7 +3,6 @@ package de.prob2.ui.simulation;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -11,15 +10,12 @@ import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
-import de.prob2.ui.simulation.simulators.check.SimulationTraceChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +129,7 @@ public class SimulationItemHandler {
     }
 
     private void handleTraceReplay(SimulationItem item, boolean checkAll) {
-        Trace trace = currentTrace.get();
+        /*Trace trace = currentTrace.get();
         ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
         Map<String, Object> additionalInformation = new HashMap<>();
         if(item.getSimulationConfiguration().containsField("TIME")) {
@@ -156,7 +152,8 @@ public class SimulationItemHandler {
                 break;
             default:
                 break;
-        }
+        }*/
+        // TODO: Trace Replay as a special kind of simulation
     }
 
     public void checkItem(SimulationItem item, boolean checkAll) {
