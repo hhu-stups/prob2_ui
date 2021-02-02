@@ -159,7 +159,7 @@ public abstract class Simulator {
         return newValues;
     }
 
-    public Trace executeNextOperation(ActivationOperationConfiguration timingConfig, Trace trace) {
+    public Trace executeOperation(ActivationOperationConfiguration timingConfig, Trace trace) {
         String id = timingConfig.getId();
 	    String chosenOp = timingConfig.getOpName();
         List<String> activationConfiguration = timingConfig.getActivation();
@@ -426,11 +426,6 @@ public abstract class Simulator {
             newTrace = executeOperation(opConfig, newTrace);
         }
         return newTrace;
-    }
-
-
-    protected Trace executeOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
-        return executeNextOperation(activationConfig, trace);
     }
 
     protected String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
