@@ -5,9 +5,7 @@ import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.configuration.ConfigurationCheckingError;
-import de.prob2.ui.simulation.simulators.AbstractSimulator;
-import de.prob2.ui.simulation.simulators.Simulator;
+import de.prob2.ui.simulation.simulators.ProbabilityBasedSimulator;
 import javafx.scene.control.Alert;
 import javafx.stage.Window;
 import org.slf4j.Logger;
@@ -25,7 +23,7 @@ public class SimulationHelperFunctions {
         return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
     }
 
-	public static void initSimulator(StageManager stageManager, Window window, AbstractSimulator simulator, File file) {
+	public static void initSimulator(StageManager stageManager, Window window, ProbabilityBasedSimulator simulator, File file) {
 		try {
 			simulator.initSimulator(file);
 		} catch (IOException e) {
