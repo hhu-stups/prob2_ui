@@ -134,16 +134,4 @@ public class SimulationFileHandler {
         return activationKind;
     }
 
-    private static Map<String, String> buildDestinationState(JsonElement jsonElement) {
-        Map<String, String> destState = null;
-        if(jsonElement != null) {
-			destState = new HashMap<>();
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
-            for(String key : jsonObject.keySet()) {
-				destState.put(key, jsonObject.get(key).getAsString());
-            }
-        }
-        return destState;
-    }
-
 }
