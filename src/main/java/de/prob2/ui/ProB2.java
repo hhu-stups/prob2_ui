@@ -7,7 +7,6 @@ import com.google.inject.Key;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
-import de.prob.statespace.Trace;
 import de.prob2.ui.config.BasicConfig;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.BasicConfigModule;
@@ -25,7 +24,7 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.simulation.simulators.Simulator;
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -187,7 +186,7 @@ public class ProB2 extends Application {
 			logger.error("Uncaught exception on thread {}", thread, exc);
 			Platform.runLater(() -> {
 				try {
-					injector.getInstance(Simulator.class).stop();
+					injector.getInstance(RealTimeSimulator.class).stop();
 					stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
 				} catch (Throwable t) {
 					logger.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);

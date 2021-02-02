@@ -19,7 +19,7 @@ import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.Scheduler;
-import de.prob2.ui.simulation.simulators.Simulator;
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
@@ -196,7 +196,7 @@ public class SimulatorStage extends Stage {
 
 	private final Injector injector;
 
-	private final Simulator simulator;
+	private final RealTimeSimulator realTimeSimulator;
 
 	private final MachineLoader machineLoader;
 
@@ -212,21 +212,21 @@ public class SimulatorStage extends Stage {
 
 	private Timer timer;
 
-	private ObjectProperty<Simulator> lastSimulator;
+	private ObjectProperty<RealTimeSimulator> lastSimulator;
 
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-						  final Injector injector, final Simulator simulator, final MachineLoader machineLoader,
+						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
 						  final SimulationItemHandler simulationItemHandler, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
-	    this.simulator = simulator;
+	    this.realTimeSimulator = realTimeSimulator;
 	    this.machineLoader = machineLoader;
 	    this.simulationItemHandler = simulationItemHandler;
-	    this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", simulator);
+	    this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
         this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
@@ -237,7 +237,7 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		simulator.runningProperty().addListener((observable, from, to) -> {
+		realTimeSimulator.runningProperty().addListener((observable, from, to) -> {
 			if(to) {
 				Platform.runLater(() -> {
 					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PAUSE));
@@ -250,10 +250,10 @@ public class SimulatorStage extends Stage {
 				});
 			}
 		});
-		btLoadConfiguration.disableProperty().bind(simulator.runningProperty());
+		btLoadConfiguration.disableProperty().bind(realTimeSimulator.runningProperty());
 		btSimulate.disableProperty().bind(configurationPath.isNull());
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
-		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(simulator.runningProperty()));
+		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()));
 		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, currentTrace, bundle));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
@@ -292,41 +292,41 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	public void simulate() {
-		this.simulate(simulator);
+		this.simulate(realTimeSimulator);
 	}
 
-	public void simulate(Simulator simulator) {
-		if(!simulator.isRunning()) {
-			runSimulator(simulator);
+	public void simulate(RealTimeSimulator realTimeSimulator) {
+		if(!realTimeSimulator.isRunning()) {
+			runSimulator(realTimeSimulator);
 		} else {
-			stopSimulator(simulator);
+			stopSimulator(realTimeSimulator);
 		}
 	}
 
-	private void runSimulator(Simulator simulator) {
+	private void runSimulator(RealTimeSimulator realTimeSimulator) {
 		Path path = configurationPath.get();
 		if(path != null) {
-			injector.getInstance(Scheduler.class).setSimulator(simulator);
-			if (lastSimulator.isNull().get() || !lastSimulator.get().equals(simulator)) {
+			injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
+			if (lastSimulator.isNull().get() || !lastSimulator.get().equals(realTimeSimulator)) {
 				this.time = 0;
-				SimulationHelperFunctions.initSimulator(stageManager, this, simulator, configurationPath.get().toFile());
+				SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			}
-			simulator.run();
-			startTimer(simulator);
+			realTimeSimulator.run();
+			startTimer(realTimeSimulator);
 		}
 	}
 
-	public void initSimulator(Simulator simulator) {
-		SimulationHelperFunctions.initSimulator(stageManager, this, simulator, configurationPath.get().toFile());
+	public void initSimulator(RealTimeSimulator realTimeSimulator) {
+		SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 	}
 
-	private void stopSimulator(Simulator simulator) {
+	private void stopSimulator(RealTimeSimulator realTimeSimulator) {
 		Path path = configurationPath.get();
 		if (path != null) {
-			simulator.updateRemainingTime(time - simulator.timeProperty().get());
-			simulator.updateDelay();
+			realTimeSimulator.updateRemainingTime(time - realTimeSimulator.timeProperty().get());
+			realTimeSimulator.updateDelay();
 		}
-		simulator.stop();
+		realTimeSimulator.stop();
 		cancelTimer();
 	}
 
@@ -343,7 +343,7 @@ public class SimulatorStage extends Stage {
 			lbTime.setText("");
 			this.time = 0;
 			File configFile = path.toFile();;
-			SimulationHelperFunctions.initSimulator(stageManager, this, simulator, configurationPath.get().toFile());
+			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}
     }
@@ -351,11 +351,11 @@ public class SimulatorStage extends Stage {
     private void resetSimulator() {
 		lbTime.setText("");
 		this.time = 0;
-		simulator.resetSimulator();
+		realTimeSimulator.resetSimulator();
 	}
 
     private void loadSimulationItems() {
-		SimulationConfiguration config = simulator.getConfig();
+		SimulationConfiguration config = realTimeSimulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
 		// TODO
@@ -378,18 +378,18 @@ public class SimulatorStage extends Stage {
 		choosingStage.showAndWait();
 	}
 
-	private void startTimer(Simulator simulator) {
+	private void startTimer(RealTimeSimulator realTimeSimulator) {
 		cancelTimer();
-		lastSimulator.set(simulator);
+		lastSimulator.set(realTimeSimulator);
 		List<Boolean> firstStart = new ArrayList<>(Collections.singletonList(true));
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
 				if(firstStart.get(0)) {
-					time = simulator.timeProperty().get();
+					time = realTimeSimulator.timeProperty().get();
 					firstStart.set(0, false);
-				} else if(!simulator.endingConditionReached(currentTrace.get())) {
-					if(time + 100 < simulator.getTime() + simulator.getDelay()) {
+				} else if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
+					if(time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
 						time += 100;
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 						Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
@@ -397,8 +397,8 @@ public class SimulatorStage extends Stage {
 				}
 			}
 		};
-		simulator.timeProperty().addListener((observable, from, to) -> {
-			if(!simulator.endingConditionReached(currentTrace.get())) {
+		realTimeSimulator.timeProperty().addListener((observable, from, to) -> {
+			if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
 				time = to.intValue();
 				if(time == 0) {
 					Platform.runLater(() -> lbTime.setText(""));

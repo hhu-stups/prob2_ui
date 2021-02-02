@@ -4,13 +4,13 @@ package de.prob2.ui.simulation.simulators.check;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.simulators.ProbabilityBasedSimulator;
+import de.prob2.ui.simulation.simulators.Simulator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SimulationMonteCarlo extends ProbabilityBasedSimulator {
+public class SimulationMonteCarlo extends Simulator {
 
 	public enum EndingType {
 		NUMBER_STEPS("Number Steps"),

@@ -16,7 +16,7 @@ public class Scheduler {
 
     private ChangeListener<Trace> listener;
 
-    private Simulator simulator;
+    private RealTimeSimulator realTimeSimulator;
 
     private final CurrentTrace currentTrace;
 
@@ -33,7 +33,7 @@ public class Scheduler {
         this.listener = (observable, from, to) -> {
             if(to != null) {
                 if (!to.getCurrentState().isInitialised()) {
-                    Trace newTrace = simulator.setupBeforeSimulation(to);
+                    Trace newTrace = realTimeSimulator.setupBeforeSimulation(to);
                     currentTrace.set(newTrace);
                 }
             }
@@ -44,13 +44,13 @@ public class Scheduler {
     public void run() {
         runningProperty.set(true);
         Trace trace = currentTrace.get();
-        currentTrace.set(simulator.setupBeforeSimulation(trace));
+        currentTrace.set(realTimeSimulator.setupBeforeSimulation(trace));
         currentTrace.addListener(listener);
         thread = new Thread(() -> {
-            while(simulator.isRunning()) {
+            while(realTimeSimulator.isRunning()) {
                 try {
-                    Thread.sleep(simulator.getDelay());
-                    simulator.simulate();
+                    Thread.sleep(realTimeSimulator.getDelay());
+                    realTimeSimulator.simulate();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -62,8 +62,8 @@ public class Scheduler {
         thread.start();
     }
 
-    public void setSimulator(Simulator simulator) {
-        this.simulator = simulator;
+    public void setSimulator(RealTimeSimulator realTimeSimulator) {
+        this.realTimeSimulator = realTimeSimulator;
     }
 
     public void stop() {
