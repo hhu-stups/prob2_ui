@@ -244,7 +244,7 @@ public abstract class Simulator {
                 return newTrace;
             }
             updateRemainingTime();
-            newTrace = executeOperations(newTrace);
+            newTrace = executeActivatedOperations(newTrace);
             updateDelay();
         }
         return newTrace;
@@ -258,14 +258,14 @@ public abstract class Simulator {
             if(nextTransitions.contains("$setup_constants")) {
                 ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$setup_constants");
                 activateOperation(newTrace.getCurrentState(), setupConfiguration, new ArrayList<>(), "1=1");
-                newTrace = executeOperation(setupConfiguration, newTrace);
+                newTrace = executeActivatedOperation(setupConfiguration, newTrace);
                 updateDelay();
             }
             nextTransitions = newTrace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
             if(nextTransitions.contains("$initialise_machine")) {
                 ActivationOperationConfiguration initConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$initialise_machine");
                 activateOperation(newTrace.getCurrentState(), initConfiguration, new ArrayList<>(), "1=1");
-                newTrace = executeOperation(initConfiguration, newTrace);
+                newTrace = executeActivatedOperation(initConfiguration, newTrace);
                 updateDelay();
             }
         }
@@ -273,13 +273,13 @@ public abstract class Simulator {
         return newTrace;
     }
 
-    protected Trace executeOperations(Trace trace) {
+    protected Trace executeActivatedOperations(Trace trace) {
         Trace newTrace = trace;
         for(ActivationOperationConfiguration opConfig : activationConfigurationsSorted) {
             if (endingConditionReached(newTrace)) {
                 break;
             }
-            newTrace = executeOperation(opConfig, newTrace);
+            newTrace = executeActivatedOperation(opConfig, newTrace);
         }
         return newTrace;
     }
@@ -294,10 +294,10 @@ public abstract class Simulator {
         return cache.readValueWithCaching(state, newExpression);
     }
 
-    public Trace executeOperation(ActivationOperationConfiguration timingConfig, Trace trace) {
-        String id = timingConfig.getId();
-	    String chosenOp = timingConfig.getOpName();
-        List<String> activationConfiguration = timingConfig.getActivation();
+    public Trace executeActivatedOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
+        String id = activationConfig.getId();
+	    String chosenOp = activationConfig.getOpName();
+        List<String> activationConfiguration = activationConfig.getActivation();
 
         List<Activation> activationForOperation = configurationToActivation.get(id);
         List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
@@ -312,30 +312,28 @@ public abstract class Simulator {
 
             State currentState = newTrace.getCurrentState();
             List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
-            if (!shouldExecuteNextOperation(currentState, transitions, activation.getAdditionalGuards())) {
-                continue;
-            }
-            Map<String, String> values = mergeValues(chooseProbabilistic(activation, currentState), chooseParameters(activation, currentState));
-
-            if (values == null) {
-                // TODO: uniform, refactor
-                Transition transition = transitions.get(random.nextInt(transitions.size()));
-                newTrace = appendTrace(newTrace, transition);
-                List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
-                String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
-                activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
-            } else {
-                State finalCurrentState = newTrace.getCurrentState();
-                String predicate = chooseVariableValues(finalCurrentState, values);
-                final IEvalElement pred = newTrace.getModel().parseFormula(predicate, FormulaExpand.TRUNCATE);
-                final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(finalCurrentState.getStateSpace(), finalCurrentState.getId(), chosenOp, pred, 1);
-                finalCurrentState.getStateSpace().execute(command);
-                if (!command.hasErrors()) {
-                    Transition transition = command.getNewTransitions().get(0);
+            if (shouldExecuteNextOperation(currentState, transitions, activation.getAdditionalGuards())) {
+                Map<String, String> values = mergeValues(chooseProbabilistic(activation, currentState), chooseParameters(activation, currentState));
+                if (values == null) {
+                    // TODO: uniform, refactor
+                    Transition transition = transitions.get(random.nextInt(transitions.size()));
                     newTrace = appendTrace(newTrace, transition);
                     List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
                     String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
                     activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
+                } else {
+                    State finalCurrentState = newTrace.getCurrentState();
+                    String predicate = chooseVariableValues(finalCurrentState, values);
+                    final IEvalElement pred = newTrace.getModel().parseFormula(predicate, FormulaExpand.TRUNCATE);
+                    final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(finalCurrentState.getStateSpace(), finalCurrentState.getId(), chosenOp, pred, 1);
+                    finalCurrentState.getStateSpace().execute(command);
+                    if (!command.hasErrors()) {
+                        Transition transition = command.getNewTransitions().get(0);
+                        newTrace = appendTrace(newTrace, transition);
+                        List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
+                        String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
+                        activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
+                    }
                 }
             }
         }
