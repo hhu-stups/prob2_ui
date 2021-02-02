@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.simulators;
 
 import com.github.krukow.clj_lang.PersistentVector;
 import de.prob.animator.command.GetOperationByPredicateCommand;
+import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
@@ -23,6 +24,7 @@ import javafx.beans.value.ChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +61,8 @@ public abstract class Simulator {
 
     protected ChangeListener<? super Trace> traceListener = null;
 
+    protected int maxTransitions;
+
 	public Simulator(final CurrentTrace currentTrace) {
         super();
         this.currentTrace = currentTrace;
@@ -73,6 +77,9 @@ public abstract class Simulator {
 	}
 
     public String chooseVariableValues(State currentState, Map<String, String> values) {
+	    if(values == null || values.isEmpty()) {
+	        return "1=1";
+        }
         StringBuilder conjuncts = new StringBuilder();
         for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
             String key = it.next();
@@ -251,6 +258,10 @@ public abstract class Simulator {
     }
 
     public Trace setupBeforeSimulation(Trace trace) {
+        GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
+        currentTrace.getStateSpace().execute(cmd);
+        this.maxTransitions = Integer.parseInt(cmd.getValue());
+
         Trace newTrace = trace;
         State currentState = newTrace.getCurrentState();
         if(!currentState.isInitialised()) {
@@ -269,6 +280,10 @@ public abstract class Simulator {
                 updateDelay();
             }
         }
+        cmd = new GetPreferenceCommand("MAX_OPERATIONS");
+        currentTrace.getStateSpace().execute(cmd);
+        this.maxTransitions = Integer.parseInt(cmd.getValue());
+
         stepCounter = newTrace.getTransitionList().size();
         return newTrace;
     }
@@ -311,30 +326,21 @@ public abstract class Simulator {
             activationForOperation.remove(activation);
 
             State currentState = newTrace.getCurrentState();
-            List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp);
+            Map<String, String> values = mergeValues(chooseProbabilistic(activation, currentState), chooseParameters(activation, currentState));
+            String predicate = chooseVariableValues(newTrace.getCurrentState(), values);
+            List<Transition> transitions = currentState.findTransitions(chosenOp, new ArrayList<>(Collections.singleton(predicate)), maxTransitions);
+
             if (shouldExecuteNextOperation(currentState, transitions, activation.getAdditionalGuards())) {
-                Map<String, String> values = mergeValues(chooseProbabilistic(activation, currentState), chooseParameters(activation, currentState));
-                if (values == null) {
-                    // TODO: uniform, refactor
-                    Transition transition = transitions.get(random.nextInt(transitions.size()));
-                    newTrace = appendTrace(newTrace, transition);
-                    List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
-                    String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
-                    activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
+                Transition transition;
+                if(transitions.size() > 1) {
+                    transition = transitions.get(random.nextInt(transitions.size()));
                 } else {
-                    State finalCurrentState = newTrace.getCurrentState();
-                    String predicate = chooseVariableValues(finalCurrentState, values);
-                    final IEvalElement pred = newTrace.getModel().parseFormula(predicate, FormulaExpand.TRUNCATE);
-                    final GetOperationByPredicateCommand command = new GetOperationByPredicateCommand(finalCurrentState.getStateSpace(), finalCurrentState.getId(), chosenOp, pred, 1);
-                    finalCurrentState.getStateSpace().execute(command);
-                    if (!command.hasErrors()) {
-                        Transition transition = command.getNewTransitions().get(0);
-                        newTrace = appendTrace(newTrace, transition);
-                        List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
-                        String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
-                        activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
-                    }
+                    transition = transitions.get(0);
                 }
+                newTrace = appendTrace(newTrace, transition);
+                List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
+                String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
+                activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
             }
         }
         stepCounter = newTrace.getTransitionList().size();
