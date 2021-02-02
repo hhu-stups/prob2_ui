@@ -3,8 +3,6 @@ package de.prob2.ui.simulation;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
@@ -20,7 +18,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
-import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
@@ -215,7 +212,7 @@ public class SimulatorStage extends Stage {
 
 	private Timer timer;
 
-	private ObjectProperty<IRealTimeSimulator> lastSimulator;
+	private ObjectProperty<Simulator> lastSimulator;
 
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
@@ -298,7 +295,7 @@ public class SimulatorStage extends Stage {
 		this.simulate(simulator);
 	}
 
-	public void simulate(IRealTimeSimulator simulator) {
+	public void simulate(Simulator simulator) {
 		if(!simulator.isRunning()) {
 			runSimulator(simulator);
 		} else {
@@ -306,7 +303,7 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
-	private void runSimulator(IRealTimeSimulator simulator) {
+	private void runSimulator(Simulator simulator) {
 		Path path = configurationPath.get();
 		if(path != null) {
 			injector.getInstance(Scheduler.class).setSimulator(simulator);
@@ -319,11 +316,11 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
-	public void initSimulator(IRealTimeSimulator simulator) {
+	public void initSimulator(Simulator simulator) {
 		SimulationHelperFunctions.initSimulator(stageManager, this, simulator, configurationPath.get().toFile());
 	}
 
-	private void stopSimulator(IRealTimeSimulator simulator) {
+	private void stopSimulator(Simulator simulator) {
 		Path path = configurationPath.get();
 		if (path != null) {
 			simulator.updateRemainingTime(time - simulator.timeProperty().get());
@@ -346,7 +343,7 @@ public class SimulatorStage extends Stage {
 			lbTime.setText("");
 			this.time = 0;
 			File configFile = path.toFile();;
-			SimulationHelperFunctions.initSimulator(stageManager, this, (IRealTimeSimulator) simulator, configurationPath.get().toFile());
+			SimulationHelperFunctions.initSimulator(stageManager, this, simulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}
     }
@@ -381,7 +378,7 @@ public class SimulatorStage extends Stage {
 		choosingStage.showAndWait();
 	}
 
-	private void startTimer(IRealTimeSimulator simulator) {
+	private void startTimer(Simulator simulator) {
 		cancelTimer();
 		lastSimulator.set(simulator);
 		List<Boolean> firstStart = new ArrayList<>(Collections.singletonList(true));

@@ -16,7 +16,7 @@ public class Scheduler {
 
     private ChangeListener<Trace> listener;
 
-    private IRealTimeSimulator simulator;
+    private Simulator simulator;
 
     private final CurrentTrace currentTrace;
 
@@ -62,7 +62,7 @@ public class Scheduler {
         thread.start();
     }
 
-    public void setSimulator(IRealTimeSimulator simulator) {
+    public void setSimulator(Simulator simulator) {
         this.simulator = simulator;
     }
 

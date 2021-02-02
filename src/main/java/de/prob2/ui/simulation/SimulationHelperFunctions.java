@@ -7,7 +7,7 @@ import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.configuration.ConfigurationCheckingError;
 import de.prob2.ui.simulation.simulators.AbstractSimulator;
-import de.prob2.ui.simulation.simulators.IRealTimeSimulator;
+import de.prob2.ui.simulation.simulators.Simulator;
 import javafx.scene.control.Alert;
 import javafx.stage.Window;
 import org.slf4j.Logger;
@@ -24,18 +24,6 @@ public class SimulationHelperFunctions {
         // Note: Rodin parser does not have IF-THEN-ELSE nor REAL
         return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
     }
-
-	public static void initSimulator(StageManager stageManager, Window window, IRealTimeSimulator simulator, File file) {
-		try {
-			simulator.initSimulator(file);
-		} catch (IOException e) {
-			LOGGER.debug("Tried to load simulation configuration file");
-			alert(stageManager, window, e, "simulation.error.header.fileNotFound","simulation.error.body.fileNotFound");
-		} catch (ConfigurationCheckingError e) {
-			LOGGER.debug("Errors in simulation configuration file detected");
-			alert(stageManager, window, e, "simulation.error.header.configurationError", "simulation.error.body.configurationError", e.getMessage());
-		}
-	}
 
 	public static void initSimulator(StageManager stageManager, Window window, AbstractSimulator simulator, File file) {
 		try {

@@ -8,7 +8,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 
 @Singleton
-public class Simulator extends ProbabilityBasedSimulator implements IRealTimeSimulator {
+public class Simulator extends ProbabilityBasedSimulator {
 
 	private final Scheduler scheduler;
 
@@ -31,7 +31,6 @@ public class Simulator extends ProbabilityBasedSimulator implements IRealTimeSim
 		scheduler.stop();
 	}
 
-	@Override
 	public void simulate() {
 		scheduler.startSimulationStep();
 		// Read trace and pass it through chooseOperation to avoid race condition
@@ -41,12 +40,10 @@ public class Simulator extends ProbabilityBasedSimulator implements IRealTimeSim
 		scheduler.endSimulationStep();
 	}
 
-	@Override
 	public BooleanProperty runningProperty() {
 		return scheduler.runningPropertyProperty();
 	}
 
-	@Override
 	public boolean isRunning() {
 		return scheduler.isRunning();
 	}
