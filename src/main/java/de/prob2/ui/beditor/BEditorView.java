@@ -39,6 +39,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
+import org.fxmisc.richtext.model.StyleSpans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -101,6 +102,7 @@ public class BEditorView extends BorderPane {
 	
 	private Thread watchThread;
 	private WatchKey key;
+	private StyleSpans<Collection<String>> highlighting;
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
@@ -115,6 +117,7 @@ public class BEditorView extends BorderPane {
 		this.errors = FXCollections.observableArrayList();
 		this.watchThread = null;
 		this.key = null;
+		this.highlighting = null;
 		stageManager.loadFXML(this, "beditorView.fxml");
 	}
 
@@ -391,5 +394,13 @@ public class BEditorView extends BorderPane {
 		bEditor.requestFocus();
 		bEditor.moveTo(line, column);
 		bEditor.requestFollowCaret();
+	}
+
+	void setHighlighting(StyleSpans<Collection<String>> highlighting) {
+		this.highlighting = highlighting;
+	}
+
+	StyleSpans<Collection<String>> getHighlighting() {
+		return highlighting;
 	}
 }

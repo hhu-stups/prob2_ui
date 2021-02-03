@@ -1,6 +1,7 @@
 package de.prob2.ui.beditor;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.scripting.ClassicalBFactory;
@@ -71,6 +72,7 @@ public class BEditor extends CodeArea {
 	private final FontSize fontSize;
 	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
+	private final Injector injector;
 
 	private final ExecutorService executor;
 	private final ObservableList<ErrorItem> errors;
@@ -78,10 +80,11 @@ public class BEditor extends CodeArea {
 	private final Label errorPopupLabel;
 
 	@Inject
-	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final CurrentProject currentProject, final StopActions stopActions) {
+	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final Injector injector, final CurrentProject currentProject, final StopActions stopActions) {
 		this.fontSize = fontSize;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
+		this.injector = injector;
 		this.executor = Executors.newSingleThreadExecutor();
 		stopActions.add(this.executor::shutdownNow);
 		this.errors = FXCollections.observableArrayList();
@@ -286,7 +289,13 @@ public class BEditor extends CodeArea {
 	}
 
 	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
-		this.setStyleSpans(0, addErrorHighlighting(highlighting));
+		StyleSpans<Collection<String>> highlightingWithErrors = addErrorHighlighting(highlighting);
+		injector.getInstance(BEditorView.class).setHighlighting(highlightingWithErrors);
+		this.setStyleSpans(0, highlightingWithErrors);
+	}
+
+	public void resetHighlighting() {
+		this.setStyleSpans(0,injector.getInstance(BEditorView.class).getHighlighting());
 	}
 
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {

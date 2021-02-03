@@ -552,6 +552,10 @@
 	-rtfx-underline-color: red;
 }
 
+.editor .errorTable{
+	-rtfx-background-color: yellow;
+}
+
 .editorPopupLabel {
 	-fx-background-color: -fx-base;
 	-fx-border-color: -prob-grey;
