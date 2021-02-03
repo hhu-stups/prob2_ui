@@ -1,10 +1,7 @@
 package de.prob2.ui.simulation.simulators;
 
 import com.github.krukow.clj_lang.PersistentVector;
-import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -96,7 +93,7 @@ public abstract class Simulator {
     }
 
     public Map<String, String> chooseParameters(Activation activation, State currentState) {
-        Map<String, String> parameters = activation.getParameters();
+        Map<String, String> parameters = activation.getFixedVariables();
         if(parameters == null) {
             return null;
         }
@@ -112,7 +109,7 @@ public abstract class Simulator {
     public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
         Map<String, String> values = null;
 
-        Object probability = activation.getProbability();
+        Object probability = activation.getProbabilisticVariables();
         if(probability == null) {
             return values;
         }
@@ -312,7 +309,7 @@ public abstract class Simulator {
     public Trace executeActivatedOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
         String id = activationConfig.getId();
 	    String chosenOp = activationConfig.getOpName();
-        List<String> activationConfiguration = activationConfig.getActivation();
+        List<String> activationConfiguration = activationConfig.getActivations();
 
         List<Activation> activationForOperation = configurationToActivation.get(id);
         List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
@@ -435,8 +432,8 @@ public abstract class Simulator {
         String time = activationOperationConfiguration.getTime();
         ActivationOperationConfiguration.ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
         String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
-        Map<String, String> parameters = activationOperationConfiguration.getParameters();
-        Object probability = activationOperationConfiguration.getProbability();
+        Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
+        Object probability = activationOperationConfiguration.getProbabilisticVariables();
         int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates));
 
         switch (activationKind) {

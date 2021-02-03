@@ -19,23 +19,23 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     private final ActivationKind activationKind;
 
-    private final Map<String, String> parameters;
+    private final Map<String, String> fixedVariables;
 
-    private final Object probability;
+    private final Object probabilisticVariables;
 
-    private final List<String> activation;
+    private final List<String> activations;
 
     public ActivationOperationConfiguration(String id, String opName, String time, int priority, String additionalGuards, ActivationKind activationKind,
-                                            Map<String, String> parameters, Object probability, List<String> activation) {
+                                            Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations) {
         super(id);
         this.opName = opName;
         this.time = time;
         this.priority = priority;
         this.additionalGuards = additionalGuards;
         this.activationKind = activationKind;
-        this.parameters = parameters;
-        this.probability = probability;
-        this.activation = activation;
+        this.fixedVariables = fixedVariables;
+        this.probabilisticVariables = probabilisticVariables;
+        this.activations = activations;
     }
 
     public String getOpName() {
@@ -58,16 +58,16 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         return activationKind;
     }
 
-    public Map<String, String> getParameters() {
-        return parameters;
+    public Map<String, String> getFixedVariables() {
+        return fixedVariables;
     }
 
-    public Object getProbability() {
-        return probability;
+    public Object getProbabilisticVariables() {
+        return probabilisticVariables;
     }
 
-    public List<String> getActivation() {
-        return activation;
+    public List<String> getActivations() {
+        return activations;
     }
 
     @Override
@@ -100,25 +100,25 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         sb.append("=");
         sb.append(activationKind);
 
-        if(parameters != null) {
+        if(fixedVariables != null) {
             sb.append(", ");
-            sb.append("parameters");
+            sb.append("fixedVariables");
             sb.append("=");
-            sb.append(parameters);
+            sb.append(fixedVariables);
             sb.append(", ");
         }
-        if(probability != null) {
+        if(probabilisticVariables != null) {
             sb.append(", ");
-            sb.append("probability");
+            sb.append("probabilisticVariables");
             sb.append("=");
-            sb.append(probability);
+            sb.append(probabilisticVariables);
             sb.append(", ");
         }
-        if(activation != null) {
+        if(activations != null) {
             sb.append(", ");
-            sb.append("activation");
+            sb.append("activations");
             sb.append("=");
-            sb.append(activation);
+            sb.append(activations);
         }
         sb.append(")");
         return sb.toString();

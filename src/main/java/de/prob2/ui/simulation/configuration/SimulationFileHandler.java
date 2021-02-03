@@ -37,7 +37,7 @@ public class SimulationFileHandler {
     }
 
     private static ActivationConfiguration buildActivationConfiguration(JsonElement activationElement) {
-        if(activationElement.getAsJsonObject().has("activations")) {
+        if(!activationElement.getAsJsonObject().has("op")) {
             JsonObject activationAsObject = activationElement.getAsJsonObject();
             String id = activationAsObject.get("id").getAsString();
             JsonArray activationsArray = activationAsObject.getAsJsonArray("activations");
@@ -56,14 +56,14 @@ public class SimulationFileHandler {
             String opName = activationAsObject.get("op").getAsString();
 
             int priority = activationAsObject.get("priority") == null ? 0 : activationAsObject.get("priority").getAsInt();
-            List<String> activation = buildActivation(activationAsObject.get("activation"));
+            List<String> activations = buildActivation(activationAsObject.get("activations"));
 
             String time = activationAsObject.get("time") == null ? "0" : activationAsObject.get("time").getAsString();
             String additionalGuards = activationAsObject.get("additionalGuards") == null ? null : activationAsObject.get("additionalGuards").getAsString();
             ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
-            Map<String, String> parameters = buildParameters(activationAsObject.get("parameters"));
-            Object probability = buildProbability(activationAsObject.get("probability"));
-            return new ActivationOperationConfiguration(id, opName, time, priority, additionalGuards, activationKind, parameters, probability, activation);
+            Map<String, String> fixedVariables = buildParameters(activationAsObject.get("fixedVariables"));
+            Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
+            return new ActivationOperationConfiguration(id, opName, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations);
         }
     }
 

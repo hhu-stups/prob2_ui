@@ -36,7 +36,7 @@ public class SimulationConfigurationChecker {
 	}
 
 	private void checkActivationOperationConfiguration(ActivationOperationConfiguration activation) {
-		Object probability = activation.getProbability();
+		Object probability = activation.getProbabilisticVariables();
 		String activatedOp = activation.getOpName();
 		if("$initialise_machine".equals(activatedOp) || "$setup_constants".equals(activatedOp)) {
 			return;
@@ -55,7 +55,7 @@ public class SimulationConfigurationChecker {
 				operationVariables.addAll(opInfo.getParameterNames());
 				if(operationVariables.isEmpty())
 
-				if (activation.getParameters() != null && (!activation.getParameters().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activation.getParameters().keySet()))) {
+				if (activation.getFixedVariables() != null && (!activation.getFixedVariables().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activation.getFixedVariables().keySet()))) {
 					errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
 				}
 			}
@@ -79,10 +79,10 @@ public class SimulationConfigurationChecker {
 				Map<String, Map<String, String>> probabilityAsMap = (Map<String, Map<String, String>>) probability;
 				Set<String> configurationVariables = new HashSet<>();
 				configurationVariables.addAll(probabilityAsMap.keySet());
-				if (activation.getParameters() != null) {
-					configurationVariables.addAll(activation.getParameters().keySet());
+				if (activation.getFixedVariables() != null) {
+					configurationVariables.addAll(activation.getFixedVariables().keySet());
 					// Check whether fixed variables, and those for probabilistic choice are disjunct
-					if (activation.getParameters().keySet().stream().anyMatch(probabilityAsMap::containsKey)) {
+					if (activation.getFixedVariables().keySet().stream().anyMatch(probabilityAsMap::containsKey)) {
 						errors.add(new ConfigurationCheckingError(String.format("Fixed variables and those defined for probabilistic choice for operation %s must be disjunct", activatedOp)));
 					}
 				}
