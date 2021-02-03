@@ -69,8 +69,12 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 				vbox.getChildren().add(locationLabel);
 			}
 			this.setGraphic(vbox);
-			// If the TreeTableRow is clicked the BEditorView will jump to the first error corresponding to the file
-			this.getTreeTableRow().setOnMouseClicked(e -> jumpToResource(((ErrorItem)item).getLocations().get(0)));
+			// If the TreeTableRow is double clicked the BEditorView will jump to the first error corresponding to the file
+			this.getTreeTableRow().setOnMouseClicked(e -> {
+				if (e.getClickCount() == 2) {
+					jumpToResource(((ErrorItem)item).getLocations().get(0));
+				}
+			});
 		} else {
 			throw new AssertionError("Invalid table element type: " + item.getClass());
 		}
