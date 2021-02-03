@@ -37,19 +37,22 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 			final VBox vbox = new VBox();
 			for (final ErrorItem.Location location : ((ErrorItem)item).getLocations()) {
 				final StringBuilder sb = new StringBuilder();
-				sb.append(location.getStartLine());
-				sb.append(':');
-				sb.append(location.getStartColumn());
+				ResourceBundle rb = injector.getInstance(ResourceBundle.class);
+				sb.append(rb.getString("error.errorTable.columns.locations.line") + location.getStartLine());
+				sb.append(", ");
+				sb.append(rb.getString("error.errorTable.columns.locations.column") + location.getStartColumn());
 				
 				if (location.getStartLine() != location.getEndLine() || location.getStartColumn() != location.getEndColumn()) {
-					sb.append(" to ");
-					sb.append(location.getEndLine());
-					sb.append(':');
-					sb.append(location.getEndColumn());
+					sb.append(rb.getString("error.errorTable.columns.locations.to"));
+					sb.append(rb.getString("error.errorTable.columns.locations.line") + location.getEndLine());
+					sb.append(", ");
+					sb.append(rb.getString("error.errorTable.columns.locations.column") + location.getEndColumn());
 				}
 				// Add ContextMenu for every location to be able to jump to each of them
 				ContextMenu contextMenu = new ContextMenu();
-				MenuItem menuItem = new MenuItem(String.format(injector.getInstance(ResourceBundle.class).getString("error.errorTable.location.jumpTo"), location.getStartLine() + ":" + location.getStartColumn()));
+				MenuItem menuItem = new MenuItem(String.format(rb.getString("error.errorTable.location.jumpTo"),
+						rb.getString("error.errorTable.columns.locations.line") + location.getStartLine() + ", " +
+						rb.getString("error.errorTable.columns.locations.column") + location.getStartColumn()));
 				menuItem.setOnAction(e -> jumpToResource(location));
 				contextMenu.getItems().add(menuItem);
 
@@ -69,7 +72,7 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 		((Stage) this.getScene().getWindow()).toBack();
 		injector.getInstance(StageManager.class).getMainStage().toFront();
 		injector.getInstance(MainView.class).switchTabPane("beditorTab");
-		injector.getInstance(BEditorView.class).setPath(new File(location.getFilename()).toPath());
+		injector.getInstance(BEditorView.class).selectMachine(new File(location.getFilename()).toPath());
 		BEditor bEditor = injector.getInstance(BEditor.class);
 		bEditor.requestFocus();
 		bEditor.moveTo(bEditor.getAbsolutePosition(location.getStartLine()-1, location.getStartColumn()));
