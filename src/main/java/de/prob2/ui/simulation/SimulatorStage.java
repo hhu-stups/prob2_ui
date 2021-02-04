@@ -343,7 +343,6 @@ public class SimulatorStage extends Stage {
 			configurationPath.set(path);
 			lbTime.setText("");
 			this.time = 0;
-			File configFile = path.toFile();;
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}

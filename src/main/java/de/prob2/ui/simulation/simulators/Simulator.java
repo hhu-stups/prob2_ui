@@ -21,7 +21,6 @@ import javafx.beans.value.ChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -59,7 +58,9 @@ public abstract class Simulator {
 
     protected ChangeListener<? super Trace> traceListener = null;
 
-    protected int maxTransitions;
+	protected int maxTransitionsBeforeInitialisation;
+
+	protected int maxTransitions;
 
 	public Simulator(final CurrentTrace currentTrace) {
         super();
@@ -176,6 +177,10 @@ public abstract class Simulator {
 
     public void resetSimulator() {
         this.configurationToActivation = new HashMap<>();
+		this.activationConfigurationMap = new HashMap<>();
+		this.operationToActivations = new HashMap<>();
+
+        this.delay = 0;
         this.time.set(0);
         this.stepCounter = 0;
         if(config != null) {
@@ -185,9 +190,8 @@ public abstract class Simulator {
                     .map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
                     .sorted(Comparator.comparingInt(ActivationOperationConfiguration::getPriority))
                     .collect(Collectors.toList());
-            activationConfigurationMap = new HashMap<>();
+
             config.getActivationConfigurations().forEach(activationConfiguration -> activationConfigurationMap.put(activationConfiguration.getId(), activationConfiguration));
-            operationToActivations = new HashMap<>();
             config.getActivationConfigurations().stream()
                     .filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
                     .map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
@@ -198,14 +202,9 @@ public abstract class Simulator {
                         }
                         operationToActivations.get(opName).add(activationConfiguration.getId());
                     });
-            initializeRemainingTime();
+			activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
             currentTrace.removeListener(traceListener);
         }
-    }
-
-    private void initializeRemainingTime() {
-        activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
-        updateDelay();
     }
 
     public void updateRemainingTime() {
@@ -235,47 +234,35 @@ public abstract class Simulator {
 
     protected Trace simulationStep(Trace trace) {
         Trace newTrace = trace;
-        State currentState = newTrace.getCurrentState();
-        if(currentState.isInitialised()) {
-            if(endingConditionReached(newTrace)) {
-                return newTrace;
-            }
-            updateRemainingTime();
-            newTrace = executeActivatedOperations(newTrace);
-            updateDelay();
-        }
+		if(endingConditionReached(newTrace)) {
+			return newTrace;
+		}
+		updateRemainingTime();
+		newTrace = executeActivatedOperations(newTrace);
+		updateDelay();
         return newTrace;
     }
 
-    public Trace setupBeforeSimulation(Trace trace) {
+    public void setupBeforeSimulation(Trace trace) {
         GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
         currentTrace.getStateSpace().execute(cmd);
-        this.maxTransitions = Integer.parseInt(cmd.getValue());
+        this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
 
-        Trace newTrace = trace;
-        State currentState = newTrace.getCurrentState();
+		cmd = new GetPreferenceCommand("MAX_OPERATIONS");
+		currentTrace.getStateSpace().execute(cmd);
+		this.maxTransitions = Integer.parseInt(cmd.getValue());
+
+        State currentState = trace.getCurrentState();
         if(!currentState.isInitialised()) {
-            List<String> nextTransitions = trace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
-            if(nextTransitions.contains("$setup_constants")) {
-                ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$setup_constants");
-                activateOperation(newTrace.getCurrentState(), setupConfiguration, new ArrayList<>(), "1=1");
-                newTrace = executeActivatedOperation(setupConfiguration, newTrace);
-                updateDelay();
-            }
-            nextTransitions = newTrace.getNextTransitions().stream().map(Transition::getName).collect(Collectors.toList());
-            if(nextTransitions.contains("$initialise_machine")) {
-                ActivationOperationConfiguration initConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$initialise_machine");
-                activateOperation(newTrace.getCurrentState(), initConfiguration, new ArrayList<>(), "1=1");
-                newTrace = executeActivatedOperation(initConfiguration, newTrace);
-                updateDelay();
-            }
+        	if(configurationToActivation.containsKey("$setup_constants")) {
+				ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$setup_constants");
+				activateOperation(trace.getCurrentState(), setupConfiguration, new ArrayList<>(), "1=1");
+			}
+			if(configurationToActivation.containsKey("$initialise_machine")) {
+				ActivationOperationConfiguration initConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$initialise_machine");
+				activateOperation(trace.getCurrentState(), initConfiguration, new ArrayList<>(), "1=1");
+			}
         }
-        cmd = new GetPreferenceCommand("MAX_OPERATIONS");
-        currentTrace.getStateSpace().execute(cmd);
-        this.maxTransitions = Integer.parseInt(cmd.getValue());
-
-        stepCounter = newTrace.getTransitionList().size();
-        return newTrace;
     }
 
     protected Trace executeActivatedOperations(Trace trace) {
@@ -331,7 +318,7 @@ public abstract class Simulator {
 
             if (!transitions.isEmpty()) {
                 Transition transition = transitions.get(random.nextInt(transitions.size()));
-                newTrace = appendTrace(newTrace, transition);
+                newTrace = newTrace.add(transition);
                 List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
                 String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
                 activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
@@ -443,14 +430,6 @@ public abstract class Simulator {
                 activateSingleOperations(id, opName, activationKind, new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
                 break;
         }
-    }
-
-    public Trace appendTrace(Trace trace, Transition transition) {
-        TraceElement current = trace.getCurrent();
-        PersistentVector<Transition> transitionList = (PersistentVector<Transition>) trace.getTransitionList();
-        current = new TraceElement(transition, current);
-        transitionList = transitionList.assocN(transitionList.size(), transition);
-        return new Trace(trace.getStateSpace(), current, transitionList, trace.getUUID());
     }
 
     public boolean endingConditionReached(Trace trace) {

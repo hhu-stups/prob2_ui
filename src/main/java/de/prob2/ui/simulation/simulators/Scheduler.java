@@ -33,8 +33,7 @@ public class Scheduler {
         this.listener = (observable, from, to) -> {
             if(to != null) {
                 if (!to.getCurrentState().isInitialised()) {
-                    Trace newTrace = realTimeSimulator.setupBeforeSimulation(to);
-                    currentTrace.set(newTrace);
+                	realTimeSimulator.setupBeforeSimulation(to);
                 }
             }
         };
@@ -44,7 +43,7 @@ public class Scheduler {
     public void run() {
         runningProperty.set(true);
         Trace trace = currentTrace.get();
-        currentTrace.set(realTimeSimulator.setupBeforeSimulation(trace));
+		realTimeSimulator.setupBeforeSimulation(trace);
         currentTrace.addListener(listener);
         thread = new Thread(() -> {
             while(realTimeSimulator.isRunning()) {

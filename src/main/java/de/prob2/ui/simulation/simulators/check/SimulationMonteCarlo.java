@@ -69,7 +69,8 @@ public class SimulationMonteCarlo extends Simulator {
 			startTrace.getStateSpace().startTransaction();
 
 			for (int i = 0; i < numberExecutions; i++) {
-				Trace newTrace = setupBeforeSimulation(startTrace);
+				Trace newTrace = startTrace;
+				setupBeforeSimulation(newTrace);
 				while (!endingConditionReached(newTrace)) {
 					newTrace = simulationStep(newTrace);
 				}
