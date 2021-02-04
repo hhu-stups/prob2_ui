@@ -55,7 +55,14 @@ public class SimulationFileHandler {
             String id = activationAsObject.get("id").getAsString();
             String opName = activationAsObject.get("op").getAsString();
 
-            int priority = activationAsObject.get("priority") == null ? 0 : activationAsObject.get("priority").getAsInt();
+            int priority;
+            if("$initialse_machine".equals(opName)) {
+				priority = 1;
+			} else if("$setup_constants".equals(opName) || activationAsObject.get("priority") == null) {
+				priority = 0;
+			} else {
+            	priority = activationAsObject.get("priority").getAsInt();
+			}
             List<String> activations = buildActivation(activationAsObject.get("activations"));
 
             String time = activationAsObject.get("time") == null ? "0" : activationAsObject.get("time").getAsString();
