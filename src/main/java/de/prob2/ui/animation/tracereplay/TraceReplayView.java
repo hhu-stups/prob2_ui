@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.scripting.ModelTranslationError;
@@ -187,7 +188,7 @@ public class TraceReplayView extends ScrollPane {
 				Path relative = currentProject.getLocation().relativize(element);
 				currentProject.getCurrentMachine().addTraceFile(relative);
 			});
-		} catch (ModelTranslationError modelTranslationError) {
+		} catch (ModelTranslationError | PrologTermNotDefinedException modelTranslationError) {
 			modelTranslationError.printStackTrace();
 		}
 		}

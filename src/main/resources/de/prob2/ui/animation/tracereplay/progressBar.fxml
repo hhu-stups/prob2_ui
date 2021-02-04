@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<fx:root type="AnchorPane" fx:id="ground" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+		 prefHeight="236.0" prefWidth="379.0" xmlns="http://javafx.com/javafx/11.0.1"
+		 xmlns:fx="http://javafx.com/fxml/1">
+	<ProgressBar fx:id="bar" layoutX="29.0" layoutY="55.0" prefHeight="68.0" prefWidth="316.0" progress="0.0"/>
+	<Label fx:id="label" layoutX="38.0" layoutY="140.0" prefHeight="16.0" prefWidth="300.0" text="Label"/>
+</fx:root>

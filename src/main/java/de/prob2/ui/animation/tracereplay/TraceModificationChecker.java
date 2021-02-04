@@ -3,6 +3,7 @@ package de.prob2.ui.animation.tracereplay;
 import com.google.common.io.Files;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.check.ReplayOptions;
 import de.prob.check.tracereplay.check.TraceChecker;
 import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
@@ -12,8 +13,12 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import javafx.application.Platform;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +26,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TraceModificationChecker {
 
-	final TraceChecker traceChecker;
+	TraceChecker traceChecker;
 	private final TraceJsonFile traceJsonFile;
 	private final PersistentTrace persistentTrace;
 	private final Injector injector;
@@ -34,12 +42,13 @@ public class TraceModificationChecker {
 	private final Path path;
 	private final ResourceBundle resourceBundle;
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceModificationChecker.class);
+	private final CompletableFuture<TraceChecker> futureTraceChecker = new CompletableFuture<>();
+	private final Stage progressStage;
 
 
 
 	public TraceModificationChecker(TraceManager traceManager, Path traceJsonFilePath, StateSpace stateSpace,
-									Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException, ModelTranslationError {
-		TraceChecker traceChecker1;
+									Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException, ModelTranslationError, PrologTermNotDefinedException {
 		this.path = traceJsonFilePath;
 		this.traceManager = traceManager;
 		traceJsonFile = traceManager.load(traceJsonFilePath);
@@ -53,52 +62,82 @@ public class TraceModificationChecker {
 		Path oldPath = currentProject.getLocation().resolve(Paths.get( ((TraceMetaData) traceJsonFile.getMetaData()).getPath()));
 		Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
 
-		boolean flag = false;
 
-		if(java.nio.file.Files.exists(path) && newPath!=oldPath) {
+		ReplayOptionsOverview traceOptionChoice = new ReplayOptionsOverview(traceJsonFile.getVariableNames(), traceJsonFile.getMachineOperationInfos(), stageManager);
+		Optional<ReplayOptions> optionResult = traceOptionChoice.showAndWait();
+		ReplayOptions replayOptions = optionResult.get();
+
+		progressStage = new Stage();
+
+		ProgressMemory progressMemory = ProgressMemory.setupForTraceChecker(resourceBundle, stageManager, progressStage);
+
+		stageManager.register(progressStage, "progressStage");
+
+		progressStage.initOwner(stageManager.getMainStage().getOwner());
+		progressStage.initModality(Modality.WINDOW_MODAL);
+
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+		Runnable traceCheckerProcess = () -> {
+
 			try {
-				traceChecker1 = new TraceChecker(persistentTrace.getTransitionList(),
-						new HashMap<>(traceJsonFile.getMachineOperationInfos()),
-						new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
-						new HashSet<>(traceJsonFile.getVariableNames()),
-						new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
-						new HashSet<>(stateSpace.getLoadedMachine().getSetNames()),
-						new HashSet<>(stateSpace.getLoadedMachine().getConstantNames()),
-						oldPath.toString(),
-						newPath.toString(),
-						injector,
-						new MappingFactory(injector, stageManager));
+				if(java.nio.file.Files.exists(oldPath)) {
+					futureTraceChecker.complete(createComplexChecker(stateSpace, newPath, oldPath, replayOptions, progressMemory));
+				}
+				else {
+					futureTraceChecker.complete(createSimplerChecker(stateSpace, newPath, replayOptions, progressMemory));
+				}
+				Platform.runLater(progressStage::close);
+			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException e) {
+				//LOGGER.;
+				e.printStackTrace();
+			}    };
 
-			} catch (PrologTermNotDefinedException e) {
-				LOGGER.error("A problem with the prolog core appeared:", e);
-				traceChecker1 = createSimplerChecker(stateSpace, path);
-			}
-		}
-		else {
-			traceChecker1 = createSimplerChecker(stateSpace, newPath);
+		executorService.submit(traceCheckerProcess);
+
+		progressStage.showAndWait();
 
 
-		}
 
-		traceChecker = traceChecker1;
 	}
 
-	private TraceChecker createSimplerChecker(StateSpace stateSpace, Path newPath) throws IOException, ModelTranslationError {
+	private TraceChecker createSimplerChecker(StateSpace stateSpace, Path newPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError {
 		return new TraceChecker(persistentTrace.getTransitionList(),
 				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
 				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
 				new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
 				new HashSet<>(traceJsonFile.getVariableNames()),
-				new HashSet<>(stateSpace.getLoadedMachine().getSetNames()),
-				new HashSet<>(stateSpace.getLoadedMachine().getConstantNames()),
 				newPath.toString(),
 				injector,
-				new MappingFactory(injector, stageManager));
+				new MappingFactory(injector, stageManager),
+				replayOptions,
+				progressMemory);
+	}
+
+	private TraceChecker createComplexChecker(StateSpace stateSpace, Path newPath, Path oldPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, PrologTermNotDefinedException {
+		return new TraceChecker(persistentTrace.getTransitionList(),
+				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
+				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
+				new HashSet<>(traceJsonFile.getVariableNames()),
+				new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
+				oldPath.toString(),
+				newPath.toString(),
+				injector,
+				new MappingFactory(injector, stageManager),
+				replayOptions,
+				progressMemory);
 	}
 
 
 
 	public List<Path> checkTrace(){
+
+		traceChecker = futureTraceChecker.join();
+
+
+		if(traceChecker == null){
+			throw new NullPointerException();
+		}
 
 		final List<Path> result = new ArrayList<>();
 
