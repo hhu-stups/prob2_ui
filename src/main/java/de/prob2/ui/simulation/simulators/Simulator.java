@@ -70,6 +70,13 @@ public abstract class Simulator {
         this.traceListener = (observable, from, to) -> {
             if(config != null && to != null && to.getStateSpace() != null) {
                 checkConfiguration(to.getStateSpace());
+				GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
+				currentTrace.getStateSpace().execute(cmd);
+				this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
+
+				cmd = new GetPreferenceCommand("MAX_OPERATIONS");
+				currentTrace.getStateSpace().execute(cmd);
+				this.maxTransitions = Integer.parseInt(cmd.getValue());
                 currentTrace.removeListener(traceListener);
             }
         };
@@ -161,6 +168,13 @@ public abstract class Simulator {
         this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
         if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
             checkConfiguration(currentTrace.getStateSpace());
+			GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
+			currentTrace.getStateSpace().execute(cmd);
+			this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
+
+			cmd = new GetPreferenceCommand("MAX_OPERATIONS");
+			currentTrace.getStateSpace().execute(cmd);
+			this.maxTransitions = Integer.parseInt(cmd.getValue());
         } else {
             currentTrace.addListener(traceListener);
         }
@@ -244,14 +258,6 @@ public abstract class Simulator {
     }
 
     public void setupBeforeSimulation(Trace trace) {
-        GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
-        currentTrace.getStateSpace().execute(cmd);
-        this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
-
-		cmd = new GetPreferenceCommand("MAX_OPERATIONS");
-		currentTrace.getStateSpace().execute(cmd);
-		this.maxTransitions = Integer.parseInt(cmd.getValue());
-
         State currentState = trace.getCurrentState();
         if(!currentState.isInitialised()) {
         	if(configurationToActivation.containsKey("$setup_constants")) {
@@ -314,8 +320,7 @@ public abstract class Simulator {
 
             State currentState = newTrace.getCurrentState();
 			String predicate = buildPredicateForTransition(currentState, activation);
-            List<Transition> transitions = currentState.findTransitions(chosenOp, Collections.singletonList(predicate), maxTransitions);
-
+			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp, predicate, maxTransitions);
             if (!transitions.isEmpty()) {
                 Transition transition = transitions.get(random.nextInt(transitions.size()));
                 newTrace = newTrace.add(transition);
