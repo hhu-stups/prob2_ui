@@ -21,6 +21,7 @@ import javafx.beans.value.ChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -139,14 +140,6 @@ public abstract class Simulator {
         }
 
         return values;
-    }
-
-    private boolean shouldExecuteNextOperation(State state, List<Transition> transitions, String additionalGuards) {
-        String additionalGuardsResult = additionalGuards == null ? "TRUE" : cache.readValueWithCaching(state, additionalGuards);
-        if (transitions.isEmpty() || "FALSE".equals(additionalGuardsResult)) {
-            return false;
-        }
-        return true;
     }
 
     private Map<String, String> mergeValues(Map<String, String> values1, Map<String, String> values2) {
@@ -306,6 +299,16 @@ public abstract class Simulator {
         return cache.readValueWithCaching(state, newExpression);
     }
 
+    private String buildPredicateForTransition(State state, Activation activation) {
+		String additionalGuardsResult = activation.getAdditionalGuards() == null ? "TRUE" : cache.readValueWithCaching(state, activation.getAdditionalGuards());
+		if("FALSE".equals(additionalGuardsResult)) {
+			return "1=2";
+		}
+
+		Map<String, String> values = mergeValues(chooseProbabilistic(activation, state), chooseParameters(activation, state));
+		return chooseVariableValues(state, values);
+	}
+
     public Trace executeActivatedOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
         String id = activationConfig.getId();
 	    String chosenOp = activationConfig.getOpName();
@@ -323,17 +326,11 @@ public abstract class Simulator {
             activationForOperation.remove(activation);
 
             State currentState = newTrace.getCurrentState();
-            Map<String, String> values = mergeValues(chooseProbabilistic(activation, currentState), chooseParameters(activation, currentState));
-            String predicate = chooseVariableValues(newTrace.getCurrentState(), values);
-            List<Transition> transitions = currentState.findTransitions(chosenOp, new ArrayList<>(Collections.singleton(predicate)), maxTransitions);
+			String predicate = buildPredicateForTransition(currentState, activation);
+            List<Transition> transitions = currentState.findTransitions(chosenOp, Collections.singletonList(predicate), maxTransitions);
 
-            if (shouldExecuteNextOperation(currentState, transitions, activation.getAdditionalGuards())) {
-                Transition transition;
-                if(transitions.size() > 1) {
-                    transition = transitions.get(random.nextInt(transitions.size()));
-                } else {
-                    transition = transitions.get(0);
-                }
+            if (!transitions.isEmpty()) {
+                Transition transition = transitions.get(random.nextInt(transitions.size()));
                 newTrace = appendTrace(newTrace, transition);
                 List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
                 String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();

@@ -121,7 +121,6 @@ public class SimulationFileHandler {
         return activations;
     }
 
-
     private static ActivationOperationConfiguration.ActivationKind buildActivationKind(JsonElement jsonElement) {
         ActivationOperationConfiguration.ActivationKind activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
         if(jsonElement == null || "multi".equals(jsonElement.getAsString())) {
