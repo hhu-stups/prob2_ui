@@ -728,7 +728,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 					List<String> partnerIntermediate2 = TraceAnalyser.calculateIntermediate(singleton(candidate), selectedTrace).get(candidate);
 
 					Label rightMixedNames1 = new Label(partnerIntermediate2.get(0));
-					Label rightMixedNames2 = new Label(partnerIntermediate2.get(1));
+					Label rightMixedNames2 = new Label(partnerIntermediate2.get(1)); //toDO WRONG111111
 					VBox mixedNames = new VBox();
 					mixedNames.getChildren().add(rightMixedNames1);
 					mixedNames.getChildren().add(rightMixedNames2);
