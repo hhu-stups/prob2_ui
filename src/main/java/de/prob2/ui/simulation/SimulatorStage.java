@@ -148,6 +148,14 @@ public class SimulatorStage extends Stage {
 				});
 				menuItems.add(saveTraces);
 
+				MenuItem saveTimedTraces = new MenuItem(bundle.getString("simulation.contextMenu.saveGeneratedTimedTraces"));
+				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
+						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null || this.itemProperty().get().getType() == SimulationType.TRACE_REPLAY,this.itemProperty())));
+				saveTimedTraces.setOnAction(e -> {
+					// TODO: Generate Simulation Configuration
+				});
+				menuItems.add(saveTimedTraces);
+
 				contextMenu.getItems().addAll(menuItems);
 				this.setContextMenu(contextMenu);
 			}

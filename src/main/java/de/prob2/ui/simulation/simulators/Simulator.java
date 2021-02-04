@@ -62,6 +62,8 @@ public abstract class Simulator {
 
 	protected int maxTransitions;
 
+	protected List<Integer> timestamps;
+
 	public Simulator(final CurrentTrace currentTrace) {
         super();
         this.currentTrace = currentTrace;
@@ -193,6 +195,7 @@ public abstract class Simulator {
         this.configurationToActivation = new HashMap<>();
 		this.activationConfigurationMap = new HashMap<>();
 		this.operationToActivations = new HashMap<>();
+		this.timestamps = new ArrayList<>();
 
         this.delay = 0;
         this.time.set(0);
@@ -248,9 +251,6 @@ public abstract class Simulator {
 
     protected Trace simulationStep(Trace trace) {
         Trace newTrace = trace;
-		if(endingConditionReached(newTrace)) {
-			return newTrace;
-		}
 		updateRemainingTime();
 		newTrace = executeActivatedOperations(newTrace);
 		updateDelay();
@@ -327,6 +327,7 @@ public abstract class Simulator {
                 List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
                 String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
                 activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
+            	timestamps.add(time.get());
             }
         }
         stepCounter = newTrace.getTransitionList().size();
@@ -459,4 +460,7 @@ public abstract class Simulator {
         return delay;
     }
 
+	public List<Integer> getTimestamps() {
+		return timestamps;
+	}
 }

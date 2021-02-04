@@ -78,7 +78,9 @@ public class SimulationItemHandler {
         Thread thread = new Thread(() -> {
             monteCarlo.run();
             List<Trace> resultingTraces = monteCarlo.getResultingTraces();
+            List<List<Integer>> timestamps = monteCarlo.getResultingTimestamps();
             item.setTraces(resultingTraces);
+            item.setTimestamps(timestamps);
             Platform.runLater(() -> {
                 if(resultingTraces.size() == executions) {
                     item.setChecked(Checked.SUCCESS);
@@ -109,6 +111,7 @@ public class SimulationItemHandler {
 			hypothesisChecker.run();
 			SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.getResult();
 			item.setTraces(hypothesisChecker.getResultingTraces());
+			item.setTimestamps(hypothesisChecker.getResultingTimestamps());
 			Platform.runLater(() -> {
 				switch (result) {
 					case SUCCESS:

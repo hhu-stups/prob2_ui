@@ -28,6 +28,8 @@ public class SimulationMonteCarlo extends Simulator {
 		}
 	}
 
+	protected List<List<Integer>> resultingTimestamps;
+
     protected List<Trace> resultingTraces;
 
     protected Trace trace;
@@ -39,6 +41,7 @@ public class SimulationMonteCarlo extends Simulator {
     public SimulationMonteCarlo(final CurrentTrace currentTrace, Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
         super(currentTrace);
         this.resultingTraces = new ArrayList<>();
+        this.resultingTimestamps = new ArrayList<>();
         this.trace = trace;
         this.numberExecutions = numberExecutions;
         this.additionalInformation = additionalInformation;
@@ -75,6 +78,7 @@ public class SimulationMonteCarlo extends Simulator {
 					newTrace = simulationStep(newTrace);
 				}
 				resultingTraces.add(newTrace);
+				resultingTimestamps.add(getTimestamps());
 				checkTrace(newTrace, time.get());
 				resetSimulator();
 			}
@@ -96,4 +100,7 @@ public class SimulationMonteCarlo extends Simulator {
 		return resultingTraces;
 	}
 
+	public List<List<Integer>> getResultingTimestamps() {
+		return resultingTimestamps;
+	}
 }

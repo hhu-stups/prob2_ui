@@ -9,6 +9,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +27,12 @@ public class SimulationItem {
 
     private transient ListProperty<Trace> traces;
 
+    private transient ListProperty<List<Integer>> timestamps;
+
     public SimulationItem(SimulationCheckingConfiguration simulationCheckingConfiguration) {
         this.simulationCheckingConfiguration = simulationCheckingConfiguration;
         this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
+        this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
         updateItem();
     }
 
@@ -94,4 +98,16 @@ public class SimulationItem {
     public List<Trace> getTraces() {
         return traces.get();
     }
+
+	public void setTimestamps(List<List<Integer>> timestamps) {
+		this.timestamps.setAll(timestamps);
+	}
+
+	public ListProperty<List<Integer>> timestampsProperty() {
+		return timestamps;
+	}
+
+	public List<List<Integer>> getTimestamps() {
+		return timestamps.get();
+	}
 }

@@ -9,7 +9,7 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         SINGLE, SINGLE_MIN, SINGLE_MAX, MULTI
     }
 
-    private final String opName;
+    private final String op;
 
     private final String time;
 
@@ -25,10 +25,10 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     private final List<String> activations;
 
-    public ActivationOperationConfiguration(String id, String opName, String time, int priority, String additionalGuards, ActivationKind activationKind,
+    public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
                                             Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations) {
         super(id);
-        this.opName = opName;
+        this.op = op;
         this.time = time;
         this.priority = priority;
         this.additionalGuards = additionalGuards;
@@ -39,7 +39,7 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
     }
 
     public String getOpName() {
-        return opName;
+        return op;
     }
 
     public String getTime() {
@@ -78,9 +78,9 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         sb.append("=");
         sb.append(id);
         sb.append(", ");
-        sb.append("opName");
+        sb.append("op");
         sb.append("=");
-        sb.append(opName);
+        sb.append(op);
         sb.append(", ");
         sb.append("time");
         sb.append("=");
