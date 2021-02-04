@@ -129,9 +129,12 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		VBox accordion4 = createTypeIVMapping(
 				traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase4(),
 				traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase3II());
+
 		typeIV.setContent(accordion4);
 		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + accordion4.getChildren().size() + ")");
-		if(accordion4.getChildren().size()==0){
+
+		if(traceModificationChecker.traceChecker.getTraceModifier().typeIVDirty()){
+			typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + 0 + ")");
 			typeIV.setCollapsible(false);
 		}
 
