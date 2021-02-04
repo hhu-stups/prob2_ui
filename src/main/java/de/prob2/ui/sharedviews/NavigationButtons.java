@@ -44,7 +44,6 @@ public final class NavigationButtons extends HBox {
 		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not().or(realTimeSimulator.runningProperty()));
 		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().and(forwardExecutingNextOperationBinding.not()).or(realTimeSimulator.runningProperty()));
 		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().or(realTimeSimulator.runningProperty()));
-		reloadButton.disableProperty().bind(realTimeSimulator.runningProperty());
 
 		forwardExecutingNextOperationBinding.addListener((observable, from, to) -> {
 			Node graphic = forwardButton.getGraphic();
