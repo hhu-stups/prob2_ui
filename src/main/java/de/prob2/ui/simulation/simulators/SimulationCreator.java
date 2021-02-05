@@ -56,8 +56,6 @@ public class SimulationCreator {
             activationConfigurations.add(activationConfig);
             currentTimestamp = timestamps.get(i);
         }
-        System.out.println(activationConfigurations);
-        System.out.println("----------------");
         return new SimulationConfiguration(activationConfigurations);
     }
 
