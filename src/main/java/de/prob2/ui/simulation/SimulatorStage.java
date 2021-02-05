@@ -20,6 +20,8 @@ import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+import de.prob2.ui.simulation.simulators.SimulationCreator;
+import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
@@ -152,6 +154,8 @@ public class SimulatorStage extends Stage {
 				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
 						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null || this.itemProperty().get().getType() == SimulationType.TRACE_REPLAY,this.itemProperty())));
 				saveTimedTraces.setOnAction(e -> {
+					SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
+					simulationSaver.saveConfigurations(item);
 					// TODO: Generate Simulation Configuration
 				});
 				menuItems.add(saveTimedTraces);

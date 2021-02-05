@@ -20,7 +20,7 @@ import java.util.Map;
 @Singleton
 public class SimulationCreator {
 
-    public SimulationConfiguration createConfiguration(Trace trace, List<Integer> timestamps) {
+    public SimulationConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave) {
         PersistentTrace persistentTrace = new PersistentTrace(trace);
         List<PersistentTransition> transitions = persistentTrace.getTransitionList();
 
@@ -52,7 +52,7 @@ public class SimulationCreator {
             fixedVariables = newFixedVariables.isEmpty() ? null : newFixedVariables;
 
             List<String> activations = "$setup_constants".equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
-            ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, "1=1", ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations);
+            ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations);
             activationConfigurations.add(activationConfig);
             currentTimestamp = timestamps.get(i);
         }

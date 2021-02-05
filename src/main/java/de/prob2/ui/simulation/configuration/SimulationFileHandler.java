@@ -65,8 +65,8 @@ public class SimulationFileHandler {
 			}
             List<String> activations = buildActivation(activationAsObject.get("activations"));
 
-            String time = activationAsObject.get("time") == null ? "0" : activationAsObject.get("time").getAsString();
-            String additionalGuards = activationAsObject.get("additionalGuards") == null ? null : activationAsObject.get("additionalGuards").getAsString();
+            String time = activationAsObject.get("time") == null || activationAsObject.get("time").isJsonNull() ? "0" : activationAsObject.get("time").getAsString();
+            String additionalGuards = activationAsObject.get("additionalGuards") == null || activationAsObject.get("additionalGuards").isJsonNull() ? null : activationAsObject.get("additionalGuards").getAsString();
             ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
             Map<String, String> fixedVariables = buildParameters(activationAsObject.get("fixedVariables"));
             Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
@@ -76,7 +76,7 @@ public class SimulationFileHandler {
 
     private static Map<String, String> buildParameters(JsonElement jsonElement) {
         Map<String, String> parameters;
-        if(jsonElement == null) {
+        if(jsonElement == null || jsonElement.isJsonNull()) {
             parameters = null;
         } else {
             parameters = new HashMap<>();
@@ -91,7 +91,7 @@ public class SimulationFileHandler {
 
     private static Object buildProbability(JsonElement jsonElement) {
         Object probability;
-        if(jsonElement == null) {
+        if(jsonElement == null ||jsonElement.isJsonNull()) {
             probability = null;
         } else if(jsonElement.isJsonPrimitive()) {
             probability = jsonElement.getAsString();
@@ -115,7 +115,7 @@ public class SimulationFileHandler {
 
     private static List<String> buildActivation(JsonElement jsonElement) {
         List<String> activations = null;
-        if(jsonElement != null) {
+        if(jsonElement != null && !jsonElement.isJsonNull()) {
             activations = new ArrayList<>();
             if(jsonElement.isJsonArray()) {
                 for(int j = 0; j < jsonElement.getAsJsonArray().size(); j++) {
@@ -130,7 +130,7 @@ public class SimulationFileHandler {
 
     private static ActivationOperationConfiguration.ActivationKind buildActivationKind(JsonElement jsonElement) {
         ActivationOperationConfiguration.ActivationKind activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
-        if(jsonElement == null || "multi".equals(jsonElement.getAsString())) {
+        if(jsonElement == null || jsonElement.isJsonNull() || "multi".equals(jsonElement.getAsString())) {
             activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
         } else if("single:max".equals(jsonElement.getAsString())) {
             activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE_MAX;
