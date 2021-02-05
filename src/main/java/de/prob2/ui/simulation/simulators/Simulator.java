@@ -8,6 +8,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -152,20 +153,6 @@ public abstract class Simulator {
         return values;
     }
 
-    private Map<String, String> mergeValues(Map<String, String> values1, Map<String, String> values2) {
-        if(values1 == null) {
-            return values2;
-        }
-
-        if(values2 == null) {
-            return values1;
-        }
-
-        Map<String, String> newValues = new HashMap<>(values1);
-        newValues.putAll(values2);
-        return newValues;
-    }
-
     public void initSimulator(File configFile) throws IOException {
         this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
         if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
@@ -177,6 +164,23 @@ public abstract class Simulator {
 			cmd = new GetPreferenceCommand("MAX_OPERATIONS");
 			currentTrace.getStateSpace().execute(cmd);
 			this.maxTransitions = Integer.parseInt(cmd.getValue());
+        } else {
+            currentTrace.addListener(traceListener);
+        }
+        resetSimulator();
+    }
+
+    public void initSimulator(SimulationConfiguration config) throws IOException {
+        this.config = config;
+        if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
+            checkConfiguration(currentTrace.getStateSpace());
+            GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
+            currentTrace.getStateSpace().execute(cmd);
+            this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
+
+            cmd = new GetPreferenceCommand("MAX_OPERATIONS");
+            currentTrace.getStateSpace().execute(cmd);
+            this.maxTransitions = Integer.parseInt(cmd.getValue());
         } else {
             currentTrace.addListener(traceListener);
         }
@@ -298,7 +302,7 @@ public abstract class Simulator {
 			return "1=2";
 		}
 
-		Map<String, String> values = mergeValues(chooseProbabilistic(activation, state), chooseParameters(activation, state));
+		Map<String, String> values = SimulationHelperFunctions.mergeValues(chooseProbabilistic(activation, state), chooseParameters(activation, state));
 		return chooseVariableValues(state, values);
 	}
 

@@ -4,14 +4,14 @@ import java.util.List;
 
 public class SimulationConfiguration {
 
-    private final List<ActivationConfiguration> activationConfigurations;
+    private final List<ActivationConfiguration> activations;
 
-    public SimulationConfiguration(List<ActivationConfiguration> activationConfigurations) {
-        this.activationConfigurations = activationConfigurations;
+    public SimulationConfiguration(List<ActivationConfiguration> activations) {
+        this.activations = activations;
     }
 
     public List<ActivationConfiguration> getActivationConfigurations() {
-        return activationConfigurations;
+        return activations;
     }
 
 }

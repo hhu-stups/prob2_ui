@@ -9,7 +9,10 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
+import de.prob2.ui.simulation.simulators.SimulationCreator;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -25,6 +28,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -36,15 +40,22 @@ public class SimulationTracesView extends Stage {
 
 		private Trace trace;
 
+		private List<Integer> timestamps;
+
 		private int index;
 
-		public SimulationTraceItem(Trace trace, int index) {
+		public SimulationTraceItem(Trace trace, List<Integer> timestamps, int index) {
 			this.trace = trace;
+			this.timestamps = timestamps;
 			this.index = index;
 		}
 
 		public Trace getTrace() {
 			return trace;
+		}
+
+		public List<Integer> getTimestamps() {
+			return timestamps;
 		}
 
 		public int getIndex() {
@@ -85,10 +96,10 @@ public class SimulationTracesView extends Stage {
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
-	public void setItems(List<Trace> traces) {
+	public void setItems(List<Trace> traces, List<List<Integer>> timestamps) {
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
 		for(int i = 1; i <= traces.size(); i++) {
-			items.add(new SimulationTraceItem(traces.get(i - 1), i));
+			items.add(new SimulationTraceItem(traces.get(i - 1), timestamps.get(i-1), i));
 		}
 		traceTableView.setItems(items);
 	}
@@ -114,17 +125,22 @@ public class SimulationTracesView extends Stage {
 			final MenuItem playTraceItem = new MenuItem(bundle.getString("simulation.contextMenu.play"));
 
 			playTraceItem.setOnAction(e -> {
-				/*Trace trace = new Trace(currentTrace.getStateSpace());
-				PersistentTrace persistentTrace = new PersistentTrace(row.getItem().getTrace(), row.getItem().getTrace().getCurrent().getIndex() + 1);
-				TraceSimulator traceSimulator = new TraceSimulator(currentTrace, injector.getInstance(Scheduler.class), trace, persistentTrace);
-				if(traceSimulator.isRunning()) {
-					traceSimulator.stop();
+				Trace trace = new Trace(currentTrace.getStateSpace());
+				currentTrace.set(trace);
+				SimulationTraceItem traceItem = row.getItem();
+				SimulationConfiguration config = injector.getInstance(SimulationCreator.class).createConfiguration(traceItem.getTrace(), traceItem.getTimestamps());
+				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
+
+				try {
+					realTimeSimulator.initSimulator(config);
+				} catch (IOException exception) {
+					exception.printStackTrace();
+					// TODO: Handle error
 				}
-				simulatorStage.initSimulator(traceSimulator);
+				realTimeSimulator.setupBeforeSimulation(trace);
 				trace.setExploreStateByDefault(false);
-				simulatorStage.simulate(traceSimulator);
-				trace.setExploreStateByDefault(true);*/
-				// TODO: Trace Replay as a special kind of simulation
+				simulatorStage.simulate();
+				trace.setExploreStateByDefault(true);
 			});
 
             row.contextMenuProperty().bind(

@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SimulationHelperFunctions {
 
@@ -40,6 +42,20 @@ public class SimulationHelperFunctions {
 		final Alert alert = stageManager.makeExceptionAlert(ex, header, body, params);
 		alert.initOwner(window);
 		alert.showAndWait();
+	}
+
+	public static Map<String, String> mergeValues(Map<String, String> values1, Map<String, String> values2) {
+		if(values1 == null) {
+			return values2;
+		}
+
+		if(values2 == null) {
+			return values1;
+		}
+
+		Map<String, String> newValues = new HashMap<>(values1);
+		newValues.putAll(values2);
+		return newValues;
 	}
 
 }
