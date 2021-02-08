@@ -164,7 +164,7 @@ public class SimulationChoosingStage extends Stage {
 	}
 
     private void changeGUIType(final SimulationType type) {
-        inputBox.getChildren().removeAll(timeBox, simulationHypothesisChoice, tracesChoice);
+        inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, tracesChoice);
 		simulationHypothesisChoice.clear();
 		tracesChoice.clear();
         switch (type) {
