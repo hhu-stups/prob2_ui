@@ -2,15 +2,30 @@ package de.prob2.ui.simulation.simulators.check;
 
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.simulation.choice.SimulationCheckingType;
 
 import java.util.Map;
 
-public class SimulationEstimator extends SimulationMonteCarlo {
+public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 
-    public SimulationEstimator(final CurrentTrace currentTrace, Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
-        super(currentTrace, trace, numberExecutions, additionalInformation);
-        //TODO
+    public enum EstimationType {
+        MEAN("Mean estimator");
+
+        private String name;
+
+        EstimationType(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
+
+    public SimulationEstimator(final CurrentTrace currentTrace, Trace trace, int numberExecutions, SimulationCheckingType type, Map<String, Object> additionalInformation) {
+        super(currentTrace, trace, numberExecutions, type, additionalInformation);
+    }
+
 
     public void check() {
         // TODO do after run

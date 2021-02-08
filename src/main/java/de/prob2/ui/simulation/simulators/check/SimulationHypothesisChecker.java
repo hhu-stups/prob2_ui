@@ -12,7 +12,7 @@ import org.apache.commons.math3.analysis.function.Gaussian;
 import java.util.List;
 import java.util.Map;
 
-public class SimulationHypothesisChecker extends SimulationMonteCarlo {
+public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
 	public enum HypothesisCheckingType {
 		LEFT_TAILED("Left-tailed hypothesis test"),
@@ -34,100 +34,19 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
         NOT_FINISHED, SUCCESS, FAIL
     }
 
-    private final SimulationCheckingType type;
-
 	private final HypothesisCheckingType hypothesisCheckingType;
 
 	private final double probability;
-
-    private int numberSuccess;
 
     private HypothesisCheckResult result;
 
     public SimulationHypothesisChecker(final CurrentTrace currentTrace, final Trace trace, final int numberExecutions, final SimulationCheckingType type,
 									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final Map<String, Object> additionalInformation) {
-        super(currentTrace, trace, numberExecutions, additionalInformation);
-		this.type = type;
+        super(currentTrace, trace, numberExecutions, type, additionalInformation);
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.result = HypothesisCheckResult.NOT_FINISHED;
     }
-
-	@Override
-    public void checkTrace(Trace trace, int time) {
-		switch (type) {
-			case ALL_INVARIANTS:
-				checkAllInvariants(trace);
-				break;
-			case INVARIANT:
-				checkInvariant(trace);
-				break;
-			case ALMOST_CERTAIN_PROPERTY:
-				checkAlmostCertainProperty(trace);
-				break;
-			case TIMING:
-				checkTiming(time);
-				break;
-			default:
-				break;
-		}
-	}
-
-	public void checkAllInvariants(Trace trace) {
-    	boolean invariantOk = true;
-    	for(Transition transition : trace.getTransitionList()) {
-			State destination = transition.getDestination();
-			if(!destination.isInvariantOk()) {
-				invariantOk = false;
-				break;
-			}
-		}
-    	if(invariantOk) {
-    		numberSuccess++;
-		}
-	}
-
-	public void checkInvariant(Trace trace) {
-		boolean invariantOk = true;
-		String invariant = (String) additionalInformation.get("INVARIANT");
-		for(Transition transition : trace.getTransitionList()) {
-			State destination = transition.getDestination();
-			if(destination.isInitialised()) {
-				AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
-				if ("FALSE".equals(evalResult.toString())) {
-					invariantOk = false;
-					break;
-				}
-			}
-		}
-		if(invariantOk) {
-			numberSuccess++;
-		}
-	}
-
-	public void checkAlmostCertainProperty(Trace trace) {
-    	// TODO: Fix Property
-    	String property = (String) additionalInformation.get("PROPERTY");
-    	for(Transition transition : trace.getTransitionList()) {
-    		State destination = transition.getDestination();
-    		if(destination.isInitialised()) {
-				AbstractEvalResult evalResult = destination.eval(property, FormulaExpand.TRUNCATE);
-				if("TRUE".equals(evalResult.toString())) {
-					List<Transition> transitions = destination.getOutTransitions();
-					String stateID = destination.getId();
-					//TODO: Implement some caching
-					boolean propertyOk = transitions.stream()
-							.map(Transition::getDestination)
-							.map(dest -> stateID.equals(dest.getId()))
-							.reduce(true, (e, a) -> e && a);
-					if(propertyOk) {
-						numberSuccess++;
-						break;
-					}
-				}
-			}
-		}
-	}
 
 	private void checkTwoTailed() {
 		int n = resultingTraces.size();
@@ -221,13 +140,6 @@ public class SimulationHypothesisChecker extends SimulationMonteCarlo {
 			this.result = HypothesisCheckResult.SUCCESS;
 		} else {
 			this.result = HypothesisCheckResult.FAIL;
-		}
-	}
-
-	public void checkTiming(int time) {
-		int maximumTime = (int) additionalInformation.get("TIME");
-		if(time <= maximumTime) {
-			numberSuccess++;
 		}
 	}
 

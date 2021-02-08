@@ -47,6 +47,9 @@ public class SimulationChoosingStage extends Stage {
 	private SimulationHypothesisChoice simulationHypothesisChoice;
 
 	@FXML
+	private SimulationEstimationChoice simulationEstimationChoice;
+
+	@FXML
 	private SimulationTraceChoice tracesChoice;
 
 	@FXML
@@ -89,6 +92,7 @@ public class SimulationChoosingStage extends Stage {
         });
 		simulationMonteCarloChoice.setSimulationChoosingStage(this);
 		simulationHypothesisChoice.setSimulationChoosingStage(this);
+		simulationEstimationChoice.setSimulationChoosingStage(this);
 		tracesChoice.setSimulationChoosingStage(this);
 	}
 
@@ -122,7 +126,7 @@ public class SimulationChoosingStage extends Stage {
 			case MONTE_CARLO_SIMULATION:
 				return simulationMonteCarloChoice.checkSelection();
 			case ESTIMATION:
-				// TODO
+				return simulationEstimationChoice.checkSelection();
 			case HYPOTHESIS_TEST:
 				return simulationHypothesisChoice.checkSelection();
 			case TRACE_REPLAY:
@@ -152,7 +156,8 @@ public class SimulationChoosingStage extends Stage {
 				information = simulationMonteCarloChoice.extractInformation();
 				break;
 			case ESTIMATION:
-				// TODO
+				information = simulationEstimationChoice.extractInformation();
+				break;
 			case HYPOTHESIS_TEST:
 				information = simulationHypothesisChoice.extractInformation();
 				break;
@@ -164,7 +169,7 @@ public class SimulationChoosingStage extends Stage {
 	}
 
     private void changeGUIType(final SimulationType type) {
-        inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, tracesChoice);
+        inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, simulationEstimationChoice, tracesChoice);
 		simulationHypothesisChoice.clear();
 		tracesChoice.clear();
         switch (type) {
@@ -172,7 +177,8 @@ public class SimulationChoosingStage extends Stage {
 				inputBox.getChildren().add(0, simulationMonteCarloChoice);
 				break;
 			case ESTIMATION:
-				// TODO
+				inputBox.getChildren().add(0, simulationEstimationChoice);
+				break;
 			case HYPOTHESIS_TEST:
                 inputBox.getChildren().add(0, simulationHypothesisChoice);
                 break;
@@ -193,6 +199,7 @@ public class SimulationChoosingStage extends Stage {
         btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
         simulationMonteCarloChoice.clear();
 		simulationHypothesisChoice.clear();
+		simulationEstimationChoice.clear();
         tracesChoice.clear();
 	}
 

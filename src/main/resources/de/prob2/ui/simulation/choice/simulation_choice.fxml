@@ -16,6 +16,7 @@
 <?import de.prob2.ui.simulation.choice.SimulationTraceChoice?>
 
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice?>
+<?import de.prob2.ui.simulation.choice.SimulationEstimationChoice?>
 <fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
 		 resizable="false" maxWidth="400.0" maxHeight="400.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -26,6 +27,7 @@
         </HBox>
 		<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
 		<SimulationHypothesisChoice fx:id="simulationHypothesisChoice"/>
+		<SimulationEstimationChoice fx:id="simulationEstimationChoice"/>
 		<SimulationTraceChoice fx:id="tracesChoice"/>
 		<HBox fx:id="tracesBox" spacing="5.0">
 			<Label text="%simulation.choice.traces"/>
