@@ -11,6 +11,7 @@ import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
+import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
@@ -113,6 +114,7 @@ public class SimulationItemHandler {
             SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.getResult();
             item.setTraces(hypothesisChecker.getResultingTraces());
             item.setTimestamps(hypothesisChecker.getResultingTimestamps());
+            item.setSimulationStats(hypothesisChecker.getStats());
             Platform.runLater(() -> {
                 switch (result) {
                     case SUCCESS:
@@ -153,6 +155,7 @@ public class SimulationItemHandler {
             SimulationEstimator.EstimationCheckResult result = simulationEstimator.getResult();
             item.setTraces(simulationEstimator.getResultingTraces());
             item.setTimestamps(simulationEstimator.getResultingTimestamps());
+            item.setSimulationStats(simulationEstimator.getStats());
             Platform.runLater(() -> {
                 switch (result) {
                     case SUCCESS:

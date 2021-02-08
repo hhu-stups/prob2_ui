@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.layout.VBox?>
+
+<?import de.prob2.ui.simulation.simulators.check.SimulationStatsView?>
+
+<fx:root type="SimulationStatsView" title="%simulation.choice.title"
+         resizable="false" minWidth="200.0" minHeight="200.0" maxWidth="200.0" maxHeight="200.0" xmlns:fx="http://javafx.com/fxml/1">
+    <scene>
+        <Scene stylesheets="@/prob.css">
+            <VBox spacing="3.0" xmlns:fx="http://javafx.com/fxml">
+                <HBox spacing="7.0">
+                    <Label text="%simulation.statistics.numberSimulations" styleClass="bold" />
+                    <Label fx:id="numberSimulations" />
+                </HBox>
+                <HBox spacing="7.0">
+                    <Label text="%simulation.statistics.numberSuccess" styleClass="bold" />
+                    <Label fx:id="numberSuccess" />
+                </HBox>
+                <HBox spacing="7.0">
+                    <Label text="%simulation.statistics.percentage" styleClass="bold" />
+                    <Label fx:id="percentage" />
+                </HBox>
+            </VBox>
+        </Scene>
+    </scene>
+</fx:root>

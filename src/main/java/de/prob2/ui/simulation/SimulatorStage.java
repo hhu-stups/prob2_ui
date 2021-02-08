@@ -22,6 +22,8 @@ import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.SimulationCreator;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
+import de.prob2.ui.simulation.simulators.check.SimulationStats;
+import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
@@ -138,6 +140,17 @@ public class SimulatorStage extends Stage {
 					}
 				});
 				menuItems.add(showTraces);
+
+				MenuItem showStatistics = new MenuItem(bundle.getString("simulation.contextMenu.showStatistics"));
+				showStatistics.disableProperty().bind(item.tracesProperty().emptyProperty());
+				showStatistics.setOnAction(e -> {
+					SimulationStatsView statsView = injector.getInstance(SimulationStatsView.class);
+					statsView.setStats(item.getSimulationStats());
+					statsView.show();
+					System.out.println(item.getSimulationStats());
+					System.out.println("------------");
+				});
+				menuItems.add(showStatistics);
 
 				MenuItem saveTraces = new MenuItem(bundle.getString("simulation.contextMenu.saveGeneratedTraces"));
 				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(

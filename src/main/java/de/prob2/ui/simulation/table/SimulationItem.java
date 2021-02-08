@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.table;
 import de.prob.statespace.Trace;
 import de.prob2.ui.simulation.SimulationCheckingConfiguration;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.Checked;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -25,6 +26,8 @@ public class SimulationItem {
 
     private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
+    private transient SimulationStats simulationStats;
+
     private transient ListProperty<Trace> traces;
 
     private transient ListProperty<List<Integer>> timestamps;
@@ -33,6 +36,7 @@ public class SimulationItem {
         this.simulationCheckingConfiguration = simulationCheckingConfiguration;
         this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
         this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
+        this.simulationStats = null;
         updateItem();
     }
 
@@ -110,4 +114,12 @@ public class SimulationItem {
 	public List<List<Integer>> getTimestamps() {
 		return timestamps.get();
 	}
+
+	public void setSimulationStats(SimulationStats simulationStats) {
+        this.simulationStats = simulationStats;
+    }
+
+    public SimulationStats getSimulationStats() {
+        return simulationStats;
+    }
 }
