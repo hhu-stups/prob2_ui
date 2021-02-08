@@ -8,6 +8,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -96,39 +97,79 @@ public class SimulationItemHandler {
         Trace trace = currentTrace.get();
         int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
         Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationCheckingType checkingType = (SimulationCheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
-		SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getSimulationConfiguration().getField("HYPOTHESIS_CHECKING_TYPE");
-		double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
+        SimulationCheckingType checkingType = (SimulationCheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
+        SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getSimulationConfiguration().getField("HYPOTHESIS_CHECKING_TYPE");
+        double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
 
 
-		if(item.getSimulationConfiguration().containsField("TIME")) {
-		    additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
+        if(item.getSimulationConfiguration().containsField("TIME")) {
+            additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
         }
 
         SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(currentTrace, trace, executions, checkingType, hypothesisCheckingType, probability, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path.toFile());
-		Thread thread = new Thread(() -> {
-			hypothesisChecker.run();
-			SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.getResult();
-			item.setTraces(hypothesisChecker.getResultingTraces());
-			item.setTimestamps(hypothesisChecker.getResultingTimestamps());
-			Platform.runLater(() -> {
-				switch (result) {
-					case SUCCESS:
-						item.setChecked(Checked.SUCCESS);
-						break;
-					case FAIL:
-						item.setChecked(Checked.FAIL);
-						break;
-					case NOT_FINISHED:
-						item.setChecked(Checked.NOT_CHECKED);
-						break;
-					default:
-						break;
-				}
-			});
-		});
-		thread.start();
+        SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path.toFile());
+        Thread thread = new Thread(() -> {
+            hypothesisChecker.run();
+            SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.getResult();
+            item.setTraces(hypothesisChecker.getResultingTraces());
+            item.setTimestamps(hypothesisChecker.getResultingTimestamps());
+            Platform.runLater(() -> {
+                switch (result) {
+                    case SUCCESS:
+                        item.setChecked(Checked.SUCCESS);
+                        break;
+                    case FAIL:
+                        item.setChecked(Checked.FAIL);
+                        break;
+                    case NOT_FINISHED:
+                        item.setChecked(Checked.NOT_CHECKED);
+                        break;
+                    default:
+                        break;
+                }
+            });
+        });
+        thread.start();
+    }
+
+    private void handleEstimation(SimulationItem item, boolean checkAll) {
+        Trace trace = currentTrace.get();
+        int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
+        Map<String, Object> additionalInformation = extractAdditionalInformation(item);
+        SimulationCheckingType checkingType = (SimulationCheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
+        SimulationEstimator.EstimationType estimationType = (SimulationEstimator.EstimationType) item.getSimulationConfiguration().getField("ESTIMATION_TYPE");
+        double desiredValue = (double) item.getSimulationConfiguration().getField("DESIRED_VALUE");
+        double faultTolerance = (double) item.getSimulationConfiguration().getField("FAULT_TOLERANCE");
+
+
+        if(item.getSimulationConfiguration().containsField("TIME")) {
+            additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
+        }
+
+        SimulationEstimator simulationEstimator = new SimulationEstimator(currentTrace, trace, executions, checkingType, estimationType, desiredValue, faultTolerance, additionalInformation);
+        SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator, path.toFile());
+        Thread thread = new Thread(() -> {
+            simulationEstimator.run();
+            SimulationEstimator.EstimationCheckResult result = simulationEstimator.getResult();
+            item.setTraces(simulationEstimator.getResultingTraces());
+            item.setTimestamps(simulationEstimator.getResultingTimestamps());
+            Platform.runLater(() -> {
+                switch (result) {
+                    case SUCCESS:
+                        item.setChecked(Checked.SUCCESS);
+                        break;
+                    case FAIL:
+                        item.setChecked(Checked.FAIL);
+                        break;
+                    case NOT_FINISHED:
+                        item.setChecked(Checked.NOT_CHECKED);
+                        break;
+                    default:
+                        break;
+                }
+            });
+        });
+        thread.start();
     }
 
     private void handleTraceReplay(SimulationItem item, boolean checkAll) {
@@ -173,6 +214,7 @@ public class SimulationItemHandler {
                 handleHypothesisTest(item, checkAll);
                 break;
             case ESTIMATION:
+                handleEstimation(item, checkAll);
                 // TODO
                 break;
             case TRACE_REPLAY:
