@@ -1,10 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
-import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.check.tracereplay.PersistentTransition;
-import de.prob.check.tracereplay.check.Delta;
 import de.prob.check.tracereplay.check.ReplayOptions;
-import de.prob.check.tracereplay.check.TraceExplorer;
 import de.prob.statespace.OperationInfo;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
@@ -13,12 +9,8 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 
 public class ReplayOptionsOverview extends Dialog<ReplayOptions> {
 
