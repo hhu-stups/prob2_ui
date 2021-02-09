@@ -55,7 +55,6 @@
 				<SimulationPropertyItem checkingType="PREDICATE_INVARIANT"/>
 				<SimulationPropertyItem checkingType="PREDICATE_FINAL"/>
 				<SimulationPropertyItem checkingType="PREDICATE_EVENTUALLY"/>
-				<SimulationPropertyItem checkingType="ALMOST_CERTAIN_PROPERTY"/>
 				<SimulationPropertyItem checkingType="TIMING"/>
 			</FXCollections>
 		</items>

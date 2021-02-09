@@ -8,7 +8,6 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 
-import java.util.List;
 import java.util.Map;
 
 public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
@@ -37,9 +36,6 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
                 break;
             case PREDICATE_EVENTUALLY:
                 checkPredicateEventually(trace);
-                break;
-            case ALMOST_CERTAIN_PROPERTY:
-                checkAlmostCertainProperty(trace);
                 break;
             case TIMING:
                 checkTiming(time);
@@ -113,32 +109,6 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
         }
         if(predicateOk) {
             numberSuccess++;
-        }
-    }
-
-    public void checkAlmostCertainProperty(Trace trace) {
-        // TODO: Guided by operation instead of predicate
-
-        // TODO: Fix Property
-        String property = (String) additionalInformation.get("PROPERTY");
-        for(Transition transition : trace.getTransitionList()) {
-            State destination = transition.getDestination();
-            if(destination.isInitialised()) {
-                AbstractEvalResult evalResult = destination.eval(property, FormulaExpand.TRUNCATE);
-                if("TRUE".equals(evalResult.toString())) {
-                    List<Transition> transitions = destination.getOutTransitions();
-                    String stateID = destination.getId();
-                    //TODO: Implement some caching
-                    boolean propertyOk = transitions.stream()
-                            .map(Transition::getDestination)
-                            .map(dest -> stateID.equals(dest.getId()))
-                            .reduce(true, (e, a) -> e && a);
-                    if(propertyOk) {
-                        numberSuccess++;
-                        break;
-                    }
-                }
-            }
         }
     }
 

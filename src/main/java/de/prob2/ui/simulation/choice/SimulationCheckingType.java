@@ -5,7 +5,6 @@ public enum SimulationCheckingType {
     PREDICATE_INVARIANT("Predicate as Invariant"),
     PREDICATE_FINAL("Final Predicate"),
     PREDICATE_EVENTUALLY("Predicate Eventually"),
-    ALMOST_CERTAIN_PROPERTY("Almost-certain property"),
     TIMING("Timing");
 
     private String name;
