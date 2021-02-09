@@ -102,6 +102,9 @@ public class SimulationItemHandler {
         SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getSimulationConfiguration().getField("HYPOTHESIS_CHECKING_TYPE");
         double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
 
+        if(item.getSimulationConfiguration().containsField("PREDICATE")) {
+            additionalInformation.put("PREDICATE", item.getSimulationConfiguration().getField("PREDICATE"));
+        }
 
         if(item.getSimulationConfiguration().containsField("TIME")) {
             additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
@@ -143,6 +146,9 @@ public class SimulationItemHandler {
         double desiredValue = (double) item.getSimulationConfiguration().getField("DESIRED_VALUE");
         double faultTolerance = (double) item.getSimulationConfiguration().getField("FAULT_TOLERANCE");
 
+        if(item.getSimulationConfiguration().containsField("PREDICATE")) {
+            additionalInformation.put("PREDICATE", item.getSimulationConfiguration().getField("PREDICATE"));
+        }
 
         if(item.getSimulationConfiguration().containsField("TIME")) {
             additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));

@@ -29,8 +29,14 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
             case ALL_INVARIANTS:
                 checkAllInvariants(trace);
                 break;
-            case INVARIANT:
-                checkInvariant(trace);
+            case PREDICATE_INVARIANT:
+                checkPredicateInvariant(trace);
+                break;
+            case PREDICATE_FINAL:
+                checkPredicateFinal(trace);
+                break;
+            case PREDICATE_EVENTUALLY:
+                checkPredicateEventually(trace);
                 break;
             case ALMOST_CERTAIN_PROPERTY:
                 checkAlmostCertainProperty(trace);
@@ -57,9 +63,9 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
         }
     }
 
-    public void checkInvariant(Trace trace) {
+    public void checkPredicateInvariant(Trace trace) {
         boolean invariantOk = true;
-        String invariant = (String) additionalInformation.get("INVARIANT");
+        String invariant = (String) additionalInformation.get("PREDICATE");
         for(Transition transition : trace.getTransitionList()) {
             State destination = transition.getDestination();
             if(destination.isInitialised()) {
@@ -75,7 +81,44 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
         }
     }
 
+    public void checkPredicateFinal(Trace trace) {
+        boolean predicateOk = true;
+        String invariant = (String) additionalInformation.get("PREDICATE");
+        int size = trace.getTransitionList().size();
+        Transition transition = trace.getTransitionList().get(size - 1);
+        State destination = transition.getDestination();
+        if(destination.isInitialised()) {
+            AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
+            if ("FALSE".equals(evalResult.toString())) {
+                predicateOk = false;
+            }
+        }
+        if(predicateOk) {
+            numberSuccess++;
+        }
+    }
+
+    public void checkPredicateEventually(Trace trace) {
+        boolean predicateOk = false;
+        String invariant = (String) additionalInformation.get("PREDICATE");
+        for(Transition transition : trace.getTransitionList()) {
+            State destination = transition.getDestination();
+            if(destination.isInitialised()) {
+                AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
+                if ("TRUE".equals(evalResult.toString())) {
+                    predicateOk = true;
+                    break;
+                }
+            }
+        }
+        if(predicateOk) {
+            numberSuccess++;
+        }
+    }
+
     public void checkAlmostCertainProperty(Trace trace) {
+        // TODO: Guided by operation instead of predicate
+
         // TODO: Fix Property
         String property = (String) additionalInformation.get("PROPERTY");
         for(Transition transition : trace.getTransitionList()) {

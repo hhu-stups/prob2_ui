@@ -23,6 +23,9 @@
 		<Label fx:id="lbEndingTime" text="%simulation.choice.endingTime"/>
 		<TextField fx:id="tfEndingTime"/>
 
+		<Label fx:id="lbPredicate" text="%simulation.choice.predicate" />
+		<TextField fx:id="tfPredicate" VBox.vgrow="NEVER"/>
+
 		<Label fx:id="lbMonteCarloTime" text="%simulation.choice.time" />
 		<TextField fx:id="tfMonteCarloTime" VBox.vgrow="NEVER"/>
 	</fx:define>
@@ -49,15 +52,17 @@
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationPropertyItem checkingType="ALL_INVARIANTS"/>
-				<SimulationPropertyItem checkingType="INVARIANT"/>
+				<SimulationPropertyItem checkingType="PREDICATE_INVARIANT"/>
+				<SimulationPropertyItem checkingType="PREDICATE_FINAL"/>
+				<SimulationPropertyItem checkingType="PREDICATE_EVENTUALLY"/>
 				<SimulationPropertyItem checkingType="ALMOST_CERTAIN_PROPERTY"/>
 				<SimulationPropertyItem checkingType="TIMING"/>
 			</FXCollections>
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.estimator" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="estimationChoice" GridPane.rowIndex="5" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.estimator" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="estimationChoice" GridPane.rowIndex="6" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationEstimationChoiceItem estimationType="MEAN"/>
@@ -65,9 +70,9 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.desiredValue" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfDesiredValue" GridPane.rowIndex="6" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.desiredValue" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfDesiredValue" GridPane.rowIndex="7" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.faultTolerance" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfFaultTolerance" GridPane.rowIndex="7" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.faultTolerance" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfFaultTolerance" GridPane.rowIndex="8" GridPane.columnIndex="2"/>
 </fx:root>

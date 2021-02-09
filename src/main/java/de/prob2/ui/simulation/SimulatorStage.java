@@ -147,8 +147,6 @@ public class SimulatorStage extends Stage {
 					SimulationStatsView statsView = injector.getInstance(SimulationStatsView.class);
 					statsView.setStats(item.getSimulationStats());
 					statsView.show();
-					System.out.println(item.getSimulationStats());
-					System.out.println("------------");
 				});
 				menuItems.add(showStatistics);
 

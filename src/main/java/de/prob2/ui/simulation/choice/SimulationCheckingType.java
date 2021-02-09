@@ -2,7 +2,9 @@ package de.prob2.ui.simulation.choice;
 
 public enum SimulationCheckingType {
     ALL_INVARIANTS("All Invariants"),
-    INVARIANT("Invariant"),
+    PREDICATE_INVARIANT("Predicate as Invariant"),
+    PREDICATE_FINAL("Final Predicate"),
+    PREDICATE_EVENTUALLY("Predicate Eventually"),
     ALMOST_CERTAIN_PROPERTY("Almost-certain property"),
     TIMING("Timing");
 
