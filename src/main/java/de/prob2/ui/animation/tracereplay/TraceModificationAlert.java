@@ -28,7 +28,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private final ResourceBundle resourceBundle;
 	private final StageManager stageManager;
 	private final TraceModificationChecker traceModificationChecker;
-	ObservableSet<Delta> selectedDelta = FXCollections.observableSet();
+	ObservableSet<RenamingDelta> selectedRenamingDelta = FXCollections.observableSet();
 	ObservableMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> selectedMapping = FXCollections.observableHashMap();
 	Set<String> typeIVCandidates;
 
@@ -70,10 +70,10 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		this.getDialogPane().getButtonTypes().addAll(buttonTypeI, buttonTypeB, buttonTypeN);
 
 		this.setResultConverter(param -> {
-			Set<Delta> deltaHelper = new HashSet<>(selectedDelta);
+			Set<RenamingDelta> renamingDeltaHelper = new HashSet<>(selectedRenamingDelta);
 			HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> mappingHelper = new HashMap<>(selectedMapping);
 			List<PersistentTransition> selectedTrace = traceModificationChecker.traceChecker.getTraceModifier()
-					.getChangelogPhase3II().get(deltaHelper).get(mappingHelper).stream()
+					.getChangelogPhase3II().get(renamingDeltaHelper).get(mappingHelper).stream()
 					.flatMap(delta -> delta.getNewTransitions().stream()).collect(toList());
 
 			if(param.getButtonData() == ButtonBar.ButtonData.NO){
@@ -97,44 +97,45 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private void initialize(){
 		stageManager.register(this);
 
-		IDeltaFinder deltaFinder = traceModificationChecker.traceChecker.getDeltaFinder();
+		RenamingAnalyzerInterface renamingAnalyzer = traceModificationChecker.traceChecker.getRenamingAnalyzer();
+		TraceModifier traceModifier = traceModificationChecker.traceChecker.getTraceModifier();
 
-		VBox accordion = setTypeIIConflicts(deltaFinder.getResultTypeII(), deltaFinder.getResultTypeIIInit(), traceModificationChecker.traceChecker.getOldOperationInfos());
+		VBox accordion = setTypeIIConflicts(renamingAnalyzer.getResultTypeII(), renamingAnalyzer.getResultTypeIIInit(), traceModificationChecker.traceChecker.getOldOperationInfos());
 		typeII.setContent(accordion);
-		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + accordion.getChildren().size()+ ")");
+		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + traceModifier.getSizeTypeDetII()+ ")");
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
 		accordion.prefWidthProperty().bindBidirectional(typeII.prefWidthProperty());
-		if(accordion.getChildren().size()==0){
+		if(!traceModifier.typeIIDetDirty()){
 			typeII.setCollapsible(false);
 		}
 
-		VBox accordion2 = setTypeIIAmbiguousConflicts(deltaFinder.getResultTypeIIWithCandidatesAsDeltaMap());
+		VBox accordion2 = setTypeIIAmbiguousConflicts(renamingAnalyzer.getResultTypeIIWithCandidatesAsDeltaMap());
 		typeIIPer.setContent(accordion2);
-		typeIIPer.textProperty().set(resourceBundle.getString("traceModification.alert.typeIIAmbiguous" ) + " (" + accordion2.getChildren().size()+ ")");
-		if(accordion2.getChildren().size()==0){
+		typeIIPer.textProperty().set(resourceBundle.getString("traceModification.alert.typeIIAmbiguous" ) + " (" + traceModifier.getSizeTypeNonDetII() + ")");
+		if(!traceModifier.typeIINonDetDirty()){
 			typeIIPer.setCollapsible(false);
 		}
 
-		VBox accordion3 = setTypeIIIConflicts(traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase3II(),
+		VBox accordion3 = setTypeIIIConflicts(traceModifier.getChangelogPhase3II(),
 				traceModificationChecker.traceChecker.getOldOperationInfos(),
 				traceModificationChecker.traceChecker.getNewOperationInfos());
+
 		typeIII.setContent(accordion3);
-		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + (accordion3.getChildren().size()-1) + ")");
-		if(accordion3.getChildren().size() == 0){
-			typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + 0 + ")");
+		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + traceModifier.getSizeTypeIII() + ")");
+
+		if(!traceModifier.typeIIIDirty()){
+	//		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + 0 + ")");
 			typeIII.setCollapsible(false);
 		}
 
 
-		VBox accordion4 = createTypeIVMapping(
-				traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase4(),
-				traceModificationChecker.traceChecker.getTraceModifier().getChangelogPhase3II());
+		VBox accordion4 = createTypeIVMapping(traceModifier.getChangelogPhase4(), traceModifier.getChangelogPhase3II());
 
 		typeIV.setContent(accordion4);
-		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + accordion4.getChildren().size() + ")");
+		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + traceModifier.getSizeTypeIV() + ")");
 
-		if(traceModificationChecker.traceChecker.getTraceModifier().typeIVDirty()){
-			typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + 0 + ")");
+		if(!traceModifier.typeIVDirty()){
+	//		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + 0 + ")");
 			typeIV.setCollapsible(false);
 		}
 
@@ -361,10 +362,10 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-	public VBox setTypeIIAmbiguousConflicts(Map<String, List<Delta>> typeIIWithCandidates) {
+	public VBox setTypeIIAmbiguousConflicts(Map<String, List<RenamingDelta>> typeIIWithCandidates) {
 
 
-		Map<Pair<String, String>, Delta> changeToDelta = typeIIWithCandidates.entrySet().stream().flatMap(entry -> entry.getValue().stream()
+		Map<Pair<String, String>, RenamingDelta> changeToDelta = typeIIWithCandidates.entrySet().stream().flatMap(entry -> entry.getValue().stream()
 						.map(delta -> new Pair<>(new Pair<>(delta.getOriginalName(), delta.getDeltaName()), delta)))
 				.collect(toMap(Pair::getKey, Pair::getValue));
 
@@ -374,7 +375,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		VBox result = new VBox();
 
-		for(Map.Entry<String, List<Delta>> entry : typeIIWithCandidates.entrySet()){
+		for(Map.Entry<String, List<RenamingDelta>> entry : typeIIWithCandidates.entrySet()){
 
 			StringProperty title = new SimpleStringProperty("Title");
 
@@ -397,7 +398,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 			VBox newB = new VBox(); // prepareColumn(Collections.singletonList(entry.getKey()));
-			ChoiceBox<String> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(entry.getValue().stream().map(Delta::getDeltaName).collect(toList())));
+			ChoiceBox<String> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(entry.getValue().stream().map(RenamingDelta::getDeltaName).collect(toList())));
 			selected.add(new Pair<>(entry.getKey(), choiceBox.getValue()));
 			newB.getChildren().add(choiceBox);
 			VBox oldB = new VBox(new Label(entry.getKey()));
@@ -446,15 +447,15 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 				changeToDelta.get(key).getOutputParameters().forEach((key1, value) -> mapOutput.get(key1).set(value));
 
-				selectedDelta.clear();
-				selectedDelta.addAll(selected.stream().map(changeToDelta::get).collect(Collectors.toSet()));
+				selectedRenamingDelta.clear();
+				selectedRenamingDelta.addAll(selected.stream().map(changeToDelta::get).collect(Collectors.toSet()));
 
 			});
 
 			choiceBox.getSelectionModel().selectFirst();
-			Set<Delta> selectedDeltaPre = new HashSet<>();
-			selectedDeltaPre.addAll(selected.stream().map(changeToDelta::get).collect(Collectors.toSet()));
-			selectedDelta.addAll(selectedDeltaPre);
+			Set<RenamingDelta> selectedRenamingDeltaPre = new HashSet<>();
+			selectedRenamingDeltaPre.addAll(selected.stream().map(changeToDelta::get).collect(Collectors.toSet()));
+			selectedRenamingDelta.addAll(selectedRenamingDeltaPre);
 
 			TitledPane titledPane = new TitledPane("", gridPane);
 			titledPane.textProperty().bindBidirectional(title);
@@ -481,7 +482,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-	public VBox setTypeIIIConflicts(Map<Set<Delta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, List<PersistenceDelta>>> resultTypeIIIWithTransitions,
+	public VBox setTypeIIIConflicts(Map<Set<RenamingDelta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, List<PersistenceDelta>>> resultTypeIIIWithTransitions,
 									Map<String, OperationInfo> oldInfo, Map<String, OperationInfo> newInfo){
 
 
@@ -629,12 +630,12 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		//GridPane is pass by reference...
 	}
 
-	public VBox createTypeIVMapping(Map<Set<Delta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, Map<String, TraceAnalyser.AnalyserResult>>> typeIVResults,
-									Map<Set<Delta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, List<PersistenceDelta>>> resultTypeIIIWithTransitions){
+	public VBox createTypeIVMapping(Map<Set<RenamingDelta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, Map<String, TraceAnalyser.AnalyserResult>>> typeIVResults,
+									Map<Set<RenamingDelta>, Map<Map<String, Map<TraceExplorer.MappingNames, Map<String, String>>>, List<PersistenceDelta>>> resultTypeIIIWithTransitions){
 
 		VBox result = new VBox();
 
-		Set<Delta> accessCollection = new HashSet<>(selectedDelta);
+		Set<RenamingDelta> accessCollection = new HashSet<>(selectedRenamingDelta);
 		HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> accessMap = new HashMap<>(selectedMapping);
 
 		Map<String, TraceAnalyser.AnalyserResult> penis = typeIVResults.get(accessCollection).get(accessMap);
@@ -642,9 +643,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		result.getChildren().add(createTypeIVView(penis, vagina));
 
-		selectedDelta.addListener((SetChangeListener<Delta>) change -> {
+		selectedRenamingDelta.addListener((SetChangeListener<RenamingDelta>) change -> {
 			if(change.wasAdded()){
-				Set<Delta> accessCollectionHelper = new HashSet<>(change.getSet());
+				Set<RenamingDelta> accessCollectionHelper = new HashSet<>(change.getSet());
 				Map<String, TraceAnalyser.AnalyserResult> currentlySelectedTypeIV = typeIVResults.get(accessCollectionHelper).get(selectedMapping);
 				List<PersistenceDelta> selectedTrace = resultTypeIIIWithTransitions.get(accessCollectionHelper).get(selectedMapping);
 
@@ -657,8 +658,8 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			if(change.wasAdded()){
 				HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> accessMapHelper = new HashMap<>(change.getMap());
 
-				Map<String, TraceAnalyser.AnalyserResult> currentlySelectedTypeIV = typeIVResults.get(selectedDelta).get(accessMapHelper);
-				List<PersistenceDelta> selectedTrace = resultTypeIIIWithTransitions.get(selectedDelta).get(accessMapHelper);
+				Map<String, TraceAnalyser.AnalyserResult> currentlySelectedTypeIV = typeIVResults.get(selectedRenamingDelta).get(accessMapHelper);
+				List<PersistenceDelta> selectedTrace = resultTypeIIIWithTransitions.get(selectedRenamingDelta).get(accessMapHelper);
 
 				result.getChildren().clear();
 				result.getChildren().add(createTypeIVView(currentlySelectedTypeIV, selectedTrace));
