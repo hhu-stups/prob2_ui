@@ -34,8 +34,6 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 
     private EstimationCheckResult result;
 
-    private SimulationStats stats;
-
     public SimulationEstimator(final CurrentTrace currentTrace, Trace trace, int numberExecutions, SimulationCheckingType type,
                                final EstimationType estimationType, final double desiredValue, final double faultTolerance, Map<String, Object> additionalInformation) {
         super(currentTrace, trace, numberExecutions, type, additionalInformation);
@@ -43,7 +41,6 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
         this.desiredValue = desiredValue;
         this.faultTolerance = faultTolerance;
         this.result = EstimationCheckResult.NOT_FINISHED;
-        this.stats = null;
     }
 
     private void checkMean() {
@@ -54,7 +51,6 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
         } else {
             this.result = EstimationCheckResult.FAIL;
         }
-        stats = new SimulationStats(n, numberSuccess, ratio);
     }
 
     public void check() {
@@ -66,13 +62,18 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
             default:
                 break;
         }
+
+    }
+
+    @Override
+    protected void calculateStatistics() {
+        int n = resultingTraces.size();
+        double ratio = (double) numberSuccess / n;
+        this.stats = new SimulationStats(n, numberSuccess, ratio, calculateExtendedStats());
     }
 
     public EstimationCheckResult getResult() {
         return result;
     }
 
-    public SimulationStats getStats() {
-        return stats;
-    }
 }

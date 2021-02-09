@@ -8,10 +8,15 @@ public class SimulationStats {
 
     private final double percentage;
 
-    public SimulationStats(int numberSimulations, int numberSuccess, double percentage) {
+    private final SimulationExtendedStats extendedStats;
+
+
+    public SimulationStats(int numberSimulations, int numberSuccess, double percentage,
+                           SimulationExtendedStats extendedStats) {
         this.numberSimulations = numberSimulations;
         this.numberSuccess = numberSuccess;
         this.percentage = percentage;
+        this.extendedStats = extendedStats;
     }
 
     public int getNumberSimulations() {
@@ -24,5 +29,9 @@ public class SimulationStats {
 
     public double getPercentage() {
         return percentage;
+    }
+
+    public SimulationExtendedStats getExtendedStats() {
+        return extendedStats;
     }
 }

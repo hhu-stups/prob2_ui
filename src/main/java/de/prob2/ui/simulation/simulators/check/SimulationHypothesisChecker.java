@@ -35,15 +35,12 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
     private HypothesisCheckResult result;
 
-    private SimulationStats stats;
-
     public SimulationHypothesisChecker(final CurrentTrace currentTrace, final Trace trace, final int numberExecutions, final SimulationCheckingType type,
 									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final Map<String, Object> additionalInformation) {
         super(currentTrace, trace, numberExecutions, type, additionalInformation);
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.result = HypothesisCheckResult.NOT_FINISHED;
-		this.stats = null;
     }
 
 	private void checkTwoTailed() {
@@ -155,10 +152,14 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 			default:
 				break;
 		}
-		int n = this.getResultingTraces().size();
-		double ratio = (double) numberSuccess / n;
-		stats = new SimulationStats(n, numberSuccess, ratio);
     }
+
+	@Override
+	protected void calculateStatistics() {
+		int n = resultingTraces.size();
+		double ratio = (double) numberSuccess / n;
+		this.stats = new SimulationStats(n, numberSuccess, ratio, calculateExtendedStats());
+	}
 
 	public HypothesisCheckResult getResult() {
 		return result;

@@ -81,8 +81,10 @@ public class SimulationItemHandler {
             monteCarlo.run();
             List<Trace> resultingTraces = monteCarlo.getResultingTraces();
             List<List<Integer>> timestamps = monteCarlo.getResultingTimestamps();
+            SimulationStats stats = monteCarlo.getStats();
             item.setTraces(resultingTraces);
             item.setTimestamps(timestamps);
+            item.setSimulationStats(stats);
             Platform.runLater(() -> {
                 if(resultingTraces.size() == executions) {
                     item.setChecked(Checked.SUCCESS);

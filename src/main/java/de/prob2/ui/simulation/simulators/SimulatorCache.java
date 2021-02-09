@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SimulatorCache {
@@ -16,6 +17,8 @@ public class SimulatorCache {
     private final Map<String, Map<String, String>> valuesCache = new HashMap<>();
 
     private final Map<String, Map<String, Map<String, List<Transition>>>> transitionCache = new HashMap<>();
+
+    private final Map<String, Set<String>> enabledOperationsCache = new HashMap<>();
 
     public String readValueWithCaching(State bState, String expression) {
         String stateID = bState.getId();
@@ -50,9 +53,21 @@ public class SimulatorCache {
         return transitionCache.get(stateID).get(opName).get(predicate);
     }
 
+    public Set<String> readEnabledOperationsWithCaching(State bState) {
+        String stateID = bState.getId();
+        if(!enabledOperationsCache.containsKey(stateID)) {
+            Set<String> operations = bState.getOutTransitions().stream()
+                    .map(Transition::getName)
+                    .collect(Collectors.toSet());
+            enabledOperationsCache.put(stateID, operations);
+        }
+        return enabledOperationsCache.get(stateID);
+    }
+
     public void clear() {
         valuesCache.clear();
         transitionCache.clear();
+        enabledOperationsCache.clear();
     }
 
 }

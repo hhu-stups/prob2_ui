@@ -40,6 +40,7 @@ public final class SimulationStatsView extends Stage {
 				numberSimulations.setText(String.valueOf(to.getNumberSimulations()));
 				numberSuccess.setText(String.valueOf(to.getNumberSuccess()));
 				percentage.setText(String.valueOf(to.getPercentage()));
+				// TODO: Show extended statistics
 			}
 		});
 	}
