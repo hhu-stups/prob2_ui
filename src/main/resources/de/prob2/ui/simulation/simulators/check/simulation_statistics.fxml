@@ -7,11 +7,13 @@
 
 <?import de.prob2.ui.simulation.simulators.check.SimulationStatsView?>
 
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.GridPane?>
 <fx:root type="SimulationStatsView" title="%simulation.choice.title"
-         resizable="false" minWidth="200.0" minHeight="200.0" maxWidth="200.0" maxHeight="200.0" xmlns:fx="http://javafx.com/fxml/1">
+         resizable="false" minWidth="300.0" minHeight="600.0" xmlns:fx="http://javafx.com/fxml/1">
     <scene>
         <Scene stylesheets="@/prob.css">
-            <VBox spacing="3.0" xmlns:fx="http://javafx.com/fxml">
+            <VBox fx:id="simulationBox" spacing="3.0" xmlns:fx="http://javafx.com/fxml">
                 <HBox spacing="7.0">
                     <Label text="%simulation.statistics.numberSimulations" styleClass="bold" />
                     <Label fx:id="numberSimulations" />
@@ -24,6 +26,9 @@
                     <Label text="%simulation.statistics.percentage" styleClass="bold" />
                     <Label fx:id="percentage" />
                 </HBox>
+                <ScrollPane>
+                    <GridPane fx:id="statisticsPane"/>
+                </ScrollPane>
             </VBox>
         </Scene>
     </scene>

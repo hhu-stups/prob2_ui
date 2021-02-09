@@ -170,14 +170,13 @@ public class SimulationMonteCarlo extends Simulator {
 		for(String key : operationEnablings.keySet()) {
 			int absoluteExecutions = operationExecutions.get(key).stream().reduce(0, Integer::sum);
 			int absoluteEnablings = operationEnablings.get(key).stream().reduce(0, Integer::sum);
-			int operationExecutionsValue = (int) Math.round((double) absoluteExecutions/numberExecutions);
-			int operationEnablingsValue = (int) Math.round((double) absoluteEnablings/numberExecutions);
+			int operationExecutionsValue = (int) Math.round((double) absoluteExecutions);
+			int operationEnablingsValue = (int) Math.round((double) absoluteEnablings);
 			executionsResult.put(key, operationExecutionsValue);
 			enablingsResult.put(key, operationEnablingsValue);
 			percentageResult.put(key, (double) absoluteExecutions/absoluteEnablings);
 		}
-		int lengthTraces = executionsResult.values().stream().reduce(0, Integer::sum);
-		return new SimulationExtendedStats(lengthTraces, executionsResult, enablingsResult, percentageResult);
+		return new SimulationExtendedStats(executionsResult, enablingsResult, percentageResult);
 	}
 
 	public List<Trace> getResultingTraces() {
