@@ -77,7 +77,7 @@ public class SimulationMonteCarlo extends Simulator {
 			return "TRUE".equals(evalResult);
 		} else if(additionalInformation.containsKey("ENDING_TIME")) {
 			int endingTime = (int) additionalInformation.get("ENDING_TIME");
-			return endingTime >= time.get();
+			return time.get() >= endingTime;
 		}
 		return false;
 	}
