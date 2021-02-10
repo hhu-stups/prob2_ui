@@ -60,8 +60,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 			}
 			coverage = gaussian.value(mu + i + 0.5) - gaussian.value(mu - i - 0.5);
 		}
-		int numberFailed = n - numberSuccess;
-		if(numberFailed >= mu - range && numberFailed <= mu + range) {
+		if(numberSuccess >= mu - range && numberSuccess <= mu + range) {
 			this.result = HypothesisCheckResult.SUCCESS;
 		} else {
 			this.result = HypothesisCheckResult.FAIL;
@@ -95,8 +94,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 				coverage = 100.0 - gaussian.value(mu + i - 0.5);
 			}
 		}
-		int numberFailed = n - numberSuccess;
-		if(numberFailed >= mu - range && numberFailed <= n) {
+		if(numberSuccess >= mu - range && numberSuccess <= n) {
 			this.result = HypothesisCheckResult.SUCCESS;
 		} else {
 			this.result = HypothesisCheckResult.FAIL;
@@ -130,8 +128,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 				coverage = gaussian.value(mu - i + 0.5);
 			}
 		}
-		int numberFailed = n - numberSuccess;
-		if(numberFailed >= 0 && numberFailed <= mu + range) {
+		if(numberSuccess >= 0 && numberSuccess <= mu + range) {
 			this.result = HypothesisCheckResult.SUCCESS;
 		} else {
 			this.result = HypothesisCheckResult.FAIL;
