@@ -116,7 +116,8 @@ dependencies {
 	implementation group: "org.controlsfx", name: "controlsfx", version: "8.40.18"
 	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.5"
 	implementation group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
-	implementation group: "org.hildan.fxgson", name: "fx-gson", version: "4.0.1"
+	// Version 4.0.0 and later of fx-gson are incompatible with Java 8.
+	implementation group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.2"
 	implementation group: "org.pf4j", name: "pf4j", version: "2.6.0"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 	implementation group: "com.github.spullara.mustache.java", name: "compiler", version: "0.9.7"
