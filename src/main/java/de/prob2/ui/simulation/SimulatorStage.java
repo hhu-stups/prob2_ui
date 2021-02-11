@@ -162,7 +162,6 @@ public class SimulatorStage extends Stage {
 				saveTimedTraces.setOnAction(e -> {
 					SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
 					simulationSaver.saveConfigurations(item);
-					// TODO: Generate Simulation Configuration
 				});
 				menuItems.add(saveTimedTraces);
 

@@ -6,13 +6,16 @@ import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationCreator;
+import de.prob2.ui.simulation.simulators.SimulationSaver;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -29,6 +32,7 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -75,14 +79,17 @@ public class SimulationTracesView extends Stage {
 	private SplitPane splitPane;
 
 	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
 	private final Injector injector;
 
 	private SimulatorStage simulatorStage;
 
 	@Inject
-	public SimulationTracesView(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle, final Injector injector) {
+	public SimulationTracesView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+								final ResourceBundle bundle, final Injector injector) {
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.bundle = bundle;
 		this.injector = injector;
 		stageManager.loadFXML(this, "simulation_generated_traces.fxml");
@@ -122,6 +129,7 @@ public class SimulationTracesView extends Stage {
 				this.currentTrace.set(item.getTrace());
 			});
 
+
 			final MenuItem playTraceItem = new MenuItem(bundle.getString("simulation.contextMenu.play"));
 
 			playTraceItem.setOnAction(e -> {
@@ -143,10 +151,40 @@ public class SimulationTracesView extends Stage {
 				trace.setExploreStateByDefault(true);
 			});
 
+			final MenuItem saveTraceItem = new MenuItem(bundle.getString("simulation.contextMenu.saveTrace"));
+
+			saveTraceItem.setOnAction(e -> {
+				SimulationTraceItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
+				if (currentTrace.get() != null) {
+					Trace trace = item.getTrace();
+					traceSaver.save(new PersistentTrace(trace, trace.getCurrent().getIndex() + 1), currentProject.getCurrentMachine());
+				}
+			});
+
+			final MenuItem saveTimedTraceItem = new MenuItem(bundle.getString("simulation.contextMenu.saveTimedTrace"));
+
+			saveTimedTraceItem.setOnAction(e -> {
+				SimulationTraceItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
+				try {
+					simulationSaver.saveConfiguration(item.getTrace(), item.getTimestamps());
+				} catch (IOException exception) {
+					exception.printStackTrace();
+					// TODO: Handle error
+				}
+			});
+
             row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(loadTraceItem, playTraceItem)));
+					.otherwise(new ContextMenu(loadTraceItem, playTraceItem, saveTraceItem, saveTimedTraceItem)));
 
 			row.setOnMouseClicked(event -> {
 				SimulationTraceItem item = row.getItem();

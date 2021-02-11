@@ -13,11 +13,13 @@ import de.prob.json.ObjectWithMetadata;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 
 
 import java.io.IOException;
@@ -32,6 +34,8 @@ import java.util.stream.Stream;
 @Singleton
 public class SimulationSaver {
 
+    public static final String SIMULATION_EXTENSION = ".json";
+
     public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
     private final StageManager stageManager;
@@ -42,15 +46,18 @@ public class SimulationSaver {
 
     private final SimulationCreator simulationCreator;
 
+    private final CurrentProject currentProject;
+
     private final ResourceBundle bundle;
 
     @Inject
     public SimulationSaver(final StageManager stageManager, final FileChooserManager fileChooserManager, final JsonManager<SimulationConfiguration> jsonManager, final SimulationCreator simulationCreator,
-                           final ResourceBundle bundle) {
+                           final CurrentProject currentProject, final ResourceBundle bundle) {
         this.stageManager = stageManager;
         this.fileChooserManager = fileChooserManager;
         this.jsonManager = jsonManager;
         this.simulationCreator = simulationCreator;
+        this.currentProject = currentProject;
         this.bundle = bundle;
 
         final Gson gson = new GsonBuilder()
@@ -64,6 +71,18 @@ public class SimulationSaver {
                 return new ObjectWithMetadata<>(oldObject, oldMetadata);
             }
         });
+    }
+
+    public void saveConfiguration(Trace trace, List<Integer> timestamps) throws IOException {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
+        fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + SIMULATION_EXTENSION);
+        fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", SIMULATION_EXTENSION));
+        final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
+        if (path != null) {
+            SimulationConfiguration configuration = simulationCreator.createConfiguration(trace, timestamps, true);
+            this.jsonManager.writeToFile(path, configuration);
+        }
     }
 
 
@@ -97,7 +116,7 @@ public class SimulationSaver {
             int numberGeneratedTraces = traces.size();
             //Starts counting with 1 in the file name
             for(int i = 1; i <= numberGeneratedTraces; i++) {
-                final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + ".json");
+                final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + SIMULATION_EXTENSION);
                 //String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
                 // TODO: Metadata
                 this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath);
