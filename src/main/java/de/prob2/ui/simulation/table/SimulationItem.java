@@ -1,10 +1,17 @@
 package de.prob2.ui.simulation.table;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import de.prob.json.JsonManager;
 import de.prob.statespace.Trace;
 import de.prob2.ui.simulation.SimulationCheckingConfiguration;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -12,19 +19,17 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class SimulationItem {
-
-    private SimulationType type;
-
-    private String configuration;
+    public static final JsonDeserializer<SimulationItem> JSON_DESERIALIZER = SimulationItem::new;
 
     private SimulationCheckingConfiguration simulationCheckingConfiguration;
 
-    private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+    private transient ObjectProperty<Checked> checked;
 
     private transient SimulationStats simulationStats;
 
@@ -34,15 +39,20 @@ public class SimulationItem {
 
     public SimulationItem(SimulationCheckingConfiguration simulationCheckingConfiguration) {
         this.simulationCheckingConfiguration = simulationCheckingConfiguration;
+        initListeners();
+    }
+
+    private SimulationItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
+        final JsonObject object = json.getAsJsonObject();
+        this.simulationCheckingConfiguration = JsonManager.checkDeserialize(context, object, "simulationCheckingConfiguration", SimulationCheckingConfiguration.class);
+        initListeners();
+    }
+
+    private void initListeners() {
+        this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
         this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
         this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
         this.simulationStats = null;
-        updateItem();
-    }
-
-    private void updateItem() {
-        this.type = simulationCheckingConfiguration.getType();
-        this.configuration = simulationCheckingConfiguration.getConfiguration();
     }
 
     public void setChecked(Checked checked) {
@@ -58,11 +68,11 @@ public class SimulationItem {
     }
 
     public String getTypeAsName() {
-        return type.getName();
+        return simulationCheckingConfiguration.getType().getName();
     }
 
     public SimulationType getType() {
-        return type;
+        return simulationCheckingConfiguration.getType();
     }
 
     public SimulationCheckingConfiguration getSimulationConfiguration() {
@@ -70,12 +80,12 @@ public class SimulationItem {
     }
 
     public String getConfiguration() {
-        return configuration;
+        return simulationCheckingConfiguration.getConfiguration();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, configuration);
+        return Objects.hash(simulationCheckingConfiguration);
     }
 
     @Override
@@ -84,7 +94,7 @@ public class SimulationItem {
             return false;
         }
         SimulationItem otherItem = (SimulationItem) obj;
-        return this.configuration.equals(otherItem.getConfiguration()) && this.type.equals(otherItem.getType());
+        return this.simulationCheckingConfiguration.equals(otherItem.simulationCheckingConfiguration);
     }
 
     public void reset() {

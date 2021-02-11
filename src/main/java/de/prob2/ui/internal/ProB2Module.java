@@ -18,6 +18,8 @@ import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.simulation.SimulationCheckingConfiguration;
+import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.ltl.LTLData;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -122,6 +124,9 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(LTLFormulaItem.class, LTLFormulaItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLPatternItem.class, LTLPatternItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLData.class, LTLData.JSON_DESERIALIZER)
+			.registerTypeAdapter(SimulationItem.class, SimulationItem.JSON_DESERIALIZER)
+			.registerTypeAdapter(SimulationCheckingConfiguration.class, SimulationCheckingConfiguration.JSON_DESERIALIZER)
+			.registerTypeAdapter(SimulationCheckingConfiguration.SimulationCheckingInformation.class, SimulationCheckingConfiguration.SimulationCheckingInformation.JSON_DESERIALIZER)
 			.registerTypeAdapter(SymbolicCheckingFormulaItem.class, SymbolicCheckingFormulaItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(SymbolicAnimationItem.class, SymbolicAnimationItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(TestCaseGenerationItem.McdcInformation.class, TestCaseGenerationItem.McdcInformation.JSON_DESERIALIZER)

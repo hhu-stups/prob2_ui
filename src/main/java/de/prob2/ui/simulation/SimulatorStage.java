@@ -364,6 +364,7 @@ public class SimulatorStage extends Stage {
         Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			configurationPath.set(path);
+			injector.getInstance(SimulationChoosingStage.class).setPath(path);
 			lbTime.setText("");
 			this.time = 0;
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
@@ -397,7 +398,6 @@ public class SimulatorStage extends Stage {
 	public void addSimulation() {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
-		choosingStage.setPath(configurationPath.get());
 		choosingStage.showAndWait();
 	}
 
