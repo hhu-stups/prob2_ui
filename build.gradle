@@ -13,6 +13,7 @@ apply plugin: 'eclipse'
 
 project.group = "de.hhu.stups"
 project.version = "1.1.1-SNAPSHOT"
+final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 if (project != rootProject) {
 	throw new GradleException(
@@ -41,9 +42,11 @@ targetCompatibility="1.8"
 
 repositories {
 	mavenCentral()
-	maven {
-		name "sonatype snapshots"
-		url "https://oss.sonatype.org/content/repositories/snapshots"
+	if (isSnapshot) {
+		maven {
+			name "sonatype snapshots"
+			url "https://oss.sonatype.org/content/repositories/snapshots"
+		}
 	}
 }
 
