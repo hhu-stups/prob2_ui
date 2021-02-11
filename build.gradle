@@ -37,9 +37,6 @@ wrapper {
 	distributionType = Wrapper.DistributionType.ALL
 }
 
-sourceCompatibility="1.8"
-targetCompatibility="1.8"
-
 repositories {
 	mavenCentral()
 	if (isSnapshot) {
@@ -50,13 +47,10 @@ repositories {
 	}
 }
 
-// Our actual application class is de.prob2.ui.ProB2.
-// See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
-mainClassName = "de.prob2.ui.Main"
-
-applicationDefaultJvmArgs += [
-	"-Xss2M",
-]
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 // Module export/open declarations for Java 9+
 def exports = []
@@ -80,9 +74,19 @@ exports += [
 	"javafx.graphics/com.sun.javafx.css",
 ]
 
-if (JavaVersion.current().java9Compatible) {
-	applicationDefaultJvmArgs += exports.collect {"--add-exports=${it}=ALL-UNNAMED".toString()}
-	applicationDefaultJvmArgs += opens.collect {"--add-opens=${it}=ALL-UNNAMED".toString()}
+application {
+	// Our actual application class is de.prob2.ui.ProB2.
+	// See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
+	mainClass = "de.prob2.ui.Main"
+
+	applicationDefaultJvmArgs += [
+		"-Xss2M",
+	]
+
+	if (JavaVersion.current().java9Compatible) {
+		applicationDefaultJvmArgs += exports.collect {"--add-exports=${it}=ALL-UNNAMED".toString()}
+		applicationDefaultJvmArgs += opens.collect {"--add-opens=${it}=ALL-UNNAMED".toString()}
+	}
 }
 
 tasks.withType(JavaCompile) {
@@ -241,7 +245,7 @@ task multiPlatformShadowJar(type: ShadowJar) {
 	manifest {
 		inheritFrom(jar.manifest)
 		attributes([
-				"Main-Class": mainClassName,
+				"Main-Class": application.mainClass,
 				"Multi-Release": "true",
 		])
 	}
@@ -291,7 +295,7 @@ task jpackage(type: Exec) {
 		"--dest", project.distsDirectory.get().asFile,
 		"--input", shadowJarFile.parent,
 		"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
-		'--main-class', mainClassName,
+		'--main-class', application.mainClass,
 		// When targetting Linux, jpackage doesn't handle spaces in the application name correctly.
 		"--name", osdetector.os == "linux" ? applicationNameNoSpaces : applicationName,
 		// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
