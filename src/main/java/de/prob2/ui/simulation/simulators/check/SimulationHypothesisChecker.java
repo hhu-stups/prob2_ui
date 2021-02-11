@@ -3,11 +3,27 @@ package de.prob2.ui.simulation.simulators.check;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
-import org.apache.commons.math3.analysis.function.Gaussian;
+import org.apache.commons.math3.special.Erf;
 
 import java.util.Map;
 
 public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
+
+	public static class DistributionFunction {
+
+		private double mu;
+
+		private double sigma;
+
+		public DistributionFunction(double mu, double sigma) {
+			this.mu = mu;
+			this.sigma = sigma;
+		}
+
+		public double value(double x) {
+			return 0.5 * (1 + Erf.erf((x - mu)/(Math.sqrt(2*sigma*sigma))));
+		}
+	}
 
 	public enum HypothesisCheckingType {
 		LEFT_TAILED("Left-tailed hypothesis test"),
@@ -33,13 +49,16 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
 	private final double probability;
 
+	private final double faultTolerance;
+
     private HypothesisCheckResult result;
 
     public SimulationHypothesisChecker(final CurrentTrace currentTrace, final Trace trace, final int numberExecutions, final SimulationCheckingType type,
-									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final Map<String, Object> additionalInformation) {
+									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final double faultTolerance, final Map<String, Object> additionalInformation) {
         super(currentTrace, trace, numberExecutions, type, additionalInformation);
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
+		this.faultTolerance = faultTolerance;
 		this.result = HypothesisCheckResult.NOT_FINISHED;
     }
 
@@ -48,17 +67,17 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		double p = probability;
     	double mu = Math.round(n * p);
     	double sigma = Math.sqrt(n * p * (1 - p));
-		Gaussian gaussian = new Gaussian(mu, sigma);
+		DistributionFunction dsf = new DistributionFunction(mu, sigma);
 		double coverage = 0.0;
 
 		int range = 0;
 
-		for(int i = 1; i <= Math.ceil(mu/2); i++) {
-			if(100.0 - coverage < p) {
+		for(int i = 0; i <= n; i++) {
+			if(1.0 - coverage < faultTolerance) {
 				range = i;
 				break;
 			}
-			coverage = gaussian.value(mu + i + 0.5) - gaussian.value(mu - i - 0.5);
+			coverage = dsf.value(mu + i + 0.5) - dsf.value(mu - i - 0.5);
 		}
 		if(numberSuccess >= mu - range && numberSuccess <= mu + range) {
 			this.result = HypothesisCheckResult.SUCCESS;
@@ -72,28 +91,19 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		double p = probability;
 		double mu = Math.round(n * p);
 		double sigma = Math.sqrt(n * p * (1 - p));
-		Gaussian gaussian = new Gaussian(mu, sigma);
+		DistributionFunction dsf = new DistributionFunction(mu, sigma);
 		double coverage = 0.0;
 
 		int range = 0;
 
-		if(p >= 0.5) {
-			for (int i = 1; i <= mu; i++) {
-				if (100.0 - coverage < p) {
-					range = i;
-					break;
-				}
-				coverage = 100.0 - gaussian.value(mu - i - 0.5);
+		for (int i = 0; i <= n; i++) {
+			if (1.0 - coverage < faultTolerance) {
+				range = i;
+				break;
 			}
-		} else {
-			for (int i = 1; i <= mu; i++) {
-				if (100.0 - coverage >= p) {
-					range = i;
-					break;
-				}
-				coverage = 100.0 - gaussian.value(mu + i - 0.5);
-			}
+			coverage = 1.0 - dsf.value(mu - i - 0.5);
 		}
+
 		if(numberSuccess >= mu - range && numberSuccess <= n) {
 			this.result = HypothesisCheckResult.SUCCESS;
 		} else {
@@ -106,28 +116,19 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		double p = probability;
 		int mu = (int) Math.round(n * p);
 		double sigma = Math.sqrt(n * p * (1 - p));
-		Gaussian gaussian = new Gaussian(mu, sigma);
+		DistributionFunction dsf = new DistributionFunction(mu, sigma);
 		double coverage = 0.0;
 
 		int range = 0;
 
-		if(p >= 0.5) {
-			for (int i = 1; i <= mu; i++) {
-				if (100.0 - coverage < p) {
-					range = i;
-					break;
-				}
-				coverage = gaussian.value(mu + i + 0.5);
+		for (int i = 0; i <= n; i++) {
+			if (1.0 - coverage < faultTolerance) {
+				range = i;
+				break;
 			}
-		} else {
-			for (int i = 1; i <= mu; i++) {
-				if (100.0 - coverage >= p) {
-					range = i;
-					break;
-				}
-				coverage = gaussian.value(mu - i + 0.5);
-			}
+			coverage = dsf.value(mu + i + 0.5);
 		}
+
 		if(numberSuccess >= 0 && numberSuccess <= mu + range) {
 			this.result = HypothesisCheckResult.SUCCESS;
 		} else {

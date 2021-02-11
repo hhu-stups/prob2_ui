@@ -73,4 +73,7 @@
 
 	<Label text="%simulation.choice.probability" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
 	<TextField fx:id="tfProbability" GridPane.rowIndex="7" GridPane.columnIndex="2"/>
+
+	<Label text="%simulation.choice.faultTolerance" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfFaultTolerance" GridPane.rowIndex="8" GridPane.columnIndex="2"/>
 </fx:root>

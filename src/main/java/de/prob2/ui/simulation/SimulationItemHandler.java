@@ -103,6 +103,7 @@ public class SimulationItemHandler {
         SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
         SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getField("HYPOTHESIS_CHECKING_TYPE");
         double probability = (double) item.getField("PROBABILITY");
+        double faultTolerance = (double) item.getField("FAULT_TOLERANCE");
 
         if(item.containsField("PREDICATE")) {
             additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
@@ -112,7 +113,7 @@ public class SimulationItemHandler {
             additionalInformation.put("TIME", item.getField("TIME"));
         }
 
-        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(currentTrace, trace, executions, checkingType, hypothesisCheckingType, probability, additionalInformation);
+        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(currentTrace, trace, executions, checkingType, hypothesisCheckingType, probability, faultTolerance, additionalInformation);
         SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path.toFile());
         Thread thread = new Thread(() -> {
             hypothesisChecker.run();
