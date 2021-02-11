@@ -1,25 +1,18 @@
 package de.prob2.ui.simulation.choice;
 
 import com.google.inject.Injector;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceViewHandler;
-import de.prob2.ui.simulation.SimulationCheckingConfiguration;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
@@ -27,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 
 public class SimulationChoosingStage extends Stage {
@@ -139,7 +131,7 @@ public class SimulationChoosingStage extends Stage {
 
 
 	private SimulationItem extractItem() {
-		return new SimulationItem(new SimulationCheckingConfiguration(this.extractType(), this.extractInformation()));
+		return new SimulationItem(this.extractType(), this.extractInformation());
 	}
 
 	private SimulationType extractType() {

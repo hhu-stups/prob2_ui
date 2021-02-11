@@ -61,19 +61,19 @@ public class SimulationItemHandler {
 
     private Map<String, Object> extractAdditionalInformation(SimulationItem item) {
         Map<String, Object> additionalInformation = new HashMap<>();
-        if(item.getSimulationConfiguration().containsField("STEPS_PER_EXECUTION")) {
-            additionalInformation.put("STEPS_PER_EXECUTION", item.getSimulationConfiguration().getField("STEPS_PER_EXECUTION"));
-        } else if(item.getSimulationConfiguration().containsField("ENDING_PREDICATE")) {
-            additionalInformation.put("ENDING_PREDICATE", item.getSimulationConfiguration().getField("ENDING_PREDICATE"));
-        } else if(item.getSimulationConfiguration().containsField("ENDING_TIME")) {
-            additionalInformation.put("ENDING_TIME", item.getSimulationConfiguration().getField("ENDING_TIME"));
+        if(item.containsField("STEPS_PER_EXECUTION")) {
+            additionalInformation.put("STEPS_PER_EXECUTION", item.getField("STEPS_PER_EXECUTION"));
+        } else if(item.containsField("ENDING_PREDICATE")) {
+            additionalInformation.put("ENDING_PREDICATE", item.getField("ENDING_PREDICATE"));
+        } else if(item.containsField("ENDING_TIME")) {
+            additionalInformation.put("ENDING_TIME", item.getField("ENDING_TIME"));
         }
         return additionalInformation;
     }
 
     private void handleMonteCarloSimulation(SimulationItem item, boolean checkAll) {
         Trace trace = currentTrace.get();
-        int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
+        int executions = (int) item.getField("EXECUTIONS");
         Map<String, Object> additionalInformation = extractAdditionalInformation(item);
         SimulationMonteCarlo monteCarlo = new SimulationMonteCarlo(currentTrace, trace, executions, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), monteCarlo, path.toFile());
@@ -98,18 +98,18 @@ public class SimulationItemHandler {
 
     private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
         Trace trace = currentTrace.get();
-        int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
+        int executions = (int) item.getField("EXECUTIONS");
         Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-        SimulationCheckingType checkingType = (SimulationCheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
-        SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getSimulationConfiguration().getField("HYPOTHESIS_CHECKING_TYPE");
-        double probability = (double) item.getSimulationConfiguration().getField("PROBABILITY");
+        SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
+        SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getField("HYPOTHESIS_CHECKING_TYPE");
+        double probability = (double) item.getField("PROBABILITY");
 
-        if(item.getSimulationConfiguration().containsField("PREDICATE")) {
-            additionalInformation.put("PREDICATE", item.getSimulationConfiguration().getField("PREDICATE"));
+        if(item.containsField("PREDICATE")) {
+            additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
         }
 
-        if(item.getSimulationConfiguration().containsField("TIME")) {
-            additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
+        if(item.containsField("TIME")) {
+            additionalInformation.put("TIME", item.getField("TIME"));
         }
 
         SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(currentTrace, trace, executions, checkingType, hypothesisCheckingType, probability, additionalInformation);
@@ -141,19 +141,19 @@ public class SimulationItemHandler {
 
     private void handleEstimation(SimulationItem item, boolean checkAll) {
         Trace trace = currentTrace.get();
-        int executions = (int) item.getSimulationConfiguration().getField("EXECUTIONS");
+        int executions = (int) item.getField("EXECUTIONS");
         Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-        SimulationCheckingType checkingType = (SimulationCheckingType) item.getSimulationConfiguration().getField("CHECKING_TYPE");
-        SimulationEstimator.EstimationType estimationType = (SimulationEstimator.EstimationType) item.getSimulationConfiguration().getField("ESTIMATION_TYPE");
-        double desiredValue = (double) item.getSimulationConfiguration().getField("DESIRED_VALUE");
-        double faultTolerance = (double) item.getSimulationConfiguration().getField("FAULT_TOLERANCE");
+        SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
+        SimulationEstimator.EstimationType estimationType = (SimulationEstimator.EstimationType) item.getField("ESTIMATION_TYPE");
+        double desiredValue = (double) item.getField("DESIRED_VALUE");
+        double faultTolerance = (double) item.getField("FAULT_TOLERANCE");
 
-        if(item.getSimulationConfiguration().containsField("PREDICATE")) {
-            additionalInformation.put("PREDICATE", item.getSimulationConfiguration().getField("PREDICATE"));
+        if(item.containsField("PREDICATE")) {
+            additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
         }
 
-        if(item.getSimulationConfiguration().containsField("TIME")) {
-            additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
+        if(item.containsField("TIME")) {
+            additionalInformation.put("TIME", item.getField("TIME"));
         }
 
         SimulationEstimator simulationEstimator = new SimulationEstimator(currentTrace, trace, executions, checkingType, estimationType, desiredValue, faultTolerance, additionalInformation);
@@ -185,10 +185,10 @@ public class SimulationItemHandler {
 
     private void handleTraceReplay(SimulationItem item, boolean checkAll) {
         /*Trace trace = currentTrace.get();
-        ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
+        ReplayTrace replayTrace = (ReplayTrace) item.getField("TRACE");
         Map<String, Object> additionalInformation = new HashMap<>();
-        if(item.getSimulationConfiguration().containsField("TIME")) {
-            additionalInformation.put("TIME", item.getSimulationConfiguration().getField("TIME"));
+        if(item.containsField("TIME")) {
+            additionalInformation.put("TIME", item.getField("TIME"));
         }
         SimulationTraceChecker traceChecker = new SimulationTraceChecker(currentTrace, trace, replayTrace, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), traceChecker, path.toFile());
