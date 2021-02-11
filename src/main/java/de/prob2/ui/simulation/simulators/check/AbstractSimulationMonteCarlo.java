@@ -65,8 +65,8 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
         for(Transition transition : trace.getTransitionList()) {
             State destination = transition.getDestination();
             if(destination.isInitialised()) {
-                AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
-                if ("FALSE".equals(evalResult.toString())) {
+                String evalResult = cache.readValueWithCaching(destination, invariant);
+                if ("FALSE".equals(evalResult)) {
                     invariantOk = false;
                     break;
                 }
@@ -79,13 +79,13 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 
     public void checkPredicateFinal(Trace trace) {
         boolean predicateOk = true;
-        String invariant = (String) additionalInformation.get("PREDICATE");
+        String finalPredicate = (String) additionalInformation.get("PREDICATE");
         int size = trace.getTransitionList().size();
         Transition transition = trace.getTransitionList().get(size - 1);
         State destination = transition.getDestination();
         if(destination.isInitialised()) {
-            AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
-            if ("FALSE".equals(evalResult.toString())) {
+            String evalResult = cache.readValueWithCaching(destination, finalPredicate);
+            if ("FALSE".equals(evalResult)) {
                 predicateOk = false;
             }
         }
@@ -96,12 +96,12 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 
     public void checkPredicateEventually(Trace trace) {
         boolean predicateOk = false;
-        String invariant = (String) additionalInformation.get("PREDICATE");
+        String predicate = (String) additionalInformation.get("PREDICATE");
         for(Transition transition : trace.getTransitionList()) {
             State destination = transition.getDestination();
             if(destination.isInitialised()) {
-                AbstractEvalResult evalResult = destination.eval(invariant, FormulaExpand.TRUNCATE);
-                if ("TRUE".equals(evalResult.toString())) {
+                String evalResult = cache.readValueWithCaching(destination, predicate);
+                if ("TRUE".equals(evalResult)) {
                     predicateOk = true;
                     break;
                 }
