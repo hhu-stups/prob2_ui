@@ -9,7 +9,7 @@
 
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.GridPane?>
-<fx:root type="SimulationStatsView" title="%simulation.choice.title"
+<fx:root type="SimulationStatsView" title="%simulation.statistics.title"
          resizable="false" minWidth="300.0" minHeight="600.0" xmlns:fx="http://javafx.com/fxml/1">
     <scene>
         <Scene stylesheets="@/prob.css">
