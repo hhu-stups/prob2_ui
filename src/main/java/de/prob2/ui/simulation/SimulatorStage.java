@@ -88,6 +88,7 @@ public class SimulatorStage extends Stage {
 				List<MenuItem> menuItems = FXCollections.observableArrayList();
 
 				MenuItem checkItem = new MenuItem(bundle.getString("simulation.contextMenu.check"));
+				checkItem.disableProperty().bind(configurationPath.isNull().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty())));
 				checkItem.setOnAction(e-> simulationItemHandler.checkItem(this.getItem(), false));
 
 				MenuItem removeItem = new MenuItem(bundle.getString("simulation.contextMenu.remove"));
@@ -95,12 +96,6 @@ public class SimulatorStage extends Stage {
 
 				menuItems.add(checkItem);
 				menuItems.add(removeItem);
-
-				this.itemProperty().addListener((observable, from, to) -> {
-					if(to != null) {
-						checkItem.disableProperty().bind(lastSimulator.isNull().or(lastSimulator.get().runningProperty()));
-					}
-				});
 
 				MenuItem playItem = new MenuItem(bundle.getString("simulation.contextMenu.play"));
 
