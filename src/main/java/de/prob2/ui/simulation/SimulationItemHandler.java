@@ -24,6 +24,7 @@ import javafx.collections.FXCollections;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -265,6 +266,16 @@ public class SimulationItemHandler {
         }, "Simulation Thread");
         currentJobThreads.add(thread);
         thread.start();
+    }
+
+    public void interrupt() {
+        List<Thread> removedThreads = new ArrayList<>();
+        for (Thread thread : currentJobThreads) {
+            thread.interrupt();
+            removedThreads.add(thread);
+        }
+        currentTrace.getStateSpace().sendInterrupt();
+        currentJobThreads.removeAll(removedThreads);
     }
 
     public BooleanExpression runningProperty() {
