@@ -37,7 +37,9 @@ import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.visb.VisBStage;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -57,7 +59,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -94,7 +95,7 @@ public class SimulatorStage extends Stage {
 				List<MenuItem> menuItems = FXCollections.observableArrayList();
 
 				MenuItem checkItem = new MenuItem(bundle.getString("simulation.contextMenu.check"));
-				checkItem.disableProperty().bind(configurationPath.isNull().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty())));
+				checkItem.disableProperty().bind(configurationPath.isNull().or(simulationItemHandler.runningProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
 				checkItem.setOnAction(e-> simulationItemHandler.checkItem(this.getItem(), false));
 
 				MenuItem removeItem = new MenuItem(bundle.getString("simulation.contextMenu.remove"));
@@ -183,6 +184,12 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private Button btSimulate;
+
+	@FXML
+	private Button btCheckMachine;
+
+	@FXML
+	private Button btCancel;
 
 	@FXML
 	private Button btAddSimulation;
@@ -275,6 +282,16 @@ public class SimulatorStage extends Stage {
 		});
 		btLoadConfiguration.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
 		btSimulate.disableProperty().bind(configurationPath.isNull().or(currentProject.currentMachineProperty().isNull()));
+		final BooleanProperty noSimulations = new SimpleBooleanProperty();
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
+			} else {
+				noSimulations.unbind();
+				noSimulations.set(true);
+			}
+		});
+		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(simulationItemHandler.runningProperty().or(noSimulations.or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
@@ -453,6 +470,17 @@ public class SimulatorStage extends Stage {
 			timer.cancel();
 			timer = null;
 		}
+	}
+
+	@FXML
+	private void checkMachine() {
+		Machine machine = currentProject.getCurrentMachine();
+		simulationItemHandler.handleMachine(machine);
+	}
+
+	@FXML
+	private void cancel() {
+
 	}
 
 	@FXML

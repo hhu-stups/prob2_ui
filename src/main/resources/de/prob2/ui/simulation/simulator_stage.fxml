@@ -50,6 +50,23 @@
 									</tooltip>
 								</Button>
 								<Spacer/>
+								<Button fx:id="btCheckMachine" disable="true" onAction="#checkMachine">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.checkMachine" />
+									</tooltip>
+								</Button>
+								<Button fx:id="btCancel" onAction="#cancel">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.cancel" />
+									</tooltip>
+								</Button>
+								<Spacer/>
 								<NavigationButtons/>
 								<Spacer/>
 								<Label fx:id="lbTime"/>

@@ -3,6 +3,7 @@ package de.prob2.ui.simulation;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -14,7 +15,12 @@ import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
@@ -34,11 +40,16 @@ public class SimulationItemHandler {
 
     private Path path;
 
+    private final ListProperty<Thread> currentJobThreads;
+
     @Inject
-    private SimulationItemHandler(final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector) {
+    private SimulationItemHandler(final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector,
+                                  final DisablePropertyController disablePropertyController) {
         this.currentTrace = currentTrace;
         this.stageManager = stageManager;
         this.injector = injector;
+        this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+        disablePropertyController.addDisableExpression(this.runningProperty());
     }
 
     public List<SimulationItem> getItems(final Machine machine) {
@@ -92,7 +103,9 @@ public class SimulationItemHandler {
                     item.setChecked(Checked.FAIL);
                 }
             });
+            currentJobThreads.remove(Thread.currentThread());
         });
+        currentJobThreads.add(thread);
         thread.start();
     }
 
@@ -136,7 +149,9 @@ public class SimulationItemHandler {
                         break;
                 }
             });
+            currentJobThreads.remove(Thread.currentThread());
         });
+        currentJobThreads.add(thread);
         thread.start();
     }
 
@@ -180,7 +195,9 @@ public class SimulationItemHandler {
                         break;
                 }
             });
+            currentJobThreads.remove(Thread.currentThread());
         });
+        currentJobThreads.add(thread);
         thread.start();
     }
 
@@ -227,7 +244,6 @@ public class SimulationItemHandler {
                 break;
             case ESTIMATION:
                 handleEstimation(item, checkAll);
-                // TODO
                 break;
             case TRACE_REPLAY:
                 handleTraceReplay(item, checkAll);
@@ -238,8 +254,25 @@ public class SimulationItemHandler {
     }
 
     public void handleMachine(Machine machine) {
-        //machine.getSymbolicAnimationFormulas().forEach(item -> handleItem(item, true));
-        // TODO
+        Thread thread = new Thread(() -> {
+            for (SimulationItem item : machine.getSimulations()) {
+                this.checkItem(item, true);
+                if(Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+            }
+            currentJobThreads.remove(Thread.currentThread());
+        }, "Simulation Thread");
+        currentJobThreads.add(thread);
+        thread.start();
+    }
+
+    public BooleanExpression runningProperty() {
+        return currentJobThreads.emptyProperty().not();
+    }
+
+    public boolean isRunning() {
+        return this.runningProperty().get();
     }
 
     public void setPath(Path path) {
