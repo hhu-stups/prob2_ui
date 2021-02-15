@@ -1087,7 +1087,7 @@
 .simulation-item {
 	-fx-cell-size: 6.8em;
 }
-.simulation-item .name {
+.simulation-item .id {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
 	-fx-font-size: 1.1em;

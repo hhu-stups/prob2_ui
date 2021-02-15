@@ -17,6 +17,9 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
@@ -24,9 +27,11 @@ import de.prob2.ui.simulation.simulators.SimulationCreator;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
+import de.prob2.ui.simulation.table.SimulationChoiceDebugItem;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
+import de.prob2.ui.simulation.table.SimulationOperationDebugItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.visb.VisBStage;
@@ -59,6 +64,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -376,15 +382,28 @@ public class SimulatorStage extends Stage {
 		SimulationConfiguration config = realTimeSimulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
-		// TODO
-		/*for(OperationConfiguration opConfig : config.getOperationConfigurations()) {
-			String opName = opConfig.getOpName();
-			List<ActivationConfiguration> activationConfiguration = opConfig.getActivation();
-			String priority = String.valueOf(opConfig.getPriority());
-			Map<String, String> destState = opConfig.getDestState();
-			observableList.add(new SimulationDebugItem(opName, activationConfiguration, priority, destState));
-		}*/
-
+		for(ActivationConfiguration activationConfig : config.getActivationConfigurations()) {
+			if(activationConfig instanceof ActivationOperationConfiguration) {
+				ActivationOperationConfiguration opConfig = (ActivationOperationConfiguration) activationConfig;
+				String id = opConfig.getId();
+				String opName = opConfig.getOpName();
+				String time = opConfig.getTime();
+				String priority = String.valueOf(opConfig.getPriority());
+				List<String> activations = opConfig.getActivations();
+				ActivationOperationConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
+				String additionalGuards = opConfig.getAdditionalGuards();
+				Map<String, String> fixedVariables = opConfig.getFixedVariables();
+				Object probabilisticVariables = opConfig.getProbabilisticVariables();
+				observableList.add(new SimulationOperationDebugItem(id, opName, time, priority, activations, activationKind,
+									additionalGuards, fixedVariables, probabilisticVariables));
+			} else {
+				ActivationChoiceConfiguration choiceConfig = (ActivationChoiceConfiguration) activationConfig;
+				String id = choiceConfig.getId();
+				List<String> activations = choiceConfig.getActivations();
+				List<String> probability = choiceConfig.getProbability();
+				observableList.add(new SimulationChoiceDebugItem(id, activations, probability));
+			}
+		}
 		simulationDebugItems.setItems(observableList);
 	}
 

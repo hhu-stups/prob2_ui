@@ -4,12 +4,14 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -44,43 +46,10 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 		this.item = item;
 		if(item != null) {
 			this.itemBox.getChildren().clear();
-
-			Label lbOpName = new Label(item.getOpName());
-			lbOpName.getStyleClass().add("name");
-			this.itemBox.getChildren().add(lbOpName);
-
-			// TODO: Evaluated value of additional guard
-
-			if(!item.getActivationAsString().isEmpty()) {
-				Label lbActivation = new Label(String.format(bundle.getString("simulation.item.activation"), item.getActivation()));
-				lbActivation.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbActivation);
-			}
-
-			if(!item.getPriority().isEmpty()) {
-				Label lbPriority = new Label(String.format(bundle.getString("simulation.item.priority"), item.getPriority()));
-				lbPriority.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbPriority);
-			}
-
-			if(!item.getValuesAsString().isEmpty()) {
-				Label lbVariableValues = new Label(String.format(bundle.getString("simulation.item.values"), item.getValuesAsString()));
-				lbVariableValues.getStyleClass().add("information");
-				this.itemBox.getChildren().add(lbVariableValues);
-
-				Map<String, String> values = item.getValues();
-
-				if(currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised()) {
-					Map<String, String> evaluatedValues = new HashMap<>();
-					for (String key : values.keySet()) {
-						AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(currentTrace.getCurrentState(), (String) values.get(key));
-						evaluatedValues.put(key, evalResult.toString());
-					}
-					Label lbEvaluatedValues = new Label(String.format(bundle.getString("simulation.item.concreteValues"), evaluatedValues.toString()));
-					lbEvaluatedValues.getStyleClass().add("information");
-					this.itemBox.getChildren().add(lbEvaluatedValues);
-				}
-
+			if(item instanceof SimulationOperationDebugItem) {
+				updateOperationDebugItem();
+			} else {
+				updateChoiceDebugItem();
 			}
 			this.setPrefHeight(itemBox.getChildren().size() * 20.0f);
 			this.setGraphic(this.itemBox);
@@ -88,6 +57,79 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 		} else {
 			clear();
 		}
+	}
+
+	public void updateOperationDebugItem() {
+		SimulationOperationDebugItem item = (SimulationOperationDebugItem) this.item;
+		Label lbID = new Label(item.getId());
+		lbID.getStyleClass().add("id");
+		this.itemBox.getChildren().add(lbID);
+
+		Label lbOpName = new Label(item.getOpName());
+		lbOpName.getStyleClass().add("information");
+		this.itemBox.getChildren().add(lbOpName);
+
+		Label lbTime = new Label(item.getTime());
+		lbTime.getStyleClass().add("information");
+		this.itemBox.getChildren().add(lbTime);
+
+		if(!item.getPriority().isEmpty()) {
+			Label lbPriority = new Label(String.format(bundle.getString("simulation.item.priority"), item.getPriority()));
+			lbPriority.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbPriority);
+		}
+
+
+		if(!item.getActivationsAsString().isEmpty()) {
+			Label lbActivation = new Label(String.format(bundle.getString("simulation.item.activations"), item.getActivationsAsString()));
+			lbActivation.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbActivation);
+		}
+
+		Label lbActivationKind = new Label(String.format(bundle.getString("simulation.item.activationKind"), item.getActivationKind()));
+		lbActivationKind.getStyleClass().add("information");
+		this.itemBox.getChildren().add(lbActivationKind);
+
+
+		if(!item.getAdditionalGuardsAsString().isEmpty()) {
+			Label lbAdditionalGuards = new Label(String.format(bundle.getString("simulation.item.additionalGuards"), item.getAdditionalGuards()));
+			lbAdditionalGuards.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbAdditionalGuards);
+		}
+
+		if(!item.getFixedVariablesAsString().isEmpty()) {
+			Label lbFixedVariables = new Label(String.format(bundle.getString("simulation.item.fixedVariables"), item.getFixedVariablesAsString()));
+			lbFixedVariables.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbFixedVariables);
+		}
+
+		if(!item.getProbabilisticVariablesAsString().isEmpty()) {
+			Label lbProbabilisticVariables = new Label(String.format(bundle.getString("simulation.item.probabilisticVariables"), item.getProbabilisticVariablesAsString()));
+			lbProbabilisticVariables.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbProbabilisticVariables);
+		}
+
+		// TODO: Evaluated values
+	}
+
+	public void updateChoiceDebugItem() {
+		SimulationChoiceDebugItem item = (SimulationChoiceDebugItem) this.item;
+		Label lbID = new Label(item.getId());
+		lbID.getStyleClass().add("id");
+		this.itemBox.getChildren().add(lbID);
+
+		if(!item.getActivationsAsString().isEmpty()) {
+			Label lbActivation = new Label(String.format(bundle.getString("simulation.item.activations"), item.getActivationsAsString()));
+			lbActivation.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbActivation);
+		}
+
+		if(!item.getProbabilityAsString().isEmpty()) {
+			Label lbActivation = new Label(String.format(bundle.getString("simulation.item.probability"), item.getProbabilityAsString()));
+			lbActivation.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbActivation);
+		}
+
 	}
 
 	public void clear() {
