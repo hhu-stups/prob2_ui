@@ -65,11 +65,11 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 		lbID.getStyleClass().add("id");
 		this.itemBox.getChildren().add(lbID);
 
-		Label lbOpName = new Label(item.getOpName());
+		Label lbOpName = new Label(String.format(bundle.getString("simulation.item.operation"), item.getOpName()));
 		lbOpName.getStyleClass().add("information");
 		this.itemBox.getChildren().add(lbOpName);
 
-		Label lbTime = new Label(item.getTime());
+		Label lbTime = new Label(String.format(bundle.getString("simulation.item.time"), item.getTime()));
 		lbTime.getStyleClass().add("information");
 		this.itemBox.getChildren().add(lbTime);
 
