@@ -83,6 +83,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		});
 		symbolicModelCheckAlgorithmChoiceBox.getItems().setAll(SymbolicModelcheckCommand.Algorithm.values());
 		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
+		this.setResizable(true);
 	}
 	
 	public SymbolicGUIType getGUIType() {

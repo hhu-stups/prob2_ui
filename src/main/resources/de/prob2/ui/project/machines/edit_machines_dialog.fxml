@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 <fx:root type="Dialog" title=""
-		 xmlns:fx="http://javafx.com/fxml/1">
+		 xmlns:fx="http://javafx.com/fxml/1" resizable="true">
 	<dialogPane>
 		<DialogPane stylesheets="@/prob.css">
 			<content>

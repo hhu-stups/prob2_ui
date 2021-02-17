@@ -63,6 +63,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 
 	@FXML
 	private void initialize() {
+		this.setResizable(true);
 		this.prefsView.setPreferences(this.prefs);
 		this.preference = new Preference("", new HashMap<>());
 
