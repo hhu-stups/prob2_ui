@@ -73,14 +73,14 @@ public class VisBDebugStage extends Stage {
 
     private void removeHighlighting(VisBItem item) {
 		String id = item.getId();
-		String invocation = buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString("opacity"), wrapAsString("1.0"));
+		String invocation = buildInvocation("changeAttribute", wrapAsString(id), wrapAsString("opacity"), wrapAsString("1.0"));
 		// TO DO: if initial opacity was not 1.0, this does *not* reset the opacity to its initial value !!!
 		injector.getInstance(VisBStage.class).runScript(invocation);
 	}
 
 	private void applyHighlighting(VisBItem item) {
 		String id = item.getId();
-		String invocation = buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString("opacity"), wrapAsString("0.5"));
+		String invocation = buildInvocation("changeAttribute", wrapAsString(id), wrapAsString("opacity"), wrapAsString("0.5"));
 		// TO DO: maybe we can find better ways of highlighting an object, maybe using filters ?
 		injector.getInstance(VisBStage.class).runScript(invocation);
 	}

@@ -47,7 +47,7 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if(visBEvent != null) {
 				String id = visBEvent.getId();
-				String invocation = buildInvocation("changeAttribute", wrapAsString("#" + id), wrapAsString("opacity"), to ? wrapAsString("0.5") : wrapAsString("1.0"));
+				String invocation = buildInvocation("changeAttribute", wrapAsString(id), wrapAsString("opacity"), to ? wrapAsString("0.5") : wrapAsString("1.0"));
 				injector.getInstance(VisBStage.class).runScript(invocation);
 			}
 		});
