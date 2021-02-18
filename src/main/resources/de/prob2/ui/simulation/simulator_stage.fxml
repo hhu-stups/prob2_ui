@@ -98,21 +98,23 @@
 								</Button>
 							</HBox>
 							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
-								<content>
-									<TableView fx:id="simulationItems">
-										<columnResizePolicy>
-											<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-										</columnResizePolicy>
-										<columns>
-											<TableColumn fx:id="simulationStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-											<TableColumn fx:id="simulationTypeColumn" minWidth="140.0" maxWidth="140.0" text="%simulation.tableView.type" />
-											<TableColumn fx:id="simulationConfigurationColumn" minWidth="80.0" text="%simulation.tableView.configuration" />
-										</columns>
-										<placeholder>
-											<Label text="%simulation.tableView.noSimulation" />
-										</placeholder>
-									</TableView>
-								</content>
+								<TableView fx:id="simulationItems">
+									<columnResizePolicy>
+										<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+									</columnResizePolicy>
+									<columns>
+										<TableColumn fx:id="simulationStatusColumn" style="-fx-alignment: CENTER;"
+													 minWidth="${fontSize.fontSize * 6}"
+													 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+										<TableColumn fx:id="simulationTypeColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
+													 text="%simulation.tableView.type"/>
+										<TableColumn fx:id="simulationConfigurationColumn" minWidth="80.0"
+													 text="%simulation.tableView.configuration"/>
+									</columns>
+									<placeholder>
+										<Label text="%simulation.tableView.noSimulation"/>
+									</placeholder>
+								</TableView>
 							</ScrollPane>
 						</VBox>
 					</AnchorPane>

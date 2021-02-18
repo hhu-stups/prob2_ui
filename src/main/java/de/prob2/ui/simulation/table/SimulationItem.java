@@ -171,7 +171,7 @@ public class SimulationItem {
             }
         }
         if(!configurations.isEmpty()) {
-            return String.join(", ", configurations);
+            return String.join(",\n", configurations);
         }
         return type.name();
     }

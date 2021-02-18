@@ -1,18 +1,12 @@
 package de.prob2.ui.simulation.table;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.SimulationHelperFunctions;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
@@ -23,14 +17,11 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 
 	private SimulationDebugItem item;
 
-	private final CurrentTrace currentTrace;
-
 	private final ResourceBundle bundle;
 
-	public SimulationListViewDebugItem(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public SimulationListViewDebugItem(final StageManager stageManager, final ResourceBundle bundle) {
 		stageManager.loadFXML(this,"simulation_list_view_item.fxml");
 		this.item = null;
-		this.currentTrace = currentTrace;
 		this.bundle = bundle;
 	}
 
