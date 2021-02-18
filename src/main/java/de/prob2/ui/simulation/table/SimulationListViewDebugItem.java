@@ -114,13 +114,6 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 			lbActivation.getStyleClass().add("information");
 			this.itemBox.getChildren().add(lbActivation);
 		}
-
-		if(!item.getProbabilityAsString().isEmpty()) {
-			Label lbActivation = new Label(String.format(bundle.getString("simulation.item.probability"), item.getProbabilityAsString()));
-			lbActivation.getStyleClass().add("information");
-			this.itemBox.getChildren().add(lbActivation);
-		}
-
 	}
 
 	public void clear() {

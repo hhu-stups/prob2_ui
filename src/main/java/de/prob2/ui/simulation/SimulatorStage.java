@@ -415,9 +415,8 @@ public class SimulatorStage extends Stage {
 			} else {
 				ActivationChoiceConfiguration choiceConfig = (ActivationChoiceConfiguration) activationConfig;
 				String id = choiceConfig.getId();
-				List<String> activations = choiceConfig.getActivations();
-				List<String> probability = choiceConfig.getProbability();
-				observableList.add(new SimulationChoiceDebugItem(id, activations, probability));
+				Map<String, String> activations = choiceConfig.getActivations();
+				observableList.add(new SimulationChoiceDebugItem(id, activations));
 			}
 		}
 		simulationDebugItems.setItems(observableList);

@@ -40,16 +40,12 @@ public class SimulationFileHandler {
         if(!activationElement.getAsJsonObject().has("execute")) {
             JsonObject activationAsObject = activationElement.getAsJsonObject();
             String id = activationAsObject.get("id").getAsString();
-            JsonArray activationsArray = activationAsObject.getAsJsonArray("activating");
-            JsonArray probabilityArray = activationAsObject.getAsJsonArray("probability");
-            assert(activationsArray.size() == probabilityArray.size());
-            List<String> activations = new ArrayList<>();
-            List<String> probability = new ArrayList<>();
-            for(int i = 0; i < activationsArray.size(); i++) {
-                activations.add(activationsArray.get(i).getAsString());
-                probability.add(probabilityArray.get(i).getAsString());
+            JsonObject chooseActivationAsObject = activationAsObject.getAsJsonObject("chooseActivation");
+            Map<String, String> activations = new HashMap<>();
+            for(String key : chooseActivationAsObject.keySet()) {
+                activations.put(key, chooseActivationAsObject.get(key).getAsString());
             }
-            return new ActivationChoiceConfiguration(id, activations, probability);
+            return new ActivationChoiceConfiguration(id, activations);
         } else {
             JsonObject activationAsObject = activationElement.getAsJsonObject();
             String id = activationAsObject.get("id").getAsString();

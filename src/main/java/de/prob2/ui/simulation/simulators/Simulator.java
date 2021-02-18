@@ -401,9 +401,9 @@ public abstract class Simulator {
                                  List<String> parametersAsString, String parameterPredicates) {
         double probabilityMinimum = 0.0;
         double randomDouble = random.nextDouble();
-        for(int i = 0; i < activationChoiceConfiguration.getActivations().size(); i++) {
-            ActivationConfiguration activationConfiguration = activationConfigurationMap.get(activationChoiceConfiguration.getActivations().get(i));;
-            double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, activationChoiceConfiguration.getProbability().get(i)));
+        for(String id : activationChoiceConfiguration.getActivations().keySet()) {
+            ActivationConfiguration activationConfiguration = activationConfigurationMap.get(id);
+            double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, activationChoiceConfiguration.getActivations().get(id)));
             if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
                 handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
                 break;

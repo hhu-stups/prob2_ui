@@ -1,21 +1,18 @@
 package de.prob2.ui.simulation.table;
 
-import java.util.List;
+import java.util.Map;
 
 public class SimulationChoiceDebugItem extends SimulationDebugItem {
 
-	private final List<String> activations;
+	private final Map<String, String> activations;
 
-	private final List<String> probability;
-
-	public SimulationChoiceDebugItem(String id, List<String> activations, List<String> probability) {
+	public SimulationChoiceDebugItem(String id, Map<String, String> activations) {
 		super(id);
 		this.activations = activations;
-		this.probability = probability;
 	}
 
 
-	public List<String> getActivations() {
+	public Map<String, String> getActivations() {
 		return activations;
 	}
 
@@ -23,11 +20,4 @@ public class SimulationChoiceDebugItem extends SimulationDebugItem {
 		return activations.toString();
 	}
 
-	public List<String> getProbability() {
-		return probability;
-	}
-
-	public String getProbabilityAsString() {
-		return probability.toString();
-	}
 }
