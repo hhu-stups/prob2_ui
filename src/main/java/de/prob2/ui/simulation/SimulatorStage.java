@@ -403,9 +403,9 @@ public class SimulatorStage extends Stage {
 				ActivationOperationConfiguration opConfig = (ActivationOperationConfiguration) activationConfig;
 				String id = opConfig.getId();
 				String opName = opConfig.getOpName();
-				String time = opConfig.getTime();
+				String time = opConfig.getAfter();
 				String priority = String.valueOf(opConfig.getPriority());
-				List<String> activations = opConfig.getActivations();
+				List<String> activations = opConfig.getActivating();
 				ActivationOperationConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
 				String additionalGuards = opConfig.getAdditionalGuards();
 				Map<String, String> fixedVariables = opConfig.getFixedVariables();

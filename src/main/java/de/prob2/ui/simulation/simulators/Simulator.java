@@ -1,11 +1,9 @@
 package de.prob2.ui.simulation.simulators;
 
-import com.github.krukow.clj_lang.PersistentVector;
 import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob.statespace.TraceElement;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
@@ -22,7 +20,6 @@ import javafx.beans.value.ChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -309,7 +306,7 @@ public abstract class Simulator {
     public Trace executeActivatedOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
         String id = activationConfig.getId();
 	    String chosenOp = activationConfig.getOpName();
-        List<String> activationConfiguration = activationConfig.getActivations();
+        List<String> activationConfiguration = activationConfig.getActivating();
 
         List<Activation> activationForOperation = configurationToActivation.get(id);
         List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
@@ -423,7 +420,7 @@ public abstract class Simulator {
         }
         String id = activationOperationConfiguration.getId();
         String opName = activationOperationConfiguration.getOpName();
-        String time = activationOperationConfiguration.getTime();
+        String time = activationOperationConfiguration.getAfter();
         ActivationOperationConfiguration.ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
         String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
         Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();

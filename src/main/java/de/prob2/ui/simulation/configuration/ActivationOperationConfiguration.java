@@ -9,9 +9,9 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         SINGLE, SINGLE_MIN, SINGLE_MAX, MULTI
     }
 
-    private final String op;
+    private final String execute;
 
-    private final String time;
+    private final String after;
 
     private final int priority;
 
@@ -23,27 +23,27 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
     private final Object probabilisticVariables;
 
-    private final List<String> activations;
+    private final List<String> activating;
 
     public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
                                             Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations) {
         super(id);
-        this.op = op;
-        this.time = time;
+        this.execute = op;
+        this.after = time;
         this.priority = priority;
         this.additionalGuards = additionalGuards;
         this.activationKind = activationKind;
         this.fixedVariables = fixedVariables;
         this.probabilisticVariables = probabilisticVariables;
-        this.activations = activations;
+        this.activating = activations;
     }
 
     public String getOpName() {
-        return op;
+        return execute;
     }
 
-    public String getTime() {
-        return time;
+    public String getAfter() {
+        return after;
     }
 
     public int getPriority() {
@@ -66,8 +66,8 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         return probabilisticVariables;
     }
 
-    public List<String> getActivations() {
-        return activations;
+    public List<String> getActivating() {
+        return activating;
     }
 
     @Override
@@ -78,13 +78,13 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
         sb.append("=");
         sb.append(id);
         sb.append(", ");
-        sb.append("op");
+        sb.append("execute");
         sb.append("=");
-        sb.append(op);
+        sb.append(execute);
         sb.append(", ");
-        sb.append("time");
+        sb.append("after");
         sb.append("=");
-        sb.append(time);
+        sb.append(after);
         sb.append(", ");
         sb.append("priority");
         sb.append("=");
@@ -114,11 +114,11 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
             sb.append(probabilisticVariables);
             sb.append(", ");
         }
-        if(activations != null) {
+        if(activating != null) {
             sb.append(", ");
-            sb.append("activations");
+            sb.append("activating");
             sb.append("=");
-            sb.append(activations);
+            sb.append(activating);
         }
         sb.append(")");
         return sb.toString();
