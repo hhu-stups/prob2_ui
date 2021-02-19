@@ -132,6 +132,8 @@ public class SimulationFileHandler {
             activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE_MAX;
         } else if("single:min".equals(jsonElement.getAsString())) {
             activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE_MIN;
+        } else if("single".equals(jsonElement.getAsString())) {
+            activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE;
         }
         return activationKind;
     }
