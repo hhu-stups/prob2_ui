@@ -70,6 +70,9 @@ public class SimulationItem {
             if(object.has("FAULT_TOLERANCE")) {
                 information.put("FAULT_TOLERANCE", JsonManager.checkDeserialize(context, object, "FAULT_TOLERANCE", double.class));
             }
+            if(object.has("TIME")) {
+                information.put("TIME", JsonManager.checkDeserialize(context, object, "TIME", int.class));
+            }
         }
 
         public Map<String, Object> getInformation() {
