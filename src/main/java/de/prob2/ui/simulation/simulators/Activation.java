@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public class Activation {
 
+    private String operation;
+
     private int time;
 
     private final String additionalGuards;
@@ -22,8 +24,9 @@ public class Activation {
 
     private final String firingTransitionParametersPredicate;
 
-    public Activation(int time, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
+    public Activation(String operation, int time, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
                       Map<String, String> fixedVariables, Object probabilisticVariables, List<String> firingTransitionParameters, String firingTransitionParametersPredicate) {
+        this.operation = operation;
         this.time = time;
         this.additionalGuards = additionalGuards;
         this.activationKind = activationKind;
@@ -31,6 +34,10 @@ public class Activation {
         this.probabilisticVariables = probabilisticVariables;
         this.firingTransitionParameters = firingTransitionParameters;
         this.firingTransitionParametersPredicate = firingTransitionParametersPredicate;
+    }
+
+    public String getOperation() {
+        return operation;
     }
 
     public void decreaseTime(int delta) {
@@ -70,16 +77,16 @@ public class Activation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Activation that = (Activation) o;
-        return time == that.time && Objects.equals(additionalGuards, that.additionalGuards) && activationKind == that.activationKind && Objects.equals(probabilisticVariables, that.probabilisticVariables) && Objects.equals(firingTransitionParameters, that.firingTransitionParameters) && Objects.equals(firingTransitionParametersPredicate, that.firingTransitionParametersPredicate);
+        return operation.equals(that.operation) && time == that.time && Objects.equals(additionalGuards, that.additionalGuards) && activationKind == that.activationKind && Objects.equals(probabilisticVariables, that.probabilisticVariables) && Objects.equals(firingTransitionParameters, that.firingTransitionParameters) && Objects.equals(firingTransitionParametersPredicate, that.firingTransitionParametersPredicate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(time, additionalGuards, activationKind, probabilisticVariables, firingTransitionParameters, firingTransitionParametersPredicate);
+        return Objects.hash(operation, time, additionalGuards, activationKind, probabilisticVariables, firingTransitionParameters, firingTransitionParametersPredicate);
     }
 
     @Override
     public String toString() {
-        return String.format("Activation{time = %s, probability = %s, additionalGuards = %s, activationKind = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s}", time, probabilisticVariables, additionalGuards, activationKind, firingTransitionParameters, firingTransitionParametersPredicate);
+        return String.format("Activation{operation = %s, time = %s, probability = %s, additionalGuards = %s, activationKind = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s}", operation, time, probabilisticVariables, additionalGuards, activationKind, firingTransitionParameters, firingTransitionParametersPredicate);
     }
 }

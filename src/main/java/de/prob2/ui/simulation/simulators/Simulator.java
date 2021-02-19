@@ -318,12 +318,9 @@ public abstract class Simulator {
                 break;
             }
             activationForOperation.remove(activation);
-
             State currentState = newTrace.getCurrentState();
-			String predicate = buildPredicateForTransition(currentState, activation);
-			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, chosenOp, predicate, maxTransitions);
-            if (!transitions.isEmpty()) {
-                Transition transition = transitions.get(random.nextInt(transitions.size()));
+            Transition transition = selectTransition(activation, currentState);
+            if (transition != null) {
                 newTrace = newTrace.add(transition);
                 List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
                 String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
@@ -333,6 +330,31 @@ public abstract class Simulator {
         }
         stepCounter = newTrace.getTransitionList().size();
         return newTrace;
+    }
+
+    private Transition selectTransition(Activation activation, State currentState) {
+	    String opName = activation.getOperation();
+	    Object probabilisticVariables = activation.getProbabilisticVariables();
+        String predicate = buildPredicateForTransition(currentState, activation);
+        List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, maxTransitions);
+        if(probabilisticVariables == null) {
+            assert transitions.size() <= 1;
+            if(transitions.size() == 1) {
+                return transitions.get(0);
+            }
+        } else {
+            if(transitions.size() > 0) {
+                String probabilisticVariablesAsString = (String) probabilisticVariables;
+                if("uniform".equals(probabilisticVariablesAsString)) {
+                    return transitions.get(random.nextInt(transitions.size()));
+                } else if("first".equals(probabilisticVariablesAsString)) {
+                    return transitions.get(0);
+                } else {
+                    throw new RuntimeException("Configuration for probabilistic choice of parameters and non-deterministic variables not supported yet");
+                }
+            }
+        }
+        return null;
     }
 
     protected void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
@@ -429,12 +451,12 @@ public abstract class Simulator {
 
         switch (activationKind) {
             case MULTI:
-                activateMultiOperations(activationsForOperation, new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+                activateMultiOperations(activationsForOperation, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
                 break;
             case SINGLE:
             case SINGLE_MAX:
             case SINGLE_MIN:
-                activateSingleOperations(id, opName, activationKind, new Activation(evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+                activateSingleOperations(id, opName, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
                 break;
         }
     }
