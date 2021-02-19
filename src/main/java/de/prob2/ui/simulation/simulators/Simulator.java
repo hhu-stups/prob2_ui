@@ -32,7 +32,10 @@ import java.util.stream.Collectors;
 
 public abstract class Simulator {
 
-    protected Random random = new Random(System.nanoTime());
+    ///protected Random random = new Random(System.nanoTime());
+
+    //Set fixed seed to reproduce results in paper
+    protected Random random = new Random(1000);
 
     protected SimulationConfiguration config;
 
