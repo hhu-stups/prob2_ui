@@ -100,7 +100,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		RenamingAnalyzerInterface renamingAnalyzer = traceModificationChecker.traceChecker.getRenamingAnalyzer();
 		TraceModifier traceModifier = traceModificationChecker.traceChecker.getTraceModifier();
 
-		VBox accordion = setTypeIIConflicts(renamingAnalyzer.getResultTypeII(), renamingAnalyzer.getResultTypeIIInit(), traceModificationChecker.traceChecker.getOldOperationInfos());
+		VBox accordion = setTypeIIConflicts(renamingAnalyzer.getResultTypeIIAsDeltaList(), renamingAnalyzer.getResultTypeIIInit(), traceModificationChecker.traceChecker.getOldOperationInfos());
 		typeII.setContent(accordion);
 		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + traceModifier.getSizeTypeDetII()+ ")");
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
@@ -109,7 +109,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			typeII.setCollapsible(false);
 		}
 
-		VBox accordion2 = setTypeIIAmbiguousConflicts(renamingAnalyzer.getResultTypeIIWithCandidatesAsDeltaMap());
+		VBox accordion2 = setTypeIIAmbiguousConflicts(renamingAnalyzer.getResultTypeIIWithCandidates());
 		typeIIPer.setContent(accordion2);
 		typeIIPer.textProperty().set(resourceBundle.getString("traceModification.alert.typeIIAmbiguous" ) + " (" + traceModifier.getSizeTypeNonDetII() + ")");
 		if(!traceModifier.typeIINonDetDirty()){
@@ -124,7 +124,6 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + traceModifier.getSizeTypeIII() + ")");
 
 		if(!traceModifier.typeIIIDirty()){
-	//		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + 0 + ")");
 			typeIII.setCollapsible(false);
 		}
 
@@ -135,7 +134,6 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + traceModifier.getSizeTypeIV() + ")");
 
 		if(!traceModifier.typeIVDirty()){
-	//		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + 0 + ")");
 			typeIV.setCollapsible(false);
 		}
 
@@ -143,7 +141,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-	private VBox setTypeIIConflicts(Map<String, Map<String, String>> resultTypeII, Map<String, String> resultInit,
+	private VBox setTypeIIConflicts(List<RenamingDelta> resultTypeII, Map<String, String> resultInit,
 									Map<String, OperationInfo> operationInfoMap){
 
 
@@ -177,14 +175,12 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	}
 
 
-	public void generateLabelView(Map<String, Map<String, String>> resultTypeII, Map<String, OperationInfo> operationInfoMap,
-								  VBox result){
+	public void generateLabelView(List<RenamingDelta> resultTypeII, Map<String, OperationInfo> operationInfoMap, VBox result){
 
 
-		for(Map.Entry<String, Map<String, String>> entry : resultTypeII.entrySet()){
+		for(RenamingDelta entry : resultTypeII){
 			int row = 0;
 			GridPane gridPane = new GridPane();
-
 
 
 			Label empty = new Label();
@@ -198,100 +194,39 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			Label operations = new Label(resourceBundle.getString("traceModification.alert.name"));
 
 
-			VBox oldB = prepareColumn(singletonList(entry.getKey()));
-			VBox newB = prepareColumn(singletonList(entry.getValue().get(entry.getKey())));
+			VBox oldB = prepareColumn(singletonList(entry.getOriginalName()));
+			VBox newB = prepareColumn(singletonList(entry.getDeltaName()));
 			row = registerRow(gridPane, operations, oldB, newB, row);
 
 
-			OperationInfo operationInfo = operationInfoMap.get(entry.getKey());
-			List<String> variables = Stream.of(operationInfo.getReadVariables(), operationInfo.getNonDetWrittenVariables(), operationInfo.getWrittenVariables())
-					.flatMap(Collection::stream).distinct().collect(toList());
+			OperationInfo operationInfo = operationInfoMap.get(entry.getOriginalName());
 
-			Map<String, String> partner = entry.getValue();
 
-			if(!variables.isEmpty()){
-				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.variables")), prepareColumn(variables),
-						prepareColumn(retractEntries(variables,partner)), row);
+			if(!operationInfo.getAllVariables().isEmpty()){
+				List<String> partner = operationInfo.getAllVariables().stream().map(innerEntry -> entry.getVariables().get(innerEntry)).collect(toList());
+				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.variables")), prepareColumn(operationInfo.getAllVariables()),
+						prepareColumn(partner), row);
 			}
 
 			if(!operationInfo.getParameterNames().isEmpty()){
+				List<String> partner = operationInfo.getParameterNames().stream().map(innerEntry -> entry.getInputParameters().get(innerEntry)).collect(toList());
 				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.input")),
 						prepareColumn(operationInfo.getParameterNames()),
-						prepareColumn(retractEntries(operationInfo.getParameterNames(),partner)), row);
+						prepareColumn(partner), row);
 			}
 
 			if(!operationInfo.getParameterNames().isEmpty()){
+				List<String> partner = operationInfo.getOutputParameterNames().stream().map(innerEntry -> entry.getOutputParameters().get(innerEntry)).collect(toList());
 				registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.output")),
 						prepareColumn(operationInfo.getOutputParameterNames()),
-						prepareColumn(retractEntries(operationInfo.getOutputParameterNames(),partner)), row);
+						prepareColumn(partner), row);
 			}
 
-			TitledPane titledPane = new TitledPane(entry.getKey() + "<->" + entry.getValue().get(entry.getKey()), gridPane);
+			TitledPane titledPane = new TitledPane(entry.getOriginalName() + "<->" + entry.getDeltaName(), gridPane);
 
 			result.getChildren().add(titledPane);
 		}
 
-	}
-
-
-	public Map<String, Map<String, SimpleStringProperty>> generateLabelViewForTypeIII(Map<String, Map<String, String>> resultTypeIII,
-																			Map<String, OperationInfo> operationInfoMap, VBox result){
-
-		Map<String, Map<String, SimpleStringProperty>> partnerIsProperty = resultTypeIII.entrySet()
-				.stream()
-				.collect(toMap(Map.Entry::getKey, entry -> entry.getValue().entrySet()
-						.stream()
-						.collect(toMap(Map.Entry::getKey, innerEntry -> new SimpleStringProperty(innerEntry.getValue())))));
-
-
-		for(Map.Entry<String, Map<String, SimpleStringProperty>> entry : partnerIsProperty.entrySet()){
-
-			int row = 0;
-			GridPane gridPane = new GridPane();
-
-			Label empty = new Label();
-			Label newL = new Label(resourceBundle.getString("traceModification.alert.new"));
-			Label oldL = new Label(resourceBundle.getString("traceModification.alert.old"));
-
-			row = registerRow(gridPane, empty, oldL, newL, row);
-
-			Label operations = new Label(resourceBundle.getString("traceModification.alert.name"));
-
-			//Type III keep their names
-			VBox oldB = prepareColumn(singletonList(entry.getKey()));
-			VBox newB = prepareColumn(singletonList(entry.getKey()));
-			row = registerRow(gridPane, operations, oldB, newB, row);
-
-
-			OperationInfo operationInfo = operationInfoMap.get(entry.getKey());
-			List<String> variables = operationInfo.getAllVariables();
-
-			Map<String, SimpleStringProperty> partner = partnerIsProperty.get(entry.getKey());
-
-			if(!variables.isEmpty()){
-				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.variables")),
-						prepareColumn(variables),
-						prepareColumn2(retractEntries2(variables,partner)), row);
-			}
-
-			if(!operationInfo.getParameterNames().isEmpty()){
-				row = registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.input")),
-						prepareColumn(operationInfo.getParameterNames()),
-						prepareColumn2(retractEntries2(operationInfo.getParameterNames(),partner)), row);
-			}
-
-			if(!operationInfo.getOutputParameterNames().isEmpty()){
-				registerRow(gridPane, new Label(resourceBundle.getString("traceModification.alert.output")),
-						prepareColumn(operationInfo.getOutputParameterNames()),
-						prepareColumn2(retractEntries2(operationInfo.getOutputParameterNames(),partner)), row);
-			}
-
-			TitledPane titledPane = new TitledPane(entry.getKey() + "<->" +entry.getKey(), gridPane);
-
-			result.getChildren().add(titledPane);
-		}
-
-		return partnerIsProperty;
 	}
 
 
@@ -305,9 +240,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		return row+1;
 	}
 
-	List<String> retractEntries(List<String> entries, Map<String, String> goal){
-		return entries.stream().map(goal::get).collect(toList());
-	}
+
 
 	List<SimpleStringProperty> retractEntries2(List<String> entries, Map<String, SimpleStringProperty> goal){
 		return entries.stream().map(goal::get).collect(toList());
@@ -406,12 +339,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 			OperationInfo operationInfo = operationInfoMap.get(entry.getKey());
-			List<String> variables = Stream.of(operationInfo.getReadVariables(), operationInfo.getNonDetWrittenVariables(),
-					operationInfo.getWrittenVariables()).flatMap(Collection::stream).distinct().collect(toList());
 
 
-
-			if(!variables.isEmpty()){
+			if(!operationInfo.getAllVariables().isEmpty()){
 				row = flexibleRow(entry.getValue().get(0).getVariables(), mapVariables,
 						gridPane, row, resourceBundle.getString("traceModification.alert.variables"));
 
@@ -453,8 +383,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			});
 
 			choiceBox.getSelectionModel().selectFirst();
-			Set<RenamingDelta> selectedRenamingDeltaPre = new HashSet<>();
-			selectedRenamingDeltaPre.addAll(selected.stream().map(changeToDelta::get).collect(Collectors.toSet()));
+			Set<RenamingDelta> selectedRenamingDeltaPre = selected.stream().map(changeToDelta::get).collect(Collectors.toSet());
 			selectedRenamingDelta.addAll(selectedRenamingDeltaPre);
 
 			TitledPane titledPane = new TitledPane("", gridPane);
@@ -638,10 +567,10 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		Set<RenamingDelta> accessCollection = new HashSet<>(selectedRenamingDelta);
 		HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> accessMap = new HashMap<>(selectedMapping);
 
-		Map<String, TraceAnalyser.AnalyserResult> penis = typeIVResults.get(accessCollection).get(accessMap);
-		List<PersistenceDelta> vagina = resultTypeIIIWithTransitions.get(accessCollection).get(accessMap);
+		Map<String, TraceAnalyser.AnalyserResult> typeIVMap = typeIVResults.get(accessCollection).get(accessMap);
+		List<PersistenceDelta> typeIIIMap = resultTypeIIIWithTransitions.get(accessCollection).get(accessMap);
 
-		result.getChildren().add(createTypeIVView(penis, vagina));
+		result.getChildren().add(createTypeIVView(typeIVMap, typeIIIMap));
 
 		selectedRenamingDelta.addListener((SetChangeListener<RenamingDelta>) change -> {
 			if(change.wasAdded()){
