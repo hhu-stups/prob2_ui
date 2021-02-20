@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.check.ReplayOptions;
 import de.prob.check.tracereplay.check.TraceChecker;
+import de.prob.check.tracereplay.check.exceptions.DeltaCalculationException;
 import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
@@ -88,7 +89,7 @@ public class TraceModificationChecker {
 					futureTraceChecker.complete(createSimplerChecker(stateSpace, newPath, replayOptions, progressMemory));
 				}
 				Platform.runLater(progressStage::close);
-			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException e) {
+			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException | DeltaCalculationException e) {
 				//LOGGER.;
 				e.printStackTrace();
 			}    };
@@ -101,7 +102,7 @@ public class TraceModificationChecker {
 
 	}
 
-	private TraceChecker createSimplerChecker(StateSpace stateSpace, Path newPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError {
+	private TraceChecker createSimplerChecker(StateSpace stateSpace, Path newPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException {
 		return new TraceChecker(persistentTrace.getTransitionList(),
 				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
 				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
@@ -114,7 +115,7 @@ public class TraceModificationChecker {
 				progressMemory);
 	}
 
-	private TraceChecker createComplexChecker(StateSpace stateSpace, Path newPath, Path oldPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, PrologTermNotDefinedException {
+	private TraceChecker createComplexChecker(StateSpace stateSpace, Path newPath, Path oldPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, PrologTermNotDefinedException, DeltaCalculationException {
 		return new TraceChecker(persistentTrace.getTransitionList(),
 				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
 				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
