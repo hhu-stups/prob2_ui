@@ -18,7 +18,7 @@
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice?>
 <?import de.prob2.ui.simulation.choice.SimulationEstimationChoice?>
 <fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
-		 resizable="false" maxWidth="400.0" maxHeight="400.0" xmlns:fx="http://javafx.com/fxml/1">
+		 resizable="false" maxWidth="400.0" maxHeight="500.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 
         <HBox fx:id="timeBox" spacing="5.0">

@@ -34,6 +34,23 @@ public class SimulationMonteCarlo extends Simulator {
 		}
 	}
 
+	public enum StartingType {
+		NO_CONDITION("No Condition"),
+		START_AFTER_STEPS("Start after Number of Steps"),
+		STARTING_PREDICATE("Starting Predicate"),
+		STARTING_TIME("Starting Time");
+
+		private String name;
+
+		StartingType(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
 	protected Map<String, List<Integer>> operationExecutions;
 
 	protected Map<String, List<Integer>> operationEnablings;
@@ -48,6 +65,12 @@ public class SimulationMonteCarlo extends Simulator {
 
     protected int numberExecutions;
 
+	protected boolean startingConditionReached;
+
+	protected int startAtStep;
+
+	protected int startAtTime;
+
     protected Map<String, Object> additionalInformation;
 
 	protected SimulationStats stats;
@@ -61,15 +84,21 @@ public class SimulationMonteCarlo extends Simulator {
         this.resultingTimestamps = new ArrayList<>();
         this.trace = trace;
         this.numberExecutions = numberExecutions;
+        this.startingConditionReached = false;
+        this.startAtStep = Integer.MAX_VALUE;
+        this.startAtTime = Integer.MAX_VALUE;
         this.additionalInformation = additionalInformation;
         this.stats = null;
     }
 
     @Override
     public boolean endingConditionReached(Trace trace) {
+    	if(!startingConditionReached) {
+    		return false;
+		}
 		if(additionalInformation.containsKey("STEPS_PER_EXECUTION")) {
 			int stepsPerExecution = (int) additionalInformation.get("STEPS_PER_EXECUTION");
-			return stepCounter >= stepsPerExecution;
+			return stepCounter >= stepsPerExecution + startAtStep;
 		} else if(additionalInformation.containsKey("ENDING_PREDICATE")) {
 			String predicate = (String) additionalInformation.get("ENDING_PREDICATE");
 			State state = trace.getCurrentState();
@@ -77,9 +106,42 @@ public class SimulationMonteCarlo extends Simulator {
 			return "TRUE".equals(evalResult);
 		} else if(additionalInformation.containsKey("ENDING_TIME")) {
 			int endingTime = (int) additionalInformation.get("ENDING_TIME");
-			return time.get() > endingTime;
+			return time.get() > startAtTime + endingTime;
 		}
 		return false;
+	}
+
+	@Override
+	public void updateStartingInformation(Trace trace) {
+    	if(startingConditionReached) {
+    		return;
+		}
+		if(additionalInformation.containsKey("START_AFTER_STEPS")) {
+			int startAfterSteps = (int) additionalInformation.get("START_AFTER_STEPS");
+			if(stepCounter >= startAfterSteps) {
+				setStartingInformation();
+			}
+		} else if(additionalInformation.containsKey("STARTING_PREDICATE")) {
+			String predicate = (String) additionalInformation.get("STARTING_PREDICATE");
+			State state = trace.getCurrentState();
+			String evalResult = cache.readValueWithCaching(state, predicate);
+			if("TRUE".equals(evalResult)) {
+				setStartingInformation();
+			}
+		} else if(additionalInformation.containsKey("STARTING_TIME")) {
+			int startingTime = (int) additionalInformation.get("STARTING_TIME");
+			if(time.get() >= startingTime) {
+				setStartingInformation();
+			}
+		} else {
+			setStartingInformation();
+		}
+	}
+
+	private void setStartingInformation() {
+		startingConditionReached = true;
+		startAtStep = stepCounter;
+		startAtTime = time.get();
 	}
 
     @Override
@@ -157,6 +219,14 @@ public class SimulationMonteCarlo extends Simulator {
 			}
 			operationExecutions.get(key).add(addedExecution);
 		}
+	}
+
+	@Override
+	public void resetSimulator() {
+		super.resetSimulator();
+		this.startingConditionReached = false;
+		this.startAtStep = Integer.MAX_VALUE;
+		this.startAtTime = Integer.MAX_VALUE;
 	}
 
 	protected void calculateStatistics() {

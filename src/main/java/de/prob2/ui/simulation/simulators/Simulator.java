@@ -308,7 +308,6 @@ public abstract class Simulator {
 
     public Trace executeActivatedOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
         String id = activationConfig.getId();
-	    String chosenOp = activationConfig.getOpName();
         List<String> activationConfiguration = activationConfig.getActivating();
 
         List<Activation> activationForOperation = configurationToActivation.get(id);
@@ -325,13 +324,14 @@ public abstract class Simulator {
             Transition transition = selectTransition(activation, currentState);
             if (transition != null) {
                 newTrace = newTrace.add(transition);
+                updateStartingInformation(newTrace);
+                stepCounter++;
                 List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
                 String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
                 activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
             	timestamps.add(time.get());
             }
         }
-        stepCounter = newTrace.getTransitionList().size();
         return newTrace;
     }
 
@@ -341,8 +341,7 @@ public abstract class Simulator {
         String predicate = buildPredicateForTransition(currentState, activation);
         List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, maxTransitions);
         if(probabilisticVariables == null || probabilisticVariables instanceof HashMap) {
-            assert transitions.size() <= 1;
-            if(transitions.size() == 1) {
+            if(transitions.size() >= 1) {
                 return transitions.get(0);
             }
         } else if (probabilisticVariables instanceof String){
@@ -462,6 +461,10 @@ public abstract class Simulator {
                 activateSingleOperations(id, opName, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
                 break;
         }
+    }
+
+    public void updateStartingInformation(Trace trace) {
+	    // This is used in Monte Carlo Simulation to check when the starting condition is reached
     }
 
     public boolean endingConditionReached(Trace trace) {

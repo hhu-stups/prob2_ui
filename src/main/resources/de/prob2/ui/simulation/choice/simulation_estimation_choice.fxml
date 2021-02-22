@@ -12,8 +12,18 @@
 <?import de.prob2.ui.simulation.choice.SimulationEndingItem?>
 <?import de.prob2.ui.simulation.choice.SimulationEstimationChoiceItem?>
 
+<?import de.prob2.ui.simulation.choice.SimulationStartingItem?>
 <fx:root type="SimulationEstimationChoice" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
+		<Label fx:id="lbStartAfter" text="%simulation.choice.startAfterSteps"/>
+		<TextField fx:id="tfStartAfter"/>
+
+		<Label fx:id="lbStartingPredicate" text="%simulation.choice.startingPredicate"/>
+		<TextField fx:id="tfStartingPredicate"/>
+
+		<Label fx:id="lbStartingTime" text="%simulation.choice.startingTime"/>
+		<TextField fx:id="tfStartingTime"/>
+
 		<Label fx:id="lbSteps" text="%simulation.choice.stepsPerSimulation"/>
 		<TextField fx:id="tfSteps"/>
 
@@ -35,8 +45,20 @@
 	<Label text="%simulation.choice.numberSimulations" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 	<TextField fx:id="tfSimulations" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="2" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.startingCondition" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="2" GridPane.columnIndex="2">
+		<items>
+			<FXCollections fx:factory="observableArrayList">
+				<SimulationStartingItem startingType="NO_CONDITION"/>
+				<SimulationStartingItem startingType="START_AFTER_STEPS"/>
+				<SimulationStartingItem startingType="STARTING_PREDICATE"/>
+				<SimulationStartingItem startingType="STARTING_TIME"/>
+			</FXCollections>
+		</items>
+	</ChoiceBox>
+
+	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="4" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationEndingItem endingType="NUMBER_STEPS"/>
@@ -47,8 +69,8 @@
 	</ChoiceBox>
 
 
-	<Label text="%simulation.choice.check" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="checkingChoice" GridPane.rowIndex="4" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.check" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="checkingChoice" GridPane.rowIndex="6" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationPropertyItem checkingType="ALL_INVARIANTS"/>
@@ -60,8 +82,8 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.estimator" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="estimationChoice" GridPane.rowIndex="6" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.estimator" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="estimationChoice" GridPane.rowIndex="8" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationEstimationChoiceItem estimationType="MEAN"/>
@@ -69,9 +91,9 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.desiredValue" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfDesiredValue" GridPane.rowIndex="7" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.desiredValue" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfDesiredValue" GridPane.rowIndex="9" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.faultTolerance" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfFaultTolerance" GridPane.rowIndex="8" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.faultTolerance" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfFaultTolerance" GridPane.rowIndex="10" GridPane.columnIndex="2"/>
 </fx:root>

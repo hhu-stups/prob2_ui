@@ -55,6 +55,15 @@ public class SimulationItem {
             if(object.has("ENDING_TIME")) {
                 information.put("ENDING_TIME", JsonManager.checkDeserialize(context, object, "ENDING_TIME", int.class));
             }
+            if(object.has("START_AFTER_STEPS")) {
+                information.put("START_AFTER_STEPS", JsonManager.checkDeserialize(context, object, "START_AFTER_STEPS", int.class));
+            }
+            if(object.has("STARTING_PREDICATE")) {
+                information.put("STARTING_PREDICATE", JsonManager.checkDeserialize(context, object, "STARTING_PREDICATE", String.class));
+            }
+            if(object.has("STARTING_TIME")) {
+                information.put("STARTING_TIME", JsonManager.checkDeserialize(context, object, "STARTING_TIME", int.class));
+            }
             if(object.has("HYPOTHESIS_CHECKING_TYPE")) {
                 information.put("HYPOTHESIS_CHECKING_TYPE", JsonManager.checkDeserialize(context, object, "HYPOTHESIS_CHECKING_TYPE", SimulationHypothesisChecker.HypothesisCheckingType.class));
             }

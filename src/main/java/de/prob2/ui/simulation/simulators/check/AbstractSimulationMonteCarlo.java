@@ -46,9 +46,10 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 
     public void checkAllInvariants(Trace trace) {
         boolean invariantOk = true;
-        for(Transition transition : trace.getTransitionList()) {
+        for(int i = 0; i < trace.getTransitionList().size(); i++) {
+            Transition transition = trace.getTransitionList().get(i);
             State destination = transition.getDestination();
-            if(!destination.isInvariantOk()) {
+            if(startAtStep >= i && !destination.isInvariantOk()) {
                 invariantOk = false;
                 break;
             }
@@ -61,11 +62,12 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
     public void checkPredicateInvariant(Trace trace) {
         boolean invariantOk = true;
         String invariant = (String) additionalInformation.get("PREDICATE");
-        for(Transition transition : trace.getTransitionList()) {
+        for(int i = 0; i < trace.getTransitionList().size(); i++) {
+            Transition transition = trace.getTransitionList().get(i);
             State destination = transition.getDestination();
             if(destination.isInitialised()) {
                 String evalResult = cache.readValueWithCaching(destination, invariant);
-                if ("FALSE".equals(evalResult)) {
+                if (startAtStep >= i && "FALSE".equals(evalResult)) {
                     invariantOk = false;
                     break;
                 }
@@ -96,11 +98,12 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
     public void checkPredicateEventually(Trace trace) {
         boolean predicateOk = false;
         String predicate = (String) additionalInformation.get("PREDICATE");
-        for(Transition transition : trace.getTransitionList()) {
+        for(int i = 0; i < trace.getTransitionList().size(); i++) {
+            Transition transition = trace.getTransitionList().get(i);
             State destination = transition.getDestination();
             if(destination.isInitialised()) {
                 String evalResult = cache.readValueWithCaching(destination, predicate);
-                if ("TRUE".equals(evalResult)) {
+                if (startAtStep >= i && "TRUE".equals(evalResult)) {
                     predicateOk = true;
                     break;
                 }
@@ -113,7 +116,7 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 
     public void checkTiming(int time) {
         int maximumTime = (int) additionalInformation.get("TIME");
-        if(time <= maximumTime) {
+        if(time - startAtTime <= maximumTime) {
             numberSuccess++;
         }
     }
