@@ -324,8 +324,8 @@ public abstract class Simulator {
             Transition transition = selectTransition(activation, currentState);
             if (transition != null) {
                 newTrace = newTrace.add(transition);
-                updateStartingInformation(newTrace);
                 stepCounter++;
+                updateStartingInformation(newTrace);
                 List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
                 String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
                 activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
