@@ -339,21 +339,25 @@ public abstract class Simulator {
 	    String opName = activation.getOperation();
 	    Object probabilisticVariables = activation.getProbabilisticVariables();
         String predicate = buildPredicateForTransition(currentState, activation);
-        List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, maxTransitions);
         if(probabilisticVariables == null || probabilisticVariables instanceof HashMap) {
+            List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, maxTransitions);
             if(transitions.size() >= 1) {
                 return transitions.get(0);
             }
         } else if (probabilisticVariables instanceof String){
-            if(transitions.size() > 0) {
-                String probabilisticVariablesAsString = (String) probabilisticVariables;
-                if("uniform".equals(probabilisticVariablesAsString)) {
-                    return transitions.get(random.nextInt(transitions.size()));
-                } else if("first".equals(probabilisticVariablesAsString)) {
+            String probabilisticVariablesAsString = (String) probabilisticVariables;
+            if("first".equals(probabilisticVariablesAsString)) {
+                List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, 1);
+                if(transitions.size() > 0) {
                     return transitions.get(0);
-                } else {
-                    throw new RuntimeException("Configuration for probabilistic choice of parameters and non-deterministic variables not supported yet");
                 }
+            } else if("uniform".equals(probabilisticVariablesAsString)) {
+                List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, maxTransitions);
+                if(transitions.size() > 0) {
+                    return transitions.get(random.nextInt(transitions.size()));
+                }
+            } else {
+                throw new RuntimeException("Configuration for probabilistic choice of parameters and non-deterministic variables not supported yet");
             }
         }
         return null;
