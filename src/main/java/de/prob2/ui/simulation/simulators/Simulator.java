@@ -263,6 +263,7 @@ public abstract class Simulator {
 
     public void setupBeforeSimulation(Trace trace) {
         State currentState = trace.getCurrentState();
+        updateStartingInformation(trace);
         if(!currentState.isInitialised()) {
         	if(configurationToActivation.containsKey("$setup_constants")) {
 				ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$setup_constants");

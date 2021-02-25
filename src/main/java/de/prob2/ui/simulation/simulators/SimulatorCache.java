@@ -21,6 +21,9 @@ public class SimulatorCache {
     private final Map<String, Set<String>> enabledOperationsCache = new HashMap<>();
 
     public String readValueWithCaching(State bState, String expression) {
+        if(valuesCache.keySet().size() > 5000) {
+            valuesCache.clear();
+        }
         String stateID = bState.getId();
         String value;
 
@@ -38,6 +41,9 @@ public class SimulatorCache {
     }
 
     public List<Transition> readTransitionsWithCaching(State bState, String opName, String predicate, int maxTransitions) {
+        if(transitionCache.keySet().size() > 5000) {
+            transitionCache.clear();
+        }
         String stateID = bState.getId();
         if(!transitionCache.containsKey(stateID) || !transitionCache.get(stateID).containsKey(opName) ||
 				!transitionCache.get(stateID).get(opName).containsKey(predicate)) {
@@ -54,6 +60,9 @@ public class SimulatorCache {
     }
 
     public Set<String> readEnabledOperationsWithCaching(State bState) {
+        if(enabledOperationsCache.size() > 5000) {
+            enabledOperationsCache.clear();
+        }
         String stateID = bState.getId();
         if(!enabledOperationsCache.containsKey(stateID)) {
             Set<String> operations = bState.getOutTransitions().stream()
