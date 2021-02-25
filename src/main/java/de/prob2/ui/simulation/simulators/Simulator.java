@@ -340,7 +340,12 @@ public abstract class Simulator {
 	    String opName = activation.getOperation();
 	    Object probabilisticVariables = activation.getProbabilisticVariables();
         String predicate = buildPredicateForTransition(currentState, activation);
-        if(probabilisticVariables == null || probabilisticVariables instanceof HashMap) {
+        if(probabilisticVariables == null) {
+            List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, 1);
+            if(transitions.size() > 0) {
+                return transitions.get(0);
+            }
+        } else if(probabilisticVariables instanceof HashMap) {
             List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, maxTransitions);
             if(transitions.size() >= 1) {
                 return transitions.get(0);
