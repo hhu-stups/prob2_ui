@@ -34,6 +34,8 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+
 public class TraceFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
@@ -106,68 +108,49 @@ public class TraceFileHandler {
 	public void save(SimulationItem item, Machine machine) {
 		List<PersistentTrace> traces = item.getTraces().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
-				.collect(Collectors.toList());
-		final DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"));
-		final Path path = this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+				.collect(toList());
+
+		final Path path = chooseDirectory();
 		if (path == null) {
 			return;
 		}
 
 		try {
-			try (final Stream<Path> children = Files.list(path)) {
-				if (children.anyMatch(p -> p.getFileName().toString().startsWith(SIMULATION_TRACE_PREFIX))) {
-					// Directory already contains test case trace - ask if the user really wants to save here.
-					final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
-					if (!selected.isPresent() || selected.get() != ButtonType.YES) {
-						return;
-					}
-				}
+
+			if(checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX)){
+				return;
 			}
 
-			int numberGeneratedTraces = traces.size();
-			//Starts counting with 1 in the file name
-			for(int i = 1; i <= numberGeneratedTraces; i++) {
-				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + ".prob2trace");
+			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
+			for(PersistentTrace trace : traces){
+				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + numberGeneratedTraces + ".prob2trace");
 				String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
-				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
-				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
-						.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-						.withModelName(machine.getName())
-						.withCreator(createdBy)
-						.build();
-				jsonManager.writeToFile(traceFilePath, traces.get(i-1), metadata);
+				save(machine, createdBy, traceFilePath, trace);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
+				numberGeneratedTraces++;
 			}
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
-			return;
 		}
 	}
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
 		List<PersistentTrace> traces = item.getExamples().stream()
 				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
-				.collect(Collectors.toList());
+				.collect(toList());
 		List<TraceInformationItem> traceInformation = item.getTraceInformation().stream()
 				.filter(information -> information.getTrace() != null)
-				.collect(Collectors.toList());
-		final DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"));
-		final Path path = this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+				.collect(toList());
+
+		Path path = chooseDirectory();
 		if (path == null) {
 			return;
 		}
 
 		try {
-			try (final Stream<Path> children = Files.list(path)) {
-				if (children.anyMatch(p -> p.getFileName().toString().startsWith(TEST_CASE_TRACE_PREFIX))) {
-					// Directory already contains test case trace - ask if the user really wants to save here.
-					final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
-					if (!selected.isPresent() || selected.get() != ButtonType.YES) {
-						return;
-					}
-				}
+
+			if(checkIfPathAlreadyContainsFiles(path, TEST_CASE_TRACE_PREFIX)){
+				return;
 			}
 
 			int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
@@ -175,13 +158,7 @@ public class TraceFileHandler {
 			for(int i = 1; i <= numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i-1);
-				JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
-				final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
-					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-					.withModelName(machine.getName())
-					.withCreator(createdBy)
-					.build();
-				jsonManager.writeToFile(traceFilePath, traces.get(i-1), metadata);
+				save(machine, createdBy, traceFilePath, traces.get(i-1));
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
 		} catch (IOException e) {
@@ -194,6 +171,25 @@ public class TraceFileHandler {
 					"animation.testcase.notAllTestCasesGenerated.content",
 					NUMBER_MAXIMUM_GENERATED_TRACES).showAndWait();
 		}
+	}
+
+	public Path chooseDirectory(){
+		final DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"));
+		return this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+	}
+
+	public boolean checkIfPathAlreadyContainsFiles(Path path, String prefix) throws IOException {
+		try (final Stream<Path> children = Files.list(path)) {
+			if (children.anyMatch(p -> p.getFileName().toString().startsWith(prefix))) {
+				// Directory already contains test case trace - ask if the user really wants to save here.
+				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
+				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public void save(PersistentTrace trace, Machine machine) {
@@ -213,6 +209,21 @@ public class TraceFileHandler {
 			traceLoaderSaver.save(trace, location, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
+		}
+	}
+
+	public void save(Machine machine, String createdBy, Path traceFilePath, PersistentTrace trace){
+
+		JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
+		final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
+				.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+				.withModelName(machine.getName())
+				.withCreator(createdBy)
+				.build();
+		try {
+			jsonManager.writeToFile(traceFilePath, trace, metadata);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
