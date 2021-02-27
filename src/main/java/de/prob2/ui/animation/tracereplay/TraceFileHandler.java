@@ -70,7 +70,6 @@ public class TraceFileHandler {
 	}
 
 
-
 	public TraceJsonFile loadFile(Path path) {
 		try {
 			return traceManager.load(currentProject.getLocation().resolve(path));
@@ -240,30 +239,5 @@ public class TraceFileHandler {
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
 	}
-/*
-	public void save(PersistentTrace trace, Path location) {
-		try {
-			save(trace, location, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
-		} catch (IOException e) {
-			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
-		}
-	}
-
-	public void save(Machine machine, String createdBy, Path traceFilePath, PersistentTrace trace){
-
-		JsonManager<PersistentTrace> jsonManager = traceLoaderSaver.getJsonManager();
-		final JsonMetadata metadata = jsonManager.defaultMetadataBuilder()
-				.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-				.withModelName(machine.getName())
-				.withCreator(createdBy)
-				.build();
-		try {
-			jsonManager.writeToFile(traceFilePath, trace, metadata);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-*/
-
 
 }
