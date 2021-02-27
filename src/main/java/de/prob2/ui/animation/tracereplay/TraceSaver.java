@@ -30,9 +30,7 @@ public class TraceSaver {
         Trace possiblyLostTrace = currentTrace.get();
         if (currentTrace.get() != null) {
             try {
-                traceSaver.save(
-                        new PersistentTrace(currentTrace.get(), currentTrace.get().getCurrent().getIndex() + 1),
-                        currentProject.getCurrentMachine());
+            	traceSaver.save(possiblyLostTrace, currentProject.getCurrentMachine());
             } catch (Exception e) {
                 TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
                 alert.initOwner(window);

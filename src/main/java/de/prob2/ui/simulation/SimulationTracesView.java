@@ -161,7 +161,11 @@ public class SimulationTracesView extends Stage {
 				TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 				if (currentTrace.get() != null) {
 					Trace trace = item.getTrace();
-					traceSaver.save(new PersistentTrace(trace, trace.getCurrent().getIndex() + 1), currentProject.getCurrentMachine());
+					try {
+						traceSaver.save(trace, currentProject.getCurrentMachine());
+					} catch (IOException ioException) {
+						ioException.printStackTrace();
+					}
 				}
 			});
 

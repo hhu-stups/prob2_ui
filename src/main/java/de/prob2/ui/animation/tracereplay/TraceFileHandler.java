@@ -1,16 +1,21 @@
 package de.prob2.ui.animation.tracereplay;
 
+import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
+import de.prob.check.tracereplay.json.TraceManager;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
+import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -33,6 +38,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import de.prob2.ui.internal.VersionInfo;
+
 
 import static java.util.stream.Collectors.toList;
 
@@ -43,27 +50,46 @@ public class TraceFileHandler {
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
-	private final VersionInfo versionInfo;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
+	private final TraceManager traceManager;
+	private final VersionInfo versionInfo;
 	private final TraceLoaderSaver traceLoaderSaver;
 
 	@Inject
-	public TraceFileHandler(TraceLoaderSaver traceLoaderSaver, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
-		this.traceLoaderSaver = traceLoaderSaver;
+	public TraceFileHandler(TraceManager traceManger, TraceLoaderSaver traceLoaderSaver, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.versionInfo = versionInfo;
+		this.traceLoaderSaver = traceLoaderSaver;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
+		this.traceManager = traceManger;
+	}
+
+
+
+	public TraceJsonFile loadFile(Path path) {
+		try {
+			return traceManager.load(currentProject.getLocation().resolve(path));
+		} catch (IOException e) {
+			this.showLoadError(path, e);
+			return null;
+		}
 	}
 
 	public PersistentTrace load(Path path) {
+		LOGGER.debug(path.toString());
 		try {
-			return traceLoaderSaver.load(currentProject.getLocation().resolve(path));
-		} catch (IOException | JsonParseException e) {
+			try{
+				TraceJsonFile traceJsonFile = traceManager.load(currentProject.getLocation().resolve(path));
+				return new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
+			}catch (ValueInstantiationException e){
+				return traceLoaderSaver.load(currentProject.getLocation().resolve(path));
+			}
+		} catch (IOException e) {
 			this.showLoadError(path, e);
 			return null;
 		}
@@ -106,9 +132,6 @@ public class TraceFileHandler {
 	}
 
 	public void save(SimulationItem item, Machine machine) {
-		List<PersistentTrace> traces = item.getTraces().stream()
-				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
-				.collect(toList());
 
 		final Path path = chooseDirectory();
 		if (path == null) {
@@ -122,10 +145,10 @@ public class TraceFileHandler {
 			}
 
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
-			for(PersistentTrace trace : traces){
+			for(Trace trace : item.getTraces()){
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + numberGeneratedTraces + ".prob2trace");
 				String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
-				save(machine, createdBy, traceFilePath, trace);
+				save(trace, traceFilePath, machine.getName(), createdBy);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 				numberGeneratedTraces++;
 			}
@@ -135,9 +158,7 @@ public class TraceFileHandler {
 	}
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
-		List<PersistentTrace> traces = item.getExamples().stream()
-				.map(trace -> new PersistentTrace(trace, trace.getCurrent().getIndex() + 1))
-				.collect(toList());
+		List<Trace> traces = new ArrayList<>(item.getExamples());
 		List<TraceInformationItem> traceInformation = item.getTraceInformation().stream()
 				.filter(information -> information.getTrace() != null)
 				.collect(toList());
@@ -155,12 +176,13 @@ public class TraceFileHandler {
 
 			int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 			//Starts counting with 1 in the file name
-			for(int i = 1; i <= numberGeneratedTraces; i++) {
-				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + i + ".prob2trace");
-				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i-1);
-				save(machine, createdBy, traceFilePath, traces.get(i-1));
+			for(int i = 0; i < numberGeneratedTraces; i++) {
+				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + (i+1) + ".prob2trace");
+				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
+				save(traces.get(i), traceFilePath, machine.getName(), createdBy);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
+
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
 			return;
@@ -191,22 +213,37 @@ public class TraceFileHandler {
 		}
 		return false;
 	}
-	
-	public void save(PersistentTrace trace, Machine machine) {
+
+	public void save(Trace trace, Path location, String machineName, String createdBy) throws IOException {
+		JsonMetadata jsonMetadata = new JsonMetadataBuilder("Trace", 2)
+				.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+				.withModelName(machineName)
+				.withCreator(createdBy)
+				.build();
+		TraceJsonFile traceJsonFile = new TraceJsonFile(trace, jsonMetadata);
+		traceManager.save(location, traceJsonFile);
+	}
+
+	public void save(TraceJsonFile traceFile, Path location) throws IOException {
+		traceManager.save(location, traceFile);
+	}
+
+
+	public void save(Trace trace, Machine machine) throws IOException {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(machine.getName() + "." + TRACE_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TRACE_FILE_EXTENSION));
 		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
-			save(trace, path);
+			save(trace, path, machine.getName(), "traceReplay");
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
 	}
-
+/*
 	public void save(PersistentTrace trace, Path location) {
 		try {
-			traceLoaderSaver.save(trace, location, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
+			save(trace, location, versionInfo.getCliVersion().getShortVersionString(), currentProject.getCurrentMachine().getName());
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
 		}
@@ -226,4 +263,7 @@ public class TraceFileHandler {
 			e.printStackTrace();
 		}
 	}
+*/
+
+
 }

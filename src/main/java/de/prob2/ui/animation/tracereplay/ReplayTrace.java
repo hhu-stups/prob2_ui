@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
@@ -13,6 +14,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -111,16 +113,22 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		} else {
 			return null;
 		}
-
 	}
 
 	public void setDescription(String description) {
-		PersistentTrace trace = getPersistentTrace();
-		if (trace != null) {
-			trace.setDescription(description);
-			injector.getInstance(TraceFileHandler.class)
-				.save(trace, injector.getInstance(CurrentProject.class).getLocation().resolve(location));
+		TraceJsonFile file = getTraceJsonFile();
+		if (file.getTransitionList() != null) {
+			try {
+				injector.getInstance(TraceFileHandler.class)
+					.save(file.changeDescription(description),injector.getInstance(CurrentProject.class).getLocation().resolve(location));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+
+	public TraceJsonFile getTraceJsonFile() {
+		return injector.getInstance(TraceFileHandler.class).loadFile(this.getLocation());
 	}
 
 	public PersistentTrace getPersistentTrace() {
