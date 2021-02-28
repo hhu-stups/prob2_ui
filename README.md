@@ -1,5 +1,9 @@
 # ProB 2 Standalone GUI
 
+ProB2-UI is a modern JavaFX-based user interface for the animator, constraint solver, and model checker [ProB](https://prob.hhu.de).
+In addition to the [B-method](http://en.wikipedia.org/wiki/B-Method), ProB also supports [Event-B](http://www.event-b.org), [CSP-M](http://en.wikipedia.org/wiki/Communicating_sequential_processes), [TLA+](http://research.microsoft.com/en-us/um/people/lamport/tla/tla.html), and [Z](http://en.wikipedia.org/wiki/Z_notation).
+
+
 ## Requirements
 
 The ProB 2 UI requires Java 8 or newer, and has been tested with Oracle JDK 8, 9, and 10.
