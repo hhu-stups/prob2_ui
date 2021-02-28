@@ -18,4 +18,4 @@ If you want to build the UI without installing Pandoc, you can pass the option `
 
 ## Main Features ##
 
-![Main Window of ProB2-UI](/src/doc/prob2ui-screenshot2.pdf?raw=true "Main Window of ProB2-UI")
+![Main Window of ProB2-UI](/src/doc/prob2ui-screenshot2.png?raw=true "Main Window of ProB2-UI")
