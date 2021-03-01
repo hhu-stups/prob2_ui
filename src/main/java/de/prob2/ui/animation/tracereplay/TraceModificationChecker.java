@@ -3,8 +3,8 @@ package de.prob2.ui.animation.tracereplay;
 import com.google.common.io.Files;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.check.TraceChecker;
+import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.check.tracereplay.json.storage.TraceMetaData;
@@ -12,16 +12,15 @@ import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TraceModificationChecker {
 
@@ -33,9 +32,14 @@ public class TraceModificationChecker {
 	private final StageManager stageManager;
 	private final TraceManager traceManager;
 	private final Path path;
+	private final ResourceBundle resourceBundle;
+	private static final Logger LOGGER = LoggerFactory.getLogger(TraceModificationChecker.class);
+
+
 
 	public TraceModificationChecker(TraceManager traceManager, Path traceJsonFilePath, StateSpace stateSpace,
 									Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException, ModelTranslationError {
+		TraceChecker traceChecker1;
 		this.path = traceJsonFilePath;
 		this.traceManager = traceManager;
 		traceJsonFile = traceManager.load(traceJsonFilePath);
@@ -43,39 +47,53 @@ public class TraceModificationChecker {
 		this.injector = injector;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.resourceBundle = injector.getInstance(ResourceBundle.class);
 
 
 		Path oldPath = currentProject.getLocation().resolve(Paths.get( ((TraceMetaData) traceJsonFile.getMetaData()).getPath()));
 		Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
 
-		if(java.nio.file.Files.exists(path) && newPath!=oldPath) {
-			traceChecker = new TraceChecker(persistentTrace.getTransitionList(),
-					new HashMap<>(traceJsonFile.getMachineOperationInfos()),
-					new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
-					new HashSet<>(traceJsonFile.getVariableNames()),
-					new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
-					new HashSet<>(stateSpace.getLoadedMachine().getSetNames()),
-					new HashSet<>(stateSpace.getLoadedMachine().getConstantNames()),
-					oldPath.toString(),
-					newPath.toString(),
-					injector,
-					new MappingFactory(injector, stageManager));
-		}else {
+		boolean flag = false;
 
-			traceChecker = new TraceChecker(persistentTrace.getTransitionList(),
-					new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
-					new HashMap<>(traceJsonFile.getMachineOperationInfos()),
-					new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
-					new HashSet<>(traceJsonFile.getVariableNames()),
-					new HashSet<>(stateSpace.getLoadedMachine().getSetNames()),
-					new HashSet<>(stateSpace.getLoadedMachine().getConstantNames()),
-					newPath.toString(),
-					injector,
-					new MappingFactory(injector, stageManager));
+		if(java.nio.file.Files.exists(path) && newPath!=oldPath) {
+			try {
+				traceChecker1 = new TraceChecker(persistentTrace.getTransitionList(),
+						new HashMap<>(traceJsonFile.getMachineOperationInfos()),
+						new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
+						new HashSet<>(traceJsonFile.getVariableNames()),
+						new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
+						new HashSet<>(stateSpace.getLoadedMachine().getSetNames()),
+						new HashSet<>(stateSpace.getLoadedMachine().getConstantNames()),
+						oldPath.toString(),
+						newPath.toString(),
+						injector,
+						new MappingFactory(injector, stageManager));
+
+			} catch (PrologTermNotDefinedException e) {
+				LOGGER.error("A problem with the prolog core appeared:", e);
+				traceChecker1 = createSimplerChecker(stateSpace, path);
+			}
+		}
+		else {
+			traceChecker1 = createSimplerChecker(stateSpace, newPath);
 
 
 		}
 
+		traceChecker = traceChecker1;
+	}
+
+	private TraceChecker createSimplerChecker(StateSpace stateSpace, Path newPath) throws IOException, ModelTranslationError {
+		return new TraceChecker(persistentTrace.getTransitionList(),
+				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
+				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
+				new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
+				new HashSet<>(traceJsonFile.getVariableNames()),
+				new HashSet<>(stateSpace.getLoadedMachine().getSetNames()),
+				new HashSet<>(stateSpace.getLoadedMachine().getConstantNames()),
+				newPath.toString(),
+				injector,
+				new MappingFactory(injector, stageManager));
 	}
 
 
@@ -90,7 +108,6 @@ public class TraceModificationChecker {
 
 
 			if(traceChecker.getTraceModifier().getChangelogPhase3II().isEmpty()) {
-				ResourceBundle resourceBundle = injector.getInstance(ResourceBundle.class);
 				Alert alert = new Alert(Alert.AlertType.CONFIRMATION, resourceBundle.getString("traceModification.alert.traceNotReplayable") , ButtonType.YES, ButtonType.NO);
 				alert.setTitle("No suitable configuration found.");
 				Optional<ButtonType> dialogResult = alert.showAndWait();
