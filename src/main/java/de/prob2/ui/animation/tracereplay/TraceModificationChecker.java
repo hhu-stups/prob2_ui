@@ -9,7 +9,6 @@ import de.prob.check.tracereplay.check.exceptions.DeltaCalculationException;
 import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.check.tracereplay.json.storage.TraceMetaData;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
@@ -30,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class TraceModificationChecker {
 
@@ -39,7 +39,6 @@ public class TraceModificationChecker {
 	private final Injector injector;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final TraceManager traceManager;
 	private final Path path;
 	private final ResourceBundle resourceBundle;
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceModificationChecker.class);
@@ -48,19 +47,21 @@ public class TraceModificationChecker {
 
 
 
-	public TraceModificationChecker(TraceManager traceManager, Path traceJsonFilePath, StateSpace stateSpace,
+	public TraceModificationChecker(TraceJsonFile traceJsonFile, Path traceJsonFilePath, StateSpace stateSpace,
 									Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException, ModelTranslationError, PrologTermNotDefinedException {
 		this.path = traceJsonFilePath;
-		this.traceManager = traceManager;
-		traceJsonFile = traceManager.load(traceJsonFilePath);
-		this.persistentTrace = traceJsonFile.getTrace();
+	
+		this.traceJsonFile = traceJsonFile;
+		this.persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
 		this.injector = injector;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.resourceBundle = injector.getInstance(ResourceBundle.class);
 
 
-		Path oldPath = currentProject.getLocation().resolve(Paths.get( ((TraceMetaData) traceJsonFile.getMetaData()).getPath()));
+		Path oldPath = getFile(traceJsonFilePath, traceJsonFile.getMetadata().getModelName());
+		System.out.println("path: " + oldPath);
+		LOGGER.debug(oldPath.toString());
 		Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
 
 
@@ -175,6 +176,7 @@ public class TraceModificationChecker {
 
 				result.add(saveAt);
 				try {
+					TraceManager traceManager = injector.getInstance(TraceManager.class);
 					traceManager.save(saveAt, traceJsonFile.changeTrace(element));
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -188,5 +190,16 @@ public class TraceModificationChecker {
 
 	}
 
+	private static Path getFile(Path path, String name){
+		String[] entries = path.toFile().list();
+		if(entries==null){
+			return Paths.get("");
+		}
+		List<String> candidates = Arrays.stream(entries).filter(entry -> entry.startsWith(name)).collect(Collectors.toList());
+		if(candidates.size()<1){
+			return Paths.get("");
+		}
+		return path.resolve(candidates.get(0));
+	}
 
 }

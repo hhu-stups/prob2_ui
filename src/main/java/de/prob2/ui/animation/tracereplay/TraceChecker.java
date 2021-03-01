@@ -9,8 +9,8 @@ import de.prob.check.tracereplay.ITraceChecker;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.TraceReplay;
+import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.check.tracereplay.json.storage.TraceMetaData;
 import de.prob.formula.PredicateBuilder;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
@@ -88,21 +88,19 @@ public class TraceChecker implements ITraceChecker {
 
 				TraceModificationChecker traceModificationChecker =
 						new TraceModificationChecker(
-								persistentTrace, traceJsonFile.getMachineOperationInfos(),
-								stateSpace.getLoadedMachine().getOperations(),
-								newPath.toString(),
-								oldPath.toString(),
-								injector, stageManager);
+								traceJsonFile, replayTrace.getLocation(),
+								stateSpace,
+								injector, currentProject, stageManager);
 				System.out.println("------------------------------------------------");
 				System.out.println("Modification");
 				Platform.runLater(() -> {
-					TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, traceModificationChecker);
+					TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, traceModificationChecker, new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList()));
 
 					dialog.showAndWait();
 					//					alert.show();
 				});
 
-			} catch (IOException | ModelTranslationError e) {
+			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException e) {
 				e.printStackTrace();
 			}
 
