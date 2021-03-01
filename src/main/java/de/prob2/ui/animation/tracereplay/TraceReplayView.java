@@ -178,7 +178,7 @@ public class TraceReplayView extends ScrollPane {
 
 		try {
 			TraceModificationChecker traceModificationChecker =
-					new TraceModificationChecker(traceManager, traceFile, currentTrace.getStateSpace(), injector, currentProject, stageManager);
+					new TraceModificationChecker(traceJsonFile, traceFile, currentTrace.getStateSpace(), injector, currentProject, stageManager);
 			List<Path> persistentTraceList = traceModificationChecker.checkTrace();
 
 
