@@ -13,7 +13,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.simulation.choice.SimulationHypothesisChoice?>
-<?import de.prob2.ui.simulation.choice.SimulationTraceChoice?>
 
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice?>
 <?import de.prob2.ui.simulation.choice.SimulationEstimationChoice?>
@@ -28,11 +27,6 @@
 		<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
 		<SimulationHypothesisChoice fx:id="simulationHypothesisChoice"/>
 		<SimulationEstimationChoice fx:id="simulationEstimationChoice"/>
-		<SimulationTraceChoice fx:id="tracesChoice"/>
-		<HBox fx:id="tracesBox" spacing="5.0">
-			<Label text="%simulation.choice.traces"/>
-			<ChoiceBox fx:id="cbTraces"/>
-		</HBox>
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -49,7 +43,6 @@
 									<SimulationChoiceItem simulationType="MONTE_CARLO_SIMULATION"/>
 									<SimulationChoiceItem simulationType="HYPOTHESIS_TEST"/>
 									<SimulationChoiceItem simulationType="ESTIMATION"/>
-									<SimulationChoiceItem simulationType="TRACE_REPLAY"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

@@ -42,9 +42,6 @@ public class SimulationChoosingStage extends Stage {
 	private SimulationEstimationChoice simulationEstimationChoice;
 
 	@FXML
-	private SimulationTraceChoice tracesChoice;
-
-	@FXML
 	private VBox inputBox;
 
 	@FXML
@@ -85,7 +82,6 @@ public class SimulationChoosingStage extends Stage {
 		simulationMonteCarloChoice.setSimulationChoosingStage(this);
 		simulationHypothesisChoice.setSimulationChoosingStage(this);
 		simulationEstimationChoice.setSimulationChoosingStage(this);
-		tracesChoice.setSimulationChoosingStage(this);
 	}
 
 	private void setCheckListeners() {
@@ -121,8 +117,6 @@ public class SimulationChoosingStage extends Stage {
 				return simulationEstimationChoice.checkSelection();
 			case HYPOTHESIS_TEST:
 				return simulationHypothesisChoice.checkSelection();
-			case TRACE_REPLAY:
-				return tracesChoice.checkSelection();
 			default:
 				break;
 		}
@@ -153,17 +147,13 @@ public class SimulationChoosingStage extends Stage {
 			case HYPOTHESIS_TEST:
 				information = simulationHypothesisChoice.extractInformation();
 				break;
-			case TRACE_REPLAY:
-				information = tracesChoice.extractInformation();
-				break;
 		}
 		return information;
 	}
 
     private void changeGUIType(final SimulationType type) {
-        inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, simulationEstimationChoice, tracesChoice);
+        inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, simulationEstimationChoice);
 		simulationHypothesisChoice.clear();
-		tracesChoice.clear();
         switch (type) {
 			case MONTE_CARLO_SIMULATION:
 				inputBox.getChildren().add(0, simulationMonteCarloChoice);
@@ -173,10 +163,6 @@ public class SimulationChoosingStage extends Stage {
 				break;
 			case HYPOTHESIS_TEST:
                 inputBox.getChildren().add(0, simulationHypothesisChoice);
-                break;
-            case TRACE_REPLAY:
-            	tracesChoice.updateTraces(injector.getInstance(TraceViewHandler.class).getTraces());
-            	inputBox.getChildren().add(0, tracesChoice);
                 break;
         }
     }
@@ -192,7 +178,6 @@ public class SimulationChoosingStage extends Stage {
         simulationMonteCarloChoice.clear();
 		simulationHypothesisChoice.clear();
 		simulationEstimationChoice.clear();
-        tracesChoice.clear();
 	}
 
 	public void setPath(Path path) {

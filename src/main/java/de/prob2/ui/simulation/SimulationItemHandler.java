@@ -211,34 +211,6 @@ public class SimulationItemHandler {
         thread.start();
     }
 
-    private void handleTraceReplay(SimulationItem item, boolean checkAll) {
-        /*Trace trace = currentTrace.get();
-        ReplayTrace replayTrace = (ReplayTrace) item.getField("TRACE");
-        Map<String, Object> additionalInformation = new HashMap<>();
-        if(item.containsField("TIME")) {
-            additionalInformation.put("TIME", item.getField("TIME"));
-        }
-        SimulationTraceChecker traceChecker = new SimulationTraceChecker(currentTrace, trace, replayTrace, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), traceChecker, path.toFile());
-        traceChecker.run();
-        SimulationTraceChecker.TraceCheckResult result = traceChecker.check();
-        item.setTraces(Collections.singletonList(traceChecker.getResultingTrace()));
-        switch (result) {
-            case SUCCESS:
-                item.setChecked(Checked.SUCCESS);
-                break;
-            case FAIL:
-                item.setChecked(Checked.FAIL);
-                break;
-            case NOT_FINISHED:
-                item.setChecked(Checked.NOT_CHECKED);
-                break;
-            default:
-                break;
-        }*/
-        // TODO: Trace Replay as a special kind of simulation
-    }
-
     public void checkItem(SimulationItem item, boolean checkAll) {
         /*if(!item.selected()) {
             return;
@@ -254,9 +226,6 @@ public class SimulationItemHandler {
                 break;
             case ESTIMATION:
                 handleEstimation(item, checkAll);
-                break;
-            case TRACE_REPLAY:
-                handleTraceReplay(item, checkAll);
                 break;
             default:
                 break;

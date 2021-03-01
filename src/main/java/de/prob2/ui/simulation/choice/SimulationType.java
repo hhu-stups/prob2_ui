@@ -4,8 +4,7 @@ public enum SimulationType {
 
     MONTE_CARLO_SIMULATION("Monte Carlo Simulation"),
     HYPOTHESIS_TEST("Hypothesis Test"),
-    ESTIMATION("Estimation"),
-    TRACE_REPLAY("Trace Replay");
+    ESTIMATION("Estimation");
 
     private String name;
 

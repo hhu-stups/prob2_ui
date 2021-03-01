@@ -47,6 +47,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -57,6 +58,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -102,31 +104,6 @@ public class SimulatorStage extends Stage {
 				menuItems.add(checkItem);
 				menuItems.add(removeItem);
 
-				MenuItem playItem = new MenuItem(bundle.getString("simulation.contextMenu.play"));
-
-				SimulationType type = item.getType();
-				switch (type) {
-					case TRACE_REPLAY:
-						playItem.setOnAction(e -> {
-							/*Trace trace = new Trace(currentTrace.getStateSpace());
-							ReplayTrace replayTrace = (ReplayTrace) item.getSimulationConfiguration().getField("TRACE");
-							TraceSimulator traceSimulator = new TraceSimulator(currentTrace, injector.getInstance(Scheduler.class), trace, replayTrace);
-							if(traceSimulator.isRunning()) {
-								traceSimulator.stop();
-							}
-							SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), (IRealTimeSimulator) traceSimulator, configurationPath.get().toFile());
-							trace.setExploreStateByDefault(false);
-							simulate(traceSimulator);
-							trace.setExploreStateByDefault(true);*/
-							// TODO: Trace Replay as a special kind of simulation
-						});
-						break;
-					default:
-						playItem.setDisable(true);
-						break;
-				}
-				menuItems.add(playItem);
-
 				MenuItem showTraces = new MenuItem(bundle.getString("simulation.contextMenu.showTraces"));
 				showTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
 				showTraces.setOnAction(e -> {
@@ -152,7 +129,7 @@ public class SimulatorStage extends Stage {
 
 				MenuItem saveTraces = new MenuItem(bundle.getString("simulation.contextMenu.saveGeneratedTraces"));
 				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
-						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null || this.itemProperty().get().getType() == SimulationType.TRACE_REPLAY,this.itemProperty())));
+						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
 				saveTraces.setOnAction(e -> {
 					TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 					if (currentTrace.get() != null) {
@@ -163,7 +140,7 @@ public class SimulatorStage extends Stage {
 
 				MenuItem saveTimedTraces = new MenuItem(bundle.getString("simulation.contextMenu.saveGeneratedTimedTraces"));
 				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
-						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null || this.itemProperty().get().getType() == SimulationType.TRACE_REPLAY,this.itemProperty())));
+						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null,this.itemProperty())));
 				saveTimedTraces.setOnAction(e -> {
 					SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
 					simulationSaver.saveConfigurations(item);
@@ -199,7 +176,13 @@ public class SimulatorStage extends Stage {
 	private Button openVisBButton;
 
 	@FXML
-	private Button saveTraceButton;
+	private MenuButton saveTraceButton;
+
+	@FXML
+	private MenuItem saveTraceItem;
+
+	@FXML
+	private MenuItem saveTimedTraceItem;
 
 	@FXML
 	private TableView<SimulationItem> simulationItems;
@@ -293,7 +276,16 @@ public class SimulatorStage extends Stage {
 		btCancel.disableProperty().bind(simulationItemHandler.runningProperty().not());
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
-		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
+		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR));
+		saveTimedTraceItem.setOnAction(e -> {
+			try {
+				injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps());
+			} catch (IOException exception) {
+				exception.printStackTrace();
+				//TODO: Handle error
+			}
+		});
 		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, bundle));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
@@ -487,11 +479,6 @@ public class SimulatorStage extends Stage {
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 		visBStage.show();
 		visBStage.toFront();
-	}
-
-	@FXML
-	public void saveTrace() {
-		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR);
 	}
 
 }
