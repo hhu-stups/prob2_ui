@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 @Singleton
 public class SimulationSaver {
 
-    public static final String SIMULATION_EXTENSION = ".json";
+    public static final String SIMULATION_EXTENSION = "json";
 
     public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
@@ -76,8 +76,8 @@ public class SimulationSaver {
     public void saveConfiguration(Trace trace, List<Integer> timestamps) throws IOException {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
-        fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + SIMULATION_EXTENSION);
-        fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", SIMULATION_EXTENSION));
+        fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + SIMULATION_EXTENSION);
+        fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Simulation", SIMULATION_EXTENSION));
         final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
         if (path != null) {
             SimulationConfiguration configuration = simulationCreator.createConfiguration(trace, timestamps, true);
@@ -116,7 +116,7 @@ public class SimulationSaver {
             int numberGeneratedTraces = traces.size();
             //Starts counting with 1 in the file name
             for(int i = 1; i <= numberGeneratedTraces; i++) {
-                final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + SIMULATION_EXTENSION);
+                final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
                 //String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
                 // TODO: Metadata
                 this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath);
