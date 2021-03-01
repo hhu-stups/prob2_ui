@@ -10,7 +10,6 @@ import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.JsonMetadataBuilder;
-import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
@@ -80,7 +79,6 @@ public class TraceFileHandler {
 	}
 
 	public PersistentTrace load(Path path) {
-		LOGGER.debug(path.toString());
 		try {
 			try{
 				TraceJsonFile traceJsonFile = traceManager.load(currentProject.getLocation().resolve(path));
@@ -194,7 +192,7 @@ public class TraceFileHandler {
 		}
 	}
 
-	public Path chooseDirectory(){
+	private Path chooseDirectory(){
 		final DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"));
 		return this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
