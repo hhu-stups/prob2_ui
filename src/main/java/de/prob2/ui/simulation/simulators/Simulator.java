@@ -65,10 +65,13 @@ public abstract class Simulator {
 
 	protected List<Integer> timestamps;
 
+	protected boolean noActivationQueued;
+
 	public Simulator(final CurrentTrace currentTrace) {
         super();
         this.currentTrace = currentTrace;
         this.time = new SimpleIntegerProperty(0);
+        this.noActivationQueued = false;
         this.cache = new SimulatorCache();
         this.traceListener = (observable, from, to) -> {
             if(config != null && to != null && to.getStateSpace() != null) {
@@ -127,9 +130,7 @@ public abstract class Simulator {
         }
         //choose between non-deterministic assigned variables
         if(probability instanceof String) {
-            if("uniform".equals(probability.toString())) {
-                return null;
-            }
+            return null;
         } else {
             Map<String, Map<String, String>> probabilityMap = (Map<String, Map<String, String>>) probability;
             values = new HashMap<>();
@@ -146,6 +147,9 @@ public abstract class Simulator {
                         values.put(variable, evalValue);
                     }
                     probabilityMinimum += evalProbability;
+                }
+                if(Math.abs(1.0 - probabilityMinimum) > 0.000001) {
+                    throw new RuntimeException("Sum of probabilistic choice is not equal 1");
                 }
             }
         }
@@ -242,9 +246,11 @@ public abstract class Simulator {
     }
 
     public void updateDelay() {
+	    this.noActivationQueued = true;
         int delay = Integer.MAX_VALUE;
         for(List<Activation> activations : configurationToActivation.values()) {
             for(Activation activation : activations) {
+                this.noActivationQueued = false;
                 if(activation.getTime() < delay) {
                     delay = activation.getTime();
                 }
@@ -440,9 +446,11 @@ public abstract class Simulator {
             double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, activationChoiceConfiguration.getActivations().get(id)));
             if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
                 handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
-                break;
             }
             probabilityMinimum += evalProbability;
+        }
+        if(Math.abs(1.0 - probabilityMinimum) > 0.000001) {
+            throw new RuntimeException("Sum of probabilistic choice is not equal 1");
         }
     }
 
@@ -478,7 +486,7 @@ public abstract class Simulator {
     }
 
     public boolean endingConditionReached(Trace trace) {
-        return false;
+	    return noActivationQueued;
     }
 
     public SimulationConfiguration getConfig() {

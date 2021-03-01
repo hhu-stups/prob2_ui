@@ -93,6 +93,9 @@ public class SimulationMonteCarlo extends Simulator {
 
     @Override
     public boolean endingConditionReached(Trace trace) {
+    	if(super.endingConditionReached(trace)) {
+    		return true;
+		}
     	if(!startingConditionReached) {
     		return false;
 		}
