@@ -191,7 +191,7 @@ public class TraceViewHandler {
     }
 
     public MenuItem createRecheckTraceForChangesItem(){
-    	return new MenuItem("Start Trace analysis");
+    	return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.refactorTrace"));
 	}
 
     private static void updateStatusIcon(final BindableGlyph iconView, final Checked status) {
