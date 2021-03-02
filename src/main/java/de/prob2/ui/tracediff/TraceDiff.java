@@ -245,7 +245,7 @@ public class TraceDiff extends VBox {
 		} else {
 			cTransitions = current.getTransitionList();
 		}
-		
+
 		maxSize = Math.max(rTransitions.size(), pTransitions.size());
 		minSize = Math.min(rTransitions.size(), pTransitions.size());
 

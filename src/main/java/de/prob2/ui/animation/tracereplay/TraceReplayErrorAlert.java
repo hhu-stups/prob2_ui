@@ -136,11 +136,11 @@ public final class TraceReplayErrorAlert extends Alert {
 		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 		Optional<ButtonType> type = this.showAndWait();
 		if (type.get() == ButtonType.NO) {
-			currentTrace.set(history);
+			currentTrace.set(history == null ? new Trace(currentTrace.getStateSpace()) : history);
 		} else if (type.get() == showTraceDiff) {
 			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
 			traceDiffStage.setAlert(this);
-			traceDiffStage.setLists(attemptedReplayTrace, storedTrace, history);
+			traceDiffStage.setLists(attemptedReplayTrace, storedTrace, history == null ? new Trace(currentTrace.getStateSpace()) : history);
 			traceDiffStage.show();
 		}
 	}
