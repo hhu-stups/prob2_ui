@@ -106,7 +106,6 @@ public class TraceModificationChecker {
 	 * Runs a analysis of the given data, don't run twice
 	 */
 	public void check(){
-		System.out.println("check");
 		executeCheck(false);
 	}
 
@@ -116,7 +115,6 @@ public class TraceModificationChecker {
 	 * would result in no changes discovered while trace file would indicate different.
 	 */
 	public void recheck(){
-		System.out.println("recheck");
 		executeCheck(true);
 	}
 
@@ -131,7 +129,7 @@ public class TraceModificationChecker {
 
 		ProgressMemory progressMemory = ProgressMemory.setupForTraceChecker(resourceBundle, stageManager, progressStage);
 
-		stageManager.register(progressStage, "progressStage");
+		stageManager.register(progressStage, null);
 
 		progressStage.initOwner(stageManager.getMainStage().getOwner());
 		progressStage.initModality(Modality.WINDOW_MODAL);
@@ -139,6 +137,8 @@ public class TraceModificationChecker {
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		Runnable traceCheckerProcess = () -> {
+
+
 
 			try {
 				try{
@@ -152,15 +152,17 @@ public class TraceModificationChecker {
 					}
 				}
 				catch (FileNotFoundException e){
+					System.out.println("innerException");
 					futureTraceChecker.complete(createSimplerChecker(stateSpace, newPath, replayOptions, progressMemory));
 				}
 				Platform.runLater(progressStage::close);
-			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException | DeltaCalculationException e) {
+			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException | DeltaCalculationException | NullPointerException e) {
 				e.printStackTrace();
 			}
 		};
 
 		executorService.submit(traceCheckerProcess);
+
 
 		progressStage.showAndWait();
 	}
@@ -233,18 +235,23 @@ public class TraceModificationChecker {
 
 
 	public static Path getFile(Path path, String name) throws FileNotFoundException {
-		String[] entries = path.getParent().toFile().list();
 
-		if(entries==null){
+		try {
+			String[] entries = path.getParent().toFile().list();
+
+			if (entries == null) {
+				throw new FileNotFoundException();
+			}
+			List<String> endings = Arrays.asList(".mch", ".ref", ".imp");
+			List<String> candidates = Arrays.stream(entries)
+					.filter(entry -> endings.contains(entry.substring(entry.lastIndexOf(".")))).filter(entry -> entry.substring(0, entry.lastIndexOf(".")).equals(name)).collect(Collectors.toList());
+			if (candidates.size() == 0) {
+				throw new FileNotFoundException();
+			}
+			return path.getParent().resolve(candidates.get(0));
+		}catch (NullPointerException e){
 			throw new FileNotFoundException();
 		}
-		List<String> endings = Arrays.asList(".mch", ".ref", ".imp");
-		List<String> candidates = Arrays.stream(entries)
-				.filter(entry -> endings.contains(entry.substring(entry.lastIndexOf(".")))).filter(entry -> entry.substring(0, entry.lastIndexOf(".")).equals(name)).collect(Collectors.toList());
-		if(candidates.size()==0){
-			throw new FileNotFoundException();
-		}
-		return path.getParent().resolve(candidates.get(0));
 
 	}
 
