@@ -126,7 +126,7 @@ public class TraceReplayView extends ScrollPane {
             recheckTraceItem.setOnAction(event -> {
 				try {
 					TraceModificationChecker traceModificationChecker = new TraceModificationChecker(row.getItem(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
-					traceModificationChecker.check();
+					traceModificationChecker.recheck();
 					List<Path> persistentTraceList = traceModificationChecker.evaluateResults();
 					persistentTraceList.remove(row.getItem().getLocation());
 					addPathsToProject(persistentTraceList);
