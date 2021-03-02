@@ -200,7 +200,7 @@ public class TraceModificationChecker {
 
 
 
-	private static Path getFile(Path path, String name) throws FileNotFoundException {
+	public static Path getFile(Path path, String name) throws FileNotFoundException {
 		String[] entries = path.getParent().toFile().list();
 
 		if(entries==null){
@@ -208,14 +208,13 @@ public class TraceModificationChecker {
 		}
 		List<String> endings = Arrays.asList(".mch", ".ref", ".imp");
 		List<String> candidates = Arrays.stream(entries)
-				.filter(entry -> endings.contains(entry.substring(entry.lastIndexOf(".")+1)))
-				.filter(entry -> entry.substring(0, entry.lastIndexOf(".")).equals(name)).collect(Collectors.toList());
+				.filter(entry -> endings.contains(entry.substring(entry.lastIndexOf(".")))).filter(entry -> entry.substring(0, entry.lastIndexOf(".")).equals(name)).collect(Collectors.toList());
 		if(candidates.size()==0){
 			throw new FileNotFoundException();
 		}
-		Path result = path.resolve(candidates.get(0));
+		Path result = path.getParent().resolve(candidates.get(0));
 
-		if(result.toFile().exists()){
+		if(result.toFile().isFile()){
 			return result;
 		}
 
