@@ -298,7 +298,11 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	public VBox setTypeIIAmbiguousConflicts(Map<String, List<RenamingDelta>> typeIIWithCandidates) {
 
 
-		Map<Pair<String, String>, RenamingDelta> changeToDelta = typeIIWithCandidates.entrySet().stream().flatMap(entry -> entry.getValue().stream()
+		Map<Pair<String, String>, RenamingDelta> changeToDelta = typeIIWithCandidates
+				.entrySet()
+				.stream()
+				.flatMap(entry -> entry.getValue()
+						.stream()
 						.map(delta -> new Pair<>(new Pair<>(delta.getOriginalName(), delta.getDeltaName()), delta)))
 				.collect(toMap(Pair::getKey, Pair::getValue));
 

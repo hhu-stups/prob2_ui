@@ -83,21 +83,11 @@ public class TraceChecker implements ITraceChecker {
 
 			try {
 
-				Path oldPath = currentProject.getLocation().resolve(Paths.get(traceJsonFile.getMetadata().getSavedAt().toString()));
-				Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
+				TraceModificationChecker traceModificationChecker = new TraceModificationChecker(traceJsonFile, replayTrace.getLocation(), stateSpace, injector, currentProject, stageManager);
 
-				TraceModificationChecker traceModificationChecker =
-						new TraceModificationChecker(
-								traceJsonFile, replayTrace.getLocation(),
-								stateSpace,
-								injector, currentProject, stageManager);
-				System.out.println("------------------------------------------------");
-				System.out.println("Modification");
 				Platform.runLater(() -> {
 					TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, traceModificationChecker, new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList()));
-
 					dialog.showAndWait();
-					//					alert.show();
 				});
 
 			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException e) {
