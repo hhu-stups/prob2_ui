@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
@@ -27,23 +26,17 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
+
+import static de.prob2.ui.animation.tracereplay.TraceModificationChecker.traceNotReplayAble;
 
 @FXMLInjected
 @Singleton
@@ -125,16 +118,29 @@ public class TraceReplayView extends ScrollPane {
             final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
             final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
 			final MenuItem deleteTraceItem = traceViewHandler.createDeleteTraceItem();
+			final MenuItem recheckTraceItem = traceViewHandler.createRecheckTraceForChangesItem();
 
             // Set listeners for menu items
             traceViewHandler.initializeRow(this.getScene(), row, replayTraceItem, showErrorItem, openInExternalEditorItem);
             deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
+            recheckTraceItem.setOnAction(event -> {
+				try {
+					TraceModificationChecker traceModificationChecker = new TraceModificationChecker(row.getItem(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
+					traceModificationChecker.check();
+					List<Path> persistentTraceList = traceModificationChecker.evaluateResults();
+					persistentTraceList.remove(row.getItem().getLocation());
+					addPathsToProject(persistentTraceList);
+				} catch (ModelTranslationError | PrologTermNotDefinedException modelTranslationError) {
+					Optional<ButtonType> dialogResult = traceNotReplayAble(bundle).showAndWait();
+				}
+
+			});
             showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(replayTraceItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem)));
+					.otherwise(new ContextMenu(replayTraceItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, recheckTraceItem)));
 
 			row.setOnMouseClicked(event -> {
 				ReplayTrace item = row.getItem();
@@ -178,15 +184,9 @@ public class TraceReplayView extends ScrollPane {
 
 		try {
 			TraceModificationChecker traceModificationChecker = new TraceModificationChecker(traceJsonFile, traceFile, currentTrace.getStateSpace(), injector, currentProject, stageManager);
-			List<Path> persistentTraceList = traceModificationChecker.checkTrace();
-
-
-
-			persistentTraceList.forEach(element -> {
-
-				Path relative = currentProject.getLocation().relativize(element);
-				currentProject.getCurrentMachine().addTraceFile(relative);
-			});
+			traceModificationChecker.check();
+			List<Path> persistentTraceList = traceModificationChecker.evaluateResults();
+			addPathsToProject(persistentTraceList);
 		} catch (ModelTranslationError | PrologTermNotDefinedException modelTranslationError) {
 			modelTranslationError.printStackTrace();
 		}
@@ -207,6 +207,13 @@ public class TraceReplayView extends ScrollPane {
 		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, injector));
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
+	}
+
+	private void addPathsToProject(List<Path> persistentTraceList){
+		persistentTraceList.forEach(element -> {
+			Path relative = currentProject.getLocation().relativize(element);
+			currentProject.getCurrentMachine().addTraceFile(relative);
+		});
 	}
 
 	public void refresh() {
