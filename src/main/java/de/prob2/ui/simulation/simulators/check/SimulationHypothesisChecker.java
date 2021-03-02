@@ -49,16 +49,16 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
 	private final double probability;
 
-	private final double faultTolerance;
+	private final double significance;
 
     private HypothesisCheckResult result;
 
     public SimulationHypothesisChecker(final CurrentTrace currentTrace, final Trace trace, final int numberExecutions, final SimulationCheckingType type,
-									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final double faultTolerance, final Map<String, Object> additionalInformation) {
+									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance, final Map<String, Object> additionalInformation) {
         super(currentTrace, trace, numberExecutions, type, additionalInformation);
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
-		this.faultTolerance = faultTolerance;
+		this.significance = significance;
 		this.result = HypothesisCheckResult.NOT_FINISHED;
     }
 
@@ -73,7 +73,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		int range = 0;
 
 		for(int i = 0; i <= n; i++) {
-			if(1.0 - coverage < faultTolerance) {
+			if(1.0 - coverage < significance) {
 				range = i;
 				break;
 			}
@@ -97,7 +97,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		int range = 0;
 
 		for (int i = 0; i <= n; i++) {
-			if (1.0 - coverage < faultTolerance) {
+			if (1.0 - coverage < significance) {
 				range = i;
 				break;
 			}
@@ -122,7 +122,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		int range = 0;
 
 		for (int i = 0; i <= n; i++) {
-			if (1.0 - coverage < faultTolerance) {
+			if (1.0 - coverage < significance) {
 				range = i;
 				break;
 			}

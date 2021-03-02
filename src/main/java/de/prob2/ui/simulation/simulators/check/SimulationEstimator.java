@@ -30,23 +30,23 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 
     private final double desiredValue;
 
-    private final double faultTolerance;
+    private final double epsilon;
 
     private EstimationCheckResult result;
 
     public SimulationEstimator(final CurrentTrace currentTrace, Trace trace, int numberExecutions, SimulationCheckingType type,
-                               final EstimationType estimationType, final double desiredValue, final double faultTolerance, Map<String, Object> additionalInformation) {
+                               final EstimationType estimationType, final double desiredValue, final double epsilon, Map<String, Object> additionalInformation) {
         super(currentTrace, trace, numberExecutions, type, additionalInformation);
         this.estimationType = estimationType;
         this.desiredValue = desiredValue;
-        this.faultTolerance = faultTolerance;
+        this.epsilon = epsilon;
         this.result = EstimationCheckResult.NOT_FINISHED;
     }
 
     private void checkMean() {
         int n = resultingTraces.size();
         double ratio = (double) numberSuccess / n;
-        if(ratio >= desiredValue - faultTolerance && ratio <= desiredValue + faultTolerance) {
+        if(ratio >= desiredValue - epsilon && ratio <= desiredValue + epsilon) {
             this.result = EstimationCheckResult.SUCCESS;
         } else {
             this.result = EstimationCheckResult.FAIL;

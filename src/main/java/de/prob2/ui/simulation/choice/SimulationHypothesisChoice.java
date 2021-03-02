@@ -39,7 +39,7 @@ public class SimulationHypothesisChoice extends SimulationMonteCarloChoice {
     private TextField tfProbability;
 
     @FXML
-    private TextField tfFaultTolerance;
+    private TextField tfSignificance;
 
     @Inject
     protected SimulationHypothesisChoice(final StageManager stageManager) {
@@ -76,7 +76,7 @@ public class SimulationHypothesisChoice extends SimulationMonteCarloChoice {
         information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
         information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());
         information.put("PROBABILITY", Double.parseDouble(tfProbability.getText()));
-        information.put("FAULT_TOLERANCE", Double.parseDouble(tfFaultTolerance.getText()));
+        information.put("SIGNIFICANCE", Double.parseDouble(tfSignificance.getText()));
 
         if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
             information.put("PREDICATE", tfPredicate.getText());

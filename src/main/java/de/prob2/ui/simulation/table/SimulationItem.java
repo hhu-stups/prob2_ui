@@ -76,8 +76,11 @@ public class SimulationItem {
             if(object.has("DESIRED_VALUE")) {
                 information.put("DESIRED_VALUE", JsonManager.checkDeserialize(context, object, "DESIRED_VALUE", double.class));
             }
-            if(object.has("FAULT_TOLERANCE")) {
-                information.put("FAULT_TOLERANCE", JsonManager.checkDeserialize(context, object, "FAULT_TOLERANCE", double.class));
+            if(object.has("SIGNIFICANCE")) {
+                information.put("SIGNIFICANCE", JsonManager.checkDeserialize(context, object, "SIGNIFICANCE", double.class));
+            }
+            if(object.has("EPSILON")) {
+                information.put("EPSILON", JsonManager.checkDeserialize(context, object, "EPSILON", double.class));
             }
             if(object.has("TIME")) {
                 information.put("TIME", JsonManager.checkDeserialize(context, object, "TIME", int.class));

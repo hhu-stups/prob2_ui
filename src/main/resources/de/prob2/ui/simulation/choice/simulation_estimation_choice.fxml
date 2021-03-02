@@ -94,6 +94,6 @@
 	<Label text="%simulation.choice.desiredValue" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
 	<TextField fx:id="tfDesiredValue" GridPane.rowIndex="9" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.faultTolerance" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfFaultTolerance" GridPane.rowIndex="10" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.epsilon" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfEpsilon" GridPane.rowIndex="10" GridPane.columnIndex="2"/>
 </fx:root>

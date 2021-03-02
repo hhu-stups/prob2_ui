@@ -39,7 +39,7 @@ public class SimulationEstimationChoice extends SimulationMonteCarloChoice {
     private TextField tfDesiredValue;
 
     @FXML
-    private TextField tfFaultTolerance;
+    private TextField tfEpsilon;
 
     @Inject
     protected SimulationEstimationChoice(final StageManager stageManager) {
@@ -76,7 +76,7 @@ public class SimulationEstimationChoice extends SimulationMonteCarloChoice {
         information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
         information.put("ESTIMATION_TYPE", estimationChoice.getSelectionModel().getSelectedItem().getEstimationType());
         information.put("DESIRED_VALUE", Double.parseDouble(tfDesiredValue.getText()));
-        information.put("FAULT_TOLERANCE", Double.parseDouble(tfFaultTolerance.getText()));
+        information.put("EPSILON", Double.parseDouble(tfEpsilon.getText()));
 
         if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
             information.put("PREDICATE", tfPredicate.getText());

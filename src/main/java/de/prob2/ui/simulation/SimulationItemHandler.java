@@ -126,7 +126,7 @@ public class SimulationItemHandler {
         SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
         SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getField("HYPOTHESIS_CHECKING_TYPE");
         double probability = (double) item.getField("PROBABILITY");
-        double faultTolerance = (double) item.getField("FAULT_TOLERANCE");
+        double significance = (double) item.getField("SIGNIFICANCE");
 
         if(item.containsField("PREDICATE")) {
             additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
@@ -136,7 +136,7 @@ public class SimulationItemHandler {
             additionalInformation.put("TIME", item.getField("TIME"));
         }
 
-        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(currentTrace, trace, executions, checkingType, hypothesisCheckingType, probability, faultTolerance, additionalInformation);
+        SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(currentTrace, trace, executions, checkingType, hypothesisCheckingType, probability, significance, additionalInformation);
         SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path.toFile());
         Thread thread = new Thread(() -> {
             hypothesisChecker.run();
@@ -172,7 +172,7 @@ public class SimulationItemHandler {
         SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
         SimulationEstimator.EstimationType estimationType = (SimulationEstimator.EstimationType) item.getField("ESTIMATION_TYPE");
         double desiredValue = (double) item.getField("DESIRED_VALUE");
-        double faultTolerance = (double) item.getField("FAULT_TOLERANCE");
+        double epsilon = (double) item.getField("EPSILON");
 
         if(item.containsField("PREDICATE")) {
             additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
@@ -182,7 +182,7 @@ public class SimulationItemHandler {
             additionalInformation.put("TIME", item.getField("TIME"));
         }
 
-        SimulationEstimator simulationEstimator = new SimulationEstimator(currentTrace, trace, executions, checkingType, estimationType, desiredValue, faultTolerance, additionalInformation);
+        SimulationEstimator simulationEstimator = new SimulationEstimator(currentTrace, trace, executions, checkingType, estimationType, desiredValue, epsilon, additionalInformation);
         SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator, path.toFile());
         Thread thread = new Thread(() -> {
             simulationEstimator.run();

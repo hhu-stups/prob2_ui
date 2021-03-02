@@ -96,6 +96,6 @@
 	<Label text="%simulation.choice.probability" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
 	<TextField fx:id="tfProbability" GridPane.rowIndex="9" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.faultTolerance" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfFaultTolerance" GridPane.rowIndex="10" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.significance" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfSignificance" GridPane.rowIndex="10" GridPane.columnIndex="2"/>
 </fx:root>
