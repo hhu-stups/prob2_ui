@@ -4,6 +4,7 @@ import com.google.inject.Singleton;
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
+import de.prob.statespace.FormalismType;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -53,7 +54,7 @@ public class TestCaseGenerationItemHandler {
 
 	public void generateTestCases(TestCaseGenerationItem item) {
 		AbstractModel model = currentTrace.getModel();
-		if(!(model instanceof ClassicalBModel)) {
+		if(model.getFormalismType() != FormalismType.B) {
 			return;
 		}
 		ClassicalBModel bModel = (ClassicalBModel) model;
