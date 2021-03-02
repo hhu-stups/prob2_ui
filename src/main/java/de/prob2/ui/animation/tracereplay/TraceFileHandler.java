@@ -7,10 +7,8 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.JsonMetadataBuilder;
-import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
@@ -36,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import de.prob2.ui.internal.VersionInfo;
 
