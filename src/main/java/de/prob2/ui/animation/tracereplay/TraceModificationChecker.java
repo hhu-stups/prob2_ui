@@ -3,12 +3,15 @@ package de.prob2.ui.animation.tracereplay;
 import com.google.common.io.Files;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.TraceLoaderSaver;
 import de.prob.check.tracereplay.check.ReplayOptions;
 import de.prob.check.tracereplay.check.TraceChecker;
 import de.prob.check.tracereplay.check.exceptions.DeltaCalculationException;
 import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.scripting.ClassicalBFactory;
+import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
@@ -22,6 +25,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -58,10 +62,6 @@ public class TraceModificationChecker {
 		this.stageManager = stageManager;
 		this.resourceBundle = injector.getInstance(ResourceBundle.class);
 
-
-		Path oldPath = getFile(traceJsonFilePath, traceJsonFile.getMetadata().getModelName());
-		System.out.println("path: " + oldPath);
-		LOGGER.debug(oldPath.toString());
 		Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
 
 
@@ -83,10 +83,12 @@ public class TraceModificationChecker {
 		Runnable traceCheckerProcess = () -> {
 
 			try {
-				if(java.nio.file.Files.exists(oldPath)) {
+				try{
+				Path oldPath = getFile(traceJsonFilePath, traceJsonFile.getMetadata().getModelName());
+
 					futureTraceChecker.complete(createComplexChecker(stateSpace, newPath, oldPath, replayOptions, progressMemory));
 				}
-				else {
+				catch (FileNotFoundException e){
 					futureTraceChecker.complete(createSimplerChecker(stateSpace, newPath, replayOptions, progressMemory));
 				}
 				Platform.runLater(progressStage::close);
@@ -105,8 +107,8 @@ public class TraceModificationChecker {
 
 	private TraceChecker createSimplerChecker(StateSpace stateSpace, Path newPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException {
 		return new TraceChecker(persistentTrace.getTransitionList(),
-				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
 				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
+				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
 				new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
 				new HashSet<>(traceJsonFile.getVariableNames()),
 				newPath.toString(),
@@ -170,14 +172,15 @@ public class TraceModificationChecker {
 			persistentTraces.forEach(element -> {
 
 				String filename = Files.getNameWithoutExtension(path.toString());
-				String modified = filename + "_edited_for_" + currentProject.getCurrentMachine().getName() +"." + Files.getFileExtension(path.toString());
+				String newMachineName = currentProject.getCurrentMachine().getName();
+				String modified = filename + "_edited_for_" + newMachineName+"." + Files.getFileExtension(path.toString());
 
 				Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
 
 				result.add(saveAt);
 				try {
-					TraceManager traceManager = injector.getInstance(TraceManager.class);
-					traceManager.save(saveAt, traceJsonFile.changeTrace(element));
+					TraceFileHandler traceManager = injector.getInstance(TraceFileHandler.class);
+					traceManager.save(traceJsonFile.changeTrace(element).changeModelName(newMachineName), saveAt);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -190,16 +193,26 @@ public class TraceModificationChecker {
 
 	}
 
-	private static Path getFile(Path path, String name){
-		String[] entries = path.toFile().list();
+	private static Path getFile(Path path, String name) throws FileNotFoundException {
+		String[] entries = path.getParent().toFile().list();
+
 		if(entries==null){
-			return Paths.get("");
+			throw new FileNotFoundException();
 		}
-		List<String> candidates = Arrays.stream(entries).filter(entry -> entry.startsWith(name)).collect(Collectors.toList());
-		if(candidates.size()<1){
-			return Paths.get("");
+		List<String> endings = Arrays.asList(".mch", ".ref", ".imp");
+		List<String> candidates = Arrays.stream(entries)
+				.filter(entry -> endings.contains(entry.substring(entry.lastIndexOf(".")+1)))
+				.filter(entry -> entry.substring(0, entry.lastIndexOf(".")).equals(name)).collect(Collectors.toList());
+		if(candidates.size()==0){
+			throw new FileNotFoundException();
 		}
-		return path.resolve(candidates.get(0));
+		Path result = path.resolve(candidates.get(0));
+
+		if(result.toFile().exists()){
+			return result;
+		}
+
+		throw new FileNotFoundException();
 	}
 
 }
