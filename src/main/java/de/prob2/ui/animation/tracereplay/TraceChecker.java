@@ -79,21 +79,6 @@ public class TraceChecker implements ITraceChecker {
 		Map<String, Object> replayInformation = new HashMap<>();
 		replayInformation.put("replayTrace", replayTrace);
 		Thread replayThread = new Thread(() -> {
-			TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
-
-			try {
-
-				TraceModificationChecker traceModificationChecker = new TraceModificationChecker(traceJsonFile, replayTrace.getLocation(), stateSpace, injector, currentProject, stageManager);
-
-				Platform.runLater(() -> {
-					TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, traceModificationChecker, new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList()));
-					dialog.showAndWait();
-				});
-
-			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException e) {
-				e.printStackTrace();
-			}
-
 			Trace trace = TraceReplay.replayTrace(persistentTrace, stateSpace, setCurrentAnimation, replayInformation, this);
 			if (setCurrentAnimation) {
 				// set the current trace if no error has occurred. Otherwise leave the decision to the user
