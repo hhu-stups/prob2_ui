@@ -190,6 +190,10 @@ public class TraceViewHandler {
         return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.openInExternalEditor"));
     }
 
+    public MenuItem createRecheckTraceForChangesItem(){
+    	return new MenuItem("Start Trace analysis");
+	}
+
     private static void updateStatusIcon(final BindableGlyph iconView, final Checked status) {
         switch (status) {
             case SUCCESS:
