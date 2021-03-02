@@ -233,14 +233,19 @@ public class TraceDiff extends VBox {
 	final void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
 		List<Transition> rTransitions = replayedOrLost.getTransitionList();
 		List<PersistentTransition> pTransitions;
+		List<Transition> cTransitions;
 		// if triggered by HistoryView: No persistent trace available
 		if (persistent == null) {
 			pTransitions = FXCollections.emptyObservableList();
 		} else {
 			pTransitions = persistent.getTransitionList();
 		}
-		List<Transition> cTransitions = current.getTransitionList();
-
+		if (current == null) {
+			cTransitions = FXCollections.emptyObservableList();
+		} else {
+			cTransitions = current.getTransitionList();
+		}
+		
 		maxSize = Math.max(rTransitions.size(), pTransitions.size());
 		minSize = Math.min(rTransitions.size(), pTransitions.size());
 
