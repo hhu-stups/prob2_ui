@@ -13,6 +13,8 @@ import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelTranslationError;
+import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -48,11 +50,12 @@ public class TraceModificationChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceModificationChecker.class);
 	private final CompletableFuture<TraceChecker> futureTraceChecker = new CompletableFuture<>();
 	private final Stage progressStage;
+	private final Map<String, OperationInfo> currentMachine;
 
 
 
 	public TraceModificationChecker(TraceJsonFile traceJsonFile, Path traceJsonFilePath, StateSpace stateSpace,
-									Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException, ModelTranslationError, PrologTermNotDefinedException {
+									Injector injector, CurrentProject currentProject, StageManager stageManager) throws  ModelTranslationError, PrologTermNotDefinedException {
 		this.path = traceJsonFilePath;
 	
 		this.traceJsonFile = traceJsonFile;
@@ -61,6 +64,7 @@ public class TraceModificationChecker {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.resourceBundle = injector.getInstance(ResourceBundle.class);
+		this.currentMachine  = stateSpace.getLoadedMachine().getOperations();
 
 		Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
 
@@ -180,7 +184,7 @@ public class TraceModificationChecker {
 				result.add(saveAt);
 				try {
 					TraceFileHandler traceManager = injector.getInstance(TraceFileHandler.class);
-					traceManager.save(traceJsonFile.changeTrace(element).changeModelName(newMachineName), saveAt);
+					traceManager.save(traceJsonFile.changeTrace(element).changeModelName(newMachineName).changeMachineInfos(currentMachine), saveAt);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -192,6 +196,9 @@ public class TraceModificationChecker {
 		return result;
 
 	}
+
+
+
 
 	private static Path getFile(Path path, String name) throws FileNotFoundException {
 		String[] entries = path.getParent().toFile().list();
