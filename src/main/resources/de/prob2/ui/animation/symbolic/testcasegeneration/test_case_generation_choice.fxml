@@ -11,8 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
-<fx:root type="TestCaseGenerationChoosingStage" fx:id="cbcChoice" title="%animation.testcase.choice.title"
-		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="TestCaseGenerationChoosingStage" fx:id="cbcChoice" title="%animation.testcase.choice.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane styleClass="dialog">
