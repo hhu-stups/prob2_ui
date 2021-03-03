@@ -37,7 +37,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 			input.changeType(to);
 			this.sizeToScene();
 		});
-		this.setResizable(true);
 	}
 	
 	public TestCaseGenerationType getTestCaseGenerationType() {
