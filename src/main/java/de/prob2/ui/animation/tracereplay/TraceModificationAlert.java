@@ -5,6 +5,7 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.check.*;
 import de.prob.statespace.OperationInfo;
+import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
 import javafx.beans.property.*;
 import javafx.collections.*;
@@ -148,6 +149,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		VBox result = new VBox();
 
 		if(!resultInit.isEmpty()){
+
+			resultTypeII = resultTypeII.stream().filter(entry -> !entry.getOriginalName().equals(Transition.INITIALISE_MACHINE_NAME)).collect(toList());
+
 			GridPane gridPane = new GridPane();
 
 
@@ -178,6 +182,11 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	public void generateLabelView(List<RenamingDelta> resultTypeII, Map<String, OperationInfo> operationInfoMap, VBox result){
 
 
+		//Todo deal with init
+
+
+
+
 		for(RenamingDelta entry : resultTypeII){
 			int row = 0;
 			GridPane gridPane = new GridPane();
@@ -199,7 +208,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 			row = registerRow(gridPane, operations, oldB, newB, row);
 
 
-			OperationInfo operationInfo = operationInfoMap.get(entry.getOriginalName());
+			OperationInfo operationInfo=operationInfoMap.get(entry.getOriginalName());
 
 
 			if(!operationInfo.getAllVariables().isEmpty()){
@@ -238,34 +247,6 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		GridPane.setHgrow(oldB, Priority.ALWAYS);
 		GridPane.setHgrow(newB, Priority.ALWAYS);
 		return row+1;
-	}
-
-
-
-	List<SimpleStringProperty> retractEntries2(List<String> entries, Map<String, SimpleStringProperty> goal){
-		return entries.stream().map(goal::get).collect(toList());
-	}
-
-
-	VBox prepareColumn2(List<SimpleStringProperty> stuff){
-
-		List<Label> oldStuffFX = stuff.stream().map(entry -> {
-			if(entry != null)
-			{
-				Label result = new Label(entry.getName());
-				result.textProperty().bindBidirectional(entry);
-				return result;
-			}
-			else{
-				return new Label("???");
-			}
-		}).collect(toList());
-
-
-		Node[] elements = new Node[oldStuffFX.size()];
-		oldStuffFX.toArray(elements);
-
-		return new VBox(elements);
 	}
 
 
@@ -519,11 +500,16 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 	public int fillGridPane(Map<String, String> mappings, List<String> oldIds , List<String> newIds, String labelTitle, int row, GridPane gridPane){
 
-		Map<String, String> cleanedMapping = mappings.entrySet()
-				.stream()
-				.filter(entry -> !entry.getKey().equals(entry.getValue()))
-				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+		Map<String, String> cleanedMapping;
 
+		if(labelTitle.equals("Input Parameters") || labelTitle.equals("Output Parameters")){
+			cleanedMapping = mappings;
+		}else {
+			cleanedMapping =  mappings.entrySet()
+					.stream()
+					.filter(entry -> !entry.getKey().equals(entry.getValue()))
+					.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+		}
 
 		Set<String> voidCards = oldIds.stream()
 				.filter(entry -> !mappings.containsKey(entry))
