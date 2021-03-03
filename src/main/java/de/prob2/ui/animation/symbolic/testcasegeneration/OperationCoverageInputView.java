@@ -20,9 +20,11 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import javafx.util.converter.IntegerStringConverter;
 
 @FXMLInjected
 public class OperationCoverageInputView extends VBox {
@@ -91,6 +93,11 @@ public class OperationCoverageInputView extends VBox {
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.update(to));
 		this.update(currentTrace.getStateSpace());
 		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
+		depthSpinner.getEditor().textProperty().addListener((observable, from, to) -> {
+			if(!to.matches("[1-9]+")){
+				depthSpinner.getEditor().setText(from);
+			}
+		});
 		this.reset();
 	}
 

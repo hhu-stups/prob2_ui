@@ -8,7 +8,9 @@ import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
+import javafx.util.converter.IntegerStringConverter;
 
 @FXMLInjected
 public class MCDCInputView extends VBox {
@@ -29,6 +31,16 @@ public class MCDCInputView extends VBox {
 	private void initialize() {
 		levelSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
 		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
+		levelSpinner.getEditor().textProperty().addListener((observable, from, to) -> {
+			if(!to.matches("\\d+")){
+				levelSpinner.getEditor().setText(from);
+			}
+		});
+		depthSpinner.getEditor().textProperty().addListener((observable, from, to) -> {
+			if(!to.matches("[1-9]+")){
+				depthSpinner.getEditor().setText(from);
+			}
+		});
 		this.reset();
 	}
 
