@@ -54,6 +54,6 @@ public abstract class AbstractResultHandler {
 		stageManager.makeAlert(AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
 				"verifications.abstractResultHandler.alerts.alreadyExists.content", bundle.getString(itemType.getKey()))
-				.showAndWait();
+				.show();
 	}
 }
