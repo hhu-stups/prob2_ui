@@ -149,6 +149,7 @@ public class Machine implements DescriptionView.Describable {
 	
 	private static Machine.CheckingStatus combineCheckingStatus(final List<? extends IExecutableItem> items) {
 		boolean anyEnabled = false;
+		boolean anyUnknown = false;
 		for(IExecutableItem item : items) {
 			if(!item.selected()) {
 				continue;
@@ -156,11 +157,11 @@ public class Machine implements DescriptionView.Describable {
 			anyEnabled = true;
 			if(item.getChecked() == Checked.FAIL) {
 				return Machine.CheckingStatus.FAILED;
-			} else if (item.getChecked() != Checked.SUCCESS) {
-				return Machine.CheckingStatus.UNKNOWN;
+			} else if (item.getChecked() == Checked.NOT_CHECKED) {
+				anyUnknown = true;
 			}
 		}
-		return anyEnabled ? Machine.CheckingStatus.SUCCESSFUL : Machine.CheckingStatus.NONE;
+		return anyEnabled ? (anyUnknown? CheckingStatus.UNKNOWN :  Machine.CheckingStatus.SUCCESSFUL) : Machine.CheckingStatus.NONE;
 	}
 
 	private static Machine.MachineCheckingStatus combineMachineCheckingStatus(final List<? extends IExecutableItem> items) {
