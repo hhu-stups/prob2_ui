@@ -65,7 +65,7 @@
 								<Label fx:id="lbDescription" prefHeight="100.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 								<VBox spacing="20.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 									<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
-									<TextArea fx:id="taFormula" promptText="%dynamic.enterFormula.placeholder" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8;"/>
+									<TextArea fx:id="taFormula" promptText="%dynamic.enterFormula.placeholder" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 								</VBox>
 							</VBox>
 						</VBox>
