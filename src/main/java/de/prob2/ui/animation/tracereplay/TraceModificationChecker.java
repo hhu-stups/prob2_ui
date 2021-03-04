@@ -29,13 +29,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 
 /**
@@ -52,10 +57,9 @@ public class TraceModificationChecker {
 	private final Path traceJsonFilePath;
 	private final ResourceBundle resourceBundle;
 	private final StateSpace stateSpace;
-	private static final Logger LOGGER = LoggerFactory.getLogger(TraceModificationChecker.class);
-	private final CompletableFuture<TraceChecker> futureTraceChecker = new CompletableFuture<>();
 	private final Map<String, OperationInfo> currentMachine;
-
+	private Stage progressStage;
+	private Thread traceCheckerProcess;
 
 	public TraceModificationChecker(ReplayTrace replayTrace, StateSpace stateSpace,
 									Injector injector, CurrentProject currentProject, StageManager stageManager) throws ModelTranslationError, PrologTermNotDefinedException {
@@ -118,6 +122,13 @@ public class TraceModificationChecker {
 		executeCheck(true);
 	}
 
+	/**
+	 * Does two things:
+	 * 1) Prepares a progress bar to show the progress while running the trace modification
+	 * 2) Starts the trace modification check in a parallel thread. The progress bar gets started in the UI. The
+	 * calculation thread will update the progress bar. When the progress bar gets closed the second thread needs to be interrupted
+	 * @param recheck indicates wherever an recheck is requested. A recheck means that the old machine is definitely not available
+	 */
 	private void executeCheck(boolean recheck){
 		Path newPath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
 
@@ -125,45 +136,37 @@ public class TraceModificationChecker {
 		Optional<ReplayOptions> optionResult = traceOptionChoice.showAndWait();
 		ReplayOptions replayOptions = optionResult.get();
 
-		Stage progressStage = new Stage();
-
+		progressStage = new Stage();
 		ProgressMemory progressMemory = ProgressMemory.setupForTraceChecker(resourceBundle, stageManager, progressStage);
-
 		stageManager.register(progressStage, null);
-
 		progressStage.initOwner(stageManager.getMainStage().getOwner());
 		progressStage.initModality(Modality.WINDOW_MODAL);
+		progressStage.setOnCloseRequest(event -> {
+			traceCheckerProcess.interrupt();
+		});
 
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-		Runnable traceCheckerProcess = () -> {
+		Runnable traceCheckerRunnable = () -> {
 
-
+			Path oldPath = null;
+			try{
+				oldPath = getFile(traceJsonFilePath, traceJsonFile.getMetadata().getModelName());
+			}catch (FileNotFoundException ignored){}
 
 			try {
-				try{
-					Path oldPath = getFile(traceJsonFilePath, traceJsonFile.getMetadata().getModelName());
-					System.out.println("file : " + oldPath);
-					System.out.println("recheck : " + recheck);
-					if(oldPath.toFile().isFile() && !recheck){
-						futureTraceChecker.complete(createComplexChecker(stateSpace, newPath, oldPath, replayOptions, progressMemory));
-					}else{
-						futureTraceChecker.complete(createSimplerChecker(stateSpace, newPath, replayOptions, progressMemory));
-					}
-				}
-				catch (FileNotFoundException e){
-					System.out.println("innerException");
-					futureTraceChecker.complete(createSimplerChecker(stateSpace, newPath, replayOptions, progressMemory));
+				if(oldPath != null && oldPath.toFile().isFile() && !recheck){
+					traceChecker = createComplexChecker(stateSpace, newPath, oldPath, replayOptions, progressMemory);
+				}else{
+					traceChecker = createSimplerChecker(stateSpace, newPath, replayOptions, progressMemory);
 				}
 				Platform.runLater(progressStage::close);
-			} catch (IOException | ModelTranslationError | PrologTermNotDefinedException | DeltaCalculationException | NullPointerException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				throw new TraceModificationError(e);
 			}
 		};
 
-		executorService.submit(traceCheckerProcess);
-
-
+		traceCheckerProcess = new Thread(traceCheckerRunnable);
+		traceCheckerProcess.start();
 		progressStage.showAndWait();
 	}
 
@@ -174,64 +177,62 @@ public class TraceModificationChecker {
 	 */
 	public List<Path> evaluateResults(){
 
-		traceChecker = futureTraceChecker.join();
+		try {
+			traceCheckerProcess.join();
+			progressStage.close();
 
-
-		if(traceChecker == null){
-			throw new NullPointerException();
-		}
-
-		final List<Path> result = new ArrayList<>();
-
-		if(traceChecker.getTraceModifier().isDirty()) {
-
-			final List<PersistentTrace> persistentTraces = new ArrayList<>();
-
-
-			if(traceChecker.getTraceModifier().getChangelogPhase3II().isEmpty()) {
-				Optional<ButtonType> dialogResult = traceNotReplayAble(resourceBundle).showAndWait();
-				if(dialogResult.get()==ButtonType.YES){
-					result.add(traceJsonFilePath);
-				}
-			}else {
-				TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, this, persistentTrace);
-				stageManager.register(dialog);
-				Optional<List<PersistentTrace>> dialogResult = dialog.showAndWait();
-				persistentTraces.addAll(dialogResult.get());
+			if(traceChecker == null){
+				throw new NullPointerException();
 			}
 
+			final List<Path> result = new ArrayList<>();
 
-			if (persistentTraces.remove(persistentTrace)) {
-				result.add(traceJsonFilePath);
-			}
-
-			persistentTraces.forEach(element -> {
-
-				String filename = Files.getNameWithoutExtension(traceJsonFilePath.toString());
-				String newMachineName = currentProject.getCurrentMachine().getName();
-				String modified = filename + "_edited_for_" + newMachineName+"." + Files.getFileExtension(traceJsonFilePath.toString());
-
-				Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
-
-				result.add(saveAt);
-				try {
-					TraceFileHandler traceManager = injector.getInstance(TraceFileHandler.class);
-					traceManager.save(traceJsonFile.changeTrace(element).changeModelName(newMachineName).changeMachineInfos(currentMachine), saveAt);
-				} catch (IOException e) {
-					e.printStackTrace();
+			if(traceChecker.getTraceModifier().isDirty()) {
+				if(traceChecker.getTraceModifier().getChangelogPhase3II().isEmpty()) {
+					Optional<ButtonType> dialogResult = traceNotReplayAble(resourceBundle).showAndWait();
+					if(dialogResult.get()==ButtonType.YES){
+						result.add(traceJsonFilePath);
+					}
+				}else {
+					TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, this, persistentTrace);
+					stageManager.register(dialog);
+					List<PersistentTrace> dialogResult = dialog.showAndWait().get();//The dialog can only return 0,1 or 2 results
+					if(dialogResult.remove(persistentTrace)){
+						result.add(traceJsonFilePath);
+					}
+					if(!dialogResult.isEmpty()){
+						result.add(saveNewTrace(dialogResult.get(0)));
+					}
 				}
-			});
 		}else{
 			result.add(traceJsonFilePath);
 		}
 
-		return result;
+			return result;
 
+		} catch (Exception e) {
+			Optional<ButtonType> dialogResult = traceNotReplayAble(resourceBundle).showAndWait();
+			if(dialogResult.get()==ButtonType.YES){
+				return singletonList(traceJsonFilePath);
+			}
+			return emptyList();
+		}
 	}
 
 
+	private Path saveNewTrace(PersistentTrace persistentTrace) throws IOException {
 
+		String filename = Files.getNameWithoutExtension(traceJsonFilePath.toString());
+		String newMachineName = currentProject.getCurrentMachine().getName();
+		String modified = filename + "_edited_for_" + newMachineName+"." + Files.getFileExtension(traceJsonFilePath.toString());
 
+		Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
+
+		TraceFileHandler traceManager = injector.getInstance(TraceFileHandler.class);
+		traceManager.save(traceJsonFile.changeTrace(persistentTrace).changeModelName(newMachineName).changeMachineInfos(currentMachine), saveAt);
+
+		return saveAt;
+	}
 
 
 	public static Path getFile(Path path, String name) throws FileNotFoundException {
@@ -244,23 +245,47 @@ public class TraceModificationChecker {
 			}
 			List<String> endings = Arrays.asList(".mch", ".ref", ".imp");
 			List<String> candidates = Arrays.stream(entries)
-					.filter(entry -> endings.contains(entry.substring(entry.lastIndexOf(".")))).filter(entry -> entry.substring(0, entry.lastIndexOf(".")).equals(name)).collect(Collectors.toList());
+					.filter(entry -> entry.contains("."))
+					.filter(entry -> endings.contains(entry.substring(entry.lastIndexOf("."))))
+					.filter(entry -> entry.substring(0, entry.lastIndexOf(".")).equals(name)).collect(Collectors.toList());
 			if (candidates.size() == 0) {
 				throw new FileNotFoundException();
 			}
 			return path.getParent().resolve(candidates.get(0));
-		}catch (NullPointerException e){
+		}catch (NullPointerException  e){
 			throw new FileNotFoundException();
 		}
 
 	}
 
-
-
 	public static Alert traceNotReplayAble(ResourceBundle resourceBundle){
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, resourceBundle.getString("traceModification.alert.traceNotReplayable") , ButtonType.YES, ButtonType.NO);
 		alert.setTitle("No suitable configuration found.");
 		return alert;
+	}
+
+	class TraceModificationError extends RuntimeException{
+
+		/**
+		 * Constructs an instance of this class.
+		 *
+		 * @param message the detail message, can be null
+		 * @param cause   the {@code IOException}
+		 * @throws NullPointerException if the cause is {@code null}
+		 */
+		public TraceModificationError(String message, Exception cause) {
+			super(message, cause);
+		}
+
+		/**
+		 * Constructs an instance of this class.
+		 *
+		 * @param cause the {@code IOException}
+		 * @throws NullPointerException if the cause is {@code null}
+		 */
+		public TraceModificationError(Exception cause) {
+			super(cause);
+		}
 	}
 
 }
