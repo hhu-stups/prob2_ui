@@ -11,9 +11,9 @@ public class TraceModificationCheckerTest {
 
 	@Test
 	public void getFile_test() throws FileNotFoundException {
-		Path pathOld = Paths.get("src", "test", "resources", "machines", "island", "ISLAND.prob2trace").toAbsolutePath();
+		Path pathOld = Paths.get("src", "test", "resources", "machines", "island", "wrongName", "testTraceMachine.mch").toAbsolutePath();
 
-		Path result = TraceModificationChecker.getFile(pathOld, "ISLAND");
+		Path result = TraceModificationChecker.getFile(pathOld, "Lift");
 
 		Path expected = Paths.get("/home/sebastian/IdeaProjects/prob2_ui/src/test/resources/machines/island/ISLAND.mch");
 

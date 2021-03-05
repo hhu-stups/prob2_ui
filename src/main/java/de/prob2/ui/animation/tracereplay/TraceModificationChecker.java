@@ -6,6 +6,7 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
 import de.prob.check.tracereplay.check.ReplayOptions;
 import de.prob.check.tracereplay.check.TraceChecker;
+import de.prob.check.tracereplay.check.TraceModifier;
 import de.prob.check.tracereplay.check.exceptions.DeltaCalculationException;
 import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
@@ -187,35 +188,28 @@ public class TraceModificationChecker {
 
 			final List<Path> result = new ArrayList<>();
 
-			if(traceChecker.getTraceModifier().isDirty()) {
-				if(traceChecker.getTraceModifier().getChangelogPhase3II().isEmpty()) {
-					Optional<ButtonType> dialogResult = traceNotReplayAble(resourceBundle).showAndWait();
-					if(dialogResult.get()==ButtonType.YES){
-						result.add(traceJsonFilePath);
-					}
-				}else {
-					TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, this, persistentTrace);
-					stageManager.register(dialog);
-					List<PersistentTrace> dialogResult = dialog.showAndWait().get();//The dialog can only return 0,1 or 2 results
-					if(dialogResult.remove(persistentTrace)){
-						result.add(traceJsonFilePath);
-					}
-					if(!dialogResult.isEmpty()){
-						result.add(saveNewTrace(dialogResult.get(0)));
-					}
+			TraceModifier traceModifier = traceChecker.getTraceModifier();
+			if(traceModifier.succesfullTracing() && !traceModifier.originalMatchesProduced()){
+				TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, this, persistentTrace);
+				stageManager.register(dialog);
+				List<PersistentTrace> dialogResult = dialog.showAndWait().get();//The dialog can only return 0,1 or 2 results
+				if(dialogResult.remove(persistentTrace)){
+					result.add(traceJsonFilePath);
 				}
-		}else{
-			result.add(traceJsonFilePath);
-		}
+				if(!dialogResult.isEmpty()){
+					result.add(saveNewTrace(dialogResult.get(0)));
+				}
+			}else if(traceModifier.succesfullTracing() && traceModifier.originalMatchesProduced()){
+				result.add(traceJsonFilePath);
+			}
+			else if(!traceModifier.succesfullTracing()) {
+				result.addAll(traceNotReplayable());
+			}
 
 			return result;
 
 		} catch (Exception e) {
-			Optional<ButtonType> dialogResult = traceNotReplayAble(resourceBundle).showAndWait();
-			if(dialogResult.get()==ButtonType.YES){
-				return singletonList(traceJsonFilePath);
-			}
-			return emptyList();
+			return traceNotReplayable();
 		}
 	}
 
@@ -258,11 +252,24 @@ public class TraceModificationChecker {
 
 	}
 
-	public static Alert traceNotReplayAble(ResourceBundle resourceBundle){
+	private List<Path> traceNotReplayable(){
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, resourceBundle.getString("traceModification.alert.traceNotReplayable") , ButtonType.YES, ButtonType.NO);
 		alert.setTitle("No suitable configuration found.");
-		return alert;
+
+		Optional<ButtonType> dialogResult = alert.showAndWait();
+		if (dialogResult.get() == ButtonType.YES) {
+			return singletonList(traceJsonFilePath);
+		}else{
+			return emptyList();
+		}
 	}
+
+	public static void traceNotReplayableConfirmation(ResourceBundle bundle){
+		Alert alert = new Alert(Alert.AlertType.INFORMATION, bundle.getString("traceModification.alert.traceNotReplayable"));
+		alert.setTitle("No suitable configuration found.");
+		alert.showAndWait();
+	}
+
 
 	class TraceModificationError extends RuntimeException{
 

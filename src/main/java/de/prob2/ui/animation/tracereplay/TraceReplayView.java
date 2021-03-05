@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import static de.prob2.ui.animation.tracereplay.TraceModificationChecker.traceNotReplayAble;
 
 @FXMLInjected
 @Singleton
@@ -131,7 +130,7 @@ public class TraceReplayView extends ScrollPane {
 					persistentTraceList.remove(row.getItem().getLocation());
 					addPathsToProject(persistentTraceList);
 				} catch (ModelTranslationError | PrologTermNotDefinedException modelTranslationError) {
-					Optional<ButtonType> dialogResult = traceNotReplayAble(bundle).showAndWait();
+					TraceModificationChecker.traceNotReplayableConfirmation(bundle);
 				}
 
 			});
@@ -181,6 +180,7 @@ public class TraceReplayView extends ScrollPane {
 		//Check if machine file is valid
 		TraceManager traceManager = new TraceManager(new ObjectMapper());
 		TraceJsonFile traceJsonFile = traceManager.load(traceFile);
+
 
 		try {
 			TraceModificationChecker traceModificationChecker = new TraceModificationChecker(traceJsonFile, traceFile, currentTrace.getStateSpace(), injector, currentProject, stageManager);
