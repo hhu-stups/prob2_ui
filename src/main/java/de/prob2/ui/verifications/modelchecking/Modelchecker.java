@@ -3,11 +3,19 @@ package de.prob2.ui.verifications.modelchecking;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.animator.domainobjects.EventB;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.StateSpaceStats;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.eventb.EventBPackageModel;
+import de.prob.model.representation.AbstractModel;
+import de.prob.statespace.FormalismType;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
@@ -119,8 +127,23 @@ public class Modelchecker {
 		}
 	}
 
+	private IEvalElement getGoal(ModelCheckingItem item) {
+		IEvalElement evalElement = null;
+		if(currentTrace.getModel().getFormalismType() == FormalismType.B) {
+			if(!item.getGoal().equals("-")) {
+				AbstractModel model = currentTrace.getModel();
+				if(model instanceof EventBModel) {
+					evalElement = new EventB(item.getGoal(), FormulaExpand.EXPAND);
+				} else {
+					evalElement = new ClassicalB(item.getGoal(), FormulaExpand.EXPAND);
+				}
+			}
+		}
+		return evalElement;
+	}
+
 	private IModelCheckJob buildModelCheckJob(StateSpace stateSpace, ModelCheckingItem item, boolean recheckExisting, IModelCheckListener listener) {
-		ConsistencyChecker checker = new ConsistencyChecker(stateSpace, item.getOptions().recheckExisting(recheckExisting), null, listener);
+		ConsistencyChecker checker = new ConsistencyChecker(stateSpace, item.getOptions().recheckExisting(recheckExisting), getGoal(item), listener);
 		if (!"-".equals(item.getNodesLimit())) {
 			checker.getLimitConfiguration().setNodesLimit(Integer.parseInt(item.getNodesLimit()));
 		}

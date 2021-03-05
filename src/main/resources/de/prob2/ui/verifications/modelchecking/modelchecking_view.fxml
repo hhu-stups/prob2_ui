@@ -122,6 +122,15 @@
 						</Label>
 					</graphic>
 				</TableColumn>
+				<TableColumn fx:id="addGoalsColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 8}" maxWidth="${fontSize.fontSize * 8}">
+					<graphic>
+						<Label text="%verifications.modelchecking.modelcheckingView.column.additionalGoals">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingView.column.hover.additionalGoals"/>
+							</tooltip>
+						</Label>
+					</graphic>
+				</TableColumn>
 				<TableColumn fx:id="stopAtFullCoverageColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}">
 					<graphic>
 						<Label text="%verifications.modelchecking.modelcheckingView.column.stopFullCoverage">

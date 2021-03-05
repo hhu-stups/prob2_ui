@@ -88,7 +88,10 @@ public final class ModelcheckingView extends ScrollPane {
 
 	@FXML
 	private TableColumn<ModelCheckingItem, Boolean> otherErrorsColumn;
-	
+
+	@FXML
+	private TableColumn<ModelCheckingItem, String> addGoalsColumn;
+
 	@FXML
 	private TableColumn<ModelCheckingItem, Boolean> goalsColumn;
 	
@@ -192,6 +195,7 @@ public final class ModelcheckingView extends ScrollPane {
 		assertionViolationsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_ASSERTION_VIOLATIONS, false));
 		otherErrorsColumn.setCellFactory(col -> new BooleanCell<>());
 		otherErrorsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_OTHER_ERRORS, true));
+		addGoalsColumn.setCellValueFactory(new PropertyValueFactory<>("goal"));
 		goalsColumn.setCellFactory(col -> new BooleanCell<>());
 		goalsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_GOAL, false));
 		stopAtFullCoverageColumn.setCellFactory(col -> new BooleanCell<>());

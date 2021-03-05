@@ -31,18 +31,20 @@ public class ModelCheckingItem implements IExecutableItem {
 	private final String timeLimit;
 
 	private final ModelCheckingOptions options;
+
+	private final String goal;
 	
 	private BooleanProperty shouldExecute;
 	
 	private final transient ListProperty<ModelCheckingJobItem> items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
 
-	public ModelCheckingItem(String nodesLimit, String timeLimit, ModelCheckingOptions options) {
+	public ModelCheckingItem(String nodesLimit, String timeLimit, String goal, ModelCheckingOptions options) {
 		Objects.requireNonNull(options);
 		this.nodesLimit = nodesLimit;
 		this.timeLimit = timeLimit;
+		this.goal = goal;
 		this.options = options;
 		this.shouldExecute = new SimpleBooleanProperty(true);
-		
 		this.initListeners();
 	}
 	
@@ -50,6 +52,7 @@ public class ModelCheckingItem implements IExecutableItem {
 		final JsonObject object = json.getAsJsonObject();
 		this.nodesLimit = JsonManager.checkDeserialize(context, object, "nodesLimit", String.class);
 		this.timeLimit = JsonManager.checkDeserialize(context, object, "timeLimit", String.class);
+		this.goal = JsonManager.checkDeserialize(context, object, "goal", String.class);
 		this.options = JsonManager.checkDeserialize(context, object, "options", ModelCheckingOptions.class);
 		this.shouldExecute = JsonManager.checkDeserialize(context, object, "shouldExecute", BooleanProperty.class);
 		
@@ -97,6 +100,10 @@ public class ModelCheckingItem implements IExecutableItem {
 		return timeLimit;
 	}
 
+	public String getGoal() {
+		return goal;
+	}
+
 	public ModelCheckingOptions getOptions() {
 		return this.options;
 	}
@@ -129,11 +136,12 @@ public class ModelCheckingItem implements IExecutableItem {
 	public boolean settingsEqual(final ModelCheckingItem other) {
 		return this.getNodesLimit().equals(other.getNodesLimit())
 			&& this.getTimeLimit().equals(other.getTimeLimit())
+			&& this.getGoal().equals(other.getGoal())
 			&& this.getOptions().equals(other.getOptions());
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("%s(%s,%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getTimeLimit(), this.getOptions());
+		return String.format("%s(%s,%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
 	}
 }

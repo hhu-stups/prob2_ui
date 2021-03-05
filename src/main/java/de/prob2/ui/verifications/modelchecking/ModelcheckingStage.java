@@ -14,6 +14,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -60,6 +61,10 @@ public class ModelcheckingStage extends Stage {
 	private Spinner<Integer> nodesLimit;
 	@FXML
 	private Spinner<Integer> timeLimit;
+	@FXML
+	private CheckBox additionalGoal;
+	@FXML
+	private TextField tfAdditionalGoal;
 	
 	private final ResourceBundle bundle;
 	
@@ -123,6 +128,7 @@ public class ModelcheckingStage extends Stage {
 				alert.showAndWait();;
 			}
 		});
+		this.tfAdditionalGoal.visibleProperty().bind(additionalGoal.selectedProperty());
 	}
 
 	@FXML
@@ -130,7 +136,8 @@ public class ModelcheckingStage extends Stage {
 		if (currentTrace.get() != null) {
 			String nLimit = chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-";
 			String tLimit = chooseTimeLimit.isSelected() ? String.valueOf(timeLimit.getValue()) : "-";
-			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(nLimit, tLimit, getOptions());
+			String goal = additionalGoal.isSelected() ? tfAdditionalGoal.getText() : "-";
+			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(nLimit, tLimit, goal, getOptions());
 			if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);

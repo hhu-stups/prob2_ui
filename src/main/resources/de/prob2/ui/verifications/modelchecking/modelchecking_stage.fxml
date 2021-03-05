@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+<?import javafx.scene.control.TextField?>
 <fx:root type="Stage" fx:id="mcheckStage" resizable="false"
 		 title="%verifications.modelchecking.modelcheckingStage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
@@ -90,6 +91,16 @@
 								text="%verifications.modelchecking.modelcheckingStage.options.findGoal"
 								AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
 						</AnchorPane>
+						<HBox alignment="CENTER_LEFT" spacing="5.0">
+							<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" spacing="10.0">
+								<CheckBox fx:id="additionalGoal" text="%verifications.modelchecking.modelcheckingStage.options.findAdditionalGoal"/>
+								<TextField fx:id="tfAdditionalGoal">
+									<tooltip>
+										<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.additionalGoal" />
+									</tooltip>
+								</TextField>
+							</HBox>
+						</HBox>
 						<AnchorPane VBox.vgrow="ALWAYS">
 							<CheckBox fx:id="stopAtFullCoverage"
 								text="%verifications.modelchecking.modelcheckingStage.options.stopAtFullCoverage"
