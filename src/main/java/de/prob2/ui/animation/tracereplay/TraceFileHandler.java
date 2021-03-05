@@ -1,7 +1,7 @@
 package de.prob2.ui.animation.tracereplay;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
-import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.TraceLoaderSaver;
@@ -23,6 +23,9 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -100,7 +103,8 @@ public class TraceFileHandler {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
 			messageContent.add(path);
-		} else if (e instanceof JsonParseException) {
+
+		} else if (e instanceof com.google.gson.JsonParseException || e instanceof JsonMappingException || e instanceof com.fasterxml.jackson.core.JsonParseException ) {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content";
 			messageContent.add(path);

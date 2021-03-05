@@ -33,13 +33,22 @@ import javafx.stage.FileChooser;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 
 @FXMLInjected
 @Singleton
 public class TraceReplayView extends ScrollPane {
+	private final StageManager stageManager;
+	private final CurrentProject currentProject;
+	private final CurrentTrace currentTrace;
+	private final TraceChecker traceChecker;
+	private final ResourceBundle bundle;
+	private final FileChooserManager fileChooserManager;
+	private final Injector injector;
+	private final TraceViewHandler traceViewHandler;
+	private final CheckBox selectAll;
+	private final TraceFileHandler traceFileHandler;
 	@FXML
 	private TableView<ReplayTrace> traceTableView;
 	@FXML
@@ -58,22 +67,12 @@ public class TraceReplayView extends ScrollPane {
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 	@FXML
 	private SplitPane splitPane;
-
-	private final StageManager stageManager;
-	private final CurrentProject currentProject;
-	private final CurrentTrace currentTrace;
-	private final TraceChecker traceChecker;
-	private final ResourceBundle bundle;
-	private final FileChooserManager fileChooserManager;
-	private final Injector injector;
-	private final TraceViewHandler traceViewHandler;
-	private final CheckBox selectAll;
 	private boolean showDescription;
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
-			final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
-			final FileChooserManager fileChooserManager, final Injector injector, final TraceViewHandler traceViewHandler) {
+							final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
+							final FileChooserManager fileChooserManager, final Injector injector, final TraceViewHandler traceViewHandler, TraceFileHandler traceFileHandler) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -83,6 +82,7 @@ public class TraceReplayView extends ScrollPane {
 		this.injector = injector;
 		this.traceViewHandler = traceViewHandler;
 		this.selectAll = new CheckBox();
+		this.traceFileHandler = traceFileHandler;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
@@ -112,43 +112,41 @@ public class TraceReplayView extends ScrollPane {
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<ReplayTrace> row = new TableRow<>();
 
-            final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
-            final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
-            final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
-            final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
+			final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
+			final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
+			final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
+			final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
 			final MenuItem deleteTraceItem = traceViewHandler.createDeleteTraceItem();
 			final MenuItem recheckTraceItem = traceViewHandler.createRecheckTraceForChangesItem();
 
-            // Set listeners for menu items
-            traceViewHandler.initializeRow(this.getScene(), row, replayTraceItem, showErrorItem, openInExternalEditorItem);
-            deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
-            recheckTraceItem.setOnAction(event -> {
-				try {
+			// Set listeners for menu items
+			traceViewHandler.initializeRow(this.getScene(), row, replayTraceItem, showErrorItem, openInExternalEditorItem);
+			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
+			recheckTraceItem.setOnAction(event -> {
+
 					TraceModificationChecker traceModificationChecker = new TraceModificationChecker(row.getItem(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
 					traceModificationChecker.recheck();
 					List<Path> persistentTraceList = traceModificationChecker.evaluateResults();
 					persistentTraceList.remove(row.getItem().getLocation());
 					addPathsToProject(persistentTraceList);
-				} catch (ModelTranslationError | PrologTermNotDefinedException modelTranslationError) {
-					TraceModificationChecker.traceNotReplayableConfirmation(bundle);
-				}
+
 
 			});
-            showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
+			showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
-					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(replayTraceItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, recheckTraceItem)));
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(replayTraceItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, recheckTraceItem)));
 
 			row.setOnMouseClicked(event -> {
 				ReplayTrace item = row.getItem();
-				if(item == null) {
+				if (item == null) {
 					return;
 				}
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					this.traceChecker.check(item, true);
-				} else if(showDescription && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 1) {
+				} else if (showDescription && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 1) {
 					showDescription(row.getItem());
 					row.updateSelected(true);
 				}
@@ -176,20 +174,20 @@ public class TraceReplayView extends ScrollPane {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
 		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
 
+
 		if (traceFile != null) {
-		//Check if machine file is valid
-		TraceManager traceManager = new TraceManager(new ObjectMapper());
-		TraceJsonFile traceJsonFile = traceManager.load(traceFile);
+			//Check if machine file is valid
 
-
-		try {
-			TraceModificationChecker traceModificationChecker = new TraceModificationChecker(traceJsonFile, traceFile, currentTrace.getStateSpace(), injector, currentProject, stageManager);
-			traceModificationChecker.check();
-			List<Path> persistentTraceList = traceModificationChecker.evaluateResults();
-			addPathsToProject(persistentTraceList);
-		} catch (ModelTranslationError | PrologTermNotDefinedException modelTranslationError) {
-			modelTranslationError.printStackTrace();
-		}
+			TraceJsonFile traceJsonFile = traceFileHandler.loadFile(traceFile);
+			if(traceJsonFile != null) {
+				TraceModificationChecker traceModificationChecker = new TraceModificationChecker(traceJsonFile, traceFile, currentTrace.getStateSpace(), injector, currentProject, stageManager);
+				traceModificationChecker.check();
+				List<Path> persistentTraceList = traceModificationChecker.evaluateResults();
+				addPathsToProject(persistentTraceList);
+			}else{
+				Path relative = currentProject.getLocation().relativize(traceFile);
+				currentProject.getCurrentMachine().addTraceFile(relative);
+			}
 		}
 	}
 
@@ -201,7 +199,7 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	private void showDescription(ReplayTrace trace) {
-		if(showDescription) {
+		if (showDescription) {
 			closeDescription();
 		}
 		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, injector));
@@ -209,7 +207,7 @@ public class TraceReplayView extends ScrollPane {
 		showDescription = true;
 	}
 
-	private void addPathsToProject(List<Path> persistentTraceList){
+	private void addPathsToProject(List<Path> persistentTraceList) {
 		persistentTraceList.forEach(element -> {
 			Path relative = currentProject.getLocation().relativize(element);
 			currentProject.getCurrentMachine().addTraceFile(relative);
@@ -217,6 +215,6 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	public void refresh() {
-	    this.traceTableView.refresh();
-    }
+		this.traceTableView.refresh();
+	}
 }
