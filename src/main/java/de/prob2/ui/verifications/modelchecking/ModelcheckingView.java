@@ -320,19 +320,19 @@ public final class ModelcheckingView extends ScrollPane {
 		tvChecks.setRowFactory(table -> {
 			final TableRow<ModelCheckingJobItem> row = new TableRow<>();
 
-			MenuItem showTraceToErrorItem = new MenuItem(injector.getInstance(ResourceBundle.class).getString("verifications.modelchecking.modelcheckingView.contextMenu.showTraceToError"));
-			showTraceToErrorItem.setOnAction(e-> {
+			MenuItem showTraceItem = new MenuItem(injector.getInstance(ResourceBundle.class).getString("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
+			showTraceItem.setOnAction(e-> {
 				ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
 				injector.getInstance(CurrentTrace.class).set(item.getTrace());
 			});
-			showTraceToErrorItem.disableProperty().bind(Bindings.createBooleanBinding(
+			showTraceItem.disableProperty().bind(Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription),
 					row.emptyProperty(), row.itemProperty()));
 			
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu)null)
-					.otherwise(new ContextMenu(showTraceToErrorItem)));
+					.otherwise(new ContextMenu(showTraceItem)));
 			return row;
 		});
 	}

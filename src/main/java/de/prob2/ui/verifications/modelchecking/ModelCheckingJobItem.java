@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import de.prob.check.IModelCheckingResult;
+import de.prob.check.ModelCheckGoalFound;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
@@ -20,8 +21,7 @@ public class ModelCheckingJobItem {
 	public ModelCheckingJobItem(final int index, final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final StateSpace stateSpace) {
 		this.index = index;
 		this.result = result;
-		
-		if (result instanceof ModelCheckOk) {
+		if (result instanceof ModelCheckOk || result instanceof ModelCheckGoalFound) {
 			this.checked = Checked.SUCCESS;
 		} else if (result instanceof ITraceDescription) {
 			this.checked = Checked.FAIL;
