@@ -44,7 +44,7 @@ public final class CheckedCell<T> extends TableCell<T, Checked> {
 					styleClass = "fail";
 					icon = FontAwesome.Glyph.REMOVE;
 					break;
-				
+				case LIMIT_REACHED:
 				case INTERRUPTED:
 				case TIMEOUT:
 					styleClass = "interrupted";

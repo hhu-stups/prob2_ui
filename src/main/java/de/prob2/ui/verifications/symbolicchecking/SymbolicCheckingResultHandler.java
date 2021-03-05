@@ -169,6 +169,9 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 			case INTERRUPTED:
 				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.interrupted", Checked.INTERRUPTED);
 				break;
+			case LIMIT_REACHED:
+				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached", Checked.LIMIT_REACHED);
+				break;
 			default:
 				break;
 		}
