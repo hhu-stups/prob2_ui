@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
@@ -83,7 +84,7 @@ public class TraceFileHandler {
 			try{
 				TraceJsonFile traceJsonFile = traceManager.load(currentProject.getLocation().resolve(path));
 				return new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
-			}catch (ValueInstantiationException e){
+			}catch (ValueInstantiationException | UnrecognizedPropertyException | com.fasterxml.jackson.core.JsonParseException e){
 				return traceLoaderSaver.load(currentProject.getLocation().resolve(path));
 			}
 		} catch (IOException e) {
