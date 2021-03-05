@@ -63,12 +63,12 @@ public class TraceModificationChecker {
 	private Thread traceCheckerProcess;
 
 	public TraceModificationChecker(ReplayTrace replayTrace, StateSpace stateSpace,
-									Injector injector, CurrentProject currentProject, StageManager stageManager) throws ModelTranslationError, PrologTermNotDefinedException {
+									Injector injector, CurrentProject currentProject, StageManager stageManager)  {
 		this(replayTrace.getTraceJsonFile(), replayTrace.getLocation(), stateSpace, injector, currentProject, stageManager);
 	}
 
 	public TraceModificationChecker(TraceJsonFile traceJsonFile, Path traceJsonFilePath, StateSpace stateSpace,
-									Injector injector, CurrentProject currentProject, StageManager stageManager) throws  ModelTranslationError, PrologTermNotDefinedException {
+									Injector injector, CurrentProject currentProject, StageManager stageManager)  {
 		this.traceJsonFilePath = traceJsonFilePath;
 		this.traceJsonFile = traceJsonFile;
 		this.persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
