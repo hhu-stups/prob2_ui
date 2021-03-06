@@ -103,7 +103,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		VBox accordion = setTypeIIConflicts(renamingAnalyzer.getResultTypeIIAsDeltaList(), renamingAnalyzer.getResultTypeIIInit(), traceModificationChecker.traceChecker.getOldOperationInfos());
 		typeII.setContent(accordion);
-		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + traceModifier.getSizeTypeDetII()+ ")");
+		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + traceModifier.changedTracesTypeIIDet()+ ")");
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
 		accordion.prefWidthProperty().bindBidirectional(typeII.prefWidthProperty());
 		if(!traceModifier.typeIIDetDirty()){
@@ -112,7 +112,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		VBox accordion2 = setTypeIIAmbiguousConflicts(renamingAnalyzer.getResultTypeIIWithCandidates());
 		typeIIPer.setContent(accordion2);
-		typeIIPer.textProperty().set(resourceBundle.getString("traceModification.alert.typeIIAmbiguous" ) + " (" + traceModifier.getSizeTypeNonDetII() + ")");
+		typeIIPer.textProperty().set(resourceBundle.getString("traceModification.alert.typeIIAmbiguous" ) + " (" + traceModifier.changedTracesTypeIINonDet() + ")");
 		if(!traceModifier.typeIINonDetDirty()){
 			typeIIPer.setCollapsible(false);
 		}
@@ -122,7 +122,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 				traceModificationChecker.traceChecker.getNewOperationInfos());
 
 		typeIII.setContent(accordion3);
-		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + traceModifier.getSizeTypeIII() + ")");
+		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + traceModifier.changedTracesTypeIII() + ")");
 
 		if(!traceModifier.typeIIIDirty()){
 			typeIII.setCollapsible(false);
@@ -132,7 +132,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		VBox accordion4 = createTypeIVMapping(traceModifier.getChangelogPhase4(), traceModifier.getChangelogPhase3II());
 
 		typeIV.setContent(accordion4);
-		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + traceModifier.getSizeTypeIV() + ")");
+		typeIV.textProperty().set(resourceBundle.getString("traceModification.alert.typeIV") + " (" + traceModifier.changedTracesTypeIV() + ")");
 
 		if(!traceModifier.typeIVDirty()){
 			typeIV.setCollapsible(false);
