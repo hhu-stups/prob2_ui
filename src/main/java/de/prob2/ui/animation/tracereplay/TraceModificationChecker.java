@@ -23,6 +23,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -189,20 +190,20 @@ public class TraceModificationChecker {
 			final List<Path> result = new ArrayList<>();
 
 			TraceModifier traceModifier = traceChecker.getTraceModifier();
-			if(traceModifier.succesfullTracing() && !traceModifier.originalMatchesProduced()){
+			if(traceModifier.tracingFoundResult() && traceModifier.isDirty()){
 				TraceModificationAlert dialog = new TraceModificationAlert(injector, stageManager, this, persistentTrace);
 				stageManager.register(dialog);
-				List<PersistentTrace> dialogResult = dialog.showAndWait().get();//The dialog can only return 0,1 or 2 results
+				List<PersistentTrace> dialogResult = new ArrayList<>(dialog.showAndWait().get());//The dialog can only return 0,1 or 2 results
 				if(dialogResult.remove(persistentTrace)){
 					result.add(traceJsonFilePath);
 				}
 				if(!dialogResult.isEmpty()){
 					result.add(saveNewTrace(dialogResult.get(0)));
 				}
-			}else if(traceModifier.succesfullTracing() && traceModifier.originalMatchesProduced()){
+			}else if(traceModifier.tracingFoundResult() && !traceModifier.isDirty()){
 				result.add(traceJsonFilePath);
 			}
-			else if(!traceModifier.succesfullTracing()) {
+			else if(!traceModifier.tracingFoundResult()) {
 				result.addAll(traceNotReplayable());
 			}
 
@@ -254,6 +255,7 @@ public class TraceModificationChecker {
 
 	private List<Path> traceNotReplayable(){
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, resourceBundle.getString("traceModification.alert.traceNotReplayable") , ButtonType.YES, ButtonType.NO);
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.setTitle("No suitable configuration found.");
 
 		Optional<ButtonType> dialogResult = alert.showAndWait();
@@ -266,6 +268,7 @@ public class TraceModificationChecker {
 
 	public static void traceNotReplayableConfirmation(ResourceBundle bundle){
 		Alert alert = new Alert(Alert.AlertType.INFORMATION, bundle.getString("traceModification.alert.traceNotReplayable"));
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.setTitle("No suitable configuration found.");
 		alert.showAndWait();
 	}
