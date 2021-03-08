@@ -1,31 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
-import com.google.gson.JsonParseException;
-import com.google.inject.Inject;
-import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.check.tracereplay.TraceLoaderSaver;
-import de.prob.check.tracereplay.json.TraceManager;
-import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.json.JsonManager;
-import de.prob.json.JsonMetadata;
-import de.prob.json.JsonMetadataBuilder;
-import de.prob.statespace.Trace;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.simulation.table.SimulationItem;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,10 +10,32 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import de.prob2.ui.internal.VersionInfo;
 
+import com.google.gson.JsonParseException;
+import com.google.inject.Inject;
+
+import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.json.TraceManager;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.json.JsonMetadata;
+import de.prob.statespace.Trace;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.table.SimulationItem;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.stream.Collectors.toList;
 
@@ -56,12 +52,10 @@ public class TraceFileHandler {
 	private final ResourceBundle bundle;
 	private final TraceManager traceManager;
 	private final VersionInfo versionInfo;
-	private final TraceLoaderSaver traceLoaderSaver;
 
 	@Inject
-	public TraceFileHandler(TraceManager traceManger, TraceLoaderSaver traceLoaderSaver, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+	public TraceFileHandler(TraceManager traceManger, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.versionInfo = versionInfo;
-		this.traceLoaderSaver = traceLoaderSaver;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -80,17 +74,8 @@ public class TraceFileHandler {
 	}
 
 	public PersistentTrace load(Path path) {
-		try {
-			try{
-				TraceJsonFile traceJsonFile = traceManager.load(currentProject.getLocation().resolve(path));
-				return new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
-			}catch (ValueInstantiationException | UnrecognizedPropertyException | com.fasterxml.jackson.core.JsonParseException e){
-				return traceLoaderSaver.load(currentProject.getLocation().resolve(path));
-			}
-		} catch (IOException e) {
-			this.showLoadError(path, e);
-			return null;
-		}
+		TraceJsonFile traceJsonFile = this.loadFile(path);
+		return new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
 	}
 
 	public void showLoadError(Path path, Exception e) {
@@ -213,7 +198,7 @@ public class TraceFileHandler {
 	}
 
 	public void save(Trace trace, Path location, String machineName, String createdBy) throws IOException {
-		JsonMetadata jsonMetadata = new JsonMetadataBuilder("Trace", 2)
+		JsonMetadata jsonMetadata = TraceJsonFile.metadataBuilder()
 				.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
 				.withModelName(machineName)
 				.withCreator(createdBy)
