@@ -6,7 +6,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <fx:root type="Stage" title="%project.newProjectStage.title"
-		 resizable="false" xmlns:fx="http://javafx.com/fxml/1">
+		 resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>
