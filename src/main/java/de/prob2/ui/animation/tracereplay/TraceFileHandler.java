@@ -75,6 +75,9 @@ public class TraceFileHandler {
 
 	public PersistentTrace load(Path path) {
 		TraceJsonFile traceJsonFile = this.loadFile(path);
+		if(traceJsonFile == null) {
+			return null;
+		}
 		return new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
 	}
 
