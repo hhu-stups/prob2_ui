@@ -42,7 +42,13 @@ public class Scheduler {
 
     public void run() {
         runningProperty.set(true);
-        Trace trace = currentTrace.get();
+        Trace trace;
+        if(realTimeSimulator.getTime() > 0) {
+            trace = currentTrace.get();
+        } else {
+            trace = new Trace(currentTrace.getStateSpace());
+            currentTrace.set(trace);
+        }
 		realTimeSimulator.setupBeforeSimulation(trace);
         currentTrace.addListener(listener);
         thread = new Thread(() -> {

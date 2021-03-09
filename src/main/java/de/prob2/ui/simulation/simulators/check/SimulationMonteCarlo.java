@@ -149,7 +149,7 @@ public class SimulationMonteCarlo extends Simulator {
 
     @Override
     public void run() {
-		Trace startTrace = trace;
+		Trace startTrace = new Trace(trace.getStateSpace());
 
 		try {
 			startTrace.getStateSpace().startTransaction();
