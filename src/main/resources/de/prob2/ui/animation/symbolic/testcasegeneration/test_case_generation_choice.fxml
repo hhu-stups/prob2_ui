@@ -14,7 +14,7 @@
 <fx:root type="TestCaseGenerationChoosingStage" fx:id="cbcChoice" title="%animation.testcase.choice.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<AnchorPane styleClass="dialog">
+			<VBox styleClass="dialog">
 				<VBox spacing="10.0" alignment="CENTER">
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
@@ -32,7 +32,7 @@
 					</HBox>
 					<TestCaseGenerationInput fx:id="input"/>
 				</VBox>
-			</AnchorPane>
+			</VBox>
 		</Scene>
 	</scene>
 </fx:root>
