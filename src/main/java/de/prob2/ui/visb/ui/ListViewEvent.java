@@ -2,9 +2,9 @@ package de.prob2.ui.visb.ui;
 
 
 import com.google.inject.Injector;
+import de.prob.animator.domainobjects.VisBEvent;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visb.VisBStage;
-import de.prob2.ui.visb.visbobjects.VisBEvent;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

@@ -5,7 +5,10 @@ import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Injector;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
+import de.prob.animator.command.LoadVisBSetAttributesCommand;
 import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.VisBEvent;
+import de.prob.animator.domainobjects.VisBItem;
 import de.prob.exception.ProBError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
@@ -15,8 +18,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.exceptions.VisBNestedException;
-import de.prob2.ui.visb.exceptions.VisBParseException;
-import de.prob2.ui.visb.visbobjects.VisBEvent;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
@@ -34,19 +35,18 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-
 import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
 import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 
 /**
- * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler} and {@link VisBParser}.
+ * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler}.
  * Everything that can be done in Java only and uses interaction with ProB2-UI should be in here, not in the other classes.
  */
 @Singleton
 public class VisBController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBController.class);
 
+	private final VisBFileHandler visBFileHandler;
 	private final CurrentTrace currentTrace;
 	private final ChangeListener<Trace> currentTraceChangeListener;
 	private final Injector injector;
@@ -65,7 +65,8 @@ public class VisBController {
 	 * @param bundle used to access string resources
 	 */
 	@Inject
-	public VisBController(final Injector injector, final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public VisBController(final VisBFileHandler visBFileHandler, final Injector injector, final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+		this.visBFileHandler = visBFileHandler;
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -115,12 +116,22 @@ public class VisBController {
 	}
 
 	private void applySVGChanges() {
+		if(!currentTrace.getCurrentState().isInitialised()) {
+			return;
+		}
+
 		String svgChanges;
-		VisBParser visBParser = injector.getInstance(VisBParser.class);
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
+
+		String stateID = currentTrace.getCurrentState().getId();
+		LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID);
+		currentTrace.getStateSpace().execute(setAttributesCmd);
+
+		List<VisBItem> items = setAttributesCmd.getItems();
+
 		try {
-			svgChanges = visBParser.evaluateFormulas(this.visBVisualisation.getVisBItems());
-		} catch(VisBParseException | VisBNestedException | IllegalArgumentException | BCompoundException | ProBError e){
+			svgChanges = buildJQueryForChanges(items);
+		} catch(VisBNestedException | IllegalArgumentException | ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 			updateInfo("visb.infobox.visualisation.error");
 			visBStage.clear();
@@ -128,7 +139,7 @@ public class VisBController {
 		}
 
 		// TO DO: parse formula once when loading the file to check for syntax errors
-		if(svgChanges == null || svgChanges.isEmpty()){
+		if(svgChanges.isEmpty()){
 			updateInfo("visb.infobox.no.change");
 		} else {
 			try {
@@ -143,6 +154,25 @@ public class VisBController {
 			//LOGGER.debug("Running script: "+svgChanges);
 			updateInfo("visb.infobox.visualisation.updated.nr",countLines(svgChanges));
 		}
+	}
+
+	/**
+	 * Uses evaluateFormula to evaluate the visualisation items.
+	 * @param visItems items given by the {@link VisBController}
+	 * @return all needed jQueries in one string
+	 * @throws EvaluationException from evaluating formula on trace
+	 */
+	private String buildJQueryForChanges(List<VisBItem> visItems) throws EvaluationException, VisBNestedException {
+		StringBuilder jQueryForChanges = new StringBuilder();
+		try {
+			for(VisBItem visItem : visItems){
+				String jQueryTemp = buildInvocation("changeAttribute", wrapAsString(visItem.getId()), wrapAsString(visItem.getAttribute()), visItem.getValue());
+				jQueryForChanges.append(jQueryTemp);
+			}
+		} catch (EvaluationException e){
+			throw(new VisBNestedException("Exception evaluating B formulas",e));
+		}
+		return jQueryForChanges.toString();
 	}
 
 	/**
@@ -300,7 +330,7 @@ public class VisBController {
 		}
 		currentTrace.removeListener(currentTraceChangeListener);
 		try {
-			this.visBVisualisation = VisBFileHandler.constructVisualisationFromJSON(visFile);
+			this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visFile);
 		} catch (JsonSyntaxException | MalformedJsonException e) {
 			throw e;
 		} catch (IOException e) {
@@ -322,7 +352,7 @@ public class VisBController {
 			return;
 		} catch (JsonSyntaxException e) {
 			// Set VisB Visualisation with VisB file only. This is then used for reload (after the JSON syntax errors are fixed)
-			this.visBVisualisation = new VisBVisualisation(null, null, null, file);
+			this.visBVisualisation = new VisBVisualisation(null, null, file);
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
@@ -339,12 +369,13 @@ public class VisBController {
 			startVisualisation();
 			updateVisualisationIfPossible();
 		}
-		if(visBVisualisation.getVisBItems() == null || visBVisualisation.getVisBEvents() == null){
-			updateInfo("visb.infobox.visualisation.error");
-			alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
-		} else if (visBVisualisation.getVisBItems().isEmpty()){
-			updateInfo("visb.infobox.visualisation.items.alert");
-		} else if (visBVisualisation.getVisBEvents().isEmpty()){
+		// TODO: Check this
+		//if(visBVisualisation.getVisBItems() == null || visBVisualisation.getVisBEvents() == null){
+		//	updateInfo("visb.infobox.visualisation.error");
+		//	alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
+		//} else if (visBVisualisation.getVisBItems().isEmpty()){
+		//	updateInfo("visb.infobox.visualisation.items.alert");
+		/*} else */if (visBVisualisation.getVisBEvents().isEmpty()){
 			//There is no need to load on click functions, if no events are available.
 			updateInfo("visb.infobox.visualisation.events.alert");
 		} else {
@@ -388,31 +419,15 @@ public class VisBController {
 	}
 
 	private void addOnClickItem(VisBEvent visBEvent, List<VisBOnClickMustacheItem> onClickItems) {
-		String event = visBEvent.getEvent();
-		if (!(event.equals("") || isValidTopLevelEvent(event))) { // for "" we allow to provide just hover
-			if (visBEvent.eventIsOptional()) {
-				System.out.println("Ignoring event " + event);
-			} else {
-				Alert alert = this.stageManager.makeExceptionAlert(new VisBException(), "visb.exception.header", "visb.infobox.invalid.event", event);
-				alert.initOwner(this.injector.getInstance(VisBStage.class));
-				alert.show();
-			}
-		} else {
-			String enterAction = visBEvent.getHovers().stream()
-					.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
-					.collect(Collectors.joining("\n"));
-			String leaveAction = visBEvent.getHovers().stream()
-					.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
-					.collect(Collectors.joining("\n"));
-			String eventID = visBEvent.getId();
-			String eventName = visBEvent.getEvent();
-			onClickItems.add(new VisBOnClickMustacheItem(enterAction, leaveAction, eventID, eventName));
-		}
-	}
-	
-	private boolean isValidTopLevelEvent(String event) {
-			OperationInfo operationInfo = 
-			        currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(event);
-			return operationInfo != null && operationInfo.isTopLevel();
+		String enterAction = visBEvent.getHovers().stream()
+				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
+				.collect(Collectors.joining("\n"));
+		String leaveAction = visBEvent.getHovers().stream()
+				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
+				.collect(Collectors.joining("\n"));
+		String eventID = visBEvent.getId();
+		String eventName = visBEvent.getEvent();
+		onClickItems.add(new VisBOnClickMustacheItem(enterAction, leaveAction, eventID, eventName));
+
 	}
 }

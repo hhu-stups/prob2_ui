@@ -2,13 +2,13 @@ package de.prob2.ui.visb;
 
 
 import com.google.inject.Injector;
+import de.prob.animator.domainobjects.VisBEvent;
+import de.prob.animator.domainobjects.VisBItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.ui.ListViewEvent;
 import de.prob2.ui.visb.ui.ListViewItem;
-import de.prob2.ui.visb.visbobjects.VisBEvent;
-import de.prob2.ui.visb.visbobjects.VisBItem;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -91,7 +91,7 @@ public class VisBDebugStage extends Stage {
      */
     public void initialiseListViews(VisBVisualisation visBVisualisation){
     	clear();
-		this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
+		//this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
 		this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
     }
 

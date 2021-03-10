@@ -1,5 +1,7 @@
 package de.prob2.ui.visb.visbobjects;
 
+import de.prob.animator.domainobjects.VisBEvent;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
@@ -10,18 +12,15 @@ import java.util.List;
 public class VisBVisualisation {
 	private Path svgPath;
 	private File jsonFile;
-	private List<VisBItem> visBItems;
 	private List<VisBEvent> visBEvents;
 
 	public VisBVisualisation(){
-		this.visBItems = null;
 		this.visBEvents = null;
 		this.svgPath = null;
 		this.jsonFile = null;
 	}
 
-	public VisBVisualisation(List<VisBItem> visBItems, List<VisBEvent> visBEvents, Path svgPath, File jFile) {
-		this.visBItems = visBItems;
+	public VisBVisualisation(List<VisBEvent> visBEvents, Path svgPath, File jFile) {
 		this.visBEvents = visBEvents;
 		this.svgPath = svgPath;
 		this.jsonFile = jFile;
@@ -29,10 +28,6 @@ public class VisBVisualisation {
 
 	public List<VisBEvent> getVisBEvents() {
 		return visBEvents;
-	}
-
-	public List<VisBItem> getVisBItems() {
-		return visBItems;
 	}
 
 	public Path getSvgPath() {
@@ -55,14 +50,12 @@ public class VisBVisualisation {
 	}
 
 	public boolean isReady(){
-		return ((visBEvents != null && !visBEvents.isEmpty()) || (visBItems != null && !visBItems.isEmpty())) && svgPath != null;
+		return visBEvents != null && !visBEvents.isEmpty() && svgPath != null;
 	}
 
 	@Override
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("Visualisation Items List:\n");
-		appendListWithNull(stringBuilder, visBItems);
 		stringBuilder.append("Visualisation Events List:\n");
 		appendListWithNull(stringBuilder, visBEvents);
 		stringBuilder.append("SVG: \n");

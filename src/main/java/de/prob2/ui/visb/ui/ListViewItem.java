@@ -2,10 +2,10 @@ package de.prob2.ui.visb.ui;
 
 import com.google.inject.Injector;
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.VisBItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.VisBStage;
-import de.prob2.ui.visb.visbobjects.VisBItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -63,12 +63,11 @@ public class ListViewItem extends ListCell<VisBItem> {
 		this.visBItem = visBItem;
 		if(visBItem != null) {
 			this.lbID.setText(visBItem.getId());
+			// TODO: get rid of lbExpression?
 			this.lbExpression.setText(String.format(bundle.getString("visb.item.expression"), visBItem.getValue()));
 			this.lbAttribute.setText(String.format(bundle.getString("visb.item.attribute"), visBItem.getAttribute()));
-			if(visBItem.getParsedFormula() != null && currentTrace.isNotNull().get() &&
-			   currentTrace.getCurrentState() != null) {
-				AbstractEvalResult result = currentTrace.getCurrentState().eval(visBItem.getParsedFormula());
-				this.lbValue.setText(String.format(bundle.getString("visb.item.value"), result.toString()));
+			if(currentTrace.isNotNull().get() && currentTrace.getCurrentState() != null) {
+				this.lbValue.setText(String.format(bundle.getString("visb.item.value"), visBItem.getValue()));
 			} else {
 				this.lbValue.setText("");
 			}
