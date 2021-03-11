@@ -10,7 +10,6 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.exception.ProBError;
-import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
@@ -128,6 +127,8 @@ public class VisBController {
 		currentTrace.getStateSpace().execute(setAttributesCmd);
 
 		List<VisBItem> items = setAttributesCmd.getItems();
+		visBVisualisation.setVisBItems(items);
+		injector.getInstance(VisBDebugStage.class).updateItems(items);
 
 		try {
 			svgChanges = buildJQueryForChanges(items);
@@ -352,7 +353,7 @@ public class VisBController {
 			return;
 		} catch (JsonSyntaxException e) {
 			// Set VisB Visualisation with VisB file only. This is then used for reload (after the JSON syntax errors are fixed)
-			this.visBVisualisation = new VisBVisualisation(null, null, file);
+			this.visBVisualisation = new VisBVisualisation(null, null, null, file);
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
@@ -369,13 +370,10 @@ public class VisBController {
 			startVisualisation();
 			updateVisualisationIfPossible();
 		}
-		// TODO: Check this
-		//if(visBVisualisation.getVisBItems() == null || visBVisualisation.getVisBEvents() == null){
-		//	updateInfo("visb.infobox.visualisation.error");
-		//	alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
-		//} else if (visBVisualisation.getVisBItems().isEmpty()){
-		//	updateInfo("visb.infobox.visualisation.items.alert");
-		/*} else */if (visBVisualisation.getVisBEvents().isEmpty()){
+		if(visBVisualisation.getVisBEvents() == null){
+			updateInfo("visb.infobox.visualisation.error");
+			alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
+		} else if (visBVisualisation.getVisBEvents().isEmpty()){
 			//There is no need to load on click functions, if no events are available.
 			updateInfo("visb.infobox.visualisation.events.alert");
 		} else {

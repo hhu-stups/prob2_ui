@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
@@ -91,8 +92,11 @@ public class VisBDebugStage extends Stage {
      */
     public void initialiseListViews(VisBVisualisation visBVisualisation){
     	clear();
-		//this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
 		this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
+    }
+
+    public void updateItems(List<VisBItem> items) {
+        this.visBItems.setItems(FXCollections.observableArrayList(items));
     }
 
     public void clear(){

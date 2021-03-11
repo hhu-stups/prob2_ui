@@ -46,11 +46,18 @@ public class VisBFileHandler {
 		try {
 			currentTrace.getStateSpace().execute(loadCmd);
 		} catch (Exception e) {
+
 			// TODO
 		}
 
 		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(inputFile.getPath());
-		currentTrace.getStateSpace().execute(svgCmd);
+
+
+		try {
+			currentTrace.getStateSpace().execute(svgCmd);
+		} catch(Exception e) {
+			throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
+		}
 
 		String parentFile = inputFile.getParentFile().toString();
 
@@ -64,7 +71,7 @@ public class VisBFileHandler {
 		currentTrace.getStateSpace().execute(readEventsCmd);
 		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
 
-		return new VisBVisualisation(visBEvents, svgPath, inputFile);
+		return new VisBVisualisation(visBEvents, null, svgPath, inputFile);
 	}
 
 	/**

@@ -24,8 +24,6 @@ public class ListViewItem extends ListCell<VisBItem> {
 	@FXML
 	private Label lbAttribute;
 	@FXML
-	private Label lbExpression;
-	@FXML
 	private Label lbValue;
 
 	private VisBItem visBItem;
@@ -63,8 +61,6 @@ public class ListViewItem extends ListCell<VisBItem> {
 		this.visBItem = visBItem;
 		if(visBItem != null) {
 			this.lbID.setText(visBItem.getId());
-			// TODO: get rid of lbExpression?
-			this.lbExpression.setText(String.format(bundle.getString("visb.item.expression"), visBItem.getValue()));
 			this.lbAttribute.setText(String.format(bundle.getString("visb.item.attribute"), visBItem.getAttribute()));
 			if(currentTrace.isNotNull().get() && currentTrace.getCurrentState() != null) {
 				this.lbValue.setText(String.format(bundle.getString("visb.item.value"), visBItem.getValue()));
@@ -80,7 +76,6 @@ public class ListViewItem extends ListCell<VisBItem> {
 
 	public void clear() {
 		this.lbID.setText("");
-		this.lbExpression.setText("");
 		this.lbAttribute.setText("");
 		this.lbValue.setText("");
 		this.setGraphic(this.itemBox);

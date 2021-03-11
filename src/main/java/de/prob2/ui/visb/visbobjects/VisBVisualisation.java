@@ -1,6 +1,7 @@
 package de.prob2.ui.visb.visbobjects;
 
 import de.prob.animator.domainobjects.VisBEvent;
+import de.prob.animator.domainobjects.VisBItem;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -13,21 +14,28 @@ public class VisBVisualisation {
 	private Path svgPath;
 	private File jsonFile;
 	private List<VisBEvent> visBEvents;
+	private List<VisBItem> visBItems;
 
 	public VisBVisualisation(){
 		this.visBEvents = null;
+		this.visBItems = null;
 		this.svgPath = null;
 		this.jsonFile = null;
 	}
 
-	public VisBVisualisation(List<VisBEvent> visBEvents, Path svgPath, File jFile) {
+	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath, File jFile) {
 		this.visBEvents = visBEvents;
+		this.visBItems = visBItems;
 		this.svgPath = svgPath;
 		this.jsonFile = jFile;
 	}
 
 	public List<VisBEvent> getVisBEvents() {
 		return visBEvents;
+	}
+
+	public List<VisBItem> getVisBItems() {
+		return visBItems;
 	}
 
 	public Path getSvgPath() {
@@ -50,7 +58,7 @@ public class VisBVisualisation {
 	}
 
 	public boolean isReady(){
-		return visBEvents != null && !visBEvents.isEmpty() && svgPath != null;
+		return (visBEvents != null && !visBEvents.isEmpty() || visBItems != null && !visBItems.isEmpty()) && svgPath != null;
 	}
 
 	@Override
@@ -58,6 +66,8 @@ public class VisBVisualisation {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Visualisation Events List:\n");
 		appendListWithNull(stringBuilder, visBEvents);
+		stringBuilder.append("Visualisation Item List:\n");
+		appendListWithNull(stringBuilder, visBItems);
 		stringBuilder.append("SVG: \n");
 		appendObjectWithNull(stringBuilder, svgPath);
 		stringBuilder.append("JSON: \n");
@@ -84,5 +94,9 @@ public class VisBVisualisation {
 			sb.append("null");
 		}
 		sb.append("\n");
+	}
+
+	public void setVisBItems(List<VisBItem> visBItems) {
+		this.visBItems = visBItems;
 	}
 }
