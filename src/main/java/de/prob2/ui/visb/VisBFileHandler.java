@@ -46,8 +46,8 @@ public class VisBFileHandler {
 		try {
 			currentTrace.getStateSpace().execute(loadCmd);
 		} catch (Exception e) {
-
-			// TODO
+			// TODO: We should handle errors when loading a VisB file here.
+			// This might require some improvements in Prolog e.g. that formula are only parsed when the machine is already initialized
 		}
 
 		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(inputFile.getPath());
