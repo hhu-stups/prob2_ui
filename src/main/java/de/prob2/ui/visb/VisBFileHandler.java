@@ -46,12 +46,7 @@ public class VisBFileHandler {
 		currentTrace.getStateSpace().execute(loadCmd);
 		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(inputFile.getPath());
 
-		try {
-			currentTrace.getStateSpace().execute(svgCmd);
-		} catch(Exception e) {
-			throw new VisBParseException("There was no path to an SVG file found in your VisB file. Make sure, that you include one under the id \"svg\".");
-		}
-
+		currentTrace.getStateSpace().execute(svgCmd);
 		String parentFile = inputFile.getParentFile().toString();
 
 		String filePath = svgCmd.getSvgPath();
