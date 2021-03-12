@@ -43,14 +43,8 @@ public class VisBFileHandler {
 	public VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException, JsonSyntaxException {
 		LoadVisBCommand loadCmd = new LoadVisBCommand(inputFile.getPath());
 
-		try {
-			currentTrace.getStateSpace().execute(loadCmd);
-		} catch (Exception e) {
-			throw new VisBParseException("Loading VisB file failed: " +  inputFile);
-		}
-
+		currentTrace.getStateSpace().execute(loadCmd);
 		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(inputFile.getPath());
-
 
 		try {
 			currentTrace.getStateSpace().execute(svgCmd);

@@ -332,7 +332,7 @@ public class VisBController {
 		currentTrace.removeListener(currentTraceChangeListener);
 		try {
 			this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visFile);
-		} catch (JsonSyntaxException | MalformedJsonException e) {
+		} catch (ProBError | JsonSyntaxException | MalformedJsonException e) {
 			throw e;
 		} catch (IOException e) {
 			alert(e,"visb.exception.io", "visb.infobox.visualisation.error");
