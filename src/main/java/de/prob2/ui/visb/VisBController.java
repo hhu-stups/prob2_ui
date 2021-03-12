@@ -119,11 +119,8 @@ public class VisBController {
 		String svgChanges;
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 
-		String stateID = currentTrace.getCurrentState().getId();
-		LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID);
-		currentTrace.getStateSpace().execute(setAttributesCmd);
+		List<VisBItem> items = this.injector.getInstance(VisBFileHandler.class).loadItems();
 
-		List<VisBItem> items = setAttributesCmd.getItems();
 		injector.getInstance(VisBDebugStage.class).updateItems(items);
 
 		try {

@@ -61,13 +61,17 @@ public class VisBFileHandler {
 		currentTrace.getStateSpace().execute(readEventsCmd);
 		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
 
+		List<VisBItem> items = loadItems();
+
+		return new VisBVisualisation(visBEvents, items, svgPath, inputFile);
+	}
+
+	public List<VisBItem> loadItems() {
 		String stateID = currentTrace.getCurrentState().getId();
 		LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID);
 		currentTrace.getStateSpace().execute(setAttributesCmd);
 
-		List<VisBItem> items = setAttributesCmd.getItems();
-
-		return new VisBVisualisation(visBEvents, items, svgPath, inputFile);
+		return setAttributesCmd.getItems();
 	}
 
 	/**
