@@ -6,6 +6,7 @@ import com.google.inject.Injector;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.command.LoadVisBSetAttributesCommand;
+import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
@@ -115,10 +116,6 @@ public class VisBController {
 	}
 
 	private void applySVGChanges() {
-		if(!currentTrace.getCurrentState().isInitialised()) {
-			return;
-		}
-
 		String svgChanges;
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 
@@ -127,7 +124,6 @@ public class VisBController {
 		currentTrace.getStateSpace().execute(setAttributesCmd);
 
 		List<VisBItem> items = setAttributesCmd.getItems();
-		visBVisualisation.setVisBItems(items);
 		injector.getInstance(VisBDebugStage.class).updateItems(items);
 
 		try {
@@ -332,6 +328,7 @@ public class VisBController {
 		currentTrace.removeListener(currentTraceChangeListener);
 		try {
 			this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visFile);
+			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 		} catch (ProBError | JsonSyntaxException | MalformedJsonException e) {
 			throw e;
 		} catch (IOException e) {
@@ -366,7 +363,6 @@ public class VisBController {
 
 	private void showVisualisationAfterSetup() {
 		if(this.visBVisualisation.isReady()) {
-			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 			startVisualisation();
 			updateVisualisationIfPossible();
 		}

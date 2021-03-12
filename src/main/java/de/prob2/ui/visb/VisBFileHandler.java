@@ -4,9 +4,11 @@ import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.command.LoadVisBCommand;
+import de.prob.animator.command.LoadVisBSetAttributesCommand;
 import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.domainobjects.VisBEvent;
+import de.prob.animator.domainobjects.VisBItem;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
@@ -59,7 +61,13 @@ public class VisBFileHandler {
 		currentTrace.getStateSpace().execute(readEventsCmd);
 		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
 
-		return new VisBVisualisation(visBEvents, null, svgPath, inputFile);
+		String stateID = currentTrace.getCurrentState().getId();
+		LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID);
+		currentTrace.getStateSpace().execute(setAttributesCmd);
+
+		List<VisBItem> items = setAttributesCmd.getItems();
+
+		return new VisBVisualisation(visBEvents, items, svgPath, inputFile);
 	}
 
 	/**

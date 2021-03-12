@@ -93,6 +93,7 @@ public class VisBDebugStage extends Stage {
     public void initialiseListViews(VisBVisualisation visBVisualisation){
     	clear();
 		this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
+        this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
     }
 
     public void updateItems(List<VisBItem> items) {
