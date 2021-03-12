@@ -116,6 +116,10 @@ public class VisBController {
 	}
 
 	private void applySVGChanges() {
+		if(!currentTrace.getCurrentState().isInitialised()) {
+			return;
+		}
+
 		String svgChanges;
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 
