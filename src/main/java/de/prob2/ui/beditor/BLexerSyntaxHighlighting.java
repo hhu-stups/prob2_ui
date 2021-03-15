@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.be4.classicalb.core.parser.BLexer;
+import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.TAbstractConstants;
@@ -224,6 +225,9 @@ final class BLexerSyntaxHighlighting {
 
 	static StyleSpans<Collection<String>> computeBHighlighting(String text) {
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
+		ParseOptions parseOptions = new ParseOptions();
+		parseOptions.setIgnoreCheckingValidCombinations(true);
+		lexer.setParseOptions(parseOptions);
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
 		try {
 			Token t;
