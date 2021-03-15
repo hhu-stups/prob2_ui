@@ -5,8 +5,6 @@ import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Injector;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
-import de.prob.animator.command.LoadVisBSetAttributesCommand;
-import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
@@ -116,19 +114,16 @@ public class VisBController {
 	}
 
 	private void applySVGChanges() {
-		if(!currentTrace.getCurrentState().isInitialised()) {
-			return;
-		}
-
 		String svgChanges;
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 
 		List<VisBItem> items = this.injector.getInstance(VisBFileHandler.class).loadItems();
+		visBVisualisation.setVisBItems(items);
 
-		injector.getInstance(VisBDebugStage.class).updateItems(items);
+		injector.getInstance(VisBDebugStage.class).updateItems(visBVisualisation.getVisBItems());
 
 		try {
-			svgChanges = buildJQueryForChanges(items);
+			svgChanges = buildJQueryForChanges(visBVisualisation.getVisBItems());
 		} catch(VisBNestedException | IllegalArgumentException | ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 			updateInfo("visb.infobox.visualisation.error");

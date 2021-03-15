@@ -58,7 +58,7 @@ public class VisBVisualisation {
 	}
 
 	public boolean isReady(){
-		return (visBEvents != null && !visBEvents.isEmpty() || visBItems != null && !visBItems.isEmpty()) && svgPath != null;
+		return svgPath != null;
 	}
 
 	@Override
