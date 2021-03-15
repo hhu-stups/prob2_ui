@@ -130,10 +130,14 @@ public class LTLFormulaChecker {
 			return res;
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
-			error.getErrors().stream()
-				.flatMap(err -> err.getLocations().stream())
-				.map(location -> new LTLMarker("error", location.getStartLine(), location.getStartColumn(), location.getEndColumn() - location.getStartColumn(), error.getMessage()))
-				.collect(Collectors.toCollection(() -> errorMarkers));
+			if(error.getErrors() == null) {
+				errorMarkers.add(new LTLMarker("error", 0, 0, error.getMessage().length(), error.getMessage()));
+			} else {
+				error.getErrors().stream()
+						.flatMap(err -> err.getLocations().stream())
+						.map(location -> new LTLMarker("error", location.getStartLine(), location.getStartColumn(), location.getEndColumn() - location.getStartColumn(), error.getMessage()))
+						.collect(Collectors.toCollection(() -> errorMarkers));
+			}
 			return error;
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
