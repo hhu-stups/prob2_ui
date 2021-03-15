@@ -172,6 +172,13 @@ public class VisBStage extends Stage {
 			updateUIOnMachine(to);
 			loadVisBFileFromMachine(to);
 		});
+
+		this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> {
+			if (to != null && (from == null || !from.getLoadedMachine().equals(to.getLoadedMachine())) && visBPath.isNotNull().get()) {
+				this.setupMachineVisBFile();
+			}
+		});
+
 		injector.getInstance(VisBDebugStage.class).initOwner(this);
 	}
 
@@ -193,12 +200,6 @@ public class VisBStage extends Stage {
 			visBPath.set(visBVisualisation == null ? null : currentProject.getLocation().resolve(visBVisualisation));
 			if(currentTrace.getStateSpace() != null) {
 				Platform.runLater(this::setupMachineVisBFile);
-			} else {
-				this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> {
-					if (to != null && (from == null || !from.getLoadedMachine().equals(to.getLoadedMachine())) && visBPath.isNotNull().get()) {
-						this.setupMachineVisBFile();
-					}
-				});
 			}
 		}
 	}
