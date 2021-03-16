@@ -5,6 +5,7 @@ import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Injector;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
+import de.prob.animator.command.LoadVisBSetAttributesCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
@@ -117,8 +118,9 @@ public class VisBController {
 		String svgChanges;
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 
-		List<VisBItem> items = this.injector.getInstance(VisBFileHandler.class).loadItems();
-		visBVisualisation.setVisBItems(items);
+		String stateID = currentTrace.getCurrentState().getId();
+		LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID, visBVisualisation.getVisBItemMap());
+		currentTrace.getStateSpace().execute(setAttributesCmd);
 
 		injector.getInstance(VisBDebugStage.class).updateItems(visBVisualisation.getVisBItems());
 

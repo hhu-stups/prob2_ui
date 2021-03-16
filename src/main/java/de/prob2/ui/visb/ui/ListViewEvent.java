@@ -3,6 +3,7 @@ package de.prob2.ui.visb.ui;
 
 import com.google.inject.Injector;
 import de.prob.animator.domainobjects.VisBEvent;
+import de.prob.animator.domainobjects.VisBHover;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visb.VisBStage;
 
@@ -47,8 +48,10 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if(visBEvent != null) {
 				String id = visBEvent.getId();
-				String invocation = buildInvocation("changeAttribute", wrapAsString(id), wrapAsString("opacity"), to ? wrapAsString("0.5") : wrapAsString("1.0"));
-				injector.getInstance(VisBStage.class).runScript(invocation);
+				for (VisBHover hover : visBEvent.getHovers()) {
+					String invocation = buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), to ? wrapAsString(hover.getHoverEnterVal()) : wrapAsString(hover.getHoverLeaveVal()));
+					injector.getInstance(VisBStage.class).runScript(invocation);
+				}
 			}
 		});
 	}

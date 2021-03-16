@@ -7,6 +7,7 @@
     <VBox fx:id="itemBox">
         <Label fx:id="lbID" styleClass="name"/>
         <Label fx:id="lbAttribute" styleClass="information" />
+        <Label fx:id="lbExpression" styleClass="information" />
         <Label fx:id="lbValue" styleClass="information" />
     </VBox>
 </fx:root>

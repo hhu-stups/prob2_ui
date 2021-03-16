@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.LoadVisBCommand;
 import de.prob.animator.command.LoadVisBSetAttributesCommand;
 import de.prob.animator.command.ReadVisBEventsHoversCommand;
+import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
@@ -67,11 +68,10 @@ public class VisBFileHandler {
 	}
 
 	public List<VisBItem> loadItems() {
-		String stateID = currentTrace.getCurrentState().getId();
-		LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID);
-		currentTrace.getStateSpace().execute(setAttributesCmd);
+		ReadVisBItemsCommand readVisBItemsCommand = new ReadVisBItemsCommand();
+		currentTrace.getStateSpace().execute(readVisBItemsCommand);
 
-		return setAttributesCmd.getItems();
+		return readVisBItemsCommand.getItems();
 	}
 
 	/**
