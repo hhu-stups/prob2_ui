@@ -410,10 +410,10 @@ public class VisBController {
 
 	private void addOnClickItem(VisBEvent visBEvent, List<VisBOnClickMustacheItem> onClickItems) {
 		String enterAction = visBEvent.getHovers().stream()
-				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
+				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
 				.collect(Collectors.joining("\n"));
 		String leaveAction = visBEvent.getHovers().stream()
-				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverId()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
+				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
 				.collect(Collectors.joining("\n"));
 		String eventID = visBEvent.getId();
 		String eventName = visBEvent.getEvent();
