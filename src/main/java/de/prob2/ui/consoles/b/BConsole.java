@@ -16,29 +16,24 @@ import java.util.ResourceBundle;
 @Singleton
 public final class BConsole extends Console {
 
-	private boolean typedIn;
-
 	@Inject
 	private BConsole(BInterpreter bInterpreter, ResourceBundle bundle, CurrentTrace currentTrace, Config config) {
 		super(bundle, bundle.getString("consoles.b.header"), bundle.getString("consoles.b.prompt.classicalB"), bInterpreter);
-		this.typedIn = false;
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			if(!typedIn) {
-				return;
-			}
 			final String message;
-			if (to == null) {
-				message = bundle.getString("consoles.b.message.modelUnloaded");
-			} else {
+			if (to != null) {
 				final File modelFile = to.getModel().getModelFile();
 				final String name = modelFile == null ? to.getMainComponent().toString() : modelFile.getName();
 				message = String.format(bundle.getString("consoles.b.message.modelLoaded"), name);
+				String lastLine = this.getText(this.getLineNumber() - 1);
+				if(!message.equals(lastLine)) {
+					final int oldCaretPos = this.getCaretPosition();
+					final String line = message + '\n';
+					this.insertText(this.getLineNumber(), 0, line);
+					this.moveTo(oldCaretPos + line.length());
+					this.requestFollowCaret();
+				}
 			}
-			final int oldCaretPos = this.getCaretPosition();
-			final String line = message + '\n';
-			this.insertText(this.getLineNumber(), 0, line);
-			this.moveTo(oldCaretPos + line.length());
-			this.requestFollowCaret();
 		});
 		
 		config.addListener(new ConfigListener() {
@@ -52,11 +47,6 @@ public final class BConsole extends Console {
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.bConsoleInstructions = saveInstructions();
-			}
-		});
-		this.textProperty().addListener((observable, from, to) -> {
-			if(!from.equals(to)) {
-				typedIn = true;
 			}
 		});
 	}
