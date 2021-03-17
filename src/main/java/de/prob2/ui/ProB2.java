@@ -61,8 +61,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ProB2 extends Application {
-	private static final Path OLD_CONFIG_FILE_PATH = Paths.get(Main.getProBDirectory(), "prob2ui", "config.json");
-
 	private Logger logger;
 
 	private RuntimeOptions runtimeOptions;
@@ -111,10 +109,6 @@ public class ProB2 extends Application {
 				final Path unversionedConfigFilePath = configDirectory.resolve("config.json");
 				if (Files.exists(unversionedConfigFilePath)) {
 					foundPreviousConfigFilePath = unversionedConfigFilePath;
-				} else if (Files.exists(OLD_CONFIG_FILE_PATH)) {
-					// Very old config file (format version 0/none or 1,
-					// from earlier ProB 2 UI 1.1.0 snapshots or 1.0.0 and earlier).
-					foundPreviousConfigFilePath = OLD_CONFIG_FILE_PATH;
 				}
 			}
 			if (foundPreviousConfigFilePath != null) {

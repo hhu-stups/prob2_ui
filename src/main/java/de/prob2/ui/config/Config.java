@@ -10,15 +10,14 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.ObjectWithMetadata;
-import de.prob2.ui.MainController;
 import de.prob2.ui.internal.ConfigFile;
-import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StopActions;
 
 import org.slf4j.Logger;
@@ -40,29 +39,12 @@ public final class Config {
 		this.configFilePath = configFilePath;
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(gson, ConfigData.class, ConfigData.FILE_TYPE, ConfigData.CURRENT_FORMAT_VERSION) {
-			private static final String GUI_STATE_FIELD = "guiState";
-			private static final String PERSPECTIVE_KIND_FIELD = "perspectiveKind";
-			private static final String PERSPECTIVE_FIELD = "perspective";
 			private static final String ERROR_LEVEL_FIELD = "errorLevel";
 			
 			@Override
 			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
-				if (oldMetadata.getFormatVersion() <= 0 && oldObject.has(GUI_STATE_FIELD)) {
-					final String guiState = oldObject.remove(GUI_STATE_FIELD).getAsString();
-					final PerspectiveKind perspectiveKind;
-					final String perspective;
-					if (guiState.contains("detached")) {
-						perspectiveKind = PerspectiveKind.PRESET;
-						perspective = MainController.DEFAULT_PERSPECTIVE;
-					} else if (guiState.startsWith("custom ")) {
-						perspectiveKind = PerspectiveKind.CUSTOM;
-						perspective = guiState.replace("custom ", "");
-					} else {
-						perspectiveKind = PerspectiveKind.PRESET;
-						perspective = guiState;
-					}
-					oldObject.addProperty(PERSPECTIVE_KIND_FIELD, perspectiveKind.name());
-					oldObject.addProperty(PERSPECTIVE_FIELD, perspective);
+				if (oldMetadata.getFormatVersion() <= 0) {
+					throw new JsonParseException("Loading config files older than format version 1 is no longer supported (config file uses format version " + oldMetadata.getFormatVersion() + ")");
 				}
 				if (oldMetadata.getFormatVersion() <= 1) {
 					oldObject.addProperty(ERROR_LEVEL_FIELD, "WARNING");
