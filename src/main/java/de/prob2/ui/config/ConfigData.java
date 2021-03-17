@@ -15,6 +15,17 @@ import javafx.geometry.BoundingBox;
  */
 @SuppressWarnings("PublicField")
 public final class ConfigData extends BasicConfigData {
+	public static final String FILE_TYPE = "Config";
+	public static final int CURRENT_FORMAT_VERSION = 2;
+	
+	public static String configFileNameForVersion(final int formatVersion) {
+		if (formatVersion >= 2) {
+			return "config_v" + formatVersion + ".json";
+		} else {
+			throw new IllegalArgumentException("Config file format version " + formatVersion + " did not use versioned file names yet");
+		}
+	}
+	
 	public int maxRecentProjects;
 	public int fontSize;
 	public List<Path> recentProjects;

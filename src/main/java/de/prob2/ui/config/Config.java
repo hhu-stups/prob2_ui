@@ -39,7 +39,7 @@ public final class Config {
 	private Config(final @ConfigFile Path configFilePath, final Gson gson, final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
 		this.configFilePath = configFilePath;
 		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(gson, ConfigData.class, "Config", 2) {
+		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(gson, ConfigData.class, ConfigData.FILE_TYPE, ConfigData.CURRENT_FORMAT_VERSION) {
 			private static final String GUI_STATE_FIELD = "guiState";
 			private static final String PERSPECTIVE_KIND_FIELD = "perspectiveKind";
 			private static final String PERSPECTIVE_FIELD = "perspective";

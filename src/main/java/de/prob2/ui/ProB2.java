@@ -8,8 +8,10 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.Main;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.BasicConfig;
+import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.internal.BasicConfigModule;
+import de.prob2.ui.internal.ConfigDirectory;
 import de.prob2.ui.internal.ConfigFile;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
@@ -89,11 +91,36 @@ public class ProB2 extends Application {
 	}
 
 	private void migrateOldConfigFileIfNeeded(final Injector basicConfigInjector) throws IOException {
-		final Path newConfigFilePath = basicConfigInjector.getInstance(Key.get(Path.class, ConfigFile.class));
-		if (!Files.exists(newConfigFilePath) && Files.exists(OLD_CONFIG_FILE_PATH)) {
-			logger.info("Found old config file at {} - migrating to {}", OLD_CONFIG_FILE_PATH, newConfigFilePath);
-			Files.createDirectories(newConfigFilePath.getParent());
-			Files.copy(OLD_CONFIG_FILE_PATH, newConfigFilePath);
+		final Path currentConfigFilePath = basicConfigInjector.getInstance(Key.get(Path.class, ConfigFile.class));
+		// Attempt migration only if no current config file exists.
+		if (!Files.exists(currentConfigFilePath)) {
+			final Path configDirectory = basicConfigInjector.getInstance(Key.get(Path.class, ConfigDirectory.class));
+			Files.createDirectories(configDirectory);
+			Path foundPreviousConfigFilePath = null;
+			// Search for the newest versioned config file that exists.
+			for (int version = ConfigData.CURRENT_FORMAT_VERSION - 1; version >= 2; version--) {
+				final Path previousConfigFilePath = configDirectory.resolve(ConfigData.configFileNameForVersion(version));
+				if (Files.exists(previousConfigFilePath)) {
+					foundPreviousConfigFilePath = previousConfigFilePath;
+					break;
+				}
+			}
+			if (foundPreviousConfigFilePath == null) {
+				// No versioned config file found - look for an unversioned config file
+				// (format version 1 or 2, from ProB 2 UI 1.1.0 or later snapshots of that version).
+				final Path unversionedConfigFilePath = configDirectory.resolve("config.json");
+				if (Files.exists(unversionedConfigFilePath)) {
+					foundPreviousConfigFilePath = unversionedConfigFilePath;
+				} else if (Files.exists(OLD_CONFIG_FILE_PATH)) {
+					// Very old config file (format version 0/none or 1,
+					// from earlier ProB 2 UI 1.1.0 snapshots or 1.0.0 and earlier).
+					foundPreviousConfigFilePath = OLD_CONFIG_FILE_PATH;
+				}
+			}
+			if (foundPreviousConfigFilePath != null) {
+				logger.info("Found old config file at {} - migrating to {}", foundPreviousConfigFilePath, currentConfigFilePath);
+				Files.copy(foundPreviousConfigFilePath, currentConfigFilePath);
+			}
 		}
 	}
 

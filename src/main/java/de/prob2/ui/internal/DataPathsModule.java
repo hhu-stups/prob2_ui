@@ -7,6 +7,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.config.ConfigData;
+
 import net.harawata.appdirs.AppDirs;
 import net.harawata.appdirs.AppDirsFactory;
 
@@ -26,9 +28,16 @@ public final class DataPathsModule extends AbstractModule {
 	
 	@Provides
 	@Singleton
+	@ConfigDirectory
+	private static Path getConfigDirectoryPath(final AppDirs appDirs) {
+		return Paths.get(appDirs.getUserConfigDir(APPDIRS_APP_NAME, null, APPDIRS_APP_AUTHOR));
+	}
+	
+	@Provides
+	@Singleton
 	@ConfigFile
-	private static Path getConfigFilePath(final AppDirs appDirs) {
-		return Paths.get(appDirs.getUserConfigDir(APPDIRS_APP_NAME, null, APPDIRS_APP_AUTHOR), "config.json");
+	private static Path getConfigFilePath(final @ConfigDirectory Path configDirectory) {
+		return configDirectory.resolve(ConfigData.configFileNameForVersion(ConfigData.CURRENT_FORMAT_VERSION));
 	}
 	
 	@Provides
