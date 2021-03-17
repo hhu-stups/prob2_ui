@@ -42,11 +42,11 @@ public class SimulationTracesView extends Stage {
 
 	private static class SimulationTraceItem {
 
-		private Trace trace;
+		private final Trace trace;
 
-		private List<Integer> timestamps;
+		private final List<Integer> timestamps;
 
-		private int index;
+		private final int index;
 
 		public SimulationTraceItem(Trace trace, List<Integer> timestamps, int index) {
 			this.trace = trace;
@@ -163,8 +163,9 @@ public class SimulationTracesView extends Stage {
 					Trace trace = item.getTrace();
 					try {
 						traceSaver.save(trace, currentProject.getCurrentMachine());
-					} catch (IOException ioException) {
-						ioException.printStackTrace();
+					} catch (IOException exception) {
+						exception.printStackTrace();
+						// TODO: Handle error
 					}
 				}
 			});
