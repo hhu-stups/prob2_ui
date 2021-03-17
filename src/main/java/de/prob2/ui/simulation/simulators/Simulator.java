@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.simulators;
 
 import de.prob.animator.command.GetPreferenceCommand;
+import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -90,22 +91,16 @@ public abstract class Simulator {
 	}
 
     public String chooseVariableValues(State currentState, Map<String, String> values) {
-	    if(values == null || values.isEmpty()) {
+	    if(values == null) {
 	        return "1=1";
         }
-        StringBuilder conjuncts = new StringBuilder();
-        for(Iterator<String> it = values.keySet().iterator(); it.hasNext();) {
-            String key = it.next();
+        PredicateBuilder predicateBuilder = new PredicateBuilder();
+        for(String key : values.keySet()) {
             String value = values.get(key);
             String evalResult  = cache.readValueWithCaching(currentState, value);
-            conjuncts.append(key);
-            conjuncts.append(" = ");
-            conjuncts.append(evalResult);
-            if(it.hasNext()) {
-                conjuncts.append(" & ");
-            }
+            predicateBuilder.add(key, evalResult);
         }
-        return conjuncts.toString();
+        return predicateBuilder.toString();
     }
 
     public Map<String, String> chooseParameters(Activation activation, State currentState) {
@@ -122,6 +117,7 @@ public abstract class Simulator {
     }
 
 
+    @SuppressWarnings("unchecked")
     public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
         Map<String, String> values = null;
 
@@ -137,8 +133,7 @@ public abstract class Simulator {
             values = new HashMap<>();
             for(String variable : probabilityMap.keySet()) {
                 double probabilityMinimum = 0.0;
-                Object probabilityValue = probabilityMap.get(variable);
-                Map<String, String> probabilityValueMap = (Map<String, String>) probabilityValue;
+                Map<String, String> probabilityValueMap = probabilityMap.get(variable);
                 double randomDouble = random.nextDouble();
                 for(String value : probabilityValueMap.keySet()) {
                     String valueProbability = probabilityValueMap.get(value);
