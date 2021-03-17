@@ -6,6 +6,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.simulators.Simulator;
+import de.prob2.ui.verifications.Checked;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +52,10 @@ public class SimulationMonteCarlo extends Simulator {
 		}
 	}
 
+	public enum MonteCarloCheckResult {
+		NOT_FINISHED, SUCCESS, FAIL
+	}
+
 	protected Map<String, List<Integer>> operationExecutions;
 
 	protected Map<String, List<Integer>> operationEnablings;
@@ -75,6 +80,8 @@ public class SimulationMonteCarlo extends Simulator {
 
 	protected SimulationStats stats;
 
+	protected MonteCarloCheckResult result;
+
     public SimulationMonteCarlo(final CurrentTrace currentTrace, Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
         super(currentTrace);
         this.operationExecutions = new HashMap<>();
@@ -89,6 +96,7 @@ public class SimulationMonteCarlo extends Simulator {
         this.startAtTime = Integer.MAX_VALUE;
         this.additionalInformation = additionalInformation;
         this.stats = null;
+		this.result = MonteCarloCheckResult.NOT_FINISHED;
     }
 
     @Override
@@ -175,7 +183,11 @@ public class SimulationMonteCarlo extends Simulator {
     }
 
     public void check() {
-		// Monte Carlo Simulation does not apply any checks. But classes inheriting from SimulationMonteCarlo might apply some checks.
+		if(this.resultingTraces.size() == numberExecutions) {
+			this.result = MonteCarloCheckResult.SUCCESS;
+		} else {
+			this.result = MonteCarloCheckResult.FAIL;
+		}
     }
 
     public void checkTrace(Trace trace, int time) {
@@ -251,5 +263,9 @@ public class SimulationMonteCarlo extends Simulator {
 
 	public SimulationStats getStats() {
 		return stats;
+	}
+
+	public MonteCarloCheckResult getResult() {
+		return result;
 	}
 }

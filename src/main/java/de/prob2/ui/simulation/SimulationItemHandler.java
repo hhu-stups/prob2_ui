@@ -92,31 +92,44 @@ public class SimulationItemHandler {
         return additionalInformation;
     }
 
+    private void setResult(SimulationItem item, SimulationMonteCarlo monteCarlo) {
+        item.setTraces(monteCarlo.getResultingTraces());
+        item.setTimestamps(monteCarlo.getResultingTimestamps());
+        item.setSimulationStats(monteCarlo.getStats());
+        Platform.runLater(() -> {
+            switch (monteCarlo.getResult()) {
+                case SUCCESS:
+                    item.setChecked(Checked.SUCCESS);
+                    break;
+                case FAIL:
+                    item.setChecked(Checked.FAIL);
+                    break;
+                case NOT_FINISHED:
+                    item.setChecked(Checked.NOT_CHECKED);
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
+    private void runAndCheck(SimulationItem item, SimulationMonteCarlo monteCarlo) {
+        Thread thread = new Thread(() -> {
+            monteCarlo.run();
+            setResult(item, monteCarlo);
+            currentJobThreads.remove(Thread.currentThread());
+        });
+        currentJobThreads.add(thread);
+        thread.start();
+    }
+
     private void handleMonteCarloSimulation(SimulationItem item, boolean checkAll) {
         Trace trace = currentTrace.get();
         int executions = (int) item.getField("EXECUTIONS");
         Map<String, Object> additionalInformation = extractAdditionalInformation(item);
         SimulationMonteCarlo monteCarlo = new SimulationMonteCarlo(currentTrace, trace, executions, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), monteCarlo, path.toFile());
-        Thread thread = new Thread(() -> {
-            monteCarlo.run();
-            List<Trace> resultingTraces = monteCarlo.getResultingTraces();
-            List<List<Integer>> timestamps = monteCarlo.getResultingTimestamps();
-            SimulationStats stats = monteCarlo.getStats();
-            item.setTraces(resultingTraces);
-            item.setTimestamps(timestamps);
-            item.setSimulationStats(stats);
-            Platform.runLater(() -> {
-                if(resultingTraces.size() == executions) {
-                    item.setChecked(Checked.SUCCESS);
-                } else {
-                    item.setChecked(Checked.FAIL);
-                }
-            });
-            currentJobThreads.remove(Thread.currentThread());
-        });
-        currentJobThreads.add(thread);
-        thread.start();
+        runAndCheck(item, monteCarlo);
     }
 
     private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
@@ -138,31 +151,7 @@ public class SimulationItemHandler {
 
         SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(currentTrace, trace, executions, checkingType, hypothesisCheckingType, probability, significance, additionalInformation);
         SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path.toFile());
-        Thread thread = new Thread(() -> {
-            hypothesisChecker.run();
-            SimulationHypothesisChecker.HypothesisCheckResult result = hypothesisChecker.getResult();
-            item.setTraces(hypothesisChecker.getResultingTraces());
-            item.setTimestamps(hypothesisChecker.getResultingTimestamps());
-            item.setSimulationStats(hypothesisChecker.getStats());
-            Platform.runLater(() -> {
-                switch (result) {
-                    case SUCCESS:
-                        item.setChecked(Checked.SUCCESS);
-                        break;
-                    case FAIL:
-                        item.setChecked(Checked.FAIL);
-                        break;
-                    case NOT_FINISHED:
-                        item.setChecked(Checked.NOT_CHECKED);
-                        break;
-                    default:
-                        break;
-                }
-            });
-            currentJobThreads.remove(Thread.currentThread());
-        });
-        currentJobThreads.add(thread);
-        thread.start();
+        runAndCheck(item, hypothesisChecker);
     }
 
     private void handleEstimation(SimulationItem item, boolean checkAll) {
@@ -184,31 +173,7 @@ public class SimulationItemHandler {
 
         SimulationEstimator simulationEstimator = new SimulationEstimator(currentTrace, trace, executions, checkingType, estimationType, desiredValue, epsilon, additionalInformation);
         SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator, path.toFile());
-        Thread thread = new Thread(() -> {
-            simulationEstimator.run();
-            SimulationEstimator.EstimationCheckResult result = simulationEstimator.getResult();
-            item.setTraces(simulationEstimator.getResultingTraces());
-            item.setTimestamps(simulationEstimator.getResultingTimestamps());
-            item.setSimulationStats(simulationEstimator.getStats());
-            Platform.runLater(() -> {
-                switch (result) {
-                    case SUCCESS:
-                        item.setChecked(Checked.SUCCESS);
-                        break;
-                    case FAIL:
-                        item.setChecked(Checked.FAIL);
-                        break;
-                    case NOT_FINISHED:
-                        item.setChecked(Checked.NOT_CHECKED);
-                        break;
-                    default:
-                        break;
-                }
-            });
-            currentJobThreads.remove(Thread.currentThread());
-        });
-        currentJobThreads.add(thread);
-        thread.start();
+        runAndCheck(item, simulationEstimator);
     }
 
     public void checkItem(SimulationItem item, boolean checkAll) {

@@ -106,17 +106,11 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		}
 	}
 
-    public enum HypothesisCheckResult {
-        NOT_FINISHED, SUCCESS, FAIL
-    }
-
 	private final HypothesisCheckingType hypothesisCheckingType;
 
 	private final double probability;
 
 	private final double significance;
-
-    private HypothesisCheckResult result;
 
     public SimulationHypothesisChecker(final CurrentTrace currentTrace, final Trace trace, final int numberExecutions, final SimulationCheckingType type,
 									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance, final Map<String, Object> additionalInformation) {
@@ -124,7 +118,6 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.significance = significance;
-		this.result = HypothesisCheckResult.NOT_FINISHED;
     }
 
     public void check() {
@@ -141,9 +134,9 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		}
 
 		if(distribution.isSuccess(hypothesisCheckingType, numberSuccess, range)) {
-			this.result = HypothesisCheckResult.SUCCESS;
+			this.result = MonteCarloCheckResult.SUCCESS;
 		} else {
-			this.result = HypothesisCheckResult.FAIL;
+			this.result = MonteCarloCheckResult.FAIL;
 		}
     }
 
@@ -152,10 +145,6 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
 		this.stats = new SimulationStats(n, numberSuccess, ratio, calculateExtendedStats());
-	}
-
-	public HypothesisCheckResult getResult() {
-		return result;
 	}
 
 	public SimulationStats getStats() {
