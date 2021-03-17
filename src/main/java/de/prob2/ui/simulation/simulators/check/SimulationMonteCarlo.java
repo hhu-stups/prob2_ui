@@ -188,38 +188,27 @@ public class SimulationMonteCarlo extends Simulator {
     	for(Transition transition : trace.getTransitionList()) {
     		String opName = transition.getName();
 
-    		//update executed operations
-			if(!operationExecutionsTrace.containsKey(opName)) {
-				operationExecutionsTrace.put(opName, 1);
-			} else {
-				operationExecutionsTrace.computeIfPresent(opName, (key, val) -> val + 1);
-			}
+			//update executed operations
+    		operationExecutionsTrace.putIfAbsent(opName, 0);
+			operationExecutionsTrace.computeIfPresent(opName, (key, val) -> val + 1);
 
 			// update enabled operations
-			Set<String> enabledOperations = cache.readEnabledOperationsWithCaching(transition.getSource());
-			for(String enabledOp : enabledOperations) {
-				if(!operationEnablingsTrace.containsKey(enabledOp)) {
-					operationEnablingsTrace.put(enabledOp, 1);
-				} else {
-					operationEnablingsTrace.computeIfPresent(enabledOp, (key, val) -> val + 1);
-				}
-			}
+			cache.readEnabledOperationsWithCaching(transition.getSource())
+					.forEach(enabledOp -> {
+						operationEnablingsTrace.putIfAbsent(enabledOp, 0);
+						operationEnablingsTrace.computeIfPresent(enabledOp, (key, val) -> val + 1);
+					});
 		}
-
     	for(String key : operationEnablingsTrace.keySet()) {
     		//update enabled operations for all traces
 			int addedEnabling = operationEnablingsTrace.getOrDefault(key, 0);
 
-			if(!operationEnablings.containsKey(key)) {
-				operationEnablings.put(key, new ArrayList<>());
-			}
+			operationEnablings.putIfAbsent(key, new ArrayList<>());
 			operationEnablings.get(key).add(addedEnabling);
 
     		//update executed operations for all traces
 			int addedExecution = operationExecutionsTrace.getOrDefault(key, 0);
-			if(!operationExecutions.containsKey(key)) {
-				operationExecutions.put(key, new ArrayList<>());
-			}
+			operationExecutions.putIfAbsent(key, new ArrayList<>());
 			operationExecutions.get(key).add(addedExecution);
 		}
 	}
