@@ -117,57 +117,37 @@ public abstract class Simulator {
     }
 
 
-    @SuppressWarnings("unchecked")
+
     public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
-        Map<String, String> values = null;
-
         Object probability = activation.getProbabilisticVariables();
-        if(probability == null) {
-            return values;
-        }
-        //choose between non-deterministic assigned variables
-        if(probability instanceof String) {
+        if(probability == null || probability instanceof String) {
             return null;
-        } else {
-            Map<String, Map<String, String>> probabilityMap = (Map<String, Map<String, String>>) probability;
-            values = new HashMap<>();
-            for(String variable : probabilityMap.keySet()) {
-                double probabilityMinimum = 0.0;
-                Map<String, String> probabilityValueMap = probabilityMap.get(variable);
-                double randomDouble = random.nextDouble();
-                for(String value : probabilityValueMap.keySet()) {
-                    String valueProbability = probabilityValueMap.get(value);
-                    double evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, valueProbability));
-                    if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
-                        String evalValue = cache.readValueWithCaching(currentState, value);
-                        values.put(variable, evalValue);
-                    }
-                    probabilityMinimum += evalProbability;
-                }
-                if(Math.abs(1.0 - probabilityMinimum) > 0.000001) {
-                    throw new RuntimeException("Sum of probabilistic choice is not equal 1");
-                }
-            }
         }
-
-        return values;
+        return buildProbabilisticChoice(currentState, probability);
     }
 
-    public void initSimulator(File configFile) throws IOException {
-        this.config = SimulationFileHandler.constructConfigurationFromJSON(configFile);
-        if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
-            checkConfiguration(currentTrace.getStateSpace());
-			GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
-			currentTrace.getStateSpace().execute(cmd);
-			this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
-
-			cmd = new GetPreferenceCommand("MAX_OPERATIONS");
-			currentTrace.getStateSpace().execute(cmd);
-			this.maxTransitions = Integer.parseInt(cmd.getValue());
-        } else {
-            currentTrace.addListener(traceListener);
+    @SuppressWarnings("unchecked")
+    private Map<String, String> buildProbabilisticChoice(State currentState, Object probability) {
+        Map<String, Map<String, String>> probabilityMap = (Map<String, Map<String, String>>) probability;
+        Map<String, String> values = new HashMap<>();
+        for(String variable : probabilityMap.keySet()) {
+            double probabilityMinimum = 0.0;
+            Map<String, String> probabilityValueMap = probabilityMap.get(variable);
+            double randomDouble = random.nextDouble();
+            for(String value : probabilityValueMap.keySet()) {
+                String valueProbability = probabilityValueMap.get(value);
+                double evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, valueProbability));
+                if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
+                    String evalValue = cache.readValueWithCaching(currentState, value);
+                    values.put(variable, evalValue);
+                }
+                probabilityMinimum += evalProbability;
+            }
+            if(Math.abs(1.0 - probabilityMinimum) > 0.000001) {
+                throw new RuntimeException("Sum of probabilistic choice is not equal 1");
+            }
         }
-        resetSimulator();
+        return values;
     }
 
     public void initSimulator(SimulationConfiguration config) throws IOException {

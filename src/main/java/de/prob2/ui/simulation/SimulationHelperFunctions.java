@@ -5,6 +5,7 @@ import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import javafx.scene.control.Alert;
 import javafx.stage.Window;
@@ -27,7 +28,7 @@ public class SimulationHelperFunctions {
 
 	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, File file) {
 		try {
-			simulator.initSimulator(file);
+			simulator.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(file));
 		} catch (IOException e) {
 			LOGGER.debug("Tried to load simulation configuration file");
 			alert(stageManager, window, e, "simulation.error.header.fileNotFound","simulation.error.body.fileNotFound");
