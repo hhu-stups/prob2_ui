@@ -108,6 +108,7 @@ public class Machine implements DescriptionView.Describable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
+	private ObjectProperty<Path> simulation;
 	private ObjectProperty<Path> visBVisualisation;
 	private transient PatternManager patternManager = new PatternManager();
 	private final transient BooleanProperty changed = new SimpleBooleanProperty(false);
@@ -125,6 +126,7 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
+		this.simulation = new SimpleObjectProperty<>(this, "simulation", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.initListeners();
 	}
@@ -143,6 +145,7 @@ public class Machine implements DescriptionView.Describable {
 		this.testCases = JsonManager.checkDeserialize(context, object, "testCases", new TypeToken<ListProperty<TestCaseGenerationItem>>() {}.getType());
 		this.traces = JsonManager.checkDeserialize(context, object, "traces", new TypeToken<SetProperty<Path>>() {}.getType());
 		this.modelcheckingItems = JsonManager.checkDeserialize(context, object, "modelcheckingItems", new TypeToken<ListProperty<ModelCheckingItem>>() {}.getType());
+		this.simulation = JsonManager.checkDeserialize(context, object, "simulation", new TypeToken<ObjectProperty<Path>>() {}.getType());
 		this.visBVisualisation = JsonManager.checkDeserialize(context, object, "visBVisualisation", new TypeToken<ObjectProperty<Path>>() {}.getType());
 		this.initListeners();
 	}
@@ -210,6 +213,7 @@ public class Machine implements DescriptionView.Describable {
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
+		this.simulationProperty().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 
 		addCheckingStatusListener(this.ltlFormulasProperty(), this.ltlStatusProperty());
@@ -407,6 +411,18 @@ public class Machine implements DescriptionView.Describable {
 	
 	public Path getLocation() {
 		return this.location;
+	}
+
+	public ObjectProperty<Path> simulationProperty() {
+		return simulation;
+	}
+
+	public Path getSimulation() {
+		return simulation.get();
+	}
+
+	public void setSimulation(Path simulation) {
+		this.simulationProperty().set(simulation);
 	}
 
 	public ObjectProperty<Path> visBVisualizationProperty() {

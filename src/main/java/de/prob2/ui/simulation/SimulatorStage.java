@@ -32,6 +32,8 @@ import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
 import de.prob2.ui.simulation.table.SimulationOperationDebugItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.visb.VisBController;
+import de.prob2.ui.visb.VisBDebugStage;
 import de.prob2.ui.visb.VisBStage;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -43,7 +45,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -56,8 +61,10 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.controlsfx.glyphfont.FontAwesome;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -66,6 +73,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -168,6 +176,9 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private Button btAddSimulation;
+
+	@FXML
+	private Button btManageDefaultSimulation;
 
 	@FXML
 	private Label lbTime;
@@ -295,14 +306,20 @@ public class SimulatorStage extends Stage {
 			resetSimulator();
 		});
 
+		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadSimulationFromMachine(currentProject.getCurrentMachine()));
+
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			btManageDefaultSimulation.disableProperty().unbind();
+			btManageDefaultSimulation.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(configurationPath.isNull()));
 			if(to != null) {
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
 			} else {
 				simulationItems.getItems().clear();
 				simulationItems.itemsProperty().unbind();
 			}
+			loadSimulationFromMachine(to);
 		};
+
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
@@ -348,10 +365,6 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
-	public void initSimulator(RealTimeSimulator realTimeSimulator) {
-		SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
-	}
-
 	private void stopSimulator(RealTimeSimulator realTimeSimulator) {
 		Path path = configurationPath.get();
 		if (path != null) {
@@ -370,7 +383,7 @@ public class SimulatorStage extends Stage {
                 fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json")
         );
         Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
-		if(path != null) {
+        if(path != null) {
 			configurationPath.set(path);
 			injector.getInstance(SimulationChoosingStage.class).setPath(path);
 			lbTime.setText("");
@@ -479,6 +492,81 @@ public class SimulatorStage extends Stage {
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 		visBStage.show();
 		visBStage.toFront();
+	}
+
+	@FXML
+	public void manageDefaultSimulation() {
+		Machine machine = currentProject.getCurrentMachine();
+		List<ButtonType> buttons = new ArrayList<>();
+
+		ButtonType loadButton = new ButtonType(bundle.getString("simulation.defaultSimulation.load"));
+		ButtonType setButton = new ButtonType(bundle.getString("simulation.defaultSimulation.set"));
+		ButtonType resetButton = new ButtonType(bundle.getString("simulation.defaultSimulation.reset"));
+
+		Alert alert;
+		if(machine.simulationProperty().isNotNull().get()) {
+			boolean simulationPathNotEqualsMachinePath = !currentProject.getLocation().relativize(configurationPath.get()).equals(machine.getSimulation());
+			if(configurationPath.get() != null && simulationPathNotEqualsMachinePath) {
+				buttons.add(loadButton);
+				buttons.add(setButton);
+			}
+			buttons.add(resetButton);
+			ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+			buttons.add(buttonTypeCancel);
+			alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "simulation.defaultSimulation.header", "simulation.defaultSimulation.text", machine.simulationProperty().get());
+		} else {
+			if(configurationPath != null) {
+				buttons.add(setButton);
+			}
+			ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+			buttons.add(buttonTypeCancel);
+			alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "simulation.defaultSimulation.header", "simulation.noDefaultSimulation.text");
+		}
+
+		alert.initOwner(this);
+
+		Optional<ButtonType> result = alert.showAndWait();
+		if(result.isPresent()) {
+			if (result.get() == loadButton) {
+				loadDefaultSimulation();
+			} else if (result.get() == setButton) {
+				setDefaultSimulation();
+			} else if (result.get() == resetButton) {
+				resetDefaultSimulation();
+			} else {
+				alert.close();
+			}
+		}
+	}
+
+	private void loadSimulationFromMachine(Machine machine) {
+		configurationPath.set(null);
+		if(machine != null) {
+			Path simulation = machine.getSimulation();
+			configurationPath.set(simulation == null ? null : currentProject.getLocation().resolve(simulation));
+			if(simulation != null) {
+				injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
+				lbTime.setText("");
+				this.time = 0;
+				SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
+				loadSimulationItems();
+			}
+		}
+	}
+
+	private void loadDefaultSimulation() {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		loadSimulationFromMachine(currentMachine);
+	}
+
+	private void setDefaultSimulation() {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		currentMachine.setSimulation(currentProject.getLocation().relativize(configurationPath.get()));
+	}
+
+	private void resetDefaultSimulation() {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		currentMachine.setSimulation(null);
 	}
 
 }

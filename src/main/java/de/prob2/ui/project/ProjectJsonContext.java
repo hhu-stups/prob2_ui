@@ -21,7 +21,7 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 	private Path location;
 
 	ProjectJsonContext(final Gson gson) {
-		super(gson, Project.class, "Project", 11);
+		super(gson, Project.class, "Project", 12);
 	}
 	
 	private static void updateV0CheckableItem(final JsonObject checkableItem) {
@@ -342,6 +342,16 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 			});
 		});
 	}
+
+	private static void updateV11Project(final JsonObject project) {
+		project.getAsJsonArray("machines").forEach(machineElement -> {
+			final JsonObject machine = machineElement.getAsJsonObject();
+			if(!machine.has("simulation")) {
+				String nullString = null;
+				machine.addProperty("simulation", nullString);
+			}
+		});
+	}
 	
 	@Override
 	public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
@@ -377,6 +387,9 @@ class ProjectJsonContext extends JsonManager.Context<Project> {
 		}
 		if (oldMetadata.getFormatVersion() <= 10) {
 			updateV10Project(oldObject);
+		}
+		if (oldMetadata.getFormatVersion() <= 11) {
+			updateV11Project(oldObject);
 		}
 		return new ObjectWithMetadata<>(oldObject, oldMetadata);
 	}

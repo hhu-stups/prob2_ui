@@ -69,6 +69,14 @@
 										<Tooltip text="%common.buttons.cancel" />
 									</tooltip>
 								</Button>
+								<Button fx:id="btManageDefaultSimulation" onAction="#manageDefaultSimulation">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%simulation.button.manageDefaultSimulation" />
+									</tooltip>
+								</Button>
 								<Spacer/>
 								<NavigationButtons/>
 								<Spacer/>

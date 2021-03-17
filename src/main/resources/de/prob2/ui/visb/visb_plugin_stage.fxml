@@ -111,7 +111,7 @@
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG" bindableFontSize="${fontSize.fontSize + 2}" />
 								</graphic>
 								<tooltip>
-									<Tooltip text="%visb.buttons.showItemsAndEvents" />
+									<Tooltip text="%visb.buttons.manageDefaultVisualisation" />
 								</tooltip>
 							</Button>
 							<Spacer/>
