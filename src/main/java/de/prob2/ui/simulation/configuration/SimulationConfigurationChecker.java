@@ -35,64 +35,47 @@ public class SimulationConfigurationChecker {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void checkActivationOperationConfiguration(ActivationOperationConfiguration activation) {
 		Object probability = activation.getProbabilisticVariables();
 		String activatedOp = activation.getOpName();
 		if("$initialise_machine".equals(activatedOp) || "$setup_constants".equals(activatedOp)) {
 			return;
 		}
+		//Check whether given operation name exists
+		OperationInfo opInfo = stateSpace.getLoadedMachine().getMachineOperationInfo(activatedOp);
+		if(opInfo == null) {
+			errors.add(new ConfigurationCheckingError(String.format("Used operation %s does not exist", activatedOp)));
+			return;
+		}
+
+		Set<String> operationVariables = new HashSet<>();
+		operationVariables.addAll(opInfo.getNonDetWrittenVariables());
+		operationVariables.addAll(opInfo.getParameterNames());
+
 		if(probability == null) {
-
-			//Check whether given operation name exists
-			OperationInfo opInfo = stateSpace.getLoadedMachine().getMachineOperationInfo(activatedOp);
-			if(opInfo == null) {
-				errors.add(new ConfigurationCheckingError(String.format("Used operation %s does not exist", activatedOp)));
-			} else {
-
-				// Check whether given variables cover all non-deterministic variables and parameters of the operation
-				Set<String> operationVariables = new HashSet<>();
-				operationVariables.addAll(opInfo.getNonDetWrittenVariables());
-				operationVariables.addAll(opInfo.getParameterNames());
-				if(operationVariables.isEmpty())
-
-				if (activation.getFixedVariables() != null && (!activation.getFixedVariables().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activation.getFixedVariables().keySet()))) {
-					errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
-				}
+			// Check whether given variables cover all non-deterministic variables and parameters of the operation
+			if (activation.getFixedVariables() != null && (!activation.getFixedVariables().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activation.getFixedVariables().keySet()))) {
+				errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
 			}
 		} else if(probability instanceof String) {
-			// Currently, only uniform for probabilistic choice is allowed
-			// TODO: Implement first
-			if(!"uniform".equals(probability)) {
+			if(!"uniform".equals(probability) && !"first".equals(probability)) {
 				errors.add(new ConfigurationCheckingError(String.format("Value %s for probability in activation configuration is not allowed", probability.toString())));
 			}
-		} else {
-
-			//Check whether given operation name exists
-			OperationInfo opInfo = stateSpace.getLoadedMachine().getMachineOperationInfo(activatedOp);
-			if(opInfo == null) {
-				errors.add(new ConfigurationCheckingError(String.format("Used operation %s does not exist", activatedOp)));
-			} else {
-				Set<String> operationVariables = new HashSet<>();
-				operationVariables.addAll(opInfo.getNonDetWrittenVariables());
-				operationVariables.addAll(opInfo.getParameterNames());
-
-				Map<String, Map<String, String>> probabilityAsMap = (Map<String, Map<String, String>>) probability;
-				Set<String> configurationVariables = new HashSet<>();
-				configurationVariables.addAll(probabilityAsMap.keySet());
-				if (activation.getFixedVariables() != null) {
-					configurationVariables.addAll(activation.getFixedVariables().keySet());
-					// Check whether fixed variables, and those for probabilistic choice are disjunct
-					if (activation.getFixedVariables().keySet().stream().anyMatch(probabilityAsMap::containsKey)) {
-						errors.add(new ConfigurationCheckingError(String.format("Fixed variables and those defined for probabilistic choice for operation %s must be disjunct", activatedOp)));
-					}
+		} else { // probability is a map
+			Map<String, Map<String, String>> probabilityAsMap = (Map<String, Map<String, String>>) probability;
+			Set<String> configurationVariables = new HashSet<>(probabilityAsMap.keySet());
+			if (activation.getFixedVariables() != null) {
+				configurationVariables.addAll(activation.getFixedVariables().keySet());
+				// Check whether fixed variables, and those for probabilistic choice are disjunct
+				if (activation.getFixedVariables().keySet().stream().anyMatch(probabilityAsMap::containsKey)) {
+					errors.add(new ConfigurationCheckingError(String.format("Fixed variables and those defined for probabilistic choice for operation %s must be disjunct", activatedOp)));
 				}
+			}
 
-
-				// Check whether given variables cover all non-deterministic variables and parameters of the operation
-				if (!operationVariables.containsAll(configurationVariables) || !configurationVariables.containsAll(operationVariables)) {
-					errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
-				}
-
+			// Check whether given variables are covered by all non-deterministic variables and parameters of the operation
+			if (!operationVariables.containsAll(configurationVariables) || !configurationVariables.containsAll(operationVariables)) {
+				errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
 			}
 		}
 	}
