@@ -29,6 +29,10 @@ public class SimulatorCache {
         String stateID = bState.getId();
         String value;
 
+        // Do not replace these if branches by putIfAbsent invocations on the HashMap
+        // It seems that Java evaluates the value first, before adding it to the HashMap under the condition that the corresponding key is not present
+        // This would destroy the idea of caching, i.e., only evaluating when the key is absent.
+
         if(!valuesCache.containsKey(stateID) || !valuesCache.get(stateID).containsKey(expression)) {
             // loads values in cache if necessary
             if(!valuesCache.containsKey(stateID)) {
@@ -46,6 +50,11 @@ public class SimulatorCache {
         if(transitionCache.keySet().size() > 5000) {
             transitionCache.clear();
         }
+
+        // Do not replace these if branches by putIfAbsent invocations on the HashMap
+        // It seems that Java evaluates the value first, before adding it to the HashMap under the condition that the corresponding key is not present
+        // This would destroy the idea of caching, i.e., only evaluating when the key is absent.
+
         String stateID = bState.getId();
         if(!transitionCache.containsKey(stateID) || !transitionCache.get(stateID).containsKey(opName) ||
 				!transitionCache.get(stateID).get(opName).containsKey(predicate)) {
@@ -66,6 +75,11 @@ public class SimulatorCache {
             enabledOperationsCache.clear();
         }
         String stateID = bState.getId();
+
+        // Do not replace these if branches by putIfAbsent invocations on the HashMap
+        // It seems that Java evaluates the value first, before adding it to the HashMap under the condition that the corresponding key is not present
+        // This would destroy the idea of caching, i.e., only evaluating when the key is absent.
+
         if(!enabledOperationsCache.containsKey(stateID)) {
             Set<String> operations = bState.getOutTransitions().stream()
                     .map(Transition::getName)
