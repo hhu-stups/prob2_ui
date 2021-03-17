@@ -53,23 +53,26 @@ public final class SimulationStatsView extends Stage {
 				numberSimulations.setText(String.valueOf(to.getNumberSimulations()));
 				numberSuccess.setText(String.valueOf(to.getNumberSuccess()));
 				percentage.setText(String.valueOf(to.getPercentage()));
+				buildExtendedStatistics(to.getExtendedStats());
 
-				SimulationExtendedStats extendedStats = to.getExtendedStats();
-				List<Stat> stats = new ArrayList<>();
-				for(String key : extendedStats.getOperationEnablings().keySet()) {
-					int executions = extendedStats.getOperationExecutions().get(key);
-					int enablings = extendedStats.getOperationEnablings().get(key);
-					BigDecimal percentage = BigDecimal.valueOf(100 * extendedStats.getOperationPercentage().get(key)).setScale(2, RoundingMode.HALF_UP);
-					stats.add(new Stat(key, String.format("%s/%s(%s%%)", executions, enablings, percentage)));
-				}
-				for(int i = 0; i < stats.size(); i++) {
-					Stat stat = stats.get(i);
-					Node[] nodes = stat.toFX();
-					statisticsPane.add(nodes[0], 1, i);
-					statisticsPane.add(nodes[1], 2, i);
-				}
 			}
 		});
+	}
+
+	private void buildExtendedStatistics(SimulationExtendedStats extendedStats) {
+		List<Stat> stats = new ArrayList<>();
+		for(String key : extendedStats.getOperationEnablings().keySet()) {
+			int executions = extendedStats.getOperationExecutions().get(key);
+			int enablings = extendedStats.getOperationEnablings().get(key);
+			BigDecimal percentage = BigDecimal.valueOf(100 * extendedStats.getOperationPercentage().get(key)).setScale(2, RoundingMode.HALF_UP);
+			stats.add(new Stat(key, String.format("%s/%s(%s%%)", executions, enablings, percentage)));
+		}
+		for(int i = 0; i < stats.size(); i++) {
+			Stat stat = stats.get(i);
+			Node[] nodes = stat.toFX();
+			statisticsPane.add(nodes[0], 1, i);
+			statisticsPane.add(nodes[1], 2, i);
+		}
 	}
 	
 	public ObjectProperty<SimulationStats> statsProperty() {
