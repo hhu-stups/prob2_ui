@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class Scheduler {
 
-    private final Timer timer;
-
     private final ChangeListener<Trace> listener;
+
+    private final Timer timer;
 
     private RealTimeSimulator realTimeSimulator;
 
@@ -31,7 +31,7 @@ public class Scheduler {
     @Inject
     public Scheduler(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
         super();
-        this.timer = new Timer();
+        this.timer = new Timer(true);
         this.currentTrace = currentTrace;
         this.runningProperty = new SimpleBooleanProperty(false);
         this.executingOperationProperty = new SimpleBooleanProperty(false);
@@ -101,6 +101,10 @@ public class Scheduler {
     public void finish() {
         currentTrace.removeListener(listener);
         executingOperationProperty.set(false);
+    }
+
+    public void stopTimer() {
+        timer.purge();
     }
 
 }

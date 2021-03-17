@@ -27,6 +27,7 @@ import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+import de.prob2.ui.simulation.simulators.Scheduler;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -399,7 +400,7 @@ public class ProB2 extends Application {
 				throw new AssertionError("Unhandled button: " + result);
 			}
 		} else {
-
+			injector.getInstance(Scheduler.class).stopTimer();
 			Platform.exit();
 		}
 	}
