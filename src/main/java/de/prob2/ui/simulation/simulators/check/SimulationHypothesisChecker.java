@@ -25,6 +25,71 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		}
 	}
 
+	public static class Distribution {
+
+		private int n;
+		private double p;
+		private double mu;
+		private double sigma;
+		private DistributionFunction dsf;
+
+		public Distribution(int n, double p) {
+			this.n = n;
+			this.p = p;
+			this.mu = Math.round(n * p);
+			this.sigma = Math.sqrt(n * p * (1 - p));
+			this.dsf = new DistributionFunction(mu, sigma);
+		}
+
+		public int getN() {
+			return n;
+		}
+
+		public double getP() {
+			return p;
+		}
+
+		public double getMu() {
+			return mu;
+		}
+
+		public double getSigma() {
+			return sigma;
+		}
+
+		public DistributionFunction getDistributionFunction() {
+			return dsf;
+		}
+
+		public double calculateCoverage(HypothesisCheckingType checkingType, int epsilon) {
+			switch (checkingType) {
+				case TWO_TAILED:
+					return dsf.value(mu + epsilon + 0.5) - dsf.value(mu - epsilon - 0.5);
+				case LEFT_TAILED:
+					return 1.0 - dsf.value(mu - epsilon - 0.5);
+				case RIGHT_TAILED:
+					return dsf.value(mu + epsilon + 0.5);
+				default:
+					break;
+			}
+			return 0.0;
+		}
+
+		public boolean isSuccess(HypothesisCheckingType checkingType, int numberSuccess, int range) {
+			switch (checkingType) {
+				case TWO_TAILED:
+					return numberSuccess >= mu - range && numberSuccess <= mu + range;
+				case LEFT_TAILED:
+					return numberSuccess >= mu - range && numberSuccess <= n;
+				case RIGHT_TAILED:
+					return numberSuccess >= 0 && numberSuccess <= mu + range;
+				default:
+					break;
+			}
+			return false;
+		}
+	}
+
 	public enum HypothesisCheckingType {
 		LEFT_TAILED("Left-tailed hypothesis test"),
 		RIGHT_TAILED("Right-tailed hypothesis test"),
@@ -62,93 +127,23 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		this.result = HypothesisCheckResult.NOT_FINISHED;
     }
 
-	private void checkTwoTailed() {
-		int n = resultingTraces.size();
-		double p = probability;
-    	double mu = Math.round(n * p);
-    	double sigma = Math.sqrt(n * p * (1 - p));
-		DistributionFunction dsf = new DistributionFunction(mu, sigma);
-		double coverage = 0.0;
-
-		int range = 0;
-
-		for(int i = 0; i <= n; i++) {
-			if(1.0 - coverage < significance) {
-				range = i;
-				break;
-			}
-			coverage = dsf.value(mu + i + 0.5) - dsf.value(mu - i - 0.5);
-		}
-		if(numberSuccess >= mu - range && numberSuccess <= mu + range) {
-			this.result = HypothesisCheckResult.SUCCESS;
-		} else {
-			this.result = HypothesisCheckResult.FAIL;
-		}
-	}
-
-	private void checkLeftTailed() {
-		int n = resultingTraces.size();
-		double p = probability;
-		double mu = Math.round(n * p);
-		double sigma = Math.sqrt(n * p * (1 - p));
-		DistributionFunction dsf = new DistributionFunction(mu, sigma);
-		double coverage = 0.0;
-
-		int range = 0;
-
-		for (int i = 0; i <= n; i++) {
-			if (1.0 - coverage < significance) {
-				range = i;
-				break;
-			}
-			coverage = 1.0 - dsf.value(mu - i - 0.5);
-		}
-
-		if(numberSuccess >= mu - range && numberSuccess <= n) {
-			this.result = HypothesisCheckResult.SUCCESS;
-		} else {
-			this.result = HypothesisCheckResult.FAIL;
-		}
-	}
-
-	private void checkRightTailed() {
-		int n = resultingTraces.size();
-		double p = probability;
-		int mu = (int) Math.round(n * p);
-		double sigma = Math.sqrt(n * p * (1 - p));
-		DistributionFunction dsf = new DistributionFunction(mu, sigma);
-		double coverage = 0.0;
-
-		int range = 0;
-
-		for (int i = 0; i <= n; i++) {
-			if (1.0 - coverage < significance) {
-				range = i;
-				break;
-			}
-			coverage = dsf.value(mu + i + 0.5);
-		}
-
-		if(numberSuccess >= 0 && numberSuccess <= mu + range) {
-			this.result = HypothesisCheckResult.SUCCESS;
-		} else {
-			this.result = HypothesisCheckResult.FAIL;
-		}
-	}
-
     public void check() {
-    	switch (hypothesisCheckingType) {
-			case LEFT_TAILED:
-				checkLeftTailed();
+		Distribution distribution = new Distribution(resultingTraces.size(), probability);
+		double coverage = 0.0;
+		int range = 0;
+
+		for (int i = 0; i <= distribution.getN(); i++) {
+			if (1.0 - coverage < significance) {
+				range = i;
 				break;
-			case RIGHT_TAILED:
-				checkRightTailed();
-				break;
-			case TWO_TAILED:
-				checkTwoTailed();
-				break;
-			default:
-				break;
+			}
+			coverage = distribution.calculateCoverage(hypothesisCheckingType, i);
+		}
+
+		if(distribution.isSuccess(hypothesisCheckingType, numberSuccess, range)) {
+			this.result = HypothesisCheckResult.SUCCESS;
+		} else {
+			this.result = HypothesisCheckResult.FAIL;
 		}
     }
 
