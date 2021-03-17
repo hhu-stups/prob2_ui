@@ -54,12 +54,12 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
     }
 
     public void check() {
-        // What do we want to estimate? Probability? Integer expressions? Boolean expressions? What are the conditions for estimation? Other complicated types e.g. expressions might be hard
         switch (estimationType) {
             case MEAN:
                 checkMean();
                 break;
             default:
+                // TODO: New estimation types
                 break;
         }
 
