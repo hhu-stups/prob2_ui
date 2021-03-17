@@ -9,12 +9,16 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
 @Singleton
 public class Scheduler {
 
-    private Thread thread;
+    private final Timer timer;
 
-    private ChangeListener<Trace> listener;
+    private final ChangeListener<Trace> listener;
 
     private RealTimeSimulator realTimeSimulator;
 
@@ -27,6 +31,7 @@ public class Scheduler {
     @Inject
     public Scheduler(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
         super();
+        this.timer = new Timer();
         this.currentTrace = currentTrace;
         this.runningProperty = new SimpleBooleanProperty(false);
         this.executingOperationProperty = new SimpleBooleanProperty(false);
@@ -51,20 +56,21 @@ public class Scheduler {
         }
 		realTimeSimulator.setupBeforeSimulation(trace);
         currentTrace.addListener(listener);
-        thread = new Thread(() -> {
-            while(realTimeSimulator.isRunning()) {
-                try {
-                    Thread.sleep(realTimeSimulator.getDelay());
+        startSimulationLoop();
+    }
+
+    private void startSimulationLoop() {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(realTimeSimulator.isRunning()) {
                     realTimeSimulator.simulate();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
-                if(thread.isInterrupted()) {
-                    return;
+                if(runningProperty.get()) {
+                    startSimulationLoop();
                 }
             }
-        });
-        thread.start();
+        }, realTimeSimulator.getDelay());
     }
 
     public void setSimulator(RealTimeSimulator realTimeSimulator) {
@@ -72,9 +78,6 @@ public class Scheduler {
     }
 
     public void stop() {
-        if(thread != null) {
-            thread.interrupt();
-        }
         currentTrace.removeListener(listener);
         runningProperty.set(false);
     }
