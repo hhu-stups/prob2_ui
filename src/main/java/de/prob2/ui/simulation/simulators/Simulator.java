@@ -86,6 +86,7 @@ public abstract class Simulator {
                 currentTrace.removeListener(traceListener);
             }
         };
+        currentTrace.stateSpaceProperty().addListener((observable, from, to) -> cache.clear());
 	}
 
     public String chooseVariableValues(State currentState, Map<String, String> values) {
