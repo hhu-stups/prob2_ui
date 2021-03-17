@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 public class SimulatorCache {
 
+    private static final int MAXIMUM_CACHE_SIZE = 5000;
+
     private final Map<String, Map<String, String>> valuesCache = new HashMap<>();
 
     private final Map<String, Map<String, Map<String, List<Transition>>>> transitionCache = new HashMap<>();
@@ -21,7 +23,7 @@ public class SimulatorCache {
     private final Map<String, Set<String>> enabledOperationsCache = new HashMap<>();
 
     public String readValueWithCaching(State bState, String expression) {
-        if(valuesCache.keySet().size() > 5000) {
+        if(valuesCache.keySet().size() > MAXIMUM_CACHE_SIZE) {
             valuesCache.clear();
         }
         String stateID = bState.getId();
