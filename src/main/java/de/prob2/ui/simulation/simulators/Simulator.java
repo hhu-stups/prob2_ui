@@ -76,19 +76,27 @@ public abstract class Simulator {
         this.cache = new SimulatorCache();
         this.traceListener = (observable, from, to) -> {
             if(config != null && to != null && to.getStateSpace() != null) {
-                checkConfiguration(to.getStateSpace());
-				GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
-				currentTrace.getStateSpace().execute(cmd);
-				this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
-
-				cmd = new GetPreferenceCommand("MAX_OPERATIONS");
-				currentTrace.getStateSpace().execute(cmd);
-				this.maxTransitions = Integer.parseInt(cmd.getValue());
-                currentTrace.removeListener(traceListener);
+                setPreferences(to);
             }
         };
         currentTrace.stateSpaceProperty().addListener((observable, from, to) -> cache.clear());
 	}
+
+	private void setPreferences(Trace trace) {
+        SimulationConfigurationChecker simulationConfigurationChecker = new SimulationConfigurationChecker(trace.getStateSpace(), this.config);
+        simulationConfigurationChecker.check();
+        if(!simulationConfigurationChecker.getErrors().isEmpty()) {
+            throw new RuntimeException(simulationConfigurationChecker.getErrors().stream().map(Throwable::getMessage).collect(Collectors.joining("\n")));
+        }
+        GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
+        currentTrace.getStateSpace().execute(cmd);
+        this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
+
+        cmd = new GetPreferenceCommand("MAX_OPERATIONS");
+        currentTrace.getStateSpace().execute(cmd);
+        this.maxTransitions = Integer.parseInt(cmd.getValue());
+        currentTrace.removeListener(traceListener);
+    }
 
     public String chooseVariableValues(State currentState, Map<String, String> values) {
 	    if(values == null) {
@@ -115,8 +123,6 @@ public abstract class Simulator {
         }
         return values;
     }
-
-
 
     public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
         Object probability = activation.getProbabilisticVariables();
@@ -153,26 +159,11 @@ public abstract class Simulator {
     public void initSimulator(SimulationConfiguration config) throws IOException {
         this.config = config;
         if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
-            checkConfiguration(currentTrace.getStateSpace());
-            GetPreferenceCommand cmd = new GetPreferenceCommand("MAX_INITIALISATIONS");
-            currentTrace.getStateSpace().execute(cmd);
-            this.maxTransitionsBeforeInitialisation = Integer.parseInt(cmd.getValue());
-
-            cmd = new GetPreferenceCommand("MAX_OPERATIONS");
-            currentTrace.getStateSpace().execute(cmd);
-            this.maxTransitions = Integer.parseInt(cmd.getValue());
+            setPreferences(currentTrace.get());
         } else {
             currentTrace.addListener(traceListener);
         }
         resetSimulator();
-    }
-
-    protected void checkConfiguration(StateSpace stateSpace) throws RuntimeException {
-        SimulationConfigurationChecker simulationConfigurationChecker = new SimulationConfigurationChecker(stateSpace, this.config);
-        simulationConfigurationChecker.check();
-        if(!simulationConfigurationChecker.getErrors().isEmpty()) {
-            throw new RuntimeException(simulationConfigurationChecker.getErrors().stream().map(Throwable::getMessage).collect(Collectors.joining("\n")));
-        }
     }
 
     public void resetSimulator() {
@@ -198,9 +189,7 @@ public abstract class Simulator {
                     .map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
                     .forEach(activationConfiguration -> {
                         String opName = activationConfiguration.getOpName();
-                        if(!operationToActivations.containsKey(opName)) {
-                            operationToActivations.put(opName, new HashSet<>());
-                        }
+                        operationToActivations.putIfAbsent(opName, new HashSet<>());
                         operationToActivations.get(opName).add(activationConfiguration.getId());
                     });
 			activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
