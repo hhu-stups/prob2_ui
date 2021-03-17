@@ -179,16 +179,9 @@ public class SimulationItem {
         List<String> configurations = new ArrayList<>();
         for(String key : information.keySet()) {
             Object obj = information.get(key);
-            if(obj instanceof ReplayTrace) {
-                configurations.add(key + " : " + ((ReplayTrace) obj).getName());
-            } else {
-                configurations.add(key + " : " + obj.toString());
-            }
+            configurations.add(String.format("%s : %s", key, obj.toString()));
         }
-        if(!configurations.isEmpty()) {
-            return String.join(",\n", configurations);
-        }
-        return type.name();
+        return String.join(",\n", configurations);
     }
 
     public void setTraces(List<Trace> traces) {
