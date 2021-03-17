@@ -36,37 +36,45 @@ public class SimulationFileHandler {
         return activationConfigurations;
     }
 
+    private static ActivationChoiceConfiguration buildChoiceActivationConfiguration(JsonElement activationElement) {
+        JsonObject activationAsObject = activationElement.getAsJsonObject();
+        String id = activationAsObject.get("id").getAsString();
+        JsonObject chooseActivationAsObject = activationAsObject.getAsJsonObject("chooseActivation");
+        Map<String, String> activations = new HashMap<>();
+        for(String key : chooseActivationAsObject.keySet()) {
+            activations.put(key, chooseActivationAsObject.get(key).getAsString());
+        }
+        return new ActivationChoiceConfiguration(id, activations);
+    }
+
+    private static ActivationOperationConfiguration buildOperationConfiguration(JsonElement activationElement) {
+        JsonObject activationAsObject = activationElement.getAsJsonObject();
+        String id = activationAsObject.get("id").getAsString();
+        String opName = activationAsObject.get("execute").getAsString();
+
+        int priority;
+        if("$initialse_machine".equals(opName)) {
+            priority = 1;
+        } else if("$setup_constants".equals(opName) || activationAsObject.get("priority") == null) {
+            priority = 0;
+        } else {
+            priority = activationAsObject.get("priority").getAsInt();
+        }
+        List<String> activations = buildActivation(activationAsObject.get("activating"));
+
+        String after = activationAsObject.get("after") == null || activationAsObject.get("after").isJsonNull() ? "0" : activationAsObject.get("after").getAsString();
+        String additionalGuards = activationAsObject.get("additionalGuards") == null || activationAsObject.get("additionalGuards").isJsonNull() ? null : activationAsObject.get("additionalGuards").getAsString();
+        ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
+        Map<String, String> fixedVariables = buildParameters(activationAsObject.get("fixedVariables"));
+        Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
+        return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations);
+    }
+
     private static ActivationConfiguration buildActivationConfiguration(JsonElement activationElement) {
         if(!activationElement.getAsJsonObject().has("execute")) {
-            JsonObject activationAsObject = activationElement.getAsJsonObject();
-            String id = activationAsObject.get("id").getAsString();
-            JsonObject chooseActivationAsObject = activationAsObject.getAsJsonObject("chooseActivation");
-            Map<String, String> activations = new HashMap<>();
-            for(String key : chooseActivationAsObject.keySet()) {
-                activations.put(key, chooseActivationAsObject.get(key).getAsString());
-            }
-            return new ActivationChoiceConfiguration(id, activations);
+            return buildChoiceActivationConfiguration(activationElement);
         } else {
-            JsonObject activationAsObject = activationElement.getAsJsonObject();
-            String id = activationAsObject.get("id").getAsString();
-            String opName = activationAsObject.get("execute").getAsString();
-
-            int priority;
-            if("$initialse_machine".equals(opName)) {
-				priority = 1;
-			} else if("$setup_constants".equals(opName) || activationAsObject.get("priority") == null) {
-				priority = 0;
-			} else {
-            	priority = activationAsObject.get("priority").getAsInt();
-			}
-            List<String> activations = buildActivation(activationAsObject.get("activating"));
-
-            String after = activationAsObject.get("after") == null || activationAsObject.get("after").isJsonNull() ? "0" : activationAsObject.get("after").getAsString();
-            String additionalGuards = activationAsObject.get("additionalGuards") == null || activationAsObject.get("additionalGuards").isJsonNull() ? null : activationAsObject.get("additionalGuards").getAsString();
-            ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
-            Map<String, String> fixedVariables = buildParameters(activationAsObject.get("fixedVariables"));
-            Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
-            return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations);
+            return buildOperationConfiguration(activationElement);
         }
     }
 
