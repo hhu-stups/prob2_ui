@@ -55,9 +55,11 @@ public class SimulationConfigurationChecker {
 
 		if(probability == null) {
 			// Check whether given variables cover all non-deterministic variables and parameters of the operation
-			if (activation.getFixedVariables() != null && (!activation.getFixedVariables().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activation.getFixedVariables().keySet()))) {
-				errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
-			}
+
+			// TODO: OperationInfo also contains variables which are not non-deterministically assigned
+			//if (activation.getFixedVariables() != null && (!activation.getFixedVariables().keySet().containsAll(operationVariables) || !operationVariables.containsAll(activation.getFixedVariables().keySet()))) {
+			//	errors.add(new ConfigurationCheckingError(String.format("Given parameters for triggering operation %s do not cover whole operation", activatedOp)));
+			//}
 		} else if(probability instanceof String) {
 			if(!"uniform".equals(probability) && !"first".equals(probability)) {
 				errors.add(new ConfigurationCheckingError(String.format("Value %s for probability in activation configuration is not allowed", probability.toString())));
