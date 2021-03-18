@@ -278,14 +278,7 @@ public class SimulatorStage extends Stage {
 		btLoadConfiguration.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
 		btSimulate.disableProperty().bind(configurationPath.isNull().or(currentProject.currentMachineProperty().isNull()));
 		final BooleanProperty noSimulations = new SimpleBooleanProperty();
-		currentProject.currentMachineProperty().addListener((o, from, to) -> {
-			if (to != null) {
-				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
-			} else {
-				noSimulations.unbind();
-				noSimulations.set(true);
-			}
-		});
+
 		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(simulationItemHandler.runningProperty().or(noSimulations.or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
 		btCancel.disableProperty().bind(simulationItemHandler.runningProperty().not());
 		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
@@ -314,9 +307,14 @@ public class SimulatorStage extends Stage {
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			btManageDefaultSimulation.disableProperty().unbind();
 			btManageDefaultSimulation.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(configurationPath.isNull()));
+			configurationPath.set(null);
+			simulationDebugItems.getItems().clear();
 			if(to != null) {
+				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
 			} else {
+				noSimulations.unbind();
+				noSimulations.set(true);
 				simulationItems.getItems().clear();
 				simulationItems.itemsProperty().unbind();
 			}
@@ -334,11 +332,6 @@ public class SimulatorStage extends Stage {
 		simulationItems.setRowFactory(table -> new SimulationItemRow(this));
 
 		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			configurationPath.set(null);
-			simulationDebugItems.getItems().clear();
-			simulationDebugItems.refresh();
-		});
 	}
 
 
@@ -436,6 +429,7 @@ public class SimulatorStage extends Stage {
 			}
 		}
 		simulationDebugItems.setItems(observableList);
+		simulationDebugItems.refresh();
 	}
 
 	@FXML
