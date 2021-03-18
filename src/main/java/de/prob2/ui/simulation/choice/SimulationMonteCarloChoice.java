@@ -19,7 +19,7 @@ public class SimulationMonteCarloChoice extends GridPane {
 
     public static class SimulationStartingItem {
 
-        private SimulationMonteCarlo.StartingType startingType;
+        private final SimulationMonteCarlo.StartingType startingType;
 
         public SimulationStartingItem(@NamedArg("startingType") SimulationMonteCarlo.StartingType startingType) {
             this.startingType = startingType;
@@ -38,7 +38,7 @@ public class SimulationMonteCarloChoice extends GridPane {
 
     public static class SimulationEndingItem {
 
-        private SimulationMonteCarlo.EndingType endingType;
+        private final SimulationMonteCarlo.EndingType endingType;
 
         public SimulationEndingItem(@NamedArg("endingType") SimulationMonteCarlo.EndingType endingType) {
             this.endingType = endingType;
@@ -57,7 +57,7 @@ public class SimulationMonteCarloChoice extends GridPane {
 
     public static class SimulationPropertyItem {
 
-        private SimulationCheckingType checkingType;
+        private final SimulationCheckingType checkingType;
 
         public SimulationPropertyItem(@NamedArg("checkingType") SimulationCheckingType checkingType) {
             this.checkingType = checkingType;

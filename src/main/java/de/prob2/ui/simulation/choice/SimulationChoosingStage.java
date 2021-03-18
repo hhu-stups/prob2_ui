@@ -27,7 +27,7 @@ public class SimulationChoosingStage extends Stage {
 
 	public static class SimulationChoiceItem {
 
-		private SimulationType simulationType;
+		private final SimulationType simulationType;
 
 		public SimulationChoiceItem(@NamedArg("simulationType") SimulationType simulationType) {
 			this.simulationType = simulationType;
@@ -68,20 +68,15 @@ public class SimulationChoosingStage extends Stage {
 	@FXML
 	private ChoiceBox<SimulationChoiceItem> simulationChoice;
 
-	private final Injector injector;
-
 	private final ResourceBundle bundle;
 
 	private final CurrentProject currentProject;
 
 	private final SimulationItemHandler simulationItemHandler;
 
-	private Path path;
-
 	@Inject
-	public SimulationChoosingStage(final StageManager stageManager, final Injector injector, final ResourceBundle bundle, final CurrentProject currentProject,
+	public SimulationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject,
 								   final SimulationItemHandler simulationItemHandler) {
-		this.injector = injector;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.simulationItemHandler = simulationItemHandler;
@@ -202,7 +197,6 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	public void setPath(Path path) {
-		this.path = path;
 		simulationItemHandler.setPath(path);
 	}
 

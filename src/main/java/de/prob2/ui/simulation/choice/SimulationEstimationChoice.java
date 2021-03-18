@@ -19,7 +19,7 @@ public class SimulationEstimationChoice extends SimulationMonteCarloChoice {
 
     public static class SimulationEstimationChoiceItem {
 
-        private SimulationEstimator.EstimationType estimationType;
+        private final SimulationEstimator.EstimationType estimationType;
 
         public SimulationEstimationChoiceItem(@NamedArg("estimationType") SimulationEstimator.EstimationType estimationType) {
             this.estimationType = estimationType;

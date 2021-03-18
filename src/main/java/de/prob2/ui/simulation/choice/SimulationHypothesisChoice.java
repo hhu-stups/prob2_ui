@@ -19,7 +19,7 @@ public class SimulationHypothesisChoice extends SimulationMonteCarloChoice {
 
     public static class SimulationHypothesisChoiceItem {
 
-        private SimulationHypothesisChecker.HypothesisCheckingType checkingType;
+        private final SimulationHypothesisChecker.HypothesisCheckingType checkingType;
 
         public SimulationHypothesisChoiceItem(@NamedArg("checkingType") SimulationHypothesisChecker.HypothesisCheckingType checkingType) {
             this.checkingType = checkingType;

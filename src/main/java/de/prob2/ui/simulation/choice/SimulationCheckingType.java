@@ -7,7 +7,7 @@ public enum SimulationCheckingType {
     PREDICATE_EVENTUALLY("Predicate Eventually"),
     TIMING("Timing");
 
-    private String name;
+    private final String name;
 
     SimulationCheckingType(String name) {
         this.name = name;

@@ -6,7 +6,7 @@ public enum SimulationType {
     HYPOTHESIS_TEST("Hypothesis Test"),
     ESTIMATION("Estimation");
 
-    private String name;
+    private final String name;
 
     SimulationType(String name) {
         this.name = name;
