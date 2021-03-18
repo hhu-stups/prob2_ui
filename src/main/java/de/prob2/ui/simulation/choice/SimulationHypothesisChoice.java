@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @FXMLInjected
-public class SimulationHypothesisChoice extends SimulationMonteCarloChoice {
+public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoice {
 
     public static class SimulationHypothesisChoiceItem {
 
@@ -36,23 +36,6 @@ public class SimulationHypothesisChoice extends SimulationMonteCarloChoice {
 
     }
 
-    private final List<SimulationCheckingType> PREDICATE_TYPES = Arrays.asList(SimulationCheckingType.PREDICATE_INVARIANT, SimulationCheckingType.PREDICATE_FINAL, SimulationCheckingType.PREDICATE_EVENTUALLY);
-
-    @FXML
-    private Label lbMonteCarloTime;
-
-    @FXML
-    private TextField tfMonteCarloTime;
-
-    @FXML
-    private Label lbPredicate;
-
-    @FXML
-    private TextField tfPredicate;
-
-    @FXML
-    private ChoiceBox<SimulationPropertyItem> checkingChoice;
-
     @FXML
     private ChoiceBox<SimulationHypothesisChoiceItem> hypothesisCheckingChoice;
 
@@ -64,30 +47,7 @@ public class SimulationHypothesisChoice extends SimulationMonteCarloChoice {
 
     @Inject
     protected SimulationHypothesisChoice(final StageManager stageManager) {
-        super();
-        stageManager.loadFXML(this, "simulation_hypothesis_choice.fxml");
-    }
-
-    @FXML
-    protected void initialize() {
-        super.initialize();
-        checkingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-            this.getChildren().remove(lbMonteCarloTime);
-            this.getChildren().remove(tfMonteCarloTime);
-            this.getChildren().remove(lbPredicate);
-            this.getChildren().remove(tfPredicate);
-            if(to != null) {
-                if(to.getCheckingType() == SimulationCheckingType.TIMING) {
-                    this.add(lbMonteCarloTime, 1, 11);
-                    this.add(tfMonteCarloTime, 2, 11);
-                }
-                if(PREDICATE_TYPES.contains(to.getCheckingType())) {
-                    this.add(lbPredicate, 1, 7);
-                    this.add(tfPredicate, 2, 7);
-                }
-            }
-            choosingStage.sizeToScene();
-        });
+        super(stageManager, "simulation_hypothesis_choice.fxml");
     }
 
     public Map<String, Object> extractInformation() {
