@@ -10,6 +10,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -239,7 +240,8 @@ public class SimulatorStage extends Stage {
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
-						  final SimulationItemHandler simulationItemHandler, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+						  final SimulationItemHandler simulationItemHandler, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
+						  final StopActions stopActions) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -253,7 +255,8 @@ public class SimulatorStage extends Stage {
 		this.fileChooserManager = fileChooserManager;
         this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
         this.time = 0;
-        this.timer = new Timer();
+        this.timer = new Timer(true);
+        stopActions.add(this::cancelTimer);
 		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
 	}
 

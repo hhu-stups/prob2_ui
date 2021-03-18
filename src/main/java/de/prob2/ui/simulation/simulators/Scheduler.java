@@ -11,16 +11,15 @@ import javafx.beans.value.ChangeListener;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class Scheduler {
 
     private final ChangeListener<Trace> listener;
 
-    private final Timer timer;
-
     private RealTimeSimulator realTimeSimulator;
+
+    private Timer timer;
 
     private final CurrentTrace currentTrace;
 
@@ -38,7 +37,7 @@ public class Scheduler {
         this.listener = (observable, from, to) -> {
             if(to != null) {
                 if (!to.getCurrentState().isInitialised()) {
-                	realTimeSimulator.setupBeforeSimulation(to);
+                    realTimeSimulator.setupBeforeSimulation(to);
                 }
             }
         };
@@ -54,7 +53,7 @@ public class Scheduler {
             trace = new Trace(currentTrace.getStateSpace());
             currentTrace.set(trace);
         }
-		realTimeSimulator.setupBeforeSimulation(trace);
+        realTimeSimulator.setupBeforeSimulation(trace);
         currentTrace.addListener(listener);
         startSimulationLoop();
     }
@@ -63,12 +62,13 @@ public class Scheduler {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if(realTimeSimulator.isRunning()) {
+                if (realTimeSimulator.isRunning()) {
                     realTimeSimulator.simulate();
                 }
-                if(runningProperty.get()) {
+                if (runningProperty.get()) {
                     startSimulationLoop();
                 }
+
             }
         }, realTimeSimulator.getDelay());
     }
@@ -104,7 +104,9 @@ public class Scheduler {
     }
 
     public void stopTimer() {
+        stop();
         timer.purge();
+        timer = null;
     }
 
 }
