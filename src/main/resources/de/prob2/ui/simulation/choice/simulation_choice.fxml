@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.simulation.choice.SimulationChoiceItem?>
+<?import de.prob2.ui.simulation.choice.SimulationChoosingStage.SimulationChoiceItem?>
 <?import de.prob2.ui.simulation.choice.SimulationChoosingStage?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
@@ -40,9 +40,9 @@
 						<ChoiceBox fx:id="simulationChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SimulationChoiceItem simulationType="MONTE_CARLO_SIMULATION"/>
-									<SimulationChoiceItem simulationType="HYPOTHESIS_TEST"/>
-									<SimulationChoiceItem simulationType="ESTIMATION"/>
+									<SimulationChoosingStage.SimulationChoiceItem simulationType="MONTE_CARLO_SIMULATION"/>
+									<SimulationChoosingStage.SimulationChoiceItem simulationType="HYPOTHESIS_TEST"/>
+									<SimulationChoosingStage.SimulationChoiceItem simulationType="ESTIMATION"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

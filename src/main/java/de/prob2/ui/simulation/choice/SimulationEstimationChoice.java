@@ -2,6 +2,8 @@ package de.prob2.ui.simulation.choice;
 
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
+import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -14,6 +16,25 @@ import java.util.Map;
 
 @FXMLInjected
 public class SimulationEstimationChoice extends SimulationMonteCarloChoice {
+
+    public static class SimulationEstimationChoiceItem {
+
+        private SimulationEstimator.EstimationType estimationType;
+
+        public SimulationEstimationChoiceItem(@NamedArg("estimationType") SimulationEstimator.EstimationType estimationType) {
+            this.estimationType = estimationType;
+        }
+
+        @Override
+        public String toString() {
+            return estimationType.getName();
+        }
+
+        public SimulationEstimator.EstimationType getEstimationType() {
+            return estimationType;
+        }
+
+    }
 
     private final List<SimulationCheckingType> PREDICATE_TYPES = Arrays.asList(SimulationCheckingType.PREDICATE_INVARIANT, SimulationCheckingType.PREDICATE_FINAL, SimulationCheckingType.PREDICATE_EVENTUALLY);
 

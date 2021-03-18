@@ -6,6 +6,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
+import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -23,6 +24,26 @@ import java.util.ResourceBundle;
 
 
 public class SimulationChoosingStage extends Stage {
+
+	public static class SimulationChoiceItem {
+
+		private SimulationType simulationType;
+
+		public SimulationChoiceItem(@NamedArg("simulationType") SimulationType simulationType) {
+			this.simulationType = simulationType;
+		}
+
+		@Override
+		public String toString() {
+			return simulationType.getName();
+		}
+
+		public SimulationType getSimulationType() {
+			return simulationType;
+		}
+
+	}
+
 	@FXML
 	private Button btAdd;
 

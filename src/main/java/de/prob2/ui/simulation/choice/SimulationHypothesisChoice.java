@@ -2,6 +2,8 @@ package de.prob2.ui.simulation.choice;
 
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
+import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -14,6 +16,25 @@ import java.util.Map;
 
 @FXMLInjected
 public class SimulationHypothesisChoice extends SimulationMonteCarloChoice {
+
+    public static class SimulationHypothesisChoiceItem {
+
+        private SimulationHypothesisChecker.HypothesisCheckingType checkingType;
+
+        public SimulationHypothesisChoiceItem(@NamedArg("checkingType") SimulationHypothesisChecker.HypothesisCheckingType checkingType) {
+            this.checkingType = checkingType;
+        }
+
+        @Override
+        public String toString() {
+            return checkingType.getName();
+        }
+
+        public SimulationHypothesisChecker.HypothesisCheckingType getCheckingType() {
+            return checkingType;
+        }
+
+    }
 
     private final List<SimulationCheckingType> PREDICATE_TYPES = Arrays.asList(SimulationCheckingType.PREDICATE_INVARIANT, SimulationCheckingType.PREDICATE_FINAL, SimulationCheckingType.PREDICATE_EVENTUALLY);
 

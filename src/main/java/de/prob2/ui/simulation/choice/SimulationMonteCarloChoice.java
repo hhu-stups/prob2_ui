@@ -2,6 +2,8 @@ package de.prob2.ui.simulation.choice;
 
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
+import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -14,6 +16,63 @@ import java.util.Map;
 
 @FXMLInjected
 public class SimulationMonteCarloChoice extends GridPane {
+
+    public static class SimulationStartingItem {
+
+        private SimulationMonteCarlo.StartingType startingType;
+
+        public SimulationStartingItem(@NamedArg("startingType") SimulationMonteCarlo.StartingType startingType) {
+            this.startingType = startingType;
+        }
+
+        @Override
+        public String toString() {
+            return startingType.getName();
+        }
+
+        public SimulationMonteCarlo.StartingType getStartingType() {
+            return startingType;
+        }
+
+    }
+
+    public static class SimulationEndingItem {
+
+        private SimulationMonteCarlo.EndingType endingType;
+
+        public SimulationEndingItem(@NamedArg("endingType") SimulationMonteCarlo.EndingType endingType) {
+            this.endingType = endingType;
+        }
+
+        @Override
+        public String toString() {
+            return endingType.getName();
+        }
+
+        public SimulationMonteCarlo.EndingType getEndingType() {
+            return endingType;
+        }
+
+    }
+
+    public static class SimulationPropertyItem {
+
+        private SimulationCheckingType checkingType;
+
+        public SimulationPropertyItem(@NamedArg("checkingType") SimulationCheckingType checkingType) {
+            this.checkingType = checkingType;
+        }
+
+        @Override
+        public String toString() {
+            return checkingType.getName();
+        }
+
+        public SimulationCheckingType getCheckingType() {
+            return checkingType;
+        }
+
+    }
 
     protected SimulationChoosingStage choosingStage;
 

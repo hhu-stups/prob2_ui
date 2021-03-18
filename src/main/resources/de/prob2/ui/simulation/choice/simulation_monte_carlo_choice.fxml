@@ -7,9 +7,9 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
-<?import de.prob2.ui.simulation.choice.SimulationEndingItem?>
+<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationEndingItem?>
+<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationStartingItem?>
 
-<?import de.prob2.ui.simulation.choice.SimulationStartingItem?>
 <fx:root type="SimulationMonteCarloChoice" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<Label fx:id="lbStartAfter" text="%simulation.choice.startAfterSteps"/>
@@ -41,10 +41,10 @@
 	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="2" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
-				<SimulationStartingItem startingType="NO_CONDITION"/>
-				<SimulationStartingItem startingType="START_AFTER_STEPS"/>
-				<SimulationStartingItem startingType="STARTING_PREDICATE"/>
-				<SimulationStartingItem startingType="STARTING_TIME"/>
+				<SimulationMonteCarloChoice.SimulationStartingItem startingType="NO_CONDITION"/>
+				<SimulationMonteCarloChoice.SimulationStartingItem startingType="START_AFTER_STEPS"/>
+				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE"/>
+				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_TIME"/>
 			</FXCollections>
 		</items>
 	</ChoiceBox>
@@ -53,9 +53,9 @@
 	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="4" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
-				<SimulationEndingItem endingType="NUMBER_STEPS"/>
-				<SimulationEndingItem endingType="ENDING_PREDICATE"/>
-				<SimulationEndingItem endingType="ENDING_TIME"/>
+				<SimulationMonteCarloChoice.SimulationEndingItem endingType="NUMBER_STEPS"/>
+				<SimulationMonteCarloChoice.SimulationEndingItem endingType="ENDING_PREDICATE"/>
+				<SimulationMonteCarloChoice.SimulationEndingItem endingType="ENDING_TIME"/>
 			</FXCollections>
 		</items>
 	</ChoiceBox>
