@@ -86,7 +86,7 @@ public class SimulatorStage extends Stage {
 
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
 
-		private SimulatorStage simulatorStage;
+		private final SimulatorStage simulatorStage;
 
 		private SimulationItemRow(SimulatorStage simulatorStage) {
 			super();
@@ -235,7 +235,7 @@ public class SimulatorStage extends Stage {
 
 	private Timer timer;
 
-	private ObjectProperty<RealTimeSimulator> lastSimulator;
+	private final ObjectProperty<RealTimeSimulator> lastSimulator;
 
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
@@ -402,29 +402,37 @@ public class SimulatorStage extends Stage {
 		realTimeSimulator.resetSimulator();
 	}
 
+	private SimulationOperationDebugItem createOperationDebugItem(ActivationConfiguration activationConfig) {
+		ActivationOperationConfiguration opConfig = (ActivationOperationConfiguration) activationConfig;
+		String id = opConfig.getId();
+		String opName = opConfig.getOpName();
+		String time = opConfig.getAfter();
+		String priority = String.valueOf(opConfig.getPriority());
+		List<String> activations = opConfig.getActivating();
+		ActivationOperationConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
+		String additionalGuards = opConfig.getAdditionalGuards();
+		Map<String, String> fixedVariables = opConfig.getFixedVariables();
+		Object probabilisticVariables = opConfig.getProbabilisticVariables();
+		return new SimulationOperationDebugItem(id, opName, time, priority, activations, activationKind,
+				additionalGuards, fixedVariables, probabilisticVariables);
+	}
+
+	private SimulationChoiceDebugItem createChoiceDebugItem(ActivationConfiguration activationConfig) {
+		ActivationChoiceConfiguration choiceConfig = (ActivationChoiceConfiguration) activationConfig;
+		String id = choiceConfig.getId();
+		Map<String, String> activations = choiceConfig.getActivations();
+		return new SimulationChoiceDebugItem(id, activations);
+	}
+
     private void loadSimulationItems() {
 		SimulationConfiguration config = realTimeSimulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 
 		for(ActivationConfiguration activationConfig : config.getActivationConfigurations()) {
 			if(activationConfig instanceof ActivationOperationConfiguration) {
-				ActivationOperationConfiguration opConfig = (ActivationOperationConfiguration) activationConfig;
-				String id = opConfig.getId();
-				String opName = opConfig.getOpName();
-				String time = opConfig.getAfter();
-				String priority = String.valueOf(opConfig.getPriority());
-				List<String> activations = opConfig.getActivating();
-				ActivationOperationConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
-				String additionalGuards = opConfig.getAdditionalGuards();
-				Map<String, String> fixedVariables = opConfig.getFixedVariables();
-				Object probabilisticVariables = opConfig.getProbabilisticVariables();
-				observableList.add(new SimulationOperationDebugItem(id, opName, time, priority, activations, activationKind,
-									additionalGuards, fixedVariables, probabilisticVariables));
+				observableList.add(createOperationDebugItem(activationConfig));
 			} else {
-				ActivationChoiceConfiguration choiceConfig = (ActivationChoiceConfiguration) activationConfig;
-				String id = choiceConfig.getId();
-				Map<String, String> activations = choiceConfig.getActivations();
-				observableList.add(new SimulationChoiceDebugItem(id, activations));
+				observableList.add(createChoiceDebugItem(activationConfig));
 			}
 		}
 		simulationDebugItems.setItems(observableList);
@@ -441,7 +449,19 @@ public class SimulatorStage extends Stage {
 		cancelTimer();
 		lastSimulator.set(realTimeSimulator);
 		List<Boolean> firstStart = new ArrayList<>(Collections.singletonList(true));
-		TimerTask task = new TimerTask() {
+		realTimeSimulator.timeProperty().addListener((observable, from, to) -> {
+			if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
+				time = to.intValue();
+				if(time == 0) {
+					Platform.runLater(() -> lbTime.setText(""));
+				} else {
+					BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
+					Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+				}
+			}
+		});
+		this.timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
 				if(firstStart.get(0)) {
@@ -455,20 +475,7 @@ public class SimulatorStage extends Stage {
 					}
 				}
 			}
-		};
-		realTimeSimulator.timeProperty().addListener((observable, from, to) -> {
-			if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
-				time = to.intValue();
-				if(time == 0) {
-					Platform.runLater(() -> lbTime.setText(""));
-				} else {
-					BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
-					Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
-				}
-			}
-		});
-		this.timer = new Timer();
-		timer.scheduleAtFixedRate(task, 100, 100);
+		}, 100, 100);
 	}
 
 	private void cancelTimer() {
