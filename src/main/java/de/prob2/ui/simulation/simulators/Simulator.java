@@ -162,18 +162,18 @@ public abstract class Simulator {
         return newTrace;
     }
 
+    private void activateBeforeInitialisation(Trace trace, String operation) {
+        if(configurationToActivation.containsKey(operation)) {
+            ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get(operation);
+            simulationEventHandler.activateOperation(trace.getCurrentState(), setupConfiguration, new ArrayList<>(), "1=1");
+        }
+    }
+
     public void setupBeforeSimulation(Trace trace) {
-        State currentState = trace.getCurrentState();
         updateStartingInformation(trace);
-        if(!currentState.isInitialised()) {
-        	if(configurationToActivation.containsKey("$setup_constants")) {
-				ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$setup_constants");
-                simulationEventHandler.activateOperation(trace.getCurrentState(), setupConfiguration, new ArrayList<>(), "1=1");
-			}
-			if(configurationToActivation.containsKey("$initialise_machine")) {
-				ActivationOperationConfiguration initConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get("$initialise_machine");
-                simulationEventHandler.activateOperation(trace.getCurrentState(), initConfiguration, new ArrayList<>(), "1=1");
-			}
+        if(!trace.getCurrentState().isInitialised()) {
+            activateBeforeInitialisation(trace, "$setup_constants");
+            activateBeforeInitialisation(trace, "$initialise_machine");
         }
     }
 
