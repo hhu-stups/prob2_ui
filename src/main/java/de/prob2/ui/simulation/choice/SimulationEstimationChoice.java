@@ -52,20 +52,9 @@ public class SimulationEstimationChoice extends SimulationAbstractMonteCarloChoi
 
     public Map<String, Object> extractInformation() {
         Map<String, Object> information = super.extractInformation();
-        SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
-
-        information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
         information.put("ESTIMATION_TYPE", estimationChoice.getSelectionModel().getSelectedItem().getEstimationType());
         information.put("DESIRED_VALUE", Double.parseDouble(tfDesiredValue.getText()));
         information.put("EPSILON", Double.parseDouble(tfEpsilon.getText()));
-
-        if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
-            information.put("PREDICATE", tfPredicate.getText());
-        }
-
-        if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
-            information.put("TIME", Integer.parseInt(tfMonteCarloTime.getText()));
-        }
         return information;
     }
 

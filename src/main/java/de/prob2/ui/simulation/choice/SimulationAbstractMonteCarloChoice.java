@@ -61,4 +61,18 @@ public class SimulationAbstractMonteCarloChoice extends SimulationMonteCarloChoi
         });
     }
 
+    @Override
+    public Map<String, Object> extractInformation() {
+        Map<String, Object> information = super.extractInformation();
+        SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
+        information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
+        if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
+            information.put("PREDICATE", tfPredicate.getText());
+        }
+
+        if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
+            information.put("TIME", Integer.parseInt(tfMonteCarloTime.getText()));
+        }
+        return information;
+    }
 }
