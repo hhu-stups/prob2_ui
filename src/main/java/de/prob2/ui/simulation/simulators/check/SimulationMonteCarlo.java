@@ -113,7 +113,7 @@ public class SimulationMonteCarlo extends Simulator {
 		} else if(additionalInformation.containsKey("ENDING_PREDICATE")) {
 			String predicate = (String) additionalInformation.get("ENDING_PREDICATE");
 			State state = trace.getCurrentState();
-			String evalResult = cache.readValueWithCaching(state, predicate);
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate);
 			return "TRUE".equals(evalResult);
 		} else if(additionalInformation.containsKey("ENDING_TIME")) {
 			int endingTime = (int) additionalInformation.get("ENDING_TIME");
@@ -135,7 +135,7 @@ public class SimulationMonteCarlo extends Simulator {
 		} else if(additionalInformation.containsKey("STARTING_PREDICATE")) {
 			String predicate = (String) additionalInformation.get("STARTING_PREDICATE");
 			State state = trace.getCurrentState();
-			String evalResult = cache.readValueWithCaching(state, predicate);
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate);
 			if("TRUE".equals(evalResult)) {
 				setStartingInformation();
 			}
@@ -205,7 +205,7 @@ public class SimulationMonteCarlo extends Simulator {
 			operationExecutionsTrace.computeIfPresent(opName, (key, val) -> val + 1);
 
 			// update enabled operations
-			cache.readEnabledOperationsWithCaching(transition.getSource())
+			simulationEventHandler.getCache().readEnabledOperationsWithCaching(transition.getSource())
 					.forEach(enabledOp -> {
 						operationEnablingsTrace.putIfAbsent(enabledOp, 0);
 						operationEnablingsTrace.computeIfPresent(enabledOp, (key, val) -> val + 1);

@@ -66,7 +66,7 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
             Transition transition = trace.getTransitionList().get(i);
             State destination = transition.getDestination();
             if(destination.isInitialised()) {
-                String evalResult = cache.readValueWithCaching(destination, invariant);
+                String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, invariant);
                 if (i >= startAtStep && "FALSE".equals(evalResult)) {
                     invariantOk = false;
                     break;
@@ -85,7 +85,7 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
         Transition transition = trace.getTransitionList().get(size - 1);
         State destination = transition.getDestination();
         if(destination.isInitialised()) {
-            String evalResult = cache.readValueWithCaching(destination, finalPredicate);
+            String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, finalPredicate);
             if ("FALSE".equals(evalResult)) {
                 predicateOk = false;
             }
@@ -102,7 +102,7 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
             Transition transition = trace.getTransitionList().get(i);
             State destination = transition.getDestination();
             if(destination.isInitialised()) {
-                String evalResult = cache.readValueWithCaching(destination, predicate);
+                String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, predicate);
                 if (i >= startAtStep && "TRUE".equals(evalResult)) {
                     predicateOk = true;
                     break;
