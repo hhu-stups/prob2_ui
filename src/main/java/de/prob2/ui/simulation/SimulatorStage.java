@@ -14,6 +14,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.DefaultPathHandler;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
@@ -237,11 +238,13 @@ public class SimulatorStage extends Stage {
 
 	private final ObjectProperty<RealTimeSimulator> lastSimulator;
 
+	private final DefaultPathHandler defaultPathHandler;
+
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
 						  final SimulationItemHandler simulationItemHandler, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
-						  final StopActions stopActions) {
+						  final StopActions stopActions, final DefaultPathHandler defaultPathHandler) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -250,6 +253,8 @@ public class SimulatorStage extends Stage {
 	    this.realTimeSimulator = realTimeSimulator;
 	    this.machineLoader = machineLoader;
 	    this.simulationItemHandler = simulationItemHandler;
+	    this.defaultPathHandler = defaultPathHandler;
+		defaultPathHandler.setSimulatorStage(this);
 	    this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
@@ -500,50 +505,10 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	public void manageDefaultSimulation() {
-		Machine machine = currentProject.getCurrentMachine();
-		List<ButtonType> buttons = new ArrayList<>();
-
-		ButtonType loadButton = new ButtonType(bundle.getString("simulation.defaultSimulation.load"));
-		ButtonType setButton = new ButtonType(bundle.getString("simulation.defaultSimulation.set"));
-		ButtonType resetButton = new ButtonType(bundle.getString("simulation.defaultSimulation.reset"));
-
-		Alert alert;
-		if(machine.simulationProperty().isNotNull().get()) {
-			boolean simulationPathNotEqualsMachinePath = !currentProject.getLocation().relativize(configurationPath.get()).equals(machine.getSimulation());
-			if(configurationPath.get() != null && simulationPathNotEqualsMachinePath) {
-				buttons.add(loadButton);
-				buttons.add(setButton);
-			}
-			buttons.add(resetButton);
-			ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
-			buttons.add(buttonTypeCancel);
-			alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "simulation.defaultSimulation.header", "simulation.defaultSimulation.text", machine.simulationProperty().get());
-		} else {
-			if(configurationPath != null) {
-				buttons.add(setButton);
-			}
-			ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
-			buttons.add(buttonTypeCancel);
-			alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "simulation.defaultSimulation.header", "simulation.noDefaultSimulation.text");
-		}
-
-		alert.initOwner(this);
-
-		Optional<ButtonType> result = alert.showAndWait();
-		if(result.isPresent()) {
-			if (result.get() == loadButton) {
-				loadDefaultSimulation();
-			} else if (result.get() == setButton) {
-				setDefaultSimulation();
-			} else if (result.get() == resetButton) {
-				resetDefaultSimulation();
-			} else {
-				alert.close();
-			}
-		}
+		defaultPathHandler.manageDefault(DefaultPathHandler.DefaultKind.SIMB);
 	}
 
-	private void loadSimulationFromMachine(Machine machine) {
+	public void loadSimulationFromMachine(Machine machine) {
 		configurationPath.set(null);
 		if(machine != null) {
 			Path simulation = machine.getSimulation();
@@ -558,19 +523,7 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
-	private void loadDefaultSimulation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		loadSimulationFromMachine(currentMachine);
+	public ObjectProperty<Path> getConfigurationPath() {
+		return configurationPath;
 	}
-
-	private void setDefaultSimulation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		currentMachine.setSimulation(currentProject.getLocation().relativize(configurationPath.get()));
-	}
-
-	private void resetDefaultSimulation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		currentMachine.setSimulation(null);
-	}
-
 }

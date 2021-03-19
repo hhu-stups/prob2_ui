@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class SimulationEventHandler {
 
-    ///protected Random random = new Random(System.nanoTime());
+    ///private Random random = new Random(System.nanoTime());
 
     //Set fixed seed to reproduce results in paper
     private final Random random = new Random(1000);
@@ -93,7 +93,7 @@ public class SimulationEventHandler {
         return values;
     }
 
-    protected String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
+    private String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
         String newExpression;
         if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
             newExpression = expression;
@@ -147,7 +147,7 @@ public class SimulationEventHandler {
         return null;
     }
 
-    protected void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
+    private void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
         int insertionIndex = 0;
         while(insertionIndex < activationsForOperation.size() &&
                 activation.getTime() >= activationsForOperation.get(insertionIndex).getTime()) {
@@ -156,7 +156,7 @@ public class SimulationEventHandler {
         activationsForOperation.add(insertionIndex, activation);
     }
 
-    protected void activateSingleOperations(String id, String opName, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
+    private void activateSingleOperations(String id, String opName, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
         Set<String> activationsForOperation = simulator.getOperationToActivations().get(opName);
         int evaluatedTime = activation.getTime();
 

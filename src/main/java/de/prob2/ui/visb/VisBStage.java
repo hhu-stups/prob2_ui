@@ -9,6 +9,7 @@ import de.prob2.ui.internal.MustacheTemplateManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.DefaultPathHandler;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceSelectionView;
 import de.prob2.ui.simulation.SimulatorStage;
@@ -69,6 +70,7 @@ public class VisBStage extends Stage {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final DefaultPathHandler defaultPathHandler;
 	private boolean connectorSet = false;
 	private final FileChooserManager fileChooserManager;
 	private final ObjectProperty<Path> visBPath;
@@ -122,7 +124,8 @@ public class VisBStage extends Stage {
 	 */
 	@Inject
 	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
-					 final CurrentTrace currentTrace, final ResourceBundle bundle, final FileChooserManager fileChooserManager) {
+					 final CurrentTrace currentTrace, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
+					 final DefaultPathHandler defaultPathHandler) {
 		super();
 		this.injector = injector;
 		this.bundle = bundle;
@@ -130,6 +133,8 @@ public class VisBStage extends Stage {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.fileChooserManager = fileChooserManager;
+		this.defaultPathHandler = defaultPathHandler;
+		defaultPathHandler.setVisBStage(this);
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
 	}
@@ -192,7 +197,7 @@ public class VisBStage extends Stage {
 		}
 	}
 
-	private void loadVisBFileFromMachine(Machine machine) {
+	public void loadVisBFileFromMachine(Machine machine) {
 		clear();
 		visBPath.set(null);
 		if(machine != null) {
@@ -318,21 +323,6 @@ public class VisBStage extends Stage {
 		information.setText(text);
 	}
 
-	private void loadDefaultVisualisation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		loadVisBFileFromMachine(currentMachine);
-	}
-
-	private void setDefaultVisualisation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		currentMachine.setVisBVisualisation(currentProject.getLocation().relativize(visBPath.get()));
-	}
-
-	private void resetDefaultVisualisation() {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		currentMachine.setVisBVisualisation(null);
-	}
-
 	/**
 	 * On click function for the button and file menu item
 	 */
@@ -443,49 +433,12 @@ public class VisBStage extends Stage {
 
 	@FXML
 	public void manageDefaultVisualisation() {
-		Machine machine = currentProject.getCurrentMachine();
-		List<ButtonType> buttons = new ArrayList<>();
-
-		ButtonType loadButton = new ButtonType(bundle.getString("visb.defaultVisualisation.load"));
-		ButtonType setButton = new ButtonType(bundle.getString("visb.defaultVisualisation.set"));
-		ButtonType resetButton = new ButtonType(bundle.getString("visb.defaultVisualisation.reset"));
-
-		Alert alert;
-		if(machine.visBVisualizationProperty().isNotNull().get()) {
-			boolean visBPathNotEqualsMachinePath = !currentProject.getLocation().relativize(visBPath.get()).equals(machine.getVisBVisualisation());
-			if(visBPath.get() != null && visBPathNotEqualsMachinePath) {
-				buttons.add(loadButton);
-				buttons.add(setButton);
-			}
-			buttons.add(resetButton);
-			ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
-			buttons.add(buttonTypeCancel);
-			alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "visb.defaultVisualisation.header", "visb.defaultVisualisation.text", machine.visBVisualizationProperty().get());
-		} else {
-			if(visBPath != null) {
-				buttons.add(setButton);
-			}
-			ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
-			buttons.add(buttonTypeCancel);
-			alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, "visb.defaultVisualisation.header", "visb.noDefaultVisualisation.text");
-		}
-
-		alert.initOwner(this);
-
-		Optional<ButtonType> result = alert.showAndWait();
-		if(result.isPresent()) {
-			if (result.get() == loadButton) {
-				loadDefaultVisualisation();
-			} else if (result.get() == setButton) {
-				setDefaultVisualisation();
-			} else if (result.get() == resetButton) {
-				resetDefaultVisualisation();
-			} else {
-			   alert.close();
-			}
-		}
+		defaultPathHandler.manageDefault(DefaultPathHandler.DefaultKind.VISB);
 	}
 
+	public ObjectProperty<Path> getVisBPath() {
+		return visBPath;
+	}
 }
 
 
