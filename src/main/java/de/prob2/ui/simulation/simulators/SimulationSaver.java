@@ -75,13 +75,12 @@ public class SimulationSaver {
 
     public void saveConfiguration(Trace trace, List<Integer> timestamps) throws IOException {
         final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
+        fileChooser.setTitle(bundle.getString("simulation.tracereplay.fileChooser.saveTimedTrace.title"));
         fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + SIMULATION_EXTENSION);
         fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Simulation", SIMULATION_EXTENSION));
         final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
         if (path != null) {
-            SimulationConfiguration configuration = simulationCreator.createConfiguration(trace, timestamps, true);
-            this.jsonManager.writeToFile(path, configuration);
+            saveConfiguration(trace, timestamps, path);
         }
     }
 
@@ -96,8 +95,8 @@ public class SimulationSaver {
         List<List<Integer>> timestamps = item.getTimestamps();
 
         final DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"));
-        final Path path = this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+        directoryChooser.setTitle(bundle.getString("simulation.tracereplay.fileChooser.saveTimedPaths.title"));
+        final Path path = this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
         if (path == null) {
             return;
         }
@@ -106,7 +105,7 @@ public class SimulationSaver {
             try (final Stream<Path> children = Files.list(path)) {
                 if (children.anyMatch(p -> p.getFileName().toString().startsWith(SIMULATION_TRACE_PREFIX))) {
                     // Directory already contains test case trace - ask if the user really wants to save here.
-                    final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
+                    final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "simulation.save.directoryAlreadyContainsSimulations", path).showAndWait();
                     if (!selected.isPresent() || selected.get() != ButtonType.YES) {
                         return;
                     }
@@ -122,8 +121,7 @@ public class SimulationSaver {
                 this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath);
             }
         } catch (IOException e) {
-            stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
-            return;
+            stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();
         }
     }
 
