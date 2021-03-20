@@ -3,42 +3,29 @@ package de.prob2.ui.animation.tracereplay;
 import com.google.common.io.Files;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.check.tracereplay.TraceLoaderSaver;
-import de.prob.check.tracereplay.check.ReplayOptions;
+import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.check.TraceChecker;
 import de.prob.check.tracereplay.check.TraceModifier;
-import de.prob.check.tracereplay.check.exceptions.DeltaCalculationException;
-import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
-import de.prob.check.tracereplay.json.TraceManager;
+import de.prob.check.tracereplay.check.exploration.ReplayOptions;
+import de.prob.check.tracereplay.check.renamig.DeltaCalculationException;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.scripting.ClassicalBFactory;
-import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelTranslationError;
-import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.application.Platform;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
@@ -81,7 +68,7 @@ public class TraceModificationChecker {
 		this.stateSpace = stateSpace;
 	}
 
-	private TraceChecker createSimplerChecker(StateSpace stateSpace, Path newPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException {
+	private TraceChecker createSimplerChecker(StateSpace stateSpace, Path newPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException, DeltaCalculationException {
 		return new TraceChecker(persistentTrace.getTransitionList(),
 				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
 				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
@@ -94,7 +81,8 @@ public class TraceModificationChecker {
 				progressMemory);
 	}
 
-	private TraceChecker createComplexChecker(StateSpace stateSpace, Path newPath, Path oldPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, PrologTermNotDefinedException, DeltaCalculationException {
+
+	private TraceChecker createComplexChecker(StateSpace stateSpace, Path newPath, Path oldPath, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException {
 		return new TraceChecker(persistentTrace.getTransitionList(),
 				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
 				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
@@ -203,7 +191,9 @@ public class TraceModificationChecker {
 			}else if(traceModifier.tracingFoundResult() && !traceModifier.isDirty()){
 				result.add(traceJsonFilePath);
 			}
-			else if(!traceModifier.tracingFoundResult()) {
+			else if(!traceModifier.tracingFoundResult() && traceModifier.thereAreIncompleteTraces() && traceModifier.ungracefulTraceWithMinLength(3).isEmpty()) {
+				result.addAll(traceReplayedUngracefully(traceModifier.ungracefulTraceWithMinLength(3)));
+			} else{
 				result.addAll(traceNotReplayable());
 			}
 
@@ -215,11 +205,28 @@ public class TraceModificationChecker {
 	}
 
 
+	private List<Path> saveTraces(List<PersistentTrace> persistentTraces) throws IOException {
+
+		List<Path> results = new ArrayList<>();
+
+		for(PersistentTrace persistentTrace : persistentTraces) {
+			String newMachineName = currentProject.getCurrentMachine().getName();
+			results.add(save("_not_fully_replayable_for_", persistentTrace));
+
+		}
+		return results;
+	}
+
 	private Path saveNewTrace(PersistentTrace persistentTrace) throws IOException {
+		return save( "_edited_for_", persistentTrace);
+	}
+
+	private Path save(String filenameModification, PersistentTrace persistentTrace) throws IOException {
+		String newMachineName = currentProject.getCurrentMachine().getName();
 
 		String filename = Files.getNameWithoutExtension(traceJsonFilePath.toString());
-		String newMachineName = currentProject.getCurrentMachine().getName();
-		String modified = filename + "_edited_for_" + newMachineName+"." + Files.getFileExtension(traceJsonFilePath.toString());
+
+		String modified = filename +  filenameModification + newMachineName+"." + Files.getFileExtension(traceJsonFilePath.toString());
 
 		Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
 
@@ -251,6 +258,21 @@ public class TraceModificationChecker {
 			throw new FileNotFoundException();
 		}
 
+	}
+
+
+	private List<Path> traceReplayedUngracefully(List<List<PersistentTransition>> persistentTraces) throws IOException {
+		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, resourceBundle.getString("traceModification.alert.traceReplayedUngracefully") , ButtonType.YES, ButtonType.NO);
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+		alert.setTitle("Trace refactoring could not complete");
+
+		Optional<ButtonType> dialogResult = alert.showAndWait();
+		if (dialogResult.get() == ButtonType.YES) {
+			List<PersistentTrace> toSave = persistentTraces.stream().map(persistentTrace::setTrace).collect(Collectors.toList());
+			return saveTraces(toSave);
+		}else{
+			return emptyList();
+		}
 	}
 
 	private List<Path> traceNotReplayable(){

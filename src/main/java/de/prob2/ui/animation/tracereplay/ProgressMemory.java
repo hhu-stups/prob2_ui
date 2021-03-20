@@ -1,7 +1,7 @@
 package de.prob2.ui.animation.tracereplay;
 
 import com.google.inject.Injector;
-import de.prob.check.tracereplay.check.ProgressMemoryInterface;
+import de.prob.check.tracereplay.check.ui.ProgressMemoryInterface;
 import de.prob2.ui.internal.StageManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

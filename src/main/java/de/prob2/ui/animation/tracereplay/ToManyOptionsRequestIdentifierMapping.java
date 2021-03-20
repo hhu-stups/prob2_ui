@@ -1,9 +1,8 @@
 package de.prob2.ui.animation.tracereplay;
 
 import com.google.inject.Injector;
-import de.prob.check.tracereplay.check.TraceExplorer;
-import de.prob.check.tracereplay.check.exceptions.ToManyOptionsIdentifierMapping;
-import de.prob.statespace.OperationInfo;
+import de.prob.check.tracereplay.check.exploration.TraceExplorer;
+import de.prob.check.tracereplay.check.ui.ToManyOptionsIdentifierMapping;
 import de.prob2.ui.internal.StageManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;

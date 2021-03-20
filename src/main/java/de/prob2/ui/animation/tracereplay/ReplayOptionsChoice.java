@@ -1,6 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
-import de.prob.check.tracereplay.check.ReplayOptions;
+import de.prob.check.tracereplay.check.exploration.ReplayOptions;
 import de.prob.statespace.OperationInfo;
 import de.prob2.ui.internal.StageManager;
 import javafx.collections.ObservableList;

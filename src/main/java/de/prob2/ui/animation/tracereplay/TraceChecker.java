@@ -9,7 +9,6 @@ import de.prob.check.tracereplay.ITraceChecker;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.TraceReplay;
-import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.formula.PredicateBuilder;
 import de.prob.scripting.ModelTranslationError;
