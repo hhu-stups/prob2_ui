@@ -60,8 +60,7 @@ final class RegexSyntaxHighlighting {
 		syntaxClassesForXTL.put("[A-Z][_a-zA-Z0-9]*", "editor_xtl_variable");
 		syntaxClassesForXTL.put("[_a-z][_a-zA-Z0-9]*", "editor_xtl_functor");
 		syntaxClassesForXTL.put(":-|!|-->|;|\\.", "editor_assignments");
-		//The + in (.)+, (\n)+ and (\r)+ avoids possible StackOverflowError
-		syntaxClassesForXTL.put("(%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
+		syntaxClassesForXTL.put("(%(.)*|/\\*([^*]|\\*+[^*/])*\\*+/)", "editor_comment");
 		syntaxClassesForXTL.put("( |\t|\r|\n)+", "editor_ignored");
 
 		//TLA Regex
@@ -69,7 +68,7 @@ final class RegexSyntaxHighlighting {
 		syntaxClassesForTLA.put("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLES|VARIABLE|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)", "editor_keyword");
 		syntaxClassesForTLA.put("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)", "editor_ctrlkeyword");
 		syntaxClassesForTLA.put("(Next|Init|Spec|Inv)", "editor_types");
-		syntaxClassesForTLA.put("(\\\\\\*[^\n\r](\n|\r))|(\\(\\*(.+|\n+|\r+)*\\*\\))", "editor_comment");
+		syntaxClassesForTLA.put("(\\\\\\*[^\n\r](\n|\r))|(\\(\\*([^*]|\\*+[^*)])*\\*+\\))", "editor_comment");
 		syntaxClassesForTLA.put("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|/|Int|Nat", "editor_arithmetic");
 		syntaxClassesForTLA.put("<=>|=>|<<|>>|!|#|/=|~|<>|->|->|~\\\\|\"|\\[\\]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\", "editor_logical");
 		syntaxClassesForTLA.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
@@ -84,7 +83,7 @@ final class RegexSyntaxHighlighting {
 		syntaxClassesForCSP.put("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|\\!=|>|<|<=|>=|=<|&&|\\|\\||Int|Bool", "editor_logical");
 		syntaxClassesForCSP.put("external|extensions|productions|Proc", "editor_unsupported");
 		syntaxClassesForCSP.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-		syntaxClassesForCSP.put("(\\{-(.+|\n+|\r+)*-\\})|(--(.*))", "editor_comment");
+		syntaxClassesForCSP.put("(\\{-([^-]|-+[^\\-\\}])*-+\\})|(--(.*))", "editor_comment");
 		syntaxClassesForCSP.put("( |\t|\r|\n)+", "editor_ignored");
 
 		//Alloy Regex
@@ -92,7 +91,7 @@ final class RegexSyntaxHighlighting {
 		syntaxClassesForAlloy.put("module|sig|fact|extends|run|abstract|open|fun|pred|check|assert|plus|minus|mul|div|rem|sum", "editor_keyword");
 		syntaxClassesForAlloy.put("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|\\~|->|&|\\+|-|=|\\#", "editor_types");
 		syntaxClassesForAlloy.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-		syntaxClassesForAlloy.put("(//[^\n\r]*|/\\*((.)+|(\n)+|(\r)+)*\\*/)", "editor_comment");
+		syntaxClassesForAlloy.put("(//[^\n\r]*|/\\*([^*]|\\*+[^*/])*\\*+/)", "editor_comment");
 
 		//Z Regex
 		final Map<String, String> syntaxClassesForZ = new LinkedHashMap<>();
@@ -102,7 +101,7 @@ final class RegexSyntaxHighlighting {
 		syntaxClassesForZ.put("(\\\\(where|also|Delta))|(\\\\(begin|end)\\{(schema|zed|axdef)\\})", "editor_keyword");
 		syntaxClassesForZ.put("::=|=|\\\\(IF|THEN|ELSE|LET|defs)", "editor_assignments");
 		syntaxClassesForZ.put("(\\\\|[_a-zA-Z])[_a-zA-Z0-9]*", "editor_identifier");
-		syntaxClassesForZ.put("%(.)*|/\\*((.)+|(\n)+|(\r)+)*\\*/|\\\\(noindent|documentclass|(begin|end)\\{(document)\\}|(sub)?section|(usepackage)\\{(fuzz|z-eves)\\}|\\\\)", "editor_comment");
+		syntaxClassesForZ.put("%(.)*|/\\*([^*]|\\*+[^*/])*\\*+/|\\\\(noindent|documentclass|(begin|end)\\{(document)\\}|(sub)?section|(usepackage)\\{(fuzz|z-eves)\\}|\\\\)", "editor_comment");
 		syntaxClassesForZ.put("\\\\(infix|arithmos)", "editor_unsupported");
 
 		syntaxClassesOtherLanguages.put(XTLFactory.class, syntaxClassesForXTL);
