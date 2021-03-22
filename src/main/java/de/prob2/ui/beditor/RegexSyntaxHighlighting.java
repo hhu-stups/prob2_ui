@@ -69,7 +69,7 @@ final class RegexSyntaxHighlighting {
 		syntaxClassesForTLA.put("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLE|VARIABLES|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)", "editor_keyword");
 		syntaxClassesForTLA.put("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)", "editor_ctrlkeyword");
 		syntaxClassesForTLA.put("(Next|Init|Spec|Inv)", "editor_types");
-		syntaxClassesForTLA.put("(\\\\\\*[^\n\r]*)|(\\(\\*(.|[\n\r]*)*\\*\\))", "editor_comment");
+		syntaxClassesForTLA.put("(\\\\\\*[^\n\r]*)|(\\(\\*(.+|\n+|\r+)*\\*\\))", "editor_comment");
 		syntaxClassesForTLA.put("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|/|Int|Nat", "editor_arithmetic");
 		syntaxClassesForTLA.put("<=>|=>|<<|>>|!|#|/=|~|<>|->|->|~\\\\|\"|\\[\\]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\", "editor_logical");
 		syntaxClassesForTLA.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
@@ -84,7 +84,7 @@ final class RegexSyntaxHighlighting {
 		syntaxClassesForCSP.put("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|\\!=|>|<|<=|>=|=<|&&|\\|\\||Int|Bool", "editor_logical");
 		syntaxClassesForCSP.put("external|extensions|productions|Proc", "editor_unsupported");
 		syntaxClassesForCSP.put("[_a-zA-Z][_a-zA-Z0-9]*", "editor_identifier");
-		syntaxClassesForCSP.put("(\\{-(.|[\n\r]*)*-\\})|(--(.*))", "editor_comment");
+		syntaxClassesForCSP.put("(\\{-(.+|\n+|\r+)*-\\})|(--(.*))", "editor_comment");
 		syntaxClassesForCSP.put("( |\t|\r|\n)+", "editor_ignored");
 
 		//Alloy Regex
