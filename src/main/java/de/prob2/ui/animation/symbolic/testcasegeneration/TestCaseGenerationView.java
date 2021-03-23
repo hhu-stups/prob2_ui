@@ -2,9 +2,8 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.statespace.FormalismType;
+import de.prob.model.eventb.EventBModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -193,7 +192,7 @@ public class TestCaseGenerationView extends ScrollPane {
 	}
 	
 	private void setBindings() {
-		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
+		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noTestCases = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {

@@ -3,8 +3,8 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 import com.google.inject.Singleton;
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
-import de.prob.statespace.FormalismType;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -54,11 +54,10 @@ public class TestCaseGenerationItemHandler {
 
 	public void generateTestCases(TestCaseGenerationItem item) {
 		AbstractModel model = currentTrace.getModel();
-		if(model.getFormalismType() != FormalismType.B) {
+		if(!(model instanceof ClassicalBModel) && !(model instanceof EventBModel)) {
 			return;
 		}
-		ClassicalBModel bModel = (ClassicalBModel) model;
-		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = testCaseGeneratorCreator.getTestCaseGenerator(bModel, item);
+		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = testCaseGeneratorCreator.getTestCaseGenerator(item);
 		testCaseGenerator.generateTestCases(item, cbTestCaseGenerator);
 	}
 
