@@ -20,7 +20,6 @@ import de.prob.model.eventb.translate.EventBFileNotFoundException;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.ExtractedModel;
 import de.prob.scripting.ModelFactory;
-import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.error.WarningAlert;
@@ -179,7 +178,7 @@ public class MachineLoader {
 						.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
 								"project.machineLoader.alerts.fileNotFound.content", currentProject.get().getAbsoluteMachinePath(machine))
 						.showAndWait());
-			} catch (CliError | IOException | ModelTranslationError | ProBError e) {
+			} catch (CliError | IOException | ProBError e) {
 				LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
 				Platform.runLater(() -> stageManager
 						.makeExceptionAlert(e, "", "project.machineLoader.alerts.couldNotOpen.content", machine.getName())
@@ -197,7 +196,7 @@ public class MachineLoader {
 		});
 	}
 
-	private void loadInternal(final Machine machine, final Map<String, String> prefs) throws IOException, ModelTranslationError {
+	private void loadInternal(final Machine machine, final Map<String, String> prefs) throws IOException {
 		this.currentTrace.set(null);
 		setLoadingStatus(StatusBar.LoadingStatus.PARSING_FILE);
 		final Path path = currentProject.get().getAbsoluteMachinePath(machine);
@@ -240,7 +239,7 @@ public class MachineLoader {
 		}
 	}
 
-	private void load(Machine machine, Map<String, String> prefs) throws IOException, ModelTranslationError {
+	private void load(Machine machine, Map<String, String> prefs) throws IOException {
 		// NOTE: This method may be called from outside the JavaFX main thread,
 		// for example from loadAsync.
 		// This means that all JavaFX calls must be wrapped in
