@@ -94,7 +94,9 @@ public class OperationCoverageInputView extends VBox {
 		this.update(currentTrace.getStateSpace());
 		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
 		depthSpinner.getEditor().textProperty().addListener((observable, from, to) -> {
-			if(!to.matches("[1-9]+")){
+			if(to.isEmpty()) {
+				depthSpinner.getEditor().setText("1");
+			} else  if(!to.matches("[1-9]+")){
 				depthSpinner.getEditor().setText(from);
 			}
 		});
@@ -104,6 +106,7 @@ public class OperationCoverageInputView extends VBox {
 	private void update(final StateSpace to) {
 		tvOperations.getItems().clear();
 		if (to != null) {
+			// operations are already collected to tvOperations, that is why the result is ignored
 			to.getLoadedMachine().getOperationNames().stream()
 				.map(operation -> new OperationTableItem(operation, true))
 				.collect(Collectors.toCollection(tvOperations::getItems));
