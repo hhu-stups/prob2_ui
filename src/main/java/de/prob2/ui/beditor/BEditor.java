@@ -209,32 +209,25 @@ public class BEditor extends CodeArea {
 	}
 
 	protected boolean handleUndoRedo(KeyEvent e) {
-		switch (e.getText()) {
-			case "Z":
-			case "z":
-				if(e.isShortcutDown()) {
-					if (e.isShiftDown()) {
-						// CTRL/CMD + Shift + Z
-						redo();
-						return true;
-					} else {
-						// CTRL/CMD + Z in some cases
-						undo();
-						return true;
-					}
-				}
-				return false;
-			case "\u001a":
-				// CTRL + Z in some cases
-				if (!System.getProperty("os.name").toLowerCase().contains("mac")) { // Preventing use of CTRL + Z on Mac OS for CMD + Z is commonly used for undoing
-					undo();
-					return true;
-				} else {
-					// just in case if more switch cases have to be added
-					return false;
-				}
-			default:
-				return false;
+		// React only to combinations of Ctrl/Cmd and the letter Z.
+		// For combinations involving Ctrl+Z,
+		// the text is sometimes the control character ^Z (U+001A)
+		// instead of the normal letter "z" or "Z".
+		// For combinations involving Shift,
+		// the text is sometimes uppercase "Z" (Linux) and sometimes lowercase "z" (Mac).
+		// So the modifier keys *must* be checked manually using isShortcutDown() and isShiftDown()
+		// and we cannot just rely on getText().
+		if (e.isShortcutDown() && Arrays.asList("\u001a", "Z", "z").contains(e.getText())) {
+			if (e.isShiftDown()) {
+				// Shift + Ctrl/Cmd + Z
+				redo();
+			} else {
+				// Ctrl/Cmd + Z
+				undo();
+			}
+			return true;
+		} else {
+			return false;
 		}
 	}
 
