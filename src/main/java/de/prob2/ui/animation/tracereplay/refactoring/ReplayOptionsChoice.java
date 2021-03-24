@@ -1,4 +1,4 @@
-package de.prob2.ui.animation.tracereplay;
+package de.prob2.ui.animation.tracereplay.refactoring;
 
 import de.prob.check.tracereplay.check.exploration.ReplayOptions;
 import de.prob.statespace.OperationInfo;

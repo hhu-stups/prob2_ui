@@ -8,6 +8,7 @@ import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.FormalismType;
+import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -126,10 +127,10 @@ public class TraceReplayView extends ScrollPane {
 			traceViewHandler.initializeRow(this.getScene(), row, replayTraceItem, showErrorItem, openInExternalEditorItem);
 			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 			recheckTraceItem.setOnAction(event -> {
-
-					TraceModificationChecker traceModificationChecker = new TraceModificationChecker(row.getItem(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
-					traceModificationChecker.recheck();
-					List<Path> persistentTraceList = traceModificationChecker.evaluateResults();
+				Path currentMachinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
+					TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(row.getItem(), currentTrace.getStateSpace(), currentMachinePath, injector, currentProject, stageManager);
+					traceRefactoredSetup.executeCheck(true);
+					List<Path> persistentTraceList = traceRefactoredSetup.evaluateResults();
 					persistentTraceList.remove(row.getItem().getLocation());
 					addPathsToProject(persistentTraceList);
 
@@ -176,22 +177,11 @@ public class TraceReplayView extends ScrollPane {
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
 		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
-
-
 		if (traceFile != null) {
-			//Check if machine file is valid
-
-			TraceJsonFile traceJsonFile = traceFileHandler.loadFile(traceFile);
-			if(traceJsonFile != null) {
-				TraceModificationChecker traceModificationChecker = new TraceModificationChecker(traceJsonFile, traceFile, currentTrace.getStateSpace(), injector, currentProject, stageManager);
-				traceModificationChecker.check();
-				List<Path> persistentTraceList = traceModificationChecker.evaluateResults();
-				addPathsToProject(persistentTraceList);
-			}else{
-				Path relative = currentProject.getLocation().relativize(traceFile);
-				currentProject.getCurrentMachine().addTraceFile(relative);
-			}
+			Path relative = currentProject.getLocation().relativize(traceFile);
+			currentProject.getCurrentMachine().addTraceFile(relative);
 		}
+
 	}
 
 	public void closeDescription() {

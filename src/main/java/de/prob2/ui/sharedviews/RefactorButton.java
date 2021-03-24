@@ -15,6 +15,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.*;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetup;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
+import de.prob2.ui.animation.tracereplay.refactoring.ReplayOptionsOverview;
 import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;

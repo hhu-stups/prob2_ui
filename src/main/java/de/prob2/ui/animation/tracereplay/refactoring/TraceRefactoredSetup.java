@@ -13,10 +13,7 @@ import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.animation.tracereplay.MappingFactory;
-import de.prob2.ui.animation.tracereplay.ProgressMemory;
-import de.prob2.ui.animation.tracereplay.ReplayOptionsOverview;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import de.prob2.ui.animation.tracereplay.*;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.application.Platform;
@@ -50,6 +47,12 @@ public class TraceRefactoredSetup {
 	private final Map<String, OperationInfo> currentMachineOperations;
 	private Stage progressStage;
 	private Thread traceCheckerProcess;
+
+
+	public TraceRefactoredSetup(ReplayTrace replayTrace, StateSpace stateSpace, Path machineA,
+									Injector injector, CurrentProject currentProject, StageManager stageManager)  {
+		this(replayTrace.getTraceJsonFile(), machineA, null, replayTrace.getLocation(), stateSpace, injector, currentProject, stageManager);
+	}
 
 
 	public TraceRefactoredSetup(TraceJsonFile traceJsonFile, Path machineA, Path machineB, Path tracePath, StateSpace stateSpace,

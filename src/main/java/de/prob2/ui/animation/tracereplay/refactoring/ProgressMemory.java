@@ -1,6 +1,5 @@
-package de.prob2.ui.animation.tracereplay;
+package de.prob2.ui.animation.tracereplay.refactoring;
 
-import com.google.inject.Injector;
 import de.prob.check.tracereplay.check.ui.ProgressMemoryInterface;
 import de.prob2.ui.internal.StageManager;
 import javafx.application.Platform;
@@ -10,7 +9,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import org.reactfx.StateMachine;
 
 
 import java.util.*;
