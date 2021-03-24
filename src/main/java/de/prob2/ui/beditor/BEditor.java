@@ -209,19 +209,32 @@ public class BEditor extends CodeArea {
 	}
 
 	protected boolean handleUndoRedo(KeyEvent e) {
-		boolean zIsPressed = e.getText().equals("Z") || e.getText().equals("z") || e.getCode().equals(KeyCode.Z);
-		if(zIsPressed) {
-			if(e.isShortcutDown()) {
-				if (e.isShiftDown()) {
-					redo();
-					return true;
-				} else {
+		switch (e.getText()) {
+			case "Z":
+			case "z":
+				if(e.isShortcutDown()) {
+					if (e.isShiftDown()) {
+						// CTRL/CMD + Shift + Z
+						redo();
+						return true;
+					} else {
+						// CTRL/CMD + Z in some cases
+						undo();
+						return true;
+					}
+				}
+			case "\u001a":
+				// CTRL + Z in some cases
+				if (!System.getProperty("os.name").toLowerCase().contains("mac")) { // Preventing use of CTRL + Z on Mac OS for CMD + Z is commonly used for undoing
 					undo();
 					return true;
+				} else {
+					// just in case if more switch cases have to be added
+					return false;
 				}
-			}
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	protected void keyTyped(KeyEvent e) {
