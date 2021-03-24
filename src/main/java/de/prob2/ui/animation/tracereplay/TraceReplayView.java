@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.check.tracereplay.check.exceptions.PrologTermNotDefinedException;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.scripting.ModelTranslationError;
@@ -18,6 +17,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.DescriptionView;
+import de.prob2.ui.sharedviews.RefactorButton;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
@@ -63,6 +63,9 @@ public class TraceReplayView extends ScrollPane {
 	private Button loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
+	@FXML
+	private RefactorButton refactorButton;
+
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 	@FXML

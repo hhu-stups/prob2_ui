@@ -1,9 +1,13 @@
-package de.prob2.ui.animation.tracereplay;
+package de.prob2.ui.animation.tracereplay.refactoring;
 
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
-import de.prob.check.tracereplay.check.*;
+import de.prob.check.tracereplay.check.IdentifierMatcher;
+import de.prob.check.tracereplay.check.TraceAnalyser;
+import de.prob.check.tracereplay.check.TraceChecker;
+import de.prob.check.tracereplay.check.TraceCheckerUtils;
+import de.prob.check.tracereplay.check.TraceModifier;
 import de.prob.check.tracereplay.check.exploration.PersistenceDelta;
 import de.prob.check.tracereplay.check.exploration.TraceExplorer;
 import de.prob.check.tracereplay.check.renamig.RenamingAnalyzerInterface;
@@ -11,7 +15,8 @@ import de.prob.check.tracereplay.check.renamig.RenamingDelta;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
-import javafx.beans.property.*;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.*;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -25,14 +30,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
-public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
+public class TraceRefactorResults extends Dialog<List<PersistentTrace>> {
 
 	private final ResourceBundle resourceBundle;
 	private final StageManager stageManager;
-	private final TraceModificationChecker traceModificationChecker;
+	private final TraceRefactoredSetup traceRefactoredSetup;
+	private final TraceChecker traceChecker;
 	ObservableSet<RenamingDelta> selectedRenamingDelta = FXCollections.observableSet();
 	ObservableMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> selectedMapping = FXCollections.observableHashMap();
 	Set<String> typeIVCandidates;
@@ -59,11 +67,12 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private BorderPane border;
 
 
-	public TraceModificationAlert(final Injector injector, final StageManager stageManager, TraceModificationChecker traceModificationChecker, PersistentTrace oldTrace){
+	public TraceRefactorResults(final Injector injector, final StageManager stageManager, TraceRefactoredSetup traceRefactoredSetup, PersistentTrace oldTrace){
 		this.resourceBundle = injector.getInstance(ResourceBundle.class);
 		this.stageManager = stageManager;
-		this.traceModificationChecker = traceModificationChecker;
-		this.typeIVCandidates = traceModificationChecker.traceChecker.getTypeFinder().getTypeIV();
+		this.traceRefactoredSetup = traceRefactoredSetup;
+		this.typeIVCandidates = traceRefactoredSetup.traceChecker.getTypeFinder().getTypeIV();
+		this.traceChecker = traceRefactoredSetup.traceChecker;
 		stageManager.loadFXML(this, "prototypeAlertView.fxml");
 
 		ButtonType buttonTypeI = new ButtonType(resourceBundle.getString("traceModification.alert.button.current"), ButtonBar.ButtonData.NO);
@@ -77,7 +86,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		this.setResultConverter(param -> {
 			Set<RenamingDelta> renamingDeltaHelper = new HashSet<>(selectedRenamingDelta);
 			HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> mappingHelper = new HashMap<>(selectedMapping);
-			List<PersistentTransition> selectedTrace = traceModificationChecker.traceChecker.getTraceModifier()
+			List<PersistentTransition> selectedTrace = traceChecker.getTraceModifier()
 					.getChangelogPhase3II().get(renamingDeltaHelper).get(mappingHelper).stream()
 					.flatMap(delta -> delta.getNewTransitions().stream()).collect(toList());
 
@@ -102,10 +111,10 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 	private void initialize(){
 		stageManager.register(this);
 
-		RenamingAnalyzerInterface renamingAnalyzer = traceModificationChecker.traceChecker.getRenamingAnalyzer();
-		TraceModifier traceModifier = traceModificationChecker.traceChecker.getTraceModifier();
+		RenamingAnalyzerInterface renamingAnalyzer = traceRefactoredSetup.traceChecker.getRenamingAnalyzer();
+		TraceModifier traceModifier = traceRefactoredSetup.traceChecker.getTraceModifier();
 
-		VBox accordion = setTypeIIConflicts(renamingAnalyzer.getResultTypeIIAsDeltaList(), renamingAnalyzer.getResultTypeIIInit(), traceModificationChecker.traceChecker.getOldOperationInfos());
+		VBox accordion = setTypeIIConflicts(renamingAnalyzer.getResultTypeIIAsDeltaList(), renamingAnalyzer.getResultTypeIIInit(), traceChecker.getOldOperationInfos());
 		typeII.setContent(accordion);
 		typeII.textProperty().set(resourceBundle.getString("traceModification.alert.typeII") + " (" + traceModifier.changedTracesTypeIIDet()+ ")");
 		accordion.prefHeightProperty().bindBidirectional(typeII.prefHeightProperty());
@@ -122,8 +131,8 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 		}
 
 		VBox accordion3 = setTypeIIIConflicts(traceModifier.getChangelogPhase3II(),
-				traceModificationChecker.traceChecker.getOldOperationInfos(),
-				traceModificationChecker.traceChecker.getNewOperationInfos());
+				traceRefactoredSetup.traceChecker.getOldOperationInfos(),
+				traceRefactoredSetup.traceChecker.getNewOperationInfos());
 
 		typeIII.setContent(accordion3);
 		typeIII.textProperty().set(resourceBundle.getString("traceModification.alert.typeIII") + " (" + traceModifier.changedTracesTypeIII() + ")");
@@ -291,7 +300,7 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 						.map(delta -> new Pair<>(new Pair<>(delta.getOriginalName(), delta.getDeltaName()), delta)))
 				.collect(toMap(Pair::getKey, Pair::getValue));
 
-		Map<String, OperationInfo> operationInfoMap = traceModificationChecker.traceChecker.getOldOperationInfos();
+		Map<String, OperationInfo> operationInfoMap = traceChecker.getOldOperationInfos();
 
 		final Set<Pair<String, String>> selected = new HashSet<>();
 
@@ -493,9 +502,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 
 		for(Map.Entry<TraceExplorer.MappingNames, Map<String, String>> entry : mappings.entrySet()){
-				List<String> oldVars = oldSplitted.get(entry.getKey());
-				List<String> newVars = newSplitted.get(entry.getKey());
-				row = fillGridPane(entry.getValue(), oldVars, newVars, mappingsNamesToBundleNames.get(entry.getKey()),row, gridPane);
+			List<String> oldVars = oldSplitted.get(entry.getKey());
+			List<String> newVars = newSplitted.get(entry.getKey());
+			row = fillGridPane(entry.getValue(), oldVars, newVars, mappingsNamesToBundleNames.get(entry.getKey()),row, gridPane);
 		}
 
 		return new TitledPane(name, gridPane);
@@ -528,9 +537,9 @@ public class TraceModificationAlert extends Dialog<List<PersistentTrace>> {
 
 		Map<String, String> mappingKeysVar =
 				cleanedMapping.entrySet()
-				.stream()
-				.filter(element -> oldIds.contains(element.getKey()))
-				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+						.stream()
+						.filter(element -> oldIds.contains(element.getKey()))
+						.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 
 		List<Label> oldLabels = createLabel(Stream.of(voidCards, dummyWildCards, mappingKeysVar.keySet()).flatMap(Collection::stream).collect(toList()));

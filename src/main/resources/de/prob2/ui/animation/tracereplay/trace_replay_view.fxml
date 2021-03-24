@@ -14,6 +14,7 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import de.prob2.ui.sharedviews.RefactorButton?>
 <fx:root type="TraceReplayView" fitToHeight="true" fitToWidth="true"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -41,6 +42,7 @@
 					</tooltip>
 				</Button>
 				<Spacer/>
+				<RefactorButton fx:id="refactorButton" HBox.hgrow="NEVER" />
 				<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
 				<Button fx:id="loadTraceButton" onAction="#loadTraceFromFile" disable="true">
 					<graphic>
