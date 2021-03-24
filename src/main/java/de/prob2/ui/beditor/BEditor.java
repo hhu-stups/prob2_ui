@@ -223,6 +223,7 @@ public class BEditor extends CodeArea {
 						return true;
 					}
 				}
+				return false;
 			case "\u001a":
 				// CTRL + Z in some cases
 				if (!System.getProperty("os.name").toLowerCase().contains("mac")) { // Preventing use of CTRL + Z on Mac OS for CMD + Z is commonly used for undoing
