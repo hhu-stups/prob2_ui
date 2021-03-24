@@ -209,7 +209,7 @@ public class BEditor extends CodeArea {
 	}
 
 	protected boolean handleUndoRedo(KeyEvent e) {
-		boolean zIsPressed = e.getText().equals("Z") || e.getText().equals("z");
+		boolean zIsPressed = e.getText().equals("Z") || e.getText().equals("z") || e.getCode().equals(KeyCode.Z);
 		if(zIsPressed) {
 			if(e.isShortcutDown()) {
 				if (e.isShiftDown()) {
