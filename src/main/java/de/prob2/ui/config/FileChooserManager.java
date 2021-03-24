@@ -14,7 +14,9 @@ import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob.scripting.ZFuzzFactory;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
+import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
 @Singleton
 public class FileChooserManager {
 	public enum Kind {
-		PROJECTS_AND_MACHINES, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL, SIMULATION
+		PROJECTS_AND_MACHINES, NEW_MACHINE, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL, SIMULATION
 	}
 
 	public static final String EXTENSION_PATTERN_PREFIX = "*.";
@@ -56,6 +58,7 @@ public class FileChooserManager {
 	}
 
 	private final ResourceBundle bundle;
+	private final StageManager stageManager;
 
 	private final List<String> machineExtensionPatterns;
 	private final List<FileChooser.ExtensionFilter> machineExtensionFilters;
@@ -63,8 +66,9 @@ public class FileChooserManager {
 	private final Map<Kind, Path> initialDirectories = new EnumMap<>(Kind.class);
 
 	@Inject
-	private FileChooserManager(final Config config, final ResourceBundle bundle) {
+	private FileChooserManager(final Config config, final ResourceBundle bundle, final StageManager stageManager) {
 		this.bundle = bundle;
+		this.stageManager = stageManager;
 
 		this.machineExtensionPatterns = FactoryProvider.EXTENSION_TO_FACTORY_MAP.keySet()
 			.stream()
@@ -174,6 +178,16 @@ public class FileChooserManager {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind).toFile());
 		}
 		final File file = fileChooser.showSaveDialog(window);
+		if (file != null && kind.equals(Kind.NEW_MACHINE)) {
+			int i = file.toString().lastIndexOf('.');
+			String fileExtension = i == -1 ? null : "*" + file.toString().substring(i);
+			if (fileExtension == null || fileChooser.getExtensionFilters().stream().noneMatch(extensionFilter -> extensionFilter.getExtensions().contains(fileExtension))) {
+				// Either there is no file extension or an invalid one
+				stageManager.makeAlert(Alert.AlertType.WARNING, "common.fileChooser.invalidExtension.warning.header", "common.fileChooser.invalidExtension.warning.content", fileExtension == null ? bundle.getString("common.fileChooser.invalidExtension.warning.content.empty") : fileExtension).showAndWait();
+				fileChooser.setTitle(bundle.getString("common.fileChooser.invalidExtension.fileChooser.header"));
+				return showSaveFileChooser(fileChooser, kind, window);
+			}
+		}
 		final Path path = file == null ? null : file.toPath();
 		if (path != null) {
 			setInitialDirectory(kind, path.getParent());
@@ -265,7 +279,7 @@ public class FileChooserManager {
 		// This extension filter is created manually instead of with getExtensionFilter,
 		// so that the list of extensions doesn't get appended (it would be very long).
 		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), this.machineExtensionPatterns));
-		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
+		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.NEW_MACHINE, window);
 	}
 
 	private boolean containsValidInitialDirectory(Kind kind) {
