@@ -27,6 +27,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Region;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -99,6 +101,8 @@ public class RefactorButton extends Button {
 						}
 
 						Alert alert = new Alert(Alert.AlertType.CONFIRMATION, messageText, ButtonType.OK);
+						alert.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
+
 						alert.showAndWait();
 					} catch (IOException | ModelTranslationError | TraceConstructionError | BCompoundException e) {
 						e.printStackTrace();
@@ -119,6 +123,8 @@ public class RefactorButton extends Button {
 							messageText = "Only " + resultTrace.size() + "/" + json2.getTransitionList().size() +" could be replayed while enforcing all predicates";
 						}
 						Alert alert = new Alert(Alert.AlertType.CONFIRMATION, messageText, ButtonType.OK);
+						alert.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
+
 						alert.showAndWait();
 						TraceJsonFile json3 = json2.changeTransitionList(PersistentTransition.createFromList(resultTrace));
 						Path path = result.getTraceFile().getParent().resolve(result.traceFile.getFileName() + "_adapted_with_options.prob2trace" );
