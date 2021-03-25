@@ -1,6 +1,9 @@
 package de.prob2.ui.internal;
 
 import com.google.inject.Inject;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import javafx.scene.control.Alert;
@@ -16,7 +19,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
-public class ProBFileHandler {
+public abstract class ProBFileHandler {
 
     protected final CurrentProject currentProject;
     protected final StageManager stageManager;
@@ -58,6 +61,16 @@ public class ProBFileHandler {
         fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + extension);
         fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter(extensionKey, extension));
         return this.fileChooserManager.showSaveFileChooser(fileChooser, kind, stageManager.getCurrent());
+    }
+
+    protected abstract JsonMetadataBuilder metadataBuilder();
+
+    protected JsonMetadata createMetadata(String createdBy) {
+        return metadataBuilder()
+                .withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+                .withModelName(currentProject.getCurrentMachine().getName())
+                .withCreator(createdBy.replaceAll("\n", " "))
+                .build();
     }
 
 }

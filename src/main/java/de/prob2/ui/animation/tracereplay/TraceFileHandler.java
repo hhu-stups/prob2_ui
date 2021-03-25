@@ -16,6 +16,7 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
@@ -121,7 +122,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			for(Trace trace : item.getTraces()){
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + numberGeneratedTraces + ".prob2trace");
 				String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
-				save(trace, traceFilePath, machine.getName(), createdBy);
+				save(trace, traceFilePath, createdBy);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 				numberGeneratedTraces++;
 			}
@@ -152,7 +153,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			for(int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + (i+1) + ".prob2trace");
 				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
-				save(traces.get(i), traceFilePath, machine.getName(), createdBy);
+				save(traces.get(i), traceFilePath, createdBy);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
 
@@ -169,12 +170,8 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 
-	public void save(Trace trace, Path location, String machineName, String createdBy) throws IOException {
-		JsonMetadata jsonMetadata = TraceJsonFile.metadataBuilder()
-				.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-				.withModelName(machineName)
-				.withCreator(createdBy)
-				.build();
+	public void save(Trace trace, Path location, String createdBy) throws IOException {
+		JsonMetadata jsonMetadata = createMetadata(createdBy);
 		TraceJsonFile traceJsonFile = new TraceJsonFile(trace, jsonMetadata);
 		traceManager.save(location, traceJsonFile);
 	}
@@ -187,9 +184,14 @@ public class TraceFileHandler extends ProBFileHandler {
 	public void save(Trace trace, Machine machine) throws IOException {
 		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION);
 		if (path != null) {
-			save(trace, path, machine.getName(), "traceReplay");
+			save(trace, path, "traceReplay");
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
+	}
+
+	@Override
+	protected JsonMetadataBuilder metadataBuilder() {
+		return TraceJsonFile.metadataBuilder();
 	}
 
 }

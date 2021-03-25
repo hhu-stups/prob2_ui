@@ -107,12 +107,9 @@ public class SimulationSaver extends ProBFileHandler {
         }
     }
 
-    private JsonMetadata createMetadata(String createdBy) {
-        return context.getDefaultMetadataBuilder()
-                .withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-                .withModelName(currentProject.getCurrentMachine().getName())
-                .withCreator(createdBy.replaceAll("\n", " "))
-                .build();
+    @Override
+    protected JsonMetadataBuilder metadataBuilder() {
+        return context.getDefaultMetadataBuilder();
     }
 
 }
