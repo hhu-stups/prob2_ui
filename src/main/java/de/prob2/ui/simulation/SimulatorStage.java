@@ -122,7 +122,7 @@ public class SimulatorStage extends Stage {
 					} else {
 						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
 						tracesView.setSimulatorStage(simulatorStage);
-						tracesView.setItems(item.getTraces(), item.getTimestamps());
+						tracesView.setItems(item, item.getTraces(), item.getTimestamps());
 						tracesView.show();
 					}
 				});
@@ -292,7 +292,7 @@ public class SimulatorStage extends Stage {
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR));
 		saveTimedTraceItem.setOnAction(e -> {
 			try {
-				injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps());
+				injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
 			} catch (IOException exception) {
 				exception.printStackTrace();
 				//TODO: Handle error

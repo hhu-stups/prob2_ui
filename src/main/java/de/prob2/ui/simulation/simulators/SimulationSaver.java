@@ -10,6 +10,7 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
 import de.prob.json.ObjectWithMetadata;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
@@ -41,6 +42,7 @@ public class SimulationSaver extends ProBFileHandler {
     public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
     private final JsonManager<SimulationConfiguration> jsonManager;
+    private final JsonManager.Context<SimulationConfiguration> context;
     private final SimulationCreator simulationCreator;
 
     @Inject
@@ -55,25 +57,27 @@ public class SimulationSaver extends ProBFileHandler {
                 .serializeNulls()
                 .setPrettyPrinting()
                 .create();
-        jsonManager.initContext(new JsonManager.Context<SimulationConfiguration>(gson, SimulationConfiguration.class, "Timed_Trace", 1) {
+        this.context = new JsonManager.Context<SimulationConfiguration>(gson, SimulationConfiguration.class, "Timed_Trace", 1) {
             @Override
             public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
                 return new ObjectWithMetadata<>(oldObject, oldMetadata);
             }
-        });
+        };
+        jsonManager.initContext(context);
     }
 
-    public void saveConfiguration(Trace trace, List<Integer> timestamps) throws IOException {
+    public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
         final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveTimedTrace.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, SIMULATION_EXTENSION);
         if (path != null) {
-            saveConfiguration(trace, timestamps, path);
+            JsonMetadata jsonMetadata = createMetadata(createdBy);
+            saveConfiguration(trace, timestamps, path, jsonMetadata);
         }
     }
 
 
-    public void saveConfiguration(Trace trace, List<Integer> timestamps, Path location) throws IOException {
+    public void saveConfiguration(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
         SimulationConfiguration configuration = simulationCreator.createConfiguration(trace, timestamps, true);
-        this.jsonManager.writeToFile(location, configuration);
+        this.jsonManager.writeToFile(location, configuration, jsonMetadata);
     }
 
     public void saveConfigurations(SimulationItem item) {
@@ -94,11 +98,21 @@ public class SimulationSaver extends ProBFileHandler {
             //Starts counting with 1 in the file name
             for(int i = 1; i <= numberGeneratedTraces; i++) {
                 final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
-                this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath);
+                String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
+                JsonMetadata jsonMetadata = createMetadata(createdBy);
+                this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath, jsonMetadata);
             }
         } catch (IOException e) {
             stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();
         }
+    }
+
+    private JsonMetadata createMetadata(String createdBy) {
+        return context.getDefaultMetadataBuilder()
+                .withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+                .withModelName(currentProject.getCurrentMachine().getName())
+                .withCreator(createdBy.replaceAll("\n", " "))
+                .build();
     }
 
 }

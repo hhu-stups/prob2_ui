@@ -16,6 +16,7 @@ import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationCreator;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
+import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -42,16 +43,23 @@ public class SimulationTracesView extends Stage {
 
 	private static class SimulationTraceItem {
 
+		private final SimulationItem parent;
+
 		private final Trace trace;
 
 		private final List<Integer> timestamps;
 
 		private final int index;
 
-		public SimulationTraceItem(Trace trace, List<Integer> timestamps, int index) {
+		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, int index) {
+			this.parent = parent;
 			this.trace = trace;
 			this.timestamps = timestamps;
 			this.index = index;
+		}
+
+		public SimulationItem getParent() {
+			return parent;
 		}
 
 		public Trace getTrace() {
@@ -103,10 +111,10 @@ public class SimulationTracesView extends Stage {
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
-	public void setItems(List<Trace> traces, List<List<Integer>> timestamps) {
+	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps) {
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
 		for(int i = 1; i <= traces.size(); i++) {
-			items.add(new SimulationTraceItem(traces.get(i - 1), timestamps.get(i-1), i));
+			items.add(new SimulationTraceItem(item, traces.get(i - 1), timestamps.get(i-1), i));
 		}
 		traceTableView.setItems(items);
 	}
@@ -179,7 +187,8 @@ public class SimulationTracesView extends Stage {
 				}
 				SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
 				try {
-					simulationSaver.saveConfiguration(item.getTrace(), item.getTimestamps());
+					String createdBy = "Simulation: " + item.getParent().getTypeAsName() + "; " + item.getParent().getConfiguration();
+					simulationSaver.saveConfiguration(item.getTrace(), item.getTimestamps(), createdBy);
 				} catch (IOException exception) {
 					exception.printStackTrace();
 					// TODO: Handle error
