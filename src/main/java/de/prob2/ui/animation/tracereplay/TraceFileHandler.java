@@ -2,15 +2,12 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Stream;
 
 import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
@@ -23,6 +20,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -31,36 +29,27 @@ import de.prob2.ui.simulation.table.SimulationItem;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.util.stream.Collectors.toList;
 
-public class TraceFileHandler {
+public class TraceFileHandler extends ProBFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
 	public static final String SIMULATION_TRACE_PREFIX = "Simulation_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
-	private final CurrentProject currentProject;
-	private final StageManager stageManager;
-	private final FileChooserManager fileChooserManager;
-	private final ResourceBundle bundle;
+
 	private final TraceManager traceManager;
-	private final VersionInfo versionInfo;
+
 
 	@Inject
-	public TraceFileHandler(TraceManager traceManger, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
-		this.versionInfo = versionInfo;
-		this.currentProject = currentProject;
-		this.stageManager = stageManager;
-		this.fileChooserManager = fileChooserManager;
-		this.bundle = bundle;
-		this.traceManager = traceManger;
+	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+		super(versionInfo, currentProject, stageManager, fileChooserManager, bundle);
+		this.traceManager = traceManager;
 	}
 
 
@@ -118,15 +107,13 @@ public class TraceFileHandler {
 	}
 
 	public void save(SimulationItem item, Machine machine) {
-
-		final Path path = chooseDirectory();
+		final Path path = chooseDirectory(FileChooserManager.Kind.TRACES, "animation.tracereplay.fileChooser.savePaths.title");
 		if (path == null) {
 			return;
 		}
 
 		try {
-
-			if(checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX)){
+			if(checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "animation.testcase.save.directoryAlreadyContainsTestCases")){
 				return;
 			}
 
@@ -149,14 +136,14 @@ public class TraceFileHandler {
 				.filter(information -> information.getTrace() != null)
 				.collect(toList());
 
-		Path path = chooseDirectory();
+		Path path = chooseDirectory(FileChooserManager.Kind.TRACES, "animation.tracereplay.fileChooser.savePaths.title");
 		if (path == null) {
 			return;
 		}
 
 		try {
 
-			if(checkIfPathAlreadyContainsFiles(path, TEST_CASE_TRACE_PREFIX)){
+			if(checkIfPathAlreadyContainsFiles(path, TEST_CASE_TRACE_PREFIX, "animation.testcase.save.directoryAlreadyContainsTestCases")){
 				return;
 			}
 
@@ -181,24 +168,6 @@ public class TraceFileHandler {
 		}
 	}
 
-	private Path chooseDirectory(){
-		final DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.savePaths.title"));
-		return this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
-	}
-
-	public boolean checkIfPathAlreadyContainsFiles(Path path, String prefix) throws IOException {
-		try (final Stream<Path> children = Files.list(path)) {
-			if (children.anyMatch(p -> p.getFileName().toString().startsWith(prefix))) {
-				// Directory already contains test case trace - ask if the user really wants to save here.
-				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", "animation.testcase.save.directoryAlreadyContainsTestCases", path).showAndWait();
-				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 
 	public void save(Trace trace, Path location, String machineName, String createdBy) throws IOException {
 		JsonMetadata jsonMetadata = TraceJsonFile.metadataBuilder()
@@ -216,11 +185,7 @@ public class TraceFileHandler {
 
 
 	public void save(Trace trace, Machine machine) throws IOException {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(machine.getName() + "." + TRACE_FILE_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TRACE_FILE_EXTENSION));
-		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION);
 		if (path != null) {
 			save(trace, path, machine.getName(), "traceReplay");
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
