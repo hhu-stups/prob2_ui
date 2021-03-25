@@ -1,7 +1,6 @@
 package de.prob2.ui.internal;
 
 import com.google.inject.Inject;
-import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonMetadata;
 import de.prob.json.JsonMetadataBuilder;
 import de.prob2.ui.config.FileChooserManager;
@@ -69,7 +68,7 @@ public abstract class ProBFileHandler {
         return metadataBuilder()
                 .withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
                 .withModelName(currentProject.getCurrentMachine().getName())
-                .withCreator(createdBy.replaceAll("\n", " "))
+                .withCreator(createdBy)
                 .build();
     }
 

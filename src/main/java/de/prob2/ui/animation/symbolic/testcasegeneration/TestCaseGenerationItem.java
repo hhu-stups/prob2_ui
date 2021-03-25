@@ -157,4 +157,8 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 			&& this.getCode().equals(other.getCode())
 			&& this.getType().equals(other.getType());
 	}
+
+	public String createdByForMetadata(int index) {
+		return "Test Case Generation: " + getName() + "; " + getTraceInformation().get(index);
+	}
 }

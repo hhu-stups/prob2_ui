@@ -215,4 +215,9 @@ public class SimulationItem {
     public SimulationStats getSimulationStats() {
         return simulationStats;
     }
+
+    public String createdByForMetadata() {
+        String createdBy = "Simulation: " + getTypeAsName() + "; " + getConfiguration();
+        return createdBy.replaceAll("\n", " ");
+    }
 }

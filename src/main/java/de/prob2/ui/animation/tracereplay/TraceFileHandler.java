@@ -121,7 +121,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
 			for(Trace trace : item.getTraces()){
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + numberGeneratedTraces + ".prob2trace");
-				String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
+				String createdBy = item.createdByForMetadata();
 				save(trace, traceFilePath, createdBy);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 				numberGeneratedTraces++;
@@ -132,10 +132,7 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
-		List<Trace> traces = new ArrayList<>(item.getExamples());
-		List<TraceInformationItem> traceInformation = item.getTraceInformation().stream()
-				.filter(information -> information.getTrace() != null)
-				.collect(toList());
+		List<Trace> traces = item.getExamples();
 
 		Path path = chooseDirectory(FileChooserManager.Kind.TRACES, "animation.tracereplay.fileChooser.savePaths.title");
 		if (path == null) {
@@ -152,7 +149,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			//Starts counting with 1 in the file name
 			for(int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + (i+1) + ".prob2trace");
-				String createdBy = "Test Case Generation: " + item.getName() + "; " + traceInformation.get(i);
+				String createdBy = item.createdByForMetadata(i);
 				save(traces.get(i), traceFilePath, createdBy);
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
