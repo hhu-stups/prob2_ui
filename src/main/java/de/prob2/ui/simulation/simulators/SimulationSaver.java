@@ -98,8 +98,7 @@ public class SimulationSaver extends ProBFileHandler {
             //Starts counting with 1 in the file name
             for(int i = 1; i <= numberGeneratedTraces; i++) {
                 final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
-                String createdBy = "Simulation: " + item.getTypeAsName() + "; " + item.getConfiguration();
-                JsonMetadata jsonMetadata = createMetadata(createdBy);
+                JsonMetadata jsonMetadata = createMetadata(item.createdByForMetadata());
                 this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath, jsonMetadata);
             }
         } catch (IOException e) {

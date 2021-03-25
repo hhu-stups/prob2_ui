@@ -121,8 +121,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
 			for(Trace trace : item.getTraces()){
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + numberGeneratedTraces + ".prob2trace");
-				String createdBy = item.createdByForMetadata();
-				save(trace, traceFilePath, createdBy);
+				save(trace, traceFilePath, item.createdByForMetadata());
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 				numberGeneratedTraces++;
 			}
@@ -149,8 +148,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			//Starts counting with 1 in the file name
 			for(int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + (i+1) + ".prob2trace");
-				String createdBy = item.createdByForMetadata(i);
-				save(traces.get(i), traceFilePath, createdBy);
+				save(traces.get(i), traceFilePath, item.createdByForMetadata(i));
 				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
 			}
 
