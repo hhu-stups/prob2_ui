@@ -98,13 +98,14 @@ public class TraceViewHandler {
             if (from != null) {
                 from.getTraceFiles().removeListener(listener);
             }
-            traces.unbind();
             if (to != null) {
                 final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(to);
                 traces.bind(machineTraces);
                 noTraces.bind(to.tracesProperty().emptyProperty());
                 to.getTraceFiles().addListener(listener);
             } else {
+                traces.unbind();
+                traces.clear();
                 noTraces.unbind();
                 noTraces.set(true);
             }
