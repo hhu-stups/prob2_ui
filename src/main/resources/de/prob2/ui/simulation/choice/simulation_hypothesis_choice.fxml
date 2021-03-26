@@ -6,10 +6,14 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
-<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationPropertyItem?>
-<?import de.prob2.ui.simulation.choice.SimulationHypothesisChoice.SimulationHypothesisChoiceItem?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+
+
+<!-- Do not remove the following imports as they are detected as unused accidentally -->
+
+<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationPropertyItem?>
+<?import de.prob2.ui.simulation.choice.SimulationHypothesisChoice.SimulationHypothesisChoiceItem?>
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationEndingItem?>
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationStartingItem?>
 

@@ -1,9 +1,8 @@
 package de.prob2.ui.simulation.choice;
 
-import com.google.inject.Injector;
+
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.beans.NamedArg;

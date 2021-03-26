@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.simulators.check;
 
 
+import com.google.inject.Injector;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -15,8 +16,8 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 
     protected int numberSuccess;
 
-    public AbstractSimulationMonteCarlo(CurrentTrace currentTrace, Trace trace, int numberExecutions, SimulationCheckingType type, Map<String, Object> additionalInformation) {
-        super(currentTrace, trace, numberExecutions, additionalInformation);
+    public AbstractSimulationMonteCarlo(Injector injector, CurrentTrace currentTrace, int numberExecutions, SimulationCheckingType type, Map<String, Object> additionalInformation) {
+        super(injector, currentTrace, numberExecutions, additionalInformation);
         this.type = type;
         this.numberSuccess = 0;
     }

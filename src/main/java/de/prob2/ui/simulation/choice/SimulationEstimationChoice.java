@@ -50,6 +50,21 @@ public class SimulationEstimationChoice extends SimulationAbstractMonteCarloChoi
         super(stageManager, "simulation_estimation_choice.fxml");
     }
 
+    @Override
+    public boolean checkSelection() {
+        boolean selection = super.checkSelection();
+        if(!selection) {
+            return selection;
+        }
+        try {
+            Double.parseDouble(tfDesiredValue.getText());
+            Double.parseDouble(tfEpsilon.getText());
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
     public Map<String, Object> extractInformation() {
         Map<String, Object> information = super.extractInformation();
         information.put("ESTIMATION_TYPE", estimationChoice.getSelectionModel().getSelectedItem().getEstimationType());

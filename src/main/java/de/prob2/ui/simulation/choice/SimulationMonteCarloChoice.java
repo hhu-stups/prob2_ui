@@ -128,6 +128,7 @@ public class SimulationMonteCarloChoice extends GridPane {
     }
 
     protected SimulationMonteCarloChoice() {
+        super();
         //Default constructor for super classes using other FXML file
     }
 
@@ -183,8 +184,48 @@ public class SimulationMonteCarloChoice extends GridPane {
     }
 
     public boolean checkSelection() {
-        // TODO: Check integer
-        return !(tfSteps.getText().isEmpty() && tfSimulations.getText().isEmpty());
+        SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
+        try {
+            Integer.parseInt(tfSimulations.getText());
+            switch (startingItem.getStartingType()) {
+                case NO_CONDITION:
+                    break;
+                case START_AFTER_STEPS:
+                    Integer.parseInt(tfStartAfter.getText());
+                    break;
+                case STARTING_PREDICATE:
+                    if(tfStartingPredicate.getText().isEmpty()) {
+                        return false;
+                    }
+                    break;
+                case STARTING_TIME:
+                    Integer.parseInt(tfStartingTime.getText());
+                    break;
+                default:
+                    break;
+            }
+
+            SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
+            switch(endingItem.getEndingType()) {
+                case NUMBER_STEPS:
+                    Integer.parseInt(tfSteps.getText());
+                    break;
+                case ENDING_PREDICATE:
+                    if(tfEndingPredicate.getText().isEmpty()) {
+                        return false;
+                    }
+                    break;
+                case ENDING_TIME:
+                    Integer.parseInt(tfEndingTime.getText());
+                    break;
+                default:
+                    break;
+            }
+
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
 
     public Map<String, Object> extractInformation() {

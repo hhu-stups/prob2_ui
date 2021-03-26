@@ -50,6 +50,21 @@ public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoi
         super(stageManager, "simulation_hypothesis_choice.fxml");
     }
 
+    @Override
+    public boolean checkSelection() {
+        boolean selection = super.checkSelection();
+        if(!selection) {
+            return selection;
+        }
+        try {
+            Double.parseDouble(tfProbability.getText());
+            Double.parseDouble(tfSignificance.getText());
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
     public Map<String, Object> extractInformation() {
         Map<String, Object> information = super.extractInformation();
         information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());

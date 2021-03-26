@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.simulators.check;
 
+import com.google.inject.Injector;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
@@ -28,9 +29,9 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 
     private final double epsilon;
 
-    public SimulationEstimator(final CurrentTrace currentTrace, Trace trace, int numberExecutions, SimulationCheckingType type,
+    public SimulationEstimator(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, SimulationCheckingType type,
                                final EstimationType estimationType, final double desiredValue, final double epsilon, Map<String, Object> additionalInformation) {
-        super(currentTrace, trace, numberExecutions, type, additionalInformation);
+        super(injector, currentTrace, numberExecutions, type, additionalInformation);
         this.estimationType = estimationType;
         this.desiredValue = desiredValue;
         this.epsilon = epsilon;

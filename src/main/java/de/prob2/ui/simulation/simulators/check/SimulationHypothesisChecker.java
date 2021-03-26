@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.simulators.check;
 
+import com.google.inject.Injector;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
@@ -112,9 +113,9 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
 	private final double significance;
 
-    public SimulationHypothesisChecker(final CurrentTrace currentTrace, final Trace trace, final int numberExecutions, final SimulationCheckingType type,
+    public SimulationHypothesisChecker(final Injector injector, final CurrentTrace currentTrace, final int numberExecutions, final SimulationCheckingType type,
 									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance, final Map<String, Object> additionalInformation) {
-        super(currentTrace, trace, numberExecutions, type, additionalInformation);
+        super(injector, currentTrace, numberExecutions, type, additionalInformation);
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.significance = significance;

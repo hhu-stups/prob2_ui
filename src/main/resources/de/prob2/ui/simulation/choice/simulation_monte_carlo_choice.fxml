@@ -7,8 +7,12 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+
+<!-- Do not remove the following imports as they are detected as unused accidentally -->
+
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationEndingItem?>
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationStartingItem?>
+
 
 <fx:root type="SimulationMonteCarloChoice" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>

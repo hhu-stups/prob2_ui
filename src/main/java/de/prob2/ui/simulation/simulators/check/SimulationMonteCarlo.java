@@ -1,12 +1,18 @@
 package de.prob2.ui.simulation.simulators.check;
 
 
+import com.google.inject.Injector;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.SimulationError;
+import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +62,8 @@ public class SimulationMonteCarlo extends Simulator {
 		NOT_FINISHED, SUCCESS, FAIL
 	}
 
+	protected final Injector injector;
+
 	protected Map<String, List<Integer>> operationExecutions;
 
 	protected Map<String, List<Integer>> operationEnablings;
@@ -65,8 +73,6 @@ public class SimulationMonteCarlo extends Simulator {
 	protected List<List<Integer>> resultingTimestamps;
 
     protected List<Trace> resultingTraces;
-
-    protected Trace trace;
 
     protected int numberExecutions;
 
@@ -82,14 +88,14 @@ public class SimulationMonteCarlo extends Simulator {
 
 	protected MonteCarloCheckResult result;
 
-    public SimulationMonteCarlo(final CurrentTrace currentTrace, Trace trace, int numberExecutions, Map<String, Object> additionalInformation) {
+    public SimulationMonteCarlo(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, Map<String, Object> additionalInformation) {
         super(currentTrace);
+        this.injector = injector;
         this.operationExecutions = new HashMap<>();
         this.operationEnablings = new HashMap<>();
         this.operationExecutionPercentage = new HashMap<>();
         this.resultingTraces = new ArrayList<>();
         this.resultingTimestamps = new ArrayList<>();
-        this.trace = trace;
         this.numberExecutions = numberExecutions;
         this.startingConditionReached = false;
         this.startAtStep = Integer.MAX_VALUE;
@@ -114,7 +120,11 @@ public class SimulationMonteCarlo extends Simulator {
 			String predicate = (String) additionalInformation.get("ENDING_PREDICATE");
 			State state = trace.getCurrentState();
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate);
-			return "TRUE".equals(evalResult);
+			if("TRUE".equals(evalResult)) {
+				return true;
+			} else if(!"FALSE".equals(evalResult)) {
+				throw new SimulationError("Ending predicate is not of type boolean");
+			}
 		} else if(additionalInformation.containsKey("ENDING_TIME")) {
 			int endingTime = (int) additionalInformation.get("ENDING_TIME");
 			return time.get() > startAtTime + endingTime;
@@ -138,6 +148,8 @@ public class SimulationMonteCarlo extends Simulator {
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate);
 			if("TRUE".equals(evalResult)) {
 				setStartingInformation();
+			} else if(!"FALSE".equals(evalResult)) {
+				throw new SimulationError("Starting predicate is not of type boolean");
 			}
 		} else if(additionalInformation.containsKey("STARTING_TIME")) {
 			int startingTime = (int) additionalInformation.get("STARTING_TIME");
@@ -157,7 +169,7 @@ public class SimulationMonteCarlo extends Simulator {
 
     @Override
     public void run() {
-		Trace startTrace = new Trace(trace.getStateSpace());
+		Trace startTrace = new Trace(currentTrace.get().getStateSpace());
 
 		try {
 			startTrace.getStateSpace().startTransaction();
@@ -176,6 +188,13 @@ public class SimulationMonteCarlo extends Simulator {
 				resetSimulator();
 			}
 			check();
+		} catch (SimulationError e) {
+			this.result = MonteCarloCheckResult.FAIL;
+			Platform.runLater(() -> {
+				final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "simulation.error.header.runtime", "simulation.error.body.runtime");
+				alert.initOwner(injector.getInstance(SimulatorStage.class));
+				alert.showAndWait();
+			});
 		} finally {
 			startTrace.getStateSpace().endTransaction();
 		}
