@@ -114,7 +114,7 @@ dependencies {
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel", version: "4.0.0-SNAPSHOT"
 	implementation group: "net.harawata", name: "appdirs", version: "1.2.1"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "8.40.18"
-	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.5"
+	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.6"
 	implementation group: "org.fxmisc.wellbehaved", name: "wellbehavedfx", version: "0.3.3"
 	// Version 4.0.0 and later of fx-gson are incompatible with Java 8.
 	implementation group: "org.hildan.fxgson", name: "fx-gson", version: "3.1.2"
