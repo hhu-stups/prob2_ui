@@ -183,7 +183,6 @@ public class SimulationMonteCarlo extends Simulator {
 				resultingTraces.add(newTrace);
 				resultingTimestamps.add(getTimestamps());
 				checkTrace(newTrace, time.get());
-				// TODO: Checkbox for extended statistics
 				collectOperationStatistics(newTrace);
 				resetSimulator();
 			}

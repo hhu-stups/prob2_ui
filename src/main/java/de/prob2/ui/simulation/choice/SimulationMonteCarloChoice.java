@@ -233,12 +233,18 @@ public class SimulationMonteCarloChoice extends GridPane {
             return false;
         }
         try {
-            Integer.parseInt(tfSimulations.getText());
+            int numberSimulations = Integer.parseInt(tfSimulations.getText());
+            if(numberSimulations < 0) {
+                return false;
+            }
             switch (startingItem.getStartingType()) {
                 case NO_CONDITION:
                     break;
                 case START_AFTER_STEPS:
-                    Integer.parseInt(tfStartAfter.getText());
+                    int startAfterSteps = Integer.parseInt(tfStartAfter.getText());
+                    if(startAfterSteps < 0) {
+                        return false;
+                    }
                     break;
                 case STARTING_PREDICATE:
                     if(tfStartingPredicate.getText().isEmpty()) {
@@ -246,7 +252,10 @@ public class SimulationMonteCarloChoice extends GridPane {
                     }
                     break;
                 case STARTING_TIME:
-                    Integer.parseInt(tfStartingTime.getText());
+                    int startingTime = Integer.parseInt(tfStartingTime.getText());
+                    if(startingTime < 0) {
+                        return false;
+                    }
                     break;
                 default:
                     break;
@@ -254,7 +263,10 @@ public class SimulationMonteCarloChoice extends GridPane {
 
             switch(endingItem.getEndingType()) {
                 case NUMBER_STEPS:
-                    Integer.parseInt(tfSteps.getText());
+                    int numberSteps = Integer.parseInt(tfSteps.getText());
+                    if(numberSteps < 0) {
+                        return false;
+                    }
                     break;
                 case ENDING_PREDICATE:
                     if(tfEndingPredicate.getText().isEmpty()) {
@@ -262,7 +274,10 @@ public class SimulationMonteCarloChoice extends GridPane {
                     }
                     break;
                 case ENDING_TIME:
-                    Integer.parseInt(tfEndingTime.getText());
+                    int endingTime = Integer.parseInt(tfEndingTime.getText());
+                    if(endingTime < 0) {
+                        return false;
+                    }
                     break;
                 default:
                     break;

@@ -60,7 +60,7 @@ public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoi
         try {
             double probability = Double.parseDouble(tfProbability.getText());
             double significance = Double.parseDouble(tfSignificance.getText());
-            if(probability > 1.0 || probability < 0.0) {
+            if(probability >= 1.0 || probability <= 0.0 || significance <= 0.0) {
                 return false;
             }
             switch (hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType()) {
