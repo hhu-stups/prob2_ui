@@ -440,7 +440,6 @@ public class SimulatorStage extends Stage {
 	@FXML
 	public void addSimulation() {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
-		choosingStage.reset();
 		choosingStage.showAndWait();
 	}
 

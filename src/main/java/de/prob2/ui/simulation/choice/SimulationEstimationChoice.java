@@ -58,8 +58,17 @@ public class SimulationEstimationChoice extends SimulationAbstractMonteCarloChoi
             return selection;
         }
         try {
-            Double.parseDouble(tfDesiredValue.getText());
-            Double.parseDouble(tfEpsilon.getText());
+            double desiredValue = Double.parseDouble(tfDesiredValue.getText());
+            double epsilon = Double.parseDouble(tfEpsilon.getText());
+            switch (estimationChoice.getSelectionModel().getSelectedItem().getEstimationType()) {
+                case MEAN:
+                    if(desiredValue <= 0.0 || desiredValue >= 1.0 || epsilon <= 0.0) {
+                        return false;
+                    }
+                    return epsilon*2 <= Math.min(desiredValue, 1 - desiredValue);
+                default:
+                    break;
+            }
         } catch (NumberFormatException e) {
             return false;
         }
