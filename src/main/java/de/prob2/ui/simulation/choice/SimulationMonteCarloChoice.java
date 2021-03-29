@@ -4,15 +4,21 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
 import javafx.beans.NamedArg;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @FXMLInjected
 public class SimulationMonteCarloChoice extends GridPane {
@@ -34,6 +40,18 @@ public class SimulationMonteCarloChoice extends GridPane {
             return startingType;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SimulationStartingItem that = (SimulationStartingItem) o;
+            return startingType == that.startingType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(startingType);
+        }
     }
 
     public static class SimulationEndingItem {
@@ -53,6 +71,18 @@ public class SimulationMonteCarloChoice extends GridPane {
             return endingType;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SimulationEndingItem that = (SimulationEndingItem) o;
+            return endingType == that.endingType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(endingType);
+        }
     }
 
     public static class SimulationPropertyItem {
@@ -72,6 +102,18 @@ public class SimulationMonteCarloChoice extends GridPane {
             return checkingType;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SimulationPropertyItem that = (SimulationPropertyItem) o;
+            return checkingType == that.checkingType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(checkingType);
+        }
     }
 
     protected SimulationChoosingStage choosingStage;
@@ -282,5 +324,50 @@ public class SimulationMonteCarloChoice extends GridPane {
         tfSimulations.clear();
         tfSteps.clear();
     }
+
+    public void bindSimulationsProperty(SimpleStringProperty property) {
+        tfSimulations.textProperty().bindBidirectional(property);
+    }
+
+    public void bindStartingProperty(SimpleStringProperty startAfterProperty, SimpleStringProperty startingPredicateProperty, SimpleStringProperty startingTimeProperty) {
+        tfStartAfter.textProperty().bindBidirectional(startAfterProperty);
+        tfStartingPredicate.textProperty().bindBidirectional(startingPredicateProperty);
+        tfStartingTime.textProperty().bindBidirectional(startingTimeProperty);
+    }
+
+    public void bindEndingProperty(SimpleStringProperty stepsProperty, SimpleStringProperty endingPredicateProperty, SimpleStringProperty endingTimeProperty) {
+        tfSteps.textProperty().bindBidirectional(stepsProperty);
+        tfEndingPredicate.textProperty().bindBidirectional(endingPredicateProperty);
+        tfEndingTime.textProperty().bindBidirectional(endingTimeProperty);
+    }
+
+    public void bindStartingItemProperty(SimpleObjectProperty<SimulationStartingItem> property) {
+        // Bind bidirectional does not work on ReadOnlyObjectProperty
+        startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+            if(!Objects.equals(from, to)) {
+                property.set(to);
+            }
+        });
+        property.addListener((observable, from, to) -> {
+            if(!Objects.equals(from, to)) {
+                startingChoice.getSelectionModel().select(to);
+            }
+        });
+    }
+
+    public void bindEndingItemProperty(SimpleObjectProperty<SimulationEndingItem> property) {
+        // Bind bidirectional does not work on ReadOnlyObjectProperty
+        endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+            if(!Objects.equals(from, to)) {
+                property.set(to);
+            }
+        });
+        property.addListener((observable, from, to) -> {
+            if(!Objects.equals(from, to)) {
+                endingChoice.getSelectionModel().select(to);
+            }
+        });
+    }
+
 
 }

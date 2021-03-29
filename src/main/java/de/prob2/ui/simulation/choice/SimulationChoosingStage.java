@@ -4,7 +4,6 @@ package de.prob2.ui.simulation.choice;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.SimulationItemHandler;
-import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
@@ -17,13 +16,14 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-
+@Singleton
 public class SimulationChoosingStage extends Stage {
 
 	public static class SimulationChoiceItem {
@@ -77,13 +77,16 @@ public class SimulationChoosingStage extends Stage {
 
 	private final SimulationItemHandler simulationItemHandler;
 
+	private final SimulationChoiceBindings simulationChoiceBindings;
+
 	@Inject
 	public SimulationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject,
-								   final SimulationItemHandler simulationItemHandler) {
+								   final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.simulationItemHandler = simulationItemHandler;
+		this.simulationChoiceBindings = simulationChoiceBindings;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "simulation_choice.fxml");
 	}
@@ -102,6 +105,7 @@ public class SimulationChoosingStage extends Stage {
 		simulationMonteCarloChoice.setSimulationChoosingStage(this);
 		simulationHypothesisChoice.setSimulationChoosingStage(this);
 		simulationEstimationChoice.setSimulationChoosingStage(this);
+		bindCommonProperties();
 	}
 
 	private void setCheckListeners() {
@@ -179,7 +183,6 @@ public class SimulationChoosingStage extends Stage {
 
     private void changeGUIType(final SimulationType type) {
         inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, simulationEstimationChoice);
-		simulationHypothesisChoice.clear();
         switch (type) {
 			case MONTE_CARLO_SIMULATION:
 				inputBox.getChildren().add(0, simulationMonteCarloChoice);
@@ -208,6 +211,38 @@ public class SimulationChoosingStage extends Stage {
 
 	public void setPath(Path path) {
 		simulationItemHandler.setPath(path);
+	}
+
+	private void bindCommonProperties() {
+		// These bindings are used to synchronize the labels in SimulationMonteCarloChoice, SimulationHypothesisChoice, and SimulationEstimationChoice
+		simulationMonteCarloChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
+		simulationHypothesisChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
+		simulationEstimationChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
+
+		simulationMonteCarloChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
+		simulationHypothesisChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
+		simulationEstimationChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
+
+		simulationMonteCarloChoice.bindStartingItemProperty(simulationChoiceBindings.startingItemProperty());
+		simulationHypothesisChoice.bindStartingItemProperty(simulationChoiceBindings.startingItemProperty());
+		simulationEstimationChoice.bindStartingItemProperty(simulationChoiceBindings.startingItemProperty());
+
+		simulationMonteCarloChoice.bindEndingProperty(simulationChoiceBindings.stepsProperty(), simulationChoiceBindings.endingPredicateProperty(), simulationChoiceBindings.endingTimeProperty());
+		simulationHypothesisChoice.bindEndingProperty(simulationChoiceBindings.stepsProperty(), simulationChoiceBindings.endingPredicateProperty(), simulationChoiceBindings.endingTimeProperty());
+		simulationEstimationChoice.bindEndingProperty(simulationChoiceBindings.stepsProperty(), simulationChoiceBindings.endingPredicateProperty(), simulationChoiceBindings.endingTimeProperty());
+
+		simulationMonteCarloChoice.bindEndingItemProperty(simulationChoiceBindings.endingItemProperty());
+		simulationHypothesisChoice.bindEndingItemProperty(simulationChoiceBindings.endingItemProperty());
+		simulationEstimationChoice.bindEndingItemProperty(simulationChoiceBindings.endingItemProperty());
+
+		simulationHypothesisChoice.bindMonteCarloTimeProperty(simulationChoiceBindings.monteCarloTimeProperty());
+		simulationEstimationChoice.bindMonteCarloTimeProperty(simulationChoiceBindings.monteCarloTimeProperty());
+
+		simulationHypothesisChoice.bindPredicateProperty(simulationChoiceBindings.predicateProperty());
+		simulationEstimationChoice.bindPredicateProperty(simulationChoiceBindings.predicateProperty());
+
+		simulationHypothesisChoice.bindCheckingProperty(simulationChoiceBindings.checkingProperty());
+		simulationEstimationChoice.bindCheckingProperty(simulationChoiceBindings.checkingProperty());
 	}
 
 }

@@ -4,15 +4,19 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import javafx.beans.NamedArg;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @FXMLInjected
 public class SimulationAbstractMonteCarloChoice extends SimulationMonteCarloChoice {
@@ -75,4 +79,27 @@ public class SimulationAbstractMonteCarloChoice extends SimulationMonteCarloChoi
         }
         return information;
     }
+
+    public void bindMonteCarloTimeProperty(SimpleStringProperty monteCarloTimeProperty) {
+        tfMonteCarloTime.textProperty().bindBidirectional(monteCarloTimeProperty);
+    }
+
+    public void bindPredicateProperty(SimpleStringProperty predicateProperty) {
+        tfPredicate.textProperty().bindBidirectional(predicateProperty);
+    }
+
+    public void bindCheckingProperty(SimpleObjectProperty<SimulationPropertyItem> property) {
+        // Bind bidirectional does not work on ReadOnlyObjectProperty
+        checkingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+            if(!Objects.equals(from, to)) {
+                property.set(to);
+            }
+        });
+        property.addListener((observable, from, to) -> {
+            if(!Objects.equals(from, to)) {
+                checkingChoice.getSelectionModel().select(to);
+            }
+        });
+    }
+
 }
