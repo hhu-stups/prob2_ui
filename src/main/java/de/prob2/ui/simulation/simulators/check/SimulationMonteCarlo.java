@@ -122,7 +122,7 @@ public class SimulationMonteCarlo extends Simulator {
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate);
 			if("TRUE".equals(evalResult)) {
 				return true;
-			} else if(!"FALSE".equals(evalResult)) {
+			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
 				throw new SimulationError("Ending predicate is not of type boolean");
 			}
 		} else if(additionalInformation.containsKey("ENDING_TIME")) {
@@ -148,7 +148,7 @@ public class SimulationMonteCarlo extends Simulator {
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate);
 			if("TRUE".equals(evalResult)) {
 				setStartingInformation();
-			} else if(!"FALSE".equals(evalResult)) {
+			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
 				throw new SimulationError("Starting predicate is not of type boolean");
 			}
 		} else if(additionalInformation.containsKey("STARTING_TIME")) {
