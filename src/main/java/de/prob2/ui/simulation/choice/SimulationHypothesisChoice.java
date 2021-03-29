@@ -58,8 +58,20 @@ public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoi
             return selection;
         }
         try {
-            Double.parseDouble(tfProbability.getText());
-            Double.parseDouble(tfSignificance.getText());
+            double probability = Double.parseDouble(tfProbability.getText());
+            double significance = Double.parseDouble(tfSignificance.getText());
+            if(probability > 1.0 || probability < 0.0) {
+                return false;
+            }
+            switch (hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType()) {
+                case TWO_TAILED:
+                    return significance*2 <= Math.min(probability, 1 - probability);
+                case RIGHT_TAILED:
+                case LEFT_TAILED:
+                    return significance <= Math.min(probability, 1 - probability);
+                default:
+                    break;
+            }
         } catch (NumberFormatException e) {
             return false;
         }
