@@ -185,6 +185,11 @@ public class SimulationMonteCarloChoice extends GridPane {
 
     public boolean checkSelection() {
         SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
+        SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
+
+        if(startingItem == null || endingItem == null) {
+            return false;
+        }
         try {
             Integer.parseInt(tfSimulations.getText());
             switch (startingItem.getStartingType()) {
@@ -205,7 +210,6 @@ public class SimulationMonteCarloChoice extends GridPane {
                     break;
             }
 
-            SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
             switch(endingItem.getEndingType()) {
                 case NUMBER_STEPS:
                     Integer.parseInt(tfSteps.getText());

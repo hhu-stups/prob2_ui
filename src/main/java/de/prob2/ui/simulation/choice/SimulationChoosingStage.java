@@ -4,9 +4,11 @@ package de.prob2.ui.simulation.choice;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.SimulationItemHandler;
+import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.HBox;
@@ -67,6 +69,8 @@ public class SimulationChoosingStage extends Stage {
 	@FXML
 	private ChoiceBox<SimulationChoiceItem> simulationChoice;
 
+	private final StageManager stageManager;
+
 	private final ResourceBundle bundle;
 
 	private final CurrentProject currentProject;
@@ -76,6 +80,7 @@ public class SimulationChoosingStage extends Stage {
 	@Inject
 	public SimulationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject,
 								   final SimulationItemHandler simulationItemHandler) {
+		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.simulationItemHandler = simulationItemHandler;
@@ -103,18 +108,18 @@ public class SimulationChoosingStage extends Stage {
         btAdd.setOnAction(e -> {
 			boolean validChoice = checkSelection();
 			if(!validChoice) {
+				showInvalidSelection();
 				return;
 			}
-			// TODO: Inform user
             this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
             this.close();
         });
         btCheck.setOnAction(e -> {
         	boolean validChoice = checkSelection();
-        	if(!validChoice) {
-        		return;
+			if(!validChoice) {
+				showInvalidSelection();
+				return;
 			}
-        	// TODO: Inform user
             final SimulationItem newItem = this.extractItem();
             final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), newItem);
             this.close();
@@ -136,6 +141,12 @@ public class SimulationChoosingStage extends Stage {
 				break;
 		}
 		return true;
+	}
+
+	private void showInvalidSelection() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "simulation.error.header.invalid", "simulation.error.body.invalid");
+		alert.initOwner(this);
+		alert.showAndWait();
 	}
 
 
