@@ -2,6 +2,7 @@ package de.prob2.ui.config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -86,8 +87,8 @@ public final class Config {
 				logger.info("Config file not found, loading default settings");
 				configData = new ConfigData();
 			} catch (IOException exc) {
-				logger.warn("Failed to open config file", exc);
-				return;
+				logger.warn("Failed to load config file", exc);
+				throw new UncheckedIOException("Failed to load config file: " + exc, exc);
 			}
 		} else {
 			logger.info("Config loading disabled via runtime options, loading default config");
