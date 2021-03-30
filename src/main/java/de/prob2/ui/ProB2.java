@@ -10,6 +10,7 @@ import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.BasicConfig;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.RuntimeOptions;
+import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.internal.BasicConfigModule;
 import de.prob2.ui.internal.ConfigDirectory;
 import de.prob2.ui.internal.ConfigFile;
@@ -36,6 +37,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -62,6 +64,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ProB2 extends Application {
+	public static final String BUG_REPORT_URL = "https://github.com/hhu-stups/prob-issues/issues/new/choose";
+
 	private Logger logger;
 
 	private RuntimeOptions runtimeOptions;
@@ -175,6 +179,23 @@ public class ProB2 extends Application {
 		}
 	}
 
+	private void showStartupError(final Throwable t, final Stage primaryStage) {
+		primaryStage.setTitle("Error during ProB 2.0 startup");
+		
+		final String errorText = "An error occurred while starting ProB 2.0. Please copy the error information below and create a bug report at: " + BUG_REPORT_URL + "\n\n" + ExceptionAlert.getExceptionStackTrace(t);
+		final TextArea errorTextArea = new TextArea(errorText);
+		errorTextArea.setEditable(false);
+		errorTextArea.setWrapText(true);
+		// The weird height is intentional,
+		// to make the text field cut off in the middle of a line.
+		// This hopefully makes it more obvious to the user
+		// that there is more text below that can be seen by scrolling.
+		errorTextArea.setPrefHeight(390.0);
+		final Scene startupErrorScene = new Scene(errorTextArea);
+		primaryStage.setScene(startupErrorScene);
+		primaryStage.show();
+	}
+
 	@Override
 	public void start(Stage primaryStage) {
 		final ImageView loadingImageView = new ImageView(ProB2.class.getResource("ProB_Logo.png").toExternalForm());
@@ -187,7 +208,14 @@ public class ProB2 extends Application {
 		primaryStage.show();
 
 		new Thread(() -> {
-			final Scene mainScene = this.startInBackground(primaryStage);
+			final Scene mainScene;
+			try {
+				mainScene = this.startInBackground(primaryStage);
+			} catch (RuntimeException | Error t) {
+				logger.error("Uncaught exception during UI startup", t);
+				Platform.runLater(() -> this.showStartupError(t, primaryStage));
+				return;
+			}
 			Platform.runLater(() -> this.postStart(primaryStage, mainScene));
 		}, "Main UI Loader").start();
 	}

@@ -42,7 +42,7 @@ public class HelpMenu extends Menu {
 
 	@FXML
 	private void handleReportBug() {
-		injector.getInstance(ProB2.class).getHostServices().showDocument("https://github.com/hhu-stups/prob-issues/issues/new/choose");
+		injector.getInstance(ProB2.class).getHostServices().showDocument(ProB2.BUG_REPORT_URL);
 	}
 
 	MenuItem getAboutItem() {

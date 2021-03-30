@@ -90,7 +90,7 @@ public final class ExceptionAlert extends Alert {
 		});
 	}
 	
-	private static String getExceptionStackTrace(final Throwable throwable) {
+	public static String getExceptionStackTrace(final Throwable throwable) {
 		try (final CharArrayWriter caw = new CharArrayWriter(); final PrintWriter pw = new PrintWriter(caw)) {
 			throwable.printStackTrace(pw);
 			return caw.toString();
