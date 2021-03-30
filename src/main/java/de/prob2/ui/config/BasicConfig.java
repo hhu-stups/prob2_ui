@@ -2,13 +2,11 @@ package de.prob2.ui.config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Locale;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -27,14 +25,14 @@ public final class BasicConfig {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BasicConfig.class);
 	
 	private final Path configFilePath;
-	private final Gson gson;
+	private final ObjectMapper objectMapper;
 	
 	@Inject
-	private BasicConfig(final @ConfigFile Path configFilePath, final Gson gson) {
+	private BasicConfig(final @ConfigFile Path configFilePath, final ObjectMapper objectMapper) {
 		super();
 		
 		this.configFilePath = configFilePath;
-		this.gson = gson;
+		this.objectMapper = objectMapper;
 	}
 	
 	/**
@@ -43,8 +41,8 @@ public final class BasicConfig {
 	 * @return basic settings from the config file
 	 */
 	private BasicConfigData load() {
-		try (final Reader reader = Files.newBufferedReader(this.configFilePath)) {
-			final BasicConfigData data = gson.fromJson(reader, BasicConfigData.class);
+		try {
+			final BasicConfigData data = this.objectMapper.readValue(this.configFilePath.toFile(), BasicConfigData.class);
 			if (data == null) {
 				// Config file is empty, use defaults instead.
 				return new BasicConfigData();
@@ -54,7 +52,7 @@ public final class BasicConfig {
 			LOGGER.info("Config file not found while loading basic config, loading default settings", exc);
 			return new BasicConfigData();
 		} catch (IOException exc) {
-			LOGGER.warn("Failed to open config file while loading basic config", exc);
+			LOGGER.warn("Failed to load basic config", exc);
 			return new BasicConfigData();
 		}
 	}
