@@ -65,7 +65,7 @@ public class SimulationEstimationChoice extends SimulationAbstractMonteCarloChoi
                     if(desiredValue <= 0.0 || desiredValue >= 1.0 || epsilon <= 0.0) {
                         return false;
                     }
-                    return epsilon*2 <= Math.min(desiredValue, 1 - desiredValue);
+                    return epsilon <= Math.min(desiredValue, 1 - desiredValue);
                 default:
                     break;
             }
