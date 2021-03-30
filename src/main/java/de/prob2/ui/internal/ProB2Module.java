@@ -1,5 +1,12 @@
 package de.prob2.ui.internal;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
@@ -9,6 +16,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
@@ -29,18 +37,13 @@ import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
 import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
-import javafx.geometry.BoundingBox;
 import javafx.util.BuilderFactory;
-import org.hildan.fxgson.FxGson;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import org.hildan.fxgson.FxGson;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -110,16 +113,6 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(json.getAsString()))
 			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString().replaceAll("\\\\", "/")))
 			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsString()))
-			.registerTypeAdapter(BoundingBox.class, (JsonSerializer<BoundingBox>)(src, typeOfSrc, context) ->
-				context.serialize(new double[] {src.getMinX(), src.getMinY(), src.getWidth(), src.getHeight()})
-			)
-			.registerTypeAdapter(BoundingBox.class, (JsonDeserializer<BoundingBox>)(json, typeOfT, context) -> {
-				final double[] array = context.deserialize(json, double[].class);
-				if (array.length != 4) {
-					throw new IllegalArgumentException("JSON array representing a BoundingBox must have exactly 4 elements");
-				}
-				return new BoundingBox(array[0], array[1], array[2], array[3]);
-			})
 			.registerTypeAdapter(LTLFormulaItem.class, LTLFormulaItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLPatternItem.class, LTLPatternItem.JSON_DESERIALIZER)
 			.registerTypeAdapter(LTLData.class, LTLData.JSON_DESERIALIZER)
@@ -138,5 +131,10 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(MagicEdgegroup.class, MagicEdgegroup.JSON_DESERIALIZER)
 			.registerTypeAdapter(MagicLayoutSettings.class, MagicLayoutSettings.JSON_DESERIALIZER)
 			.create();
+	}
+
+	@Provides
+	private static ObjectMapper provideObjectMapper() {
+		return new ObjectMapper().registerModule(new ProB2UIJacksonModule());
 	}
 }

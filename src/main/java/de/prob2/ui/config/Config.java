@@ -9,15 +9,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.json.JsonManager;
-import de.prob.json.JsonMetadata;
-import de.prob.json.ObjectWithMetadata;
+import de.prob.json.JacksonManager;
+import de.prob.json.JsonConversionException;
 import de.prob2.ui.internal.ConfigFile;
 import de.prob2.ui.internal.StopActions;
 
@@ -29,28 +27,26 @@ public final class Config {
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
 	private final Path configFilePath;
-	private final JsonManager<ConfigData> jsonManager;
+	private final JacksonManager<ConfigData> jacksonManager;
 	private final RuntimeOptions runtimeOptions;
 	
 	private ConfigData currentConfigData;
 	private final List<ConfigListener> listeners;
 
 	@Inject
-	private Config(final @ConfigFile Path configFilePath, final Gson gson, final JsonManager<ConfigData> jsonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
+	private Config(final @ConfigFile Path configFilePath, final ObjectMapper objectMapper, final JacksonManager<ConfigData> jacksonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
 		this.configFilePath = configFilePath;
-		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new JsonManager.Context<ConfigData>(gson, ConfigData.class, ConfigData.FILE_TYPE, ConfigData.CURRENT_FORMAT_VERSION) {
-			private static final String ERROR_LEVEL_FIELD = "errorLevel";
-			
+		this.jacksonManager = jacksonManager;
+		this.jacksonManager.initContext(new JacksonManager.Context<ConfigData>(objectMapper, ConfigData.class, ConfigData.FILE_TYPE, ConfigData.CURRENT_FORMAT_VERSION, false) {
 			@Override
-			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
-				if (oldMetadata.getFormatVersion() <= 0) {
-					throw new JsonParseException("Loading config files older than format version 1 is no longer supported (config file uses format version " + oldMetadata.getFormatVersion() + ")");
+			public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
+				if (oldVersion <= 0) {
+					throw new JsonConversionException("Loading config files older than format version 1 is no longer supported (config file uses format version " + oldVersion + ")");
 				}
-				if (oldMetadata.getFormatVersion() <= 1) {
-					oldObject.addProperty(ERROR_LEVEL_FIELD, "WARNING");
+				if (oldVersion <= 1) {
+					oldObject.put("errorLevel", "WARNING");
 				}
-				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+				return oldObject;
 			}
 		});
 		this.runtimeOptions = runtimeOptions;
@@ -77,7 +73,7 @@ public final class Config {
 		ConfigData configData;
 		if (this.runtimeOptions.isLoadConfig()) {
 			try {
-				configData = this.jsonManager.readFromFile(this.configFilePath).getObject();
+				configData = this.jacksonManager.readFromFile(this.configFilePath);
 				logger.info("Config successfully loaded from {}", this.configFilePath);
 				if (configData == null) {
 					// Config file is empty, use default config.
@@ -109,13 +105,16 @@ public final class Config {
 		}
 		
 		final ConfigData configData = this.currentConfigData;
+		
+		// Replace any existing metadata that was previously loaded from the file.
+		configData.setMetadata(ConfigData.metadataBuilder().build());
 
 		for (final ConfigListener listener : this.listeners) {
 			listener.saveConfig(configData);
 		}
 
 		try {
-			this.jsonManager.writeToFile(this.configFilePath, configData);
+			this.jacksonManager.writeToFile(this.configFilePath, configData);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			logger.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
