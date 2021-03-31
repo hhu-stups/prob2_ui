@@ -12,19 +12,37 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
 <fx:root type="Dialog" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
-		<DialogPane prefHeight="330.0" prefWidth="360.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+		<DialogPane prefHeight="284.0" prefWidth="414.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
 			<content>
-				<Pane>
+				<VBox>
 					<children>
-						<Button fx:id="firstMachine" layoutX="23.0" layoutY="71.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="First Machine" />
-						<Button fx:id="secondMachine" layoutX="23.0" layoutY="124.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="Second Machine" />
-						<Button fx:id="traceFile" layoutX="23.0" layoutY="174.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="Trace File" />
-						<ChoiceBox fx:id="options" layoutX="23.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="320.0" />
-						<CheckBox fx:id="checkBox" layoutX="23.0" layoutY="235.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="set result as trace in current machine" />
+						<ChoiceBox fx:id="options" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="320.0">
+							<VBox.margin>
+								<Insets top="10.0" />
+							</VBox.margin>
+						</ChoiceBox>
+						<Button fx:id="firstMachine" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="First Machine">
+							<VBox.margin>
+								<Insets top="10.0" />
+							</VBox.margin>
+						</Button>
+						<Button fx:id="secondMachine" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="Second Machine">
+							<VBox.margin>
+								<Insets top="10.0" />
+							</VBox.margin>
+						</Button>
+						<Button fx:id="traceFile" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="Trace File">
+							<VBox.margin>
+								<Insets top="10.0" />
+							</VBox.margin>
+						</Button>
+						<CheckBox fx:id="checkBox" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="set result as trace in current machine" />
 					</children>
-				</Pane>
+				</VBox>
 			</content>
 		</DialogPane>
 	</dialogPane>
