@@ -86,51 +86,37 @@ public class TraceRefactoredSetup {
 	}
 
 
-	private TraceChecker createChecker(ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException {
-		StateSpace localStateSpace = TraceCheckerUtils.createStateSpace(machineA.toString(), injector);
 
+	private TraceChecker create(boolean useStateSpaceFromCurrentlyLoaded, boolean useDynamicChecks, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException {
+		StateSpace localStateSpace;
+
+		if(useStateSpaceFromCurrentlyLoaded){
+			localStateSpace = stateSpace;
+		}else{
+			localStateSpace = TraceCheckerUtils.createStateSpace(machineA.toString(), injector);
+		}
+
+		String localMachineB;
+
+		if(useDynamicChecks){
+			localMachineB = this.machineB.toString();
+		}else{
+			localMachineB = null;
+		}
 
 		return new TraceChecker(persistentTrace.getTransitionList(),
 				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
 				new HashMap<>(localStateSpace.getLoadedMachine().getOperations()),
 				new HashSet<>(traceJsonFile.getVariableNames()),
 				new HashSet<>(localStateSpace.getLoadedMachine().getVariableNames()),
-				machineA.toString(),
-				machineB.toString(),
-				injector,
-				new MappingFactory(injector, stageManager),
-				replayOptions,
-				progressMemory);
-	}
-
-	private TraceChecker createCheckerForLocalMachine(StateSpace stateSpace, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException, DeltaCalculationException {
-		return new TraceChecker(persistentTrace.getTransitionList(),
-				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
-				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
-				new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
-				new HashSet<>(traceJsonFile.getVariableNames()),
+				localMachineB,
 				machineA.toString(),
 				injector,
 				new MappingFactory(injector, stageManager),
 				replayOptions,
 				progressMemory);
+
 	}
-
-
-	private TraceChecker createComplexCheckerForLocalMachine(StateSpace stateSpace, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException {
-		return new TraceChecker(persistentTrace.getTransitionList(),
-				new HashMap<>(traceJsonFile.getMachineOperationInfos()),
-				new HashMap<>(stateSpace.getLoadedMachine().getOperations()),
-				new HashSet<>(traceJsonFile.getVariableNames()),
-				new HashSet<>(stateSpace.getLoadedMachine().getVariableNames()),
-				machineB.toString(),
-				machineA.toString(),
-				injector,
-				new MappingFactory(injector, stageManager),
-				replayOptions,
-				progressMemory);
-	}
-
 
 
 
@@ -153,16 +139,7 @@ public class TraceRefactoredSetup {
 		Runnable traceCheckerRunnable = () -> {
 
 			try {
-				if(withLocalStateSpace){
-					if(machineB != null){
-						traceChecker = createComplexCheckerForLocalMachine(stateSpace, replayOptions, progressMemory);
-					}else{
-						traceChecker = createCheckerForLocalMachine(stateSpace, replayOptions, progressMemory);
-					}
-				}else{
-					traceChecker = createChecker(replayOptions, progressMemory);
-				}
-
+				traceChecker = create(withLocalStateSpace, machineB != null && !machineA.equals(machineB), replayOptions, progressMemory);
 				Platform.runLater(progressStage::close);
 			} catch (Exception e) {
 				throw new TraceModificationError(e);
