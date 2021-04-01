@@ -663,11 +663,9 @@ public class TraceRefactorResults extends Dialog<List<PersistentTrace>> {
 					inner.add(rightMixedNames, 1, row);
 					List<String> partnerIntermediate2 = TraceAnalyser.calculateIntermediate(singleton(candidate), selectedTrace).get(candidate);
 
-					Label rightMixedNames1 = new Label(partnerIntermediate2.get(0));
-					Label rightMixedNames2 = new Label(partnerIntermediate2.get(1)); //toDO WRONG111111
+					List<Label> partner = partnerIntermediate2.stream().map(Label::new).collect(toList());
 					VBox mixedNames = new VBox();
-					mixedNames.getChildren().add(rightMixedNames1);
-					mixedNames.getChildren().add(rightMixedNames2);
+					mixedNames.getChildren().addAll(partner);
 					inner.add(mixedNames, 2, row);
 					break;
 			}
