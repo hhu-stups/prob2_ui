@@ -10,7 +10,6 @@ import de.prob.check.tracereplay.check.refinement.RefinementChecker;
 import de.prob.check.tracereplay.check.traceConstruction.AdvancedTraceConstructor;
 import de.prob.check.tracereplay.check.traceConstruction.TraceConstructionError;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.*;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetup;
@@ -77,7 +76,7 @@ public class RefactorButton extends Button {
 					TraceRefactoredSetup traceRefactoredSetup = null;
 					try {
 						traceRefactoredSetup = new TraceRefactoredSetup(traceJsonFile,  result.fileAlpha, result.fileBeta, result.getTraceFile(), injector, currentProject, stageManager);
-					} catch (IOException | ModelTranslationError e) {
+					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					traceRefactoredSetup.executeCheck(currentProject.getCurrentMachine().getLocation()==result.getFileAlpha());
@@ -104,7 +103,7 @@ public class RefactorButton extends Button {
 						alert.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
 
 						alert.showAndWait();
-					} catch (IOException | TraceConstructionError | BCompoundException | ModelTranslationError e) {
+					} catch (IOException | TraceConstructionError | BCompoundException e) {
 						e.printStackTrace();
 					}
 					break;
@@ -134,7 +133,7 @@ public class RefactorButton extends Button {
 							currentProject.getCurrentMachine().addTraceFile(path);
 						}
 
-					} catch (TraceConstructionError | IOException | ModelTranslationError traceConstructionError) {
+					} catch (TraceConstructionError | IOException traceConstructionError) {
 						traceConstructionError.printStackTrace();
 					}
 

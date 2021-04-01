@@ -10,7 +10,6 @@ import de.prob.check.tracereplay.check.TraceModifier;
 import de.prob.check.tracereplay.check.exploration.ReplayOptions;
 import de.prob.check.tracereplay.check.renamig.DeltaCalculationException;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.animation.tracereplay.*;
@@ -71,7 +70,7 @@ public class TraceRefactoredSetup {
 	}
 
 	public TraceRefactoredSetup(TraceJsonFile traceJsonFile, Path machineA, Path machineB, Path tracePath,
-								Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException, ModelTranslationError {
+								Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException {
 		this.traceJsonFile = traceJsonFile;
 		this.machineA = machineA;
 		this.machineB = machineB;
@@ -87,7 +86,7 @@ public class TraceRefactoredSetup {
 
 
 
-	private TraceChecker create(boolean useStateSpaceFromCurrentlyLoaded, boolean useDynamicChecks, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, ModelTranslationError, DeltaCalculationException {
+	private TraceChecker create(boolean useStateSpaceFromCurrentlyLoaded, boolean useDynamicChecks, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, DeltaCalculationException {
 		StateSpace localStateSpace;
 
 		if(useStateSpaceFromCurrentlyLoaded){

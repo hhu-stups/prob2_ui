@@ -11,7 +11,6 @@ import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.formula.PredicateBuilder;
-import de.prob.scripting.ModelTranslationError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
