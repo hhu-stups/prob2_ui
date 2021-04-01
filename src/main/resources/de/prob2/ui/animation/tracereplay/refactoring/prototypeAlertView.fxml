@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Dialog?>
+<?import javafx.scene.layout.BorderPane?>
+
+<fx:root type="Dialog" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
+	<dialogPane>
+		<DialogPane>
+			<content>
+				<BorderPane fx:id="border" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0">
+					<center>
+						<Accordion fx:id="toplevelAccordion">
+							<panes>
+								<TitledPane fx:id="typeII" animated="false" text="Placeholder" >
+								</TitledPane>
+								<TitledPane fx:id="typeIIPer" animated="false" text="Placeholder">
+								</TitledPane>
+								<TitledPane fx:id="typeIII" animated="false" text="Placeholder">
+								</TitledPane>
+								<TitledPane fx:id="typeIV" animated="false" text="Placeholder">
+								</TitledPane>
+							</panes>
+						</Accordion>
+					</center>
+				</BorderPane>
+			</content>
+		</DialogPane>
+	</dialogPane>
+</fx:root>

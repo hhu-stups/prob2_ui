@@ -7,6 +7,8 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
@@ -17,6 +19,8 @@ public class TraceSaver {
     private final CurrentTrace currentTrace;
 
     private final CurrentProject currentProject;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TraceSaver.class);
 
     @Inject
     public TraceSaver(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject) {
@@ -32,7 +36,8 @@ public class TraceSaver {
             try {
             	traceSaver.save(possiblyLostTrace, currentProject.getCurrentMachine());
             } catch (Exception e) {
-                TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
+				LOGGER.error("", e);
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
                 alert.initOwner(window);
                 alert.setAttemptedReplayOrLostTrace(possiblyLostTrace);
                 alert.setErrorMessage();

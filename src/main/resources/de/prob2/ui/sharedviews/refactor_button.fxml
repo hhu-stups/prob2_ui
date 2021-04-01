@@ -2,14 +2,14 @@
 
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.sharedviews.ReloadButton?>
+<?import de.prob2.ui.sharedviews.RefactorButton?>
 <?import javafx.scene.control.Tooltip?>
-<fx:root type="ReloadButton" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="RefactorButton" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
 	<graphic>
-		<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}"/>
+		<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RECYCLE" bindableFontSize="${fontSize.fontSize + 2}"/>
 	</graphic>
 	<tooltip>
 		<Tooltip text="%internal.navigationButtons.reload.tooltip"/>
