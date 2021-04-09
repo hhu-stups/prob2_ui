@@ -30,6 +30,8 @@ public final class SimulationStatsView extends Stage {
 	@FXML
 	private Label percentage;
 	@FXML
+	private Label wallTime;
+	@FXML
 	private GridPane statisticsPane;
 
 	private final ObjectProperty<SimulationStats> stats;
@@ -48,11 +50,13 @@ public final class SimulationStatsView extends Stage {
 				numberSimulations.setText(null);
 				numberSuccess.setText(null);
 				percentage.setText(null);
+				wallTime.setText(null);
 				statisticsPane.getChildren().clear();
 			} else {
 				numberSimulations.setText(String.valueOf(to.getNumberSimulations()));
 				numberSuccess.setText(String.valueOf(to.getNumberSuccess()));
 				percentage.setText(String.valueOf(to.getPercentage()));
+				wallTime.setText(String.format("%s s", to.getWallTime()));
 				buildExtendedStatistics(to.getExtendedStats());
 
 			}

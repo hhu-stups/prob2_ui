@@ -6,6 +6,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import org.apache.commons.math3.special.Erf;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
@@ -142,10 +144,11 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
     }
 
 	@Override
-	protected void calculateStatistics() {
+	protected void calculateStatistics(long time) {
+		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
-		this.stats = new SimulationStats(n, numberSuccess, ratio, calculateExtendedStats());
+		this.stats = new SimulationStats(n, numberSuccess, ratio, wallTime, calculateExtendedStats());
 	}
 
 	public SimulationStats getStats() {

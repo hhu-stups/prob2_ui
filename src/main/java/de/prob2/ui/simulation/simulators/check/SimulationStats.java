@@ -8,14 +8,17 @@ public class SimulationStats {
 
     private final double percentage;
 
+    private final double wallTime;
+
     private final SimulationExtendedStats extendedStats;
 
 
     public SimulationStats(int numberSimulations, int numberSuccess, double percentage,
-                           SimulationExtendedStats extendedStats) {
+                           double wallTime, SimulationExtendedStats extendedStats) {
         this.numberSimulations = numberSimulations;
         this.numberSuccess = numberSuccess;
         this.percentage = percentage;
+        this.wallTime = wallTime;
         this.extendedStats = extendedStats;
     }
 
@@ -29,6 +32,10 @@ public class SimulationStats {
 
     public double getPercentage() {
         return percentage;
+    }
+
+    public double getWallTime() {
+        return wallTime;
     }
 
     public SimulationExtendedStats getExtendedStats() {

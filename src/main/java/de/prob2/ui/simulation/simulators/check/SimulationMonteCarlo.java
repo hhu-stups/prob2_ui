@@ -14,6 +14,8 @@ import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -171,9 +173,10 @@ public class SimulationMonteCarlo extends Simulator {
     public void run() {
 		Trace startTrace = new Trace(currentTrace.get().getStateSpace());
 
+		long wallTime = 0;
 		try {
 			startTrace.getStateSpace().startTransaction();
-
+			wallTime = System.currentTimeMillis();
 			for (int i = 0; i < numberExecutions; i++) {
 				Trace newTrace = startTrace;
 				setupBeforeSimulation(newTrace);
@@ -195,9 +198,10 @@ public class SimulationMonteCarlo extends Simulator {
 				alert.showAndWait();
 			});
 		} finally {
+			wallTime = System.currentTimeMillis() - wallTime;
 			startTrace.getStateSpace().endTransaction();
 		}
-		calculateStatistics();
+		calculateStatistics(wallTime);
     }
 
     public void check() {
@@ -251,8 +255,9 @@ public class SimulationMonteCarlo extends Simulator {
 		this.startAtTime = Integer.MAX_VALUE;
 	}
 
-	protected void calculateStatistics() {
-		stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, calculateExtendedStats());
+	protected void calculateStatistics(long time) {
+    	double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
+		stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, calculateExtendedStats());
 	}
 
 	public SimulationExtendedStats calculateExtendedStats() {

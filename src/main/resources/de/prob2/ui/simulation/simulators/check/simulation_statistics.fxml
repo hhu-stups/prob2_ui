@@ -26,6 +26,10 @@
                     <Label text="%simulation.statistics.percentage" styleClass="bold" />
                     <Label fx:id="percentage" />
                 </HBox>
+                <HBox spacing="7.0">
+                    <Label text="%simulation.statistics.wallTime" styleClass="bold" />
+                    <Label fx:id="wallTime" />
+                </HBox>
                 <ScrollPane>
                     <GridPane fx:id="statisticsPane"/>
                 </ScrollPane>
