@@ -39,7 +39,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		public Distribution(int n, double p) {
 			this.n = n;
 			this.p = p;
-			this.mu = Math.round(n * p);
+			this.mu = n * p;
 			this.sigma = Math.sqrt(n * p * (1 - p));
 			this.dsf = new DistributionFunction(mu, sigma);
 		}
