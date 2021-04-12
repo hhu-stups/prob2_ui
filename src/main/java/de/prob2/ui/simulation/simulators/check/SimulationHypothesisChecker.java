@@ -125,15 +125,15 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
     public void check() {
 		Distribution distribution = new Distribution(resultingTraces.size(), probability);
-		double coverage = 0.0;
+		double coverage;
 		int range = 0;
 
 		for (int i = 0; i <= distribution.getN(); i++) {
+			coverage = distribution.calculateCoverage(hypothesisCheckingType, i);
 			if (1.0 - coverage < significance) {
 				range = i;
 				break;
 			}
-			coverage = distribution.calculateCoverage(hypothesisCheckingType, i);
 		}
 
 		if(distribution.isSuccess(hypothesisCheckingType, numberSuccess, range)) {
