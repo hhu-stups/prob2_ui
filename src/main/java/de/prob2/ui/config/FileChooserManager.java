@@ -178,7 +178,7 @@ public class FileChooserManager {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind).toFile());
 		}
 		final File file = fileChooser.showSaveDialog(window);
-		if (file != null && kind.equals(Kind.NEW_MACHINE)) {
+		if (file != null && Kind.NEW_MACHINE.equals(kind)) {
 			int i = file.toString().lastIndexOf('.');
 			String fileExtension = i == -1 ? null : "*" + file.toString().substring(i);
 			if (fileExtension == null || fileChooser.getExtensionFilters().stream().noneMatch(extensionFilter -> extensionFilter.getExtensions().contains(fileExtension))) {
