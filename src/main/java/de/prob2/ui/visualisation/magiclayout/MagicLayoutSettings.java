@@ -1,33 +1,40 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-import de.prob.json.JsonManager;
+import de.prob.json.HasMetadata;
+import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
 
-import java.lang.reflect.Type;
 import java.util.List;
 
-public class MagicLayoutSettings {
-	public static final JsonDeserializer<MagicLayoutSettings> JSON_DESERIALIZER = MagicLayoutSettings::new;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class MagicLayoutSettings implements HasMetadata {
+	public static final String FILE_TYPE = "Magic Layout settings";
+	public static final int CURRENT_FORMAT_VERSION = 1;
 
 	private String machineName;
 	private List<MagicNodegroup> nodegroups;
 	private List<MagicEdgegroup> edgegroups;
+	private final JsonMetadata metadata;
 
-	public MagicLayoutSettings(String machineName, List<MagicNodegroup> nodegroups, List<MagicEdgegroup> edgegroups) {
+	@JsonCreator
+	public MagicLayoutSettings(
+		@JsonProperty("machineName") final String machineName,
+		@JsonProperty("nodegroups") final List<MagicNodegroup> nodegroups,
+		@JsonProperty("edgegroups") final List<MagicEdgegroup> edgegroups,
+		@JsonProperty("metadata") final JsonMetadata metadata
+	) {
 		this.machineName = machineName;
 		this.nodegroups = nodegroups;
 		this.edgegroups = edgegroups;
+		this.metadata = metadata;
 	}
 	
-	private MagicLayoutSettings(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
-		final JsonObject object = json.getAsJsonObject();
-		this.machineName = JsonManager.checkDeserialize(context, object, "machineName", String.class);
-		this.nodegroups = JsonManager.checkDeserialize(context, object, "nodegroups", new TypeToken<List<MagicNodegroup>>() {}.getType());
-		this.edgegroups = JsonManager.checkDeserialize(context, object, "edgegroups", new TypeToken<List<MagicEdgegroup>>() {}.getType());
+	public static JsonMetadataBuilder metadataBuilder() {
+		return new JsonMetadataBuilder(FILE_TYPE, CURRENT_FORMAT_VERSION)
+			.withSavedNow()
+			.withUserCreator();
 	}
 	
 	public String getMachineName() {
@@ -40,5 +47,20 @@ public class MagicLayoutSettings {
 	
 	public List<MagicEdgegroup> getEdgegroups() {
 		return edgegroups;
+	}
+	
+	@Override
+	public JsonMetadata getMetadata() {
+		return this.metadata;
+	}
+	
+	@Override
+	public HasMetadata withMetadata(final JsonMetadata metadata) {
+		return new MagicLayoutSettings(
+			this.getMachineName(),
+			this.getNodegroups(),
+			this.getEdgegroups(),
+			metadata
+		);
 	}
 }

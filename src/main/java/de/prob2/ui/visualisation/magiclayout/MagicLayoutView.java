@@ -11,10 +11,12 @@ import javax.imageio.ImageIO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.json.JsonMetadata;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.editpane.MagicLayoutEditEdges;
@@ -73,17 +75,20 @@ public class MagicLayoutView extends Stage {
 	private final MagicGraphI magicGraph;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
+	private final VersionInfo versionInfo;
 	private final MagicLayoutSettingsManager settingsManager;
 	private final ResourceBundle bundle;
 
 	@Inject
 	public MagicLayoutView(final StageManager stageManager, final MagicGraphI magicGraph,
 			final CurrentTrace currentTrace, final CurrentProject currentProject,
+			final VersionInfo versionInfo,
 			final MagicLayoutSettingsManager settingsManager, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.magicGraph = magicGraph;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.versionInfo = versionInfo;
 		this.settingsManager = settingsManager;
 		this.bundle = bundle;
 		stageManager.loadFXML(this, "magic_layout_view.fxml");
@@ -182,8 +187,13 @@ public class MagicLayoutView extends Stage {
 
 	@FXML
 	private void saveLayoutSettings() {
-		MagicLayoutSettings layoutSettings = new MagicLayoutSettings(currentProject.getCurrentMachine().getName(),
-				magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
+		final String machineName = currentProject.getCurrentMachine().getName();
+		final JsonMetadata metadata = MagicLayoutSettings.metadataBuilder()
+			.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+			.withModelName(machineName)
+			.build();
+		MagicLayoutSettings layoutSettings = new MagicLayoutSettings(machineName,
+				magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups(), metadata);
 		settingsManager.save(layoutSettings);
 	}
 

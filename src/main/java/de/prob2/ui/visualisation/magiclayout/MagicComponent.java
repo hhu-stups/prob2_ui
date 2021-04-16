@@ -1,16 +1,11 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import de.prob.json.JsonManager;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 
-import java.lang.reflect.Type;
 import java.util.Objects;
 
 public abstract class MagicComponent {
@@ -23,40 +18,48 @@ public abstract class MagicComponent {
 	private final ObjectProperty<MagicLineWidth> lineWidth = new SimpleObjectProperty<>();
 	private final ObjectProperty<Color> textColor = new SimpleObjectProperty<>();
 	
+	// No Jackson deserialization annotations here - they need to go on the subclass constructors.
+	protected MagicComponent(
+		final String name,
+		final String expression,
+		final MagicLineType lineType,
+		final Color lineColor,
+		final MagicLineWidth lineWidth,
+		final Color textColor
+	) {
+		this.name.set(name);
+		this.expression.set(expression);
+		
+		this.lineType.set(lineType);
+		this.lineColor.set(lineColor);
+		this.lineWidth.set(lineWidth);
+		this.textColor.set(textColor);
+	}
+	
 	public MagicComponent(String name) {
 		this(name, "");
 	}
 	
 	public MagicComponent(String name, String expression) {
-		this.name.set(name);
-		this.expression.set(expression);
-		
-		this.lineType.set(MagicLineType.CONTINUOUS);
-		this.lineColor.set(Color.BLACK);
-		this.lineWidth.set(MagicLineWidth.DEFAULT);
-		this.textColor.set(Color.BLACK);
+		this(
+			name,
+			expression,
+			MagicLineType.CONTINUOUS,
+			Color.BLACK,
+			MagicLineWidth.DEFAULT,
+			Color.BLACK
+		);
 	}
 	
 	public MagicComponent(MagicComponent component) {
-		this.name.set(component.getName());
-		this.expression.set(component.getExpression());
-		
-		this.lineType.set(component.getLineType());
-		this.lineColor.set(component.getLineColor());
-		this.lineWidth.set(component.getLineWidth());
-		this.textColor.set(component.getTextColor());
-	}
-	
-	protected MagicComponent(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
-		final JsonObject object = json.getAsJsonObject();
-		
-		this.name.set(JsonManager.checkDeserialize(context, object, "name", String.class));
-		this.expression.set(JsonManager.checkDeserialize(context, object, "expression", String.class));
-		
-		this.lineType.set(JsonManager.checkDeserialize(context, object, "lineType", MagicLineType.class));
-		this.lineColor.set(JsonManager.checkDeserialize(context, object, "lineColor", Color.class));
-		this.lineWidth.set(JsonManager.checkDeserialize(context, object, "lineWidth", MagicLineWidth.class));
-		this.textColor.set(JsonManager.checkDeserialize(context, object, "textColor", Color.class));
+		this(
+			component.getName(),
+			component.getExpression(),
+			component.getLineType(),
+			component.getLineColor(),
+			component.getLineWidth(),
+			component.getTextColor()
+		);
 	}
 	
 	public StringProperty nameProperty() {

@@ -32,11 +32,8 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.visualisation.magiclayout.MagicEdgegroup;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
-import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
-import de.prob2.ui.visualisation.magiclayout.MagicNodegroup;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -127,9 +124,6 @@ public class ProB2Module extends AbstractModule {
 			.registerTypeAdapter(Machine.class, Machine.JSON_DESERIALIZER)
 			.registerTypeAdapter(Preference.class, Preference.JSON_DESERIALIZER)
 			.registerTypeAdapter(Project.class, Project.JSON_DESERIALIZER)
-			.registerTypeAdapter(MagicNodegroup.class, MagicNodegroup.JSON_DESERIALIZER)
-			.registerTypeAdapter(MagicEdgegroup.class, MagicEdgegroup.JSON_DESERIALIZER)
-			.registerTypeAdapter(MagicLayoutSettings.class, MagicLayoutSettings.JSON_DESERIALIZER)
 			.create();
 	}
 

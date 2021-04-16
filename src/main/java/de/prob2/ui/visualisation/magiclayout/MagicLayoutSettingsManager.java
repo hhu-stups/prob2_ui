@@ -5,17 +5,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 
-import de.prob.json.JsonManager;
-import de.prob.json.JsonMetadata;
-import de.prob.json.ObjectWithMetadata;
+import de.prob.json.JacksonManager;
+import de.prob.json.JsonConversionException;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.stage.FileChooser;
@@ -27,32 +24,29 @@ public class MagicLayoutSettingsManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MagicLayoutSettingsManager.class);
 	private static final String MAGIC_FILE_EXTENSION = "prob2magic";
 
-	private final JsonManager<MagicLayoutSettings> jsonManager;
-	private final VersionInfo versionInfo;
+	private final JacksonManager<MagicLayoutSettings> jsonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 
 	@Inject
-	public MagicLayoutSettingsManager(Gson gson, JsonManager<MagicLayoutSettings> jsonManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager,
+	public MagicLayoutSettingsManager(ObjectMapper objectMapper, JacksonManager<MagicLayoutSettings> jsonManager, CurrentProject currentProject, StageManager stageManager,
 									  FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new JsonManager.Context<MagicLayoutSettings>(gson, MagicLayoutSettings.class, "Magic Layout settings", 1) {
+		this.jsonManager.initContext(new JacksonManager.Context<MagicLayoutSettings>(objectMapper, MagicLayoutSettings.class, MagicLayoutSettings.FILE_TYPE, MagicLayoutSettings.CURRENT_FORMAT_VERSION, true) {
 			@Override
-			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
-				if (oldMetadata.getFileType() == null) {
-					assert oldMetadata.getFormatVersion() == 0;
+			public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
+				if (oldVersion == 0) {
 					for (final String fieldName : new String[] {"machineName", "nodegroups", "edgegroups"}) {
 						if (!oldObject.has(fieldName)) {
-							throw new JsonParseException("Not a valid Magic Layout settings file - missing required field " + fieldName);
+							throw new JsonConversionException("Not a valid Magic Layout settings file - missing required field " + fieldName);
 						}
 					}
 				}
-				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+				return oldObject;
 			}
 		});
-		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -76,11 +70,7 @@ public class MagicLayoutSettingsManager {
 
 		if (path != null) {
 			try {
-				final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
-					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-					.withModelName(layoutSettings.getMachineName())
-					.build();
-				this.jsonManager.writeToFile(path, layoutSettings, metadata);
+				this.jsonManager.writeToFile(path, layoutSettings);
 			} catch (FileNotFoundException exc) {
 				LOGGER.warn("Failed to create layout settings file", exc);
 				stageManager.makeExceptionAlert(exc,
@@ -109,7 +99,7 @@ public class MagicLayoutSettingsManager {
 		final Path path = fileChooserManager.showOpenFileChooser(fileChooser, null, stageManager.getCurrent());
 		if (path != null) {
 			try {
-				return this.jsonManager.readFromFile(path).getObject();
+				return this.jsonManager.readFromFile(path);
 			} catch (IOException e) {
 				LOGGER.warn("Failed to read magic layout settings file", e);
 				stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotReadFile.content", path);

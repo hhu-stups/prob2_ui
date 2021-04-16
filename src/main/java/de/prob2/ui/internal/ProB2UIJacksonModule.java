@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import javafx.geometry.BoundingBox;
+import javafx.scene.paint.Color;
 
 /**
  * Jackson module containing custom serializers and deserializers used by the UI.
@@ -127,6 +128,51 @@ final class ProB2UIJacksonModule extends Module {
 		}
 	}
 	
+	// (De)serializers that use a hex string representation for JavaFX Color objects.
+	// This format is compatible with the FX Gson library that we previously used.
+	
+	private static final class ColorSerializer extends StdSerializer<Color> {
+		private static final long serialVersionUID = 1L;
+		
+		private ColorSerializer() {
+			super(Color.class);
+		}
+		
+		@Override
+		public void serialize(final Color value, final JsonGenerator gen, final SerializerProvider provider) throws IOException {
+			final int red = (int)Math.round(value.getRed() * 255.0);
+			final int green = (int)Math.round(value.getGreen() * 255.0);
+			final int blue = (int)Math.round(value.getBlue() * 255.0);
+			final int opacity = (int)Math.round(value.getOpacity() * 255.0);
+			gen.writeString(String.format("#%02x%02x%02x%02x", red, green, blue, opacity));
+		}
+	}
+	
+	private static final class ColorDeserializer extends StdDeserializer<Color> {
+		private static final long serialVersionUID = 1L;
+		
+		private ColorDeserializer() {
+			super(Color.class);
+		}
+		
+		private static double readDouble(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+			final JsonToken token = p.nextToken();
+			if (!token.isNumeric()) {
+				return (double)ctxt.handleUnexpectedToken(BoundingBox.class, p);
+			}
+			return p.getDoubleValue();
+		}
+		
+		@Override
+		public Color deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+			if (!p.hasToken(JsonToken.VALUE_STRING)) {
+				return (Color) ctxt.handleUnexpectedToken(Color.class, p);
+			}
+			
+			return Color.web(p.getText());
+		}
+	}
+	
 	ProB2UIJacksonModule() {
 		super();
 	}
@@ -145,12 +191,14 @@ final class ProB2UIJacksonModule extends Module {
 	public void setupModule(final Module.SetupContext context) {
 		context.addSerializers(new SimpleSerializers(Arrays.asList(
 			new CustomNioPathSerializer(),
-			new BoundingBoxSerializer()
+			new BoundingBoxSerializer(),
+			new ColorSerializer()
 		)));
 		
 		final Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<>();
 		deserializers.put(Path.class, new CustomNioPathDeserializer());
 		deserializers.put(BoundingBox.class, new BoundingBoxDeserializer());
+		deserializers.put(Color.class, new ColorDeserializer());
 		context.addDeserializers(new SimpleDeserializers(deserializers));
 	}
 }
