@@ -119,8 +119,4 @@ public class TraceSelectionView extends Stage {
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
 	}
-
-	public void refresh() {
-		this.traceTableView.refresh();
-	}
 }
