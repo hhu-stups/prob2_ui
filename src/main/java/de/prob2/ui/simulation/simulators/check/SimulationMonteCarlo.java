@@ -74,9 +74,9 @@ public class SimulationMonteCarlo extends Simulator {
 
 	protected List<List<Integer>> resultingTimestamps;
 
-    protected List<Trace> resultingTraces;
+	protected List<Trace> resultingTraces;
 
-    protected int numberExecutions;
+	protected int numberExecutions;
 
 	protected boolean startingConditionReached;
 
@@ -84,36 +84,36 @@ public class SimulationMonteCarlo extends Simulator {
 
 	protected int startAtTime;
 
-    protected Map<String, Object> additionalInformation;
+	protected Map<String, Object> additionalInformation;
 
 	protected SimulationStats stats;
 
 	protected MonteCarloCheckResult result;
 
-    public SimulationMonteCarlo(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, Map<String, Object> additionalInformation) {
-        super(currentTrace);
-        this.injector = injector;
-        this.operationExecutions = new HashMap<>();
-        this.operationEnablings = new HashMap<>();
-        this.operationExecutionPercentage = new HashMap<>();
-        this.resultingTraces = new ArrayList<>();
-        this.resultingTimestamps = new ArrayList<>();
-        this.numberExecutions = numberExecutions;
-        this.startingConditionReached = false;
-        this.startAtStep = Integer.MAX_VALUE;
-        this.startAtTime = Integer.MAX_VALUE;
-        this.additionalInformation = additionalInformation;
-        this.stats = null;
+	public SimulationMonteCarlo(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, Map<String, Object> additionalInformation) {
+		super(currentTrace);
+		this.injector = injector;
+		this.operationExecutions = new HashMap<>();
+		this.operationEnablings = new HashMap<>();
+		this.operationExecutionPercentage = new HashMap<>();
+		this.resultingTraces = new ArrayList<>();
+		this.resultingTimestamps = new ArrayList<>();
+		this.numberExecutions = numberExecutions;
+		this.startingConditionReached = false;
+		this.startAtStep = Integer.MAX_VALUE;
+		this.startAtTime = Integer.MAX_VALUE;
+		this.additionalInformation = additionalInformation;
+		this.stats = null;
 		this.result = MonteCarloCheckResult.NOT_FINISHED;
-    }
+	}
 
-    @Override
-    public boolean endingConditionReached(Trace trace) {
-    	if(super.endingConditionReached(trace)) {
-    		return true;
+	@Override
+	public boolean endingConditionReached(Trace trace) {
+		if(super.endingConditionReached(trace)) {
+			return true;
 		}
-    	if(!startingConditionReached) {
-    		return false;
+		if(!startingConditionReached) {
+			return false;
 		}
 		if(additionalInformation.containsKey("STEPS_PER_EXECUTION")) {
 			int stepsPerExecution = (int) additionalInformation.get("STEPS_PER_EXECUTION");
@@ -136,8 +136,8 @@ public class SimulationMonteCarlo extends Simulator {
 
 	@Override
 	public void updateStartingInformation(Trace trace) {
-    	if(startingConditionReached) {
-    		return;
+		if(startingConditionReached) {
+			return;
 		}
 		if(additionalInformation.containsKey("START_AFTER_STEPS")) {
 			int startAfterSteps = (int) additionalInformation.get("START_AFTER_STEPS");
@@ -169,8 +169,8 @@ public class SimulationMonteCarlo extends Simulator {
 		startAtTime = time.get();
 	}
 
-    @Override
-    public void run() {
+	@Override
+	public void run() {
 		Trace startTrace = new Trace(currentTrace.get().getStateSpace());
 
 		long wallTime = 0;
@@ -202,28 +202,28 @@ public class SimulationMonteCarlo extends Simulator {
 			startTrace.getStateSpace().endTransaction();
 		}
 		calculateStatistics(wallTime);
-    }
+	}
 
-    public void check() {
+	public void check() {
 		if(this.resultingTraces.size() == numberExecutions) {
 			this.result = MonteCarloCheckResult.SUCCESS;
 		} else {
 			this.result = MonteCarloCheckResult.FAIL;
 		}
-    }
+	}
 
-    public void checkTrace(Trace trace, int time) {
-    	// Monte Carlo Simulation does not apply any checks on a trace. But classes inheriting from SimulationMonteCarlo might apply some checks
+	public void checkTrace(Trace trace, int time) {
+		// Monte Carlo Simulation does not apply any checks on a trace. But classes inheriting from SimulationMonteCarlo might apply some checks
 	}
 
 	private void collectOperationStatistics(Trace trace) {
-    	Map<String, Integer> operationExecutionsTrace = new HashMap<>();
-    	Map<String, Integer> operationEnablingsTrace = new HashMap<>();
-    	for(Transition transition : trace.getTransitionList()) {
-    		String opName = transition.getName();
+		Map<String, Integer> operationExecutionsTrace = new HashMap<>();
+		Map<String, Integer> operationEnablingsTrace = new HashMap<>();
+		for(Transition transition : trace.getTransitionList()) {
+			String opName = transition.getName();
 
 			//update executed operations
-    		operationExecutionsTrace.putIfAbsent(opName, 0);
+			operationExecutionsTrace.putIfAbsent(opName, 0);
 			operationExecutionsTrace.computeIfPresent(opName, (key, val) -> val + 1);
 
 			// update enabled operations
@@ -233,14 +233,14 @@ public class SimulationMonteCarlo extends Simulator {
 						operationEnablingsTrace.computeIfPresent(enabledOp, (key, val) -> val + 1);
 					});
 		}
-    	for(String key : operationEnablingsTrace.keySet()) {
-    		//update enabled operations for all traces
+		for(String key : operationEnablingsTrace.keySet()) {
+			//update enabled operations for all traces
 			int addedEnabling = operationEnablingsTrace.getOrDefault(key, 0);
 
 			operationEnablings.putIfAbsent(key, new ArrayList<>());
 			operationEnablings.get(key).add(addedEnabling);
 
-    		//update executed operations for all traces
+			//update executed operations for all traces
 			int addedExecution = operationExecutionsTrace.getOrDefault(key, 0);
 			operationExecutions.putIfAbsent(key, new ArrayList<>());
 			operationExecutions.get(key).add(addedExecution);
@@ -256,7 +256,7 @@ public class SimulationMonteCarlo extends Simulator {
 	}
 
 	protected void calculateStatistics(long time) {
-    	double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
+		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
 		stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, calculateExtendedStats());
 	}
 

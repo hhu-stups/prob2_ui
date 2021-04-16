@@ -228,9 +228,9 @@ public class SimulatorStage extends Stage {
 
 	private final FileChooserManager fileChooserManager;
 
-    private final ObjectProperty<Path> configurationPath;
+	private final ObjectProperty<Path> configurationPath;
 
-    private final SimulationItemHandler simulationItemHandler;
+	private final SimulationItemHandler simulationItemHandler;
 
 	private int time;
 
@@ -250,18 +250,18 @@ public class SimulatorStage extends Stage {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
-	    this.realTimeSimulator = realTimeSimulator;
-	    this.machineLoader = machineLoader;
-	    this.simulationItemHandler = simulationItemHandler;
-	    this.defaultPathHandler = defaultPathHandler;
+		this.realTimeSimulator = realTimeSimulator;
+		this.machineLoader = machineLoader;
+		this.simulationItemHandler = simulationItemHandler;
+		this.defaultPathHandler = defaultPathHandler;
 		defaultPathHandler.setSimulatorStage(this);
-	    this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
+		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
-        this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
-        this.time = 0;
-        this.timer = new Timer(true);
-        stopActions.add(this::cancelTimer);
+		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
+		this.time = 0;
+		this.timer = new Timer(true);
+		stopActions.add(this::cancelTimer);
 		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
 	}
 
@@ -377,14 +377,14 @@ public class SimulatorStage extends Stage {
 	}
 
 	@FXML
-    public void loadConfiguration() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(bundle.getString("simulation.stage.filechooser.title"));
-        fileChooser.getExtensionFilters().addAll(
-                fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json")
-        );
-        Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
-        if(path != null) {
+	public void loadConfiguration() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(bundle.getString("simulation.stage.filechooser.title"));
+		fileChooser.getExtensionFilters().addAll(
+				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json")
+		);
+		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
+		if(path != null) {
 			configurationPath.set(path);
 			injector.getInstance(SimulationChoosingStage.class).setPath(path);
 			lbTime.setText("");
@@ -392,9 +392,9 @@ public class SimulatorStage extends Stage {
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}
-    }
+	}
 
-    private void resetSimulator() {
+	private void resetSimulator() {
 		lbTime.setText("");
 		this.time = 0;
 		realTimeSimulator.resetSimulator();
@@ -422,7 +422,7 @@ public class SimulatorStage extends Stage {
 		return new SimulationChoiceDebugItem(id, activations);
 	}
 
-    private void loadSimulationItems() {
+	private void loadSimulationItems() {
 		SimulationConfiguration config = realTimeSimulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 

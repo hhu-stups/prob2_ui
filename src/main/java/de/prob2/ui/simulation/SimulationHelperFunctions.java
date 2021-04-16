@@ -21,10 +21,10 @@ public class SimulationHelperFunctions {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimulationHelperFunctions.class);
 
-    public static AbstractEvalResult evaluateForSimulation(State state, String formula) {
-        // Note: Rodin parser does not have IF-THEN-ELSE nor REAL
-        return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
-    }
+	public static AbstractEvalResult evaluateForSimulation(State state, String formula) {
+		// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
+		return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
+	}
 
 	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, File file) {
 		try {

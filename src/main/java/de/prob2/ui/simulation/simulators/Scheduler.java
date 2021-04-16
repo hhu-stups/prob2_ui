@@ -15,98 +15,98 @@ import java.util.TimerTask;
 @Singleton
 public class Scheduler {
 
-    private final ChangeListener<Trace> listener;
+	private final ChangeListener<Trace> listener;
 
-    private RealTimeSimulator realTimeSimulator;
+	private RealTimeSimulator realTimeSimulator;
 
-    private Timer timer;
+	private Timer timer;
 
-    private final CurrentTrace currentTrace;
+	private final CurrentTrace currentTrace;
 
-    private final BooleanProperty runningProperty;
+	private final BooleanProperty runningProperty;
 
-    private final BooleanProperty executingOperationProperty;
+	private final BooleanProperty executingOperationProperty;
 
-    @Inject
-    public Scheduler(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
-        super();
-        this.timer = new Timer(true);
-        this.currentTrace = currentTrace;
-        this.runningProperty = new SimpleBooleanProperty(false);
-        this.executingOperationProperty = new SimpleBooleanProperty(false);
-        this.listener = (observable, from, to) -> {
-            if(to != null) {
-                if (!to.getCurrentState().isInitialised()) {
-                    realTimeSimulator.setupBeforeSimulation(to);
-                }
-            }
-        };
-        disablePropertyController.addDisableExpression(this.executingOperationProperty);
-    }
+	@Inject
+	public Scheduler(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
+		super();
+		this.timer = new Timer(true);
+		this.currentTrace = currentTrace;
+		this.runningProperty = new SimpleBooleanProperty(false);
+		this.executingOperationProperty = new SimpleBooleanProperty(false);
+		this.listener = (observable, from, to) -> {
+			if(to != null) {
+				if (!to.getCurrentState().isInitialised()) {
+					realTimeSimulator.setupBeforeSimulation(to);
+				}
+			}
+		};
+		disablePropertyController.addDisableExpression(this.executingOperationProperty);
+	}
 
-    public void run() {
-        runningProperty.set(true);
-        Trace trace;
-        if(realTimeSimulator.getTime() > 0) {
-            trace = currentTrace.get();
-        } else {
-            trace = new Trace(currentTrace.getStateSpace());
-            currentTrace.set(trace);
-        }
-        realTimeSimulator.setupBeforeSimulation(trace);
-        currentTrace.addListener(listener);
-        startSimulationLoop();
-    }
+	public void run() {
+		runningProperty.set(true);
+		Trace trace;
+		if(realTimeSimulator.getTime() > 0) {
+			trace = currentTrace.get();
+		} else {
+			trace = new Trace(currentTrace.getStateSpace());
+			currentTrace.set(trace);
+		}
+		realTimeSimulator.setupBeforeSimulation(trace);
+		currentTrace.addListener(listener);
+		startSimulationLoop();
+	}
 
-    private void startSimulationLoop() {
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (realTimeSimulator.isRunning()) {
-                    realTimeSimulator.simulate();
-                }
-                if (runningProperty.get()) {
-                    startSimulationLoop();
-                }
+	private void startSimulationLoop() {
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				if (realTimeSimulator.isRunning()) {
+					realTimeSimulator.simulate();
+				}
+				if (runningProperty.get()) {
+					startSimulationLoop();
+				}
 
-            }
-        }, realTimeSimulator.getDelay());
-    }
+			}
+		}, realTimeSimulator.getDelay());
+	}
 
-    public void setSimulator(RealTimeSimulator realTimeSimulator) {
-        this.realTimeSimulator = realTimeSimulator;
-    }
+	public void setSimulator(RealTimeSimulator realTimeSimulator) {
+		this.realTimeSimulator = realTimeSimulator;
+	}
 
-    public void stop() {
-        currentTrace.removeListener(listener);
-        runningProperty.set(false);
-    }
+	public void stop() {
+		currentTrace.removeListener(listener);
+		runningProperty.set(false);
+	}
 
-    public BooleanProperty runningPropertyProperty() {
-        return runningProperty;
-    }
+	public BooleanProperty runningPropertyProperty() {
+		return runningProperty;
+	}
 
-    public boolean isRunning() {
-        return runningProperty.get();
-    }
+	public boolean isRunning() {
+		return runningProperty.get();
+	}
 
-    public void startSimulationStep() {
-        executingOperationProperty.set(true);
-    }
+	public void startSimulationStep() {
+		executingOperationProperty.set(true);
+	}
 
-    public void endSimulationStep() {
-        executingOperationProperty.set(false);
-    }
+	public void endSimulationStep() {
+		executingOperationProperty.set(false);
+	}
 
-    public void finish() {
-        currentTrace.removeListener(listener);
-        executingOperationProperty.set(false);
-    }
+	public void finish() {
+		currentTrace.removeListener(listener);
+		executingOperationProperty.set(false);
+	}
 
-    public void stopTimer() {
-        stop();
-        timer.purge();
-        timer = null;
-    }
+	public void stopTimer() {
+		stop();
+		timer.purge();
+		timer = null;
+	}
 
 }

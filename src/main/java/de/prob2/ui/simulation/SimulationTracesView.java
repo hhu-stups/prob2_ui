@@ -195,7 +195,7 @@ public class SimulationTracesView extends Stage {
 				}
 			});
 
-            row.contextMenuProperty().bind(
+			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu) null)
 					.otherwise(new ContextMenu(loadTraceItem, playTraceItem, saveTraceItem, saveTimedTraceItem)));
@@ -218,7 +218,7 @@ public class SimulationTracesView extends Stage {
 		this.simulatorStage = simulatorStage;
 	}
 
-    public void refresh() {
-        this.traceTableView.refresh();
-    }
+	public void refresh() {
+		this.traceTableView.refresh();
+	}
 }

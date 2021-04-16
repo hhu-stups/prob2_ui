@@ -23,366 +23,366 @@ import java.util.Objects;
 @FXMLInjected
 public class SimulationMonteCarloChoice extends GridPane {
 
-    public static class SimulationStartingItem {
+	public static class SimulationStartingItem {
 
-        private final SimulationMonteCarlo.StartingType startingType;
+		private final SimulationMonteCarlo.StartingType startingType;
 
-        public SimulationStartingItem(@NamedArg("startingType") SimulationMonteCarlo.StartingType startingType) {
-            this.startingType = startingType;
-        }
+		public SimulationStartingItem(@NamedArg("startingType") SimulationMonteCarlo.StartingType startingType) {
+			this.startingType = startingType;
+		}
 
-        @Override
-        public String toString() {
-            return startingType.getName();
-        }
+		@Override
+		public String toString() {
+			return startingType.getName();
+		}
 
-        public SimulationMonteCarlo.StartingType getStartingType() {
-            return startingType;
-        }
+		public SimulationMonteCarlo.StartingType getStartingType() {
+			return startingType;
+		}
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SimulationStartingItem that = (SimulationStartingItem) o;
-            return startingType == that.startingType;
-        }
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			SimulationStartingItem that = (SimulationStartingItem) o;
+			return startingType == that.startingType;
+		}
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(startingType);
-        }
-    }
+		@Override
+		public int hashCode() {
+			return Objects.hash(startingType);
+		}
+	}
 
-    public static class SimulationEndingItem {
+	public static class SimulationEndingItem {
 
-        private final SimulationMonteCarlo.EndingType endingType;
+		private final SimulationMonteCarlo.EndingType endingType;
 
-        public SimulationEndingItem(@NamedArg("endingType") SimulationMonteCarlo.EndingType endingType) {
-            this.endingType = endingType;
-        }
+		public SimulationEndingItem(@NamedArg("endingType") SimulationMonteCarlo.EndingType endingType) {
+			this.endingType = endingType;
+		}
 
-        @Override
-        public String toString() {
-            return endingType.getName();
-        }
+		@Override
+		public String toString() {
+			return endingType.getName();
+		}
 
-        public SimulationMonteCarlo.EndingType getEndingType() {
-            return endingType;
-        }
+		public SimulationMonteCarlo.EndingType getEndingType() {
+			return endingType;
+		}
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SimulationEndingItem that = (SimulationEndingItem) o;
-            return endingType == that.endingType;
-        }
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			SimulationEndingItem that = (SimulationEndingItem) o;
+			return endingType == that.endingType;
+		}
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(endingType);
-        }
-    }
+		@Override
+		public int hashCode() {
+			return Objects.hash(endingType);
+		}
+	}
 
-    public static class SimulationPropertyItem {
+	public static class SimulationPropertyItem {
 
-        private final SimulationCheckingType checkingType;
+		private final SimulationCheckingType checkingType;
 
-        public SimulationPropertyItem(@NamedArg("checkingType") SimulationCheckingType checkingType) {
-            this.checkingType = checkingType;
-        }
+		public SimulationPropertyItem(@NamedArg("checkingType") SimulationCheckingType checkingType) {
+			this.checkingType = checkingType;
+		}
 
-        @Override
-        public String toString() {
-            return checkingType.getName();
-        }
+		@Override
+		public String toString() {
+			return checkingType.getName();
+		}
 
-        public SimulationCheckingType getCheckingType() {
-            return checkingType;
-        }
+		public SimulationCheckingType getCheckingType() {
+			return checkingType;
+		}
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SimulationPropertyItem that = (SimulationPropertyItem) o;
-            return checkingType == that.checkingType;
-        }
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			SimulationPropertyItem that = (SimulationPropertyItem) o;
+			return checkingType == that.checkingType;
+		}
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(checkingType);
-        }
-    }
+		@Override
+		public int hashCode() {
+			return Objects.hash(checkingType);
+		}
+	}
 
-    protected SimulationChoosingStage choosingStage;
+	protected SimulationChoosingStage choosingStage;
 
-    @FXML
-    protected TextField tfSimulations;
+	@FXML
+	protected TextField tfSimulations;
 
-    @FXML
-    protected Label lbStartAfter;
+	@FXML
+	protected Label lbStartAfter;
 
-    @FXML
-    protected TextField tfStartAfter;
+	@FXML
+	protected TextField tfStartAfter;
 
-    @FXML
-    protected Label lbStartingPredicate;
+	@FXML
+	protected Label lbStartingPredicate;
 
-    @FXML
-    protected TextField tfStartingPredicate;
+	@FXML
+	protected TextField tfStartingPredicate;
 
-    @FXML
-    protected Label lbStartingTime;
+	@FXML
+	protected Label lbStartingTime;
 
-    @FXML
-    protected TextField tfStartingTime;
+	@FXML
+	protected TextField tfStartingTime;
 
-    @FXML
-    protected Label lbSteps;
+	@FXML
+	protected Label lbSteps;
 
-    @FXML
-    protected TextField tfSteps;
+	@FXML
+	protected TextField tfSteps;
 
-    @FXML
-    protected Label lbEndingPredicate;
+	@FXML
+	protected Label lbEndingPredicate;
 
-    @FXML
-    protected TextField tfEndingPredicate;
+	@FXML
+	protected TextField tfEndingPredicate;
 
-    @FXML
-    protected Label lbEndingTime;
+	@FXML
+	protected Label lbEndingTime;
 
-    @FXML
-    protected TextField tfEndingTime;
+	@FXML
+	protected TextField tfEndingTime;
 
-    @FXML
-    protected ChoiceBox<SimulationStartingItem> startingChoice;
+	@FXML
+	protected ChoiceBox<SimulationStartingItem> startingChoice;
 
-    @FXML
-    protected ChoiceBox<SimulationEndingItem> endingChoice;
+	@FXML
+	protected ChoiceBox<SimulationEndingItem> endingChoice;
 
-    @Inject
-    protected SimulationMonteCarloChoice(final StageManager stageManager) {
-        super();
-        stageManager.loadFXML(this, "simulation_monte_carlo_choice.fxml");
-    }
+	@Inject
+	protected SimulationMonteCarloChoice(final StageManager stageManager) {
+		super();
+		stageManager.loadFXML(this, "simulation_monte_carlo_choice.fxml");
+	}
 
-    protected SimulationMonteCarloChoice() {
-        super();
-        //Default constructor for super classes using other FXML file
-    }
+	protected SimulationMonteCarloChoice() {
+		super();
+		//Default constructor for super classes using other FXML file
+	}
 
-    @FXML
-    protected void initialize() {
-        startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-            this.getChildren().removeAll(lbStartAfter, tfStartAfter, lbStartingPredicate, tfStartingPredicate, lbStartingTime, tfStartingTime);
-            if(to != null) {
-                switch (to.getStartingType()) {
-                    case NO_CONDITION:
-                        break;
-                    case START_AFTER_STEPS:
-                        this.add(lbStartAfter, 1, 3);
-                        this.add(tfStartAfter, 2, 3);
-                        break;
-                    case STARTING_PREDICATE:
-                        this.add(lbStartingPredicate, 1, 3);
-                        this.add(tfStartingPredicate, 2, 3);
-                        break;
-                    case STARTING_TIME:
-                        this.add(lbStartingTime, 1, 3);
-                        this.add(tfStartingTime, 2, 3);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            choosingStage.sizeToScene();
-        });
+	@FXML
+	protected void initialize() {
+		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			this.getChildren().removeAll(lbStartAfter, tfStartAfter, lbStartingPredicate, tfStartingPredicate, lbStartingTime, tfStartingTime);
+			if(to != null) {
+				switch (to.getStartingType()) {
+					case NO_CONDITION:
+						break;
+					case START_AFTER_STEPS:
+						this.add(lbStartAfter, 1, 3);
+						this.add(tfStartAfter, 2, 3);
+						break;
+					case STARTING_PREDICATE:
+						this.add(lbStartingPredicate, 1, 3);
+						this.add(tfStartingPredicate, 2, 3);
+						break;
+					case STARTING_TIME:
+						this.add(lbStartingTime, 1, 3);
+						this.add(tfStartingTime, 2, 3);
+						break;
+					default:
+						break;
+				}
+			}
+			choosingStage.sizeToScene();
+		});
 
-        endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-            this.getChildren().removeAll(lbSteps, tfSteps, lbEndingPredicate, tfEndingPredicate, lbEndingTime, tfEndingTime);
-            if(to != null) {
-                switch (to.getEndingType()) {
-                    case NUMBER_STEPS:
-                        this.add(lbSteps, 1, 5);
-                        this.add(tfSteps, 2, 5);
-                        break;
-                    case ENDING_PREDICATE:
-                        this.add(lbEndingPredicate, 1, 5);
-                        this.add(tfEndingPredicate, 2, 5);
-                        break;
-                    case ENDING_TIME:
-                        this.add(lbEndingTime, 1, 5);
-                        this.add(tfEndingTime, 2, 5);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            choosingStage.sizeToScene();
-        });
-    }
+		endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			this.getChildren().removeAll(lbSteps, tfSteps, lbEndingPredicate, tfEndingPredicate, lbEndingTime, tfEndingTime);
+			if(to != null) {
+				switch (to.getEndingType()) {
+					case NUMBER_STEPS:
+						this.add(lbSteps, 1, 5);
+						this.add(tfSteps, 2, 5);
+						break;
+					case ENDING_PREDICATE:
+						this.add(lbEndingPredicate, 1, 5);
+						this.add(tfEndingPredicate, 2, 5);
+						break;
+					case ENDING_TIME:
+						this.add(lbEndingTime, 1, 5);
+						this.add(tfEndingTime, 2, 5);
+						break;
+					default:
+						break;
+				}
+			}
+			choosingStage.sizeToScene();
+		});
+	}
 
-    public boolean checkSelection() {
-        SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
-        SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
+	public boolean checkSelection() {
+		SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
+		SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
 
-        if(startingItem == null || endingItem == null) {
-            return false;
-        }
-        try {
-            int numberSimulations = Integer.parseInt(tfSimulations.getText());
-            if(numberSimulations < 0) {
-                return false;
-            }
-            switch (startingItem.getStartingType()) {
-                case NO_CONDITION:
-                    break;
-                case START_AFTER_STEPS:
-                    int startAfterSteps = Integer.parseInt(tfStartAfter.getText());
-                    if(startAfterSteps < 0) {
-                        return false;
-                    }
-                    break;
-                case STARTING_PREDICATE:
-                    if(tfStartingPredicate.getText().isEmpty()) {
-                        return false;
-                    }
-                    break;
-                case STARTING_TIME:
-                    int startingTime = Integer.parseInt(tfStartingTime.getText());
-                    if(startingTime < 0) {
-                        return false;
-                    }
-                    break;
-                default:
-                    break;
-            }
+		if(startingItem == null || endingItem == null) {
+			return false;
+		}
+		try {
+			int numberSimulations = Integer.parseInt(tfSimulations.getText());
+			if(numberSimulations < 0) {
+				return false;
+			}
+			switch (startingItem.getStartingType()) {
+				case NO_CONDITION:
+					break;
+				case START_AFTER_STEPS:
+					int startAfterSteps = Integer.parseInt(tfStartAfter.getText());
+					if(startAfterSteps < 0) {
+						return false;
+					}
+					break;
+				case STARTING_PREDICATE:
+					if(tfStartingPredicate.getText().isEmpty()) {
+						return false;
+					}
+					break;
+				case STARTING_TIME:
+					int startingTime = Integer.parseInt(tfStartingTime.getText());
+					if(startingTime < 0) {
+						return false;
+					}
+					break;
+				default:
+					break;
+			}
 
-            switch(endingItem.getEndingType()) {
-                case NUMBER_STEPS:
-                    int numberSteps = Integer.parseInt(tfSteps.getText());
-                    if(numberSteps < 0) {
-                        return false;
-                    }
-                    break;
-                case ENDING_PREDICATE:
-                    if(tfEndingPredicate.getText().isEmpty()) {
-                        return false;
-                    }
-                    break;
-                case ENDING_TIME:
-                    int endingTime = Integer.parseInt(tfEndingTime.getText());
-                    if(endingTime < 0) {
-                        return false;
-                    }
-                    break;
-                default:
-                    break;
-            }
+			switch(endingItem.getEndingType()) {
+				case NUMBER_STEPS:
+					int numberSteps = Integer.parseInt(tfSteps.getText());
+					if(numberSteps < 0) {
+						return false;
+					}
+					break;
+				case ENDING_PREDICATE:
+					if(tfEndingPredicate.getText().isEmpty()) {
+						return false;
+					}
+					break;
+				case ENDING_TIME:
+					int endingTime = Integer.parseInt(tfEndingTime.getText());
+					if(endingTime < 0) {
+						return false;
+					}
+					break;
+				default:
+					break;
+			}
 
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        return true;
-    }
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
 
-    public Map<String, Object> extractInformation() {
-        Map<String, Object> information = new HashMap<>();
-        information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
+	public Map<String, Object> extractInformation() {
+		Map<String, Object> information = new HashMap<>();
+		information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
 
-        SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
-        if(startingItem != null) {
-            switch (startingItem.getStartingType()) {
-                case NO_CONDITION:
-                    break;
-                case START_AFTER_STEPS:
-                    information.put("START_AFTER_STEPS", Integer.parseInt(tfStartAfter.getText()));
-                    break;
-                case STARTING_PREDICATE:
-                    information.put("STARTING_PREDICATE", tfStartingPredicate.getText());
-                    break;
-                case STARTING_TIME:
-                    information.put("STARTING_TIME", Integer.parseInt(tfStartingTime.getText()));
-                    break;
-                default:
-                    break;
-            }
-        }
+		SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
+		if(startingItem != null) {
+			switch (startingItem.getStartingType()) {
+				case NO_CONDITION:
+					break;
+				case START_AFTER_STEPS:
+					information.put("START_AFTER_STEPS", Integer.parseInt(tfStartAfter.getText()));
+					break;
+				case STARTING_PREDICATE:
+					information.put("STARTING_PREDICATE", tfStartingPredicate.getText());
+					break;
+				case STARTING_TIME:
+					information.put("STARTING_TIME", Integer.parseInt(tfStartingTime.getText()));
+					break;
+				default:
+					break;
+			}
+		}
 
-        SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
-        if(endingItem != null) {
-            switch(endingItem.getEndingType()) {
-                case NUMBER_STEPS:
-                    information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
-                    break;
-                case ENDING_PREDICATE:
-                    information.put("ENDING_PREDICATE", tfEndingPredicate.getText());
-                    break;
-                case ENDING_TIME:
-                    information.put("ENDING_TIME", Integer.parseInt(tfEndingTime.getText()));
-                    break;
-                default:
-                    break;
-            }
-        }
-        return information;
-    }
+		SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
+		if(endingItem != null) {
+			switch(endingItem.getEndingType()) {
+				case NUMBER_STEPS:
+					information.put("STEPS_PER_EXECUTION", Integer.parseInt(tfSteps.getText()));
+					break;
+				case ENDING_PREDICATE:
+					information.put("ENDING_PREDICATE", tfEndingPredicate.getText());
+					break;
+				case ENDING_TIME:
+					information.put("ENDING_TIME", Integer.parseInt(tfEndingTime.getText()));
+					break;
+				default:
+					break;
+			}
+		}
+		return information;
+	}
 
-    public void setSimulationChoosingStage(SimulationChoosingStage choosingStage) {
-        this.choosingStage = choosingStage;
-    }
+	public void setSimulationChoosingStage(SimulationChoosingStage choosingStage) {
+		this.choosingStage = choosingStage;
+	}
 
-    public void clear() {
-        tfSimulations.clear();
-        tfSteps.clear();
-    }
+	public void clear() {
+		tfSimulations.clear();
+		tfSteps.clear();
+	}
 
-    public void bindSimulationsProperty(SimpleStringProperty property) {
-        tfSimulations.textProperty().bindBidirectional(property);
-    }
+	public void bindSimulationsProperty(SimpleStringProperty property) {
+		tfSimulations.textProperty().bindBidirectional(property);
+	}
 
-    public void bindStartingProperty(SimpleStringProperty startAfterProperty, SimpleStringProperty startingPredicateProperty, SimpleStringProperty startingTimeProperty) {
-        tfStartAfter.textProperty().bindBidirectional(startAfterProperty);
-        tfStartingPredicate.textProperty().bindBidirectional(startingPredicateProperty);
-        tfStartingTime.textProperty().bindBidirectional(startingTimeProperty);
-    }
+	public void bindStartingProperty(SimpleStringProperty startAfterProperty, SimpleStringProperty startingPredicateProperty, SimpleStringProperty startingTimeProperty) {
+		tfStartAfter.textProperty().bindBidirectional(startAfterProperty);
+		tfStartingPredicate.textProperty().bindBidirectional(startingPredicateProperty);
+		tfStartingTime.textProperty().bindBidirectional(startingTimeProperty);
+	}
 
-    public void bindEndingProperty(SimpleStringProperty stepsProperty, SimpleStringProperty endingPredicateProperty, SimpleStringProperty endingTimeProperty) {
-        tfSteps.textProperty().bindBidirectional(stepsProperty);
-        tfEndingPredicate.textProperty().bindBidirectional(endingPredicateProperty);
-        tfEndingTime.textProperty().bindBidirectional(endingTimeProperty);
-    }
+	public void bindEndingProperty(SimpleStringProperty stepsProperty, SimpleStringProperty endingPredicateProperty, SimpleStringProperty endingTimeProperty) {
+		tfSteps.textProperty().bindBidirectional(stepsProperty);
+		tfEndingPredicate.textProperty().bindBidirectional(endingPredicateProperty);
+		tfEndingTime.textProperty().bindBidirectional(endingTimeProperty);
+	}
 
-    public void bindStartingItemProperty(SimpleObjectProperty<SimulationStartingItem> property) {
-        // Bind bidirectional does not work on ReadOnlyObjectProperty
-        startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-            if(!Objects.equals(from, to)) {
-                property.set(to);
-            }
-        });
-        property.addListener((observable, from, to) -> {
-            if(!Objects.equals(from, to)) {
-                startingChoice.getSelectionModel().select(to);
-            }
-        });
-    }
+	public void bindStartingItemProperty(SimpleObjectProperty<SimulationStartingItem> property) {
+		// Bind bidirectional does not work on ReadOnlyObjectProperty
+		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(!Objects.equals(from, to)) {
+				property.set(to);
+			}
+		});
+		property.addListener((observable, from, to) -> {
+			if(!Objects.equals(from, to)) {
+				startingChoice.getSelectionModel().select(to);
+			}
+		});
+	}
 
-    public void bindEndingItemProperty(SimpleObjectProperty<SimulationEndingItem> property) {
-        // Bind bidirectional does not work on ReadOnlyObjectProperty
-        endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-            if(!Objects.equals(from, to)) {
-                property.set(to);
-            }
-        });
-        property.addListener((observable, from, to) -> {
-            if(!Objects.equals(from, to)) {
-                endingChoice.getSelectionModel().select(to);
-            }
-        });
-    }
+	public void bindEndingItemProperty(SimpleObjectProperty<SimulationEndingItem> property) {
+		// Bind bidirectional does not work on ReadOnlyObjectProperty
+		endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(!Objects.equals(from, to)) {
+				property.set(to);
+			}
+		});
+		property.addListener((observable, from, to) -> {
+			if(!Objects.equals(from, to)) {
+				endingChoice.getSelectionModel().select(to);
+			}
+		});
+	}
 
 
 }

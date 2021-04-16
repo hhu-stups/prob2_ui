@@ -13,23 +13,23 @@ public class SimulationConfigurationChecker {
 
 	private final StateSpace stateSpace;
 
-    private final SimulationConfiguration simulationConfiguration;
+	private final SimulationConfiguration simulationConfiguration;
 
-    private final List<ConfigurationCheckingError> errors;
+	private final List<ConfigurationCheckingError> errors;
 
-    public SimulationConfigurationChecker(StateSpace stateSpace, SimulationConfiguration simulationConfiguration) {
-    	this.stateSpace = stateSpace;
-        this.simulationConfiguration = simulationConfiguration;
-        this.errors = new ArrayList<>();
-    }
+	public SimulationConfigurationChecker(StateSpace stateSpace, SimulationConfiguration simulationConfiguration) {
+		this.stateSpace = stateSpace;
+		this.simulationConfiguration = simulationConfiguration;
+		this.errors = new ArrayList<>();
+	}
 
-    public void check() {
-        checkActivationConfigurations();
-    }
+	public void check() {
+		checkActivationConfigurations();
+	}
 
-    private void checkActivationConfigurations() {
-    	for(ActivationConfiguration activationConfiguration : simulationConfiguration.getActivationConfigurations()) {
-    		if(activationConfiguration instanceof ActivationOperationConfiguration) {
+	private void checkActivationConfigurations() {
+		for(ActivationConfiguration activationConfiguration : simulationConfiguration.getActivationConfigurations()) {
+			if(activationConfiguration instanceof ActivationOperationConfiguration) {
 				this.checkActivationOperationConfiguration((ActivationOperationConfiguration) activationConfiguration);
 			}
 		}

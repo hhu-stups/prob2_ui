@@ -115,15 +115,15 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
 	private final double significance;
 
-    public SimulationHypothesisChecker(final Injector injector, final CurrentTrace currentTrace, final int numberExecutions, final SimulationCheckingType type,
-									   final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance, final Map<String, Object> additionalInformation) {
-        super(injector, currentTrace, numberExecutions, type, additionalInformation);
+	public SimulationHypothesisChecker(final Injector injector, final CurrentTrace currentTrace, final int numberExecutions, final SimulationCheckingType type,
+			final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance, final Map<String, Object> additionalInformation) {
+		super(injector, currentTrace, numberExecutions, type, additionalInformation);
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.significance = significance;
-    }
+	}
 
-    public void check() {
+	public void check() {
 		Distribution distribution = new Distribution(resultingTraces.size(), probability);
 		double coverage;
 		int range = 0;
@@ -141,7 +141,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		} else {
 			this.result = MonteCarloCheckResult.FAIL;
 		}
-    }
+	}
 
 	@Override
 	protected void calculateStatistics(long time) {

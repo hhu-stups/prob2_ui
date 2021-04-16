@@ -99,7 +99,7 @@ public final class ErrorStatusStage extends Stage {
 			if (!to.getCurrentState().isInitialised()) {
 				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotInitialised"));
 			} else if (to.getCurrentState().isInvariantOk()) {
-			    // TO DO: isInvariantOk is incorrect for ignored states (SCOPE predicate false)
+				// TO DO: isInvariantOk is incorrect for ignored states (SCOPE predicate false)
 				this.invariantOkLabel.getStyleClass().add("no-error");
 				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantOk"));
 			} else {
@@ -108,7 +108,7 @@ public final class ErrorStatusStage extends Stage {
 			}
 			
 			if (to.getCurrentState().getOutTransitions().isEmpty()) {
-			    // TO DO: this test is incorrect for ignored states (SCOPE predicate false) or if MAX_OPERATIONS==0
+				// TO DO: this test is incorrect for ignored states (SCOPE predicate false) or if MAX_OPERATIONS==0
 				this.deadlockLabel.getStyleClass().add("warning");
 				this.deadlockLabel.setText(this.bundle.getString("statusbar.errorStatusStage.deadlocked"));
 			} else {

@@ -52,7 +52,7 @@ public class SimulationChoosingStage extends Stage {
 	private Button btCheck;
 
 	@FXML
-    private HBox timeBox;
+	private HBox timeBox;
 
 	@FXML
 	private SimulationMonteCarloChoice simulationMonteCarloChoice;
@@ -93,15 +93,15 @@ public class SimulationChoosingStage extends Stage {
 
 	@FXML
 	private void initialize() {
-        inputBox.visibleProperty().bind(simulationChoice.getSelectionModel().selectedItemProperty().isNotNull());
-        setCheckListeners();
-        simulationChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-            if(to == null) {
-                return;
-            }
-            changeGUIType(to.getSimulationType());
-            this.sizeToScene();
-        });
+		inputBox.visibleProperty().bind(simulationChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		setCheckListeners();
+		simulationChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			changeGUIType(to.getSimulationType());
+			this.sizeToScene();
+		});
 		simulationMonteCarloChoice.setSimulationChoosingStage(this);
 		simulationHypothesisChoice.setSimulationChoosingStage(this);
 		simulationEstimationChoice.setSimulationChoosingStage(this);
@@ -109,29 +109,29 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	private void setCheckListeners() {
-        btAdd.setOnAction(e -> {
+		btAdd.setOnAction(e -> {
 			boolean validChoice = checkSelection();
 			if(!validChoice) {
 				showInvalidSelection();
 				return;
 			}
-            this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
-            this.close();
-        });
-        btCheck.setOnAction(e -> {
-        	boolean validChoice = checkSelection();
+			this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
+			this.close();
+		});
+		btCheck.setOnAction(e -> {
+			boolean validChoice = checkSelection();
 			if(!validChoice) {
 				showInvalidSelection();
 				return;
 			}
-            final SimulationItem newItem = this.extractItem();
-            final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), newItem);
-            this.close();
-            this.simulationItemHandler.checkItem(existingItem.orElse(newItem), false);
-        });
-    }
+			final SimulationItem newItem = this.extractItem();
+			final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), newItem);
+			this.close();
+			this.simulationItemHandler.checkItem(existingItem.orElse(newItem), false);
+		});
+	}
 
-    private boolean checkSelection() {
+	private boolean checkSelection() {
 		SimulationChoiceItem item = simulationChoice.getSelectionModel().getSelectedItem();
 		SimulationType type = item.getSimulationType();
 		switch (type) {
@@ -181,9 +181,9 @@ public class SimulationChoosingStage extends Stage {
 		return information;
 	}
 
-    private void changeGUIType(final SimulationType type) {
-        inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, simulationEstimationChoice);
-        switch (type) {
+	private void changeGUIType(final SimulationType type) {
+		inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, simulationEstimationChoice);
+		switch (type) {
 			case MONTE_CARLO_SIMULATION:
 				inputBox.getChildren().add(0, simulationMonteCarloChoice);
 				break;
@@ -191,10 +191,10 @@ public class SimulationChoosingStage extends Stage {
 				inputBox.getChildren().add(0, simulationEstimationChoice);
 				break;
 			case HYPOTHESIS_TEST:
-                inputBox.getChildren().add(0, simulationHypothesisChoice);
-                break;
-        }
-    }
+				inputBox.getChildren().add(0, simulationHypothesisChoice);
+				break;
+		}
+	}
 
 	@FXML
 	public void cancel() {
@@ -202,9 +202,9 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	public void reset() {
-        btAdd.setText(bundle.getString("common.buttons.add"));
-        btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
-        simulationMonteCarloChoice.clear();
+		btAdd.setText(bundle.getString("common.buttons.add"));
+		btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
+		simulationMonteCarloChoice.clear();
 		simulationHypothesisChoice.clear();
 		simulationEstimationChoice.clear();
 	}

@@ -38,77 +38,77 @@ import java.util.stream.Stream;
 @Singleton
 public class SimulationSaver extends ProBFileHandler {
 
-    public static final String SIMULATION_EXTENSION = "json";
-    public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
+	public static final String SIMULATION_EXTENSION = "json";
+	public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
-    private final JsonManager<SimulationConfiguration> jsonManager;
-    private final JsonManager.Context<SimulationConfiguration> context;
-    private final SimulationCreator simulationCreator;
+	private final JsonManager<SimulationConfiguration> jsonManager;
+	private final JsonManager.Context<SimulationConfiguration> context;
+	private final SimulationCreator simulationCreator;
 
-    @Inject
-    public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final JsonManager<SimulationConfiguration> jsonManager, final SimulationCreator simulationCreator,
-                           final CurrentProject currentProject, final ResourceBundle bundle) {
-        super(versionInfo, currentProject, stageManager, fileChooserManager, bundle);
-        this.jsonManager = jsonManager;
-        this.simulationCreator = simulationCreator;
+	@Inject
+	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final JsonManager<SimulationConfiguration> jsonManager, final SimulationCreator simulationCreator,
+						   final CurrentProject currentProject, final ResourceBundle bundle) {
+		super(versionInfo, currentProject, stageManager, fileChooserManager, bundle);
+		this.jsonManager = jsonManager;
+		this.simulationCreator = simulationCreator;
 
-        final Gson gson = new GsonBuilder()
-                .disableHtmlEscaping()
-                .serializeNulls()
-                .setPrettyPrinting()
-                .create();
-        this.context = new JsonManager.Context<SimulationConfiguration>(gson, SimulationConfiguration.class, "Timed_Trace", 1) {
-            @Override
-            public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
-                return new ObjectWithMetadata<>(oldObject, oldMetadata);
-            }
-        };
-        jsonManager.initContext(context);
-    }
+		final Gson gson = new GsonBuilder()
+				.disableHtmlEscaping()
+				.serializeNulls()
+				.setPrettyPrinting()
+				.create();
+		this.context = new JsonManager.Context<SimulationConfiguration>(gson, SimulationConfiguration.class, "Timed_Trace", 1) {
+			@Override
+			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
+				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+			}
+		};
+		jsonManager.initContext(context);
+	}
 
-    public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
-        final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveTimedTrace.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, SIMULATION_EXTENSION);
-        if (path != null) {
-            JsonMetadata jsonMetadata = createMetadata(createdBy);
-            saveConfiguration(trace, timestamps, path, jsonMetadata);
-        }
-    }
+	public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
+		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveTimedTrace.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, SIMULATION_EXTENSION);
+		if (path != null) {
+			JsonMetadata jsonMetadata = createMetadata(createdBy);
+			saveConfiguration(trace, timestamps, path, jsonMetadata);
+		}
+	}
 
 
-    public void saveConfiguration(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
-        SimulationConfiguration configuration = simulationCreator.createConfiguration(trace, timestamps, true);
-        this.jsonManager.writeToFile(location, configuration, jsonMetadata);
-    }
+	public void saveConfiguration(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
+		SimulationConfiguration configuration = simulationCreator.createConfiguration(trace, timestamps, true);
+		this.jsonManager.writeToFile(location, configuration, jsonMetadata);
+	}
 
-    public void saveConfigurations(SimulationItem item) {
-        List<Trace> traces = item.getTraces();
-        List<List<Integer>> timestamps = item.getTimestamps();
+	public void saveConfigurations(SimulationItem item) {
+		List<Trace> traces = item.getTraces();
+		List<List<Integer>> timestamps = item.getTimestamps();
 
-        final Path path = chooseDirectory(FileChooserManager.Kind.SIMULATION, "simulation.tracereplay.fileChooser.saveTimedPaths.title");
-        if (path == null) {
-            return;
-        }
+		final Path path = chooseDirectory(FileChooserManager.Kind.SIMULATION, "simulation.tracereplay.fileChooser.saveTimedPaths.title");
+		if (path == null) {
+			return;
+		}
 
-        try {
-            if(checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "simulation.save.directoryAlreadyContainsSimulations")){
-                return;
-            }
+		try {
+			if(checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "simulation.save.directoryAlreadyContainsSimulations")){
+				return;
+			}
 
-            int numberGeneratedTraces = traces.size();
-            //Starts counting with 1 in the file name
-            for(int i = 1; i <= numberGeneratedTraces; i++) {
-                final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
-                JsonMetadata jsonMetadata = createMetadata(item.createdByForMetadata());
-                this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath, jsonMetadata);
-            }
-        } catch (IOException e) {
-            stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();
-        }
-    }
+			int numberGeneratedTraces = traces.size();
+			//Starts counting with 1 in the file name
+			for(int i = 1; i <= numberGeneratedTraces; i++) {
+				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
+				JsonMetadata jsonMetadata = createMetadata(item.createdByForMetadata());
+				this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath, jsonMetadata);
+			}
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();
+		}
+	}
 
-    @Override
-    protected JsonMetadataBuilder metadataBuilder() {
-        return context.getDefaultMetadataBuilder();
-    }
+	@Override
+	protected JsonMetadataBuilder metadataBuilder() {
+		return context.getDefaultMetadataBuilder();
+	}
 
 }

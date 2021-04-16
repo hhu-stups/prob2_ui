@@ -45,7 +45,7 @@ public class TraceSelectionView extends Stage {
 
 	@Inject
 	public TraceSelectionView(final StageManager stageManager, final CurrentTrace currentTrace, final TraceChecker traceChecker,
-                               final Injector injector, final TraceViewHandler traceViewHandler) {
+			final Injector injector, final TraceViewHandler traceViewHandler) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
@@ -56,7 +56,7 @@ public class TraceSelectionView extends Stage {
 
 	@FXML
 	private void initialize() {
-        traceTableView.setItems(traceViewHandler.getTraces());
+		traceTableView.setItems(traceViewHandler.getTraces());
 		initTableColumns();
 		initTableRows();
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
@@ -73,16 +73,16 @@ public class TraceSelectionView extends Stage {
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<ReplayTrace> row = new TableRow<>();
 
-            final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
-            final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
-            final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
-            final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
+			final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
+			final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
+			final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
+			final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
 
-            // Set listeners for menu items
-            traceViewHandler.initializeRow(this.getScene(), row, replayTraceItem, showErrorItem, openInExternalEditorItem);
-            showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
+			// Set listeners for menu items
+			traceViewHandler.initializeRow(this.getScene(), row, replayTraceItem, showErrorItem, openInExternalEditorItem);
+			showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 
-            row.contextMenuProperty().bind(
+			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu) null)
 					.otherwise(new ContextMenu(replayTraceItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, new SeparatorMenuItem(), openInExternalEditorItem)));
@@ -120,7 +120,7 @@ public class TraceSelectionView extends Stage {
 		showDescription = true;
 	}
 
-    public void refresh() {
-        this.traceTableView.refresh();
-    }
+	public void refresh() {
+		this.traceTableView.refresh();
+	}
 }
