@@ -74,7 +74,7 @@ public final class ConfigData extends BasicConfigData implements HasMetadata {
 	}
 	
 	@Override
-	public HasMetadata withMetadata(final JsonMetadata metadata) {
+	public ConfigData withMetadata(final JsonMetadata metadata) {
 		// This implementation is actually really bad -
 		// we're supposed to return a copy of the object with just the metadata changed,
 		// and not mutate the original object in-place!

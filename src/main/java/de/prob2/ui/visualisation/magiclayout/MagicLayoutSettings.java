@@ -55,7 +55,7 @@ public class MagicLayoutSettings implements HasMetadata {
 	}
 	
 	@Override
-	public HasMetadata withMetadata(final JsonMetadata metadata) {
+	public MagicLayoutSettings withMetadata(final JsonMetadata metadata) {
 		return new MagicLayoutSettings(
 			this.getMachineName(),
 			this.getNodegroups(),
