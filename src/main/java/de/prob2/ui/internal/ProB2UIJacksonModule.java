@@ -6,7 +6,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -15,12 +18,17 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDelegatingDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import com.fasterxml.jackson.databind.ext.NioPathSerializer;
 import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
+import com.fasterxml.jackson.databind.ser.std.StdDelegatingSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.databind.util.StdConverter;
+
+import de.prob.check.ModelCheckingOptions;
 
 import javafx.geometry.BoundingBox;
 import javafx.scene.paint.Color;
@@ -173,6 +181,22 @@ final class ProB2UIJacksonModule extends Module {
 		}
 	}
 	
+	private static final class SerializedModelCheckingOptions {
+		private final Set<ModelCheckingOptions.Options> options;
+		
+		@JsonCreator
+		private SerializedModelCheckingOptions(
+			@JsonProperty("options") final Set<ModelCheckingOptions.Options> options
+		) {
+			this.options = options;
+		}
+		
+		@JsonProperty
+		private Set<ModelCheckingOptions.Options> getOptions() {
+			return this.options;
+		}
+	}
+	
 	ProB2UIJacksonModule() {
 		super();
 	}
@@ -192,13 +216,25 @@ final class ProB2UIJacksonModule extends Module {
 		context.addSerializers(new SimpleSerializers(Arrays.asList(
 			new CustomNioPathSerializer(),
 			new BoundingBoxSerializer(),
-			new ColorSerializer()
+			new ColorSerializer(),
+			new StdDelegatingSerializer(ModelCheckingOptions.class, new StdConverter<ModelCheckingOptions, SerializedModelCheckingOptions>() {
+				@Override
+				public SerializedModelCheckingOptions convert(final ModelCheckingOptions value) {
+					return new SerializedModelCheckingOptions(value.getPrologOptions());
+				}
+			})
 		)));
 		
 		final Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<>();
 		deserializers.put(Path.class, new CustomNioPathDeserializer());
 		deserializers.put(BoundingBox.class, new BoundingBoxDeserializer());
 		deserializers.put(Color.class, new ColorDeserializer());
+		deserializers.put(ModelCheckingOptions.class, new StdDelegatingDeserializer<>(new StdConverter<SerializedModelCheckingOptions, ModelCheckingOptions>() {
+			@Override
+			public ModelCheckingOptions convert(final SerializedModelCheckingOptions value) {
+				return new ModelCheckingOptions(value.getOptions());
+			}
+		}));
 		context.addDeserializers(new SimpleDeserializers(deserializers));
 	}
 }

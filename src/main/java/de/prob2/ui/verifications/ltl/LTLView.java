@@ -6,16 +6,15 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.json.JsonManager;
+import de.prob.json.JacksonManager;
+import de.prob.json.JsonConversionException;
 import de.prob.json.JsonMetadata;
-import de.prob.json.ObjectWithMetadata;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -115,7 +114,7 @@ public class LTLView extends AnchorPane {
 	private final LTLResultHandler resultHandler;
 	private final FileChooserManager fileChooserManager;
 	private final CheckBox formulaSelectAll;
-	private final JsonManager<LTLData> jsonManager;
+	private final JacksonManager<LTLData> jacksonManager;
 				
 	@Inject
 	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,
@@ -123,8 +122,8 @@ public class LTLView extends AnchorPane {
 					final LTLFormulaChecker checker, final LTLPatternParser patternParser,
 					final LTLResultHandler resultHandler,
 					final FileChooserManager fileChooserManager,
-					final Gson gson,
-					final JsonManager<LTLData> jsonManager) {
+					final ObjectMapper objectMapper,
+					final JacksonManager<LTLData> jacksonManager) {
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.injector = injector;
@@ -135,19 +134,18 @@ public class LTLView extends AnchorPane {
 		this.patternParser = patternParser;
 		this.resultHandler = resultHandler;
 		this.fileChooserManager = fileChooserManager;
-		this.jsonManager = jsonManager;
-		jsonManager.initContext(new JsonManager.Context<LTLData>(gson, LTLData.class, "LTL", 1) {
+		this.jacksonManager = jacksonManager;
+		jacksonManager.initContext(new JacksonManager.Context<LTLData>(objectMapper, LTLData.class, LTLData.FILE_TYPE, LTLData.CURRENT_FORMAT_VERSION, true) {
 			@Override
-			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
-				if (oldMetadata.getFileType() == null) {
-					assert oldMetadata.getFormatVersion() == 0;
+			public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
+				if (oldVersion <= 0) {
 					for (final String fieldName : new String[] {"formulas", "patterns"}) {
 						if (!oldObject.has(fieldName)) {
-							throw new JsonParseException("Not a valid LTL file - missing required field " + fieldName);
+							throw new JsonConversionException("Not a valid LTL file - missing required field " + fieldName);
 						}
 					}
 				}
-				return new ObjectWithMetadata<>(oldObject, oldMetadata);
+				return oldObject;
 			}
 		});
 		this.formulaSelectAll = new CheckBox();
@@ -360,11 +358,11 @@ public class LTLView extends AnchorPane {
 				.filter(LTLPatternItem::selected)
 				.collect(Collectors.toList());
 			try {
-				final JsonMetadata metadata = this.jsonManager.defaultMetadataBuilder()
+				final JsonMetadata metadata = LTLData.metadataBuilder()
 					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
 					.withModelName(machine.getName())
 					.build();
-				this.jsonManager.writeToFile(path, new LTLData(formulas, patterns), metadata);
+				this.jacksonManager.writeToFile(path, new LTLData(formulas, patterns, metadata));
 			} catch (IOException e) {
 				final Alert alert = stageManager.makeExceptionAlert(e, "verifications.ltl.ltlView.saveLTL.error");
 				alert.initOwner(this.getScene().getWindow());
@@ -386,7 +384,7 @@ public class LTLView extends AnchorPane {
 		}
 		LTLData data;
 		try {
-			data = this.jsonManager.readFromFile(ltlFile).getObject();
+			data = this.jacksonManager.readFromFile(ltlFile);
 		} catch (IOException e) {
 			logger.error("Could not load LTL file: ", e);
 			return;

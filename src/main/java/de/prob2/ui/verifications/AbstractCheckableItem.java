@@ -1,12 +1,7 @@
 package de.prob2.ui.verifications;
 
-import java.lang.reflect.Type;
-
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
-import de.prob.json.JsonManager;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -19,24 +14,16 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	private final String description;
 	private final String code;
 	private BooleanProperty selected;
-	private final transient ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
-	private final transient ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+	@JsonIgnore
+	final ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
+	@JsonIgnore
+	final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 	
 	public AbstractCheckableItem(String name, String description, String code) {
 		this.name = name;
 		this.description = description;
 		this.code = code;
 		this.selected = new SimpleBooleanProperty(true);
-		
-		this.initListeners();
-	}
-	
-	protected AbstractCheckableItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
-		final JsonObject object = json.getAsJsonObject();
-		this.name = JsonManager.checkDeserialize(context, object, "name", String.class);
-		this.description = JsonManager.checkDeserialize(context, object, "description", String.class);
-		this.code = JsonManager.checkDeserialize(context, object, "code", String.class);
-		this.selected = JsonManager.checkDeserialize(context, object, "selected", BooleanProperty.class);
 		
 		this.initListeners();
 	}
@@ -57,6 +44,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.selected.set(selected);
 	}
 	
+	@JsonProperty("selected")
 	@Override
 	public boolean selected() {
 		return selected.get();

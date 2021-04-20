@@ -1,110 +1,139 @@
 package de.prob2.ui.simulation.table;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import de.prob.json.JsonManager;
-import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.simulation.choice.SimulationCheckingType;
-import de.prob2.ui.simulation.choice.SimulationType;
-import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
-import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
-import de.prob2.ui.simulation.simulators.check.SimulationStats;
-import de.prob2.ui.verifications.Checked;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import de.prob.statespace.Trace;
+import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
+import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
+import de.prob2.ui.simulation.simulators.check.SimulationStats;
+import de.prob2.ui.verifications.Checked;
+
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+
 public class SimulationItem {
 
 	public static class SimulationCheckingInformation {
-
-		public static final JsonDeserializer<SimulationCheckingInformation> JSON_DESERIALIZER = SimulationCheckingInformation::new;
-
 		private final Map<String, Object> information;
 
-		public SimulationCheckingInformation(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
-			final JsonObject object = json.getAsJsonObject();
+		@JsonCreator
+		private SimulationCheckingInformation() {
 			information = new HashMap<>();
-			if(object.has("PROBABILITY")) {
-				information.put("PROBABILITY", JsonManager.checkDeserialize(context, object, "PROBABILITY", double.class));
-			}
-			if(object.has("EXECUTIONS")) {
-				information.put("EXECUTIONS", JsonManager.checkDeserialize(context, object, "EXECUTIONS", int.class));
-			}
-			if(object.has("PREDICATE")) {
-				information.put("PREDICATE", JsonManager.checkDeserialize(context, object, "PREDICATE", String.class));
-			}
-			if(object.has("STEPS_PER_EXECUTION")) {
-				information.put("STEPS_PER_EXECUTION", JsonManager.checkDeserialize(context, object, "STEPS_PER_EXECUTION", int.class));
-			}
-			if(object.has("ENDING_PREDICATE")) {
-				information.put("ENDING_PREDICATE", JsonManager.checkDeserialize(context, object, "ENDING_PREDICATE", String.class));
-			}
-			if(object.has("ENDING_TIME")) {
-				information.put("ENDING_TIME", JsonManager.checkDeserialize(context, object, "ENDING_TIME", int.class));
-			}
-			if(object.has("START_AFTER_STEPS")) {
-				information.put("START_AFTER_STEPS", JsonManager.checkDeserialize(context, object, "START_AFTER_STEPS", int.class));
-			}
-			if(object.has("STARTING_PREDICATE")) {
-				information.put("STARTING_PREDICATE", JsonManager.checkDeserialize(context, object, "STARTING_PREDICATE", String.class));
-			}
-			if(object.has("STARTING_TIME")) {
-				information.put("STARTING_TIME", JsonManager.checkDeserialize(context, object, "STARTING_TIME", int.class));
-			}
-			if(object.has("HYPOTHESIS_CHECKING_TYPE")) {
-				information.put("HYPOTHESIS_CHECKING_TYPE", JsonManager.checkDeserialize(context, object, "HYPOTHESIS_CHECKING_TYPE", SimulationHypothesisChecker.HypothesisCheckingType.class));
-			}
-			if(object.has("ESTIMATION_TYPE")) {
-				information.put("ESTIMATION_TYPE", JsonManager.checkDeserialize(context, object, "ESTIMATION_TYPE", SimulationEstimator.EstimationType.class));
-			}
-			if(object.has("CHECKING_TYPE")) {
-				information.put("CHECKING_TYPE", JsonManager.checkDeserialize(context, object, "CHECKING_TYPE", SimulationCheckingType.class));
-			}
-			if(object.has("DESIRED_VALUE")) {
-				information.put("DESIRED_VALUE", JsonManager.checkDeserialize(context, object, "DESIRED_VALUE", double.class));
-			}
-			if(object.has("SIGNIFICANCE")) {
-				information.put("SIGNIFICANCE", JsonManager.checkDeserialize(context, object, "SIGNIFICANCE", double.class));
-			}
-			if(object.has("EPSILON")) {
-				information.put("EPSILON", JsonManager.checkDeserialize(context, object, "EPSILON", double.class));
-			}
-			if(object.has("TIME")) {
-				information.put("TIME", JsonManager.checkDeserialize(context, object, "TIME", int.class));
-			}
 		}
 
 		public Map<String, Object> getInformation() {
 			return information;
 		}
-	}
 
-	public static final JsonDeserializer<SimulationItem> JSON_DESERIALIZER = SimulationItem::new;
+		@JsonProperty("PROBABILITY")
+		private void setProbability(final double probability) {
+			this.information.put("PROBABILITY", probability);
+		}
+
+		@JsonProperty("EXECUTIONS")
+		private void setExecutions(final int executions) {
+			this.information.put("EXECUTIONS", executions);
+		}
+
+		@JsonProperty("PREDICATE")
+		private void setPredicate(final String predicate) {
+			this.information.put("PREDICATE", predicate);
+		}
+
+		@JsonProperty("STEPS_PER_EXECUTION")
+		private void setStepsPerExecution(final int stepsPerExecution) {
+			this.information.put("STEPS_PER_EXECUTION", stepsPerExecution);
+		}
+
+		@JsonProperty("ENDING_PREDICATE")
+		private void setEndingPredicate(final String endingPredicate) {
+			this.information.put("ENDING_PREDICATE", endingPredicate);
+		}
+
+		@JsonProperty("ENDING_TIME")
+		private void setEndingTime(final int endingTime) {
+			this.information.put("ENDING_TIME", endingTime);
+		}
+
+		@JsonProperty("START_AFTER_STEPS")
+		private void setStartAfterSteps(final int startAfterSteps) {
+			this.information.put("START_AFTER_STEPS", startAfterSteps);
+		}
+
+		@JsonProperty("STARTING_PREDICATE")
+		private void setStartingPredicate(final String startingPredicate) {
+			this.information.put("STARTING_PREDICATE", startingPredicate);
+		}
+
+		@JsonProperty("STARTING_TIME")
+		private void setStartingTime(final int startingTime) {
+			this.information.put("STARTING_TIME", startingTime);
+		}
+
+		@JsonProperty("HYPOTHESIS_CHECKING_TYPE")
+		private void setHypothesisCheckingType(final SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType) {
+			this.information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingType);
+		}
+
+		@JsonProperty("ESTIMATION_TYPE")
+		private void setEstimationType(final SimulationEstimator.EstimationType estimationType) {
+			this.information.put("ESTIMATION_TYPE", estimationType);
+		}
+
+		@JsonProperty("CHECKING_TYPE")
+		private void setCheckingType(final SimulationCheckingType checkingType) {
+			this.information.put("CHECKING_TYPE", checkingType);
+		}
+
+		@JsonProperty("DESIRED_VALUE")
+		private void setDesiredValue(final double desiredValue) {
+			this.information.put("DESIRED_VALUE", desiredValue);
+		}
+
+		@JsonProperty("SIGNIFICANCE")
+		private void setSignificance(final double significance) {
+			this.information.put("SIGNIFICANCE", significance);
+		}
+
+		@JsonProperty("EPSILON")
+		private void setEpsilon(final double epsilon) {
+			this.information.put("EPSILON", epsilon);
+		}
+
+		@JsonProperty("TIME")
+		private void setTime(final int time) {
+			this.information.put("TIME", time);
+		}
+	}
 
 	private SimulationType type;
 
 	private Map<String, Object> information;
 
-	private transient ObjectProperty<Checked> checked;
+	@JsonIgnore
+	private ObjectProperty<Checked> checked;
 
-	private transient SimulationStats simulationStats;
+	@JsonIgnore
+	private SimulationStats simulationStats;
 
-	private transient ListProperty<Trace> traces;
+	@JsonIgnore
+	private ListProperty<Trace> traces;
 
-	private transient ListProperty<List<Integer>> timestamps;
+	@JsonIgnore
+	private ListProperty<List<Integer>> timestamps;
 
 	public SimulationItem(SimulationType type, Map<String, Object> information) {
 		this.type = type;
@@ -112,11 +141,12 @@ public class SimulationItem {
 		initListeners();
 	}
 
-	private SimulationItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
-		final JsonObject object = json.getAsJsonObject();
-		this.type = JsonManager.checkDeserialize(context, object, "type", SimulationType.class);
-		this.information = JsonManager.checkDeserialize(context, object, "information", SimulationCheckingInformation.class).getInformation();
-		initListeners();
+	@JsonCreator
+	private SimulationItem(
+		@JsonProperty("type") final SimulationType type,
+		@JsonProperty("information") final SimulationCheckingInformation information
+	) {
+		this(type, information.getInformation());
 	}
 
 	private void initListeners() {
@@ -138,6 +168,7 @@ public class SimulationItem {
 		return checked.get();
 	}
 
+	@JsonIgnore
 	public String getTypeAsName() {
 		return type.getName();
 	}
@@ -175,6 +206,7 @@ public class SimulationItem {
 		return information.get(key);
 	}
 
+	@JsonIgnore
 	public String getConfiguration() {
 		List<String> configurations = new ArrayList<>();
 		for(String key : information.keySet()) {

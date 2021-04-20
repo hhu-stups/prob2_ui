@@ -1,10 +1,22 @@
 package de.prob2.ui.project;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.prob.json.JsonManager;
+
+import de.prob.json.JacksonManager;
+import de.prob.json.JsonConversionException;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -13,6 +25,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -25,26 +38,16 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
 
 @Singleton
 public class ProjectManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
 
-	private final JsonManager<Project> jsonManager;
+	private final JacksonManager<Project> jacksonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
@@ -54,9 +57,9 @@ public class ProjectManager {
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(Gson gson, JsonManager<Project> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
-		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new ProjectJsonContext(gson));
+	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
+		this.jacksonManager = jacksonManager;
+		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -138,7 +141,7 @@ public class ProjectManager {
 
 	private File saveProject(Project project, File location) {
 		try {
-			this.jsonManager.writeToFile(location.toPath(), project);
+			this.jacksonManager.writeToFile(location.toPath(), project);
 		} catch (FileNotFoundException exc) {
 			LOGGER.warn("Failed to create project data file", exc);
 			return null;
@@ -181,10 +184,19 @@ public class ProjectManager {
 			}
 		}
 
-		currentProject.set(new Project(name, project.getDescription(), project.getMachines(),
-				project.getPreferences(), project.getLocation()));
+		// Change project name to new name selected by user (if necessary)
+		// and update the metadata (replacing the metadata that was previously loaded from the file).
+		final Project updatedProject = new Project(
+			name,
+			project.getDescription(),
+			project.getMachines(),
+			project.getPreferences(),
+			Project.metadataBuilder().build(),
+			project.getLocation()
+		);
+		currentProject.set(updatedProject);
 
-		File savedFile = saveProject(project, location);
+		File savedFile = saveProject(updatedProject, location);
 		if (savedFile != null) {
 			currentProject.setNewProject(false);
 			addToRecentProjects(savedFile.toPath());
@@ -202,11 +214,11 @@ public class ProjectManager {
 
 	private Project loadProject(Path path) {
 		try {
-			((ProjectJsonContext) this.jsonManager.getContext()).setProjectLocation(path);
-			final Project project = this.jsonManager.readFromFile(path).getObject();
+			((ProjectJsonContext) this.jacksonManager.getContext()).setProjectLocation(path);
+			final Project project = this.jacksonManager.readFromFile(path);
 			project.setLocation(path.getParent());
 			return project;
-		} catch (IOException | JsonSyntaxException exc) {
+		} catch (IOException | JsonConversionException exc) {
 			LOGGER.warn("Failed to open project file", exc);
 			List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(ButtonType.YES);
@@ -260,7 +272,7 @@ public class ProjectManager {
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if(replacingProject) {
-			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), projectLocation), true);
+			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 			currentProject.startAnimation(machine, Preference.DEFAULT);
 		}
 	}

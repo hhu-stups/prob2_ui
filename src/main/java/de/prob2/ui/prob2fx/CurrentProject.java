@@ -1,8 +1,15 @@
 package de.prob2.ui.prob2fx;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
+import de.prob.json.JsonMetadata;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -14,6 +21,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -31,11 +39,6 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final BooleanProperty exists;
@@ -43,6 +46,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
 	private final ListProperty<Preference> preferences;
+	private final ObjectProperty<JsonMetadata> metadata;
 	private final ObjectProperty<Machine> currentMachine;
 	private final ObjectProperty<Preference> currentPreference;
 
@@ -68,6 +72,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.name = new SimpleStringProperty(this, "name", "");
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
+		this.metadata = new SimpleObjectProperty<>(this, "metadata", null);
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
 		this.currentMachine = new SimpleObjectProperty<>(this, "currentMachine", null);
 		this.currentPreference = new SimpleObjectProperty<>(this, "currentPreference", null);
@@ -83,6 +88,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.description.set(to.getDescription());
 				this.machines.setAll(to.getMachines());
 				this.preferences.setAll(to.getPreferences());
+				this.metadata.set(to.getMetadata());
 				this.location.set(to.getLocation());
 				this.saved.set(false);
 				if (from != null && !to.getLocation().equals(from.getLocation())) {
@@ -132,6 +138,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.description.set("");
 		this.machines.clear();
 		this.preferences.clear();
+		this.metadata.set(null);
 		this.location.set(null);
 		this.saved.set(true);
 		this.updateCurrentMachine(null, null);
@@ -162,7 +169,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
 	public void removeMachine(Machine machine) {
@@ -173,13 +180,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			this.currentTrace.set(null);
 			this.updateCurrentMachine(null, null);
 		}
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getMetadata(), this.getLocation()));
 	}
 
 	public void removePreference(Preference preference) {
@@ -189,7 +196,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			.forEach(machine -> machine.setLastUsedPreferenceName(Preference.DEFAULT.getName()));
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getMetadata(), this.getLocation()));
 	}
 
 	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
@@ -210,11 +217,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void changeName(String newName) {
 		this.setNewProject(true);
-		this.set(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(), this.getLocation()));
+		this.set(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
 	public void changeDescription(String newDescription) {
-		this.set(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getLocation()));
+		this.set(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
 	public void switchTo(Project project, boolean newProject) {
@@ -272,6 +279,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public List<Preference> getPreferences() {
 		return this.preferencesProperty().get();
+	}
+
+	public ReadOnlyObjectProperty<JsonMetadata> metadataProperty() {
+		return this.metadata;
+	}
+
+	public JsonMetadata getMetadata() {
+		return this.metadataProperty().get();
 	}
 
 	public ObjectProperty<Path> locationProperty() {

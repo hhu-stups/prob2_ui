@@ -1,10 +1,8 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import java.lang.reflect.Type;
-
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
@@ -16,16 +14,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class SymbolicCheckingFormulaItem extends SymbolicItem {
-	public static final JsonDeserializer<SymbolicCheckingFormulaItem> JSON_DESERIALIZER = SymbolicCheckingFormulaItem::new;
+	@JsonIgnore
+	private final ListProperty<Trace> counterExamples = new SimpleListProperty<>(this, "counterExamples", FXCollections.observableArrayList());
 	
-	private final transient ListProperty<Trace> counterExamples = new SimpleListProperty<>(this, "counterExamples", FXCollections.observableArrayList());
-
-	public SymbolicCheckingFormulaItem(String name, String code, SymbolicExecutionType type) {
+	@JsonCreator
+	public SymbolicCheckingFormulaItem(
+		@JsonProperty("name") final String name,
+		@JsonProperty("code") final String code,
+		@JsonProperty("type") final SymbolicExecutionType type
+	) {
 		super(name, code, type);
-	}
-	
-	private SymbolicCheckingFormulaItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
-		super(json, typeOfT, context);
 	}
 	
 	public ObservableList<Trace> getCounterExamples() {
