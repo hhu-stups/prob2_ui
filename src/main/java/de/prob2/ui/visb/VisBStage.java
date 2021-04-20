@@ -1,6 +1,9 @@
 package de.prob2.ui.visb;
 
 import com.google.inject.Injector;
+import de.prob.animator.command.ExportVisBForCurrentStateCommand;
+import de.prob.animator.command.ExportVisBForHistoryCommand;
+import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
@@ -40,6 +43,7 @@ import javafx.scene.web.WebErrorEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import netscape.javascript.JSObject;
 import org.slf4j.Logger;
@@ -54,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -64,6 +69,11 @@ import java.util.ResourceBundle;
  */
 @Singleton
 public class VisBStage extends Stage {
+
+	public enum VisBExportKind {
+		CURRENT_STATE, CURRENT_TRACE
+	}
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBStage.class);
 	private final Injector injector;
 	private final ResourceBundle bundle;
@@ -111,6 +121,12 @@ public class VisBStage extends Stage {
 	private MenuItem viewMenu_zoomFontsOut;
 	@FXML
 	private MenuItem helpMenu_userManual;
+	@FXML
+	private MenuItem saveTraceItem;
+	@FXML
+	private MenuItem exportHistoryItem;
+	@FXML
+	private MenuItem exportCurrentStateItem;
 	@FXML
 	private Label information;
 	@FXML
@@ -183,6 +199,10 @@ public class VisBStage extends Stage {
 				this.setupMachineVisBFile();
 			}
 		});
+
+		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
+		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
+		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
 
 		injector.getInstance(VisBDebugStage.class).initOwner(this);
 	}
@@ -377,11 +397,6 @@ public class VisBStage extends Stage {
 	}
 
 	@FXML
-	public void saveTrace() {
-		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB);
-	}
-
-	@FXML
 	public void reloadVisualisation() {
 		injector.getInstance(VisBController.class).reloadVisualisation();
 	}
@@ -439,6 +454,27 @@ public class VisBStage extends Stage {
 	public ObjectProperty<Path> getVisBPath() {
 		return visBPath;
 	}
+
+	public void saveHTMLExport(VisBExportKind kind) {
+		if (currentTrace.get() != null) {
+			final FileChooser fileChooser = new FileChooser();
+			FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
+			fileChooser.getExtensionFilters().setAll(htmlFilter);
+			fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
+
+			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this);
+			if(path != null) {
+				if(kind == VisBExportKind.CURRENT_STATE) {
+					ExportVisBForCurrentStateCommand cmd = new ExportVisBForCurrentStateCommand(path.toAbsolutePath().toString());
+					currentTrace.getStateSpace().execute(cmd);
+				} else if(kind == VisBExportKind.CURRENT_TRACE) {
+					ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(currentTrace.getCurrentState().getId(), path.toAbsolutePath().toString());
+					currentTrace.getStateSpace().execute(cmd);
+				}
+			}
+		}
+	}
+
 }
 
 

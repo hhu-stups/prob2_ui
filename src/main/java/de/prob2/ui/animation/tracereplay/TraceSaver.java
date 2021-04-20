@@ -2,7 +2,6 @@ package de.prob2.ui.animation.tracereplay;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;

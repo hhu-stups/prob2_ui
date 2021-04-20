@@ -22,6 +22,7 @@
 <?import javafx.scene.web.WebView?>
 <?import de.prob2.ui.visb.VisBStage?>
 
+<?import javafx.scene.control.MenuButton?>
 <fx:root title="%visb.title" type="VisBStage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="1000" height="500" minHeight="160" minWidth="480">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -133,14 +134,19 @@
 									<Tooltip text="%common.buttons.openSimulation" />
 								</tooltip>
 							</Button>
-							<Button fx:id="saveTraceButton" onAction="#saveTrace">
+							<MenuButton fx:id="saveTraceButton">
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 								</graphic>
 								<tooltip>
 									<Tooltip text="%common.buttons.saveTrace" />
 								</tooltip>
-							</Button>
+								<items>
+									<MenuItem fx:id="saveTraceItem" text="%visb.contextMenu.saveTrace"/>
+									<MenuItem fx:id="exportHistoryItem" text="%visb.contextMenu.exportHistory"/>
+									<MenuItem fx:id="exportCurrentStateItem" text="%visb.contextMenu.exportCurrentState"/>
+								</items>
+							</MenuButton>
 						</HBox>
 						<StackPane fx:id="zoomingPane" VBox.vgrow="ALWAYS">
 							<WebView fx:id="webView" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" visible="false" StackPane.alignment="CENTER" />
