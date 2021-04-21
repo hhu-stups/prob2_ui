@@ -139,6 +139,15 @@ public class Project implements HasMetadata {
 		this.location = location;
 	}
 	
+	public void resetChanged() {
+		for (Machine machine : this.getMachines()) {
+			machine.changedProperty().set(false);
+		}
+		for (Preference pref : this.getPreferences()) {
+			pref.changedProperty().set(false);
+		}
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if (other == this) {

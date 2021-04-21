@@ -201,13 +201,7 @@ public class ProjectManager {
 			currentProject.setNewProject(false);
 			addToRecentProjects(savedFile.toPath());
 			currentProject.setSaved(true);
-			for (Machine machine : currentProject.get().getMachines()) {
-				machine.changedProperty().set(false);
-			}
-			for (Preference pref : currentProject.get().getPreferences()) {
-				pref.changedProperty().set(false);
-			}
-
+			currentProject.get().resetChanged();
 		}
 
 	}
@@ -217,6 +211,11 @@ public class ProjectManager {
 			((ProjectJsonContext) this.jacksonManager.getContext()).setProjectLocation(path);
 			final Project project = this.jacksonManager.readFromFile(path);
 			project.setLocation(path.getParent());
+			// Because Jackson fills in some parts of the project using setters (especially in Machine),
+			// the project will be marked as changed immediately after loading,
+			// which makes the project savedness tracking behave incorrectly.
+			// To fix this, we forcibly mark the project as unchanged again after it is loaded.
+			project.resetChanged();
 			return project;
 		} catch (IOException | JsonConversionException exc) {
 			LOGGER.warn("Failed to open project file", exc);
