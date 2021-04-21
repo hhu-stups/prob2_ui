@@ -67,8 +67,9 @@ public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoi
 				case TWO_TAILED:
 					return significance*2 <= Math.min(probability, 1 - probability);
 				case RIGHT_TAILED:
+					return significance <= 1 - probability;
 				case LEFT_TAILED:
-					return significance <= Math.min(probability, 1 - probability);
+					return significance <= probability;
 				default:
 					break;
 			}
