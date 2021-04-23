@@ -1,44 +1,54 @@
 package de.prob2.ui.project;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-import de.prob.json.JsonManager;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.Preference;
-
-import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public class Project {
-	public static final JsonDeserializer<Project> JSON_DESERIALIZER = Project::new;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import de.prob.json.HasMetadata;
+import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.preferences.Preference;
+
+public class Project implements HasMetadata {
+	public static final String FILE_TYPE = "Project";
+	public static final int CURRENT_FORMAT_VERSION = 12;
 	
 	private String name;
 	private String description;
 	private List<Machine> machines;
 	private List<Preference> preferences;
-	private transient Path location;
+	private JsonMetadata metadata;
+	@JsonIgnore
+	private Path location;
 
-	public Project(String name, String description, List<Machine> machines, List<Preference> preferences, Path location) {
+	@JsonCreator
+	public Project(
+		@JsonProperty("name") final String name,
+		@JsonProperty("description") final String description,
+		@JsonProperty("machines") final List<Machine> machines,
+		@JsonProperty("preferences") final List<Preference> preferences,
+		@JsonProperty("metadata") final JsonMetadata metadata,
+		@JsonProperty("location") final Path location
+	) {
 		this.name = name;
 		this.description = description;
 		this.machines = new ArrayList<>(machines);
 		this.preferences = new ArrayList<>(preferences);
+		this.metadata = metadata;
 		this.location = location;
 	}
 	
-	private Project(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
-		final JsonObject object = json.getAsJsonObject();
-		this.name = JsonManager.checkDeserialize(context, object, "name", String.class);
-		this.description = JsonManager.checkDeserialize(context, object, "description", String.class);
-		this.machines = JsonManager.checkDeserialize(context, object, "machines", new TypeToken<List<Machine>>() {}.getType());
-		this.preferences = JsonManager.checkDeserialize(context, object, "preferences", new TypeToken<List<Preference>>() {}.getType());
+	public static JsonMetadataBuilder metadataBuilder() {
+		return new JsonMetadataBuilder(FILE_TYPE, CURRENT_FORMAT_VERSION)
+			.withUserCreator()
+			.withSavedNow();
 	}
 
 	public String getName() {
@@ -102,12 +112,40 @@ public class Project {
 		throw new NoSuchElementException("Could not find preference with name " + name);
 	}
 	
+	@Override
+	public JsonMetadata getMetadata() {
+		return this.metadata;
+	}
+	
+	@Override
+	public Project withMetadata(final JsonMetadata metadata) {
+		return new Project(
+			this.getName(),
+			this.getDescription(),
+			this.getMachines(),
+			this.getPreferences(),
+			metadata,
+			this.getLocation()
+		);
+	}
+	
+	@JsonIgnore
 	public Path getLocation() {
 		return location;
 	}
 	
+	@JsonIgnore
 	void setLocation(Path location) {
 		this.location = location;
+	}
+	
+	public void resetChanged() {
+		for (Machine machine : this.getMachines()) {
+			machine.changedProperty().set(false);
+		}
+		for (Preference pref : this.getPreferences()) {
+			pref.changedProperty().set(false);
+		}
 	}
 	
 	@Override
@@ -124,11 +162,12 @@ public class Project {
 				otherProject.description.equals(this.description) &&
 				otherProject.machines.equals(this.machines) &&
 				otherProject.preferences.equals(this.preferences) &&
+				otherProject.metadata.equals(this.metadata) &&
 				otherProject.location.equals(this.location);
 	}
 
 	@Override
 	public int hashCode() {
-		 return Objects.hash(name, description, machines, preferences, location);
+		 return Objects.hash(name, description, machines, preferences, metadata, location);
 	}
 }

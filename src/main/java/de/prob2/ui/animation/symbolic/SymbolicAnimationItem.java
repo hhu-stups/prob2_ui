@@ -1,10 +1,8 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.lang.reflect.Type;
-
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
@@ -16,16 +14,20 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class SymbolicAnimationItem extends SymbolicItem {
-	public static final JsonDeserializer<SymbolicAnimationItem> JSON_DESERIALIZER = SymbolicAnimationItem::new;
+	@JsonIgnore
+	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 
-	private final transient ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
-
-	public SymbolicAnimationItem(String name, SymbolicExecutionType type) {
-		super(name, type);
+	@JsonCreator
+	private SymbolicAnimationItem(
+		@JsonProperty("name") final String name,
+		@JsonProperty("code") final String code,
+		@JsonProperty("type") final SymbolicExecutionType type
+	) {
+		super(name, code, type);
 	}
 
-	private SymbolicAnimationItem(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) {
-		super(json, typeOfT, context);
+	public SymbolicAnimationItem(String name, SymbolicExecutionType type) {
+		this(name, name, type);
 	}
 
 	@Override

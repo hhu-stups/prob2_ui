@@ -1,10 +1,24 @@
 package de.prob2.ui.project;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.prob.json.JsonManager;
+
+import de.prob.json.JacksonManager;
+import de.prob.json.JsonConversionException;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -13,6 +27,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -25,26 +40,16 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
 
 @Singleton
 public class ProjectManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
 
-	private final JsonManager<Project> jsonManager;
+	private final JacksonManager<Project> jacksonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
@@ -54,9 +59,9 @@ public class ProjectManager {
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(Gson gson, JsonManager<Project> jsonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
-		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new ProjectJsonContext(gson));
+	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
+		this.jacksonManager = jacksonManager;
+		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -136,25 +141,12 @@ public class ProjectManager {
 		return newItems;
 	}
 
-	private File saveProject(Project project, File location) {
-		try {
-			this.jsonManager.writeToFile(location.toPath(), project);
-		} catch (FileNotFoundException exc) {
-			LOGGER.warn("Failed to create project data file", exc);
-			return null;
-		} catch (IOException exc) {
-			LOGGER.warn("Failed to save project", exc);
-			return null;
-		}
-		return location;
-	}
-
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		String name = project.getName();
-		File location = new File(project.getLocation() + File.separator + project.getName() + "." + PROJECT_FILE_EXTENSION);
+		Path location = project.getLocation().resolve(project.getName() + "." + PROJECT_FILE_EXTENSION);
 
-		if (currentProject.isNewProject() && location.exists()) {
+		if (currentProject.isNewProject() && Files.exists(location)) {
 			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
 			ButtonType replaceBT = new ButtonType((bundle.getString("common.buttons.replace")));
 			List<ButtonType> buttons = new ArrayList<>();
@@ -176,37 +168,60 @@ public class ProjectManager {
 				if (selected == null) {
 					return;
 				}
-				location = selected.toFile();
-				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
+				location = selected;
+				name = MoreFiles.getNameWithoutExtension(location);
 			}
 		}
 
-		currentProject.set(new Project(name, project.getDescription(), project.getMachines(),
-				project.getPreferences(), project.getLocation()));
+		// Change project name to new name selected by user (if necessary)
+		// and update the metadata (replacing the metadata that was previously loaded from the file).
+		final Project updatedProject = new Project(
+			name,
+			project.getDescription(),
+			project.getMachines(),
+			project.getPreferences(),
+			Project.metadataBuilder().build(),
+			project.getLocation()
+		);
+		currentProject.set(updatedProject);
 
-		File savedFile = saveProject(project, location);
-		if (savedFile != null) {
-			currentProject.setNewProject(false);
-			addToRecentProjects(savedFile.toPath());
-			currentProject.setSaved(true);
-			for (Machine machine : currentProject.get().getMachines()) {
-				machine.changedProperty().set(false);
+		// To avoid corrupting the previously saved project if saving fails/is interrupted for some reason,
+		// save the project under a temporary file name first,
+		// and only once the project has been fully saved rename it to the real file name
+		// (overwriting any existing project file with that name).
+		final Path tempLocation = location.resolveSibling(location.getFileName() + ".tmp");
+		try {
+			this.jacksonManager.writeToFile(tempLocation, updatedProject);
+			Files.move(tempLocation, location, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException | RuntimeException exc) {
+			LOGGER.warn("Failed to save project", exc);
+			stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
+			try {
+				Files.deleteIfExists(tempLocation);
+			} catch (IOException e) {
+				LOGGER.warn("Failed to delete temporary project file after project save error", e);
 			}
-			for (Preference pref : currentProject.get().getPreferences()) {
-				pref.changedProperty().set(false);
-			}
-
+			return;
 		}
 
+		currentProject.setNewProject(false);
+		addToRecentProjects(location);
+		currentProject.setSaved(true);
+		currentProject.get().resetChanged();
 	}
 
 	private Project loadProject(Path path) {
 		try {
-			((ProjectJsonContext) this.jsonManager.getContext()).setProjectLocation(path);
-			final Project project = this.jsonManager.readFromFile(path).getObject();
+			((ProjectJsonContext) this.jacksonManager.getContext()).setProjectLocation(path);
+			final Project project = this.jacksonManager.readFromFile(path);
 			project.setLocation(path.getParent());
+			// Because Jackson fills in some parts of the project using setters (especially in Machine),
+			// the project will be marked as changed immediately after loading,
+			// which makes the project savedness tracking behave incorrectly.
+			// To fix this, we forcibly mark the project as unchanged again after it is loaded.
+			project.resetChanged();
 			return project;
-		} catch (IOException | JsonSyntaxException exc) {
+		} catch (IOException | JsonConversionException exc) {
 			LOGGER.warn("Failed to open project file", exc);
 			List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(ButtonType.YES);
@@ -260,7 +275,7 @@ public class ProjectManager {
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if(replacingProject) {
-			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), projectLocation), true);
+			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 			currentProject.startAnimation(machine, Preference.DEFAULT);
 		}
 	}
