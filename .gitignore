@@ -23,6 +23,7 @@ prob_test_log.txt
 *.log
 *.log.*
 *.prob
+*.prob2project.tmp
 
 # TestFX screenshots
 screenshot*.png

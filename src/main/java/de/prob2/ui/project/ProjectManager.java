@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -184,11 +185,22 @@ public class ProjectManager {
 		);
 		currentProject.set(updatedProject);
 
+		// To avoid corrupting the previously saved project if saving fails/is interrupted for some reason,
+		// save the project under a temporary file name first,
+		// and only once the project has been fully saved rename it to the real file name
+		// (overwriting any existing project file with that name).
+		final Path tempLocation = location.resolveSibling(location.getFileName() + ".tmp");
 		try {
-			this.jacksonManager.writeToFile(location, updatedProject);
+			this.jacksonManager.writeToFile(tempLocation, updatedProject);
+			Files.move(tempLocation, location, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project", exc);
 			stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
+			try {
+				Files.deleteIfExists(tempLocation);
+			} catch (IOException e) {
+				LOGGER.warn("Failed to delete temporary project file after project save error", e);
+			}
 			return;
 		}
 
