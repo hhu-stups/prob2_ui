@@ -189,6 +189,7 @@ public class ProjectManager {
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project", exc);
 			stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
+			return;
 		}
 
 		currentProject.setNewProject(false);
