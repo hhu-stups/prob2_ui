@@ -289,9 +289,6 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 					assert checkText(symbolicCheckingItem.get("code")).equals(oldCheckingType);
 					symbolicCheckingItem.put("type", "SYMBOLIC_MODEL_CHECK");
 				}
-				if (!symbolicCheckingItem.has("timeLimit")) {
-					symbolicCheckingItem.put("timeLimit", "-");
-				}
 			});
 		});
 	}
