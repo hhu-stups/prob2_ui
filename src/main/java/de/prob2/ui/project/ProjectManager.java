@@ -1,8 +1,8 @@
 package de.prob2.ui.project;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -142,9 +143,9 @@ public class ProjectManager {
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		String name = project.getName();
-		File location = new File(project.getLocation() + File.separator + project.getName() + "." + PROJECT_FILE_EXTENSION);
+		Path location = project.getLocation().resolve(project.getName() + "." + PROJECT_FILE_EXTENSION);
 
-		if (currentProject.isNewProject() && location.exists()) {
+		if (currentProject.isNewProject() && Files.exists(location)) {
 			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
 			ButtonType replaceBT = new ButtonType((bundle.getString("common.buttons.replace")));
 			List<ButtonType> buttons = new ArrayList<>();
@@ -166,8 +167,8 @@ public class ProjectManager {
 				if (selected == null) {
 					return;
 				}
-				location = selected.toFile();
-				name = location.getName().substring(0, location.getName().lastIndexOf('.'));
+				location = selected;
+				name = MoreFiles.getNameWithoutExtension(location);
 			}
 		}
 
@@ -184,14 +185,14 @@ public class ProjectManager {
 		currentProject.set(updatedProject);
 
 		try {
-			this.jacksonManager.writeToFile(location.toPath(), updatedProject);
+			this.jacksonManager.writeToFile(location, updatedProject);
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project", exc);
 			stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
 		}
 
 		currentProject.setNewProject(false);
-		addToRecentProjects(location.toPath());
+		addToRecentProjects(location);
 		currentProject.setSaved(true);
 		currentProject.get().resetChanged();
 	}
