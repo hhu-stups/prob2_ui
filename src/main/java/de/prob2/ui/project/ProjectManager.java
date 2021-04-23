@@ -139,19 +139,6 @@ public class ProjectManager {
 		return newItems;
 	}
 
-	private File saveProject(Project project, File location) {
-		try {
-			this.jacksonManager.writeToFile(location.toPath(), project);
-		} catch (FileNotFoundException exc) {
-			LOGGER.warn("Failed to create project data file", exc);
-			return null;
-		} catch (IOException exc) {
-			LOGGER.warn("Failed to save project", exc);
-			return null;
-		}
-		return location;
-	}
-
 	public void saveCurrentProject() {
 		Project project = currentProject.get();
 		String name = project.getName();
@@ -196,14 +183,17 @@ public class ProjectManager {
 		);
 		currentProject.set(updatedProject);
 
-		File savedFile = saveProject(updatedProject, location);
-		if (savedFile != null) {
-			currentProject.setNewProject(false);
-			addToRecentProjects(savedFile.toPath());
-			currentProject.setSaved(true);
-			currentProject.get().resetChanged();
+		try {
+			this.jacksonManager.writeToFile(location.toPath(), updatedProject);
+		} catch (IOException | RuntimeException exc) {
+			LOGGER.warn("Failed to save project", exc);
+			stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
 		}
 
+		currentProject.setNewProject(false);
+		addToRecentProjects(location.toPath());
+		currentProject.setSaved(true);
+		currentProject.get().resetChanged();
 	}
 
 	private Project loadProject(Path path) {
