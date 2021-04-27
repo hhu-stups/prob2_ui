@@ -16,10 +16,8 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonMetadata;
-import de.prob.json.JsonMetadataBuilder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TraceInformationItem;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
@@ -33,8 +31,6 @@ import javafx.scene.control.ButtonType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.util.stream.Collectors.toList;
 
 public class TraceFileHandler extends ProBFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
@@ -166,7 +162,9 @@ public class TraceFileHandler extends ProBFileHandler {
 
 
 	public void save(Trace trace, Path location, String createdBy) throws IOException {
-		JsonMetadata jsonMetadata = createMetadata(createdBy);
+		JsonMetadata jsonMetadata = updateMetadataBuilder(TraceJsonFile.metadataBuilder())
+			.withCreator(createdBy)
+			.build();
 		TraceJsonFile traceJsonFile = new TraceJsonFile(trace, jsonMetadata);
 		traceManager.save(location, traceJsonFile);
 	}
@@ -183,10 +181,4 @@ public class TraceFileHandler extends ProBFileHandler {
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
 	}
-
-	@Override
-	protected JsonMetadataBuilder metadataBuilder() {
-		return TraceJsonFile.metadataBuilder();
-	}
-
 }

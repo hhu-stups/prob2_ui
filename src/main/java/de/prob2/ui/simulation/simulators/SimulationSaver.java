@@ -12,7 +12,6 @@ import com.google.inject.Singleton;
 
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
-import de.prob.json.JsonMetadataBuilder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.ProBFileHandler;
@@ -49,7 +48,9 @@ public class SimulationSaver extends ProBFileHandler {
 	public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
 		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveTimedTrace.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, SIMULATION_EXTENSION);
 		if (path != null) {
-			JsonMetadata jsonMetadata = createMetadata(createdBy);
+			JsonMetadata jsonMetadata = updateMetadataBuilder(jsonManager.defaultMetadataBuilder())
+				.withCreator(createdBy)
+				.build();
 			saveConfiguration(trace, timestamps, path, jsonMetadata);
 		}
 	}
@@ -78,17 +79,13 @@ public class SimulationSaver extends ProBFileHandler {
 			//Starts counting with 1 in the file name
 			for(int i = 1; i <= numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
-				JsonMetadata jsonMetadata = createMetadata(item.createdByForMetadata());
+				JsonMetadata jsonMetadata = updateMetadataBuilder(jsonManager.defaultMetadataBuilder())
+					.withCreator(item.createdByForMetadata())
+					.build();
 				this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath, jsonMetadata);
 			}
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();
 		}
 	}
-
-	@Override
-	protected JsonMetadataBuilder metadataBuilder() {
-		return jsonManager.defaultMetadataBuilder();
-	}
-
 }

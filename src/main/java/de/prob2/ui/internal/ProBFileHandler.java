@@ -1,15 +1,5 @@
 package de.prob2.ui.internal;
 
-import com.google.inject.Inject;
-import de.prob.json.JsonMetadata;
-import de.prob.json.JsonMetadataBuilder;
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +7,17 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
+
+import com.google.inject.Inject;
+
+import de.prob.json.JsonMetadataBuilder;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 
 public abstract class ProBFileHandler {
 
@@ -62,14 +63,9 @@ public abstract class ProBFileHandler {
 		return this.fileChooserManager.showSaveFileChooser(fileChooser, kind, stageManager.getCurrent());
 	}
 
-	protected abstract JsonMetadataBuilder metadataBuilder();
-
-	protected JsonMetadata createMetadata(String createdBy) {
-		return metadataBuilder()
-				.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-				.withModelName(currentProject.getCurrentMachine().getName())
-				.withCreator(createdBy)
-				.build();
+	protected JsonMetadataBuilder updateMetadataBuilder(final JsonMetadataBuilder builder) {
+		return builder
+			.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+			.withModelName(currentProject.getCurrentMachine().getName());
 	}
-
 }
