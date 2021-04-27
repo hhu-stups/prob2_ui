@@ -1,17 +1,18 @@
 package de.prob2.ui.simulation.simulators;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+
 import de.prob.json.JsonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.json.JsonMetadataBuilder;
-import de.prob.json.ObjectWithMetadata;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.ProBFileHandler;
@@ -20,20 +21,6 @@ import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.table.SimulationItem;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.stream.Stream;
 
 @Singleton
 public class SimulationSaver extends ProBFileHandler {
@@ -57,12 +44,7 @@ public class SimulationSaver extends ProBFileHandler {
 				.serializeNulls()
 				.setPrettyPrinting()
 				.create();
-		this.context = new JsonManager.Context<SimulationConfiguration>(gson, SimulationConfiguration.class, "Timed_Trace", 1) {
-			@Override
-			public ObjectWithMetadata<JsonObject> convertOldData(final JsonObject oldObject, final JsonMetadata oldMetadata) {
-				return new ObjectWithMetadata<>(oldObject, oldMetadata);
-			}
-		};
+		this.context = new JsonManager.Context<>(gson, SimulationConfiguration.class, "Timed_Trace", 1);
 		jsonManager.initContext(context);
 	}
 
