@@ -332,9 +332,6 @@ public class VisBController {
 			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 		} catch (ProBError e) {
 			throw e;
-		} catch (IOException e) {
-			alert(e,"visb.exception.io", "visb.infobox.visualisation.error");
-			updateInfo("visb.infobox.visualisation.error");
 		} catch (RuntimeException e) {
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");

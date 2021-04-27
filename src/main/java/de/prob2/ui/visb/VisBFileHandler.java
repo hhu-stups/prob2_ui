@@ -38,9 +38,8 @@ public class VisBFileHandler {
 	 * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
 	 * @param inputFile File class object
 	 * @return VisBVisualisation object
-	 * @throws IOException If the file cannot be found, does not exist or is otherwise not accessible.
 	 */
-	public VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException {
+	public VisBVisualisation constructVisualisationFromJSON(File inputFile) {
 		LoadVisBCommand loadCmd = new LoadVisBCommand(inputFile.getPath());
 
 		currentTrace.getStateSpace().execute(loadCmd);
