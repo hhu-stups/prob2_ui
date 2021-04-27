@@ -29,7 +29,6 @@ public class SimulationSaver extends ProBFileHandler {
 	public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
 	private final JsonManager<SimulationConfiguration> jsonManager;
-	private final JsonManager.Context<SimulationConfiguration> context;
 	private final SimulationCreator simulationCreator;
 
 	@Inject
@@ -44,8 +43,7 @@ public class SimulationSaver extends ProBFileHandler {
 				.serializeNulls()
 				.setPrettyPrinting()
 				.create();
-		this.context = new JsonManager.Context<>(gson, SimulationConfiguration.class, "Timed_Trace", 1);
-		jsonManager.initContext(context);
+		jsonManager.initContext(new JsonManager.Context<>(gson, SimulationConfiguration.class, "Timed_Trace", 1));
 	}
 
 	public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
@@ -90,7 +88,7 @@ public class SimulationSaver extends ProBFileHandler {
 
 	@Override
 	protected JsonMetadataBuilder metadataBuilder() {
-		return context.getDefaultMetadataBuilder();
+		return jsonManager.defaultMetadataBuilder();
 	}
 
 }
