@@ -335,7 +335,7 @@ public class VisBController {
 		} catch (IOException e) {
 			alert(e,"visb.exception.io", "visb.infobox.visualisation.error");
 			updateInfo("visb.infobox.visualisation.error");
-		} catch(Exception e){
+		} catch (RuntimeException e) {
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 		}

@@ -18,7 +18,6 @@ import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 /**
@@ -40,9 +39,8 @@ public class VisBFileHandler {
 	 * @param inputFile File class object
 	 * @return VisBVisualisation object
 	 * @throws IOException If the file cannot be found, does not exist or is otherwise not accessible.
-	 * @throws VisBParseException If the file does not have the VisB format.
 	 */
-	public VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException {
+	public VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException {
 		LoadVisBCommand loadCmd = new LoadVisBCommand(inputFile.getPath());
 
 		currentTrace.getStateSpace().execute(loadCmd);
