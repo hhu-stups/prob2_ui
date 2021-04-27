@@ -22,7 +22,12 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	private Path location;
 
 	ProjectJsonContext(final ObjectMapper objectMapper) {
-		super(objectMapper, Project.class, Project.FILE_TYPE, Project.CURRENT_FORMAT_VERSION, true);
+		super(objectMapper, Project.class, Project.FILE_TYPE, Project.CURRENT_FORMAT_VERSION);
+	}
+	
+	@Override
+	public boolean shouldAcceptOldMetadata() {
+		return true;
 	}
 	
 	private static ObjectNode checkObject(final JsonNode node) {

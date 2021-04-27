@@ -37,7 +37,7 @@ public final class Config {
 	private Config(final @ConfigFile Path configFilePath, final ObjectMapper objectMapper, final JacksonManager<ConfigData> jacksonManager, final RuntimeOptions runtimeOptions, final StopActions stopActions) {
 		this.configFilePath = configFilePath;
 		this.jacksonManager = jacksonManager;
-		this.jacksonManager.initContext(new JacksonManager.Context<ConfigData>(objectMapper, ConfigData.class, ConfigData.FILE_TYPE, ConfigData.CURRENT_FORMAT_VERSION, false) {
+		this.jacksonManager.initContext(new JacksonManager.Context<ConfigData>(objectMapper, ConfigData.class, ConfigData.FILE_TYPE, ConfigData.CURRENT_FORMAT_VERSION) {
 			@Override
 			public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 				if (oldVersion <= 0) {

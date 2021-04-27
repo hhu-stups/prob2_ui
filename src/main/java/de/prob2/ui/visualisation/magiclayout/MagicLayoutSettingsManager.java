@@ -34,7 +34,12 @@ public class MagicLayoutSettingsManager {
 	public MagicLayoutSettingsManager(ObjectMapper objectMapper, JacksonManager<MagicLayoutSettings> jsonManager, CurrentProject currentProject, StageManager stageManager,
 									  FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		this.jsonManager = jsonManager;
-		this.jsonManager.initContext(new JacksonManager.Context<MagicLayoutSettings>(objectMapper, MagicLayoutSettings.class, MagicLayoutSettings.FILE_TYPE, MagicLayoutSettings.CURRENT_FORMAT_VERSION, true) {
+		this.jsonManager.initContext(new JacksonManager.Context<MagicLayoutSettings>(objectMapper, MagicLayoutSettings.class, MagicLayoutSettings.FILE_TYPE, MagicLayoutSettings.CURRENT_FORMAT_VERSION) {
+			@Override
+			public boolean shouldAcceptOldMetadata() {
+				return true;
+			}
+
 			@Override
 			public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 				if (oldVersion == 0) {

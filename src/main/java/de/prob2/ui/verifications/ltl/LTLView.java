@@ -135,7 +135,12 @@ public class LTLView extends AnchorPane {
 		this.resultHandler = resultHandler;
 		this.fileChooserManager = fileChooserManager;
 		this.jacksonManager = jacksonManager;
-		jacksonManager.initContext(new JacksonManager.Context<LTLData>(objectMapper, LTLData.class, LTLData.FILE_TYPE, LTLData.CURRENT_FORMAT_VERSION, true) {
+		jacksonManager.initContext(new JacksonManager.Context<LTLData>(objectMapper, LTLData.class, LTLData.FILE_TYPE, LTLData.CURRENT_FORMAT_VERSION) {
+			@Override
+			public boolean shouldAcceptOldMetadata() {
+				return true;
+			}
+			
 			@Override
 			public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 				if (oldVersion <= 0) {
