@@ -1,10 +1,17 @@
 package de.prob2.ui.visb;
 
-import com.google.gson.JsonSyntaxException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.LoadVisBCommand;
-import de.prob.animator.command.LoadVisBSetAttributesCommand;
 import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
@@ -13,14 +20,6 @@ import de.prob.animator.domainobjects.VisBItem;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.exceptions.VisBParseException;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
 
 /**
  * The VisBFileHandler handles everything, that needs to be done with files for the {@link VisBController}.
@@ -43,7 +42,7 @@ public class VisBFileHandler {
 	 * @throws IOException If the file cannot be found, does not exist or is otherwise not accessible.
 	 * @throws VisBParseException If the file does not have the VisB format.
 	 */
-	public VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException, JsonSyntaxException {
+	public VisBVisualisation constructVisualisationFromJSON(File inputFile) throws IOException, VisBParseException {
 		LoadVisBCommand loadCmd = new LoadVisBCommand(inputFile.getPath());
 
 		currentTrace.getStateSpace().execute(loadCmd);

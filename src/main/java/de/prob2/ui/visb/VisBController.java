@@ -1,8 +1,18 @@
 package de.prob2.ui.visb;
 
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.MalformedJsonException;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import com.google.inject.Injector;
+
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.command.LoadVisBSetAttributesCommand;
@@ -18,21 +28,14 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
+
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
+
 import netscape.javascript.JSException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
 import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
@@ -319,7 +322,7 @@ public class VisBController {
 	 * Setting up the JSON / VisB file for internal usage via {@link VisBFileHandler}.
 	 * @param visFile JSON / VisB file to be used
 	 */
-	void setupVisBFile(File visFile) throws JsonSyntaxException, MalformedJsonException {
+	void setupVisBFile(File visFile) {
 		if(visFile == null){
 			return;
 		}
@@ -327,7 +330,7 @@ public class VisBController {
 		try {
 			this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visFile);
 			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
-		} catch (ProBError | JsonSyntaxException | MalformedJsonException e) {
+		} catch (ProBError e) {
 			throw e;
 		} catch (IOException e) {
 			alert(e,"visb.exception.io", "visb.infobox.visualisation.error");
@@ -346,7 +349,7 @@ public class VisBController {
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
-		} catch (JsonSyntaxException e) {
+		} catch (ProBError e) {
 			// Set VisB Visualisation with VisB file only. This is then used for reload (after the JSON syntax errors are fixed)
 			this.visBVisualisation = new VisBVisualisation(null, null, null, file);
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
