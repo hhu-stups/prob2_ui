@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import com.google.gson.JsonParseException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTrace;
@@ -76,7 +76,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
 			messageContent.add(path);
-		} else if (e instanceof JsonParseException) {
+		} else if (e instanceof JacksonException) {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content";
 			messageContent.add(path);
