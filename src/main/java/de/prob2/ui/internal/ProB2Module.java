@@ -1,16 +1,9 @@
 package de.prob2.ui.internal;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fatboyindustrial.gsonjavatime.Converters;
-import com.google.gson.Gson;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonSerializer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -28,8 +21,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.BuilderFactory;
-
-import org.hildan.fxgson.FxGson;
 
 public class ProB2Module extends AbstractModule {
 	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
@@ -87,19 +78,6 @@ public class ProB2Module extends AbstractModule {
 		fxmlLoader.setControllerFactory(injector::getInstance);
 		fxmlLoader.setResources(bundle);
 		return fxmlLoader;
-	}
-
-	@Provides
-	@Singleton
-	private Gson provideGson() {
-		return Converters.registerAll(FxGson.fullBuilder())
-			.disableHtmlEscaping()
-			.setPrettyPrinting()
-			.registerTypeAdapter(File.class, (JsonSerializer<File>)(src, typeOfSrc, context) -> context.serialize(src.getPath()))
-			.registerTypeAdapter(File.class, (JsonDeserializer<File>)(json, typeOfT, context) -> new File(json.getAsString()))
-			.registerTypeAdapter(Path.class, (JsonSerializer<Path>)(src, typeOfSrc, context) -> context.serialize(src.toString().replaceAll("\\\\", "/")))
-			.registerTypeAdapter(Path.class, (JsonDeserializer<Path>)(json, typeOfT, context) -> Paths.get(json.getAsString()))
-			.create();
 	}
 
 	@Provides
