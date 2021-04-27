@@ -144,7 +144,7 @@ public class SimulationTracesView extends Stage {
 				Trace trace = new Trace(currentTrace.getStateSpace());
 				currentTrace.set(trace);
 				SimulationTraceItem traceItem = row.getItem();
-				SimulationConfiguration config = injector.getInstance(SimulationCreator.class).createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false);
+				SimulationConfiguration config = injector.getInstance(SimulationCreator.class).createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false, SimulationConfiguration.metadataBuilder().build());
 				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 
 				try {

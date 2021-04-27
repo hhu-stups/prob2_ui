@@ -3,6 +3,14 @@ package de.prob2.ui.simulation.configuration;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({
+	"id",
+	"execute",
+	// For all other properties, the default order (i. e. field order in class) is used.
+})
 public class ActivationOperationConfiguration extends ActivationConfiguration {
 
 	public enum ActivationKind {
@@ -38,6 +46,7 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 		this.activating = activations;
 	}
 
+	@JsonProperty("execute")
 	public String getOpName() {
 		return execute;
 	}

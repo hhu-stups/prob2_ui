@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.prob.json.JsonMetadata;
 import de.prob.statespace.Transition;
 
 public class SimulationFileHandler {
@@ -25,7 +26,8 @@ public class SimulationFileHandler {
 		JsonReader reader = new JsonReader(new FileReader(inputFile));
 		JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
 		List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
-		return new SimulationConfiguration(activationConfigurations);
+		final JsonMetadata metadata = gson.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
+		return new SimulationConfiguration(activationConfigurations, metadata);
 	}
 
 	private static List<ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {

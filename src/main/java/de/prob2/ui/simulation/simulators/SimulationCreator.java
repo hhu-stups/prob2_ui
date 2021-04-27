@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.simulators;
 import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
+import de.prob.json.JsonMetadata;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -20,7 +21,7 @@ import java.util.Map;
 @Singleton
 public class SimulationCreator {
 
-	public SimulationConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave) {
+	public SimulationConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
 		PersistentTrace persistentTrace = new PersistentTrace(trace);
 		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
 
@@ -56,7 +57,7 @@ public class SimulationCreator {
 			activationConfigurations.add(activationConfig);
 			currentTimestamp = timestamps.get(i);
 		}
-		return new SimulationConfiguration(activationConfigurations);
+		return new SimulationConfiguration(activationConfigurations, metadata);
 	}
 
 }
