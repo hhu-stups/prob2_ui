@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.prob.statespace.Transition;
+
 public class SimulationFileHandler {
 
 	public static SimulationConfiguration constructConfigurationFromJSON(File inputFile) throws IOException, JsonSyntaxException {
@@ -53,9 +55,9 @@ public class SimulationFileHandler {
 		String opName = activationAsObject.get("execute").getAsString();
 
 		int priority;
-		if("$initialse_machine".equals(opName)) {
+		if(Transition.INITIALISE_MACHINE_NAME.equals(opName)) {
 			priority = 1;
-		} else if("$setup_constants".equals(opName) || activationAsObject.get("priority") == null) {
+		} else if(Transition.SETUP_CONSTANTS_NAME.equals(opName) || activationAsObject.get("priority") == null) {
 			priority = 0;
 		} else {
 			priority = activationAsObject.get("priority").getAsInt();

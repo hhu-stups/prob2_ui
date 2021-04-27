@@ -172,8 +172,8 @@ public abstract class Simulator {
 	public void setupBeforeSimulation(Trace trace) {
 		updateStartingInformation(trace);
 		if(!trace.getCurrentState().isInitialised()) {
-			activateBeforeInitialisation(trace, "$setup_constants");
-			activateBeforeInitialisation(trace, "$initialise_machine");
+			activateBeforeInitialisation(trace, Transition.SETUP_CONSTANTS_NAME);
+			activateBeforeInitialisation(trace, Transition.INITIALISE_MACHINE_NAME);
 		}
 	}
 

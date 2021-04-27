@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.configuration;
 
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Transition;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,7 +40,7 @@ public class SimulationConfigurationChecker {
 	private void checkActivationOperationConfiguration(ActivationOperationConfiguration activation) {
 		Object probability = activation.getProbabilisticVariables();
 		String activatedOp = activation.getOpName();
-		if("$initialise_machine".equals(activatedOp) || "$setup_constants".equals(activatedOp)) {
+		if(Transition.isArtificialTransitionName(activatedOp)) {
 			return;
 		}
 		//Check whether given operation name exists

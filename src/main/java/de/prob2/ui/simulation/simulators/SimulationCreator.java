@@ -36,8 +36,8 @@ public class SimulationCreator {
 
 
 			String nextTransitionName = i >= transitions.size() - 1 ? null : transitions.get(j).getOperationName();
-			String nextOp = nextTransitionName == null ? null : "$setup_constants".equals(nextTransitionName) || "$initialse_machine".equals(nextTransitionName) ? nextTransitionName : nextTransitionName + "_" + j;
-			String id = "$setup_constants".equals(op) || "$initialise_machine".equals(op) ? op : op + "_" + i;
+			String nextOp = nextTransitionName == null ? null : Transition.isArtificialTransitionName(nextTransitionName) ? nextTransitionName : nextTransitionName + "_" + j;
+			String id = Transition.isArtificialTransitionName(op) ? op : op + "_" + i;
 
 			int time = timestamps.get(i) - currentTimestamp;
 			Map<String, String> fixedVariables = SimulationHelperFunctions.mergeValues(transition.getParameters(), transition.getDestinationStateVariables());
@@ -51,7 +51,7 @@ public class SimulationCreator {
 			}
 			fixedVariables = newFixedVariables.isEmpty() ? null : newFixedVariables;
 
-			List<String> activations = "$setup_constants".equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
+			List<String> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
 			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations);
 			activationConfigurations.add(activationConfig);
 			currentTimestamp = timestamps.get(i);
