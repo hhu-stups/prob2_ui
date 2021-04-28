@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -167,6 +169,21 @@ public class BEditor extends CodeArea {
 		fontSize.fontSizeProperty().addListener((observable, from, to) ->
 				this.setStyle(String.format("-fx-font-size: %dpx;", to.intValue()))
 		);
+	}
+
+	@Override
+	protected Predicate<Collection<String>> getFoldStyleCheck() {
+		return null;
+	}
+
+	@Override
+	protected UnaryOperator<Collection<String>> getAddFoldStyle() {
+		return null;
+	}
+
+	@Override
+	protected UnaryOperator<Collection<String>> getRemoveFoldStyle() {
+		return null;
 	}
 
 	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
