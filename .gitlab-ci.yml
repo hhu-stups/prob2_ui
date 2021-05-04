@@ -28,8 +28,8 @@ variables:
 .test-mac:
   stage: test
   before_script:
-    - export PATH="/usr/local/jdk/jdk-14.0.2.jdk/Contents/Home/bin:${PATH}"
     - export JAVA_HOME="/usr/local/jdk/jdk-14.0.2.jdk/Contents/Home"
+    - export PATH="${JAVA_HOME}/bin:${PATH}"
     - export GRADLE_USER_HOME="${PWD}/.gradle"
   cache:
     paths:
@@ -45,8 +45,8 @@ variables:
 .test-windows:
   stage: test
   before_script:
-    - SET PATH="C:\Program Files\Java\jdk-14.0.2\bin;%PATH%"
     - SET JAVA_HOME="C:\Program Files\Java\jdk-14.0.2"
+    - SET PATH="%JAVA_HOME%\bin;%PATH%"
     - SET GRADLE_USER_HOME=%cd%\.gradle
   cache:
     paths:
