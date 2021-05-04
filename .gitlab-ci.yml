@@ -3,12 +3,12 @@ stages:
   - deploy
 
 variables:
-  DEBIAN_FRONTEND: noninteractive
   GRADLE_OPTIONS: --no-daemon --info --stacktrace --warning-mode=all
 
 .test-linux:
   stage: test
   before_script: &default_before_script_linux
+    - export DEBIAN_FRONTEND="noninteractive"
     - apt-get update
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
@@ -107,6 +107,7 @@ distributions:
     - develop@stups/prob/prob2_ui
   image: debian:stable-slim
   before_script:
+    - export DEBIAN_FRONTEND="noninteractive"
     - apt-get update
     - apt-get install --assume-yes lftp
   variables:
