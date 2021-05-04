@@ -2,11 +2,23 @@ stages:
   - test
   - deploy
 
-variables:
-  GRADLE_OPTIONS: --no-daemon --info --stacktrace --warning-mode=all
+.test-common:
+  stage: test
+  variables:
+    GRADLE_OPTIONS: --no-daemon --info --stacktrace --warning-mode=all
+  cache:
+    paths:
+      - .gradle/caches
+      - .gradle/native
+      - .gradle/wrapper
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - build/distributions
+      - build/libs
 
 .test-linux:
-  stage: test
+  extends: .test-common
   before_script: &default_before_script_linux
     - export DEBIAN_FRONTEND="noninteractive"
     - apt-get update
@@ -14,50 +26,20 @@ variables:
     # pandoc is needed to build the ProB 2 UI docs.
     - apt-get install --assume-yes git pandoc
     - export GRADLE_USER_HOME="${PWD}/.gradle"
-  cache:
-    paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - build/distributions
-      - build/libs
 
 .test-mac:
-  stage: test
+  extends: .test-common
   before_script:
     - export JAVA_HOME="/usr/local/jdk/jdk-14.0.2.jdk/Contents/Home"
     - export PATH="${JAVA_HOME}/bin:${PATH}"
     - export GRADLE_USER_HOME="${PWD}/.gradle"
-  cache:
-    paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - build/distributions
-      - build/libs
 
 .test-windows:
-  stage: test
+  extends: .test-common
   before_script:
     - SET JAVA_HOME="C:\Program Files\Java\jdk-14.0.2"
     - SET PATH="%JAVA_HOME%\bin;%PATH%"
     - SET GRADLE_USER_HOME=%cd%\.gradle
-  cache:
-    paths:
-      - .gradle/caches
-      - .gradle/native
-      - .gradle/wrapper
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - build/distributions
-      - build/libs
 
 test:jdk-8-linux:
   extends: .test-linux
