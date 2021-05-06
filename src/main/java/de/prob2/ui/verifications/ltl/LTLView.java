@@ -330,11 +330,9 @@ public class LTLView extends AnchorPane {
 	}
 
 	private void loadLTLStage(LTLItemStage<?> stage, AbstractCheckableItem item) {
-		stage.getEngine().getLoadWorker().stateProperty().addListener((observable, from, to) -> {
-			if(to == Worker.State.SUCCEEDED && item != null) {
-				stage.setData(item.getDescription(), item.getCode());
-			}
-		});
+		if (item != null) {
+			stage.setData(item.getDescription(), item.getCode());
+		}
 	}
 	
 	@FXML

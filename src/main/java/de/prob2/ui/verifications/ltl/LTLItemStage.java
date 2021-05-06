@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.ltl;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.helpsystem.HelpButton;
@@ -13,17 +14,15 @@ import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import netscape.javascript.JSObject;
+import org.fxmisc.richtext.CodeArea;
 
 public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	@FXML
-	protected WebView taCode;
+	protected CodeArea taCode;
 	
 	@FXML
 	protected TextArea taDescription;
@@ -44,8 +43,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected LTLHandleItem<T> handleItem;
 	
-	protected WebEngine engine;
-
 	public LTLItemStage(final CurrentProject currentProject, final FontSize fontSize, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
 		super();
 		this.currentProject = currentProject;
@@ -59,9 +56,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	public void initialize() {
 		helpButton.setHelpContent("verification", "LTL");
 		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
-		engine = taCode.getEngine();
-		engine.load(LTLItemStage.class.getResource("LTLEditor.html").toExternalForm());
-		engine.setJavaScriptEnabled(true);
 	}
 	
 	@FXML
@@ -69,22 +63,13 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 		builtinsStage.show();
 	}
 	
-	private void setTextEditor(String text) {
-		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		editor.call("setValue", text);
-	}
-		
 	public void setData(String description, String code) {
 		taDescription.setText(description);
-		setTextEditor(code);
+		taCode.replaceText(code);
 	}
 	
 	public void clear() {
 		this.taDescription.clear();
-	}
-
-	public WebEngine getEngine() {
-		return engine;
 	}
 	
 	public void setHandleItem(LTLHandleItem<T> handleItem) {
@@ -105,14 +90,12 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	private void markText(CheckingResultItem resultItem) {
 		if(resultItem instanceof LTLCheckingResultItem) {
-			final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-			for (LTLMarker marker : ((LTLCheckingResultItem) resultItem).getErrorMarkers()) {
-				LTLMark mark = marker.getMark();
-				int line = mark.getLine() - 1;
-				JSObject from = (JSObject) engine.executeScript("from = {line:" + line + ", ch:" + mark.getPos() + "}");
-				JSObject to = (JSObject) engine.executeScript("to = {line:" + line + ", ch:" + (mark.getPos() + mark.getLength()) + "}");
-				JSObject style = (JSObject) engine.executeScript("style = {className:'error-underline'}");
-				editor.call("markText", from, to, style);
+			final List<LTLMarker> errorMarkers = ((LTLCheckingResultItem)resultItem).getErrorMarkers();
+			if (!errorMarkers.isEmpty()) {
+				// TODO Implement proper error highlighting like in BEditor
+				final LTLMark mark = errorMarkers.get(0).getMark();
+				final int line = mark.getLine() - 1;
+				taCode.selectRange(line, mark.getPos(), line, mark.getPos() + mark.getLength());
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.ltl.formula;
 
 import com.google.inject.Inject;
+
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -11,9 +12,9 @@ import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import netscape.javascript.JSObject;
 
 public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
@@ -40,8 +41,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	@FXML
 	private void applyFormula() {
-		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		String code = editor.call("getValue").toString();
+		String code = taCode.getText();
 		if(handleItem.getHandleType() == HandleType.ADD) {
 			addItem(currentProject.getCurrentMachine(), new LTLFormulaItem(code, taDescription.getText()));
 		} else {

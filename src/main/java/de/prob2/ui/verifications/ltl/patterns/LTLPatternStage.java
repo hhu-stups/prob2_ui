@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.ltl.patterns;
 
 import com.google.inject.Inject;
+
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -12,8 +13,8 @@ import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
+
 import javafx.fxml.FXML;
-import netscape.javascript.JSObject;
 
 public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	private final LTLPatternParser patternParser;
@@ -28,8 +29,7 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 	
 	@FXML
 	private void applyPattern() {
-		final JSObject editor = (JSObject) engine.executeScript("LtlEditor.cm");
-		String code = editor.call("getValue").toString();
+		String code = taCode.getText();
 		LTLPatternItem item = patternParser.parsePattern(taDescription.getText(), code, currentProject.getCurrentMachine());
 		if(handleItem.getHandleType() == HandleType.ADD) {
 			addItem(currentProject.getCurrentMachine(), item);
