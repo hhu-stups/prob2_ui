@@ -153,7 +153,6 @@ public final class ModelcheckingView extends ScrollPane {
 	public void initialize() {
 		helpButton.setHelpContent("verification", "Model");
 		setBindings();
-		setListeners();
 		setContextMenus();
 	}
 	
@@ -169,10 +168,13 @@ public final class ModelcheckingView extends ScrollPane {
 		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noModelcheckingItems = new SimpleBooleanProperty();
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
+			tvItems.itemsProperty().unbind();
+			noModelcheckingItems.unbind();
 			if (to != null) {
+				tvItems.itemsProperty().bind(to.modelcheckingItemsProperty());
 				noModelcheckingItems.bind(to.modelcheckingItemsProperty().emptyProperty());
 			} else {
-				noModelcheckingItems.unbind();
+				tvItems.setItems(FXCollections.observableArrayList());
 				noModelcheckingItems.set(true);
 			}
 		};
@@ -237,19 +239,6 @@ public final class ModelcheckingView extends ScrollPane {
 				}
 			})
 		);
-	}
-	
-	private void setListeners() {
-		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
-			tvItems.itemsProperty().unbind();
-			if(newValue != null) {
-				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
-			} else {
-				tvItems.setItems(FXCollections.observableArrayList());
-			}
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 	
 	private void tvItemsClicked(MouseEvent e) {
