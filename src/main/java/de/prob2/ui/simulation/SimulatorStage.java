@@ -314,14 +314,14 @@ public class SimulatorStage extends Stage {
 			btManageDefaultSimulation.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(configurationPath.isNull()));
 			configurationPath.set(null);
 			simulationDebugItems.getItems().clear();
+			simulationItems.itemsProperty().unbind();
+			noSimulations.unbind();
 			if(to != null) {
 				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
 			} else {
-				noSimulations.unbind();
 				noSimulations.set(true);
-				simulationItems.getItems().clear();
-				simulationItems.itemsProperty().unbind();
+				simulationItems.setItems(FXCollections.observableArrayList());
 			}
 			loadSimulationFromMachine(to);
 		};

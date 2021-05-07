@@ -180,11 +180,11 @@ public class TestCaseGenerationView extends ScrollPane {
 		setBindings();
 		tvTestCases.setRowFactory(new TestCaseGenerationCellFactory());
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
+			tvTestCases.itemsProperty().unbind();
 			if(newValue != null) {
 				tvTestCases.itemsProperty().bind(newValue.testCasesProperty());
 			} else {
 				tvTestCases.getItems().clear();
-				tvTestCases.itemsProperty().unbind();
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -196,10 +196,10 @@ public class TestCaseGenerationView extends ScrollPane {
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noTestCases = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			noTestCases.unbind();
 			if (to != null) {
 				noTestCases.bind(to.testCasesProperty().emptyProperty());
 			} else {
-				noTestCases.unbind();
 				noTestCases.set(true);
 			}
 		});

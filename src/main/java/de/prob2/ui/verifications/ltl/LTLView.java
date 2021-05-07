@@ -164,6 +164,8 @@ public class LTLView extends AnchorPane {
 		setContextMenus();
 		setBindings();
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			tvFormula.itemsProperty().unbind();
+			tvPattern.itemsProperty().unbind();
 			if(to != null) {
 				if(from != null) {
 					from.clearPatternManager();
@@ -172,9 +174,7 @@ public class LTLView extends AnchorPane {
 				tvPattern.itemsProperty().bind(to.ltlPatternsProperty());
 			} else {
 				tvFormula.getItems().clear();
-				tvFormula.itemsProperty().unbind();
 				tvPattern.getItems().clear();
-				tvPattern.itemsProperty().unbind();
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -270,10 +270,10 @@ public class LTLView extends AnchorPane {
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		final BooleanProperty noLtlFormulas = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			noLtlFormulas.unbind();
 			if (to != null) {
 				noLtlFormulas.bind(to.ltlFormulasProperty().emptyProperty());
 			} else {
-				noLtlFormulas.unbind();
 				noLtlFormulas.set(true);
 			}
 		});
