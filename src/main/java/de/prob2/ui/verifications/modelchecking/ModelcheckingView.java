@@ -48,7 +48,6 @@ import javafx.util.Callback;
 
 import java.math.BigInteger;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -265,12 +264,12 @@ public final class ModelcheckingView extends ScrollPane {
 			});
 			
 			row.itemProperty().addListener((o, from, to) -> {
+				checkItem.disableProperty().unbind();
 				if (to != null) {
 					checkItem.disableProperty().bind(to.itemsProperty().emptyProperty().not()
 						.or(checker.runningProperty())
 						.or(to.selectedProperty().not()));
 				} else {
-					checkItem.disableProperty().unbind();
 					checkItem.setDisable(true);
 				}
 			});
@@ -282,13 +281,13 @@ public final class ModelcheckingView extends ScrollPane {
 			});
 			
 			row.itemProperty().addListener((o, from, to) -> {
+				searchForNewErrorsItem.disableProperty().unbind();
 				if (to != null) {
 					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().isEmpty() || to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
 					searchForNewErrorsItem.disableProperty().bind(anySucceeded
 						.or(checker.runningProperty())
 						.or(to.selectedProperty().not()));
 				} else {
-					searchForNewErrorsItem.disableProperty().unbind();
 					searchForNewErrorsItem.setDisable(true);
 				}
 			});

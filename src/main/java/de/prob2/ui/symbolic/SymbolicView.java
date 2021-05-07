@@ -117,11 +117,11 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		setBindings();
 		setContextMenu();
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
+			tvFormula.itemsProperty().unbind();
 			if(newValue != null) {
 				tvFormula.itemsProperty().bind(formulasProperty(newValue));
 			} else {
 				tvFormula.getItems().clear();
-				tvFormula.itemsProperty().unbind();
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -137,10 +137,10 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noFormulas = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			noFormulas.unbind();
 			if (to != null) {
 				noFormulas.bind(formulasProperty(to).emptyProperty());
 			} else {
-				noFormulas.unbind();
 				noFormulas.set(true);
 			}
 		});
