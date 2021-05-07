@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
+import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
@@ -62,6 +63,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 
 /**
@@ -468,7 +470,10 @@ public class VisBStage extends Stage {
 					ExportVisBForCurrentStateCommand cmd = new ExportVisBForCurrentStateCommand(path.toAbsolutePath().toString());
 					currentTrace.getStateSpace().execute(cmd);
 				} else if(kind == VisBExportKind.CURRENT_TRACE) {
-					ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(currentTrace.getCurrentState().getId(), path.toAbsolutePath().toString());
+					List<String> transIDs = currentTrace.get().getTransitionList().stream()
+							.map(Transition::getId)
+							.collect(Collectors.toList());
+					ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(transIDs, path.toAbsolutePath().toString());
 					currentTrace.getStateSpace().execute(cmd);
 				}
 			}
