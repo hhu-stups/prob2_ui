@@ -56,7 +56,7 @@ public class TraceSelectionView extends Stage {
 
 	@FXML
 	private void initialize() {
-		traceTableView.setItems(traceViewHandler.getTraces());
+		traceTableView.itemsProperty().bind(traceViewHandler.getTraces());
 		initTableColumns();
 		initTableRows();
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);

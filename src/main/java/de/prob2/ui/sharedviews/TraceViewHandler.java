@@ -74,8 +74,10 @@ public class TraceViewHandler {
 				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(), injector);
 				Machine machine = currentProject.getCurrentMachine();
 				ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
-				machineTraces.add(replayTrace);
-				this.traceChecker.check(replayTrace, true);
+				if(!machineTraces.contains(replayTrace)) {
+					machineTraces.add(replayTrace);
+				}
+				this.traceChecker.check(machineTraces.get(machineTraces.indexOf(replayTrace)), true);
 			}
 			if (c.wasRemoved()) {
 				removeTraceItems(c.getElementRemoved());
@@ -84,6 +86,10 @@ public class TraceViewHandler {
 
 		currentProject.addListener((observable, from, to) -> {
 			this.machinesToTraces.clear();
+			traces.unbind();
+			noTraces.unbind();
+			traces.setValue(FXCollections.observableArrayList());
+			noTraces.set(true);
 			if(to != null) {
 				to.getMachines().forEach(machine -> {
 					final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
@@ -91,6 +97,12 @@ public class TraceViewHandler {
 					machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, injector)));
 					Machine.addCheckingStatusListener(machineTraces, machine.traceReplayStatusProperty());
 				});
+				if(currentProject.getCurrentMachine() != null) {
+					final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(currentProject.getCurrentMachine());
+					traces.bind(machineTraces);
+					noTraces.bind(currentProject.getCurrentMachine().tracesProperty().emptyProperty());
+					currentProject.getCurrentMachine().getTraceFiles().addListener(listener);
+				}
 			}
 		});
 
@@ -98,16 +110,15 @@ public class TraceViewHandler {
 			if (from != null) {
 				from.getTraceFiles().removeListener(listener);
 			}
+			traces.unbind();
+			noTraces.unbind();
+			traces.setValue(FXCollections.observableArrayList());
+			noTraces.set(true);
 			if (to != null) {
 				final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(to);
 				traces.bind(machineTraces);
 				noTraces.bind(to.tracesProperty().emptyProperty());
 				to.getTraceFiles().addListener(listener);
-			} else {
-				traces.unbind();
-				traces.clear();
-				noTraces.unbind();
-				noTraces.set(true);
 			}
 		});
 	}
@@ -162,7 +173,7 @@ public class TraceViewHandler {
 		return noTraces;
 	}
 
-	public ObservableList<ReplayTrace> getTraces() {
+	public ListProperty<ReplayTrace> getTraces() {
 		return traces;
 	}
 

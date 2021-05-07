@@ -92,7 +92,7 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent("animation", "Trace");
-		traceTableView.setItems(traceViewHandler.getTraces());
+		traceTableView.itemsProperty().bind(traceViewHandler.getTraces());
 		initTableColumns();
 		initTableRows();
 
