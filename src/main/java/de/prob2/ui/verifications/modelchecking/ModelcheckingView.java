@@ -213,6 +213,7 @@ public final class ModelcheckingView extends ScrollPane {
 
 
 		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			tvChecks.itemsProperty().unbind();
 			if (to != null) {
 				tvChecks.itemsProperty().bind(to.itemsProperty());
 				if(to.getItems().isEmpty()) {
@@ -221,7 +222,6 @@ public final class ModelcheckingView extends ScrollPane {
 					tvChecks.getSelectionModel().selectFirst();
 				}
 			} else {
-				tvChecks.itemsProperty().unbind();
 				// Because of the previous binding, the tvChecks items list is the same object as the job items list of one of the ModelcheckingItems.
 				// This means that we can't just clear tvChecks.getItems(), because that would also clear the ModelcheckingItem's job items, which resets the item's status.
 				tvChecks.setItems(FXCollections.observableArrayList());
@@ -241,10 +241,10 @@ public final class ModelcheckingView extends ScrollPane {
 	
 	private void setListeners() {
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
+			tvItems.itemsProperty().unbind();
 			if(newValue != null) {
 				tvItems.itemsProperty().bind(newValue.modelcheckingItemsProperty());
 			} else {
-				tvItems.itemsProperty().unbind();
 				tvItems.setItems(FXCollections.observableArrayList());
 			}
 		};
@@ -258,9 +258,7 @@ public final class ModelcheckingView extends ScrollPane {
 			if(item.getItems().isEmpty()) {
 				checker.checkItem(item, true, false);
 			} else if (item.getItems()
-					.stream()
-					.filter(job -> job.getChecked() == Checked.SUCCESS)
-					.collect(Collectors.toList()).isEmpty()) {
+					.stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
 				checker.checkItem(item, false, false);
 			}
 		}
