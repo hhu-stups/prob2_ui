@@ -214,222 +214,187 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 	}
 	
-	private static void updateV0Project(final ObjectNode project) {
-		if (!project.has("name")) {
-			project.put("name", "");
+	private static void updateV1Machine(final ObjectNode machine) {
+		checkArray(machine.get("testCases")).forEach(testCaseItemNode -> {
+			final ObjectNode additionalInformation = checkObject(checkObject(testCaseItemNode).get("additionalInformation"));
+			// These additionalInformation entries were previously saved in the project file.
+			// However, the code that would read these values could only execute after re-running the test case generation,
+			// which would overwrite these entries with newly generated values.
+			// This means that these saved values were never actually used
+			// and do not need to be stored in the project file.
+			// These entries have now been replaced with regular @JsonIgnore fields.
+			additionalInformation.remove("traceInformation");
+			additionalInformation.remove("uncoveredOperations");
+		});
+		
+		// The items of all of these lists have a field called checked,
+		// which was previously saved in the project file,
+		// but ignored when loading the project.
+		// The checked field is now marked as @JsonIgnore and no longer saved in the project file.
+		for (final String fieldName : new String[] {"modelcheckingItems", "ltlFormulas", "ltlPatterns", "symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
+			checkArray(machine.get(fieldName)).forEach(node ->
+				checkObject(node).remove("checked")
+			);
 		}
-		if (!project.has("description")) {
-			project.put("description", "");
+	}
+
+	private static void updateV2Machine(final ObjectNode machine) {
+		checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
+			final ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
+			if (!modelCheckingItem.has("nodesLimit")) {
+				modelCheckingItem.put("nodesLimit", "-");
+			}
+		});
+	}
+
+	private static void updateV3Machine(final ObjectNode machine) {
+		checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
+			final ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
+			if (!modelCheckingItem.has("timeLimit")) {
+				modelCheckingItem.put("timeLimit", "-");
+			}
+		});
+	}
+
+	private static void updateV4Machine(final ObjectNode machine) {
+		checkArray(machine.get("symbolicCheckingFormulas")).forEach(symbolicCheckingItemNode -> {
+			final ObjectNode symbolicCheckingItem = checkObject(symbolicCheckingItemNode);
+			final String oldCheckingType = checkText(symbolicCheckingItem.get("type"));
+			if ("IC3".equals(oldCheckingType) || "TINDUCTION".equals(oldCheckingType) || "KINDUCTION".equals(oldCheckingType) || "BMC".equals(oldCheckingType)) {
+				assert checkText(symbolicCheckingItem.get("name")).equals(oldCheckingType);
+				assert checkText(symbolicCheckingItem.get("code")).equals(oldCheckingType);
+				symbolicCheckingItem.put("type", "SYMBOLIC_MODEL_CHECK");
+			}
+		});
+	}
+
+	private static void updateV5Machine(final ObjectNode machine) {
+		if(!machine.has("visBVisualisation")) {
+			machine.put("visBVisualisation", "");
 		}
-		if (!project.has("machines")) {
-			project.set("machines", project.arrayNode());
-		}
-		checkArray(project.get("machines")).forEach(machineNode ->
-			updateV0Machine(checkObject(machineNode))
-		);
-		if (!project.has("preferences")) {
-			project.set("preferences", project.arrayNode());
+	}
+
+	private static void updateV6Machine(final ObjectNode machine) {
+		final String visBLocation = checkText(machine.get("visBVisualisation"));
+		if(visBLocation.isEmpty()) {
+			machine.set("visBVisualisation", machine.nullNode());
 		}
 	}
-	
-	private static void updateV1Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			checkArray(machine.get("testCases")).forEach(testCaseItemNode -> {
-				final ObjectNode additionalInformation = checkObject(checkObject(testCaseItemNode).get("additionalInformation"));
-				// These additionalInformation entries were previously saved in the project file.
-				// However, the code that would read these values could only execute after re-running the test case generation,
-				// which would overwrite these entries with newly generated values.
-				// This means that these saved values were never actually used
-				// and do not need to be stored in the project file.
-				// These entries have now been replaced with regular @JsonIgnore fields.
-				additionalInformation.remove("traceInformation");
-				additionalInformation.remove("uncoveredOperations");
-			});
-			
-			// The items of all of these lists have a field called checked,
-			// which was previously saved in the project file,
-			// but ignored when loading the project.
-			// The checked field is now marked as @JsonIgnore and no longer saved in the project file.
-			for (final String fieldName : new String[] {"modelcheckingItems", "ltlFormulas", "ltlPatterns", "symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
-				checkArray(machine.get(fieldName)).forEach(node ->
-					checkObject(node).remove("checked")
-				);
+
+	private static void updateV7Machine(final ObjectNode machine, final Path projectLocation) {
+		final JsonNode visBLocationNode = machine.get("visBVisualisation");
+		if(!visBLocationNode.isNull()) {
+			Path visBLocation = Paths.get(checkText(visBLocationNode));
+			if(visBLocation.isAbsolute()) {
+				Path newVisBLocationPath = projectLocation.getParent().relativize(visBLocation);
+				machine.put("visBVisualisation", newVisBLocationPath.toString());
+			}
+		}
+	}
+
+	private static void updateV8Machine(final ObjectNode machine) {
+		final JsonNode visBLocationNode = machine.get("visBVisualisation");
+		if(!visBLocationNode.isNull()) {
+			Path visBLocation = Paths.get(checkText(visBLocationNode).replaceAll("\\\\", "/"));
+			machine.put("visBVisualisation", visBLocation.toString());
+		}
+		Path location = Paths.get(checkText(machine.get("location")).replaceAll("\\\\", "/"));
+		machine.put("location", location.toString());
+		final ArrayNode newTraceArray = machine.arrayNode();
+		for(JsonNode traceNode : checkArray(machine.get("traces"))) {
+			Path traceLocation = Paths.get(checkText(traceNode).replaceAll("\\\\", "/"));
+			newTraceArray.add(traceLocation.toString());
+		}
+		machine.set("traces", newTraceArray);
+	}
+
+	private static void updateV9Machine(final ObjectNode machine) {
+		machine.set("simulationItems", machine.arrayNode());
+	}
+
+	private static void updateV10Machine(final ObjectNode machine) {
+		checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
+			final ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
+			if (!modelCheckingItem.has("goal")) {
+				modelCheckingItem.put("goal", "-");
 			}
 		});
 	}
 
-	private static void updateV2Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
-				final ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
-				if (!modelCheckingItem.has("nodesLimit")) {
-					modelCheckingItem.put("nodesLimit", "-");
-				}
-			});
-		});
+	private static void updateV11Machine(final ObjectNode machine) {
+		if(!machine.has("simulation")) {
+			machine.set("simulation", machine.nullNode());
+		}
 	}
 
-	private static void updateV3Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
-				final ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
-				if (!modelCheckingItem.has("timeLimit")) {
-					modelCheckingItem.put("timeLimit", "-");
-				}
-			});
-		});
-	}
-
-	private static void updateV4Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = (ObjectNode)machineNode;
-			checkArray(machine.get("symbolicCheckingFormulas")).forEach(symbolicCheckingItemNode -> {
-				final ObjectNode symbolicCheckingItem = checkObject(symbolicCheckingItemNode);
-				final String oldCheckingType = checkText(symbolicCheckingItem.get("type"));
-				if ("IC3".equals(oldCheckingType) || "TINDUCTION".equals(oldCheckingType) || "KINDUCTION".equals(oldCheckingType) || "BMC".equals(oldCheckingType)) {
-					assert checkText(symbolicCheckingItem.get("name")).equals(oldCheckingType);
-					assert checkText(symbolicCheckingItem.get("code")).equals(oldCheckingType);
-					symbolicCheckingItem.put("type", "SYMBOLIC_MODEL_CHECK");
-				}
-			});
-		});
-	}
-
-	private static void updateV5Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			if(!machine.has("visBVisualisation")) {
-				machine.put("visBVisualisation", "");
-			}
-		});
-	}
-
-	private static void updateV6Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			final String visBLocation = checkText(machine.get("visBVisualisation"));
-			if(visBLocation.isEmpty()) {
-				machine.set("visBVisualisation", machine.nullNode());
-			}
-		});
-	}
-
-	private static void updateV7Project(final ObjectNode project, final Path location) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			final JsonNode visBLocationNode = machine.get("visBVisualisation");
-			if(!visBLocationNode.isNull()) {
-				Path visBLocation = Paths.get(checkText(visBLocationNode));
-				if(visBLocation.isAbsolute()) {
-					Path newVisBLocationPath = location.getParent().relativize(visBLocation);
-					machine.put("visBVisualisation", newVisBLocationPath.toString());
-				}
-			}
-		});
-	}
-
-	private static void updateV8Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			final JsonNode visBLocationNode = machine.get("visBVisualisation");
-			if(!visBLocationNode.isNull()) {
-				Path visBLocation = Paths.get(checkText(visBLocationNode).replaceAll("\\\\", "/"));
-				machine.put("visBVisualisation", visBLocation.toString());
-			}
-			Path location = Paths.get(checkText(machine.get("location")).replaceAll("\\\\", "/"));
-			machine.put("location", location.toString());
-			final ArrayNode newTraceArray = machine.arrayNode();
-			for(JsonNode traceNode : checkArray(machine.get("traces"))) {
-				Path traceLocation = Paths.get(checkText(traceNode).replaceAll("\\\\", "/"));
-				newTraceArray.add(traceLocation.toString());
-			}
-			machine.set("traces", newTraceArray);
-		});
-	}
-
-	private static void updateV9Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			machine.set("simulationItems", machine.arrayNode());
-		});
-	}
-
-	private static void updateV10Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
-				final ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
-				if (!modelCheckingItem.has("goal")) {
-					modelCheckingItem.put("goal", "-");
-				}
-			});
-		});
-	}
-
-	private static void updateV11Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			if(!machine.has("simulation")) {
-				machine.set("simulation", machine.nullNode());
-			}
-		});
-	}
-
-	private static void updateV12Project(final ObjectNode project) {
-		checkArray(project.get("machines")).forEach(machineNode -> {
-			final ObjectNode machine = checkObject(machineNode);
-			for (final String checkableItemFieldName : new String[] {"symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
-				checkArray(machine.get(checkableItemFieldName)).forEach(checkableItemNode ->
-					checkObject(checkableItemNode).remove("description")
-				);
-			}
-		});
+	private static void updateV12Machine(final ObjectNode machine) {
+		for (final String checkableItemFieldName : new String[] {"symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
+			checkArray(machine.get(checkableItemFieldName)).forEach(checkableItemNode ->
+				checkObject(checkableItemNode).remove("description")
+			);
+		}
 	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
-			updateV0Project(oldObject);
+			if (!oldObject.has("name")) {
+				oldObject.put("name", "");
+			}
+			if (!oldObject.has("description")) {
+				oldObject.put("description", "");
+			}
+			if (!oldObject.has("machines")) {
+				oldObject.set("machines", oldObject.arrayNode());
+			}
+			if (!oldObject.has("preferences")) {
+				oldObject.set("preferences", oldObject.arrayNode());
+			}
 		}
-		if (oldVersion <= 1) {
-			updateV1Project(oldObject);
-		}
-		if (oldVersion <= 2) {
-			updateV2Project(oldObject);
-		}
-		if (oldVersion <= 3) {
-			updateV3Project(oldObject);
-		}
-		if (oldVersion <= 4) {
-			updateV4Project(oldObject);
-		}
-		if (oldVersion <= 5) {
-			updateV5Project(oldObject);
-		}
-		if (oldVersion <= 6) {
-			updateV6Project(oldObject);
-		}
-		if (oldVersion <= 7) {
-			updateV7Project(oldObject, location);
-		}
-		if (oldVersion <= 8) {
-			updateV8Project(oldObject);
-		}
-		if (oldVersion <= 9) {
-			updateV9Project(oldObject);
-		}
-		if (oldVersion <= 10) {
-			updateV10Project(oldObject);
-		}
-		if (oldVersion <= 11) {
-			updateV11Project(oldObject);
-		}
-		if (oldVersion <= 12) {
-			updateV12Project(oldObject);
-		}
+		
+		checkArray(oldObject.get("machines")).forEach(machineNode -> {
+			final ObjectNode machine = checkObject(machineNode);
+			if (oldVersion <= 0) {
+				updateV0Machine(machine);
+			}
+			if (oldVersion <= 1) {
+				updateV1Machine(machine);
+			}
+			if (oldVersion <= 2) {
+				updateV2Machine(machine);
+			}
+			if (oldVersion <= 3) {
+				updateV3Machine(machine);
+			}
+			if (oldVersion <= 4) {
+				updateV4Machine(machine);
+			}
+			if (oldVersion <= 5) {
+				updateV5Machine(machine);
+			}
+			if (oldVersion <= 6) {
+				updateV6Machine(machine);
+			}
+			if (oldVersion <= 7) {
+				updateV7Machine(machine, this.location);
+			}
+			if (oldVersion <= 8) {
+				updateV8Machine(machine);
+			}
+			if (oldVersion <= 9) {
+				updateV9Machine(machine);
+			}
+			if (oldVersion <= 10) {
+				updateV10Machine(machine);
+			}
+			if (oldVersion <= 11) {
+				updateV11Machine(machine);
+			}
+			if (oldVersion <= 12) {
+				updateV12Machine(machine);
+			}
+		});
+		
 		return oldObject;
 	}
 
