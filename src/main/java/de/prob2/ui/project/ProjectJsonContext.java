@@ -171,7 +171,32 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 	}
 	
+	/**
+	 * <p>Convert a serialied File or Path object to a plain string value if necessary/possible.</p>
+	 * <p>
+	 * Some old UI versions would serialize a File or Path object as a JSON object with a single field "path".
+	 * In later versions this was changed so that they are serialized as plain strings instead.
+	 * This method tries to convert paths from the old format.
+	 * </p>
+	 * 
+	 * @param path the path value to be converted
+	 * @return the path, converted if necessary
+	 */
+	private static JsonNode convertV0Path(final JsonNode path) {
+		if (path.isObject()) {
+			final JsonNode actualPath = path.get("path");
+			if (actualPath != null && actualPath.isTextual()) {
+				return actualPath;
+			} else {
+				return path;
+			}
+		} else {
+			return path;
+		}
+	}
+	
 	private static void updateV0Machine(final ObjectNode machine) {
+		machine.set("location", convertV0Path(machine.get("location")));
 		if (!machine.has("lastUsedPreferenceName")) {
 			final String lastUsedPreferenceName;
 			if (machine.has("lastUsed")) {
@@ -200,6 +225,10 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		);
 		if (!machine.has("traces")) {
 			machine.set("traces", machine.arrayNode());
+		}
+		final ArrayNode traces = checkArray(machine.get("traces"));
+		for (int i = 0; i < traces.size(); i++) {
+			traces.set(i, convertV0Path(traces.get(i)));
 		}
 		if (!machine.has("modelcheckingItems")) {
 			machine.set("modelcheckingItems", machine.arrayNode());
