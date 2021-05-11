@@ -13,9 +13,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
-import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationType;
-import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
 
 class ProjectJsonContext extends JacksonManager.Context<Project> {
 
@@ -59,7 +56,6 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	
 	private static void updateV0SymbolicCheckingItem(final ObjectNode symbolicCheckingItem) {
 		// The names of some symbolic checking types have changed in the past and need to be updated.
-		SymbolicExecutionType newType = null;
 		if (symbolicCheckingItem.get("type").isNull()) {
 			// If a project was loaded after a type renaming,
 			// and the UI version in question did not support file format versioning/conversion,
@@ -67,12 +63,8 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			// In this case, the type needs to be restored from the code string.
 			final String code = checkText(symbolicCheckingItem.get("code"));
 			if ("CHECK_ASSERTIONS".equals(code)) {
-				newType = SymbolicExecutionType.CHECK_STATIC_ASSERTIONS;
+				symbolicCheckingItem.put("type", "CHECK_STATIC_ASSERTIONS");
 			}
-		}
-		
-		if (newType != null) {
-			symbolicCheckingItem.put("type", newType.name());
 		}
 	}
 	
@@ -92,14 +84,14 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		// and its contents need to be extracted from the code string.
 		final String[] splitOnSlash = code.replace(" ", "").split("/");
 		final String[] splitFirstOnColon = splitOnSlash[0].split(":");
-		if (TestCaseGenerationType.MCDC.name().equals(type)) {
+		if ("MCDC".equals(type)) {
 			if (!additionalInformation.has("level")) {
 				if (!"MCDC".equals(splitFirstOnColon[0])) {
 					throw new JsonConversionException("First part of MCDC item code string does not contain level: " + splitOnSlash[0]);
 				}
 				additionalInformation.put("level", Integer.parseInt(splitFirstOnColon[1]));
 			}
-		} else if (TestCaseGenerationType.COVERED_OPERATIONS.name().equals(type)) {
+		} else if ("COVERED_OPERATIONS".equals(type)) {
 			if (!additionalInformation.has("operations")) {
 				if (!"OPERATION".equals(splitFirstOnColon[0])) {
 					throw new JsonConversionException("First part of covered operations item code string does not contain operations: " + splitOnSlash[0]);
@@ -130,7 +122,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		// which need to be converted to proper test case generation items.
 		for (final Iterator<JsonNode> it = symbolicAnimationFormulas.iterator(); it.hasNext();) {
 			final ObjectNode symbolicAnimationFormula = checkObject(it.next());
-			final TestCaseGenerationType testCaseGenerationType;
+			final String testCaseGenerationType;
 			final JsonNode typeNode = symbolicAnimationFormula.get("type");
 			if (typeNode.isNull()) {
 				// If a project contains symbolic animation items for test case generation,
@@ -140,18 +132,18 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				// In this case, the type needs to be restored from the code string.
 				final String code = checkText(symbolicAnimationFormula.get("code"));
 				if (code.startsWith("MCDC")) {
-					testCaseGenerationType = TestCaseGenerationType.MCDC;
+					testCaseGenerationType = "MCDC";
 				} else if (code.startsWith("OPERATION")) {
-					testCaseGenerationType = TestCaseGenerationType.COVERED_OPERATIONS;
+					testCaseGenerationType = "COVERED_OPERATIONS";
 				} else {
 					testCaseGenerationType = null;
 				}
 			} else {
 				final String typeName = checkText(typeNode);
 				if ("MCDC".equals(typeName)) {
-					testCaseGenerationType = TestCaseGenerationType.MCDC;
+					testCaseGenerationType = "MCDC";
 				} else if ("COVERED_OPERATIONS".equals(typeName)) {
-					testCaseGenerationType = TestCaseGenerationType.COVERED_OPERATIONS;
+					testCaseGenerationType = "COVERED_OPERATIONS";
 				} else {
 					testCaseGenerationType = null;
 				}
@@ -161,7 +153,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				it.remove();
 				testCases.add(symbolicAnimationFormula);
 				// Update/fix the type, as determined above.
-				symbolicAnimationFormula.put("type", testCaseGenerationType.name());
+				symbolicAnimationFormula.put("type", testCaseGenerationType);
 				// In symbolic animation items, the maxDepth value was stored in additionalInformation.
 				// In test case items, it is stored as a regular field.
 				// If additionalInformation is missing,
@@ -185,7 +177,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			if (machine.has("lastUsed")) {
 				lastUsedPreferenceName = checkText(checkObject(machine.get("lastUsed")).get("name"));
 			} else {
-				lastUsedPreferenceName = Preference.DEFAULT.getName();
+				lastUsedPreferenceName = "default";
 			}
 			machine.put("lastUsedPreferenceName", lastUsedPreferenceName);
 		}
