@@ -26,7 +26,6 @@ import javafx.collections.ObservableList;
 	"additionalInformation",
 	"type",
 	"name",
-	"description",
 	"code",
 	"selected",
 })
@@ -88,14 +87,14 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	
 	public TestCaseGenerationItem(int maxDepth, int level) {
-		super(getMcdcName(maxDepth, level), TestCaseGenerationType.MCDC.getName(), "");
+		super(getMcdcName(maxDepth, level), "");
 		this.type = TestCaseGenerationType.MCDC;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new McdcInformation(level);
 	}
 
 	public TestCaseGenerationItem(int maxDepth, List<String> operations) {
-		super(getCoveredOperationsName(maxDepth, operations), TestCaseGenerationType.COVERED_OPERATIONS.getName(), "");
+		super(getCoveredOperationsName(maxDepth, operations), "");
 		this.type = TestCaseGenerationType.COVERED_OPERATIONS;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new CoveredOperationsInformation(operations);
@@ -104,13 +103,12 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonCreator
 	private TestCaseGenerationItem(
 		@JsonProperty("name") final String name,
-		@JsonProperty("descriptions") final String descriptions,
 		@JsonProperty("code") final String code,
 		@JsonProperty("type") final TestCaseGenerationType type,
 		@JsonProperty("maxDepth") final int maxDepth,
 		@JsonProperty("additionalInformation") final AdditionalInformation additionalInformation
 	) {
-		super(name, descriptions, code);
+		super(name, code);
 		
 		this.type = type;
 		this.maxDepth = maxDepth;

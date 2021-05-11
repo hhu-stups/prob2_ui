@@ -9,7 +9,6 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 @JsonPropertyOrder({
 	"type",
 	"name",
-	"description",
 	"code",
 	"selected",
 })
@@ -18,7 +17,7 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 	private final SymbolicExecutionType type;
 
 	public SymbolicItem(String name, String code, SymbolicExecutionType type) {
-		super(name, type.getName(), code);
+		super(name, code);
 		this.type = type;
 	}
 	

@@ -41,7 +41,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -287,7 +286,6 @@ public class LTLView extends AnchorPane {
 	@FXML
 	public void addFormula() {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		loadLTLStage(formulaStage, null);
 		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.ADD, null));
 		formulaStage.showAndWait();
 	}
@@ -301,7 +299,6 @@ public class LTLView extends AnchorPane {
 	@FXML
 	public void addPattern() {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
-		loadLTLStage(patternStage, null);
 		patternStage.setHandleItem(new LTLHandleItem<>(LTLHandleItem.HandleType.ADD, null));
 		patternStage.showAndWait();
 	}
@@ -315,7 +312,7 @@ public class LTLView extends AnchorPane {
 	
 	private void showCurrentItemDialog(LTLFormulaItem item) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		loadLTLStage(formulaStage, item);
+		formulaStage.setData(item.getDescription(), item.getCode());
 		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		formulaStage.showAndWait();
 		formulaStage.clear();
@@ -323,16 +320,10 @@ public class LTLView extends AnchorPane {
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
-		loadLTLStage(patternStage, item);
+		patternStage.setData(item.getDescription(), item.getCode());
 		patternStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		patternStage.showAndWait();
 		patternStage.clear();
-	}
-
-	private void loadLTLStage(LTLItemStage<?> stage, AbstractCheckableItem item) {
-		if (item != null) {
-			stage.setData(item.getDescription(), item.getCode());
-		}
 	}
 	
 	@FXML

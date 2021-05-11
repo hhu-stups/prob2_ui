@@ -377,6 +377,17 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 		});
 	}
+
+	private static void updateV12Project(final ObjectNode project) {
+		checkArray(project.get("machines")).forEach(machineNode -> {
+			final ObjectNode machine = checkObject(machineNode);
+			for (final String checkableItemFieldName : new String[] {"symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
+				checkArray(machine.get(checkableItemFieldName)).forEach(checkableItemNode ->
+					checkObject(checkableItemNode).remove("description")
+				);
+			}
+		});
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -415,6 +426,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 		if (oldVersion <= 11) {
 			updateV11Project(oldObject);
+		}
+		if (oldVersion <= 12) {
+			updateV12Project(oldObject);
 		}
 		return oldObject;
 	}

@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.ltl.formula;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
@@ -11,12 +12,20 @@ import de.prob2.ui.verifications.ltl.ILTLItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+@JsonPropertyOrder({
+	"name",
+	"description",
+	"code",
+	"selected",
+})
 public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
+	private final String description;
+	
 	@JsonIgnore
 	private final ObjectProperty<Trace> counterExample = new SimpleObjectProperty<>(this, "counterExample", null);
 
 	public LTLFormulaItem(String code, String description) {
-		super("", description, code);
+		this("", description, code);
 	}
 	
 	@JsonCreator
@@ -25,7 +34,9 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 		@JsonProperty("description") final String description,
 		@JsonProperty("code") final String code
 	) {
-		super(name, description, code);
+		super(name, code);
+		
+		this.description = description;
 	}
 	
 	@Override
@@ -33,7 +44,11 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 		super.reset();
 		this.setCounterExample(null);
 	}
-			
+	
+	public String getDescription() {
+		return this.description;
+	}
+	
 	public void setCounterExample(Trace counterExample) {
 		this.counterExample.set(counterExample);
 	}
