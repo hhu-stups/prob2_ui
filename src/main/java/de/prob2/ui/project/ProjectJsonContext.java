@@ -49,9 +49,15 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	}
 	
 	private static void updateV0CheckableItem(final ObjectNode checkableItem) {
+		// Some old items might have "selected" missing or under the previous name "shouldExecute".
 		if (!checkableItem.has("selected")) {
-			checkableItem.put("selected", true);
+			if (checkableItem.has("shouldExecute")) {
+				checkableItem.set("selected", checkableItem.get("shouldExecute"));
+			} else {
+				checkableItem.put("selected", true);
+			}
 		}
+		checkableItem.remove("shouldExecute");
 	}
 	
 	private static void updateV0SymbolicCheckingItem(final ObjectNode symbolicCheckingItem) {
@@ -171,6 +177,18 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 	}
 	
+	private static void updateV0ModelcheckingItem(final ObjectNode modelcheckingItem) {
+		// This information is no longer stored in the project file
+		// and is instead derived from the options list.
+		modelcheckingItem.remove("strategy");
+		modelcheckingItem.remove("description");
+		
+		// Old modelcheckingItems might not have "shouldExecute" yet.
+		if (!modelcheckingItem.has("shouldExecute")) {
+			modelcheckingItem.put("shouldExecute", true);
+		}
+	}
+	
 	/**
 	 * <p>Convert a serialied File or Path object to a plain string value if necessary/possible.</p>
 	 * <p>
@@ -197,6 +215,13 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	
 	private static void updateV0Machine(final ObjectNode machine) {
 		machine.set("location", convertV0Path(machine.get("location")));
+		// The machine type is no longer stored explicitly in the project file
+		// and is derived from the machine file extension instead.
+		machine.remove("type");
+		
+		// The last used preference was previously stored in "lastUsed" as a full Preference object.
+		// This has been replaced by "lastUsedPreferenceName",
+		// which stores just the name and not the full map of preference values.
 		if (!machine.has("lastUsedPreferenceName")) {
 			final String lastUsedPreferenceName;
 			if (machine.has("lastUsed")) {
@@ -206,6 +231,8 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			machine.put("lastUsedPreferenceName", lastUsedPreferenceName);
 		}
+		machine.remove("lastUsed");
+		
 		for (final String checkableItemFieldName : new String[] {"ltlFormulas", "ltlPatterns", "symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
 			if (!machine.has(checkableItemFieldName)) {
 				machine.set(checkableItemFieldName, machine.arrayNode());
@@ -230,9 +257,14 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		for (int i = 0; i < traces.size(); i++) {
 			traces.set(i, convertV0Path(traces.get(i)));
 		}
+		
+		// Some very old projects might not have the "modelcheckingItems" list yet.
 		if (!machine.has("modelcheckingItems")) {
 			machine.set("modelcheckingItems", machine.arrayNode());
 		}
+		checkArray(machine.get("modelcheckingItems")).forEach(modelcheckingItemNode ->
+			updateV0ModelcheckingItem(checkObject(modelcheckingItemNode))
+		);
 	}
 	
 	private static void updateV1Machine(final ObjectNode machine) {
