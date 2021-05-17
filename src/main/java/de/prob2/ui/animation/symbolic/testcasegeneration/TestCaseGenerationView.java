@@ -60,7 +60,7 @@ public class TestCaseGenerationView extends ScrollPane {
 	private TableColumn<TestCaseGenerationItem, String> configurationColumn;
 	
 	@FXML
-	private TableColumn<TestCaseGenerationItem, String> descriptionColumn;
+	private TableColumn<TestCaseGenerationItem, String> typeColumn;
 	
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -212,7 +212,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("configurationDescription"));
-		descriptionColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getType().getName()));
+		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getType().getName()));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvTestCases,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvTestCases.setOnMouseClicked(e-> {

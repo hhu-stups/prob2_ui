@@ -70,7 +70,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	protected TableColumn<T, String> configurationColumn;
 	
 	@FXML
-	protected TableColumn<T, String> descriptionColumn;
+	protected TableColumn<T, String> typeColumn;
 	
 	@FXML
 	protected TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -151,7 +151,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
-		descriptionColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getType().getName()));
+		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getType().getName()));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvFormula.setOnMouseClicked(e-> {
