@@ -48,7 +48,7 @@ public class SimulationChoiceBindings {
 		this.endingItemProperty = new SimpleObjectProperty<>();
 		this.monteCarloTimeProperty = new SimpleStringProperty();
 		this.predicateProperty = new SimpleStringProperty();
-		this.checkingProperty = new SimpleObjectProperty();
+		this.checkingProperty = new SimpleObjectProperty<>();
 	}
 
 	public SimpleStringProperty simulationsProperty() {
