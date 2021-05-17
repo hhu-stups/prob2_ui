@@ -265,6 +265,7 @@ public class TraceRefactoredSetup {
 
 
 	class TraceModificationError extends RuntimeException{
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Constructs an instance of this class.
