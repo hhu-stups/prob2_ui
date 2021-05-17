@@ -10,7 +10,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public abstract class AbstractCheckableItem implements IExecutableItem {
-	private final String name;
 	private final String code;
 	private BooleanProperty selected;
 	@JsonIgnore
@@ -18,8 +17,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	@JsonIgnore
 	final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 	
-	protected AbstractCheckableItem(String name, String code) {
-		this.name = name;
+	protected AbstractCheckableItem(String code) {
 		this.code = code;
 		this.selected = new SimpleBooleanProperty(true);
 		
@@ -32,10 +30,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	
 	public void reset() {
 		this.setResultItem(null);
-	}
-	
-	public String getName() {
-		return name;
 	}
 	
 	public void setSelected(boolean selected) {

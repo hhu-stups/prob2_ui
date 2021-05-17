@@ -8,7 +8,6 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 // (to avoid unnecessary reordering when re-saving existing files).
 @JsonPropertyOrder({
 	"type",
-	"name",
 	"code",
 	"selected",
 })
@@ -16,8 +15,8 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 	
 	private final SymbolicExecutionType type;
 
-	public SymbolicItem(String name, String code, SymbolicExecutionType type) {
-		super(name, code);
+	public SymbolicItem(String code, SymbolicExecutionType type) {
+		super(code);
 		this.type = type;
 	}
 	
@@ -26,13 +25,12 @@ public abstract class SymbolicItem extends AbstractCheckableItem {
 	}
 	
 	public boolean settingsEqual(final SymbolicItem other) {
-		return this.getName().equals(other.getName())
-			&& this.getCode().equals(other.getCode())
+		return this.getCode().equals(other.getCode())
 			&& this.getType().equals(other.getType());
 	}
 	
 	@Override
 	public String toString() {
-		return String.join(" ", this.getName(), this.getCode(), this.getType().name());
+		return String.join(" ", this.getCode(), this.getType().name());
 	}
 }

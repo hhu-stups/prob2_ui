@@ -194,7 +194,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
 		} else if(this.getGUIType() == SymbolicGUIType.PREDICATE) {
-			predicateBuilderView.setFromPredicate(item.getName());
+			predicateBuilderView.setFromPredicate(item.getCode());
 		} else if(this.getGUIType() == SymbolicGUIType.CHOICE_BOX) {
 			if (item.getCode().isEmpty()) {
 				cbOperations.getSelectionModel().select(this.checkAllOperations);

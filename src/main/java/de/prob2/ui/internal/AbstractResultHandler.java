@@ -44,7 +44,7 @@ public abstract class AbstractResultHandler {
 				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
 				resultItem.getHeaderBundleKey(),
 				resultItem.getMessageBundleKey(), resultItem.getMessageParams());
-		alert.setTitle(item.getName());
+		alert.setTitle(bundle.getString(resultItem.getHeaderBundleKey()));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
 	}

@@ -57,7 +57,7 @@ public class TestCaseGenerationView extends ScrollPane {
 	private TableColumn<TestCaseGenerationItem, Checked> statusColumn;
 	
 	@FXML
-	private TableColumn<TestCaseGenerationItem, String> nameColumn;
+	private TableColumn<TestCaseGenerationItem, String> configurationColumn;
 	
 	@FXML
 	private TableColumn<TestCaseGenerationItem, String> descriptionColumn;
@@ -211,7 +211,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		cancelButton.disableProperty().bind(testCaseGenerator.runningProperty().not());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("configurationDescription"));
 		descriptionColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getType().getName()));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvTestCases,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);

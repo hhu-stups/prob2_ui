@@ -18,16 +18,11 @@ public class SymbolicAnimationItem extends SymbolicItem {
 	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 
 	@JsonCreator
-	private SymbolicAnimationItem(
-		@JsonProperty("name") final String name,
+	public SymbolicAnimationItem(
 		@JsonProperty("code") final String code,
 		@JsonProperty("type") final SymbolicExecutionType type
 	) {
-		super(name, code, type);
-	}
-
-	public SymbolicAnimationItem(String name, SymbolicExecutionType type) {
-		this(name, name, type);
+		super(code, type);
 	}
 
 	@Override

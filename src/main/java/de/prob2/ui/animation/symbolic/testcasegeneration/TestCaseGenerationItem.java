@@ -25,7 +25,6 @@ import javafx.collections.ObservableList;
 	"maxDepth",
 	"additionalInformation",
 	"type",
-	"name",
 	"code",
 	"selected",
 })
@@ -87,14 +86,14 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	
 	public TestCaseGenerationItem(int maxDepth, int level) {
-		super(getMcdcName(maxDepth, level), "");
+		super("");
 		this.type = TestCaseGenerationType.MCDC;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new McdcInformation(level);
 	}
 
 	public TestCaseGenerationItem(int maxDepth, List<String> operations) {
-		super(getCoveredOperationsName(maxDepth, operations), "");
+		super("");
 		this.type = TestCaseGenerationType.COVERED_OPERATIONS;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = new CoveredOperationsInformation(operations);
@@ -102,25 +101,16 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	@JsonCreator
 	private TestCaseGenerationItem(
-		@JsonProperty("name") final String name,
 		@JsonProperty("code") final String code,
 		@JsonProperty("type") final TestCaseGenerationType type,
 		@JsonProperty("maxDepth") final int maxDepth,
 		@JsonProperty("additionalInformation") final AdditionalInformation additionalInformation
 	) {
-		super(name, code);
+		super(code);
 		
 		this.type = type;
 		this.maxDepth = maxDepth;
 		this.additionalInformation = additionalInformation;
-	}
-	
-	private static String getMcdcName(final int maxDepth, final int level) {
-		return "MCDC:" + level + "/" + "DEPTH:" + maxDepth;
-	}
-	
-	private static String getCoveredOperationsName(final int maxDepth, final List<String> operations) {
-		return "OPERATION:" + String.join(",", operations) + "/" + "DEPTH:" + maxDepth;
 	}
 	
 	@Override
@@ -165,13 +155,27 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		return this.uncoveredOperations;
 	}
 	
+	@JsonIgnore
+	public String getConfigurationDescription() {
+		switch (this.getType()) {
+			case MCDC:
+				return "MCDC:" + this.getMcdcLevel() + "/" + "DEPTH:" + this.getMaxDepth();
+			
+			case COVERED_OPERATIONS:
+				return "OPERATION:" + String.join(",", this.getCoverageOperations()) + "/" + "DEPTH:" + this.getMaxDepth();
+			
+			default:
+				throw new AssertionError("Unhandled test case generation type: " + this.getType());
+		}
+	}
+	
 	public boolean settingsEqual(final TestCaseGenerationItem other) {
-		return this.getName().equals(other.getName())
+		return this.getConfigurationDescription().equals(other.getConfigurationDescription())
 			&& this.getCode().equals(other.getCode())
 			&& this.getType().equals(other.getType());
 	}
 
 	public String createdByForMetadata(int index) {
-		return "Test Case Generation: " + getName() + "; " + getTraceInformation().get(index);
+		return "Test Case Generation: " + this.getConfigurationDescription() + "; " + getTraceInformation().get(index);
 	}
 }

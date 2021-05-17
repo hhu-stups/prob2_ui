@@ -19,11 +19,10 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem {
 	
 	@JsonCreator
 	public SymbolicCheckingFormulaItem(
-		@JsonProperty("name") final String name,
 		@JsonProperty("code") final String code,
 		@JsonProperty("type") final SymbolicExecutionType type
 	) {
-		super(name, code, type);
+		super(code, type);
 	}
 	
 	public ObservableList<Trace> getCounterExamples() {

@@ -13,7 +13,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 @JsonPropertyOrder({
-	"name",
 	"description",
 	"code",
 	"selected",
@@ -23,18 +22,13 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 	
 	@JsonIgnore
 	private final ObjectProperty<Trace> counterExample = new SimpleObjectProperty<>(this, "counterExample", null);
-
-	public LTLFormulaItem(String code, String description) {
-		this("", description, code);
-	}
 	
 	@JsonCreator
-	private LTLFormulaItem(
-		@JsonProperty("name") final String name,
-		@JsonProperty("description") final String description,
-		@JsonProperty("code") final String code
+	public LTLFormulaItem(
+		@JsonProperty("code") final String code,
+		@JsonProperty("description") final String description
 	) {
-		super(name, code);
+		super(code);
 		
 		this.description = description;
 	}
