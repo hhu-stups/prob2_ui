@@ -395,6 +395,12 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			);
 		}
 	}
+
+	private static void updateV14Machine(final ObjectNode machine) {
+		checkArray(machine.get("testCases")).forEach(checkableItemNode ->
+			checkObject(checkableItemNode).remove("code")
+		);
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -456,6 +462,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 13) {
 				updateV13Machine(machine);
+			}
+			if (oldVersion <= 14) {
+				updateV14Machine(machine);
 			}
 		});
 		

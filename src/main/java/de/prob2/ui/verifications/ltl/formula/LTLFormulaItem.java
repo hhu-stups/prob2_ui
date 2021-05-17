@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"selected",
 })
 public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
+	private final String code;
 	private final String description;
 	
 	@JsonIgnore
@@ -28,8 +29,9 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 		@JsonProperty("code") final String code,
 		@JsonProperty("description") final String description
 	) {
-		super(code);
+		super();
 		
+		this.code = code;
 		this.description = description;
 	}
 	
@@ -37,6 +39,10 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 	public void reset() {
 		super.reset();
 		this.setCounterExample(null);
+	}
+	
+	public String getCode() {
+		return this.code;
 	}
 	
 	public String getDescription() {

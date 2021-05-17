@@ -20,6 +20,7 @@ public class LTLPatternItem extends AbstractCheckableItem implements ILTLItem {
 	// every time the project/machine is loaded.
 	private final String name;
 	private final String description;
+	private final String code;
 	
 	@JsonCreator
 	public LTLPatternItem(
@@ -27,10 +28,11 @@ public class LTLPatternItem extends AbstractCheckableItem implements ILTLItem {
 		@JsonProperty("description") final String description,
 		@JsonProperty("code") final String code
 	) {
-		super(code);
+		super();
 		
 		this.name = name;
 		this.description = description;
+		this.code = code;
 	}
 	
 	public String getName() {
@@ -39,6 +41,10 @@ public class LTLPatternItem extends AbstractCheckableItem implements ILTLItem {
 	
 	public String getDescription() {
 		return this.description;
+	}
+	
+	public String getCode() {
+		return this.code;
 	}
 	
 	public boolean settingsEqual(final LTLPatternItem other) {

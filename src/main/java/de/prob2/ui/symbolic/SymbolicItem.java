@@ -12,12 +12,17 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 	"selected",
 })
 public abstract class SymbolicItem extends AbstractCheckableItem {
-	
+	private final String code;
 	private final SymbolicExecutionType type;
 
 	public SymbolicItem(String code, SymbolicExecutionType type) {
-		super(code);
+		super();
+		this.code = code;
 		this.type = type;
+	}
+	
+	public String getCode() {
+		return this.code;
 	}
 	
 	public SymbolicExecutionType getType() {

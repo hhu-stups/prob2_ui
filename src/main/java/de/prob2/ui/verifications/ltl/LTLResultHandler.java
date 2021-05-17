@@ -71,7 +71,7 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		}
 	}
 	
-	public void handlePatternResult(LTLParseListener parseListener, AbstractCheckableItem item) {
+	public void handlePatternResult(LTLParseListener parseListener, LTLPatternItem item) {
 		CheckingResultItem resultItem;
 		// Empty Patterns do not have parse errors which is a little bit confusing
 		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
