@@ -66,17 +66,7 @@ public class TestCaseGenerationItemHandler {
 		if(!item.selected()) {
 			return;
 		}
-		TestCaseGenerationType type = item.getType();
-		switch(type) {
-			case MCDC:
-				generateTestCases(item);
-				break;
-			case COVERED_OPERATIONS:
-				generateTestCases(item);
-				break;
-			default:
-				break;
-		}
+		generateTestCases(item);
 	}
 	
 	public void handleMachine(Machine machine) {
