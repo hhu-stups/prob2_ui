@@ -237,9 +237,9 @@ public class TestCaseGenerationView extends ScrollPane {
 	}
 
 	private void openItem(TestCaseGenerationItem item) {
-		TestCaseGenerationInput input = injector.getInstance(TestCaseGenerationInput.class);
-		input.changeItem(item,
-				injector.getInstance(TestCaseGenerationResultHandler.class), injector.getInstance(TestCaseGenerationChoosingStage.class));
+		TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
+		choosingStage.changeItem(item,
+				injector.getInstance(TestCaseGenerationResultHandler.class));
 	}
 	
 	@FXML
