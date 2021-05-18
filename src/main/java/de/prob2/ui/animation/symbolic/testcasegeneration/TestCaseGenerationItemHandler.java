@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -39,6 +38,15 @@ public class TestCaseGenerationItemHandler {
 				currentMachine.getTestCases().add(item);
 			}
 		}
+	}
+
+	public boolean replaceItem(final TestCaseGenerationItem oldItem, final TestCaseGenerationItem newItem) {
+		Machine currentMachine = currentProject.getCurrentMachine();
+		if(currentMachine.getTestCases().stream().noneMatch(newItem::settingsEqual)) {
+			currentMachine.getTestCases().set(currentMachine.getTestCases().indexOf(oldItem), newItem);
+			return true;
+		}
+		return false;
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item) {

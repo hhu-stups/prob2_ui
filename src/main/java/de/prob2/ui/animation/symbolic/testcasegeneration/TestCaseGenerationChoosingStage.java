@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -9,8 +8,6 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -43,18 +40,15 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	
 	private final StageManager stageManager;
 	
-	private final CurrentProject currentProject;
-	
 	private final ResourceBundle bundle;
 	
 	private final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler;
 	
 	@Inject
-	private TestCaseGenerationChoosingStage(final StageManager stageManager, final CurrentProject currentProject, final ResourceBundle bundle, final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler) {
+	private TestCaseGenerationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler) {
 		super();
 		
 		this.stageManager = stageManager;
-		this.currentProject = currentProject;
 		this.bundle = bundle;
 		this.testCaseGenerationFormulaHandler = testCaseGenerationFormulaHandler;
 		
@@ -115,19 +109,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 			default:
 				throw new AssertionError("Unhandled test case generation type: " + type);
 		}
-	}
-	
-	private boolean updateItem(TestCaseGenerationItem item) {
-		if (!checkValid()) {
-			return true;
-		}
-		Machine currentMachine = currentProject.getCurrentMachine();
-		final TestCaseGenerationItem newItem = extractItem();
-		if(currentMachine.getTestCases().stream().noneMatch(newItem::settingsEqual)) {
-			currentMachine.getTestCases().set(currentMachine.getTestCases().indexOf(item), newItem);
-			return true;
-		}
-		return false;
 	}
 	
 	private void setCheckListeners() {
@@ -195,9 +176,13 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	
 	private void setChangeListeners(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler) {
 		btAdd.setOnAction(e -> {
+			if (!checkValid()) {
+				return;
+			}
 			//Close stage first so that it does not need to wait for possible Alerts
 			this.close();
-			if(updateItem(item)) {
+			final TestCaseGenerationItem newItem = extractItem();
+			if(testCaseGenerationFormulaHandler.replaceItem(item, newItem)) {
 				addItem();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
@@ -205,9 +190,13 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		});
 		
 		btCheck.setOnAction(e-> {
+			if (!checkValid()) {
+				return;
+			}
 			//Close stage first so that it does not need to wait for possible Alerts
 			this.close();
-			if(updateItem(item)) {
+			final TestCaseGenerationItem newItem = extractItem();
+			if(testCaseGenerationFormulaHandler.replaceItem(item, newItem)) {
 				checkItem();
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
