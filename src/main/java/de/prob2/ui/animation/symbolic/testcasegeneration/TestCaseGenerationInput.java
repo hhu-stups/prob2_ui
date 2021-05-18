@@ -73,9 +73,9 @@ public class TestCaseGenerationInput extends VBox {
 		boolean valid = isValid(choosingStage);
 		TestCaseGenerationItem newItem;
 		if (type == TestCaseGenerationType.MCDC) {
-			newItem = new TestCaseGenerationItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
+			newItem = new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
 		} else if (type == TestCaseGenerationType.COVERED_OPERATIONS) {
-			newItem = new TestCaseGenerationItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
+			newItem = new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
 		} else {
 			throw new AssertionError("Unhandled type: " + type);
 		}
@@ -122,7 +122,7 @@ public class TestCaseGenerationInput extends VBox {
 		addItem();
 		switch (testCaseGenerationType) {
 			case MCDC: {
-				item = new TestCaseGenerationItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
+				item = new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
 				testCaseGenerationFormulaHandler.generateTestCases(item);
 				break;
 			}
@@ -130,7 +130,7 @@ public class TestCaseGenerationInput extends VBox {
 				if(operationCoverageInputView.getOperations().isEmpty()) {
 					return;
 				}
-				item = new TestCaseGenerationItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
+				item = new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
 				testCaseGenerationFormulaHandler.generateTestCases(item);
 				break;
 			}
@@ -172,9 +172,9 @@ public class TestCaseGenerationInput extends VBox {
 		setChangeListeners(item, resultHandler, stage);
 		stage.select(item);
 		if(stage.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
-			mcdcInputView.setItem(item);
+			mcdcInputView.setItem((MCDCItem)item);
 		} else if(stage.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS) {
-			operationCoverageInputView.setItem(item);
+			operationCoverageInputView.setItem((OperationCoverageItem)item);
 		}
 		stage.show();
 	}

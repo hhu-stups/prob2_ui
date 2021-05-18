@@ -1,12 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -23,51 +17,16 @@ import javafx.collections.ObservableList;
 // (to avoid unnecessary reordering when re-saving existing files).
 @JsonPropertyOrder({
 	"maxDepth",
-	"additionalInformation",
 	"type",
 	"selected",
 })
-public class TestCaseGenerationItem extends AbstractCheckableItem {
-	@JsonSubTypes({
-		// The names here *must* match the names of the corresponding TestCaseGenerationType enum constants,
-		// because we ask Jackson to select the AdditionalInformation subclass based on the type field of TestCaseGenerationItem.
-		@JsonSubTypes.Type(value = McdcInformation.class, name = "MCDC"),
-		@JsonSubTypes.Type(value = CoveredOperationsInformation.class, name = "COVERED_OPERATIONS"),
-	})
-	private abstract static class AdditionalInformation {}
-	
-	private static final class McdcInformation extends AdditionalInformation {
-		private final int level;
-		
-		@JsonCreator
-		private McdcInformation(
-			@JsonProperty("level") final int level
-		) {
-			this.level = level;
-		}
-		
-		@JsonProperty
-		private int getLevel() {
-			return this.level;
-		}
-	}
-	
-	private static final class CoveredOperationsInformation extends AdditionalInformation {
-		private final List<String> operations;
-		
-		@JsonCreator
-		private CoveredOperationsInformation(
-			@JsonProperty("operations") final List<String> operations
-		) {
-			this.operations = new ArrayList<>(operations);
-		}
-		
-		@JsonProperty
-		private List<String> getOperations() {
-			return Collections.unmodifiableList(this.operations);
-		}
-	}
-	
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
+// The names here *must* match the names of the corresponding TestCaseGenerationType enum constants.
+@JsonSubTypes({
+	@JsonSubTypes.Type(value = MCDCItem.class, name = "MCDC"),
+	@JsonSubTypes.Type(value = OperationCoverageItem.class, name = "COVERED_OPERATIONS"),
+})
+public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	private final int maxDepth;
 	
 	@JsonIgnore
@@ -77,38 +36,12 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonIgnore
 	private final ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList();
 	
-	// Make Jackson select the AdditionalInformation subclass based on the type field.
-	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
-	private final AdditionalInformation additionalInformation;
-	
 	private final TestCaseGenerationType type;
 	
-	
-	public TestCaseGenerationItem(int maxDepth, int level) {
+	protected TestCaseGenerationItem(final TestCaseGenerationType type, final int maxDepth) {
 		super();
-		this.type = TestCaseGenerationType.MCDC;
-		this.maxDepth = maxDepth;
-		this.additionalInformation = new McdcInformation(level);
-	}
-
-	public TestCaseGenerationItem(int maxDepth, List<String> operations) {
-		super();
-		this.type = TestCaseGenerationType.COVERED_OPERATIONS;
-		this.maxDepth = maxDepth;
-		this.additionalInformation = new CoveredOperationsInformation(operations);
-	}
-	
-	@JsonCreator
-	private TestCaseGenerationItem(
-		@JsonProperty("type") final TestCaseGenerationType type,
-		@JsonProperty("maxDepth") final int maxDepth,
-		@JsonProperty("additionalInformation") final AdditionalInformation additionalInformation
-	) {
-		super();
-		
 		this.type = type;
 		this.maxDepth = maxDepth;
-		this.additionalInformation = additionalInformation;
 	}
 	
 	@Override
@@ -117,16 +50,6 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.examples.clear();
 		this.getTraceInformation().clear();
 		this.getUncoveredOperations().clear();
-	}
-	
-	@JsonIgnore
-	public int getMcdcLevel() {
-		return ((McdcInformation)this.additionalInformation).getLevel();
-	}
-	
-	@JsonIgnore
-	public List<String> getCoverageOperations() {
-		return ((CoveredOperationsInformation)this.additionalInformation).getOperations();
 	}
 	
 	public TestCaseGenerationType getType() {
@@ -154,18 +77,7 @@ public class TestCaseGenerationItem extends AbstractCheckableItem {
 	}
 	
 	@JsonIgnore
-	public String getConfigurationDescription() {
-		switch (this.getType()) {
-			case MCDC:
-				return "MCDC:" + this.getMcdcLevel() + "/" + "DEPTH:" + this.getMaxDepth();
-			
-			case COVERED_OPERATIONS:
-				return "OPERATION:" + String.join(",", this.getCoverageOperations()) + "/" + "DEPTH:" + this.getMaxDepth();
-			
-			default:
-				throw new AssertionError("Unhandled test case generation type: " + this.getType());
-		}
-	}
+	public abstract String getConfigurationDescription();
 	
 	public boolean settingsEqual(final TestCaseGenerationItem other) {
 		return this.getConfigurationDescription().equals(other.getConfigurationDescription())

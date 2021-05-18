@@ -20,22 +20,22 @@ public class TestCaseGeneratorCreator {
 	
 	public ConstraintBasedTestCaseGenerator getTestCaseGenerator(TestCaseGenerationItem item) {
 		if(item.getType() == TestCaseGenerationType.MCDC) {
-			return getMCDCTestCaseGenerator(item);
+			return getMCDCTestCaseGenerator((MCDCItem)item);
 		} else if(item.getType() == TestCaseGenerationType.COVERED_OPERATIONS) {
-			return getCoveredOperationsTestCaseGenerator(item);
+			return getCoveredOperationsTestCaseGenerator((OperationCoverageItem)item);
 		}
 		throw new RuntimeException("Unknown type: " + item.getType());
 	}
 	
-	private ConstraintBasedTestCaseGenerator getMCDCTestCaseGenerator(TestCaseGenerationItem item) {
+	private ConstraintBasedTestCaseGenerator getMCDCTestCaseGenerator(MCDCItem item) {
 		int depth = item.getMaxDepth();
-		int level = item.getMcdcLevel();
+		int level = item.getLevel();
 		return new ConstraintBasedTestCaseGenerator(currentTrace.getStateSpace(), new TestCaseGeneratorMCDCSettings(depth - 1, level), new ArrayList<>());
 	}
 	
-	private ConstraintBasedTestCaseGenerator getCoveredOperationsTestCaseGenerator(TestCaseGenerationItem item) {
+	private ConstraintBasedTestCaseGenerator getCoveredOperationsTestCaseGenerator(OperationCoverageItem item) {
 		int depth = item.getMaxDepth();
-		final List<String> operations = item.getCoverageOperations();
+		final List<String> operations = item.getOperations();
 		return new ConstraintBasedTestCaseGenerator(currentTrace.getStateSpace(), new TestCaseGeneratorOperationCoverageSettings(depth - 1, operations), new ArrayList<>());
 	}
 	

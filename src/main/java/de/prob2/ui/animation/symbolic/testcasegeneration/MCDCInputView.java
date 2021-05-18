@@ -61,8 +61,8 @@ public class MCDCInputView extends VBox {
 		depthSpinner.getValueFactory().setValue(5);
 	}
 
-	public void setItem(TestCaseGenerationItem item) {
-		levelSpinner.getValueFactory().setValue(item.getMcdcLevel());
+	public void setItem(MCDCItem item) {
+		levelSpinner.getValueFactory().setValue(item.getLevel());
 		depthSpinner.getValueFactory().setValue(item.getMaxDepth());
 	}
 

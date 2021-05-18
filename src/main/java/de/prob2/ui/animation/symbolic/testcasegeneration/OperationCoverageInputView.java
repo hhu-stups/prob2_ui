@@ -128,7 +128,7 @@ public class OperationCoverageInputView extends VBox {
 		depthSpinner.getValueFactory().setValue(5);
 	}
 
-	public void setItem(TestCaseGenerationItem item) {
+	public void setItem(OperationCoverageItem item) {
 		depthSpinner.getValueFactory().setValue(item.getMaxDepth());
 	}
 }

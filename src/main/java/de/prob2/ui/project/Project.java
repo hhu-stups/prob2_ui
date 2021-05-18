@@ -18,7 +18,7 @@ import de.prob2.ui.project.preferences.Preference;
 
 public class Project implements HasMetadata {
 	public static final String FILE_TYPE = "Project";
-	public static final int CURRENT_FORMAT_VERSION = 15;
+	public static final int CURRENT_FORMAT_VERSION = 16;
 	
 	private String name;
 	private String description;

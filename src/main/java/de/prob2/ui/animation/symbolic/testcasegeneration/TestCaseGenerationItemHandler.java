@@ -34,12 +34,12 @@ public class TestCaseGenerationItemHandler {
 	}
 
 	public void addItem(int depth, int level) {
-		TestCaseGenerationItem item = new TestCaseGenerationItem(depth, level);
+		TestCaseGenerationItem item = new MCDCItem(depth, level);
 		addItem(item);
 	}
 
 	public void addItem(int depth, List<String> operations) {
-		TestCaseGenerationItem item = new TestCaseGenerationItem(depth, operations);
+		TestCaseGenerationItem item = new OperationCoverageItem(depth, operations);
 		addItem(item);
 	}
 
