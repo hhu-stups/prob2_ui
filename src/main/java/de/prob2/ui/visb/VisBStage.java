@@ -3,6 +3,7 @@ package de.prob2.ui.visb;
 import com.google.inject.Injector;
 import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
+import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
@@ -57,7 +58,10 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -223,8 +227,17 @@ public class VisBStage extends Stage {
 		clear();
 		visBPath.set(null);
 		if(machine != null) {
+
+			Path pathFromDefinitions = null;
+
+			if(currentTrace.getStateSpace() != null) {
+				ReadVisBPathFromDefinitionsCommand cmd = new ReadVisBPathFromDefinitionsCommand();
+				currentTrace.getStateSpace().execute(cmd);
+				pathFromDefinitions = cmd.getPath() == null ? null : currentProject.getLocation().resolve(cmd.getPath());
+			}
+
 			Path visBVisualisation = machine.getVisBVisualisation();
-			visBPath.set(visBVisualisation == null ? null : currentProject.getLocation().resolve(visBVisualisation));
+			visBPath.set(visBVisualisation == null ? pathFromDefinitions : currentProject.getLocation().resolve(visBVisualisation));
 			if(currentTrace.getStateSpace() != null) {
 				Platform.runLater(this::setupMachineVisBFile);
 			}
