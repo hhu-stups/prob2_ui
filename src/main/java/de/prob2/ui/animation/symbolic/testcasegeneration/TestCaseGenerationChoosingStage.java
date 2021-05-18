@@ -89,30 +89,42 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		this.sizeToScene();
 	}
 	
-	private boolean isValid() {
-		if (this.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS) {
-			return !this.operationCoverageInputView.getOperations().isEmpty();
-		} else {
-			return true;
+	private boolean checkValid() {
+		if (this.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS && this.operationCoverageInputView.getOperations().isEmpty()) {
+			final Alert alert = stageManager.makeAlert(
+				Alert.AlertType.ERROR,
+				"animation.alerts.testcasegeneration.operations.header",
+				"animation.alerts.testcasegeneration.operations.content"
+			);
+			alert.initOwner(this.getScene().getWindow());
+			alert.showAndWait();
+			return false;
+		}
+		return true;
+	}
+	
+	private TestCaseGenerationItem extractItem() {
+		final TestCaseGenerationType type = this.getTestCaseGenerationType();
+		switch (type) {
+			case MCDC:
+				return new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
+			
+			case COVERED_OPERATIONS:
+				return new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
+			
+			default:
+				throw new AssertionError("Unhandled test case generation type: " + type);
 		}
 	}
 	
 	private boolean updateItem(TestCaseGenerationItem item) {
-		Machine currentMachine = currentProject.getCurrentMachine();
-		TestCaseGenerationType type = this.getTestCaseGenerationType();
-		boolean valid = isValid();
-		TestCaseGenerationItem newItem;
-		if (type == TestCaseGenerationType.MCDC) {
-			newItem = new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
-		} else if (type == TestCaseGenerationType.COVERED_OPERATIONS) {
-			newItem = new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
-		} else {
-			throw new AssertionError("Unhandled type: " + type);
+		if (!checkValid()) {
+			return true;
 		}
+		Machine currentMachine = currentProject.getCurrentMachine();
+		final TestCaseGenerationItem newItem = extractItem();
 		if(currentMachine.getTestCases().stream().noneMatch(newItem::settingsEqual)) {
-			if(valid) {
-				currentMachine.getTestCases().set(currentMachine.getTestCases().indexOf(item), newItem);
-			}
+			currentMachine.getTestCases().set(currentMachine.getTestCases().indexOf(item), newItem);
 			return true;
 		}
 		return false;
@@ -155,53 +167,16 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	}
 
 	public void checkItem() {
-		TestCaseGenerationType testCaseGenerationType = this.getTestCaseGenerationType();
-		TestCaseGenerationItem item = null;
 		addItem();
-		switch (testCaseGenerationType) {
-			case MCDC: {
-				item = new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
-				testCaseGenerationFormulaHandler.generateTestCases(item);
-				break;
-			}
-			case COVERED_OPERATIONS: {
-				if(operationCoverageInputView.getOperations().isEmpty()) {
-					return;
-				}
-				item = new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
-				testCaseGenerationFormulaHandler.generateTestCases(item);
-				break;
-			}
-			default:
-				break;
-		}
+		testCaseGenerationFormulaHandler.generateTestCases(extractItem());
 		this.close();
 	}
 
 	public void addItem() {
-		TestCaseGenerationType type = this.getTestCaseGenerationType();
-		switch(type) {
-			case MCDC: {
-				testCaseGenerationFormulaHandler.addItem(new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel()));
-				break;
-			}
-			case COVERED_OPERATIONS: {
-				List<String> operations = operationCoverageInputView.getOperations();
-				if(operations.isEmpty()) {
-					final Alert alert = stageManager.makeAlert(
-						Alert.AlertType.ERROR,
-							"animation.alerts.testcasegeneration.operations.header",
-							"animation.alerts.testcasegeneration.operations.content");
-					alert.initOwner(this.getScene().getWindow());
-					alert.showAndWait();
-					return;
-				}
-				testCaseGenerationFormulaHandler.addItem(new OperationCoverageItem(operationCoverageInputView.getDepth(), operations));
-				break;
-			}
-			default:
-				break;
+		if (!checkValid()) {
+			return;
 		}
+		testCaseGenerationFormulaHandler.addItem(extractItem());
 		this.close();
 	}
 	
