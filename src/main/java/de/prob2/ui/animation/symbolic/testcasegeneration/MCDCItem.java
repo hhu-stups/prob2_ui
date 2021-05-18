@@ -3,6 +3,9 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorMCDCSettings;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
+
 public final class MCDCItem extends TestCaseGenerationItem {
 	private final int level;
 	
@@ -18,6 +21,11 @@ public final class MCDCItem extends TestCaseGenerationItem {
 	
 	public int getLevel() {
 		return this.level;
+	}
+	
+	@Override
+	public TestCaseGeneratorSettings getTestCaseGeneratorSettings() {
+		return new TestCaseGeneratorMCDCSettings(this.getMaxDepth() - 1, this.getLevel());
 	}
 	
 	@Override

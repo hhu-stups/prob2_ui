@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 
@@ -59,6 +60,9 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	public int getMaxDepth() {
 		return maxDepth;
 	}
+	
+	@JsonIgnore
+	public abstract TestCaseGeneratorSettings getTestCaseGeneratorSettings();
 	
 	public ListProperty<Trace> examplesProperty() {
 		return examples;

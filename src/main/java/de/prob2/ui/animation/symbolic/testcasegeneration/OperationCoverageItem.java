@@ -6,6 +6,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorOperationCoverageSettings;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
+
 public final class OperationCoverageItem extends TestCaseGenerationItem {
 	private final List<String> operations;
 	
@@ -21,6 +24,11 @@ public final class OperationCoverageItem extends TestCaseGenerationItem {
 	
 	public List<String> getOperations() {
 		return this.operations;
+	}
+	
+	@Override
+	public TestCaseGeneratorSettings getTestCaseGeneratorSettings() {
+		return new TestCaseGeneratorOperationCoverageSettings(this.getMaxDepth() - 1, this.getOperations());
 	}
 	
 	@Override
