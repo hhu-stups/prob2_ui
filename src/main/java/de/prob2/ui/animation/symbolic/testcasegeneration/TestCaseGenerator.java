@@ -9,7 +9,6 @@ import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob2.ui.internal.DisablePropertyController;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
@@ -28,23 +27,19 @@ public class TestCaseGenerator {
 	
 	private final CurrentTrace currentTrace;
 	
-	private final CurrentProject currentProject;
-	
 	private final TestCaseGenerationResultHandler resultHandler;
 	
 	private final ListProperty<Thread> currentJobThreads;
 
 	@Inject
-	public TestCaseGenerator(final CurrentTrace currentTrace, final CurrentProject currentProject, final TestCaseGenerationResultHandler resultHandler, final DisablePropertyController disablePropertyController) {
+	public TestCaseGenerator(final CurrentTrace currentTrace, final TestCaseGenerationResultHandler resultHandler, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator) {
-		final TestCaseGenerationItem currentItem = getItemIfAlreadyExists(item);
 		Thread checkingThread = new Thread(() -> {
 			Object result;
 			try {
@@ -55,7 +50,7 @@ public class TestCaseGenerator {
 			}
 			final Object finalResult = result;
 			Platform.runLater(() -> {
-				resultHandler.handleTestCaseGenerationResult(currentItem, finalResult);
+				resultHandler.handleTestCaseGenerationResult(item, finalResult);
 			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "Test Case Generation Thread");
@@ -73,14 +68,6 @@ public class TestCaseGenerator {
 		currentJobThreads.removeAll(removedThreads);
 	}
 	
-	private TestCaseGenerationItem getItemIfAlreadyExists(TestCaseGenerationItem item) {
-		return currentProject.getCurrentMachine().getTestCases()
-			.stream()
-			.filter(item::settingsEqual)
-			.findAny()
-			.orElse(item);
-	}
-
 	public BooleanExpression runningProperty() {
 		return currentJobThreads.emptyProperty().not();
 	}
