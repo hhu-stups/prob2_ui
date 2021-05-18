@@ -112,8 +112,22 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	}
 	
 	private void setCheckListeners() {
-		btAdd.setOnAction(e -> addItem());
-		btCheck.setOnAction(e -> checkItem());
+		btAdd.setOnAction(e -> {
+			if (!checkValid()) {
+				return;
+			}
+			this.close();
+			testCaseGenerationFormulaHandler.addItem(extractItem());
+		});
+		btCheck.setOnAction(e -> {
+			if (!checkValid()) {
+				return;
+			}
+			this.close();
+			final TestCaseGenerationItem newItem = extractItem();
+			testCaseGenerationFormulaHandler.addItem(newItem);
+			testCaseGenerationFormulaHandler.generateTestCases(newItem);
+		});
 	}
 	
 	public void changeType(final TestCaseGenerationType type) {
@@ -146,20 +160,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		operationCoverageInputView.reset();
 		testChoice.getSelectionModel().clearSelection();
 	}
-
-	public void checkItem() {
-		addItem();
-		testCaseGenerationFormulaHandler.generateTestCases(extractItem());
-		this.close();
-	}
-
-	public void addItem() {
-		if (!checkValid()) {
-			return;
-		}
-		testCaseGenerationFormulaHandler.addItem(extractItem());
-		this.close();
-	}
 	
 	public void changeItem(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler) {
 		btAdd.setText(bundle.getString("testcase.input.buttons.change"));
@@ -182,9 +182,7 @@ public class TestCaseGenerationChoosingStage extends Stage {
 			//Close stage first so that it does not need to wait for possible Alerts
 			this.close();
 			final TestCaseGenerationItem newItem = extractItem();
-			if(testCaseGenerationFormulaHandler.replaceItem(item, newItem)) {
-				addItem();
-			} else {
+			if (!testCaseGenerationFormulaHandler.replaceItem(item, newItem)) {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
 		});
@@ -197,7 +195,7 @@ public class TestCaseGenerationChoosingStage extends Stage {
 			this.close();
 			final TestCaseGenerationItem newItem = extractItem();
 			if(testCaseGenerationFormulaHandler.replaceItem(item, newItem)) {
-				checkItem();
+				testCaseGenerationFormulaHandler.generateTestCases(newItem);
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
