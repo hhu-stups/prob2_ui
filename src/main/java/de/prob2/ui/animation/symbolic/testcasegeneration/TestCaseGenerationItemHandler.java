@@ -32,16 +32,6 @@ public class TestCaseGenerationItemHandler {
 		this.testCaseGenerator = testCaseGenerator;
 	}
 
-	public void addItem(int depth, int level) {
-		TestCaseGenerationItem item = new MCDCItem(depth, level);
-		addItem(item);
-	}
-
-	public void addItem(int depth, List<String> operations) {
-		TestCaseGenerationItem item = new OperationCoverageItem(depth, operations);
-		addItem(item);
-	}
-
 	public void addItem(TestCaseGenerationItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {

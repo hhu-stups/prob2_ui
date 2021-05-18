@@ -143,7 +143,7 @@ public class TestCaseGenerationInput extends VBox {
 		TestCaseGenerationType type = injector.getInstance(TestCaseGenerationChoosingStage.class).getTestCaseGenerationType();
 		switch(type) {
 			case MCDC: {
-				testCaseGenerationFormulaHandler.addItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
+				testCaseGenerationFormulaHandler.addItem(new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel()));
 				break;
 			}
 			case COVERED_OPERATIONS: {
@@ -156,7 +156,7 @@ public class TestCaseGenerationInput extends VBox {
 					alert.showAndWait();
 					return;
 				}
-				testCaseGenerationFormulaHandler.addItem(operationCoverageInputView.getDepth(), operations);
+				testCaseGenerationFormulaHandler.addItem(new OperationCoverageItem(operationCoverageInputView.getDepth(), operations));
 				break;
 			}
 			default:
