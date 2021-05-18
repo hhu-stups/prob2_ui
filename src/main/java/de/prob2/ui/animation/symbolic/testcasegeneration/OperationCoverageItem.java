@@ -27,4 +27,13 @@ public final class OperationCoverageItem extends TestCaseGenerationItem {
 	public String getConfigurationDescription() {
 		return "OPERATION:" + String.join(",", this.getOperations()) + "/" + "DEPTH:" + this.getMaxDepth();
 	}
+	
+	@Override
+	public boolean settingsEqual(final TestCaseGenerationItem other) {
+		if (!(other instanceof OperationCoverageItem)) {
+			return false;
+		}
+		final OperationCoverageItem o = (OperationCoverageItem)other;
+		return super.settingsEqual(o) && this.getOperations().equals(o.getOperations());
+	}
 }

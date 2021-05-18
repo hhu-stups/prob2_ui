@@ -24,4 +24,13 @@ public final class MCDCItem extends TestCaseGenerationItem {
 	public String getConfigurationDescription() {
 		return "MCDC:" + this.getLevel() + "/" + "DEPTH:" + this.getMaxDepth();
 	}
+	
+	@Override
+	public boolean settingsEqual(final TestCaseGenerationItem other) {
+		if (!(other instanceof MCDCItem)) {
+			return false;
+		}
+		final MCDCItem o = (MCDCItem)other;
+		return super.settingsEqual(o) && this.getLevel() == o.getLevel();
+	}
 }

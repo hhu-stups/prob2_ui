@@ -80,8 +80,8 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	public abstract String getConfigurationDescription();
 	
 	public boolean settingsEqual(final TestCaseGenerationItem other) {
-		return this.getConfigurationDescription().equals(other.getConfigurationDescription())
-			&& this.getType().equals(other.getType());
+		return this.getType().equals(other.getType())
+			&& this.getMaxDepth() == other.getMaxDepth();
 	}
 
 	public String createdByForMetadata(int index) {
