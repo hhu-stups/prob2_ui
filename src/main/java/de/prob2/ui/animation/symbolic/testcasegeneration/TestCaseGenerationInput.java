@@ -93,8 +93,7 @@ public class TestCaseGenerationInput extends VBox {
 		btCheck.setOnAction(e -> checkItem());
 	}
 	
-	public void changeType(final TestCaseExecutionItem item) {
-		TestCaseGenerationType type = item.getExecutionType();
+	public void changeType(final TestCaseGenerationType type) {
 		this.getChildren().removeAll(mcdcInputView, operationCoverageInputView);
 		switch (type) {
 			case MCDC:

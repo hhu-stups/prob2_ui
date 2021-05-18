@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 @Singleton
 public class TestCaseGenerationChoosingStage extends Stage {
@@ -17,7 +18,7 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	private TestCaseGenerationInput input;
 	
 	@FXML
-	private ChoiceBox<TestCaseExecutionItem> testChoice;
+	private ChoiceBox<TestCaseGenerationType> testChoice;
 	
 	@Inject
 	private TestCaseGenerationChoosingStage(final StageManager stageManager) {
@@ -30,6 +31,18 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	@FXML
 	public void initialize() {
 		input.visibleProperty().bind(testChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		testChoice.getItems().setAll(TestCaseGenerationType.values());
+		testChoice.setConverter(new StringConverter<TestCaseGenerationType>() {
+			@Override
+			public String toString(final TestCaseGenerationType object) {
+				return object.getName();
+			}
+			
+			@Override
+			public TestCaseGenerationType fromString(final String string) {
+				throw new UnsupportedOperationException("Conversion from String not supported");
+			}
+		});
 		testChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if(to == null) {
 				return;
@@ -41,15 +54,11 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	}
 	
 	public TestCaseGenerationType getTestCaseGenerationType() {
-		return testChoice.getSelectionModel().getSelectedItem().getExecutionType();
+		return testChoice.getSelectionModel().getSelectedItem();
 	}
 	
 	public void select(TestCaseGenerationItem item) {
-		testChoice.getItems().forEach(choice -> {
-			if(item.getType().equals(choice.getExecutionType())) {
-				testChoice.getSelectionModel().select(choice);
-			}
-		});
+		testChoice.getSelectionModel().select(item.getType());
 	}
 	
 	public void reset() {

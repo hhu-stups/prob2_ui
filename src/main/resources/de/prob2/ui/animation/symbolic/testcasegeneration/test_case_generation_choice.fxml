@@ -2,14 +2,11 @@
 
 <?import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationChoosingStage?>
 <?import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationInput?>
-<?import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseExecutionItem?>
-<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <fx:root type="TestCaseGenerationChoosingStage" fx:id="cbcChoice" title="%animation.testcase.choice.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
@@ -21,14 +18,7 @@
 					</padding>
 					<Label text="%animation.testcase.choice.text"/>
 					<HBox alignment="CENTER">
-						<ChoiceBox fx:id="testChoice">
-							<items>
-								<FXCollections fx:factory="observableArrayList">
-									<TestCaseExecutionItem executionType="MCDC"/>
-									<TestCaseExecutionItem executionType="COVERED_OPERATIONS"/>
-								</FXCollections>
-							</items>
-						</ChoiceBox>
+						<ChoiceBox fx:id="testChoice"/>
 					</HBox>
 					<TestCaseGenerationInput fx:id="input"/>
 				</VBox>
