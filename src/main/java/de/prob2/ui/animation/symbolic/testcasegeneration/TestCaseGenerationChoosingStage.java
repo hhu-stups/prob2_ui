@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -125,8 +126,8 @@ public class TestCaseGenerationChoosingStage extends Stage {
 			}
 			this.close();
 			final TestCaseGenerationItem newItem = extractItem();
-			testCaseGenerationFormulaHandler.addItem(newItem);
-			testCaseGenerationFormulaHandler.generateTestCases(newItem);
+			final Optional<TestCaseGenerationItem> existingItem = testCaseGenerationFormulaHandler.addItem(newItem);
+			testCaseGenerationFormulaHandler.generateTestCases(existingItem.orElse(newItem));
 		});
 	}
 	
@@ -182,7 +183,7 @@ public class TestCaseGenerationChoosingStage extends Stage {
 			//Close stage first so that it does not need to wait for possible Alerts
 			this.close();
 			final TestCaseGenerationItem newItem = extractItem();
-			if (!testCaseGenerationFormulaHandler.replaceItem(item, newItem)) {
+			if (testCaseGenerationFormulaHandler.replaceItem(item, newItem).isPresent()) {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			}
 		});
@@ -194,7 +195,7 @@ public class TestCaseGenerationChoosingStage extends Stage {
 			//Close stage first so that it does not need to wait for possible Alerts
 			this.close();
 			final TestCaseGenerationItem newItem = extractItem();
-			if(testCaseGenerationFormulaHandler.replaceItem(item, newItem)) {
+			if(!testCaseGenerationFormulaHandler.replaceItem(item, newItem).isPresent()) {
 				testCaseGenerationFormulaHandler.generateTestCases(newItem);
 			} else {
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);

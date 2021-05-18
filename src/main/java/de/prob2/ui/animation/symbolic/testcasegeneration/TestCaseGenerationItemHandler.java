@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -31,20 +32,22 @@ public class TestCaseGenerationItemHandler {
 		this.testCaseGenerator = testCaseGenerator;
 	}
 
-	public void addItem(TestCaseGenerationItem item) {
+	public Optional<TestCaseGenerationItem> addItem(TestCaseGenerationItem item) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		if(currentMachine.getTestCases().stream().noneMatch(item::settingsEqual)) {
+		final Optional<TestCaseGenerationItem> existingItem = currentMachine.getTestCases().stream().filter(item::settingsEqual).findAny();
+		if(!existingItem.isPresent()) {
 			currentMachine.getTestCases().add(item);
 		}
+		return existingItem;
 	}
 
-	public boolean replaceItem(final TestCaseGenerationItem oldItem, final TestCaseGenerationItem newItem) {
+	public Optional<TestCaseGenerationItem> replaceItem(final TestCaseGenerationItem oldItem, final TestCaseGenerationItem newItem) {
 		Machine currentMachine = currentProject.getCurrentMachine();
-		if(currentMachine.getTestCases().stream().noneMatch(newItem::settingsEqual)) {
+		final Optional<TestCaseGenerationItem> existingItem = currentMachine.getTestCases().stream().filter(newItem::settingsEqual).findAny();
+		if(!existingItem.isPresent()) {
 			currentMachine.getTestCases().set(currentMachine.getTestCases().indexOf(oldItem), newItem);
-			return true;
 		}
-		return false;
+		return existingItem;
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item) {
