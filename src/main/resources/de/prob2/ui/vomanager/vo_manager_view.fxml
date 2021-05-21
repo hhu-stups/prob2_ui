@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.Label?>
+
+<?import de.prob2.ui.vomanager.VOManagerStage?>
+
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import java.lang.String?>
+<fx:root title="VO Manager" type="VOManagerStage" width="1200" height="80" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<ScrollPane prefWidth="1200" prefHeight="800" fitToHeight="true" fitToWidth="true">
+				<SplitPane dividerPositions="0.35">
+					<VBox styleClass="border" spacing="20.0" alignment="CENTER_LEFT" >
+						<TableView fx:id="tvRequirements">
+							<columnResizePolicy>
+								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+							</columnResizePolicy>
+							<columns>
+								<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;"
+											 minWidth="${fontSize.fontSize * 6}"
+											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+								<TableColumn fx:id="typeColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
+											 text="Requirement Type"/>
+								<TableColumn fx:id="specificationColumn" minWidth="80.0"
+											 text="Requirement Specification"/>
+							</columns>
+							<placeholder>
+								<Label text="No Requirements"/>
+							</placeholder>
+						</TableView>
+						<TableView fx:id="tvValidationObligations">
+							<columnResizePolicy>
+								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+							</columnResizePolicy>
+							<columns>
+								<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;"
+											 minWidth="${fontSize.fontSize * 6}"
+											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+								<TableColumn fx:id="nameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
+											 text="VO Name"/>
+								<TableColumn fx:id="parametersColumn" minWidth="80.0"
+											 text="VO Parameters"/>
+							</columns>
+							<placeholder>
+								<Label text="No Validation Obligations"/>
+							</placeholder>
+						</TableView>
+					</VBox>
+					<VBox spacing="20.0">
+						<VBox>
+							<Label text="Requirement Type:"/>
+							<ChoiceBox fx:id="cbChoice">
+								<items>
+									<FXCollections fx:factory="observableArrayList">
+										<String fx:value="Invariant Requirement"/>
+										<String fx:value="Safety Requirement"/>
+										<String fx:value="Liveness Requirement"/>
+										<String fx:value="Use Case Requirement"/>
+									</FXCollections>
+								</items>
+							</ChoiceBox>
+						</VBox>
+						<VBox>
+							<Label text="Requirement:"/>
+							<TextArea style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+						</VBox>
+					</VBox>
+				</SplitPane>
+			</ScrollPane>
+		</Scene>
+	</scene>
+</fx:root>
+

@@ -13,6 +13,7 @@ import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 
+import de.prob2.ui.vomanager.VOManagerStage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -106,6 +107,13 @@ public class AdvancedMenu extends Menu {
 		SimulatorStage simulatorStage = injector.getInstance(SimulatorStage.class);
 		simulatorStage.show();
 		simulatorStage.toFront();
+	}
+
+	@FXML
+	private void openVOManager() {
+		VOManagerStage voManagerStage = injector.getInstance(VOManagerStage.class);
+		voManagerStage.show();
+		voManagerStage.toFront();
 	}
 
 }
