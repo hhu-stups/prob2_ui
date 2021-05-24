@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob2.ui.verifications.Checked;
-import javafx.beans.NamedArg;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.util.Objects;
+
 @JsonPropertyOrder({
+        "name",
         "type",
         "text"
 })
@@ -21,7 +23,7 @@ public class Requirement {
         LIVENESS("Liveness Requirement"),
         USE_CASE("Use Case Requirement");
 
-        private String name;
+        private final String name;
 
         RequirementType(String name) {
             this.name = name;
@@ -32,7 +34,7 @@ public class Requirement {
         }
     }
 
-
+    private String name;
 
     private RequirementType type;
 
@@ -42,10 +44,16 @@ public class Requirement {
     private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
     @JsonCreator
-    public Requirement(@JsonProperty("type") RequirementType type,
+    public Requirement(@JsonProperty("name") String name,
+                       @JsonProperty("type") RequirementType type,
                        @JsonProperty("text") String text) {
+        this.name = name;
         this.type = type;
         this.text = text;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public RequirementType getType() {
@@ -68,6 +76,10 @@ public class Requirement {
         this.checked.set(checked);
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setType(RequirementType type) {
         this.type = type;
     }
@@ -78,5 +90,23 @@ public class Requirement {
 
     public void reset() {
         // TODO: Implement
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Requirement that = (Requirement) o;
+        return Objects.equals(name, that.name) && type == that.type && Objects.equals(text, that.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type, text);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Requirement{checked = %s, name = %s, type = %s, text = %s}", checked, name, type, text);
     }
 }

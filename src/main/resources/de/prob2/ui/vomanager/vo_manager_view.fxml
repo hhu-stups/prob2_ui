@@ -24,6 +24,7 @@
 <?import de.prob2.ui.vomanager.Requirement.RequirementType?>
 
 
+<?import javafx.scene.control.TextField?>
 <fx:root title="VO Manager" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -57,10 +58,12 @@
 									<TableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
 												 minWidth="${fontSize.fontSize * 6}"
 												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TableColumn fx:id="typeColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
-												 text="Requirement Type"/>
-									<TableColumn fx:id="specificationColumn" minWidth="80.0"
-												 text="Requirement Specification"/>
+									<TableColumn fx:id="requirementNameColumn" style="-fx-alignment: CENTER;" minWidth="70.0" maxWidth="70.0"
+												 text="Name"/>
+									<TableColumn fx:id="typeColumn" style="-fx-alignment: CENTER;" minWidth="90.0" maxWidth="90.0"
+												 text="Type"/>
+									<TableColumn fx:id="specificationColumn" minWidth="120.0"
+												 text="Specification"/>
 								</columns>
 								<placeholder>
 									<Label text="No Requirements"/>
@@ -100,6 +103,10 @@
 								</items>
 							</ChoiceBox>
 						</VBox>
+						<HBox>
+							<Label text="Name:"/>
+							<TextField fx:id="tfName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+						</HBox>
 						<VBox>
 							<Label text="Requirement:"/>
 							<TextArea fx:id="taRequirement" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
