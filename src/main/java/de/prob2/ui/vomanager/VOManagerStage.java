@@ -29,6 +29,7 @@ import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import javax.inject.Inject;
+import java.util.List;
 
 public class VOManagerStage extends Stage {
 
@@ -61,10 +62,19 @@ public class VOManagerStage extends Stage {
     private TextArea taRequirement;
 
     @FXML
-    private ChoiceBox<Requirement.RequirementType> cbChoice;
+    private ChoiceBox<RequirementType> cbRequirementChoice;
+
+    @FXML
+    private ChoiceBox<ValidationTask> cbTaskChoice;
 
     @FXML
     private VBox requirementEditingBox;
+
+    @FXML
+    private VBox taskBox;
+
+    @FXML
+    private Button applyButton;
 
     private final CurrentProject currentProject;
 
@@ -84,7 +94,7 @@ public class VOManagerStage extends Stage {
         requirementStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 
         requirementNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("shortTypeName"));
         specificationColumn.setCellValueFactory(new PropertyValueFactory<>("text"));
 
         final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
@@ -112,6 +122,11 @@ public class VOManagerStage extends Stage {
             }
         });
 
+        // TODO: Implement possibility, just to add requirement without choosing a validation task
+
+        taskBox.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
+        applyButton.visibleProperty().bind(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull());
+
         tvRequirements.setRowFactory(table -> {
             final TableRow<Requirement> row = new TableRow<>();
 
@@ -133,13 +148,16 @@ public class VOManagerStage extends Stage {
         tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
             editModeProperty.set(to != null ? EditType.EDIT : EditType.NONE);
             showRequirement(to);
+            List<ValidationTask> tasks = VOTemplateGenerator.generate(to);
+            cbTaskChoice.getItems().clear();
+            cbTaskChoice.getItems().addAll(tasks);
         });
     }
 
     @FXML
     public void addOrCancelRequirement() {
         if(editModeProperty.get() == EditType.NONE) {
-            cbChoice.getSelectionModel().clearSelection();
+            cbRequirementChoice.getSelectionModel().clearSelection();
             taRequirement.clear();
             tfName.clear();
             editModeProperty.set(EditType.ADD);
@@ -154,12 +172,12 @@ public class VOManagerStage extends Stage {
         EditType editType = editModeProperty.get();
         Requirement requirement = null;
         if(editType == EditType.ADD) {
-            requirement = new Requirement(tfName.getText(), cbChoice.getValue(), taRequirement.getText());
+            requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText());
             currentProject.getCurrentMachine().getRequirements().add(requirement);
         } else if(editType == EditType.EDIT) {
             requirement = tvRequirements.getSelectionModel().getSelectedItem();
             requirement.setName(tfName.getText());
-            requirement.setType(cbChoice.getValue());
+            requirement.setType(cbRequirementChoice.getValue());
             requirement.setText(taRequirement.getText());
         }
         // TODO: Replace refresh?
@@ -179,7 +197,7 @@ public class VOManagerStage extends Stage {
             return;
         }
         tfName.setText(requirement.getName());
-        cbChoice.getSelectionModel().select(requirement.getType());
+        cbRequirementChoice.getSelectionModel().select(requirement.getType());
         taRequirement.setText(requirement.getText());
     }
 

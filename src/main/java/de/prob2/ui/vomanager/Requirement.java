@@ -17,23 +17,6 @@ import java.util.Objects;
 })
 public class Requirement {
 
-    public enum RequirementType {
-        INVARIANT("Invariant Requirement"),
-        SAFETY("Safety Requirement"),
-        LIVENESS("Liveness Requirement"),
-        USE_CASE("Use Case Requirement");
-
-        private final String name;
-
-        RequirementType(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
     private String name;
 
     private RequirementType type;
@@ -58,6 +41,10 @@ public class Requirement {
 
     public RequirementType getType() {
         return type;
+    }
+
+    public String getShortTypeName() {
+        return type.name();
     }
 
     public String getText() {

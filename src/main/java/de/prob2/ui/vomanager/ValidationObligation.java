@@ -16,23 +16,6 @@ import java.util.Objects;
 })
 public class ValidationObligation {
 
-    public enum ValidationTask {
-        MODEL_CHECKING("Model Checking"),
-        LTL_MODEL_CHECKING("LTL Model Checking"),
-        SYMBOLIC_MODEL_CHECKING("Symbolic Model Checking"),
-        TRACE_REPLAY("Trace Replay");
-
-        private final String name;
-
-        ValidationTask(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
     private final ValidationTask task;
 
     private final String configuration;
