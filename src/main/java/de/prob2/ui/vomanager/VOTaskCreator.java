@@ -30,6 +30,9 @@ public class VOTaskCreator {
                 ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
                 stageController.showAndWait();
                 ModelCheckingItem item = stageController.getLastItem();
+                if(item == null) {
+                    return null;
+                }
                 return new ValidationObligation(task, item.getOptions().toString(), item);
             }
             case LTL_MODEL_CHECKING: {
@@ -38,6 +41,9 @@ public class VOTaskCreator {
                 formulaStage.setHandleItem(new LTLHandleItem<>(LTLHandleItem.HandleType.ADD, null));
                 formulaStage.showAndWait();
                 LTLFormulaItem item = formulaStage.getLastItem();
+                if(item == null) {
+                    return null;
+                }
                 return new ValidationObligation(task, item.getCode(), item);
             }
             case SYMBOLIC_MODEL_CHECKING:

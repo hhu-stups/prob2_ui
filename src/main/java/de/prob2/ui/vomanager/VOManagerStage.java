@@ -212,7 +212,9 @@ public class VOManagerStage extends Stage {
 
         ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
         ValidationObligation validationObligation = taskCreator.openTaskWindow(requirement, task);
-        requirement.validationObligationsProperty().add(validationObligation);
+        if(validationObligation != null) {
+            requirement.validationObligationsProperty().add(validationObligation);
+        }
 
         // TODO: Replace refresh?
         editModeProperty.set(EditType.NONE);
