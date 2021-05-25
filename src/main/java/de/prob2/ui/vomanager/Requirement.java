@@ -76,6 +76,7 @@ public class Requirement {
         return type;
     }
 
+    @JsonIgnore
     public String getShortTypeName() {
         return type.name();
     }
