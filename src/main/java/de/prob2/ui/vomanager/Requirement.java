@@ -56,13 +56,18 @@ public class Requirement {
             final boolean success = !failed && validationObligations.stream()
                     .map(ValidationObligation::getChecked)
                     .anyMatch(Checked.SUCCESS::equals);
+            final boolean timeout = !failed && validationObligations.stream()
+                    .map(ValidationObligation::getChecked)
+                    .anyMatch(Checked.TIMEOUT::equals);
 
             if (success) {
                 this.checked.set(Checked.SUCCESS);
             } else if (failed) {
                 this.checked.set(Checked.FAIL);
-            } else {
+            } else if (timeout) {
                 this.checked.set(Checked.TIMEOUT);
+            } else {
+                this.checked.set(Checked.NOT_CHECKED);
             }
         }
     }

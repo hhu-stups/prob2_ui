@@ -249,6 +249,7 @@ public class VOManagerStage extends Stage {
                 validationObligation.setItem(executable);
                 validationObligation.checkedProperty().addListener((observable, from, to) -> requirement.updateChecked());
             }
+            requirement.updateChecked();
         }
     }
 
