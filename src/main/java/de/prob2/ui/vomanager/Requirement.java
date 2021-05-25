@@ -5,15 +5,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob2.ui.verifications.Checked;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 
+import java.util.List;
 import java.util.Objects;
 
 @JsonPropertyOrder({
         "name",
         "type",
-        "text"
+        "text",
+        "validationObligations"
 })
 public class Requirement {
 
@@ -23,16 +28,44 @@ public class Requirement {
 
     private String text;
 
+    private final ListProperty<ValidationObligation> validationObligations = new SimpleListProperty<>(FXCollections.observableArrayList());
+
     @JsonIgnore
     private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
     @JsonCreator
     public Requirement(@JsonProperty("name") String name,
                        @JsonProperty("type") RequirementType type,
-                       @JsonProperty("text") String text) {
+                       @JsonProperty("text") String text,
+                       @JsonProperty("validationObligations") List<ValidationObligation> validationObligations) {
         this.name = name;
         this.type = type;
         this.text = text;
+        this.validationObligations.get().addAll(validationObligations);
+        initListeners();;
+    }
+
+    private void initListeners() {
+        this.validationObligationsProperty().addListener((o, from, to) -> {
+            if (to.isEmpty()) {
+                this.checked.set(Checked.NOT_CHECKED);
+            } else {
+                final boolean failed = to.stream()
+                        .map(ValidationObligation::getChecked)
+                        .anyMatch(Checked.FAIL::equals);
+                final boolean success = !failed && to.stream()
+                        .map(ValidationObligation::getChecked)
+                        .anyMatch(Checked.SUCCESS::equals);
+
+                if (success) {
+                    this.checked.set(Checked.SUCCESS);
+                } else if (failed) {
+                    this.checked.set(Checked.FAIL);
+                } else {
+                    this.checked.set(Checked.TIMEOUT);
+                }
+            }
+        });
     }
 
     public String getName() {
@@ -57,6 +90,14 @@ public class Requirement {
 
     public Checked getChecked() {
         return checked.get();
+    }
+
+    public ListProperty<ValidationObligation> validationObligationsProperty() {
+        return validationObligations;
+    }
+
+    public List<ValidationObligation> getValidationObligations() {
+        return validationObligations.get();
     }
 
     public void setChecked(Checked checked) {
@@ -94,6 +135,6 @@ public class Requirement {
 
     @Override
     public String toString() {
-        return String.format("Requirement{checked = %s, name = %s, type = %s, text = %s}", checked, name, type, text);
+        return String.format("Requirement{checked = %s, name = %s, type = %s, text = %s, validationObligations = %s}", checked, name, type, text, validationObligations.get());
     }
 }

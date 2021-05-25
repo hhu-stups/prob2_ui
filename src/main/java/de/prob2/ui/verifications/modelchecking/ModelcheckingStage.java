@@ -76,6 +76,8 @@ public class ModelcheckingStage extends Stage {
 	
 	private final Modelchecker modelchecker;
 
+	private ModelCheckingItem lastItem;
+
 	@Inject
 	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, 
 							final CurrentTrace currentTrace, final CurrentProject currentProject, final Modelchecker modelchecker) {
@@ -133,6 +135,7 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void startModelCheck() {
+		lastItem = null;
 		if (currentTrace.get() != null) {
 			String nLimit = chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-";
 			String tLimit = chooseTimeLimit.isSelected() ? String.valueOf(timeLimit.getValue()) : "-";
@@ -142,6 +145,7 @@ public class ModelcheckingStage extends Stage {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
+				lastItem = modelcheckingItem;
 			} else {
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked");
 				alert.initOwner(this);
@@ -175,5 +179,9 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private void cancel() {
 		this.hide();
+	}
+
+	public ModelCheckingItem getLastItem() {
+		return lastItem;
 	}
 }

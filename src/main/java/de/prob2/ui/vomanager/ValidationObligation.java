@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -12,7 +13,8 @@ import java.util.Objects;
 
 @JsonPropertyOrder({
         "task",
-        "configuration"
+        "configuration",
+        "item"
 })
 public class ValidationObligation {
 
@@ -20,14 +22,19 @@ public class ValidationObligation {
 
     private final String configuration;
 
+    private final IExecutableItem item;
+
     @JsonIgnore
     private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
     @JsonCreator
     public ValidationObligation(@JsonProperty("task") ValidationTask task,
-                                @JsonProperty("text") String configuration) {
+                                @JsonProperty("text") String configuration,
+                                @JsonProperty("item") IExecutableItem item) {
         this.task = task;
         this.configuration = configuration;
+        this.item = item;
+        checked.bind(item.checkedProperty());
     }
 
     public ObjectProperty<Checked> checkedProperty() {
@@ -48,6 +55,10 @@ public class ValidationObligation {
 
     public String getConfiguration() {
         return configuration;
+    }
+
+    public IExecutableItem getItem() {
+        return item;
     }
 
     @Override

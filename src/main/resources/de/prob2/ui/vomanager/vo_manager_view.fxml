@@ -75,10 +75,10 @@
 								<TableColumn fx:id="voStatusColumn" style="-fx-alignment: CENTER;"
 											 minWidth="${fontSize.fontSize * 6}"
 											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-								<TableColumn fx:id="nameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
-											 text="VO Name"/>
-								<TableColumn fx:id="parametersColumn" minWidth="80.0"
-											 text="VO Parameters"/>
+								<TableColumn fx:id="voNameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
+											 text="Name"/>
+								<TableColumn fx:id="voConfigurationColumn" minWidth="80.0"
+											 text="Configuration"/>
 							</columns>
 							<placeholder>
 								<Label text="No Validation Obligations"/>
