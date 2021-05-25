@@ -45,27 +45,30 @@ public class Requirement {
         initListeners();;
     }
 
-    private void initListeners() {
-        this.validationObligationsProperty().addListener((o, from, to) -> {
-            if (to.isEmpty()) {
-                this.checked.set(Checked.NOT_CHECKED);
-            } else {
-                final boolean failed = to.stream()
-                        .map(ValidationObligation::getChecked)
-                        .anyMatch(Checked.FAIL::equals);
-                final boolean success = !failed && to.stream()
-                        .map(ValidationObligation::getChecked)
-                        .anyMatch(Checked.SUCCESS::equals);
+    public void updateChecked() {
+        List<ValidationObligation> validationObligations = this.validationObligationsProperty();
+        if (validationObligations.isEmpty()) {
+            this.checked.set(Checked.NOT_CHECKED);
+        } else {
+            final boolean failed = validationObligations.stream()
+                    .map(ValidationObligation::getChecked)
+                    .anyMatch(Checked.FAIL::equals);
+            final boolean success = !failed && validationObligations.stream()
+                    .map(ValidationObligation::getChecked)
+                    .anyMatch(Checked.SUCCESS::equals);
 
-                if (success) {
-                    this.checked.set(Checked.SUCCESS);
-                } else if (failed) {
-                    this.checked.set(Checked.FAIL);
-                } else {
-                    this.checked.set(Checked.TIMEOUT);
-                }
+            if (success) {
+                this.checked.set(Checked.SUCCESS);
+            } else if (failed) {
+                this.checked.set(Checked.FAIL);
+            } else {
+                this.checked.set(Checked.TIMEOUT);
             }
-        });
+        }
+    }
+
+    private void initListeners() {
+        this.validationObligationsProperty().addListener((o, from, to) -> updateChecked());
     }
 
     public String getName() {
@@ -91,6 +94,11 @@ public class Requirement {
 
     public Checked getChecked() {
         return checked.get();
+    }
+
+    public void addValidationObligation(ValidationObligation validationObligation) {
+        validationObligationsProperty().add(validationObligation);
+        validationObligation.checkedProperty().addListener((observable, from, to) -> updateChecked());
     }
 
     public ListProperty<ValidationObligation> validationObligationsProperty() {

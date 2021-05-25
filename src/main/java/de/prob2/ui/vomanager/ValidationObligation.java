@@ -26,7 +26,7 @@ public class ValidationObligation {
 
     private final String configuration;
 
-    private final IExecutableItem item;
+    private IExecutableItem item;
 
     @JsonIgnore
     private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
@@ -49,16 +49,20 @@ public class ValidationObligation {
         return checked.get();
     }
 
-    public void setChecked(Checked checked) {
-        this.checked.set(checked);
-    }
-
     public ValidationTask getTask() {
         return task;
     }
 
     public String getConfiguration() {
         return configuration;
+    }
+
+    public void setItem(IExecutableItem item) {
+        this.item = item;
+        checked.unbind();
+        if(item != null) {
+            checked.bind(item.checkedProperty());
+        }
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")

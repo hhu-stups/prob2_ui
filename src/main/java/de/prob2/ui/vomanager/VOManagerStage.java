@@ -1,12 +1,16 @@
 package de.prob2.ui.vomanager;
 
 
+import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -121,6 +125,7 @@ public class VOManagerStage extends Stage {
 
         final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
             if(to != null) {
+                synchronizeMachine(to);
                 tvRequirements.itemsProperty().bind(to.requirementsProperty());
             } else {
                 tvRequirements.setItems(FXCollections.observableArrayList());
@@ -213,7 +218,7 @@ public class VOManagerStage extends Stage {
         ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
         ValidationObligation validationObligation = taskCreator.openTaskWindow(requirement, task);
         if(validationObligation != null) {
-            requirement.validationObligationsProperty().add(validationObligation);
+            requirement.addValidationObligation(validationObligation);
         }
 
         // TODO: Replace refresh?
@@ -235,6 +240,40 @@ public class VOManagerStage extends Stage {
         tfName.setText(requirement.getName());
         cbRequirementChoice.getSelectionModel().select(requirement.getType());
         taRequirement.setText(requirement.getText());
+    }
+
+    private void synchronizeMachine(Machine machine) {
+        for(Requirement requirement : machine.getRequirements()) {
+            for(ValidationObligation validationObligation : requirement.validationObligationsProperty()) {
+                IExecutableItem executable = lookupExecutable(machine, validationObligation.getTask(), validationObligation.getItem());
+                validationObligation.setItem(executable);
+                validationObligation.checkedProperty().addListener((observable, from, to) -> requirement.updateChecked());
+            }
+        }
+    }
+
+    private IExecutableItem lookupExecutable(Machine machine, ValidationTask task, IExecutableItem executable) {
+        switch (task) {
+            case MODEL_CHECKING:
+                return machine.getModelcheckingItems().stream()
+                        .filter(item -> item.getOptions().equals(((ModelCheckingItem) executable).getOptions()))
+                        .findAny()
+                        .orElse(null);
+            case LTL_MODEL_CHECKING:
+                return machine.getLTLFormulas().stream()
+                        .filter(item -> item.settingsEqual((LTLFormulaItem) executable))
+                        .findAny()
+                        .orElse(null);
+            case SYMBOLIC_MODEL_CHECKING:
+                // TODO: Implement
+                break;
+            case TRACE_REPLAY:
+                // TODO: Implement
+                break;
+            default:
+                throw new RuntimeException("Validation task is not valid: " + task);
+        }
+        return executable;
     }
 
 }
