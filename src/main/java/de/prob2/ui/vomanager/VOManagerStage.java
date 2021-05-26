@@ -133,6 +133,7 @@ public class VOManagerStage extends Stage {
         voConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
 
         final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+            tvRequirements.itemsProperty().unbind();
             if(to != null) {
                 synchronizeMachine(to);
                 tvRequirements.itemsProperty().bind(to.requirementsProperty());
@@ -168,7 +169,8 @@ public class VOManagerStage extends Stage {
 
             MenuItem checkItem = new MenuItem("Check Requirement");
             checkItem.setOnAction(e -> {
-                // TODO: Implement
+                Requirement requirement = row.getItem();
+                requirement.getValidationObligations().forEach(voChecker::check);
             });
 
             MenuItem removeItem = new MenuItem("Remove Requirement");
@@ -192,6 +194,13 @@ public class VOManagerStage extends Stage {
                 tvValidationObligations.itemsProperty().bind(to.validationObligationsProperty());
             } else {
                 editModeProperty.set(EditType.NONE);
+            }
+        });
+
+        tvRequirements.setOnMouseClicked(e-> {
+            Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem();
+            if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && requirement != null && currentTrace.get() != null) {
+                requirement.getValidationObligations().forEach(voChecker::check);
             }
         });
 

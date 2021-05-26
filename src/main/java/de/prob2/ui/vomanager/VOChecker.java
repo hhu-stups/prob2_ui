@@ -5,14 +5,19 @@ import com.google.inject.Singleton;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.modelchecking.Modelchecker;
 
 @Singleton
 public class VOChecker {
 
+    private final Modelchecker modelchecker;
+
     private final LTLFormulaChecker ltlChecker;
 
     @Inject
-    public VOChecker(final LTLFormulaChecker ltlChecker) {
+    public VOChecker(final Modelchecker modelchecker, final LTLFormulaChecker ltlChecker) {
+        this.modelchecker = modelchecker;
         this.ltlChecker = ltlChecker;
     }
 
@@ -22,6 +27,7 @@ public class VOChecker {
         IExecutableItem item = validationObligation.getItem();
         switch (task) {
             case MODEL_CHECKING:
+                modelchecker.checkItem((ModelCheckingItem) item, false, false);
                 break;
             case LTL_MODEL_CHECKING:
                 ltlChecker.checkFormula((LTLFormulaItem) item);
