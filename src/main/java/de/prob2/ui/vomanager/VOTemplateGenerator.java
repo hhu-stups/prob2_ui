@@ -5,13 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class VOTemplateGenerator {
-
-    public static List<ValidationTask> generate(Requirement requirement) {
-        if(requirement == null) {
-            return Collections.emptyList();
-        }
-        RequirementType type = requirement.getType();
-        switch (type) {
+    
+    public static List<ValidationTask> generate(RequirementType requirementType) {
+        switch (requirementType) {
             case INVARIANT:
                 return Arrays.asList(ValidationTask.MODEL_CHECKING, ValidationTask.LTL_MODEL_CHECKING, ValidationTask.SYMBOLIC_MODEL_CHECKING);
             case SAFETY:
@@ -21,7 +17,7 @@ public class VOTemplateGenerator {
             case USE_CASE:
                 return Collections.singletonList(ValidationTask.TRACE_REPLAY);
             default:
-                throw new RuntimeException("Requirement type is not valid: " + type);
+                throw new RuntimeException("Requirement type is not valid: " + requirementType);
         }
     }
 
