@@ -164,6 +164,14 @@ public class VOManagerStage extends Stage {
         taskBox.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
         applyButton.visibleProperty().bind(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull());
 
+        cbRequirementChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+            cbTaskChoice.getItems().clear();
+            if(to != null) {
+                List<ValidationTask> tasks = VOTemplateGenerator.generate(to);
+                cbTaskChoice.getItems().addAll(tasks);
+            }
+        });
+
         tvRequirements.setRowFactory(table -> {
             final TableRow<Requirement> row = new TableRow<>();
 
@@ -188,9 +196,6 @@ public class VOManagerStage extends Stage {
             if(to != null) {
                 editModeProperty.set(EditType.EDIT);
                 showRequirement(to);
-                List<ValidationTask> tasks = VOTemplateGenerator.generate(to);
-                cbTaskChoice.getItems().clear();
-                cbTaskChoice.getItems().addAll(tasks);
                 tvValidationObligations.itemsProperty().bind(to.validationObligationsProperty());
             } else {
                 editModeProperty.set(EditType.NONE);
