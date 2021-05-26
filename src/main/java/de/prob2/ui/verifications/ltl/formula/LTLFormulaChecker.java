@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.ltl.formula;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,14 +9,18 @@ import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ClassicalBParser;
+import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.ltl.core.parser.LtlParseException;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLChecker;
 import de.prob.check.LTLError;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
+import de.prob.model.classicalb.ClassicalBModel;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -114,10 +119,15 @@ public class LTLFormulaChecker {
 		errorMarkers.addAll(parseListener.getErrorMarkers());
 		try {
 			final LTL formula;
+			BParser bParser = new BParser();
+			if (currentTrace.get().getModel() instanceof ClassicalBModel) {
+				IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
+				bParser.setDefinitions(definitions);
+			}
 			if(!parseListener.getErrorMarkers().isEmpty()) {
-				formula = new LTL(item.getCode(), new ClassicalBParser());
+				formula = new LTL(item.getCode(), new ClassicalBParser(bParser));
 			} else {
-				formula = new LTL(item.getCode(), new ClassicalBParser(), parser);
+				formula = new LTL(item.getCode(), new ClassicalBParser(bParser), parser);
 			}
 			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
 			final IModelCheckingResult res = checker.call();
