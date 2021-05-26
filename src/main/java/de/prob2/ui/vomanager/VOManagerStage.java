@@ -5,6 +5,7 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
@@ -28,6 +29,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
@@ -95,15 +97,22 @@ public class VOManagerStage extends Stage {
 
     private final CurrentProject currentProject;
 
+    private final CurrentTrace currentTrace;
+
     private final VOTaskCreator taskCreator;
+
+    private final VOChecker voChecker;
 
     private final ObjectProperty<EditType> editModeProperty;
 
     @Inject
-    public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final VOTaskCreator taskCreator) {
+    public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
+                          final VOTaskCreator taskCreator, final VOChecker voChecker) {
         super();
         this.currentProject = currentProject;
+        this.currentTrace = currentTrace;
         this.taskCreator = taskCreator;
+        this.voChecker = voChecker;
         this.editModeProperty = new SimpleObjectProperty<>(EditType.NONE);
         stageManager.loadFXML(this, "vo_manager_view.fxml");
     }
@@ -183,6 +192,32 @@ public class VOManagerStage extends Stage {
                 tvValidationObligations.itemsProperty().bind(to.validationObligationsProperty());
             } else {
                 editModeProperty.set(EditType.NONE);
+            }
+        });
+
+
+        tvValidationObligations.setRowFactory(table -> {
+            final TableRow<ValidationObligation> row = new TableRow<>();
+
+            MenuItem checkItem = new MenuItem("Check VO");
+            checkItem.setOnAction(e -> voChecker.check(row.getItem()));
+
+            MenuItem removeItem = new MenuItem("Remove VO");
+            removeItem.setOnAction(e -> {
+                // TODO: Implement
+            });
+
+            row.contextMenuProperty().bind(
+                    Bindings.when(row.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(new ContextMenu(checkItem, removeItem)));
+            return row;
+        });
+
+        tvValidationObligations.setOnMouseClicked(e-> {
+            ValidationObligation item = tvValidationObligations.getSelectionModel().getSelectedItem();
+            if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
+                voChecker.check(item);
             }
         });
     }
