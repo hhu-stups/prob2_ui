@@ -9,6 +9,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 
 import java.util.List;
@@ -32,6 +33,9 @@ public class Requirement {
 
     @JsonIgnore
     private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+
+    @JsonIgnore
+    private final ChangeListener<Checked> listener = (observable, from, to) -> updateChecked();
 
     @JsonCreator
     public Requirement(@JsonProperty("name") String name,
@@ -103,7 +107,12 @@ public class Requirement {
 
     public void addValidationObligation(ValidationObligation validationObligation) {
         validationObligationsProperty().add(validationObligation);
-        validationObligation.checkedProperty().addListener((observable, from, to) -> updateChecked());
+        validationObligation.checkedProperty().addListener(listener);
+    }
+
+    public void removeValidationObligation(ValidationObligation validationObligation) {
+        validationObligation.checkedProperty().removeListener(listener);
+        validationObligationsProperty().remove(validationObligation);
     }
 
     public ListProperty<ValidationObligation> validationObligationsProperty() {

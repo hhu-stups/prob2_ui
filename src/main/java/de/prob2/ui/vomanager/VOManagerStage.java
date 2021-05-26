@@ -213,7 +213,8 @@ public class VOManagerStage extends Stage {
 
             MenuItem removeItem = new MenuItem("Remove VO");
             removeItem.setOnAction(e -> {
-                // TODO: Implement
+                Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem();
+                requirement.removeValidationObligation(row.getItem());
             });
 
             row.contextMenuProperty().bind(
