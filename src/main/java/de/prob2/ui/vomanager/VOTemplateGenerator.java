@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class VOTemplateGenerator {
-    
+
     public static List<ValidationTask> generate(RequirementType requirementType) {
         switch (requirementType) {
             case INVARIANT:

@@ -1,7 +1,8 @@
 package de.prob2.ui.vomanager;
 
 
-import de.prob.check.ModelCheckingOptions;
+
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -12,8 +13,14 @@ import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -21,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -35,8 +43,11 @@ import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import javax.inject.Inject;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VOManagerStage extends Stage {
 
@@ -175,6 +186,13 @@ public class VOManagerStage extends Stage {
         tvRequirements.setRowFactory(table -> {
             final TableRow<Requirement> row = new TableRow<>();
 
+            Menu linkItem = new Menu("Link to Validation Obligation");
+
+            row.itemProperty().addListener((observable, from, to) -> {
+                final InvalidationListener linkingListener = o -> showPossibleLinkings(linkItem, to);
+                updateLinkingListener(linkItem, from, to, linkingListener);
+            });
+
             MenuItem checkItem = new MenuItem("Check Requirement");
             checkItem.setOnAction(e -> {
                 Requirement requirement = row.getItem();
@@ -187,7 +205,7 @@ public class VOManagerStage extends Stage {
             row.contextMenuProperty().bind(
                     Bindings.when(row.emptyProperty())
                             .then((ContextMenu) null)
-                            .otherwise(new ContextMenu(checkItem, removeItem)));
+                            .otherwise(new ContextMenu(linkItem, checkItem, removeItem)));
             return row;
         });
 
@@ -326,5 +344,123 @@ public class VOManagerStage extends Stage {
         }
         return executable;
     }
+
+    private ValidationObligation linkValidationObligation(Object item) {
+        if(item instanceof ModelCheckingItem) {
+            return new ValidationObligation(ValidationTask.MODEL_CHECKING, ((ModelCheckingItem) item).getOptions().toString(), (IExecutableItem) item);
+        } else if(item instanceof LTLFormulaItem) {
+            return new ValidationObligation(ValidationTask.LTL_MODEL_CHECKING, ((LTLFormulaItem) item).getCode(), (IExecutableItem) item);
+        } else if(item instanceof SymbolicCheckingFormulaItem) {
+            // TODO: Implement
+            return null;
+        } else if(item instanceof ReplayTrace) {
+            // TODO: Implement
+            return null;
+        } else if(item instanceof Path) {
+            return null;
+        } else {
+            throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
+        }
+    }
+
+    private void showPossibleLinkings(Menu linkItem, Requirement requirement) {
+        linkItem.getItems().clear();
+        List<Observable> dependentProperties = dependentPropertiesFromRequirement(requirement);
+        for(Observable observable : dependentProperties) {
+            if(observable instanceof SetProperty) {
+                ((SetProperty<?>) observable).forEach(obj -> createLinkingItem(linkItem, requirement, obj));
+            } else if(observable instanceof ListProperty) {
+                ((ListProperty<?>) observable).forEach(obj -> createLinkingItem(linkItem, requirement, obj));
+            }
+        }
+    }
+
+    private void createLinkingItem(Menu linkItem, Requirement requirement, Object voExecutable) {
+        MenuItem voItem = new MenuItem(generateVOName(voExecutable));
+        voItem.setOnAction(e -> {
+            ValidationObligation validationObligation = linkValidationObligation(voExecutable);
+            requirement.addValidationObligation(validationObligation);
+            validationObligation.checkedProperty().addListener((o, from, to) -> requirement.updateChecked());
+            voChecker.check(validationObligation);
+        });
+        linkItem.getItems().add(voItem);
+    }
+
+    private String generateVOName(Object item) {
+        if(item instanceof ModelCheckingItem) {
+            return String.format("MC(%s)", ((ModelCheckingItem) item).getOptions().getPrologOptions().stream().map(Enum::toString).collect(Collectors.joining(", ")));
+        } else if(item instanceof LTLFormulaItem) {
+            return String.format("LTL(%s)", ((LTLFormulaItem) item).getCode());
+        } else if(item instanceof SymbolicCheckingFormulaItem) {
+            // TODO: Implement
+            return null;
+        } else if(item instanceof ReplayTrace) {
+            // TODO: Implement
+            return null;
+        } else if(item instanceof Path) {
+            return ((Path) item).toString();
+        } else {
+            throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
+        }
+    }
+
+    private void updateLinkingListener(Menu linkItem, Requirement from, Requirement to, InvalidationListener linkingListener) {
+        if (from != null) {
+            List<Observable> dependentProperties = dependentPropertiesFromRequirement(from);
+            for (Observable observable : dependentProperties) {
+                observable.removeListener(linkingListener);
+            }
+        }
+
+        if(to != null) {
+            List<Observable> dependentProperties = dependentPropertiesFromRequirement(to);
+            Observable[] dependentPropertiesAsArray = dependentProperties.toArray(new Observable[0]);
+            BooleanBinding emptyProperty = Bindings.createBooleanBinding(() -> {
+                boolean result = true;
+                for(Observable observable : dependentPropertiesAsArray) {
+                    if(observable instanceof SetProperty) {
+                        result = result && ((SetProperty<?>) observable).emptyProperty().get();
+                    } else if(observable instanceof ListProperty) {
+                        result = result && ((ListProperty<?>) observable).emptyProperty().get();
+                    }
+                }
+                return result;
+            }, dependentPropertiesAsArray);
+
+            for (Observable observable : dependentProperties) {
+                linkItem.disableProperty().bind(emptyProperty);
+                observable.addListener(linkingListener);
+            }
+
+            linkingListener.invalidated(null);
+        }
+    }
+
+    private List<Observable> dependentPropertiesFromRequirement(Requirement requirement) {
+        RequirementType requirementType = requirement.getType();
+        List<Observable> lists = new ArrayList<>();
+        Machine machine = currentProject.getCurrentMachine();
+        switch (requirementType) {
+            case INVARIANT:
+                lists.add(machine.modelcheckingItemsProperty());
+                lists.add(machine.ltlFormulasProperty());
+                lists.add(machine.symbolicCheckingFormulasProperty());
+                break;
+            case SAFETY:
+                lists.add(machine.ltlFormulasProperty());
+                break;
+            case LIVENESS:
+                lists.add(machine.ltlFormulasProperty());
+                break;
+            case USE_CASE:
+                lists.add(machine.tracesProperty());
+                break;
+            default:
+                throw new RuntimeException("Requirement type is invalid: " + requirementType);
+        }
+        return lists;
+    }
+
+    // TODO: maybe replace Object by IExecutableItem, and <?> by <? extends IExecutableItem>
 
 }

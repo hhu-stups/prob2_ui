@@ -59,7 +59,7 @@ public class Requirement {
                     .anyMatch(Checked.FAIL::equals);
             final boolean success = !failed && validationObligations.stream()
                     .map(ValidationObligation::getChecked)
-                    .anyMatch(Checked.SUCCESS::equals);
+                    .allMatch(Checked.SUCCESS::equals);
             final boolean timeout = !failed && validationObligations.stream()
                     .map(ValidationObligation::getChecked)
                     .anyMatch(Checked.TIMEOUT::equals);
