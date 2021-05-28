@@ -281,7 +281,7 @@ public class ProjectManager {
 	}
 
 	public void openFile(final Path path) {
-		if (com.google.common.io.Files.getFileExtension(path.getFileName().toString()).equals(PROJECT_FILE_EXTENSION)) {
+		if (MoreFiles.getFileExtension(path).equals(PROJECT_FILE_EXTENSION)) {
 			this.openProject(path);
 		} else {
 			this.openAutomaticProjectFromMachine(path);

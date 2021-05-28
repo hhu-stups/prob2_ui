@@ -1,7 +1,20 @@
 package de.prob2.ui.animation.tracereplay.refactoring;
 
-import com.google.common.io.Files;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+import com.google.common.io.MoreFiles;
 import com.google.inject.Injector;
+
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.check.TraceChecker;
@@ -12,21 +25,17 @@ import de.prob.check.tracereplay.check.renamig.DeltaCalculationException;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.animation.tracereplay.*;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -214,9 +223,9 @@ public class TraceRefactoredSetup {
 	private Path save(String filenameModification, PersistentTrace persistentTrace) throws IOException {
 		String newMachineName = currentProject.getCurrentMachine().getName();
 
-		String filename = Files.getNameWithoutExtension(traceJsonFilePath.toString());
+		String filename = MoreFiles.getNameWithoutExtension(traceJsonFilePath);
 
-		String modified = filename +  filenameModification + newMachineName+"." + Files.getFileExtension(traceJsonFilePath.toString());
+		String modified = filename +  filenameModification + newMachineName+"." + MoreFiles.getFileExtension(traceJsonFilePath);
 
 		Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
 
