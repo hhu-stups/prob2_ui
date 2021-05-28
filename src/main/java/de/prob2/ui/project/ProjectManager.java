@@ -269,8 +269,7 @@ public class ProjectManager {
 	public void openAutomaticProjectFromMachine(Path path) {
 		final Path projectLocation = path.getParent();
 		final Path relative = projectLocation.relativize(path);
-		final String fileName = path.getFileName().toString();
-		final String shortName = fileName.substring(0, fileName.lastIndexOf('.'));
+		final String shortName = MoreFiles.getNameWithoutExtension(path);
 		final String description = String.format(bundle.getString("menu.file.automaticProjectDescription"), path);
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
