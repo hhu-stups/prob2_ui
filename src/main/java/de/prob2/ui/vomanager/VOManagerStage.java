@@ -206,6 +206,7 @@ public class VOManagerStage extends Stage {
                 showRequirement(to);
                 tvValidationObligations.itemsProperty().bind(to.validationObligationsProperty());
             } else {
+                tvValidationObligations.itemsProperty().set(FXCollections.observableArrayList());
                 editModeProperty.set(EditType.NONE);
             }
         });
