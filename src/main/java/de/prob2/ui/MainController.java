@@ -91,12 +91,12 @@ public class MainController extends BorderPane {
 			}
 		});
 		
-		Platform.runLater(() -> injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
+		injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
 			if (to != null) {
 				projectTP.setExpanded(true);
 				projectView.showMachines();
 			}
-		}));
+		});
 
 		config.addListener(new ConfigListener() {
 			@Override
