@@ -75,7 +75,6 @@ public class MainController extends BorderPane {
 
 	@FXML
 	private void initialize() {
-		accordions.forEach(acc -> acc.getPanes().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> tp.getContent().setVisible(true)));
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
 		final ObservableValue<Number> currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
