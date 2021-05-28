@@ -484,6 +484,4 @@ public class VOManagerStage extends Stage {
         return lists;
     }
 
-    // TODO: maybe replace Object by IExecutableItem, and <?> by <? extends IExecutableItem>
-
 }
