@@ -92,7 +92,8 @@ public class MainController extends BorderPane {
 		});
 		
 		injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
-			if (to != null) {
+			// When a project is opened, show the project view's machines tab for convenience.
+			if (to != null && (from == null || !from.getLocation().equals(to.getLocation()))) {
 				projectTP.setExpanded(true);
 				projectView.showMachines();
 			}
