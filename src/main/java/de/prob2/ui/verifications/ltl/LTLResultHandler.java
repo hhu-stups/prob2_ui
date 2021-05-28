@@ -1,26 +1,24 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.check.CheckInterrupted;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
-import de.prob.statespace.ITraceDescription;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
-
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @Singleton
 public class LTLResultHandler extends AbstractVerificationsResultHandler {
@@ -51,11 +49,11 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		return result instanceof Throwable || result instanceof LTLError;
 	}
 	
-	public void handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result, StateSpace stateSpace) {
+	public void handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result) {
 		CheckingResultItem resultItem = handleFormulaResult(result);
 
-		if (result instanceof ITraceDescription) {
-			item.setCounterExample(((ITraceDescription)result).getTrace(stateSpace));
+		if (result instanceof LTLCounterExample) {
+			item.setCounterExample(((LTLCounterExample)result).getTraceToLoopEntry());
 		} else {
 			item.setCounterExample(null);
 		}
