@@ -27,6 +27,7 @@ public class VOTaskCreator {
         switch (task) {
             case MODEL_CHECKING: {
                 ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
+                stageController.linkRequirement(requirement);
                 stageController.showAndWait();
                 ModelCheckingItem item = stageController.getLastItem();
                 if(item == null) {
