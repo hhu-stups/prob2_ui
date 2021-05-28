@@ -32,7 +32,9 @@ public class VOTaskCreator {
                 if(item == null) {
                     return null;
                 }
-                return new ValidationObligation(task, item.getOptions().toString(), item);
+                ValidationObligation validationObligation = new ValidationObligation(task, item.getOptions().toString(), item);
+                validationObligation.setExecutable(item);
+                return validationObligation;
             }
             case LTL_MODEL_CHECKING: {
                 LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
@@ -43,7 +45,9 @@ public class VOTaskCreator {
                 if(item == null) {
                     return null;
                 }
-                return new ValidationObligation(task, item.getCode(), item);
+                ValidationObligation validationObligation = new ValidationObligation(task, item.getCode(), item);
+                validationObligation.setExecutable(item);
+                return validationObligation;
             }
             case SYMBOLIC_MODEL_CHECKING:
                 // TODO: Implement
