@@ -2,12 +2,14 @@ package de.prob2.ui.vomanager;
 
 
 
+import com.google.inject.Injector;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -110,6 +112,8 @@ public class VOManagerStage extends Stage {
 
     private final CurrentTrace currentTrace;
 
+    private final Injector injector;
+
     private final VOTaskCreator taskCreator;
 
     private final VOChecker voChecker;
@@ -117,11 +121,12 @@ public class VOManagerStage extends Stage {
     private final ObjectProperty<EditType> editModeProperty;
 
     @Inject
-    public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
+    public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
                           final VOTaskCreator taskCreator, final VOChecker voChecker) {
         super();
         this.currentProject = currentProject;
         this.currentTrace = currentTrace;
+        this.injector = injector;
         this.taskCreator = taskCreator;
         this.voChecker = voChecker;
         this.editModeProperty = new SimpleObjectProperty<>(EditType.NONE);
@@ -354,10 +359,7 @@ public class VOManagerStage extends Stage {
             // TODO: Implement
             return null;
         } else if(item instanceof ReplayTrace) {
-            // TODO: Implement
-            return null;
-        } else if(item instanceof Path) {
-            return null;
+            return new ValidationObligation(ValidationTask.TRACE_REPLAY, ((ReplayTrace) item).getName(), (IExecutableItem) item);
         } else {
             throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
         }
@@ -395,10 +397,7 @@ public class VOManagerStage extends Stage {
             // TODO: Implement
             return null;
         } else if(item instanceof ReplayTrace) {
-            // TODO: Implement
-            return null;
-        } else if(item instanceof Path) {
-            return ((Path) item).toString();
+            return String.format("TR(%s)", ((ReplayTrace) item).getName());
         } else {
             throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
         }
@@ -453,7 +452,7 @@ public class VOManagerStage extends Stage {
                 lists.add(machine.ltlFormulasProperty());
                 break;
             case USE_CASE:
-                lists.add(machine.tracesProperty());
+                lists.add(injector.getInstance(TraceViewHandler.class).getTraces());
                 break;
             default:
                 throw new RuntimeException("Requirement type is invalid: " + requirementType);
