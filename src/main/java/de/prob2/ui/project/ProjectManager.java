@@ -124,7 +124,7 @@ public class ProjectManager {
 			newItems.add(placeholderItem);
 		} else {
 			for (final Path path : this.getRecentProjects()) {
-				final MenuItem item = new MenuItem(path.getFileName().toString());
+				final MenuItem item = new MenuItem(MoreFiles.getNameWithoutExtension(path));
 				item.setOnAction(event -> this.openProject(path));
 				newItems.add(item);
 			}
