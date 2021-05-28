@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ResourceBundle;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -147,9 +149,9 @@ public class ModelcheckingStage extends Stage {
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
 				lastItem = modelcheckingItem;
 			} else {
-				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked");
-				alert.initOwner(this);
-				alert.showAndWait();
+				ModelCheckingItem checkedItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(modelcheckingItem::settingsEqual).collect(Collectors.toList()).get(0);
+				modelchecker.checkItem(checkedItem, true, false);
+				lastItem = checkedItem;
 				this.hide();
 			}
 		} else {

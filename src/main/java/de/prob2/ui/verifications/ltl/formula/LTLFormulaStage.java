@@ -17,6 +17,8 @@ import de.prob2.ui.vomanager.Requirement;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
+import java.util.stream.Collectors;
+
 public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	@FXML
@@ -60,8 +62,10 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			formulaChecker.checkFormula(item, this);
 			lastItem = item;
 		} else {
+			LTLFormulaItem checkedItem = machine.getLTLFormulas().stream().filter(item::settingsEqual).collect(Collectors.toList()).get(0);
+			formulaChecker.checkFormula(checkedItem, this);
+			lastItem = checkedItem;
 			this.close();
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
 	}
 	
