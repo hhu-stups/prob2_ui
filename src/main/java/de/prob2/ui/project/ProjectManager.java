@@ -125,6 +125,12 @@ public class ProjectManager {
 		} else {
 			for (final Path path : this.getRecentProjects()) {
 				final MenuItem item = new MenuItem(MoreFiles.getNameWithoutExtension(path));
+				// Stop JavaFX from looking for underscores in the menu item name
+				// and interpreting them as mnemonics/key shortcuts
+				// (can be seen when opening the menu using Alt on Windows).
+				// Otherwise the first underscore (if any) in the project name disappears
+				// and is incorrectly parsed as a mnemonic.
+				item.setMnemonicParsing(false);
 				item.setOnAction(event -> this.openProject(path));
 				newItems.add(item);
 			}
