@@ -45,7 +45,6 @@ import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import javax.inject.Inject;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -319,49 +318,74 @@ public class VOManagerStage extends Stage {
         for(Requirement requirement : machine.getRequirements()) {
             for(ValidationObligation validationObligation : requirement.validationObligationsProperty()) {
                 IExecutableItem executable = lookupExecutable(machine, validationObligation.getTask(), validationObligation.getItem());
-                validationObligation.setItem(executable);
+                validationObligation.setExecutable(executable);
                 validationObligation.checkedProperty().addListener((observable, from, to) -> requirement.updateChecked());
             }
             requirement.updateChecked();
         }
     }
 
-    private IExecutableItem lookupExecutable(Machine machine, ValidationTask task, IExecutableItem executable) {
+    private IExecutableItem lookupExecutable(Machine machine, ValidationTask task, Object executableItem) {
         switch (task) {
             case MODEL_CHECKING:
                 return machine.getModelcheckingItems().stream()
-                        .filter(item -> item.getOptions().equals(((ModelCheckingItem) executable).getOptions()))
+                        .filter(item -> item.getOptions().equals(((ModelCheckingItem) executableItem).getOptions()))
                         .findAny()
                         .orElse(null);
             case LTL_MODEL_CHECKING:
                 return machine.getLTLFormulas().stream()
-                        .filter(item -> item.settingsEqual((LTLFormulaItem) executable))
+                        .filter(item -> item.settingsEqual((LTLFormulaItem) executableItem))
                         .findAny()
                         .orElse(null);
             case SYMBOLIC_MODEL_CHECKING:
                 // TODO: Implement
                 break;
             case TRACE_REPLAY:
-                // TODO: Implement
-                break;
+                return injector.getInstance(TraceViewHandler.class).getTraces().stream()
+                        .filter(item -> item.getLocation().toString().equals(executableItem))
+                        .findAny()
+                        .orElse(null);
             default:
                 throw new RuntimeException("Validation task is not valid: " + task);
         }
-        return executable;
+        return null;
     }
 
     private ValidationObligation linkValidationObligation(Object item) {
+        ValidationObligation validationObligation;
         if(item instanceof ModelCheckingItem) {
-            return new ValidationObligation(ValidationTask.MODEL_CHECKING, ((ModelCheckingItem) item).getOptions().toString(), (IExecutableItem) item);
+            validationObligation = new ValidationObligation(ValidationTask.MODEL_CHECKING, ((ModelCheckingItem) item).getOptions().toString(), item);
         } else if(item instanceof LTLFormulaItem) {
-            return new ValidationObligation(ValidationTask.LTL_MODEL_CHECKING, ((LTLFormulaItem) item).getCode(), (IExecutableItem) item);
+            validationObligation = new ValidationObligation(ValidationTask.LTL_MODEL_CHECKING, ((LTLFormulaItem) item).getCode(), item);
         } else if(item instanceof SymbolicCheckingFormulaItem) {
             // TODO: Implement
             return null;
         } else if(item instanceof ReplayTrace) {
-            return new ValidationObligation(ValidationTask.TRACE_REPLAY, ((ReplayTrace) item).getName(), (IExecutableItem) item);
+            validationObligation = new ValidationObligation(ValidationTask.TRACE_REPLAY, ((ReplayTrace) item).getName(), ((ReplayTrace) item).getLocation().toString());
         } else {
             throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
+        }
+        updateExecutableInVO(validationObligation);
+        return validationObligation;
+    }
+
+    private void updateExecutableInVO(ValidationObligation validationObligation) {
+        switch (validationObligation.getTask()) {
+            case MODEL_CHECKING:
+            case LTL_MODEL_CHECKING:
+                validationObligation.setExecutable((IExecutableItem) validationObligation.getItem());
+                break;
+            case SYMBOLIC_MODEL_CHECKING:
+                // TODO: Implement
+                break;
+            case TRACE_REPLAY:
+                validationObligation.setExecutable(injector.getInstance(TraceViewHandler.class).getTraces().stream()
+                        .filter(item -> item.getLocation().toString().equals(validationObligation.getItem()))
+                        .findAny()
+                        .orElse(null));
+                break;
+            default:
+                throw new RuntimeException("Validation task is invalid: " + validationObligation.getTask());
         }
     }
 

@@ -13,6 +13,7 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.nio.file.Path;
 import java.util.Objects;
 
 @JsonPropertyOrder({
@@ -26,7 +27,10 @@ public class ValidationObligation {
 
     private final String configuration;
 
-    private IExecutableItem item;
+    private Object item;
+
+    @JsonIgnore
+    private IExecutableItem executable;
 
     @JsonIgnore
     private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
@@ -34,11 +38,10 @@ public class ValidationObligation {
     @JsonCreator
     public ValidationObligation(@JsonProperty("task") ValidationTask task,
                                 @JsonProperty("text") String configuration,
-                                @JsonProperty("item") IExecutableItem item) {
+                                @JsonProperty("item") Object item) {
         this.task = task;
         this.configuration = configuration;
         this.item = item;
-        checked.bind(item.checkedProperty());
     }
 
     public ObjectProperty<Checked> checkedProperty() {
@@ -57,21 +60,27 @@ public class ValidationObligation {
         return configuration;
     }
 
-    public void setItem(IExecutableItem item) {
-        this.item = item;
-        checked.unbind();
-        if(item != null) {
-            checked.bind(item.checkedProperty());
-        }
-    }
-
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
     @JsonSubTypes({
             @JsonSubTypes.Type(value = ModelCheckingItem.class, name = "ModelCheckingItem"),
             @JsonSubTypes.Type(value = LTLFormulaItem.class, name = "LTLFormulaItem"),
+            @JsonSubTypes.Type(value = String.class, name = "Path"),
+
     })
-    public IExecutableItem getItem() {
+    public Object getItem() {
         return item;
+    }
+
+    public void setExecutable(IExecutableItem executable) {
+        this.executable = executable;
+        checked.unbind();
+        if(item != null) {
+            checked.bind(executable.checkedProperty());
+        }
+    }
+
+    public IExecutableItem getExecutable() {
+        return executable;
     }
 
     @Override

@@ -29,18 +29,18 @@ public class VOChecker {
 
     public void check(ValidationObligation validationObligation) {
         ValidationTask task = validationObligation.getTask();
-        IExecutableItem item = validationObligation.getItem();
+        IExecutableItem executable = validationObligation.getExecutable();
         switch (task) {
             case MODEL_CHECKING:
-                modelchecker.checkItem((ModelCheckingItem) item, false, false);
+                modelchecker.checkItem((ModelCheckingItem) executable, false, false);
                 break;
             case LTL_MODEL_CHECKING:
-                ltlChecker.checkFormula((LTLFormulaItem) item);
+                ltlChecker.checkFormula((LTLFormulaItem) executable);
                 break;
             case SYMBOLIC_MODEL_CHECKING:
                 break;
             case TRACE_REPLAY:
-                traceChecker.check((ReplayTrace) item, true);
+                traceChecker.check((ReplayTrace) executable, true);
                 break;
             default:
                 throw new RuntimeException("Validation task is not valid: " + task);
