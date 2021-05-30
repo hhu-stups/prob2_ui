@@ -9,6 +9,8 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
 @Singleton
 public class VOChecker {
@@ -17,12 +19,16 @@ public class VOChecker {
 
     private final LTLFormulaChecker ltlChecker;
 
+    private final SymbolicCheckingFormulaHandler symbolicChecker;
+
     private final TraceChecker traceChecker;
 
     @Inject
-    public VOChecker(final Modelchecker modelchecker, final LTLFormulaChecker ltlChecker, final TraceChecker traceChecker) {
+    public VOChecker(final Modelchecker modelchecker, final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
+                     final TraceChecker traceChecker) {
         this.modelchecker = modelchecker;
         this.ltlChecker = ltlChecker;
+        this.symbolicChecker = symbolicChecker;
         this.traceChecker = traceChecker;
     }
 
@@ -38,6 +44,7 @@ public class VOChecker {
                 ltlChecker.checkFormula((LTLFormulaItem) executable);
                 break;
             case SYMBOLIC_MODEL_CHECKING:
+                symbolicChecker.handleItem((SymbolicCheckingFormulaItem) executable, false);
                 break;
             case TRACE_REPLAY:
                 traceChecker.check((ReplayTrace) executable, true);

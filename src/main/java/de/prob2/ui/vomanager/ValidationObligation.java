@@ -27,7 +27,7 @@ public class ValidationObligation {
 
     private final String configuration;
 
-    private Object item;
+    private final Object item;
 
     @JsonIgnore
     private IExecutableItem executable;

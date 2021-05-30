@@ -65,8 +65,10 @@ public class VOManager {
                         .findAny()
                         .orElse(null);
             case SYMBOLIC_MODEL_CHECKING:
-                // TODO: Implement
-                break;
+                return machine.getSymbolicCheckingFormulas().stream()
+                        .filter(item -> item.settingsEqual((SymbolicCheckingFormulaItem) executableItem))
+                        .findAny()
+                        .orElse(null);
             case TRACE_REPLAY:
                 return injector.getInstance(TraceViewHandler.class).getTraces().stream()
                         .filter(item -> item.getLocation().toString().equals(executableItem))
@@ -75,20 +77,18 @@ public class VOManager {
             default:
                 throw new RuntimeException("Validation task is not valid: " + task);
         }
-        return null;
     }
 
     private ValidationObligation linkValidationObligation(Object item) {
         ValidationObligation validationObligation;
         if(item instanceof ModelCheckingItem) {
-            validationObligation = new ValidationObligation(ValidationTask.MODEL_CHECKING, ((ModelCheckingItem) item).getOptions().toString(), item);
+            validationObligation = new ValidationObligation(ValidationTask.MODEL_CHECKING, extractConfiguration((IExecutableItem) item), item);
         } else if(item instanceof LTLFormulaItem) {
-            validationObligation = new ValidationObligation(ValidationTask.LTL_MODEL_CHECKING, ((LTLFormulaItem) item).getCode(), item);
+            validationObligation = new ValidationObligation(ValidationTask.LTL_MODEL_CHECKING, extractConfiguration((IExecutableItem) item), item);
         } else if(item instanceof SymbolicCheckingFormulaItem) {
-            // TODO: Implement
-            return null;
+            validationObligation = new ValidationObligation(ValidationTask.SYMBOLIC_MODEL_CHECKING, extractConfiguration((IExecutableItem) item), item);
         } else if(item instanceof ReplayTrace) {
-            validationObligation = new ValidationObligation(ValidationTask.TRACE_REPLAY, ((ReplayTrace) item).getName(), ((ReplayTrace) item).getLocation().toString());
+            validationObligation = new ValidationObligation(ValidationTask.TRACE_REPLAY, extractConfiguration((IExecutableItem) item), ((ReplayTrace) item).getLocation().toString());
         } else {
             throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
         }
@@ -96,14 +96,46 @@ public class VOManager {
         return validationObligation;
     }
 
+    private String extractConfiguration(IExecutableItem item) {
+        if(item instanceof ModelCheckingItem) {
+            return ((ModelCheckingItem) item).getOptions().getPrologOptions().stream().map(Enum::toString).collect(Collectors.joining(", "));
+        } else if(item instanceof LTLFormulaItem) {
+            return ((LTLFormulaItem) item).getCode();
+        } else if(item instanceof SymbolicCheckingFormulaItem) {
+            SymbolicCheckingFormulaItem symbolicItem = ((SymbolicCheckingFormulaItem) item);
+            switch (symbolicItem.getType()) {
+                case INVARIANT:
+                    if(symbolicItem.getCode().isEmpty()) {
+                        return String.format("%s(%s)", symbolicItem.getType().name(), "all");
+                    } else {
+                        return String.format("%s(%s)", symbolicItem.getType().name(), symbolicItem.getCode());
+                    }
+                case DEADLOCK:
+                    return String.format("%s(%s)", symbolicItem.getType().name(), symbolicItem.getCode());
+                case SYMBOLIC_MODEL_CHECK:
+                    return symbolicItem.getCode();
+                case CHECK_DYNAMIC_ASSERTIONS:
+                case CHECK_STATIC_ASSERTIONS:
+                case CHECK_REFINEMENT:
+                case CHECK_WELL_DEFINEDNESS:
+                case FIND_REDUNDANT_INVARIANTS:
+                default:
+                    return symbolicItem.getType().name();
+            }
+
+        } else if(item instanceof ReplayTrace) {
+            return ((ReplayTrace) item).getName();
+        } else {
+            throw new RuntimeException("Class for extracting configuration is invalid: " + item.getClass());
+        }
+    }
+
     private void updateExecutableInVO(ValidationObligation validationObligation) {
         switch (validationObligation.getTask()) {
             case MODEL_CHECKING:
             case LTL_MODEL_CHECKING:
-                validationObligation.setExecutable((IExecutableItem) validationObligation.getItem());
-                break;
             case SYMBOLIC_MODEL_CHECKING:
-                // TODO: Implement
+                validationObligation.setExecutable((IExecutableItem) validationObligation.getItem());
                 break;
             case TRACE_REPLAY:
                 validationObligation.setExecutable(injector.getInstance(TraceViewHandler.class).getTraces().stream()
@@ -130,6 +162,7 @@ public class VOManager {
 
     private void createLinkingItem(Menu linkItem, Requirement requirement, Object voExecutable) {
         MenuItem voItem = new MenuItem(generateVOName(voExecutable));
+        voItem.setMnemonicParsing(false);
         voItem.setOnAction(e -> {
             ValidationObligation validationObligation = linkValidationObligation(voExecutable);
             requirement.addValidationObligation(validationObligation);
@@ -141,14 +174,13 @@ public class VOManager {
 
     private String generateVOName(Object item) {
         if(item instanceof ModelCheckingItem) {
-            return String.format("MC(%s)", ((ModelCheckingItem) item).getOptions().getPrologOptions().stream().map(Enum::toString).collect(Collectors.joining(", ")));
+            return String.format("MC(%s)", extractConfiguration((IExecutableItem) item));
         } else if(item instanceof LTLFormulaItem) {
-            return String.format("LTL(%s)", ((LTLFormulaItem) item).getCode());
+            return String.format("LTL(%s)", extractConfiguration((IExecutableItem) item));
         } else if(item instanceof SymbolicCheckingFormulaItem) {
-            // TODO: Implement
-            return null;
+            return String.format("SMC(%s)", extractConfiguration((IExecutableItem) item));
         } else if(item instanceof ReplayTrace) {
-            return String.format("TR(%s)", ((ReplayTrace) item).getName());
+            return String.format("TR(%s)", extractConfiguration((IExecutableItem) item));
         } else {
             throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
         }
