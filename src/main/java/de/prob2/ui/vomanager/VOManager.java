@@ -96,7 +96,7 @@ public class VOManager {
         return validationObligation;
     }
 
-    private String extractConfiguration(IExecutableItem item) {
+    public static String extractConfiguration(IExecutableItem item) {
         if(item instanceof ModelCheckingItem) {
             return ((ModelCheckingItem) item).getOptions().getPrologOptions().stream().map(Enum::toString).collect(Collectors.joining(", "));
         } else if(item instanceof LTLFormulaItem) {
@@ -224,6 +224,7 @@ public class VOManager {
         Machine machine = currentProject.getCurrentMachine();
         switch (requirementType) {
             case INVARIANT:
+            case DEADLOCK_FREEDOM:
                 lists.add(machine.modelcheckingItemsProperty());
                 lists.add(machine.ltlFormulasProperty());
                 lists.add(machine.symbolicCheckingFormulasProperty());

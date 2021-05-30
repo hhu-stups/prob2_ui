@@ -200,6 +200,15 @@ public class ModelcheckingStage extends Stage {
 				additionalGoal.setSelected(false);
 				stopAtFullCoverage.setSelected(false);
 				break;
+			case DEADLOCK_FREEDOM:
+				findDeadlocks.setSelected(true);
+				findInvViolations.setSelected(false);
+				findBAViolations.setSelected(false);
+				findOtherErrors.setSelected(false);
+				findGoal.setSelected(false);
+				additionalGoal.setSelected(false);
+				stopAtFullCoverage.setSelected(false);
+				break;
 			default:
 				throw new RuntimeException("Given requirement type is not supported for model checking: " + requirementType);
 		}

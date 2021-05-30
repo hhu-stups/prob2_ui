@@ -33,7 +33,7 @@ public class VOTaskCreator {
                 if(item == null) {
                     return null;
                 }
-                ValidationObligation validationObligation = new ValidationObligation(task, item.getOptions().toString(), item);
+                ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
                 validationObligation.setExecutable(item);
                 return validationObligation;
             }
@@ -46,7 +46,7 @@ public class VOTaskCreator {
                 if(item == null) {
                     return null;
                 }
-                ValidationObligation validationObligation = new ValidationObligation(task, item.getCode(), item);
+                ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
                 validationObligation.setExecutable(item);
                 return validationObligation;
             }

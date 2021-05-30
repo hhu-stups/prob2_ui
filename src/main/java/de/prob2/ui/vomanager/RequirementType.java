@@ -2,6 +2,7 @@ package de.prob2.ui.vomanager;
 
 public enum RequirementType {
     INVARIANT("Invariant Requirement"),
+    DEADLOCK_FREEDOM("Deadlock-freedom Requirement"),
     SAFETY("Safety Requirement"),
     LIVENESS("Liveness Requirement"),
     USE_CASE("Use Case Requirement");
