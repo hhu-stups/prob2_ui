@@ -5,6 +5,7 @@ public enum RequirementType {
     DEADLOCK_FREEDOM("Deadlock-freedom Requirement"),
     SAFETY("Safety Requirement"),
     LIVENESS("Liveness Requirement"),
+    FAIRNESS("Fairness Requirement"),
     USE_CASE("Use Case Requirement");
 
     private final String name;

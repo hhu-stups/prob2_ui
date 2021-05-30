@@ -233,6 +233,7 @@ public class VOManager {
                 lists.add(machine.ltlFormulasProperty());
                 break;
             case LIVENESS:
+            case FAIRNESS:
                 lists.add(machine.ltlFormulasProperty());
                 break;
             case USE_CASE:

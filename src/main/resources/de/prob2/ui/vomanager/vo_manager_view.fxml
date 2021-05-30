@@ -96,6 +96,7 @@
 										<RequirementType fx:value="DEADLOCK_FREEDOM"/>
 										<RequirementType fx:value="SAFETY"/>
 										<RequirementType fx:value="LIVENESS"/>
+										<RequirementType fx:value="FAIRNESS"/>
 										<RequirementType fx:value="USE_CASE"/>
 									</FXCollections>
 								</items>

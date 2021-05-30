@@ -14,6 +14,7 @@ public class VOTemplateGenerator {
             case SAFETY:
                 return Collections.singletonList(ValidationTask.LTL_MODEL_CHECKING);
             case LIVENESS:
+            case FAIRNESS:
                 return Collections.singletonList(ValidationTask.LTL_MODEL_CHECKING);
             case USE_CASE:
                 return Collections.singletonList(ValidationTask.TRACE_REPLAY);
