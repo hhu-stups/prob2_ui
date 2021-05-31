@@ -124,7 +124,13 @@ public class ProjectManager {
 			newItems.add(placeholderItem);
 		} else {
 			for (final Path path : this.getRecentProjects()) {
-				final MenuItem item = new MenuItem(path.getFileName().toString());
+				final MenuItem item = new MenuItem(MoreFiles.getNameWithoutExtension(path));
+				// Stop JavaFX from looking for underscores in the menu item name
+				// and interpreting them as mnemonics/key shortcuts
+				// (can be seen when opening the menu using Alt on Windows).
+				// Otherwise the first underscore (if any) in the project name disappears
+				// and is incorrectly parsed as a mnemonic.
+				item.setMnemonicParsing(false);
 				item.setOnAction(event -> this.openProject(path));
 				newItems.add(item);
 			}
@@ -269,8 +275,7 @@ public class ProjectManager {
 	public void openAutomaticProjectFromMachine(Path path) {
 		final Path projectLocation = path.getParent();
 		final Path relative = projectLocation.relativize(path);
-		final String fileName = path.getFileName().toString();
-		final String shortName = fileName.substring(0, fileName.lastIndexOf('.'));
+		final String shortName = MoreFiles.getNameWithoutExtension(path);
 		final String description = String.format(bundle.getString("menu.file.automaticProjectDescription"), path);
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
@@ -281,7 +286,7 @@ public class ProjectManager {
 	}
 
 	public void openFile(final Path path) {
-		if (com.google.common.io.Files.getFileExtension(path.getFileName().toString()).equals(PROJECT_FILE_EXTENSION)) {
+		if (MoreFiles.getFileExtension(path).equals(PROJECT_FILE_EXTENSION)) {
 			this.openProject(path);
 		} else {
 			this.openAutomaticProjectFromMachine(path);

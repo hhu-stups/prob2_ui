@@ -75,7 +75,6 @@ public class MainController extends BorderPane {
 
 	@FXML
 	private void initialize() {
-		accordions.forEach(acc -> acc.getPanes().stream().filter(tp -> tp != null && tp.getContent() != null).forEach(tp -> tp.getContent().setVisible(true)));
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
 		final ObservableValue<Number> currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
@@ -92,12 +91,13 @@ public class MainController extends BorderPane {
 			}
 		});
 		
-		Platform.runLater(() -> injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
-			if (to != null) {
+		injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
+			// When a project is opened, show the project view's machines tab for convenience.
+			if (to != null && (from == null || !from.getLocation().equals(to.getLocation()))) {
 				projectTP.setExpanded(true);
 				projectView.showMachines();
 			}
-		}));
+		});
 
 		config.addListener(new ConfigListener() {
 			@Override

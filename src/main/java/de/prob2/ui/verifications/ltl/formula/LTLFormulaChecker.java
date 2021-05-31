@@ -84,7 +84,7 @@ public class LTLFormulaChecker {
 		parser.setPatternManager(machine.getPatternManager());
 		List<LTLMarker> errorMarkers = new ArrayList<>();
 		Object result = getResult(parser, errorMarkers, item);
-		resultHandler.handleFormulaResult(item, errorMarkers, result, currentTrace.getStateSpace());
+		resultHandler.handleFormulaResult(item, errorMarkers, result);
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {

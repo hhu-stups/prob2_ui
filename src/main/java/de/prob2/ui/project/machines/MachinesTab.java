@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -262,7 +263,7 @@ public class MachinesTab extends Tab {
 			machine = new Machine(nameInProject, "", relative);
 		} catch (IllegalArgumentException e) {
 			LOGGER.info("User tried to create a machine with an invalid extension", e);
-			final String extension = com.google.common.io.Files.getFileExtension(relative.getFileName().toString());
+			final String extension = MoreFiles.getFileExtension(relative);
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.machines.machinesTab.alerts.invalidMachineExtension.content", extension);
 			alert.initOwner(this.getContent().getScene().getWindow());
 			alert.show();

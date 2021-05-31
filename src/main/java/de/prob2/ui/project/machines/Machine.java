@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.google.common.io.Files;
+import com.google.common.io.MoreFiles;
 
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
@@ -251,9 +251,7 @@ public class Machine implements DescriptionView.Describable {
 	
 	@JsonIgnore
 	public Class<? extends ModelFactory<?>> getModelFactoryClass() {
-		return FactoryProvider.factoryClassFromExtension(
-			Files.getFileExtension(this.getLocation().getFileName().toString())
-		);
+		return FactoryProvider.factoryClassFromExtension(MoreFiles.getFileExtension(this.getLocation()));
 	}
 	
 	public StringProperty lastUsedPreferenceNameProperty() {
