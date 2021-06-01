@@ -6,7 +6,10 @@ public enum RequirementType {
     SAFETY("Safety Requirement"),
     LIVENESS("Liveness Requirement"),
     FAIRNESS("Fairness Requirement"),
-    USE_CASE("Use Case Requirement");
+    USE_CASE("Use Case Requirement"),
+    TIMING("Timing Requirement"),
+    PROBABILISTIC("Probabilistic Requirement"),
+    TIMED_PROBABILISTIC("Timed Probabilistic Requirement");
 
     private final String name;
 

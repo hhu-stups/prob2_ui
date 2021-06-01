@@ -98,6 +98,9 @@
 										<RequirementType fx:value="LIVENESS"/>
 										<RequirementType fx:value="FAIRNESS"/>
 										<RequirementType fx:value="USE_CASE"/>
+										<RequirementType fx:value="TIMING"/>
+										<RequirementType fx:value="PROBABILISTIC"/>
+										<RequirementType fx:value="TIMED_PROBABILISTIC"/>
 									</FXCollections>
 								</items>
 							</ChoiceBox>

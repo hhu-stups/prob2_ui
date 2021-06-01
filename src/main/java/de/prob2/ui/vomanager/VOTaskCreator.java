@@ -7,6 +7,8 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.sharedviews.TraceViewHandler;
+import de.prob2.ui.simulation.choice.SimulationChoosingStage;
+import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
@@ -69,16 +71,28 @@ public class VOTaskCreator {
                 validationObligation.setExecutable(item);
                 return validationObligation;
             }
-            case TRACE_REPLAY:
+            case TRACE_REPLAY: {
                 TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
                 traceSaver.saveTrace(currentWindow, TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
                 ReplayTrace replayTrace = injector.getInstance(TraceViewHandler.class).getLastTrace();
-                if(replayTrace == null) {
+                if (replayTrace == null) {
                     return null;
                 }
                 ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(replayTrace), replayTrace.getLocation().toString());
                 validationObligation.setExecutable(replayTrace);
                 return validationObligation;
+            }
+            case SIMULATION: {
+                SimulationChoosingStage simulationChoosingStage = injector.getInstance(SimulationChoosingStage.class);
+                simulationChoosingStage.showAndWait();
+                SimulationItem item = simulationChoosingStage.getLastItem();
+                if (item == null) {
+                    return null;
+                }
+                ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
+                validationObligation.setExecutable(item);
+                return validationObligation;
+            }
             default:
                 throw new RuntimeException("Validation task is not valid");
         }

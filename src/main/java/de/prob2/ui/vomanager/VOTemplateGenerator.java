@@ -18,6 +18,10 @@ public class VOTemplateGenerator {
                 return Collections.singletonList(ValidationTask.LTL_MODEL_CHECKING);
             case USE_CASE:
                 return Collections.singletonList(ValidationTask.TRACE_REPLAY);
+            case TIMING:
+            case PROBABILISTIC:
+            case TIMED_PROBABILISTIC:
+                return Collections.singletonList(ValidationTask.SIMULATION);
             default:
                 throw new RuntimeException("Requirement type is not valid: " + requirementType);
         }

@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Singleton
+
 public class SimulationChoosingStage extends Stage {
 
 	public static class SimulationChoiceItem {
@@ -79,6 +79,8 @@ public class SimulationChoosingStage extends Stage {
 
 	private final SimulationChoiceBindings simulationChoiceBindings;
 
+	private SimulationItem lastItem;
+
 	@Inject
 	public SimulationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject,
 								   final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
@@ -110,15 +112,18 @@ public class SimulationChoosingStage extends Stage {
 
 	private void setCheckListeners() {
 		btAdd.setOnAction(e -> {
+			lastItem = null;
 			boolean validChoice = checkSelection();
 			if(!validChoice) {
 				showInvalidSelection();
 				return;
 			}
-			this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
+			lastItem = this.extractItem();
+			this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), lastItem);
 			this.close();
 		});
 		btCheck.setOnAction(e -> {
+			lastItem = null;
 			boolean validChoice = checkSelection();
 			if(!validChoice) {
 				showInvalidSelection();
@@ -126,6 +131,7 @@ public class SimulationChoosingStage extends Stage {
 			}
 			final SimulationItem newItem = this.extractItem();
 			final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), newItem);
+			lastItem = existingItem.orElse(newItem);
 			this.close();
 			this.simulationItemHandler.checkItem(existingItem.orElse(newItem), false);
 		});
@@ -245,4 +251,7 @@ public class SimulationChoosingStage extends Stage {
 		simulationEstimationChoice.bindCheckingProperty(simulationChoiceBindings.checkingProperty());
 	}
 
+	public SimulationItem getLastItem() {
+		return lastItem;
+	}
 }

@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.simulation.SimulationItemHandler;
+import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
@@ -23,13 +25,16 @@ public class VOChecker {
 
     private final TraceChecker traceChecker;
 
+    private final SimulationItemHandler simulationItemHandler;
+
     @Inject
     public VOChecker(final Modelchecker modelchecker, final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
-                     final TraceChecker traceChecker) {
+                     final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
         this.modelchecker = modelchecker;
         this.ltlChecker = ltlChecker;
         this.symbolicChecker = symbolicChecker;
         this.traceChecker = traceChecker;
+        this.simulationItemHandler = simulationItemHandler;
     }
 
 
@@ -48,6 +53,9 @@ public class VOChecker {
                 break;
             case TRACE_REPLAY:
                 traceChecker.check((ReplayTrace) executable, true);
+                break;
+            case SIMULATION:
+                simulationItemHandler.checkItem((SimulationItem) executable, false);
                 break;
             default:
                 throw new RuntimeException("Validation task is not valid: " + task);

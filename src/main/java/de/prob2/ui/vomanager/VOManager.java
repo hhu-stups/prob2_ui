@@ -7,6 +7,7 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceViewHandler;
+import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -74,6 +75,11 @@ public class VOManager {
                         .filter(item -> item.getLocation().toString().equals(executableItem))
                         .findAny()
                         .orElse(null);
+            case SIMULATION:
+                return machine.getSimulations().stream()
+                        .filter(item -> item.equals(executableItem))
+                        .findAny()
+                        .orElse(null);
             default:
                 throw new RuntimeException("Validation task is not valid: " + task);
         }
@@ -87,6 +93,8 @@ public class VOManager {
             validationObligation = new ValidationObligation(ValidationTask.LTL_MODEL_CHECKING, extractConfiguration((IExecutableItem) item), item);
         } else if(item instanceof SymbolicCheckingFormulaItem) {
             validationObligation = new ValidationObligation(ValidationTask.SYMBOLIC_MODEL_CHECKING, extractConfiguration((IExecutableItem) item), item);
+        } else if(item instanceof SimulationItem) {
+            validationObligation = new ValidationObligation(ValidationTask.SIMULATION, extractConfiguration((IExecutableItem) item), item);
         } else if(item instanceof ReplayTrace) {
             validationObligation = new ValidationObligation(ValidationTask.TRACE_REPLAY, extractConfiguration((IExecutableItem) item), ((ReplayTrace) item).getLocation().toString());
         } else {
@@ -105,7 +113,7 @@ public class VOManager {
             SymbolicCheckingFormulaItem symbolicItem = ((SymbolicCheckingFormulaItem) item);
             switch (symbolicItem.getType()) {
                 case INVARIANT:
-                    if(symbolicItem.getCode().isEmpty()) {
+                    if (symbolicItem.getCode().isEmpty()) {
                         return String.format("%s(%s)", symbolicItem.getType().name(), "all");
                     } else {
                         return String.format("%s(%s)", symbolicItem.getType().name(), symbolicItem.getCode());
@@ -122,7 +130,8 @@ public class VOManager {
                 default:
                     return symbolicItem.getType().name();
             }
-
+        } else if(item instanceof SimulationItem) {
+            return ((SimulationItem) item).getConfiguration();
         } else if(item instanceof ReplayTrace) {
             return ((ReplayTrace) item).getName();
         } else {
@@ -135,6 +144,7 @@ public class VOManager {
             case MODEL_CHECKING:
             case LTL_MODEL_CHECKING:
             case SYMBOLIC_MODEL_CHECKING:
+            case SIMULATION:
                 validationObligation.setExecutable((IExecutableItem) validationObligation.getItem());
                 break;
             case TRACE_REPLAY:
@@ -181,6 +191,8 @@ public class VOManager {
             return String.format("SMC(%s)", extractConfiguration((IExecutableItem) item));
         } else if(item instanceof ReplayTrace) {
             return String.format("TR(%s)", extractConfiguration((IExecutableItem) item));
+        } else if(item instanceof SimulationItem) {
+            return String.format("SIM(%s)", extractConfiguration((IExecutableItem) item));
         } else {
             throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
         }
@@ -238,6 +250,11 @@ public class VOManager {
                 break;
             case USE_CASE:
                 lists.add(injector.getInstance(TraceViewHandler.class).getTraces());
+                break;
+            case TIMING:
+            case PROBABILISTIC:
+            case TIMED_PROBABILISTIC:
+                lists.add(machine.simulationItemsProperty());
                 break;
             default:
                 throw new RuntimeException("Requirement type is invalid: " + requirementType);

@@ -4,7 +4,8 @@ public enum ValidationTask {
     MODEL_CHECKING("Model Checking"),
     LTL_MODEL_CHECKING("LTL Model Checking"),
     SYMBOLIC_MODEL_CHECKING("Symbolic Model Checking"),
-    TRACE_REPLAY("Trace Replay");
+    TRACE_REPLAY("Trace Replay"),
+    SIMULATION("Simulation");
 
     private final String name;
 
