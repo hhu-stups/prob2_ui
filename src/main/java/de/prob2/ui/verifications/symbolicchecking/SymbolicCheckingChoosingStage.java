@@ -11,7 +11,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
 
-@Singleton
 public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<SymbolicCheckingFormulaItem> {
 	@Inject
 	private SymbolicCheckingChoosingStage(

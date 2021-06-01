@@ -1,9 +1,7 @@
 package de.prob2.ui.symbolic;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -15,6 +13,9 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
+import de.prob2.ui.vomanager.Requirement;
+import de.prob2.ui.vomanager.RequirementType;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -57,6 +58,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	private final SymbolicFormulaHandler<T> formulaHandler;
 	
 	private final String checkAllOperations;
+
+	private T lastItem;
 	
 	public SymbolicChoosingStage(final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
 		this.bundle = bundle;
@@ -130,14 +133,16 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	
 	protected void setCheckListeners() {
 		btAdd.setOnAction(e -> {
-			this.formulaHandler.addItem(currentProject.getCurrentMachine(), this.extractItem());
+			lastItem = this.extractItem();
+			this.formulaHandler.addItem(currentProject.getCurrentMachine(), lastItem);
 			this.close();
 		});
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
 			final Optional<T> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
+			lastItem = existingItem.orElse(newItem);
 			this.close();
-			this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
+			this.formulaHandler.handleItem(lastItem, false);
 		});
 	}
 	
@@ -212,8 +217,10 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			final T newItem = this.extractItem();
 			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
 			if (existingItem.isPresent()) {
+				lastItem = null;
 				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 			} else {
+				lastItem = newItem;
 				this.close();
 			}
 		});
@@ -221,17 +228,37 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
 			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
-			if (existingItem.isPresent()) {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
-			} else {
-				this.close();
-				this.formulaHandler.handleItem(newItem, false);
-			}
+			lastItem = existingItem.orElse(newItem);
+			this.close();
+			this.formulaHandler.handleItem(lastItem, false);
 		});
 	}
 	
 	@FXML
 	public void cancel() {
 		this.close();
+	}
+
+	public T getLastItem() {
+		return lastItem;
+	}
+
+	public void linkRequirement(Requirement requirement) {
+		RequirementType requirementType = requirement.getType();
+		switch (requirementType) {
+			case INVARIANT:
+				cbChoice.getItems().clear();
+				cbChoice.getItems().addAll(FXCollections.observableArrayList(
+						new SymbolicExecutionItem(SymbolicExecutionType.INVARIANT, SymbolicGUIType.CHOICE_BOX),
+						new SymbolicExecutionItem(SymbolicExecutionType.SYMBOLIC_MODEL_CHECK, SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM)));
+				break;
+			case DEADLOCK_FREEDOM:
+				cbChoice.getItems().clear();
+				cbChoice.getItems().addAll(FXCollections.observableArrayList(
+						new SymbolicExecutionItem(SymbolicExecutionType.DEADLOCK, SymbolicGUIType.PREDICATE)));
+				break;
+			default:
+				throw new RuntimeException("Given requirement type is not supported for symbolic model checking: " + requirementType);
+		}
 	}
 }

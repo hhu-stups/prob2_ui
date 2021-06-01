@@ -8,6 +8,8 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
 @Singleton
 public class VOTaskCreator {
@@ -51,8 +53,16 @@ public class VOTaskCreator {
                 return validationObligation;
             }
             case SYMBOLIC_MODEL_CHECKING:
-                // TODO: Implement
-                break;
+                SymbolicCheckingChoosingStage symbolicStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
+                symbolicStage.linkRequirement(requirement);
+                symbolicStage.showAndWait();
+                SymbolicCheckingFormulaItem item = symbolicStage.getLastItem();
+                if(item == null) {
+                    return null;
+                }
+                ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
+                validationObligation.setExecutable(item);
+                return validationObligation;
             case TRACE_REPLAY:
                 // TODO: Implement
                 break;
