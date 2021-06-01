@@ -3,6 +3,10 @@ package de.prob2.ui.vomanager;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
+import de.prob2.ui.animation.tracereplay.TraceSaver;
+import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
@@ -10,6 +14,7 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import javafx.stage.Window;
 
 @Singleton
 public class VOTaskCreator {
@@ -21,7 +26,7 @@ public class VOTaskCreator {
         this.injector = injector;
     }
 
-    public ValidationObligation openTaskWindow(Requirement requirement, ValidationTask task) {
+    public ValidationObligation openTaskWindow(Window currentWindow, Requirement requirement, ValidationTask task) {
         if(task == null) {
             // TODO: Show error message
             return null;
@@ -52,24 +57,31 @@ public class VOTaskCreator {
                 validationObligation.setExecutable(item);
                 return validationObligation;
             }
-            case SYMBOLIC_MODEL_CHECKING:
+            case SYMBOLIC_MODEL_CHECKING: {
                 SymbolicCheckingChoosingStage symbolicStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
                 symbolicStage.linkRequirement(requirement);
                 symbolicStage.showAndWait();
                 SymbolicCheckingFormulaItem item = symbolicStage.getLastItem();
-                if(item == null) {
+                if (item == null) {
                     return null;
                 }
                 ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
                 validationObligation.setExecutable(item);
                 return validationObligation;
+            }
             case TRACE_REPLAY:
-                // TODO: Implement
-                break;
+                TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
+                traceSaver.saveTrace(currentWindow, TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
+                ReplayTrace replayTrace = injector.getInstance(TraceViewHandler.class).getLastTrace();
+                if(replayTrace == null) {
+                    return null;
+                }
+                ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(replayTrace), replayTrace.getLocation().toString());
+                validationObligation.setExecutable(replayTrace);
+                return validationObligation;
             default:
                 throw new RuntimeException("Validation task is not valid");
         }
-        return null;
     }
 
 }

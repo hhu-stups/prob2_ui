@@ -275,7 +275,7 @@ public class VOManagerStage extends Stage {
         assert requirement != null;
 
         ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
-        ValidationObligation validationObligation = taskCreator.openTaskWindow(requirement, task);
+        ValidationObligation validationObligation = taskCreator.openTaskWindow(this, requirement, task);
         if(validationObligation != null) {
             requirement.addValidationObligation(validationObligation);
         }

@@ -56,6 +56,8 @@ public class TraceViewHandler {
 
 	private final BooleanProperty noTraces;
 
+	private ReplayTrace lastTrace;
+
 	@Inject
 	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
 		this.traceChecker = traceChecker;
@@ -70,8 +72,10 @@ public class TraceViewHandler {
 
 	private void initialize() {
 		final SetChangeListener<Path> listener = c -> {
+			lastTrace = null;
 			if (c.wasAdded()) {
 				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(), injector);
+				lastTrace = replayTrace;
 				Machine machine = currentProject.getCurrentMachine();
 				ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
 				if(!machineTraces.contains(replayTrace)) {
@@ -228,4 +232,7 @@ public class TraceViewHandler {
 		}
 	}
 
+	public ReplayTrace getLastTrace() {
+		return lastTrace;
+	}
 }
