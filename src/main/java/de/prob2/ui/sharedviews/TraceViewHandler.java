@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.layout.BindableGlyph;
@@ -20,7 +21,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -141,8 +141,13 @@ public class TraceViewHandler {
 		};
 	}
 
-	public void initializeRow(final Scene scene, final TableRow<ReplayTrace> row, final MenuItem replayTraceItem, final MenuItem showErrorItem, final MenuItem openInExternalEditorItem) {
+	public void initializeRow(final Scene scene, final TableRow<ReplayTrace> row, final MenuItem addTestsItem, final MenuItem replayTraceItem, final MenuItem showErrorItem, final MenuItem openInExternalEditorItem) {
 		replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
+		addTestsItem.setOnAction(event -> {
+			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
+			traceTestView.loadPersistentTrace(row.getItem().getPersistentTrace());
+			traceTestView.show();
+		});
 		showErrorItem.setOnAction(event -> {
 			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, row.getItem().getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, row.getItem().getErrorMessageParams());
 			alert.initOwner(scene.getWindow());
@@ -154,6 +159,7 @@ public class TraceViewHandler {
 			showErrorItem.disableProperty().unbind();
 			if (to != null) {
 				replayTraceItem.disableProperty().bind(row.getItem().selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+
 				showErrorItem.disableProperty().bind(to.checkedProperty().isNotEqualTo(Checked.FAIL));
 				row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 			}
@@ -181,6 +187,11 @@ public class TraceViewHandler {
 		final MenuItem replayTraceItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.replayTrace"));
 		replayTraceItem.setDisable(true);
 		return replayTraceItem;
+	}
+
+	public MenuItem createAddTestsItem() {
+		final MenuItem addTestsItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.addTests"));
+		return addTestsItem;
 	}
 
 	public MenuItem createDeleteTraceItem() {

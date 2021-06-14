@@ -28,6 +28,8 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 
 	private final Injector injector;
 
+	private PersistentTrace persistentTrace;
+
 	public ReplayTrace(Path location, Injector injector) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
@@ -132,7 +134,10 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	}
 
 	public PersistentTrace getPersistentTrace() {
-		return injector.getInstance(TraceFileHandler.class).load(this.getLocation());
+		if(persistentTrace == null) {
+			persistentTrace = injector.getInstance(TraceFileHandler.class).load(this.getLocation());
+		}
+		return persistentTrace;
 	}
 	
 	@Override
