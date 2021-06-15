@@ -89,6 +89,8 @@ public abstract class Simulator {
 		this.delay = 0;
 		this.time.set(0);
 		this.stepCounter = 0;
+		this.noActivationQueued = false;
+
 		if(config != null) {
 			// sort after priority
 			this.activationConfigurationsSorted = config.getActivationConfigurations().stream()
