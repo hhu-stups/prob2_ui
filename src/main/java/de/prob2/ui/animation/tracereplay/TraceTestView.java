@@ -13,6 +13,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
@@ -20,6 +21,7 @@ import de.prob2.ui.sharedviews.TraceViewHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -44,7 +46,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @FXMLInjected
-@Singleton
 public class TraceTestView extends Stage {
 
 	private final class TestCell extends TableCell<PersistentTransition, String> {
@@ -67,6 +68,7 @@ public class TraceTestView extends Stage {
 				int index = tableRow.getIndex();
 
 				final VBox box = new VBox();
+
 				final Button btAddTest = new Button();
 				btAddTest.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
 				btAddTest.setOnAction(e1 -> {
@@ -103,8 +105,9 @@ public class TraceTestView extends Stage {
 
 				box.getChildren().add(btAddTest);
 
-				for(int i = 0; i < postconditions.get(index).size(); i++) {
-					Postcondition postcondition = postconditions.get(index).get(i);
+				for(int i = 0; i < tableItem.getPostconditions().size(); i++) {
+					Postcondition postcondition = tableItem.getPostconditions().get(i);
+					postconditions.get(index).add(postcondition);
 					final HBox innerBox = new HBox();
 					final TextField textField = new TextField("");
 					HBox.setHgrow(textField, Priority.ALWAYS);
@@ -133,7 +136,6 @@ public class TraceTestView extends Stage {
 					box.getChildren().add(box.getChildren().size() - 1, innerBox);
 				}
 
-
 				this.setGraphic(box);
 			}
 		}
@@ -148,14 +150,19 @@ public class TraceTestView extends Stage {
 	@FXML
 	private SplitPane splitPane;
 
+	private final CurrentProject currentProject;
+
 	private final FontSize fontSize;
 
-	private PersistentTrace persistentTrace;
+	private ReplayTrace replayTrace;
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
 
+	private ChangeListener<Boolean> changedListener;
+
 	@Inject
-	public TraceTestView(final StageManager stageManager, final FontSize fontSize) {
+	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize) {
+		this.currentProject = currentProject;
 		this.fontSize = fontSize;
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}
@@ -165,6 +172,11 @@ public class TraceTestView extends Stage {
 		transitionColumn.setCellValueFactory(features -> new SimpleStringProperty(buildTransitionString(features.getValue())));
 		testColumn.setCellFactory(param -> new TestCell());
 		testColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+		changedListener = (o, f, t) -> {
+			if(t) {
+				currentProject.setSaved(false);
+			}
+		};
 	}
 
 	private String buildTransitionString(PersistentTransition persistentTransition) {
@@ -178,25 +190,39 @@ public class TraceTestView extends Stage {
 		}
 	}
 
-	public void loadPersistentTrace(PersistentTrace persistentTrace) {
+	public void loadReplayTrace(ReplayTrace replayTrace) {
+		this.replayTrace = replayTrace;
+		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 		traceTableView.getItems().clear();
 		if(persistentTrace != null) {
 			traceTableView.getItems().addAll(persistentTrace.getTransitionList());
 			persistentTrace.getTransitionList().forEach(transition -> postconditions.add(new ArrayList<>()));
+			this.replayTrace.changedProperty().addListener(changedListener);
 		}
-		this.persistentTrace = persistentTrace;
 	}
 
 	@FXML
 	private void applyTest() {
-		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
+		List<PersistentTransition> transitions = replayTrace.getPersistentTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
 			transition.getPostconditions().addAll(postconditions.get(i));
-			System.out.println(transition.getPostconditions());
 		}
+		// TODO: Why is BooleanProperty not triggered?
+		currentProject.setSaved(false);
+		replayTrace.setChanged(true);
+		this.close();
 	}
+
+	@Override
+	public void close() {
+		// TODO: implement alert
+		super.close();
+		replayTrace.changedProperty().removeListener(changedListener);
+	}
+
+
 
 
 }

@@ -15,10 +15,13 @@ import java.util.ResourceBundle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -28,6 +31,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 
+import de.prob2.ui.sharedviews.TraceViewHandler;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -54,18 +58,21 @@ public class ProjectManager {
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
+	private final Injector injector;
 	
 	private final ObservableList<Path> recentProjects;
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
+	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager,
+						  ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager, final Injector injector) {
 		this.jacksonManager = jacksonManager;
 		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
+		this.injector = injector;
 		
 		this.recentProjects = FXCollections.observableArrayList();
 		this.maximumRecentProjects = new SimpleIntegerProperty(this, "maximumRecentProjects");
@@ -214,6 +221,9 @@ public class ProjectManager {
 		addToRecentProjects(location);
 		currentProject.setSaved(true);
 		currentProject.get().resetChanged();
+		for(ReplayTrace replayTrace : injector.getInstance(TraceViewHandler.class).getTraces()) {
+			replayTrace.setChanged(false);
+		}
 	}
 
 	private Project loadProject(Path path) {
@@ -226,6 +236,9 @@ public class ProjectManager {
 			// which makes the project savedness tracking behave incorrectly.
 			// To fix this, we forcibly mark the project as unchanged again after it is loaded.
 			project.resetChanged();
+			for(ReplayTrace replayTrace : injector.getInstance(TraceViewHandler.class).getTraces()) {
+				replayTrace.setChanged(false);
+			}
 			return project;
 		} catch (IOException | JsonConversionException exc) {
 			LOGGER.warn("Failed to open project file", exc);

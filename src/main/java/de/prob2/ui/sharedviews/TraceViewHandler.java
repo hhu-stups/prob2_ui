@@ -12,6 +12,7 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import javafx.beans.binding.Bindings;
@@ -72,6 +73,11 @@ public class TraceViewHandler {
 		final SetChangeListener<Path> listener = c -> {
 			if (c.wasAdded()) {
 				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(), injector);
+				replayTrace.changedProperty().addListener((o, f, t) -> {
+					if(t) {
+						currentProject.setSaved(false);
+					}
+				});
 				Machine machine = currentProject.getCurrentMachine();
 				ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
 				if(!machineTraces.contains(replayTrace)) {
@@ -102,6 +108,14 @@ public class TraceViewHandler {
 					traces.bind(machineTraces);
 					noTraces.bind(currentProject.getCurrentMachine().tracesProperty().emptyProperty());
 					currentProject.getCurrentMachine().getTraceFiles().addListener(listener);
+
+					for(ReplayTrace replayTrace : machineTraces) {
+						replayTrace.changedProperty().addListener((o, f, t) -> {
+							if(t) {
+								currentProject.setSaved(false);
+							}
+						});
+					}
 				}
 			}
 		});
@@ -119,6 +133,14 @@ public class TraceViewHandler {
 				traces.bind(machineTraces);
 				noTraces.bind(to.tracesProperty().emptyProperty());
 				to.getTraceFiles().addListener(listener);
+
+				for(ReplayTrace replayTrace : machineTraces) {
+					replayTrace.changedProperty().addListener((o, f, t) -> {
+						if(t) {
+							currentProject.setSaved(false);
+						}
+					});
+				}
 			}
 		});
 	}
@@ -145,7 +167,7 @@ public class TraceViewHandler {
 		replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
 		addTestsItem.setOnAction(event -> {
 			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
-			traceTestView.loadPersistentTrace(row.getItem().getPersistentTrace());
+			traceTestView.loadReplayTrace(row.getItem());
 			traceTestView.show();
 		});
 		showErrorItem.setOnAction(event -> {
@@ -239,4 +261,29 @@ public class TraceViewHandler {
 		}
 	}
 
+	public Map<Machine, ListProperty<ReplayTrace>> getMachinesToTraces() {
+		return machinesToTraces;
+	}
+
+	private void saveTraces(Project project) {
+		/*Path projectLocation = project.getLocation();
+		for(Machine machine : project.getMachines()) {
+			for (ReplayTrace replayTrace : injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(machine)) {
+				final Path tempLocation = projectLocation.resolveSibling(replayTrace.getLocation().getFileName() + ".tmp");
+				try {
+					injector.getInstance(TraceFileHandler.class).save(replayTrace.getTraceJsonFile(), tempLocation, "User");
+					Files.move(tempLocation, replayTrace.getLocation(), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException | RuntimeException exc) {
+					LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
+					stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
+					try {
+						Files.deleteIfExists(tempLocation);
+					} catch (IOException e) {
+						LOGGER.warn("Failed to delete temporary trace file after project save error", e);
+					}
+					return;
+				}
+			}
+		}*/
+	}
 }

@@ -10,6 +10,7 @@ import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -22,6 +23,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
 	private final Path location;
+	private final BooleanProperty changedProperty;
 	private String errorMessageBundleKey;
 	private BooleanProperty shouldExecute;
 	private Object[] errorMessageParams;
@@ -34,6 +36,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.location = location;
+		this.changedProperty = new SimpleBooleanProperty(true);
 		this.errorMessageBundleKey = null;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.injector = injector;
@@ -74,7 +77,19 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	public Path getLocation() {
 		return this.location;
 	}
-	
+
+	public BooleanProperty changedProperty() {
+		return changedProperty;
+	}
+
+	public boolean isChanged() {
+		return changedProperty.get();
+	}
+
+	public void setChanged(boolean changed) {
+		changedProperty.set(changed);
+	}
+
 	public void setErrorMessageBundleKey(String errorMessageBundleKey) {
 		this.errorMessageBundleKey = errorMessageBundleKey;
 	}
