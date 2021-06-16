@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 
 import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
+import de.prob.scripting.EventBFactory;
+import de.prob.scripting.EventBPackageFactory;
 import de.prob.scripting.ModelFactory;
 import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
@@ -52,6 +54,15 @@ final class RegexSyntaxHighlighting {
 	}
 
 	static {
+		//Event-B Regex TODO fix id, or, not etc.
+		final Map<String, String> syntaxClassesForEventB = new LinkedHashMap<>();
+		syntaxClassesForEventB.put("(CONTEXT|EXTENDS|SETS|CONSTANTS|CONCRETE_CONSTANTS|AXIOMS|THEOREMS|MACHINE|REFINES|SEES|VARIABLES|ABSTRACT_VARIABLES|INVARIANT|VARIANT|EVENTS|EVENT|BEGIN|ANY|WHERE|WHEN|WITH|THEN|INITIALISATION|END)", "editor_keyword");
+		syntaxClassesForEventB.put("((POW|POW1|card|union|inter|min|max|finite|partition|dom|ran)\\(.*\\)|UNION|INTER|id|prj1|prj2|skip)", "editor_ctrlkeyword");
+		syntaxClassesForEventB.put("(false|true|⊤|⊥|&|or|∧|∨|=>|⇒|<=>|⇔|not|!|#|¬|∃|∀)", "editor_logical");
+		syntaxClassesForEventB.put("(:\\||::|:∈|:=)", "editor_assignments");
+		syntaxClassesForEventB.put("(\\/\\\\|\\\\\\/|∩|∪|\\{\\}|∅|\\\\|\\+->>|⤀|\\+->|⇸|\\+|-->>|↠|-->|→|-|>=|<=|≤|≥|/<<:|<<:|/<:|<:|⊄|⊂|⊈|⊆|/:|:|∉|∈|>\\+>|⤔|>->>|⤖|>->|↣|><|⊗|>|<\\+|⇷|<<->>|<<->|<->>|<->|↔|<<\\||⩤|<\\||◁|<|;|circ|◦|\\|>>|⩥|\\|>|▷|\\|\\||%|≠|/=|=)", "editor_arithmetic");
+		syntaxClassesForEventB.put("(//[^\n\r]*)|(/\\*([^*]|\\*+[^*/])*\\*+/)", "editor_comment");
+
 		//XTL Regex
 		final Map<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
 		syntaxClassesForXTL.put("(start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(function_result|image|image_right_click_transition|image_click_transition))", "editor_keyword");
@@ -104,6 +115,8 @@ final class RegexSyntaxHighlighting {
 		syntaxClassesForZ.put("%(.)*|/\\*([^*]|\\*+[^*/])*\\*+/|\\\\(noindent|documentclass|(begin|end)\\{(document)\\}|(sub)?section|(usepackage)\\{(fuzz|z-eves)\\}|\\\\)", "editor_comment");
 		syntaxClassesForZ.put("\\\\(infix|arithmos)", "editor_unsupported");
 
+		syntaxClassesOtherLanguages.put(EventBFactory.class, syntaxClassesForEventB);
+		syntaxClassesOtherLanguages.put(EventBPackageFactory.class, syntaxClassesForEventB);
 		syntaxClassesOtherLanguages.put(XTLFactory.class, syntaxClassesForXTL);
 		syntaxClassesOtherLanguages.put(TLAFactory.class, syntaxClassesForTLA);
 		syntaxClassesOtherLanguages.put(CSPFactory.class, syntaxClassesForCSP);
