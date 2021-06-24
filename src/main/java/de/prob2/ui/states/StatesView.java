@@ -102,6 +102,8 @@ public final class StatesView extends StackPane {
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCache;
 	private final StateItem.FormulaEvaluator cachingEvaluator;
 
+	private boolean persistSorting;
+
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
 					   final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config) {
@@ -130,6 +132,7 @@ public final class StatesView extends StackPane {
 				return evaluateFormulaWithCaching(formula, state);
 			}
 		};
+		this.persistSorting = true;
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
 
@@ -138,9 +141,7 @@ public final class StatesView extends StackPane {
 		helpButton.setHelpContent("mainView.stateView", null);
 
 		tv.setOnSort(e -> {
-			if(tv.getSortOrder().stream()
-					.filter(s -> s.getSortType() == TreeTableColumn.SortType.ASCENDING || s.getSortType() == TreeTableColumn.SortType.DESCENDING)
-					.allMatch(p -> false)) {
+			if(tv.getSortOrder().isEmpty() && persistSorting) {
 				final Trace trace = this.currentTrace.get();
 				this.updateRootAsync(trace, trace, filterState.getText());
 			}
@@ -655,12 +656,31 @@ public final class StatesView extends StackPane {
 			addSubformulaItemsFiltered(newRoot, topLevel, to.getCurrentState(), to.canGoBack() ? to.getPreviousState() : null, filter);
 		}
 		Platform.runLater(() -> {
+			Map<String, TreeTableColumn.SortType> sortTypes = new HashMap<>();
+			for (TreeTableColumn<StateItem, ?> column : tv.getSortOrder()) {
+				sortTypes.put(column.getId(), column.getSortType());
+			}
+
 			// Workaround for JavaFX bug JDK-8199324/PROB2UI-377 on Java 10 and later.
 			// If the contents of a TreeTableView are changed while there is a selection,
 			// JavaFX incorrectly throws an IllegalStateException with message "Not a permutation change".
+			persistSorting = false;
 			tv.getSelectionModel().clearSelection();
 			this.tv.setRoot(newRoot);
 			this.tv.getSelectionModel().select(selectedRow);
+			persistSorting = true;
+
+			// Reseting the root triggers the default sorting order.
+			// When resting the sorting order to default, the table has to be refilled by triggering this method.
+			// That is why the additional flag persistSorting was introduced.
+
+			for (TreeTableColumn<StateItem, ?> column : tv.getColumns()) {
+				TreeTableColumn.SortType sortType = sortTypes.get(column.getId());
+				if (sortType != null) {
+					column.setSortType(sortType);
+					tv.getSortOrder().add(column);
+				}
+			}
 		});
 	}
 
