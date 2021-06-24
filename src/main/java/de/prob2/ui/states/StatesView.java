@@ -136,6 +136,15 @@ public final class StatesView extends StackPane {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent("mainView.stateView", null);
+
+		tv.setOnSort(e -> {
+			if(tv.getSortOrder().stream()
+					.filter(s -> s.getSortType() == TreeTableColumn.SortType.ASCENDING || s.getSortType() == TreeTableColumn.SortType.DESCENDING)
+					.allMatch(p -> false)) {
+				final Trace trace = this.currentTrace.get();
+				this.updateRootAsync(trace, trace, filterState.getText());
+			}
+		});
 		
 		this.showExpandedFormulasButton.selectedProperty().addListener((o, from, to) -> {
 			final FontAwesome.Glyph glyph;
