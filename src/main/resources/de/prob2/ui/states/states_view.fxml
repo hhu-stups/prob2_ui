@@ -35,9 +35,9 @@
 		</HBox>
 		<TreeTableView fx:id="tv" VBox.vgrow="ALWAYS" showRoot="false">
 			<columns>
-				<TreeTableColumn fx:id="tvName" id="name" editable="false" minWidth="80.0" prefWidth="160" sortable="false" text="%states.statesView.columns.name" />
-				<TreeTableColumn fx:id="tvValue" id="value" editable="false" minWidth="80.0" prefWidth="160" sortable="false" text="%states.statesView.columns.value" />
-				<TreeTableColumn fx:id="tvPreviousValue" id="previousValue" editable="false" minWidth="80.0" prefWidth="160" sortable="false" text="%states.statesView.columns.previousValue" />
+				<TreeTableColumn fx:id="tvName" id="name" editable="false" minWidth="80.0" prefWidth="160" sortable="true" text="%states.statesView.columns.name" />
+				<TreeTableColumn fx:id="tvValue" id="value" editable="false" minWidth="80.0" prefWidth="160" sortable="true" text="%states.statesView.columns.value" />
+				<TreeTableColumn fx:id="tvPreviousValue" id="previousValue" editable="false" minWidth="80.0" prefWidth="160" sortable="true" text="%states.statesView.columns.previousValue" />
 			</columns>
 			<placeholder>
 				<Label text="%common.noModelLoaded"/>
