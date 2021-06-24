@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -166,6 +167,9 @@ public final class StatesView extends StackPane {
 		this.tvName.setCellValueFactory(data -> data.getValue().valueProperty());
 		this.tvValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "currentValue"));
 		this.tvPreviousValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "previousValue"));
+
+		this.tvName.setComparator(Comparator.comparing(StateItem::getLabel));
+		// tvValue and tvPreviousValue are sorted by their string form (BVisual2Value.toString).
 
 		this.tv.setRoot(createRootItem());
 
