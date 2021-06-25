@@ -89,11 +89,13 @@ public class TraceChecker implements ITraceChecker {
 		replayThread.start();
 	}
 
+	@Override
 	public void updateProgress(double value, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
 		Platform.runLater(() -> replayTrace.setProgress(value));
 	}
 
+	@Override
 	public void setResult(boolean success, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
 		Platform.runLater(() -> {
@@ -106,10 +108,12 @@ public class TraceChecker implements ITraceChecker {
 		});
 	}
 
+	@Override
 	public void afterInterrupt() {
 		currentJobThreads.remove(Thread.currentThread());
 	}
 
+	@Override
 	public void showError(TraceReplay.TraceReplayError errorType, Map<String, Object> replayInformation) {
 		switch(errorType) {
 			case COMMAND: {
