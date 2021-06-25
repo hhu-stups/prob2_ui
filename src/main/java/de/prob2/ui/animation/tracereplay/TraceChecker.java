@@ -43,16 +43,13 @@ public class TraceChecker implements ITraceChecker {
 	private final StageManager stageManager;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
-	private final CurrentProject currentProject;
 
 	@Inject
-	private TraceChecker(final CurrentTrace currentTrace,  final CurrentProject currentProject,
-						 final Injector injector, final StageManager stageManager,
+	private TraceChecker(final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager,
 						 final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
-		this.currentProject = currentProject;
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
