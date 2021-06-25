@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -90,6 +91,7 @@ public final class PreferencesStage extends Stage {
 	private final GlobalPreferences globalPreferences;
 	private final ProBPreferences globalProBPrefs;
 	private final Config config;
+	private final StateSpace emptyStateSpace;
 
 	@Inject
 	private PreferencesStage(
@@ -101,7 +103,6 @@ public final class PreferencesStage extends Stage {
 		final CurrentProject currentProject,
 		final UIState uiState,
 		final GlobalPreferences globalPreferences,
-		final ProBPreferences globalProBPrefs,
 		final Config config,
 		final MachineLoader machineLoader
 	) {
@@ -113,9 +114,13 @@ public final class PreferencesStage extends Stage {
 		this.currentProject = currentProject;
 		this.uiState = uiState;
 		this.globalPreferences = globalPreferences;
-		this.globalProBPrefs = globalProBPrefs;
+		this.emptyStateSpace = machineLoader.getEmptyStateSpace();
+		this.globalProBPrefs = new ProBPreferences(this.emptyStateSpace.getPreferenceInformation());
 		this.config = config;
-		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace());
+		
+		// Update globalProBPrefs when globalPreferences changes
+		this.globalPreferences.addListener((o, from, to) -> this.globalProBPrefs.setCurrentPreferenceValues(to));
+		this.globalProBPrefs.setCurrentPreferenceValues(this.globalPreferences);
 
 		stageManager.loadFXML(this, "preferences_stage.fxml");
 	}
@@ -165,25 +170,6 @@ public final class PreferencesStage extends Stage {
 			}
 		});
 		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
-		
-		// Global Preferences
-		this.globalPreferences.addListener((InvalidationListener) observable -> {
-			for (final Map.Entry<String, String> entry : this.globalPreferences.entrySet()) {
-				this.globalProBPrefs.setPreferenceValue(entry.getKey(), entry.getValue());
-			}
-			
-			try {
-				this.globalProBPrefs.apply();
-			} catch (final ProBError e) {
-				LOGGER.warn("Ignoring global preference changes because of exception", e);
-			}
-		});
-		this.globalPreferences.addListener((MapChangeListener<String, String>) change -> {
-			if (change.wasRemoved() && !change.wasAdded()) {
-				this.globalProBPrefs.setPreferenceValue(change.getKey(), this.globalProBPrefs.getPreferences().get(change.getKey()).defaultValue);
-				this.globalProBPrefs.apply();
-			}
-		});
 
 		this.globalPrefsView.setPreferences(this.globalProBPrefs);
 
@@ -242,10 +228,10 @@ public final class PreferencesStage extends Stage {
 	
 	@FXML
 	private void handleApply() {
-		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getChangedPreferences());
+		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getPreferenceChanges());
 		
 		try {
-			this.globalProBPrefs.apply();
+			this.emptyStateSpace.changePreferences(changed);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content");
@@ -253,7 +239,9 @@ public final class PreferencesStage extends Stage {
 			alert.show();
 		}
 		
-		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
+		this.globalProBPrefs.apply();
+		
+		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferenceInfos();
 		for (final Map.Entry<String, String> entry : changed.entrySet()) {
 			if (defaults.get(entry.getKey()).defaultValue.equals(entry.getValue())) {
 				this.globalPreferences.remove(entry.getKey());

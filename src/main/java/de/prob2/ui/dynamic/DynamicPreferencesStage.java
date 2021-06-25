@@ -1,12 +1,14 @@
 package de.prob2.ui.dynamic;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
@@ -14,7 +16,6 @@ import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -40,18 +41,17 @@ public class DynamicPreferencesStage extends Stage {
 	protected PreferencesView preferences;
 	
 	private final StageManager stageManager;
-	private final ProBPreferences proBPreferences;
 	private final GlobalPreferences globalPreferences;
+	private final CurrentTrace currentTrace;
 	
 	private DynamicCommandStage<?> toRefresh;
 	
 	@Inject
-	private DynamicPreferencesStage(final StageManager stageManager, final ProBPreferences proBPreferences, final GlobalPreferences globalPreferences, final CurrentTrace currentTrace) {
+	private DynamicPreferencesStage(final StageManager stageManager, final GlobalPreferences globalPreferences, final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
-		this.proBPreferences = proBPreferences;
 		this.globalPreferences = globalPreferences;
+		this.currentTrace = currentTrace;
 		
-		this.proBPreferences.stateSpaceProperty().bind(currentTrace.stateSpaceProperty());
 		stageManager.loadFXML(this, "dynamic_preferences_view.fxml");
 	}
 	
@@ -61,8 +61,6 @@ public class DynamicPreferencesStage extends Stage {
 		resetButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		cancelButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		okButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-		
-		this.preferences.setPreferences(this.proBPreferences);
 	}
 	
 	public void setToRefresh(final DynamicCommandStage<?> toRefresh) {
@@ -70,27 +68,32 @@ public class DynamicPreferencesStage extends Stage {
 	}
 	
 	public void setIncludedPreferenceNames(final Collection<String> preferenceNames) {
-		this.proBPreferences.setIncludedPreferenceNames(FXCollections.observableSet(new HashSet<>(preferenceNames)));
+		final List<ProBPreference> visiblePreferences = new ArrayList<>(this.currentTrace.getStateSpace().getPreferenceInformation());
+		visiblePreferences.removeIf(pref -> !preferenceNames.contains(pref.name));
+		final ProBPreferences proBPreferences = new ProBPreferences(visiblePreferences);
+		this.globalPreferences.addListener((o, from, to) -> proBPreferences.setCurrentPreferenceValues(to));
+		proBPreferences.setCurrentPreferenceValues(this.globalPreferences);
+		this.preferences.setPreferences(proBPreferences);
 	}
 	
 	@FXML
 	private void handleRestoreDefaults() {
-		this.proBPreferences.restoreDefaults();
+		this.preferences.getPreferences().restoreDefaults();
 		this.preferences.refresh();
 	}
 	
 	@FXML
 	private void handleCancel() {
-		this.proBPreferences.rollback();
+		this.preferences.getPreferences().rollback();
 		this.preferences.refresh();
 		this.close();
 	}
 	
 	@FXML
 	private void handleOk() {
-		final Map<String, String> changedPreferences = new HashMap<>(this.proBPreferences.getChangedPreferences());
+		final Map<String, String> changedPreferences = new HashMap<>(this.preferences.getPreferences().getPreferenceChanges());
 		try {
-			this.proBPreferences.apply();
+			this.currentTrace.getStateSpace().changePreferences(changedPreferences);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content");
@@ -99,6 +102,7 @@ public class DynamicPreferencesStage extends Stage {
 			return;
 		}
 		this.globalPreferences.get().putAll(changedPreferences);
+		this.preferences.getPreferences().apply();
 		this.toRefresh.refresh();
 		this.close();
 	}

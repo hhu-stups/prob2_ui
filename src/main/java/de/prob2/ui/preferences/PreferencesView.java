@@ -87,20 +87,20 @@ public final class PreferencesView extends BorderPane {
 		
 		this.preferencesProperty().addListener((observable, from, to) -> {
 			if (from != null) {
-				from.stateSpaceProperty().removeListener(this.refreshIL);
-				from.includedPreferenceNamesProperty().removeListener(this.refreshIL);
+				from.getCurrentPreferenceValues().removeListener(this.refreshIL);
+				from.getPreferenceChanges().removeListener(this.refreshIL);
 			}
 			
 			if (to != null) {
-				to.stateSpaceProperty().addListener(this.refreshIL);
-				to.includedPreferenceNamesProperty().addListener(this.refreshIL);
+				to.getCurrentPreferenceValues().addListener(this.refreshIL);
+				to.getPreferenceChanges().addListener(this.refreshIL);
 			}
 			this.refresh();
 		});
 	}
 	
 	public void refresh() {
-		if (this.getPreferences() == null || !this.getPreferences().hasStateSpace()) {
+		if (this.getPreferences() == null) {
 			this.tv.getRoot().getChildren().clear();
 			return;
 		}
@@ -132,7 +132,7 @@ public final class PreferencesView extends BorderPane {
 			category.getChildren().removeIf(item ->
 				(!searchPattern.matcher(item.getValue().getName()).find()
 					&& !searchPattern.matcher(item.getValue().getDescription()).find())
-				|| !this.getPreferences().getPreferences().containsKey(item.getValue().getName())
+				|| !this.getPreferences().getPreferenceInfos().containsKey(item.getValue().getName())
 			);
 			if (category.getChildren().isEmpty()) {
 				// Category has no visible preferences, remove it
@@ -148,7 +148,7 @@ public final class PreferencesView extends BorderPane {
 	}
 
 	private void generateTreeItems(final Pattern searchPattern) {
-		for (ProBPreference pref : this.getPreferences().getPreferences().values()) {
+		for (ProBPreference pref : this.getPreferences().getPreferenceInfos().values()) {
 			if (!searchPattern.matcher(pref.name).find() && !searchPattern.matcher(pref.description).find()) {
 				// Preference's name and description don't match search, don't add it
 				continue;
@@ -173,7 +173,7 @@ public final class PreferencesView extends BorderPane {
 					return ti;
 				});
 
-			item.setValue(new PrefTreeItem.Preference(pref, this.getPreferences().getPreferenceValue(pref.name)));
+			item.setValue(new PrefTreeItem.Preference(pref, this.getPreferences().getPreferenceValueWithChanges(pref.name)));
 		}
 	}
 }

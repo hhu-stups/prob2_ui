@@ -32,7 +32,7 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	}
 	
 	private void setPreferenceValue(final String name, final String newValue) {
-		this.preferences.get().setPreferenceValue(name, newValue);
+		this.preferences.get().changePreference(name, newValue);
 	}
 	
 	private void changeToSpinner(final PrefTreeItem.Preference pti, final int min, final int max) {
