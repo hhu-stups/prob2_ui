@@ -226,6 +226,14 @@ public final class StatesView extends StackPane {
 				sb.append(String.format(bundle.getString("states.statesView.tooltip.elementChildren"), childrenCount));
 			}
 		}
+		if (sb.length() > 0) {
+			sb.append('\n');
+		}
+
+		final ExpandedFormula.ProofInfo proofInfo = item.getProofInfo();
+		if (proofInfo != null) {
+			sb.append(String.format(bundle.getString("states.statesView.tooltip.proofInfo"), proofInfo.getProvenCount(), proofInfo.getUnprovenCount(), proofInfo.getUnchangedCount()));
+		}
 
 		if (sb.length() > 0) {
 			return new Tooltip(sb.toString());

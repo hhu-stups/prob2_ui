@@ -69,6 +69,10 @@ public final class StateItem {
 		return this.getStructure().getDescription();
 	}
 
+	public ExpandedFormula.ProofInfo getProofInfo() {
+		return this.getStructure().getProofInfo();
+	}
+
 	public String getFunctorSymbol() {
 		return this.getStructure().getFunctorSymbol();
 	}
