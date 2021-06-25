@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -209,7 +210,10 @@ public class TraceViewHandler {
 
 	public void reset() {
 		traceChecker.cancelReplay();
-		traces.forEach(trace -> trace.setChecked(Checked.NOT_CHECKED));
+		traces.forEach(trace -> {
+			trace.setChecked(Checked.NOT_CHECKED);
+			trace.setPostconditionStatus(new ArrayList<>());
+		});
 	}
 
 	public BooleanProperty getNoTraces() {
