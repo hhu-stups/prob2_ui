@@ -11,8 +11,6 @@ import java.util.Optional;
 
 import com.google.inject.Inject;
 
-import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
@@ -35,10 +33,7 @@ public final class ExternalEditor {
 	}
 
 	private Optional<Path> getExternalEditorPath() {
-		final StateSpace stateSpace = machineLoader.getActiveStateSpace();
-		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
-		stateSpace.execute(cmd);
-		final String editorPath = cmd.getValue();
+		final String editorPath = machineLoader.getActiveStateSpace().getCurrentPreference("EDITOR_GUI");
 		return editorPath.isEmpty() ? Optional.empty() : Optional.of(Paths.get(editorPath));
 	}
 
