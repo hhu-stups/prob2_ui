@@ -3,15 +3,19 @@ package de.prob2.ui.sharedviews;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.DisablePropertyController;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
@@ -34,14 +38,21 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 @Singleton
 public class TraceViewHandler {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TraceViewHandler.class);
 
 	private final TraceChecker traceChecker;
 
@@ -51,6 +62,8 @@ public class TraceViewHandler {
 
 	private final ResourceBundle bundle;
 
+	private final StageManager stageManager;
+
 	private final ListProperty<ReplayTrace> traces;
 
 	private final Map<Machine, ListProperty<ReplayTrace>> machinesToTraces;
@@ -58,11 +71,13 @@ public class TraceViewHandler {
 	private final BooleanProperty noTraces;
 
 	@Inject
-	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
+	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
+							final StageManager stageManager) {
 		this.traceChecker = traceChecker;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.bundle = bundle;
+		this.stageManager = stageManager;
 		this.traces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
 		this.machinesToTraces = new HashMap<>();
 		this.noTraces = new SimpleBooleanProperty();
@@ -167,6 +182,7 @@ public class TraceViewHandler {
 		replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
 		addTestsItem.setOnAction(event -> {
 			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
+			traceTestView.setTraceViewHandler(this);
 			traceTestView.loadReplayTrace(row.getItem());
 			traceTestView.show();
 		});
@@ -265,25 +281,29 @@ public class TraceViewHandler {
 		return machinesToTraces;
 	}
 
-	private void saveTraces(Project project) {
-		/*Path projectLocation = project.getLocation();
+	public void saveTraces(Project project) {
+		Path projectLocation = project.getLocation();
 		for(Machine machine : project.getMachines()) {
-			for (ReplayTrace replayTrace : injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(machine)) {
-				final Path tempLocation = projectLocation.resolveSibling(replayTrace.getLocation().getFileName() + ".tmp");
-				try {
-					injector.getInstance(TraceFileHandler.class).save(replayTrace.getTraceJsonFile(), tempLocation, "User");
-					Files.move(tempLocation, replayTrace.getLocation(), StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException | RuntimeException exc) {
-					LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
-					stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
+			for (ReplayTrace replayTrace : this.getMachinesToTraces().get(machine)) {
+				if(replayTrace.isChanged()) {
+					final Path tempLocation = projectLocation.resolve(replayTrace.getLocation() + ".tmp");
 					try {
-						Files.deleteIfExists(tempLocation);
-					} catch (IOException e) {
-						LOGGER.warn("Failed to delete temporary trace file after project save error", e);
+						TraceJsonFile traceJsonFile = new TraceJsonFile(replayTrace.getPersistentTrace(), injector.getInstance(CurrentTrace.class).getStateSpace().getLoadedMachine(), TraceJsonFile.metadataBuilder().build());
+						injector.getInstance(TraceFileHandler.class).save(traceJsonFile, tempLocation);
+						Files.move(tempLocation, projectLocation.resolve(replayTrace.getLocation()), StandardCopyOption.REPLACE_EXISTING);
+						replayTrace.setChanged(false);
+					} catch (IOException | RuntimeException exc) {
+						LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
+						stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
+						try {
+							Files.deleteIfExists(tempLocation);
+						} catch (IOException e) {
+							LOGGER.warn("Failed to delete temporary trace file after project save error", e);
+						}
+						return;
 					}
-					return;
 				}
 			}
-		}*/
+		}
 	}
 }

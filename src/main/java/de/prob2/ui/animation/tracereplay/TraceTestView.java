@@ -158,6 +158,8 @@ public class TraceTestView extends Stage {
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
 
+	private TraceViewHandler traceViewHandler;
+
 	private ChangeListener<Boolean> changedListener;
 
 	@Inject
@@ -209,8 +211,6 @@ public class TraceTestView extends Stage {
 			transition.getPostconditions().clear();
 			transition.getPostconditions().addAll(postconditions.get(i));
 		}
-		// TODO: Why is BooleanProperty not triggered?
-		currentProject.setSaved(false);
 		replayTrace.setChanged(true);
 		this.close();
 	}
@@ -223,6 +223,7 @@ public class TraceTestView extends Stage {
 	}
 
 
-
-
+	public void setTraceViewHandler(TraceViewHandler traceViewHandler) {
+		this.traceViewHandler = traceViewHandler;
+	}
 }

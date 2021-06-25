@@ -186,6 +186,8 @@ public class ProjectManager {
 			}
 		}
 
+		injector.getInstance(TraceViewHandler.class).saveTraces(currentProject.get());
+
 		// Change project name to new name selected by user (if necessary)
 		// and update the metadata (replacing the metadata that was previously loaded from the file).
 		final Project updatedProject = new Project(
@@ -221,9 +223,6 @@ public class ProjectManager {
 		addToRecentProjects(location);
 		currentProject.setSaved(true);
 		currentProject.get().resetChanged();
-		for(ReplayTrace replayTrace : injector.getInstance(TraceViewHandler.class).getTraces()) {
-			replayTrace.setChanged(false);
-		}
 	}
 
 	private Project loadProject(Path path) {
@@ -236,9 +235,6 @@ public class ProjectManager {
 			// which makes the project savedness tracking behave incorrectly.
 			// To fix this, we forcibly mark the project as unchanged again after it is loaded.
 			project.resetChanged();
-			for(ReplayTrace replayTrace : injector.getInstance(TraceViewHandler.class).getTraces()) {
-				replayTrace.setChanged(false);
-			}
 			return project;
 		} catch (IOException | JsonConversionException exc) {
 			LOGGER.warn("Failed to open project file", exc);
