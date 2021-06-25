@@ -35,7 +35,7 @@ public final class ExternalEditor {
 	}
 
 	private Optional<Path> getExternalEditorPath() {
-		final StateSpace stateSpace = machineLoader.getEmptyStateSpace();
+		final StateSpace stateSpace = machineLoader.getActiveStateSpace();
 		final GetPreferenceCommand cmd = new GetPreferenceCommand("EDITOR_GUI");
 		stateSpace.execute(cmd);
 		final String editorPath = cmd.getValue();

@@ -89,7 +89,7 @@ public final class PreferencesStage extends Stage {
 	private final GlobalPreferences globalPreferences;
 	private final PreferencesChangeState globalPrefsChangeState;
 	private final Config config;
-	private final StateSpace emptyStateSpace;
+	private final MachineLoader machineLoader;
 
 	@Inject
 	private PreferencesStage(
@@ -112,8 +112,8 @@ public final class PreferencesStage extends Stage {
 		this.currentProject = currentProject;
 		this.uiState = uiState;
 		this.globalPreferences = globalPreferences;
-		this.emptyStateSpace = machineLoader.getEmptyStateSpace();
-		this.globalPrefsChangeState = new PreferencesChangeState(this.emptyStateSpace.getPreferenceInformation());
+		this.machineLoader = machineLoader;
+		this.globalPrefsChangeState = new PreferencesChangeState(machineLoader.getActiveStateSpace().getPreferenceInformation());
 		this.config = config;
 		
 		// Update globalPrefsChangeState when globalPreferences changes
@@ -229,7 +229,7 @@ public final class PreferencesStage extends Stage {
 		final Map<String, String> changed = new HashMap<>(this.globalPrefsChangeState.getPreferenceChanges());
 		
 		try {
-			this.emptyStateSpace.changePreferences(changed);
+			this.machineLoader.getActiveStateSpace().changePreferences(changed);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content");

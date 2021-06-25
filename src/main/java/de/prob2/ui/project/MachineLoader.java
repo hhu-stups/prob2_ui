@@ -55,8 +55,7 @@ public class MachineLoader {
 
 	private final ReadOnlyBooleanWrapper loading;
 	private final Object openLock;
-	private final Object emptyStateSpaceLock;
-	private StateSpace emptyStateSpace;
+	private final Object currentAnimatorLock;
 	private ReusableAnimator currentAnimator;
 
 	@Inject
@@ -81,8 +80,7 @@ public class MachineLoader {
 
 		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
 		this.openLock = new Object();
-		this.emptyStateSpaceLock = new Object();
-		this.emptyStateSpace = null;
+		this.currentAnimatorLock = new Object();
 		this.currentAnimator = null;
 	}
 
@@ -94,24 +92,55 @@ public class MachineLoader {
 		return this.loadingProperty().get();
 	}
 
+	/**
+	 * Get the single shared animator instance used by the UI.
+	 * If no shared animator instance has been started yet or it is no longer working,
+	 * a new animator is started and saved as the shared animator.
+	 * 
+	 * @return the single shared animator instance
+	 */
 	private ReusableAnimator getAnimator() {
-		if (this.currentAnimator != null) {
-			// Check that the existing animator is still working,
-			// by executing a command that does nothing and looking for errors.
-			try {
-				this.currentAnimator.execute(new GetVersionCommand());
-			} catch (CliError | ProBError e) {
-				LOGGER.warn("Main animator is no longer working - restarting", e);
-				this.currentAnimator.kill();
-				this.currentAnimator = null;
+		synchronized (this.currentAnimatorLock) {
+			if (this.currentAnimator != null) {
+				// Check that the existing animator is still working,
+				// by executing a command that does nothing and looking for errors.
+				try {
+					this.currentAnimator.execute(new GetVersionCommand());
+				} catch (CliError | ProBError e) {
+					LOGGER.warn("Main animator is no longer working - restarting", e);
+					final StateSpace currentStateSpace = this.currentAnimator.getCurrentStateSpace();
+					if (currentStateSpace != null) {
+						currentStateSpace.kill();
+					}
+					this.currentAnimator.kill();
+					this.currentAnimator = null;
+				}
 			}
+			if (this.currentAnimator == null) {
+				// Create a new animator if there is no existing one (or it was not working anymore).
+				LOGGER.info("Starting a new main animator");
+				this.currentAnimator = injector.getInstance(ReusableAnimator.class);
+			}
+			return this.currentAnimator;
 		}
-		if (this.currentAnimator == null) {
-			// Create a new animator if there is no existing one (or it was not working anymore).
-			LOGGER.info("Starting a new main animator");
-			this.currentAnimator = injector.getInstance(ReusableAnimator.class);
+	}
+
+	/**
+	 * Create a new state space based on the shared animator.
+	 * The shared animator is automatically started if necessary (see {@link #getAnimator()}).
+	 * If another state space based on the shared animator is still running,
+	 * it is automatically killed before the new one is created.
+	 * 
+	 * @return a new state space based on the shared animator
+	 */
+	private StateSpace createNewStateSpace() {
+		synchronized (this.currentAnimatorLock) {
+			final StateSpace currentStateSpace = this.getAnimator().getCurrentStateSpace();
+			if (currentStateSpace != null) {
+				currentStateSpace.kill();
+			}
+			return this.getAnimator().createStateSpace();
 		}
-		return this.currentAnimator;
 	}
 
 	private void initStateSpace(final StateSpace stateSpace, final Map<String, String> preferences) {
@@ -128,31 +157,47 @@ public class MachineLoader {
 		stateSpace.changePreferences(preferences);
 	}
 
-	public StateSpace getEmptyStateSpace() {
-		synchronized (this.emptyStateSpaceLock) {
-			if (this.emptyStateSpace == null) {
-				this.emptyStateSpace = injector.getInstance(StateSpace.class);
-				initStateSpace(this.emptyStateSpace, this.globalPreferences);
+	/**
+	 * <p>
+	 * Get the shared animator's currently active state space,
+	 * or if none is active,
+	 * a new state space with an empty machine.
+	 * The shared animator is automatically started if necessary (see {@link #getAnimator()}).
+	 * </p>
+	 * <p>
+	 * This method is meant for use by code that needs an animator in which it can execute commands or evaluate formulas,
+	 * but doesn't care about the loaded machine or other animator state.
+	 * This is useful for getting constant information from probcli,
+	 * such as the version or preference information.
+	 * </p>
+	 * 
+	 * @return the shared animator's currently active state space, or an empty one
+	 */
+	public StateSpace getActiveStateSpace() {
+		synchronized (this.currentAnimatorLock) {
+			final StateSpace currentStateSpace = this.getAnimator().getCurrentStateSpace();
+			if (currentStateSpace == null || currentStateSpace.isKilled()) {
+				final StateSpace stateSpace = this.createNewStateSpace();
+				initStateSpace(stateSpace, this.globalPreferences);
 				injector.getInstance(ClassicalBFactory.class)
 					.create("empty", "MACHINE empty END")
-					.loadIntoStateSpace(this.emptyStateSpace);
+					.loadIntoStateSpace(stateSpace);
 				if (Thread.currentThread().isInterrupted()) {
-					this.emptyStateSpace.kill();
+					stateSpace.kill();
 				}
 			}
+			return currentStateSpace;
 		}
-		return this.emptyStateSpace;
 	}
 	
 	/**
-	 * Load the shared animators (probcli instances) used by the UI.
-	 * This method is used to load the animators in the background during UI startup,
+	 * Load the shared animator (probcli instance) used by the UI.
+	 * This method is used to load the animator in the background during UI startup,
 	 * so that the user can use the console or load machines more quickly
-	 * than if the animators were started on demand.
+	 * than if the animator would be started on demand.
 	 */
 	public void preloadAnimators() {
-		this.getEmptyStateSpace();
-		this.getAnimator();
+		this.getActiveStateSpace();
 	}
 
 	public void loadAsync(Machine machine, Map<String, String> pref) {
@@ -207,14 +252,11 @@ public class MachineLoader {
 			return;
 		}
 
-		setLoadingStatus(StatusBar.LoadingStatus.STARTING_PROB_CORE);
-		final ReusableAnimator animator = this.getAnimator();
+		setLoadingStatus(StatusBar.LoadingStatus.STARTING_ANIMATOR);
+		final StateSpace stateSpace = this.createNewStateSpace();
 		if (Thread.currentThread().isInterrupted()) {
 			return;
 		}
-
-		setLoadingStatus(StatusBar.LoadingStatus.PREPARING_ANIMATOR);
-		final StateSpace stateSpace = animator.createStateSpace();
 		try {
 			final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 			allPrefs.putAll(prefs);

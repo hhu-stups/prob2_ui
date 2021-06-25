@@ -46,7 +46,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 
-		this.state = new PreferencesChangeState(machineLoader.getEmptyStateSpace().getPreferenceInformation());
+		this.state = new PreferencesChangeState(machineLoader.getActiveStateSpace().getPreferenceInformation());
 		this.state.setCurrentPreferenceValues(globalPreferences);
 
 		this.setResultConverter(type -> {
