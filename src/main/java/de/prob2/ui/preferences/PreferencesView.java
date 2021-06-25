@@ -39,28 +39,28 @@ public final class PreferencesView extends BorderPane {
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML private TreeTableColumn<PrefTreeItem, String> tvDescription;
 	
-	private final ObjectProperty<ProBPreferences> preferences;
+	private final ObjectProperty<PreferencesChangeState> state;
 	private final InvalidationListener refreshIL;
 	
 	@Inject
 	private PreferencesView(final StageManager stageManager) {
 		super();
 		
-		this.preferences = new SimpleObjectProperty<>(this, "preferences", null);
+		this.state = new SimpleObjectProperty<>(this, "preferences", null);
 		this.refreshIL = o -> this.refresh();
 		stageManager.loadFXML(this, "preferences_view.fxml");
 	}
 	
-	public ObjectProperty<ProBPreferences> preferencesProperty() {
-		return this.preferences;
+	public ObjectProperty<PreferencesChangeState> stateProperty() {
+		return this.state;
 	}
 	
-	public ProBPreferences getPreferences() {
-		return this.preferencesProperty().get();
+	public PreferencesChangeState getState() {
+		return this.stateProperty().get();
 	}
 	
-	public void setPreferences(final ProBPreferences preferences) {
-		this.preferencesProperty().set(preferences);
+	public void setState(final PreferencesChangeState state) {
+		this.stateProperty().set(state);
 	}
 	
 	@FXML
@@ -76,7 +76,7 @@ public final class PreferencesView extends BorderPane {
 			features.getValue().valueProperty()
 		));
 		
-		tvValue.setCellFactory(col -> new PreferenceValueCell(this.preferencesProperty()));
+		tvValue.setCellFactory(col -> new PreferenceValueCell(this.stateProperty()));
 		tvValue.setCellValueFactory(features -> features.getValue().valueProperty());
 
 		tvDefaultValue.setCellValueFactory(new TreeItemPropertyValueFactory<>("defaultValue"));
@@ -85,7 +85,7 @@ public final class PreferencesView extends BorderPane {
 		
 		tv.getRoot().setValue(new PrefTreeItem.Category("Preferences (this should be invisible)"));
 		
-		this.preferencesProperty().addListener((observable, from, to) -> {
+		this.stateProperty().addListener((observable, from, to) -> {
 			if (from != null) {
 				from.getCurrentPreferenceValues().removeListener(this.refreshIL);
 				from.getPreferenceChanges().removeListener(this.refreshIL);
@@ -100,7 +100,7 @@ public final class PreferencesView extends BorderPane {
 	}
 	
 	public void refresh() {
-		if (this.getPreferences() == null) {
+		if (this.getState() == null) {
 			this.tv.getRoot().getChildren().clear();
 			return;
 		}
@@ -128,11 +128,11 @@ public final class PreferencesView extends BorderPane {
 		
 		for (Iterator<TreeItem<PrefTreeItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext();) {
 			final TreeItem<PrefTreeItem> category = itcat.next();
-			// Remove all items whose name and description don't match the search or which are no longer present in the ProBPreferences object
+			// Remove all items whose name and description don't match the search or which are no longer present in the PreferencesChangeState object
 			category.getChildren().removeIf(item ->
 				(!searchPattern.matcher(item.getValue().getName()).find()
 					&& !searchPattern.matcher(item.getValue().getDescription()).find())
-				|| !this.getPreferences().getPreferenceInfos().containsKey(item.getValue().getName())
+				|| !this.getState().getPreferenceInfos().containsKey(item.getValue().getName())
 			);
 			if (category.getChildren().isEmpty()) {
 				// Category has no visible preferences, remove it
@@ -148,7 +148,7 @@ public final class PreferencesView extends BorderPane {
 	}
 
 	private void generateTreeItems(final Pattern searchPattern) {
-		for (ProBPreference pref : this.getPreferences().getPreferenceInfos().values()) {
+		for (ProBPreference pref : this.getState().getPreferenceInfos().values()) {
 			if (!searchPattern.matcher(pref.name).find() && !searchPattern.matcher(pref.description).find()) {
 				// Preference's name and description don't match search, don't add it
 				continue;
@@ -173,7 +173,7 @@ public final class PreferencesView extends BorderPane {
 					return ti;
 				});
 
-			item.setValue(new PrefTreeItem.Preference(pref, this.getPreferences().getPreferenceValueWithChanges(pref.name)));
+			item.setValue(new PrefTreeItem.Preference(pref, this.getState().getPreferenceValueWithChanges(pref.name)));
 		}
 	}
 }

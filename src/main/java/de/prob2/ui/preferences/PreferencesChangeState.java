@@ -22,7 +22,7 @@ import javafx.collections.ObservableMap;
  * the current values of these preferences,
  * and the changed values entered by the user.
  */
-public final class ProBPreferences {
+public final class PreferencesChangeState {
 	private final Map<String, ProBPreference> preferenceInfos;
 	private final Map<String, String> defaultPreferenceValues;
 	private final ObservableMap<String, String> currentPreferenceValues;
@@ -34,7 +34,7 @@ public final class ProBPreferences {
 	 * 
 	 * @param preferenceInfos the preferences to show in the view
 	 */
-	public ProBPreferences(final Collection<ProBPreference> preferenceInfos) {
+	public PreferencesChangeState(final Collection<ProBPreference> preferenceInfos) {
 		this.preferenceInfos = new HashMap<>();
 		for (final ProBPreference pref : preferenceInfos) {
 			this.preferenceInfos.put(pref.name, pref);

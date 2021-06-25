@@ -13,7 +13,7 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesView;
-import de.prob2.ui.preferences.ProBPreferences;
+import de.prob2.ui.preferences.PreferencesChangeState;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
@@ -70,28 +70,28 @@ public class DynamicPreferencesStage extends Stage {
 	public void setIncludedPreferenceNames(final Collection<String> preferenceNames) {
 		final List<ProBPreference> visiblePreferences = new ArrayList<>(this.currentTrace.getStateSpace().getPreferenceInformation());
 		visiblePreferences.removeIf(pref -> !preferenceNames.contains(pref.name));
-		final ProBPreferences proBPreferences = new ProBPreferences(visiblePreferences);
-		this.globalPreferences.addListener((o, from, to) -> proBPreferences.setCurrentPreferenceValues(to));
-		proBPreferences.setCurrentPreferenceValues(this.globalPreferences);
-		this.preferences.setPreferences(proBPreferences);
+		final PreferencesChangeState state = new PreferencesChangeState(visiblePreferences);
+		this.globalPreferences.addListener((o, from, to) -> state.setCurrentPreferenceValues(to));
+		state.setCurrentPreferenceValues(this.globalPreferences);
+		this.preferences.setState(state);
 	}
 	
 	@FXML
 	private void handleRestoreDefaults() {
-		this.preferences.getPreferences().restoreDefaults();
+		this.preferences.getState().restoreDefaults();
 		this.preferences.refresh();
 	}
 	
 	@FXML
 	private void handleCancel() {
-		this.preferences.getPreferences().rollback();
+		this.preferences.getState().rollback();
 		this.preferences.refresh();
 		this.close();
 	}
 	
 	@FXML
 	private void handleOk() {
-		final Map<String, String> changedPreferences = new HashMap<>(this.preferences.getPreferences().getPreferenceChanges());
+		final Map<String, String> changedPreferences = new HashMap<>(this.preferences.getState().getPreferenceChanges());
 		try {
 			this.currentTrace.getStateSpace().changePreferences(changedPreferences);
 		} catch (final ProBError e) {
@@ -102,7 +102,7 @@ public class DynamicPreferencesStage extends Stage {
 			return;
 		}
 		this.globalPreferences.get().putAll(changedPreferences);
-		this.preferences.getPreferences().apply();
+		this.preferences.getState().apply();
 		this.toRefresh.refresh();
 		this.close();
 	}

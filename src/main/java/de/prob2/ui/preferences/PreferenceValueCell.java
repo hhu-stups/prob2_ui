@@ -23,16 +23,16 @@ import org.slf4j.LoggerFactory;
 class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferenceValueCell.class);
 	
-	private final ReadOnlyObjectProperty<ProBPreferences> preferences;
+	private final ReadOnlyObjectProperty<PreferencesChangeState> state;
 	
-	PreferenceValueCell(final ReadOnlyObjectProperty<ProBPreferences> preferences) {
+	PreferenceValueCell(final ReadOnlyObjectProperty<PreferencesChangeState> state) {
 		super();
 		
-		this.preferences = preferences;
+		this.state = state;
 	}
 	
 	private void setPreferenceValue(final String name, final String newValue) {
-		this.preferences.get().changePreference(name, newValue);
+		this.state.get().changePreference(name, newValue);
 	}
 	
 	private void changeToSpinner(final PrefTreeItem.Preference pti, final int min, final int max) {

@@ -29,8 +29,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.ProjectManager;
 
-import javafx.beans.InvalidationListener;
-import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -89,7 +87,7 @@ public final class PreferencesStage extends Stage {
 	private final CurrentProject currentProject;
 	private final UIState uiState;
 	private final GlobalPreferences globalPreferences;
-	private final ProBPreferences globalProBPrefs;
+	private final PreferencesChangeState globalPrefsChangeState;
 	private final Config config;
 	private final StateSpace emptyStateSpace;
 
@@ -115,12 +113,12 @@ public final class PreferencesStage extends Stage {
 		this.uiState = uiState;
 		this.globalPreferences = globalPreferences;
 		this.emptyStateSpace = machineLoader.getEmptyStateSpace();
-		this.globalProBPrefs = new ProBPreferences(this.emptyStateSpace.getPreferenceInformation());
+		this.globalPrefsChangeState = new PreferencesChangeState(this.emptyStateSpace.getPreferenceInformation());
 		this.config = config;
 		
-		// Update globalProBPrefs when globalPreferences changes
-		this.globalPreferences.addListener((o, from, to) -> this.globalProBPrefs.setCurrentPreferenceValues(to));
-		this.globalProBPrefs.setCurrentPreferenceValues(this.globalPreferences);
+		// Update globalPrefsChangeState when globalPreferences changes
+		this.globalPreferences.addListener((o, from, to) -> this.globalPrefsChangeState.setCurrentPreferenceValues(to));
+		this.globalPrefsChangeState.setCurrentPreferenceValues(this.globalPreferences);
 
 		stageManager.loadFXML(this, "preferences_stage.fxml");
 	}
@@ -171,11 +169,11 @@ public final class PreferencesStage extends Stage {
 		});
 		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
 
-		this.globalPrefsView.setPreferences(this.globalProBPrefs);
+		this.globalPrefsView.setState(this.globalPrefsChangeState);
 
-		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
-		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
-		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
+		this.undoButton.disableProperty().bind(this.globalPrefsChangeState.changesAppliedProperty());
+		this.applyWarning.visibleProperty().bind(this.globalPrefsChangeState.changesAppliedProperty().not());
+		this.applyButton.disableProperty().bind(this.globalPrefsChangeState.changesAppliedProperty());
 
 		// prevent text on buttons from being abbreviated
 		undoButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
@@ -216,19 +214,19 @@ public final class PreferencesStage extends Stage {
 
 	@FXML
 	private void handleUndoChanges() {
-		this.globalProBPrefs.rollback();
+		this.globalPrefsChangeState.rollback();
 		this.globalPrefsView.refresh();
 	}
 
 	@FXML
 	private void handleRestoreDefaults() {
-		this.globalProBPrefs.restoreDefaults();
+		this.globalPrefsChangeState.restoreDefaults();
 		this.globalPrefsView.refresh();
 	}
 	
 	@FXML
 	private void handleApply() {
-		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getPreferenceChanges());
+		final Map<String, String> changed = new HashMap<>(this.globalPrefsChangeState.getPreferenceChanges());
 		
 		try {
 			this.emptyStateSpace.changePreferences(changed);
@@ -239,9 +237,9 @@ public final class PreferencesStage extends Stage {
 			alert.show();
 		}
 		
-		this.globalProBPrefs.apply();
+		this.globalPrefsChangeState.apply();
 		
-		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferenceInfos();
+		final Map<String, ProBPreference> defaults = this.globalPrefsChangeState.getPreferenceInfos();
 		for (final Map.Entry<String, String> entry : changed.entrySet()) {
 			if (defaults.get(entry.getKey()).defaultValue.equals(entry.getValue())) {
 				this.globalPreferences.remove(entry.getKey());
