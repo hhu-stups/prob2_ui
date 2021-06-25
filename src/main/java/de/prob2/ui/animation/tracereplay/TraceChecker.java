@@ -9,7 +9,6 @@ import de.prob.check.tracereplay.ITraceChecker;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.TraceReplay;
-import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -102,11 +101,16 @@ public class TraceChecker implements ITraceChecker {
 	}
 
 	@Override
-	public void setResult(boolean success, List<Boolean> postconditionResults, Map<String, Object> replayInformation) {
+	public void setResult(boolean success, List<List<Boolean>> postconditionResults, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
 		Platform.runLater(() -> {
+			//replayTrace.setPostconditionStatus(postconditionResults.stream()
+			//		.map(res -> res.stream()
+			//				.map(innerRes -> innerRes ? Checked.SUCCESS : Checked.FAIL)
+			//				.collect(Collectors.toList()))
+			//		.collect(Collectors.toList()));
 			replayTrace.setPostconditionStatus(postconditionResults.stream()
-					.map(res -> res ? Checked.SUCCESS : Checked.FAIL)
+					.map(res -> res.stream().reduce(true, (a, e) -> a && e) ? Checked.SUCCESS : Checked.FAIL)
 					.collect(Collectors.toList()));
 			if(success) {
 				replayTrace.setChecked(Checked.SUCCESS);
