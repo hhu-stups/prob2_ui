@@ -161,6 +161,8 @@ public class TraceTestView extends Stage {
 
 	private final FontSize fontSize;
 
+	private final Injector injector;
+
 	private ReplayTrace replayTrace;
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
@@ -170,9 +172,11 @@ public class TraceTestView extends Stage {
 	private ChangeListener<Boolean> changedListener;
 
 	@Inject
-	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize) {
+	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize,
+						 final Injector injector) {
 		this.currentProject = currentProject;
 		this.fontSize = fontSize;
+		this.injector = injector;
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}
 
@@ -244,12 +248,13 @@ public class TraceTestView extends Stage {
 			transition.getPostconditions().addAll(postconditions.get(i));
 		}
 		replayTrace.setChanged(true);
+		injector.getInstance(TraceChecker.class).check(replayTrace, true);
 		this.close();
 	}
 
 	@Override
 	public void close() {
-		// TODO: implement alert
+		// TODO: implement alert asking whether changes should be discarded
 		super.close();
 		replayTrace.changedProperty().removeListener(changedListener);
 	}
