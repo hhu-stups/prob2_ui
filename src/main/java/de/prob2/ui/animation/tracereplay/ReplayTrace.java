@@ -29,21 +29,17 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	private final DoubleProperty progress;
 	private final ListProperty<Checked> postconditionStatus;
 	private final Path location;
-	private final BooleanProperty changedProperty;
 	private String errorMessageBundleKey;
 	private BooleanProperty shouldExecute;
 	private Object[] errorMessageParams;
 
 	private final Injector injector;
 
-	private PersistentTrace persistentTrace;
-
 	public ReplayTrace(Path location, Injector injector) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.postconditionStatus = new SimpleListProperty<>(this, "postcondition", FXCollections.observableArrayList());
 		this.location = location;
-		this.changedProperty = new SimpleBooleanProperty(false);
 		this.errorMessageBundleKey = null;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.injector = injector;
@@ -95,18 +91,6 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	
 	public Path getLocation() {
 		return this.location;
-	}
-
-	public BooleanProperty changedProperty() {
-		return changedProperty;
-	}
-
-	public boolean isChanged() {
-		return changedProperty.get();
-	}
-
-	public void setChanged(boolean changed) {
-		changedProperty.set(changed);
 	}
 
 	public void setErrorMessageBundleKey(String errorMessageBundleKey) {
@@ -168,10 +152,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	}
 
 	public PersistentTrace getPersistentTrace() {
-		if(persistentTrace == null) {
-			this.persistentTrace = injector.getInstance(TraceFileHandler.class).load(this.getLocation());
-		}
-		return persistentTrace;
+		return injector.getInstance(TraceFileHandler.class).load(this.getLocation());
 	}
 	
 	@Override

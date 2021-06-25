@@ -89,11 +89,6 @@ public class TraceViewHandler {
 		final SetChangeListener<Path> listener = c -> {
 			if (c.wasAdded()) {
 				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(), injector);
-				replayTrace.changedProperty().addListener((o, f, t) -> {
-					if(t) {
-						currentProject.setSaved(false);
-					}
-				});
 				Machine machine = currentProject.getCurrentMachine();
 				ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
 				if(!machineTraces.contains(replayTrace)) {
@@ -124,14 +119,6 @@ public class TraceViewHandler {
 					traces.bind(machineTraces);
 					noTraces.bind(currentProject.getCurrentMachine().tracesProperty().emptyProperty());
 					currentProject.getCurrentMachine().getTraceFiles().addListener(listener);
-
-					for(ReplayTrace replayTrace : machineTraces) {
-						replayTrace.changedProperty().addListener((o, f, t) -> {
-							if(t) {
-								currentProject.setSaved(false);
-							}
-						});
-					}
 				}
 			}
 		});
@@ -149,14 +136,6 @@ public class TraceViewHandler {
 				traces.bind(machineTraces);
 				noTraces.bind(to.tracesProperty().emptyProperty());
 				to.getTraceFiles().addListener(listener);
-
-				for(ReplayTrace replayTrace : machineTraces) {
-					replayTrace.changedProperty().addListener((o, f, t) -> {
-						if(t) {
-							currentProject.setSaved(false);
-						}
-					});
-				}
 			}
 		});
 	}
@@ -284,29 +263,4 @@ public class TraceViewHandler {
 		return machinesToTraces;
 	}
 
-	public void saveTraces(Project project) {
-		Path projectLocation = project.getLocation();
-		for(Machine machine : project.getMachines()) {
-			for (ReplayTrace replayTrace : this.getMachinesToTraces().get(machine)) {
-				if(replayTrace.isChanged()) {
-					final Path tempLocation = projectLocation.resolve(replayTrace.getLocation() + ".tmp");
-					try {
-						TraceJsonFile traceJsonFile = new TraceJsonFile(replayTrace.getPersistentTrace(), injector.getInstance(CurrentTrace.class).getStateSpace().getLoadedMachine(), TraceJsonFile.metadataBuilder().build());
-						injector.getInstance(TraceFileHandler.class).save(traceJsonFile, tempLocation);
-						Files.move(tempLocation, projectLocation.resolve(replayTrace.getLocation()), StandardCopyOption.REPLACE_EXISTING);
-						replayTrace.setChanged(false);
-					} catch (IOException | RuntimeException exc) {
-						LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
-						stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
-						try {
-							Files.deleteIfExists(tempLocation);
-						} catch (IOException e) {
-							LOGGER.warn("Failed to delete temporary trace file after project save error", e);
-						}
-						return;
-					}
-				}
-			}
-		}
-	}
 }

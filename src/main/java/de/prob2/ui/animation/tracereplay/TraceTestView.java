@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.Transition;
@@ -15,6 +16,8 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Project;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.TraceViewHandler;
@@ -43,7 +46,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +61,8 @@ import java.util.stream.Collectors;
 
 @FXMLInjected
 public class TraceTestView extends Stage {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TraceTestView.class);
 
 	private final class TestCell extends TableCell<PersistentTransition, String> {
 
@@ -159,6 +170,8 @@ public class TraceTestView extends Stage {
 
 	private final CurrentProject currentProject;
 
+	private final StageManager stageManager;
+
 	private final FontSize fontSize;
 
 	private final Injector injector;
@@ -169,12 +182,11 @@ public class TraceTestView extends Stage {
 
 	private final Map<PersistentTransition, Integer> transitionToIndex = new HashMap<>();
 
-	private ChangeListener<Boolean> changedListener;
-
 	@Inject
 	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize,
 						 final Injector injector) {
 		this.currentProject = currentProject;
+		this.stageManager = stageManager;
 		this.fontSize = fontSize;
 		this.injector = injector;
 		stageManager.loadFXML(this, "trace_test_view.fxml");
@@ -206,12 +218,6 @@ public class TraceTestView extends Stage {
 				return Bindings.createObjectBinding(() -> statusIcon);
 			}
 		});
-
-		changedListener = (o, f, t) -> {
-			if(t) {
-				currentProject.setSaved(false);
-			}
-		};
 	}
 
 	private String buildTransitionString(PersistentTransition persistentTransition) {
@@ -232,7 +238,6 @@ public class TraceTestView extends Stage {
 		if(persistentTrace != null) {
 			traceTableView.getItems().addAll(persistentTrace.getTransitionList());
 			persistentTrace.getTransitionList().forEach(transition -> postconditions.add(new ArrayList<>()));
-			this.replayTrace.changedProperty().addListener(changedListener);
 			for(int i = 0; i < persistentTrace.getTransitionList().size(); i++) {
 				transitionToIndex.put(persistentTrace.getTransitionList().get(i), i);
 			}
@@ -247,16 +252,29 @@ public class TraceTestView extends Stage {
 			transition.getPostconditions().clear();
 			transition.getPostconditions().addAll(postconditions.get(i));
 		}
-		replayTrace.setChanged(true);
+		this.saveTrace(transitions);
 		injector.getInstance(TraceChecker.class).check(replayTrace, true);
 		this.close();
 	}
 
-	@Override
-	public void close() {
-		// TODO: implement alert asking whether changes should be discarded
-		super.close();
-		replayTrace.changedProperty().removeListener(changedListener);
+	public void saveTrace(List<PersistentTransition> transitions) {
+		Path projectLocation = currentProject.getLocation();
+
+		final Path tempLocation = projectLocation.resolve(replayTrace.getLocation() + ".tmp");
+		try {
+			TraceJsonFile traceJsonFile = new TraceJsonFile(new PersistentTrace(replayTrace.getDescription(), transitions), injector.getInstance(CurrentTrace.class).getStateSpace().getLoadedMachine(), TraceJsonFile.metadataBuilder().build());
+			injector.getInstance(TraceFileHandler.class).save(traceJsonFile, tempLocation);
+			Files.move(tempLocation, projectLocation.resolve(replayTrace.getLocation()), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException | RuntimeException exc) {
+			LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
+			stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
+			try {
+				Files.deleteIfExists(tempLocation);
+			} catch (IOException e) {
+				LOGGER.warn("Failed to delete temporary trace file after save error", e);
+			}
+		}
+
 	}
 
 }

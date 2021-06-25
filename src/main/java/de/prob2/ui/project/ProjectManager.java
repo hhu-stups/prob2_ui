@@ -186,8 +186,6 @@ public class ProjectManager {
 			}
 		}
 
-		injector.getInstance(TraceViewHandler.class).saveTraces(currentProject.get());
-
 		// Change project name to new name selected by user (if necessary)
 		// and update the metadata (replacing the metadata that was previously loaded from the file).
 		final Project updatedProject = new Project(
