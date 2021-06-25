@@ -18,6 +18,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.TraceViewHandler;
+import de.prob2.ui.verifications.Checked;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -27,6 +28,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
@@ -42,7 +45,9 @@ import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @FXMLInjected
@@ -148,6 +153,8 @@ public class TraceTestView extends Stage {
 	@FXML
 	private TableColumn<PersistentTransition, String> testColumn;
 	@FXML
+	private TableColumn<PersistentTransition, BindableGlyph> statusColumn;
+	@FXML
 	private SplitPane splitPane;
 
 	private final CurrentProject currentProject;
@@ -157,6 +164,8 @@ public class TraceTestView extends Stage {
 	private ReplayTrace replayTrace;
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
+
+	private final Map<PersistentTransition, Integer> transitionToIndex = new HashMap<>();
 
 	private ChangeListener<Boolean> changedListener;
 
@@ -172,6 +181,28 @@ public class TraceTestView extends Stage {
 		transitionColumn.setCellValueFactory(features -> new SimpleStringProperty(buildTransitionString(features.getValue())));
 		testColumn.setCellFactory(param -> new TestCell());
 		testColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+		statusColumn.setCellValueFactory(features -> {
+			if(replayTrace.getPostconditionStatus().isEmpty()) {
+				final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+				statusIcon.getStyleClass().add("status-icon");
+				statusIcon.bindableFontSizeProperty().bind(fontSize.fontSizeProperty());
+				TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
+				return Bindings.createObjectBinding(() -> statusIcon);
+			} else {
+				final PersistentTransition transition = features.getValue();
+				int index = transitionToIndex.get(transition);
+				Checked status = replayTrace.getPostconditionStatus().get(index);
+
+				final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+				statusIcon.getStyleClass().add("status-icon");
+				statusIcon.bindableFontSizeProperty().bind(fontSize.fontSizeProperty());
+				replayTrace.checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
+				TraceViewHandler.updateStatusIcon(statusIcon, status);
+
+				return Bindings.createObjectBinding(() -> statusIcon);
+			}
+		});
+
 		changedListener = (o, f, t) -> {
 			if(t) {
 				currentProject.setSaved(false);
@@ -198,6 +229,9 @@ public class TraceTestView extends Stage {
 			traceTableView.getItems().addAll(persistentTrace.getTransitionList());
 			persistentTrace.getTransitionList().forEach(transition -> postconditions.add(new ArrayList<>()));
 			this.replayTrace.changedProperty().addListener(changedListener);
+			for(int i = 0; i < persistentTrace.getTransitionList().size(); i++) {
+				transitionToIndex.put(persistentTrace.getTransitionList().get(i), i);
+			}
 		}
 	}
 

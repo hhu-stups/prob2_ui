@@ -28,6 +28,7 @@ import javafx.collections.FXCollections;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,8 +98,16 @@ public class TraceChecker implements ITraceChecker {
 
 	@Override
 	public void setResult(boolean success, Map<String, Object> replayInformation) {
+		setResult(success, new ArrayList<>(), replayInformation);
+	}
+
+	@Override
+	public void setResult(boolean success, List<Boolean> postconditionResults, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
 		Platform.runLater(() -> {
+			replayTrace.setPostconditionStatus(postconditionResults.stream()
+					.map(res -> res ? Checked.SUCCESS : Checked.FAIL)
+					.collect(Collectors.toList()));
 			if(success) {
 				replayTrace.setChecked(Checked.SUCCESS);
 			} else {

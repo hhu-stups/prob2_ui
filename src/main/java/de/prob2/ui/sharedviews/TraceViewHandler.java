@@ -254,7 +254,7 @@ public class TraceViewHandler {
 		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.refactorTrace"));
 	}
 
-	private static void updateStatusIcon(final BindableGlyph iconView, final Checked status) {
+	public static void updateStatusIcon(final BindableGlyph iconView, final Checked status) {
 		switch (status) {
 			case SUCCESS:
 				iconView.setIcon(FontAwesome.Glyph.CHECK);
