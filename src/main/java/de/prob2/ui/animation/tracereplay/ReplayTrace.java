@@ -9,19 +9,25 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
 	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
+	private final ListProperty<Checked> postconditionStatus;
 	private final Path location;
 	private final BooleanProperty changedProperty;
 	private String errorMessageBundleKey;
@@ -35,8 +41,8 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	public ReplayTrace(Path location, Injector injector) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
+		this.postconditionStatus = new SimpleListProperty<>(this, "postcondition", FXCollections.observableArrayList());
 		this.location = location;
-		this.persistentTrace = injector.getInstance(TraceFileHandler.class).load(this.getLocation());
 		this.changedProperty = new SimpleBooleanProperty(false);
 		this.errorMessageBundleKey = null;
 		this.shouldExecute = new SimpleBooleanProperty(true);
@@ -62,7 +68,19 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	public void setChecked(Checked status) {
 		this.status.set(status);
 	}
-	
+
+	public ListProperty<Checked> postconditionStatusProperty() {
+		return postconditionStatus;
+	}
+
+	public List<Checked> getPostconditionStatus() {
+		return postconditionStatus.get();
+	}
+
+	public void setPostconditionStatus(List<Checked> postconditionStatus) {
+		this.postconditionStatus.set(FXCollections.observableArrayList(postconditionStatus));
+	}
+
 	public DoubleProperty progressProperty() {
 		return this.progress;
 	}
@@ -150,6 +168,9 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	}
 
 	public PersistentTrace getPersistentTrace() {
+		if(persistentTrace == null) {
+			this.persistentTrace = injector.getInstance(TraceFileHandler.class).load(this.getLocation());
+		}
 		return persistentTrace;
 	}
 	
