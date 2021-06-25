@@ -182,7 +182,6 @@ public class TraceViewHandler {
 		replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
 		addTestsItem.setOnAction(event -> {
 			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
-			traceTestView.setTraceViewHandler(this);
 			traceTestView.loadReplayTrace(row.getItem());
 			traceTestView.show();
 		});

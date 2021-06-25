@@ -158,8 +158,6 @@ public class TraceTestView extends Stage {
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
 
-	private TraceViewHandler traceViewHandler;
-
 	private ChangeListener<Boolean> changedListener;
 
 	@Inject
@@ -222,8 +220,4 @@ public class TraceTestView extends Stage {
 		replayTrace.changedProperty().removeListener(changedListener);
 	}
 
-
-	public void setTraceViewHandler(TraceViewHandler traceViewHandler) {
-		this.traceViewHandler = traceViewHandler;
-	}
 }
