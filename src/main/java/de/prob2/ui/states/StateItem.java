@@ -103,9 +103,4 @@ public final class StateItem {
 	public List<BVisual2Formula> getSubformulas() {
 		return this.getStructure().getSubformulas();
 	}
-
-	@Override
-	public String toString() {
-		return this.getLabel();
-	}
 }
