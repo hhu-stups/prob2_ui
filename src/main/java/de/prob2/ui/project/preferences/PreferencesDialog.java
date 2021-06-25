@@ -2,8 +2,9 @@ package de.prob2.ui.project.preferences;
 
 import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.GlobalPreferences;
+import de.prob2.ui.preferences.PreferencesChangeState;
 import de.prob2.ui.preferences.PreferencesView;
-import de.prob2.ui.preferences.ProBPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import javafx.fxml.FXML;
@@ -33,27 +34,27 @@ public class PreferencesDialog extends Dialog<Preference> {
 	private Label errorExplanationLabel;
 
 	private final ResourceBundle bundle;
-	private final ProBPreferences prefs;
+	private final PreferencesChangeState state;
 	private final CurrentProject currentProject;
 	private Preference preference;
 	private Set<String> preferencesNamesSet;
 
 	@Inject
-	private PreferencesDialog(final StageManager stageManager, final ResourceBundle bundle, final MachineLoader machineLoader, final ProBPreferences prefs, CurrentProject currentProject) {
+	private PreferencesDialog(final StageManager stageManager, final ResourceBundle bundle, final MachineLoader machineLoader, final GlobalPreferences globalPreferences, CurrentProject currentProject) {
 		super();
 
 		this.bundle = bundle;
 		this.currentProject = currentProject;
 
-		this.prefs = prefs;
-		this.prefs.setStateSpace(machineLoader.getEmptyStateSpace());
+		this.state = new PreferencesChangeState(machineLoader.getActiveStateSpace().getPreferenceInformation());
+		this.state.setCurrentPreferenceValues(globalPreferences);
 
 		this.setResultConverter(type -> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
 				preference.setName(this.nameField.getText());
-				preference.setPreferences(new HashMap<>(this.prefs.getChangedPreferences()));
+				preference.setPreferences(new HashMap<>(this.state.getPreferenceChanges()));
 				return preference; 
 			}
 		});
@@ -64,7 +65,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 	@FXML
 	private void initialize() {
 		this.setResizable(true);
-		this.prefsView.setPreferences(this.prefs);
+		this.prefsView.setState(this.state);
 		this.preference = new Preference("", new HashMap<>());
 
 		List<Preference> preferencesList = currentProject.getPreferences();
@@ -95,7 +96,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 		preferencesNamesSet.remove(preference.getName());
 		this.nameField.setText(preference.getName());
 		for (Map.Entry<String, String> pref : preference.getPreferences().entrySet()) {
-			this.prefs.setPreferenceValue(pref.getKey(), pref.getValue());
+			this.state.changePreference(pref.getKey(), pref.getValue());
 		}
 		this.prefsView.refresh();
 	}

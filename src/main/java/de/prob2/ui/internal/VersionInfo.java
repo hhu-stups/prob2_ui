@@ -66,7 +66,7 @@ public final class VersionInfo {
 			synchronized (this.lock) {
 				// Computed lazily to avoid excessive communication with the CLI.
 				final GetVersionCommand cmd = new GetVersionCommand();
-				this.machineLoader.getEmptyStateSpace().execute(cmd);
+				this.machineLoader.getActiveStateSpace().execute(cmd);
 				// Set the field only after the command has executed
 				// to prevent storing and using a not fully initialized command object
 				// if the command fails to execute.

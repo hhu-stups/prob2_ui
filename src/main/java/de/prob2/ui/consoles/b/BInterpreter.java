@@ -35,21 +35,16 @@ public class BInterpreter implements Executable {
 	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;
 	private final ResourceBundle bundle;
-	private Trace defaultTrace;
 
 	@Inject
 	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		this.machineLoader = machineLoader;
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
-		this.defaultTrace = null;
 	}
 	
 	private Trace getDefaultTrace() {
-		if (defaultTrace == null) {
-			defaultTrace = new Trace(machineLoader.getEmptyStateSpace());
-		}
-		return defaultTrace;
+		return new Trace(machineLoader.getActiveStateSpace());
 	}
 	
 	private static ErrorItem getParseErrorFromException(final Exception e) {

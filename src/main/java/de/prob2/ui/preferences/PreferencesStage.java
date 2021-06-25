@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -28,8 +29,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.ProjectManager;
 
-import javafx.beans.InvalidationListener;
-import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -88,8 +87,9 @@ public final class PreferencesStage extends Stage {
 	private final CurrentProject currentProject;
 	private final UIState uiState;
 	private final GlobalPreferences globalPreferences;
-	private final ProBPreferences globalProBPrefs;
+	private final PreferencesChangeState globalPrefsChangeState;
 	private final Config config;
+	private final MachineLoader machineLoader;
 
 	@Inject
 	private PreferencesStage(
@@ -101,7 +101,6 @@ public final class PreferencesStage extends Stage {
 		final CurrentProject currentProject,
 		final UIState uiState,
 		final GlobalPreferences globalPreferences,
-		final ProBPreferences globalProBPrefs,
 		final Config config,
 		final MachineLoader machineLoader
 	) {
@@ -113,9 +112,13 @@ public final class PreferencesStage extends Stage {
 		this.currentProject = currentProject;
 		this.uiState = uiState;
 		this.globalPreferences = globalPreferences;
-		this.globalProBPrefs = globalProBPrefs;
+		this.machineLoader = machineLoader;
+		this.globalPrefsChangeState = new PreferencesChangeState(machineLoader.getActiveStateSpace().getPreferenceInformation());
 		this.config = config;
-		this.globalProBPrefs.setStateSpace(machineLoader.getEmptyStateSpace());
+		
+		// Update globalPrefsChangeState when globalPreferences changes
+		this.globalPreferences.addListener((o, from, to) -> this.globalPrefsChangeState.setCurrentPreferenceValues(to));
+		this.globalPrefsChangeState.setCurrentPreferenceValues(this.globalPreferences);
 
 		stageManager.loadFXML(this, "preferences_stage.fxml");
 	}
@@ -165,31 +168,12 @@ public final class PreferencesStage extends Stage {
 			}
 		});
 		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
-		
-		// Global Preferences
-		this.globalPreferences.addListener((InvalidationListener) observable -> {
-			for (final Map.Entry<String, String> entry : this.globalPreferences.entrySet()) {
-				this.globalProBPrefs.setPreferenceValue(entry.getKey(), entry.getValue());
-			}
-			
-			try {
-				this.globalProBPrefs.apply();
-			} catch (final ProBError e) {
-				LOGGER.warn("Ignoring global preference changes because of exception", e);
-			}
-		});
-		this.globalPreferences.addListener((MapChangeListener<String, String>) change -> {
-			if (change.wasRemoved() && !change.wasAdded()) {
-				this.globalProBPrefs.setPreferenceValue(change.getKey(), this.globalProBPrefs.getPreferences().get(change.getKey()).defaultValue);
-				this.globalProBPrefs.apply();
-			}
-		});
 
-		this.globalPrefsView.setPreferences(this.globalProBPrefs);
+		this.globalPrefsView.setState(this.globalPrefsChangeState);
 
-		this.undoButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
-		this.applyWarning.visibleProperty().bind(this.globalProBPrefs.changesAppliedProperty().not());
-		this.applyButton.disableProperty().bind(this.globalProBPrefs.changesAppliedProperty());
+		this.undoButton.disableProperty().bind(this.globalPrefsChangeState.changesAppliedProperty());
+		this.applyWarning.visibleProperty().bind(this.globalPrefsChangeState.changesAppliedProperty().not());
+		this.applyButton.disableProperty().bind(this.globalPrefsChangeState.changesAppliedProperty());
 
 		// prevent text on buttons from being abbreviated
 		undoButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
@@ -230,22 +214,22 @@ public final class PreferencesStage extends Stage {
 
 	@FXML
 	private void handleUndoChanges() {
-		this.globalProBPrefs.rollback();
+		this.globalPrefsChangeState.rollback();
 		this.globalPrefsView.refresh();
 	}
 
 	@FXML
 	private void handleRestoreDefaults() {
-		this.globalProBPrefs.restoreDefaults();
+		this.globalPrefsChangeState.restoreDefaults();
 		this.globalPrefsView.refresh();
 	}
 	
 	@FXML
 	private void handleApply() {
-		final Map<String, String> changed = new HashMap<>(this.globalProBPrefs.getChangedPreferences());
+		final Map<String, String> changed = new HashMap<>(this.globalPrefsChangeState.getPreferenceChanges());
 		
 		try {
-			this.globalProBPrefs.apply();
+			this.machineLoader.getActiveStateSpace().changePreferences(changed);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content");
@@ -253,7 +237,9 @@ public final class PreferencesStage extends Stage {
 			alert.show();
 		}
 		
-		final Map<String, ProBPreference> defaults = this.globalProBPrefs.getPreferences();
+		this.globalPrefsChangeState.apply();
+		
+		final Map<String, ProBPreference> defaults = this.globalPrefsChangeState.getPreferenceInfos();
 		for (final Map.Entry<String, String> entry : changed.entrySet()) {
 			if (defaults.get(entry.getKey()).defaultValue.equals(entry.getValue())) {
 				this.globalPreferences.remove(entry.getKey());
