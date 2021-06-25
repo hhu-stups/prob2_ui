@@ -24,10 +24,10 @@
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 						</columnResizePolicy>
 						<columns>
-							<TableColumn fx:id="transitionColumn" text="%animation.tracereplay.test.view.columns.transition"/>
-							<TableColumn fx:id="testColumn" text="%animation.tracereplay.test.view.columns.test"/>
+							<TableColumn fx:id="transitionColumn" text="%animation.tracereplay.test.view.columns.transition" sortable="false"/>
+							<TableColumn fx:id="testColumn" text="%animation.tracereplay.test.view.columns.test" sortable="false"/>
 							<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}"
-										 maxWidth="${fontSize.fontSize * 6}" text="%animation.tracereplay.view.columns.status"/>
+										 maxWidth="${fontSize.fontSize * 6}" text="%animation.tracereplay.view.columns.status" sortable="false"/>
 						</columns>
 						<placeholder>
 							<Label text="Trace is Empty"/>
