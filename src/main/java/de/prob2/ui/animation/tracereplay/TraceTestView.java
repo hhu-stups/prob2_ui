@@ -41,6 +41,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
@@ -67,8 +68,6 @@ public class TraceTestView extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceTestView.class);
 
 	private final class TestCell extends TableCell<PersistentTransition, String> {
-
-		private VBox box;
 
 		private TestCell() {
 			super();
@@ -114,7 +113,6 @@ public class TraceTestView extends Stage {
 					btRemoveTest.setGraphic(minusIcon);
 					btRemoveTest.setOnMouseClicked(e2 -> {
 						box.getChildren().remove(innerBox);
-						// requires postConditionIndex to remove. Otherwise there will be problems if there are duplicated predicates
 						postconditions.get(index).remove(postcondition);
 					});
 
@@ -188,12 +186,44 @@ public class TraceTestView extends Stage {
 		}
 	}
 
+	private final class TransitionDescriptionCell extends TableCell<PersistentTransition, String> {
+
+		private TransitionDescriptionCell() {
+			super();
+		}
+
+		@Override
+		protected void updateItem(final String item, final boolean empty) {
+			super.updateItem(item, empty);
+			this.setGraphic(null);
+
+			if (empty || item == null || this.getTableRow() == null || this.getTableRow().getItem() == null) {
+				this.setGraphic(null);
+			} else {
+				final TableRow<PersistentTransition> tableRow = this.getTableRow();
+				int index = tableRow.getIndex();
+				final TextArea textArea = new TextArea();
+				textArea.setStyle("-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;");
+				textArea.setText(descriptions.get(index));
+				textArea.setPrefHeight(100);
+				textArea.textProperty().addListener((o, from, to) -> {
+					if(to != null) {
+						descriptions.set(index, to);
+					}
+				});
+				this.setGraphic(textArea);
+			}
+		}
+	}
+
 	@FXML
 	private TableView<PersistentTransition> traceTableView;
 	@FXML
 	private TableColumn<PersistentTransition, String> transitionColumn;
 	@FXML
 	private TableColumn<PersistentTransition, String> testColumn;
+	@FXML
+	private TableColumn<PersistentTransition, String> descriptionColumn;
 	@FXML
 	private SplitPane splitPane;
 
@@ -208,6 +238,8 @@ public class TraceTestView extends Stage {
 	private ReplayTrace replayTrace;
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
+
+	private final List<String> descriptions = new ArrayList<>();
 
 	@Inject
 	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize,
@@ -224,6 +256,8 @@ public class TraceTestView extends Stage {
 		transitionColumn.setCellValueFactory(features -> new SimpleStringProperty(buildTransitionString(features.getValue())));
 		testColumn.setCellFactory(param -> new TestCell());
 		testColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+		descriptionColumn.setCellFactory(param -> new TransitionDescriptionCell());
+		descriptionColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
 	}
 
 	private String buildTransitionString(PersistentTransition persistentTransition) {
@@ -244,7 +278,10 @@ public class TraceTestView extends Stage {
 		traceTableView.getItems().clear();
 		if(persistentTrace != null) {
 			traceTableView.getItems().addAll(persistentTrace.getTransitionList());
-			persistentTrace.getTransitionList().forEach(transition -> postconditions.add(transition.getPostconditions()));
+			persistentTrace.getTransitionList().forEach(transition -> {
+				postconditions.add(transition.getPostconditions());
+				descriptions.add(transition.getDescription());
+			});
 		}
 	}
 
@@ -255,6 +292,7 @@ public class TraceTestView extends Stage {
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
 			transition.getPostconditions().addAll(postconditions.get(i));
+			transition.setDescription(descriptions.get(i));
 		}
 		this.saveTrace(transitions);
 		injector.getInstance(TraceChecker.class).check(replayTrace, true);
