@@ -27,7 +27,7 @@ import java.util.Objects;
 public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
 	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
-	private final ListProperty<Checked> postconditionStatus;
+	private final ListProperty<List<Checked>> postconditionStatus;
 	private final Path location;
 	private String errorMessageBundleKey;
 	private BooleanProperty shouldExecute;
@@ -65,15 +65,15 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.status.set(status);
 	}
 
-	public ListProperty<Checked> postconditionStatusProperty() {
+	public ListProperty<List<Checked>> postconditionStatusProperty() {
 		return postconditionStatus;
 	}
 
-	public List<Checked> getPostconditionStatus() {
+	public List<List<Checked>> getPostconditionStatus() {
 		return postconditionStatus.get();
 	}
 
-	public void setPostconditionStatus(List<Checked> postconditionStatus) {
+	public void setPostconditionStatus(List<List<Checked>> postconditionStatus) {
 		this.postconditionStatus.set(FXCollections.observableArrayList(postconditionStatus));
 	}
 

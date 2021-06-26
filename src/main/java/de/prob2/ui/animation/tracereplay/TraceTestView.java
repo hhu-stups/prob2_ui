@@ -27,9 +27,11 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
@@ -75,6 +77,7 @@ public class TraceTestView extends Stage {
 		@Override
 		protected void updateItem(final String item, final boolean empty) {
 			super.updateItem(item, empty);
+			this.setGraphic(null);
 
 			if (empty || item == null || this.getTableRow() == null || this.getTableRow().getItem() == null) {
 				this.setGraphic(null);
@@ -84,6 +87,7 @@ public class TraceTestView extends Stage {
 				int index = tableRow.getIndex();
 
 				final VBox box = new VBox();
+				box.setSpacing(2);
 
 				final Button btAddTest = new Button();
 				btAddTest.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
@@ -91,9 +95,8 @@ public class TraceTestView extends Stage {
 					Postcondition postcondition = new Postcondition(Postcondition.PostconditionKind.PREDICATE);
 					postconditions.get(index).add(postcondition);
 
-					int postconditionIndex = postconditions.get(index).size() - 1;
-
 					final HBox innerBox = new HBox();
+					innerBox.setSpacing(2);
 					final TextField textField = new TextField("");
 					HBox.setHgrow(textField, Priority.ALWAYS);
 					//TODO
@@ -104,16 +107,27 @@ public class TraceTestView extends Stage {
 						}
 					});
 
-					final Button btRemoveTest = new Button();
-					btRemoveTest.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE));
-					btRemoveTest.setOnAction(e2 -> {
+					final Label btRemoveTest = new Label();
+					final BindableGlyph minusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE);
+					minusIcon.getStyleClass().add("status-icon");
+					minusIcon.setPrefHeight(fontSize.getFontSize());
+					btRemoveTest.setGraphic(minusIcon);
+					btRemoveTest.setOnMouseClicked(e2 -> {
 						box.getChildren().remove(innerBox);
 						// requires postConditionIndex to remove. Otherwise there will be problems if there are duplicated predicates
-						postconditions.get(index).remove(postconditionIndex);
+						postconditions.get(index).remove(postcondition);
 					});
 
+					final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+					statusIcon.getStyleClass().add("status-icon");
+					statusIcon.setPrefHeight(fontSize.getFontSize());
+					statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
+					TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
+
 					innerBox.getChildren().add(textField);
+					innerBox.getChildren().add(statusIcon);
 					innerBox.getChildren().add(btRemoveTest);
+
 
 
 					box.getChildren().add(box.getChildren().size() - 1, innerBox);
@@ -123,29 +137,46 @@ public class TraceTestView extends Stage {
 
 				for(int i = 0; i < tableItem.getPostconditions().size(); i++) {
 					Postcondition postcondition = tableItem.getPostconditions().get(i);
-					postconditions.get(index).add(postcondition);
 					final HBox innerBox = new HBox();
+					innerBox.setSpacing(2);
 					final TextField textField = new TextField("");
 					HBox.setHgrow(textField, Priority.ALWAYS);
 					//TODO
-					textField.setText(postcondition.getValue());
 					textField.setPrefHeight(fontSize.getFontSize() * 1.5);
+					textField.setText(postcondition.getValue());
+
 					textField.textProperty().addListener((o, from, to) -> {
 						if(to != null) {
 							postcondition.setValue(to);
 						}
 					});
 
-					final Button btRemoveTest = new Button();
-					btRemoveTest.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE));
-					int finalI = i;
-					btRemoveTest.setOnAction(e2 -> {
+					final Label btRemoveTest = new Label();
+					btRemoveTest.setAlignment(Pos.TOP_CENTER);
+					final BindableGlyph minusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE);
+					minusIcon.getStyleClass().add("status-icon");
+					minusIcon.setPrefHeight(fontSize.getFontSize() * 1.5);
+					btRemoveTest.setGraphic(minusIcon);
+					btRemoveTest.setOnMouseClicked(e2 -> {
 						box.getChildren().remove(innerBox);
-						// requires postConditionIndex to remove. Otherwise there will be problems if there are duplicated predicates
-						postconditions.get(index).remove(finalI);
+						postconditions.get(index).remove(postcondition);
 					});
 
+					final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+					statusIcon.getStyleClass().add("status-icon");
+					statusIcon.setPrefHeight(fontSize.getFontSize() * 1.5);
+					statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
+
+					if(replayTrace.getPostconditionStatus().isEmpty()) {
+						TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
+					} else {
+						Checked status = replayTrace.getPostconditionStatus().get(index).get(i);
+						replayTrace.checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
+						TraceViewHandler.updateStatusIcon(statusIcon, status);
+					}
+
 					innerBox.getChildren().add(textField);
+					innerBox.getChildren().add(statusIcon);
 					innerBox.getChildren().add(btRemoveTest);
 
 
@@ -164,8 +195,6 @@ public class TraceTestView extends Stage {
 	@FXML
 	private TableColumn<PersistentTransition, String> testColumn;
 	@FXML
-	private TableColumn<PersistentTransition, BindableGlyph> statusColumn;
-	@FXML
 	private SplitPane splitPane;
 
 	private final CurrentProject currentProject;
@@ -179,8 +208,6 @@ public class TraceTestView extends Stage {
 	private ReplayTrace replayTrace;
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
-
-	private final Map<PersistentTransition, Integer> transitionToIndex = new HashMap<>();
 
 	@Inject
 	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize,
@@ -197,27 +224,6 @@ public class TraceTestView extends Stage {
 		transitionColumn.setCellValueFactory(features -> new SimpleStringProperty(buildTransitionString(features.getValue())));
 		testColumn.setCellFactory(param -> new TestCell());
 		testColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
-		statusColumn.setCellValueFactory(features -> {
-			if(replayTrace.getPostconditionStatus().isEmpty()) {
-				final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-				statusIcon.getStyleClass().add("status-icon");
-				statusIcon.bindableFontSizeProperty().bind(fontSize.fontSizeProperty());
-				TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
-				return Bindings.createObjectBinding(() -> statusIcon);
-			} else {
-				final PersistentTransition transition = features.getValue();
-				int index = transitionToIndex.get(transition);
-				Checked status = replayTrace.getPostconditionStatus().get(index);
-
-				final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-				statusIcon.getStyleClass().add("status-icon");
-				statusIcon.bindableFontSizeProperty().bind(fontSize.fontSizeProperty());
-				replayTrace.checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
-				TraceViewHandler.updateStatusIcon(statusIcon, status);
-
-				return Bindings.createObjectBinding(() -> statusIcon);
-			}
-		});
 	}
 
 	private String buildTransitionString(PersistentTransition persistentTransition) {
@@ -232,15 +238,13 @@ public class TraceTestView extends Stage {
 	}
 
 	public void loadReplayTrace(ReplayTrace replayTrace) {
+		this.postconditions.clear();
 		this.replayTrace = replayTrace;
 		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 		traceTableView.getItems().clear();
 		if(persistentTrace != null) {
 			traceTableView.getItems().addAll(persistentTrace.getTransitionList());
-			persistentTrace.getTransitionList().forEach(transition -> postconditions.add(new ArrayList<>()));
-			for(int i = 0; i < persistentTrace.getTransitionList().size(); i++) {
-				transitionToIndex.put(persistentTrace.getTransitionList().get(i), i);
-			}
+			persistentTrace.getTransitionList().forEach(transition -> postconditions.add(transition.getPostconditions()));
 		}
 	}
 

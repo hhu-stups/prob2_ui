@@ -104,13 +104,10 @@ public class TraceChecker implements ITraceChecker {
 	public void setResult(boolean success, List<List<Boolean>> postconditionResults, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
 		Platform.runLater(() -> {
-			//replayTrace.setPostconditionStatus(postconditionResults.stream()
-			//		.map(res -> res.stream()
-			//				.map(innerRes -> innerRes ? Checked.SUCCESS : Checked.FAIL)
-			//				.collect(Collectors.toList()))
-			//		.collect(Collectors.toList()));
 			replayTrace.setPostconditionStatus(postconditionResults.stream()
-					.map(res -> res.stream().reduce(true, (a, e) -> a && e) ? Checked.SUCCESS : Checked.FAIL)
+					.map(res -> res.stream()
+							.map(innerRes -> innerRes ? Checked.SUCCESS : Checked.FAIL)
+							.collect(Collectors.toList()))
 					.collect(Collectors.toList()));
 			if(success) {
 				replayTrace.setChecked(Checked.SUCCESS);
