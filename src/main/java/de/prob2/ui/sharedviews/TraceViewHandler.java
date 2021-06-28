@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 @Singleton
 public class TraceViewHandler {
@@ -162,9 +163,18 @@ public class TraceViewHandler {
 			traceTestView.show();
 		});
 		showErrorItem.setOnAction(event -> {
-			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, row.getItem().getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, row.getItem().getErrorMessageParams());
-			alert.initOwner(scene.getWindow());
-			alert.setErrorMessage();
+			ReplayTrace replayTrace = row.getItem();
+			if(row.getItem().getErrorMessageBundleKey() != null) {
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, replayTrace.getErrorMessageParams());
+				alert.initOwner(scene.getWindow());
+				alert.setErrorMessage();
+			}
+			traceChecker.showTestError(row.getItem().getPersistentTrace(), replayTrace.getPostconditionStatus()
+					.stream()
+					.map(statuses -> statuses.stream()
+							.map(status -> status == Checked.SUCCESS)
+							.collect(Collectors.toList()))
+					.collect(Collectors.toList()));
 		});
 		openInExternalEditorItem.setOnAction(
 				event -> injector.getInstance(ExternalEditor.class).open(currentProject.getLocation().resolve(row.getItem().getLocation())));
