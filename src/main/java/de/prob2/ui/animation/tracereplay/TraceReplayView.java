@@ -130,8 +130,6 @@ public class TraceReplayView extends ScrollPane {
 					List<Path> persistentTraceList = traceRefactoredSetup.evaluateResults();
 					persistentTraceList.remove(row.getItem().getLocation());
 					addPathsToProject(persistentTraceList);
-
-
 			});
 			showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 

@@ -58,21 +58,19 @@ public class ProjectManager {
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
-	private final Injector injector;
 	
 	private final ObservableList<Path> recentProjects;
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
 	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager,
-						  ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager, final Injector injector) {
+						  ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
 		this.jacksonManager = jacksonManager;
 		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
-		this.injector = injector;
 		
 		this.recentProjects = FXCollections.observableArrayList();
 		this.maximumRecentProjects = new SimpleIntegerProperty(this, "maximumRecentProjects");
