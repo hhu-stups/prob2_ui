@@ -272,6 +272,7 @@ public class TraceTestView extends Stage {
 	}
 
 	public void loadReplayTrace(ReplayTrace replayTrace) {
+		this.setTitle(String.format(this.getTitle(), replayTrace.getName()));
 		this.postconditions.clear();
 		this.replayTrace = replayTrace;
 		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();

@@ -63,8 +63,6 @@ public class TraceViewHandler {
 
 	private final ResourceBundle bundle;
 
-	private final StageManager stageManager;
-
 	private final ListProperty<ReplayTrace> traces;
 
 	private final Map<Machine, ListProperty<ReplayTrace>> machinesToTraces;
@@ -72,13 +70,11 @@ public class TraceViewHandler {
 	private final BooleanProperty noTraces;
 
 	@Inject
-	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle,
-							final StageManager stageManager) {
+	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
 		this.traceChecker = traceChecker;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.bundle = bundle;
-		this.stageManager = stageManager;
 		this.traces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
 		this.machinesToTraces = new HashMap<>();
 		this.noTraces = new SimpleBooleanProperty();
@@ -210,7 +206,7 @@ public class TraceViewHandler {
 	}
 
 	public MenuItem createAddTestsItem() {
-		final MenuItem addTestsItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.addTests"));
+		final MenuItem addTestsItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.editTrace"));
 		return addTestsItem;
 	}
 
