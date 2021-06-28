@@ -263,9 +263,8 @@ public class ProB2 extends Application {
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		currentProject.addListener((observable, from, to) -> this.updateTitle(primaryStage));
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
 		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
-		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
-		currentTrace.addListener((observable, from, to) -> this.updateTitle(primaryStage));
 
 		Parent root = injector.getInstance(MainController.class);
 		return new Scene(root);
