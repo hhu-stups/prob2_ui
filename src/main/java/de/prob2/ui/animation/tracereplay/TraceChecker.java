@@ -8,6 +8,7 @@ import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.check.tracereplay.ITraceChecker;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
+import de.prob.check.tracereplay.Postcondition;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.StateSpace;
@@ -23,14 +24,14 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.scene.control.Alert;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -41,15 +42,17 @@ public class TraceChecker implements ITraceChecker {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
+	private final ResourceBundle bundle;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager,
-						 final DisablePropertyController disablePropertyController) {
+						 final DisablePropertyController disablePropertyController, final ResourceBundle bundle) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
+		this.bundle = bundle;
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
@@ -168,6 +171,35 @@ public class TraceChecker implements ITraceChecker {
 		}
 	}
 
+
+	@Override
+	public void showTestError(PersistentTrace persistentTrace, List<List<Boolean>> postconditionResults) {
+		StringBuilder sb = new StringBuilder();
+		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
+		boolean failed = false;
+		for(int i = 0; i < transitions.size(); i++) {
+			PersistentTransition transition = transitions.get(i);
+			List<Boolean> postconditionTransitionResults = postconditionResults.get(i);
+			for(int j = 0; j < postconditionTransitionResults.size(); j++) {
+				boolean result = postconditionTransitionResults.get(j);
+				if(!result) {
+					Postcondition postcondition = transition.getPostconditions().get(j);
+					sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content"), transition.getOperationName(), postcondition.getValue()));
+					sb.append("\n");
+					failed = true;
+				}
+			}
+		}
+		if(failed) {
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setHeaderText(bundle.getString("animation.trace.replay.test.alert.header"));
+				alert.setContentText(sb.toString());
+				stageManager.register(alert);
+				alert.showAndWait();
+			});
+		}
+	}
 
 
 	private void showTraceReplayCompleteFailed(Trace trace, Map<String, Object> replayInformation) {
