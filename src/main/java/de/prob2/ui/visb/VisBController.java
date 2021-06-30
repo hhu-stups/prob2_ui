@@ -299,7 +299,7 @@ public class VisBController {
 		VisBVisualisation currentVisualisation = this.visBVisualisation;
 		closeCurrentVisualisation();
 		this.visBVisualisation = currentVisualisation;
-		setupVisualisation();
+		setupVisualisation(this.visBVisualisation.getJsonFile());
 		if(!visBVisualisation.isReady()){
 			if(visBVisualisation.getSvgPath() != null) {
 				updateInfo("visb.infobox.visualisation.error");
@@ -375,10 +375,6 @@ public class VisBController {
 		}
 	}
 
-	public void setupVisualisation(){
-		setupVisualisation(this.visBVisualisation.getJsonFile());
-	}
-
 	/**
 	 * As the name says, it updates the visualisation, if it is possible.
 	 */
@@ -403,14 +399,12 @@ public class VisBController {
 	 * Checks if on click functionality for the svg items can be added, yet. If not, nothing happens. If it can be added, the JQuery that is needed is built and executed via {@link VisBStage}.
 	 */
 	private List<VisBOnClickMustacheItem> generateOnClickItems(){
-		List<VisBOnClickMustacheItem> onClickItems = new ArrayList<>();
-		for (VisBEvent visBEvent : this.visBVisualisation.getVisBEvents()) {
-			addOnClickItem(visBEvent, onClickItems);
-		}
-		return onClickItems;
+		return this.visBVisualisation.getVisBEvents().stream()
+			.map(VisBController::generateOnClickItem)
+			.collect(Collectors.toList());
 	}
 
-	private void addOnClickItem(VisBEvent visBEvent, List<VisBOnClickMustacheItem> onClickItems) {
+	private static VisBOnClickMustacheItem generateOnClickItem(VisBEvent visBEvent) {
 		String enterAction = visBEvent.getHovers().stream()
 				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
 				.collect(Collectors.joining("\n"));
@@ -419,7 +413,6 @@ public class VisBController {
 				.collect(Collectors.joining("\n"));
 		String eventID = visBEvent.getId();
 		String eventName = visBEvent.getEvent();
-		onClickItems.add(new VisBOnClickMustacheItem(enterAction, leaveAction, eventID, eventName));
-
+		return new VisBOnClickMustacheItem(enterAction, leaveAction, eventID, eventName);
 	}
 }
