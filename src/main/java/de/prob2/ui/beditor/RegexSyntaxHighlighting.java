@@ -54,14 +54,15 @@ final class RegexSyntaxHighlighting {
 	}
 
 	static {
-		//Event-B Regex TODO fix id, or, not etc.
+		//Event-B Regex
 		final Map<String, String> syntaxClassesForEventB = new LinkedHashMap<>();
 		syntaxClassesForEventB.put("(CONTEXT|EXTENDS|SETS|CONSTANTS|CONCRETE_CONSTANTS|AXIOMS|THEOREMS|MACHINE|REFINES|SEES|VARIABLES|ABSTRACT_VARIABLES|INVARIANT|VARIANT|EVENTS|EVENT|BEGIN|ANY|WHERE|WHEN|WITH|THEN|INITIALISATION|END)", "editor_keyword");
-		syntaxClassesForEventB.put("((POW|POW1|card|union|inter|min|max|finite|partition|dom|ran)\\(.*\\)|UNION|INTER|id|prj1|prj2|skip)", "editor_ctrlkeyword");
-		syntaxClassesForEventB.put("(false|true|⊤|⊥|&|or|∧|∨|=>|⇒|<=>|⇔|not|!|#|¬|∃|∀)", "editor_logical");
+		syntaxClassesForEventB.put("((POW|POW1|card|union|inter|min|max|finite|partition|dom|ran)\\(.*\\)|[ |\t|\n|\r]*(UNION|INTER|id|prj1|prj2|skip)[ |\t|\n|\r])", "editor_ctrlkeyword");
+		syntaxClassesForEventB.put("([ |\t|\n|\r]*(false|true|or|not)[ |\t|\n|\r]|⊤|⊥|&|∧|∨|=>|⇒|<=>|⇔|!|#|¬|∃|∀)", "editor_logical");
 		syntaxClassesForEventB.put("(:\\||::|:∈|:=)", "editor_assignments");
-		syntaxClassesForEventB.put("(\\/\\\\|\\\\\\/|∩|∪|\\{\\}|∅|\\\\|\\+->>|⤀|\\+->|⇸|\\+|-->>|↠|-->|→|-|>=|<=|≤|≥|/<<:|<<:|/<:|<:|⊄|⊂|⊈|⊆|/:|:|∉|∈|>\\+>|⤔|>->>|⤖|>->|↣|><|⊗|>|<\\+|⇷|<<->>|<<->|<->>|<->|↔|<<\\||⩤|<\\||◁|<|;|circ|◦|\\|>>|⩥|\\|>|▷|\\|\\||%|≠|/=|=)", "editor_arithmetic");
+		syntaxClassesForEventB.put("(\\/\\\\|\\\\\\/|∩|∪|\\{\\}|∅|\\\\|\\+->>|⤀|\\+->|⇸|\\+|-->>|↠|-->|→|-|>=|<=|≤|≥|/<<:|<<:|/<:|<:|⊄|⊂|⊈|⊆|/:|:|∉|∈|>\\+>|⤔|>->>|⤖|>->|↣|><|⊗|>|<\\+|⇷|<<->>|<<->|<->>|<->|↔|<<\\||⩤|<\\||◁|<|;|[ |\t|\n|\r]*circ[ |\t\n\r]|◦|\\|>>|⩥|\\|>|▷|\\|\\||%|≠|/=|=)", "editor_arithmetic");
 		syntaxClassesForEventB.put("(//[^\n\r]*)|(/\\*([^*]|\\*+[^*/])*\\*+/)", "editor_comment");
+		syntaxClassesForEventB.put("( |\t|\r|\n)+", "editor_ignored");
 
 		//XTL Regex
 		final Map<String, String> syntaxClassesForXTL = new LinkedHashMap<>();
