@@ -32,6 +32,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
@@ -47,6 +48,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
@@ -60,6 +62,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @FXMLInjected
@@ -88,7 +91,7 @@ public class TraceTestView extends Stage {
 				final VBox box = new VBox();
 				box.setSpacing(2);
 
-				Button btAddTest = buildAddButton(box, index);
+				Node btAddTest = buildAddButton(box, index);
 				box.getChildren().add(btAddTest);
 
 				for(int i = 0; i < tableItem.getPostconditions().size(); i++) {
@@ -104,6 +107,7 @@ public class TraceTestView extends Stage {
 		private Label buildRemoveButton(VBox box, HBox innerBox, Postcondition postcondition, int index) {
 			final Label btRemoveTest = new Label();
 			btRemoveTest.setAlignment(Pos.TOP_CENTER);
+			btRemoveTest.getStyleClass().add("icon-dark");
 			final BindableGlyph minusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE);
 			minusIcon.getStyleClass().add("status-icon");
 			minusIcon.setPrefHeight(fontSize.getFontSize());
@@ -138,10 +142,11 @@ public class TraceTestView extends Stage {
 			return statusIcon;
 		}
 
-		private Button buildAddButton(VBox box, int index) {
-			final Button btAddTest = new Button();
-			btAddTest.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
-			btAddTest.setOnAction(e1 -> {
+		private MenuButton buildAddButton(VBox box, int index) {
+			final MenuButton btAddTest = new MenuButton("", new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
+			btAddTest.getStyleClass().add("icon-dark");
+			// TODO: Implement Menu to choose between predicate and enabledness
+			btAddTest.setOnMouseClicked(e1 -> {
 				Postcondition postcondition = new Postcondition(Postcondition.PostconditionKind.PREDICATE);
 				postconditions.get(index).add(postcondition);
 				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
@@ -154,7 +159,22 @@ public class TraceTestView extends Stage {
 			final HBox innerBox = new HBox();
 			innerBox.setSpacing(2);
 
-			final TextField textField = buildPostconditionTextField(postcondition);
+			String typeString;
+			ResourceBundle bundle = injector.getInstance(ResourceBundle.class);
+			Postcondition.PostconditionKind kind = postcondition.getKind();
+			switch (kind) {
+				case PREDICATE:
+					typeString = bundle.getString("animation.trace.replay.test.postcondition.predicate");
+					break;
+				case ENABLEDNESS:
+					typeString = bundle.getString("animation.trace.replay.test.postcondition.enabled");
+					break;
+				default:
+					throw new RuntimeException("Given postcondition kind does not exist: " + kind);
+			}
+
+			final Label typeLabel = new Label(typeString);
+			final TextField postconditionTextField = buildPostconditionTextField(postcondition);
 			final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
 			final BindableGlyph statusIcon = buildStatusIcon();
 
@@ -166,7 +186,8 @@ public class TraceTestView extends Stage {
 				TraceViewHandler.updateStatusIcon(statusIcon, status);
 			}
 
-			innerBox.getChildren().add(textField);
+			innerBox.getChildren().add(typeLabel);
+			innerBox.getChildren().add(postconditionTextField);
 			innerBox.getChildren().add(statusIcon);
 			innerBox.getChildren().add(btRemoveTest);
 			return innerBox;

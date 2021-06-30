@@ -10,7 +10,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
-<fx:root type="TraceTestView" title="%animation.tracereplay.test.stage.title" minWidth="400" minHeight="300" width="800.0" height="500.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="TraceTestView" title="%animation.tracereplay.test.stage.title" minWidth="600" minHeight="400" width="1000.0" height="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
