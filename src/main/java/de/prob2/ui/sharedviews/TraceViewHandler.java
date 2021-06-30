@@ -105,18 +105,8 @@ public class TraceViewHandler {
 			traces.setValue(FXCollections.observableArrayList());
 			noTraces.set(true);
 			if(to != null) {
-				to.getMachines().forEach(machine -> {
-					final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
-					machinesToTraces.put(machine, machineTraces);
-					machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, injector)));
-					Machine.addCheckingStatusListener(machineTraces, machine.traceReplayStatusProperty());
-				});
-				if(currentProject.getCurrentMachine() != null) {
-					final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(currentProject.getCurrentMachine());
-					traces.bind(machineTraces);
-					noTraces.bind(currentProject.getCurrentMachine().tracesProperty().emptyProperty());
-					currentProject.getCurrentMachine().getTraceFiles().addListener(listener);
-				}
+				fillMachineToTraces(to);
+				bindTraces(currentProject.getCurrentMachine(), listener);
 			}
 		});
 
@@ -128,13 +118,26 @@ public class TraceViewHandler {
 			noTraces.unbind();
 			traces.setValue(FXCollections.observableArrayList());
 			noTraces.set(true);
-			if (to != null) {
-				final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(to);
-				traces.bind(machineTraces);
-				noTraces.bind(to.tracesProperty().emptyProperty());
-				to.getTraceFiles().addListener(listener);
-			}
+			bindTraces(to, listener);
 		});
+	}
+
+	private void fillMachineToTraces(Project project) {
+		project.getMachines().forEach(machine -> {
+			final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
+			machinesToTraces.put(machine, machineTraces);
+			machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, injector)));
+			Machine.addCheckingStatusListener(machineTraces, machine.traceReplayStatusProperty());
+		});
+	}
+
+	private void bindTraces(Machine machine, SetChangeListener<Path> listener) {
+		if (machine != null) {
+			final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
+			traces.bind(machineTraces);
+			noTraces.bind(machine.tracesProperty().emptyProperty());
+			machine.getTraceFiles().addListener(listener);
+		}
 	}
 
 	public Callback<TableColumn.CellDataFeatures<ReplayTrace, Node>, ObservableValue<Node>> getTraceStatusFactory() {
