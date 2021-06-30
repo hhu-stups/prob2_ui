@@ -323,27 +323,28 @@ public class VisBStage extends Stage {
 	 */
 	public void runScript(String jQuery) {
 		if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
-		   // execute JQuery script once page fully loaded
-		   // https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
+			// execute JQuery script once page fully loaded
+			// https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
 			webView.getEngine().getLoadWorker().stateProperty().addListener(
-					  //Use new constructor instead of lambda expression to access change listener with keyword this
-					  new ChangeListener<Worker.State>() {
-						@Override
-						public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
-						  switch (newValue) {
+				//Use new constructor instead of lambda expression to access change listener with keyword this
+				new ChangeListener<Worker.State>() {
+					@Override
+					public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
+						switch (newValue) {
 							case SUCCEEDED:
 							case FAILED:
 							case CANCELLED:
-							  webView.getEngine().getLoadWorker().stateProperty().removeListener(this);
-						  }
-						  if (newValue != Worker.State.SUCCEEDED) {
-							return;
-						  }
-						  LOGGER.debug("runScript: "+jQuery+"\n-----");
-						  webView.getEngine().executeScript(jQuery);
+								webView.getEngine().getLoadWorker().stateProperty().removeListener(this);
 						}
-					  });
-					LOGGER.debug("registered runScript as Listener");
+						if (newValue != Worker.State.SUCCEEDED) {
+							return;
+						}
+						LOGGER.debug("runScript: "+jQuery+"\n-----");
+						webView.getEngine().executeScript(jQuery);
+					}
+				}
+			);
+			LOGGER.debug("registered runScript as Listener");
 		} else {
 			LOGGER.debug("runScript directly: "+jQuery+"\n-----");
 			this.webView.getEngine().executeScript(jQuery);
