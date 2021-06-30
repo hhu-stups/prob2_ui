@@ -299,7 +299,7 @@ public class VisBController {
 		VisBVisualisation currentVisualisation = this.visBVisualisation;
 		closeCurrentVisualisation();
 		this.visBVisualisation = currentVisualisation;
-		setupVisualisation();
+		setupVisualisation(this.visBVisualisation.getJsonFile());
 		if(!visBVisualisation.isReady()){
 			if(visBVisualisation.getSvgPath() != null) {
 				updateInfo("visb.infobox.visualisation.error");
@@ -373,10 +373,6 @@ public class VisBController {
 		} else {
 			updateInfo("visb.infobox.visualisation.initialise");
 		}
-	}
-
-	public void setupVisualisation(){
-		setupVisualisation(this.visBVisualisation.getJsonFile());
 	}
 
 	/**
