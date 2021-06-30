@@ -88,101 +88,88 @@ public class TraceTestView extends Stage {
 				final VBox box = new VBox();
 				box.setSpacing(2);
 
-				final Button btAddTest = new Button();
-				btAddTest.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
-				btAddTest.setOnAction(e1 -> {
-					Postcondition postcondition = new Postcondition(Postcondition.PostconditionKind.PREDICATE);
-					postconditions.get(index).add(postcondition);
-
-					final HBox innerBox = new HBox();
-					innerBox.setSpacing(2);
-					final TextField textField = new TextField("");
-					HBox.setHgrow(textField, Priority.ALWAYS);
-					//TODO
-					textField.setPrefHeight(fontSize.getFontSize() * 1.5);
-					textField.textProperty().addListener((o, from, to) -> {
-						if(to != null) {
-							postcondition.setValue(to);
-						}
-					});
-
-					final Label btRemoveTest = new Label();
-					final BindableGlyph minusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE);
-					minusIcon.getStyleClass().add("status-icon");
-					minusIcon.setPrefHeight(fontSize.getFontSize());
-					btRemoveTest.setGraphic(minusIcon);
-					btRemoveTest.setOnMouseClicked(e2 -> {
-						box.getChildren().remove(innerBox);
-						postconditions.get(index).remove(postcondition);
-					});
-
-					final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-					statusIcon.getStyleClass().add("status-icon");
-					statusIcon.setPrefHeight(fontSize.getFontSize());
-					statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
-					TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
-
-					innerBox.getChildren().add(textField);
-					innerBox.getChildren().add(statusIcon);
-					innerBox.getChildren().add(btRemoveTest);
-
-
-
-					box.getChildren().add(box.getChildren().size() - 1, innerBox);
-				});
-
+				Button btAddTest = buildAddButton(box, index);
 				box.getChildren().add(btAddTest);
 
 				for(int i = 0; i < tableItem.getPostconditions().size(); i++) {
 					Postcondition postcondition = tableItem.getPostconditions().get(i);
-					final HBox innerBox = new HBox();
-					innerBox.setSpacing(2);
-					final TextField textField = new TextField("");
-					HBox.setHgrow(textField, Priority.ALWAYS);
-					//TODO
-					textField.setPrefHeight(fontSize.getFontSize() * 1.5);
-					textField.setText(postcondition.getValue());
-
-					textField.textProperty().addListener((o, from, to) -> {
-						if(to != null) {
-							postcondition.setValue(to);
-						}
-					});
-
-					final Label btRemoveTest = new Label();
-					btRemoveTest.setAlignment(Pos.TOP_CENTER);
-					final BindableGlyph minusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE);
-					minusIcon.getStyleClass().add("status-icon");
-					minusIcon.setPrefHeight(fontSize.getFontSize() * 1.5);
-					btRemoveTest.setGraphic(minusIcon);
-					btRemoveTest.setOnMouseClicked(e2 -> {
-						box.getChildren().remove(innerBox);
-						postconditions.get(index).remove(postcondition);
-					});
-
-					final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-					statusIcon.getStyleClass().add("status-icon");
-					statusIcon.setPrefHeight(fontSize.getFontSize() * 1.5);
-					statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
-
-					if(replayTrace.getPostconditionStatus().isEmpty()) {
-						TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
-					} else {
-						Checked status = replayTrace.getPostconditionStatus().get(index).get(i);
-						replayTrace.checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
-						TraceViewHandler.updateStatusIcon(statusIcon, status);
-					}
-
-					innerBox.getChildren().add(textField);
-					innerBox.getChildren().add(statusIcon);
-					innerBox.getChildren().add(btRemoveTest);
-
-
+					final HBox innerBox = buildInnerBox(box, postcondition, false, index, i);
 					box.getChildren().add(box.getChildren().size() - 1, innerBox);
 				}
 
 				this.setGraphic(box);
 			}
+		}
+
+		private Label buildRemoveButton(VBox box, HBox innerBox, Postcondition postcondition, int index) {
+			final Label btRemoveTest = new Label();
+			btRemoveTest.setAlignment(Pos.TOP_CENTER);
+			final BindableGlyph minusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE);
+			minusIcon.getStyleClass().add("status-icon");
+			minusIcon.setPrefHeight(fontSize.getFontSize());
+			btRemoveTest.setGraphic(minusIcon);
+			btRemoveTest.setOnMouseClicked(e2 -> {
+				box.getChildren().remove(innerBox);
+				postconditions.get(index).remove(postcondition);
+			});
+			return btRemoveTest;
+		}
+
+		private TextField buildPostconditionTextField(Postcondition postcondition) {
+			final TextField textField = new TextField("");
+			HBox.setHgrow(textField, Priority.ALWAYS);
+			//TODO
+			textField.setPrefHeight(fontSize.getFontSize() * 1.5);
+			textField.setText(postcondition.getValue());
+
+			textField.textProperty().addListener((o, from, to) -> {
+				if(to != null) {
+					postcondition.setValue(to);
+				}
+			});
+			return textField;
+		}
+
+		private BindableGlyph buildStatusIcon() {
+			final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+			statusIcon.getStyleClass().add("status-icon");
+			statusIcon.setPrefHeight(fontSize.getFontSize());
+			statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
+			return statusIcon;
+		}
+
+		private Button buildAddButton(VBox box, int index) {
+			final Button btAddTest = new Button();
+			btAddTest.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
+			btAddTest.setOnAction(e1 -> {
+				Postcondition postcondition = new Postcondition(Postcondition.PostconditionKind.PREDICATE);
+				postconditions.get(index).add(postcondition);
+				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
+				box.getChildren().add(box.getChildren().size() - 1, innerBox);
+			});
+			return btAddTest;
+		}
+
+		private HBox buildInnerBox(VBox box, Postcondition postcondition, boolean isNewBox, int index, int postconditionIndex) {
+			final HBox innerBox = new HBox();
+			innerBox.setSpacing(2);
+
+			final TextField textField = buildPostconditionTextField(postcondition);
+			final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
+			final BindableGlyph statusIcon = buildStatusIcon();
+
+			if(replayTrace.getPostconditionStatus().isEmpty() || isNewBox) {
+				TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
+			} else {
+				Checked status = replayTrace.getPostconditionStatus().get(index).get(postconditionIndex);
+				replayTrace.checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
+				TraceViewHandler.updateStatusIcon(statusIcon, status);
+			}
+
+			innerBox.getChildren().add(textField);
+			innerBox.getChildren().add(statusIcon);
+			innerBox.getChildren().add(btRemoveTest);
+			return innerBox;
 		}
 	}
 
