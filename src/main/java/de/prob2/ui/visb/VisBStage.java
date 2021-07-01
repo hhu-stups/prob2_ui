@@ -254,12 +254,12 @@ public class VisBStage extends Stage {
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
 	 */
-	void initialiseWebView(List<VisBOnClickMustacheItem> clickEvents, Path jsonPath, String svgContent) {
+	void initialiseWebView(List<VisBOnClickMustacheItem> clickEvents, String svgContent) {
 		if (svgContent != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
 			String jqueryLink = Main.class.getResource("jquery.js").toExternalForm();
-			String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, jsonPath, svgContent);
+			String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, svgContent);
 			this.webView.getEngine().loadContent(htmlFile);
 			addVisBConnector();
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
@@ -439,12 +439,11 @@ public class VisBStage extends Stage {
 		simulatorStage.toFront();
 	}
 
-	private String generateHTMLFileWithSVG(String jqueryLink, List<VisBOnClickMustacheItem> clickEvents, Path jsonPath, String svgContent) {
+	private String generateHTMLFileWithSVG(String jqueryLink, List<VisBOnClickMustacheItem> clickEvents, String svgContent) {
 		InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.mustache");
 		MustacheTemplateManager templateManager = new MustacheTemplateManager(inputStream, "visb_html_view");
 		templateManager.put("jqueryLink", jqueryLink);
 		templateManager.put("clickEvents", clickEvents);
-		templateManager.put("jsonFile", jsonPath);
 		templateManager.put("svgContent", svgContent);
 		return templateManager.apply();
 	}

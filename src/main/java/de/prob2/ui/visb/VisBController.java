@@ -254,16 +254,15 @@ public class VisBController {
 	/**
 	 * Setting up the html file, it also sets the svg file for internal usage via {@link VisBFileHandler}.
 	 * @param svgPath svg file to be used
-	 * @param jsonPath json file to be used
 	 */
-	private void setupHTMLFile(final Path svgPath, final Path jsonPath) throws VisBException, IOException{
+	private void setupHTMLFile(final Path svgPath) throws VisBException, IOException{
 		if(svgPath == null || Files.notExists(svgPath)){
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
 		}
 		String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
 		if(!svgContent.isEmpty()) {
 			List<VisBOnClickMustacheItem> clickEvents = generateOnClickItems();
-			this.injector.getInstance(VisBStage.class).initialiseWebView(clickEvents, jsonPath, svgContent);
+			this.injector.getInstance(VisBStage.class).initialiseWebView(clickEvents, svgContent);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
@@ -316,7 +315,7 @@ public class VisBController {
 	public void setupVisualisation(final Path visBPath){
 		try {
 			setupVisBFile(visBPath);
-			setupHTMLFile(this.visBVisualisation.getSvgPath(), visBPath);
+			setupHTMLFile(this.visBVisualisation.getSvgPath());
 		} catch(VisBException e) {
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
 			updateInfo("visb.infobox.visualisation.error");
