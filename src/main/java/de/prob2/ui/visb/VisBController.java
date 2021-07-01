@@ -95,7 +95,6 @@ public class VisBController {
 			currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 				//This prepares VisB for the new Visualisation
 				closeCurrentVisualisation();
-				this.visBVisualisation = new VisBVisualisation();
 			});
 			currentTrace.addListener(currentTraceChangeListener);
 			injector.getInstance(VisBStage.class).onCloseRequestProperty().setValue(t -> this.clearListeners());
