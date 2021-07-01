@@ -26,7 +26,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.exceptions.VisBException;
-import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.beans.value.ChangeListener;
@@ -130,7 +129,7 @@ public class VisBController {
 
 		injector.getInstance(VisBDebugStage.class).updateItems(visBVisualisation.getVisBItems());
 
-		String svgChanges = buildJQueryForChanges(visBVisualisation.getVisBItems());
+		final List<String> svgChanges = buildJQueryForChanges(visBVisualisation.getVisBItems());
 
 		// TO DO: parse formula once when loading the file to check for syntax errors
 		if(svgChanges.isEmpty()){
@@ -139,29 +138,26 @@ public class VisBController {
 			try {
 				visBStage.runScript("resetDebugMessages()");
 				visBStage.runScript("resetErrorMessages()");
-				visBStage.runScript(svgChanges);
+				visBStage.runScript(String.join("", svgChanges));
 			} catch (JSException e){
 				alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 				updateInfo("visb.infobox.visualisation.error");
 				return;
 			}
 			//LOGGER.debug("Running script: "+svgChanges);
-			updateInfo("visb.infobox.visualisation.updated.nr",countLines(svgChanges));
+			updateInfo("visb.infobox.visualisation.updated.nr", svgChanges.size());
 		}
 	}
 
 	/**
 	 * Uses evaluateFormula to evaluate the visualisation items.
 	 * @param visItems items given by the {@link VisBController}
-	 * @return all needed jQueries in one string
+	 * @return all needed jQueries
 	 */
-	private String buildJQueryForChanges(List<VisBItem> visItems) {
-		StringBuilder jQueryForChanges = new StringBuilder();
-		for(VisBItem visItem : visItems){
-			String jQueryTemp = buildInvocation("changeAttribute", wrapAsString(visItem.getId()), wrapAsString(visItem.getAttribute()), visItem.getValue());
-			jQueryForChanges.append(jQueryTemp);
-		}
-		return jQueryForChanges.toString();
+	private static List<String> buildJQueryForChanges(List<VisBItem> visItems) {
+		return visItems.stream()
+			.map(visItem -> buildInvocation("changeAttribute", wrapAsString(visItem.getId()), wrapAsString(visItem.getAttribute()), visItem.getValue()))
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -179,11 +175,6 @@ public class VisBController {
 		Alert exceptionAlert = this.stageManager.makeExceptionAlert(ex, header, message, params);
 		exceptionAlert.initOwner(injector.getInstance(VisBStage.class));
 		exceptionAlert.showAndWait();
-	}
-
-	private static int countLines(String str) {
-	   String[] lines = str.split("\r\n|\r|\n");
-	   return  lines.length;
 	}
 
 	/**
