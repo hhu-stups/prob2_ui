@@ -96,7 +96,6 @@ public class VisBController {
 				closeCurrentVisualisation();
 			});
 			currentTrace.addListener(currentTraceChangeListener);
-			injector.getInstance(VisBStage.class).onCloseRequestProperty().setValue(t -> this.clearListeners());
 		}
 	}
 
