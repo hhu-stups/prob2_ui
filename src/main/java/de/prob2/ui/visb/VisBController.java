@@ -160,14 +160,6 @@ public class VisBController {
 	}
 
 	/**
-	 * This method removes the ChangeListener on the Trace. It is used, when the VisB Window is closed.
-	 */
-	private void clearListeners(){
-		currentTrace.removeListener(currentTraceChangeListener);
-		this.visBVisualisation = new VisBVisualisation();
-	}
-
-	/**
 	 * This method throws an ProB2-UI ExceptionAlert
 	 */
 	private void alert(Throwable ex, String header, String message, Object... params){
@@ -293,7 +285,8 @@ public class VisBController {
 	}
 
 	void closeCurrentVisualisation(){
-		this.clearListeners();
+		currentTrace.removeListener(currentTraceChangeListener);
+		this.visBVisualisation = new VisBVisualisation();
 		this.injector.getInstance(VisBStage.class).clear();
 		LOGGER.debug("Current visualisation is cleared and closed.");
 	}
