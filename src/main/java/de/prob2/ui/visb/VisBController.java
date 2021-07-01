@@ -115,23 +115,22 @@ public class VisBController {
 	}
 
 	private void applySVGChanges() {
-		String svgChanges;
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 
 		String stateID = currentTrace.getCurrentState().getId();
-		LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID, visBVisualisation.getVisBItemMap());
-		currentTrace.getStateSpace().execute(setAttributesCmd);
-
-		injector.getInstance(VisBDebugStage.class).updateItems(visBVisualisation.getVisBItems());
-
 		try {
-			svgChanges = buildJQueryForChanges(visBVisualisation.getVisBItems());
-		} catch(VisBNestedException | IllegalArgumentException | ProBError e){
+			LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID, visBVisualisation.getVisBItemMap());
+			currentTrace.getStateSpace().execute(setAttributesCmd);
+		} catch (ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 			updateInfo("visb.infobox.visualisation.error");
 			visBStage.clear();
 			return;
 		}
+
+		injector.getInstance(VisBDebugStage.class).updateItems(visBVisualisation.getVisBItems());
+
+		String svgChanges = buildJQueryForChanges(visBVisualisation.getVisBItems());
 
 		// TO DO: parse formula once when loading the file to check for syntax errors
 		if(svgChanges.isEmpty()){
@@ -155,17 +154,12 @@ public class VisBController {
 	 * Uses evaluateFormula to evaluate the visualisation items.
 	 * @param visItems items given by the {@link VisBController}
 	 * @return all needed jQueries in one string
-	 * @throws VisBNestedException from evaluating formula on trace
 	 */
-	private String buildJQueryForChanges(List<VisBItem> visItems) throws VisBNestedException {
+	private String buildJQueryForChanges(List<VisBItem> visItems) {
 		StringBuilder jQueryForChanges = new StringBuilder();
-		try {
-			for(VisBItem visItem : visItems){
-				String jQueryTemp = buildInvocation("changeAttribute", wrapAsString(visItem.getId()), wrapAsString(visItem.getAttribute()), visItem.getValue());
-				jQueryForChanges.append(jQueryTemp);
-			}
-		} catch (EvaluationException e){
-			throw(new VisBNestedException("Exception evaluating B formulas",e));
+		for(VisBItem visItem : visItems){
+			String jQueryTemp = buildInvocation("changeAttribute", wrapAsString(visItem.getId()), wrapAsString(visItem.getAttribute()), visItem.getValue());
+			jQueryForChanges.append(jQueryTemp);
 		}
 		return jQueryForChanges.toString();
 	}
