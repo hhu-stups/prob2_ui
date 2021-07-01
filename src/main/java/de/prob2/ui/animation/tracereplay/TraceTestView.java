@@ -145,13 +145,23 @@ public class TraceTestView extends Stage {
 		private MenuButton buildAddButton(VBox box, int index) {
 			final MenuButton btAddTest = new MenuButton("", new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
 			btAddTest.getStyleClass().add("icon-dark");
-			// TODO: Implement Menu to choose between predicate and enabledness
-			btAddTest.setOnMouseClicked(e1 -> {
+			MenuItem addPredicate = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.predicate"));
+			MenuItem addOperationEnabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.enabled"));
+			addPredicate.setOnAction(e1 -> {
 				Postcondition postcondition = new Postcondition(Postcondition.PostconditionKind.PREDICATE);
 				postconditions.get(index).add(postcondition);
 				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 				box.getChildren().add(box.getChildren().size() - 1, innerBox);
 			});
+			addOperationEnabled.setOnAction(e1 -> {
+				Postcondition postcondition = new Postcondition(Postcondition.PostconditionKind.ENABLEDNESS);
+				postconditions.get(index).add(postcondition);
+				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
+				box.getChildren().add(box.getChildren().size() - 1, innerBox);
+			});
+			btAddTest.getItems().add(addPredicate);
+			btAddTest.getItems().add(addOperationEnabled);
+
 			return btAddTest;
 		}
 
@@ -160,7 +170,6 @@ public class TraceTestView extends Stage {
 			innerBox.setSpacing(2);
 
 			String typeString;
-			ResourceBundle bundle = injector.getInstance(ResourceBundle.class);
 			Postcondition.PostconditionKind kind = postcondition.getKind();
 			switch (kind) {
 				case PREDICATE:
@@ -241,6 +250,8 @@ public class TraceTestView extends Stage {
 
 	private final FontSize fontSize;
 
+	private final ResourceBundle bundle;
+
 	private final Injector injector;
 
 	private ReplayTrace replayTrace;
@@ -251,10 +262,11 @@ public class TraceTestView extends Stage {
 
 	@Inject
 	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize,
-						 final Injector injector) {
+						 final ResourceBundle bundle, final Injector injector) {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
+		this.bundle = bundle;
 		this.injector = injector;
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}

@@ -24,8 +24,8 @@
 						</columnResizePolicy>
 						<columns>
 							<TableColumn fx:id="transitionColumn" text="%animation.tracereplay.test.view.columns.transition" sortable="false"/>
-							<TableColumn fx:id="testColumn" text="%animation.tracereplay.test.view.columns.test" sortable="false"/>
-							<TableColumn fx:id="descriptionColumn" text="%animation.tracereplay.test.view.columns.description" sortable="false"/>
+							<TableColumn fx:id="testColumn" minWidth="350.0" text="%animation.tracereplay.test.view.columns.test" sortable="false"/>
+							<TableColumn fx:id="descriptionColumn" minWidth="250.0" text="%animation.tracereplay.test.view.columns.description" sortable="false"/>
 						</columns>
 						<placeholder>
 							<Label text="Trace is Empty"/>

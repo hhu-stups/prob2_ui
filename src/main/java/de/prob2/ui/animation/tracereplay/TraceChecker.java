@@ -184,9 +184,23 @@ public class TraceChecker implements ITraceChecker {
 				boolean result = postconditionTransitionResults.get(j);
 				if(!result) {
 					Postcondition postcondition = transition.getPostconditions().get(j);
-					sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content"), transition.getOperationName(), postcondition.getValue()));
-					sb.append("\n");
+					Postcondition.PostconditionKind kind = postcondition.getKind();
+					switch (kind) {
+						case PREDICATE:
+							sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.predicate"), transition.getOperationName(), postcondition.getValue()));
+							sb.append("\n");
+							break;
+						case ENABLEDNESS:
+							sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabled"), transition.getOperationName(), postcondition.getValue()));
+							sb.append("\n");
+							break;
+						default:
+							throw new RuntimeException("Postcondition kind is unknown: " + kind);
+					}
 					failed = true;
+
+
+					sb.append("\n");
 				}
 			}
 		}
