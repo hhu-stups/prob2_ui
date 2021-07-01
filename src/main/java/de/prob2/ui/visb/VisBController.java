@@ -294,7 +294,6 @@ public class VisBController {
 	}
 
 	void closeCurrentVisualisation(){
-		if(visBVisualisation == null) return;
 		this.clearListeners();
 		this.injector.getInstance(VisBStage.class).clear();
 		LOGGER.debug("Current visualisation is cleared and closed.");
