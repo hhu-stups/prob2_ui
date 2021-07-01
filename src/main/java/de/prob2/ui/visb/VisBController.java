@@ -263,7 +263,7 @@ public class VisBController {
 		String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
 		if(!svgContent.isEmpty()) {
 			List<VisBOnClickMustacheItem> clickEvents = generateOnClickItems();
-			this.injector.getInstance(VisBStage.class).initialiseWebView(svgPath, clickEvents, jsonPath, svgContent);
+			this.injector.getInstance(VisBStage.class).initialiseWebView(clickEvents, jsonPath, svgContent);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
