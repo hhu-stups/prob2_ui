@@ -1,9 +1,5 @@
 package de.prob2.ui.visb;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -36,17 +32,17 @@ public class VisBFileHandler {
 
 	/**
 	 * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
-	 * @param inputFile File class object
+	 * @param jsonPath path to the VisB JSON file
 	 * @return VisBVisualisation object
 	 */
-	public VisBVisualisation constructVisualisationFromJSON(File inputFile) {
-		LoadVisBCommand loadCmd = new LoadVisBCommand(inputFile.getPath());
+	public VisBVisualisation constructVisualisationFromJSON(final Path jsonPath) {
+		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPath.toString());
 
 		currentTrace.getStateSpace().execute(loadCmd);
-		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(inputFile.getPath());
+		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.toString());
 
 		currentTrace.getStateSpace().execute(svgCmd);
-		String parentFile = inputFile.getParentFile().toString();
+		String parentFile = jsonPath.getParent().toString();
 
 		String filePath = svgCmd.getSvgPath();
 		Path svgPath = Paths.get(filePath);
@@ -60,7 +56,7 @@ public class VisBFileHandler {
 
 		List<VisBItem> items = loadItems();
 
-		return new VisBVisualisation(visBEvents, items, svgPath, inputFile);
+		return new VisBVisualisation(visBEvents, items, svgPath, jsonPath);
 	}
 
 	public List<VisBItem> loadItems() {
@@ -68,22 +64,5 @@ public class VisBFileHandler {
 		currentTrace.getStateSpace().execute(readVisBItemsCommand);
 
 		return readVisBItemsCommand.getItems();
-	}
-
-	/**
-	 * This is another help-method for {@link VisBController}. It takes a file and gives back the lines in string format.
-	 * @param file {@link File}
-	 * @return String representation of the file
-	 * @throws IOException If the file cannot be found, does not exist or is otherwise not accessible.
-	 */
-	String fileToString(File file) throws IOException{
-		StringBuilder sb = new StringBuilder();
-		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-		String s = bufferedReader.readLine();
-		while (s != null) {
-			sb.append(s);
-			s = bufferedReader.readLine();
-		}
-		return sb.toString();
 	}
 }

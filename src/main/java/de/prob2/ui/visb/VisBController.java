@@ -1,7 +1,9 @@
 package de.prob2.ui.visb;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -251,17 +253,17 @@ public class VisBController {
 
 	/**
 	 * Setting up the html file, it also sets the svg file for internal usage via {@link VisBFileHandler}.
-	 * @param svgFile svg file to be used
-	 * @param jsonFile json file to be used
+	 * @param svgPath svg file to be used
+	 * @param jsonPath json file to be used
 	 */
-	private void setupHTMLFile(File svgFile, File jsonFile) throws VisBException, IOException{
-		if(svgFile == null || !svgFile.exists()){
+	private void setupHTMLFile(final Path svgPath, final Path jsonPath) throws VisBException, IOException{
+		if(svgPath == null || Files.notExists(svgPath)){
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
 		}
-		String svgContent = this.injector.getInstance(VisBFileHandler.class).fileToString(svgFile);
-		if(svgContent != null && !svgContent.isEmpty()) {
+		String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
+		if(!svgContent.isEmpty()) {
 			List<VisBOnClickMustacheItem> clickEvents = generateOnClickItems();
-			this.injector.getInstance(VisBStage.class).initialiseWebView(svgFile, clickEvents, jsonFile, svgContent);
+			this.injector.getInstance(VisBStage.class).initialiseWebView(svgPath, clickEvents, jsonPath, svgContent);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
 			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
@@ -272,7 +274,7 @@ public class VisBController {
 		VisBVisualisation currentVisualisation = this.visBVisualisation;
 		closeCurrentVisualisation();
 		this.visBVisualisation = currentVisualisation;
-		setupVisualisation(this.visBVisualisation.getJsonFile());
+		setupVisualisation(this.visBVisualisation.getJsonPath());
 		if(!visBVisualisation.isReady()){
 			if(visBVisualisation.getSvgPath() != null) {
 				updateInfo("visb.infobox.visualisation.error");
@@ -293,15 +295,15 @@ public class VisBController {
 
 	/**
 	 * Setting up the JSON / VisB file for internal usage via {@link VisBFileHandler}.
-	 * @param visFile JSON / VisB file to be used
+	 * @param visBPath JSON / VisB file to be used
 	 */
-	void setupVisBFile(File visFile) {
-		if(visFile == null){
+	void setupVisBFile(final Path visBPath) {
+		if(visBPath == null){
 			return;
 		}
 		currentTrace.removeListener(currentTraceChangeListener);
 		try {
-			this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visFile);
+			this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visBPath);
 			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 		} catch (ProBError e) {
 			throw e;
@@ -311,17 +313,17 @@ public class VisBController {
 		}
 	}
 
-	public void setupVisualisation(File file){
+	public void setupVisualisation(final Path visBPath){
 		try {
-			setupVisBFile(file);
-			setupHTMLFile(new File(this.visBVisualisation.getSvgPath().toUri()), file);
+			setupVisBFile(visBPath);
+			setupHTMLFile(this.visBVisualisation.getSvgPath(), visBPath);
 		} catch(VisBException e) {
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
 		} catch (ProBError e) {
 			// Set VisB Visualisation with VisB file only. This is then used for reload (after the JSON syntax errors are fixed)
-			this.visBVisualisation = new VisBVisualisation(null, null, null, file);
+			this.visBVisualisation = new VisBVisualisation(null, null, null, visBPath);
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
