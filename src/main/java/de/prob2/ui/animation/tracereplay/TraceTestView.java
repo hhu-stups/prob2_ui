@@ -2,41 +2,27 @@ package de.prob2.ui.animation.tracereplay;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
+import de.prob.check.tracereplay.OperationEnabledness;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
+import de.prob.check.tracereplay.PostconditionPredicate;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.statespace.FormalismType;
-import de.prob.statespace.OperationInfo;
-import de.prob.statespace.Transition;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.Project;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.sharedviews.DescriptionView;
-import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.Checked;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -44,11 +30,9 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
@@ -59,9 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -124,13 +106,31 @@ public class TraceTestView extends Stage {
 			HBox.setHgrow(textField, Priority.ALWAYS);
 			//TODO
 			textField.setPrefHeight(fontSize.getFontSize() * 1.5);
-			textField.setText(postcondition.getValue());
 
-			textField.textProperty().addListener((o, from, to) -> {
-				if(to != null) {
-					postcondition.setValue(to);
+			switch (postcondition.getKind()) {
+				case PREDICATE: {
+					String predicate = ((PostconditionPredicate) postcondition).getPredicate();
+					textField.setText(predicate);
+					textField.textProperty().addListener((o, from, to) -> {
+						if (to != null) {
+							((PostconditionPredicate) postcondition).setPredicate(to);
+						}
+					});
+					break;
 				}
-			});
+				case ENABLEDNESS: {
+					String predicate = ((OperationEnabledness) postcondition).getOperation();
+					textField.setText(predicate);
+					textField.textProperty().addListener((o, from, to) -> {
+						if (to != null) {
+							((OperationEnabledness) postcondition).setOperation(to);
+						}
+					});
+					break;
+				}
+				default:
+					throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
+			}
 			return textField;
 		}
 
@@ -148,13 +148,13 @@ public class TraceTestView extends Stage {
 			MenuItem addPredicate = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.predicate"));
 			MenuItem addOperationEnabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.enabled"));
 			addPredicate.setOnAction(e1 -> {
-				Postcondition postcondition = new Postcondition(Postcondition.PostconditionKind.PREDICATE);
+				PostconditionPredicate postcondition = new PostconditionPredicate();
 				postconditions.get(index).add(postcondition);
 				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 				box.getChildren().add(box.getChildren().size() - 1, innerBox);
 			});
 			addOperationEnabled.setOnAction(e1 -> {
-				Postcondition postcondition = new Postcondition(Postcondition.PostconditionKind.ENABLEDNESS);
+				OperationEnabledness postcondition = new OperationEnabledness();
 				postconditions.get(index).add(postcondition);
 				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 				box.getChildren().add(box.getChildren().size() - 1, innerBox);
@@ -170,8 +170,7 @@ public class TraceTestView extends Stage {
 			innerBox.setSpacing(2);
 
 			String typeString;
-			Postcondition.PostconditionKind kind = postcondition.getKind();
-			switch (kind) {
+			switch (postcondition.getKind()) {
 				case PREDICATE:
 					typeString = bundle.getString("animation.trace.replay.test.postcondition.predicate");
 					break;
@@ -179,9 +178,8 @@ public class TraceTestView extends Stage {
 					typeString = bundle.getString("animation.trace.replay.test.postcondition.enabled");
 					break;
 				default:
-					throw new RuntimeException("Given postcondition kind does not exist: " + kind);
+					throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
 			}
-
 			final Label typeLabel = new Label(typeString);
 			final TextField postconditionTextField = buildPostconditionTextField(postcondition);
 			final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);

@@ -6,9 +6,11 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.check.tracereplay.ITraceChecker;
+import de.prob.check.tracereplay.OperationEnabledness;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
+import de.prob.check.tracereplay.PostconditionPredicate;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.StateSpace;
@@ -184,22 +186,24 @@ public class TraceChecker implements ITraceChecker {
 				boolean result = postconditionTransitionResults.get(j);
 				if(!result) {
 					Postcondition postcondition = transition.getPostconditions().get(j);
-					Postcondition.PostconditionKind kind = postcondition.getKind();
-					switch (kind) {
+					switch (postcondition.getKind()) {
 						case PREDICATE:
-							sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.predicate"), transition.getOperationName(), postcondition.getValue()));
+							sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.predicate"), transition.getOperationName(), ((PostconditionPredicate) postcondition).getPredicate()));
 							sb.append("\n");
 							break;
 						case ENABLEDNESS:
-							sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabled"), transition.getOperationName(), postcondition.getValue()));
+							String predicate = ((OperationEnabledness) postcondition).getPredicate();
+							if(predicate.isEmpty()) {
+								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabled"), transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation()));
+							} else {
+								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabledWithPredicate"), transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation(), predicate));
+							}
 							sb.append("\n");
 							break;
 						default:
-							throw new RuntimeException("Postcondition kind is unknown: " + kind);
+							throw new RuntimeException("Postcondition kind is unknown: " + postcondition.getKind());
 					}
 					failed = true;
-
-
 					sb.append("\n");
 				}
 			}
