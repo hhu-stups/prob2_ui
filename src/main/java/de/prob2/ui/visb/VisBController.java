@@ -79,12 +79,10 @@ public class VisBController {
 		LOGGER.debug("Initialise TraceChangeListener");
 		this.currentTraceChangeListener = ((observable, oldTrace, newTrace) -> {
 			if(newTrace != null){
-				if(newTrace.getCurrentState() != null && newTrace.getCurrentState().isInitialised()){
-					updateVisualisation();
-				} else {
-					showUpdateVisualisationNotPossible();
+				if (oldTrace == null || !oldTrace.getStateSpace().equals(newTrace.getStateSpace())) {
 					reloadVisualisation();
 				}
+				updateVisualisationIfPossible();
 			}
 		});
 	}
