@@ -155,9 +155,9 @@ public class VisBController {
 	 * Uses evaluateFormula to evaluate the visualisation items.
 	 * @param visItems items given by the {@link VisBController}
 	 * @return all needed jQueries in one string
-	 * @throws EvaluationException from evaluating formula on trace
+	 * @throws VisBNestedException from evaluating formula on trace
 	 */
-	private String buildJQueryForChanges(List<VisBItem> visItems) throws EvaluationException, VisBNestedException {
+	private String buildJQueryForChanges(List<VisBItem> visItems) throws VisBNestedException {
 		StringBuilder jQueryForChanges = new StringBuilder();
 		try {
 			for(VisBItem visItem : visItems){
