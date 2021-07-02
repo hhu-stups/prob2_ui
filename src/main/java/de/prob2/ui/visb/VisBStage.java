@@ -192,7 +192,7 @@ public class VisBStage extends Stage {
 
 		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
 			if (from == null && to != null && visBController.getVisBPath() == null) {
-				visBController.setVisBPath(this.getPathFromDefinitions(to));
+				visBController.setVisBPath(getPathFromDefinitions(to));
 			}
 		});
 
@@ -213,10 +213,10 @@ public class VisBStage extends Stage {
 		}
 	}
 
-	private Path getPathFromDefinitions(final StateSpace stateSpace) {
+	private static Path getPathFromDefinitions(final StateSpace stateSpace) {
 		ReadVisBPathFromDefinitionsCommand cmd = new ReadVisBPathFromDefinitionsCommand();
 		stateSpace.execute(cmd);
-		return cmd.getPath() == null ? null : currentProject.getLocation().resolve(cmd.getPath());
+		return cmd.getPath() == null ? null : stateSpace.getModel().getModelFile().toPath().resolveSibling(cmd.getPath());
 	}
 
 	public void loadVisBFileFromMachine(Machine machine) {
@@ -228,7 +228,7 @@ public class VisBStage extends Stage {
 			if (visBVisualisation != null) {
 				visBPath = currentProject.getLocation().resolve(visBVisualisation);
 			} else if (stateSpace != null) {
-				visBPath = this.getPathFromDefinitions(stateSpace);
+				visBPath = getPathFromDefinitions(stateSpace);
 			} else {
 				visBPath = null;
 			}
