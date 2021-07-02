@@ -84,7 +84,6 @@ public class VisBStage extends Stage {
 	private final VisBController visBController;
 	private boolean connectorSet = false;
 	private final FileChooserManager fileChooserManager;
-	private final ObjectProperty<Path> visBPath;
 
 	@FXML
 	private MenuBar visbMenuBar;
@@ -153,7 +152,6 @@ public class VisBStage extends Stage {
 		this.defaultPathHandler = defaultPathHandler;
 		this.visBController = visBController;
 		defaultPathHandler.setVisBStage(this);
-		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
 	}
 
@@ -175,10 +173,10 @@ public class VisBStage extends Stage {
 		// zoom fonts in/out (but only of those that are not given a fixed size):
 		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
 		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
-		this.titleProperty().bind(Bindings.createStringBinding(() -> visBPath.isNull().get() ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBPath.get()).toString()), visBPath));
+		this.titleProperty().bind(Bindings.createStringBinding(() -> visBController.getVisBPath() == null ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBController.getVisBPath()).toString()), visBController.visBPathProperty()));
 
 		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
-			visBPath.set(null);
+			visBController.setVisBPath(null);
 			visBController.closeCurrentVisualisation();
 		});
 		//Load VisB file from machine, when window is opened and set listener on the current machine
@@ -187,7 +185,7 @@ public class VisBStage extends Stage {
 			loadVisBFileFromMachine(currentProject.getCurrentMachine());
 		});
 
-		this.reloadVisualisationButton.disableProperty().bind(visBPath.isNull());
+		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			openTraceSelectionButton.disableProperty().unbind();
@@ -197,7 +195,7 @@ public class VisBStage extends Stage {
 		});
 
 		this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> {
-			if (to != null && (from == null || !from.getLoadedMachine().equals(to.getLoadedMachine())) && visBPath.isNotNull().get()) {
+			if (to != null && (from == null || !from.getLoadedMachine().equals(to.getLoadedMachine())) && visBController.getVisBPath() != null) {
 				this.setupMachineVisBFile();
 			}
 		});
@@ -211,7 +209,7 @@ public class VisBStage extends Stage {
 
 	private void updateUIOnMachine(Machine machine) {
 		final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
-		manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBPath.isNull()));
+		manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
 		if(machine != null) {
 			openTraceSelectionButton.disableProperty().bind(machine.tracesProperty().emptyProperty());
 		} else {
@@ -221,7 +219,7 @@ public class VisBStage extends Stage {
 
 	public void loadVisBFileFromMachine(Machine machine) {
 		clear();
-		visBPath.set(null);
+		visBController.setVisBPath(null);
 		if(machine != null) {
 
 			Path pathFromDefinitions = null;
@@ -233,7 +231,7 @@ public class VisBStage extends Stage {
 			}
 
 			Path visBVisualisation = machine.getVisBVisualisation();
-			visBPath.set(visBVisualisation == null ? pathFromDefinitions : currentProject.getLocation().resolve(visBVisualisation));
+			visBController.setVisBPath(visBVisualisation == null ? pathFromDefinitions : currentProject.getLocation().resolve(visBVisualisation));
 			if(currentTrace.getStateSpace() != null) {
 				Platform.runLater(this::setupMachineVisBFile);
 			}
@@ -241,7 +239,7 @@ public class VisBStage extends Stage {
 	}
 
 	private void setupMachineVisBFile() {
-		final Path path = visBPath.get();
+		final Path path = visBController.getVisBPath();
 		if (path != null) {
 			visBController.setupVisualisation(path);
 		}
@@ -372,7 +370,7 @@ public class VisBStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if(path != null) {
 			clear();
-			visBPath.set(path);
+			visBController.setVisBPath(path);
 			visBController.setupVisualisation(path);
 		}
 	}
@@ -412,7 +410,7 @@ public class VisBStage extends Stage {
 
 	@FXML
 	public void closeVisualisation() {
-		visBPath.set(null);
+		visBController.setVisBPath(null);
 		visBController.closeCurrentVisualisation();
 	}
 
@@ -460,7 +458,7 @@ public class VisBStage extends Stage {
 	}
 
 	public ObjectProperty<Path> getVisBPath() {
-		return visBPath;
+		return visBController.visBPathProperty();
 	}
 
 	public void saveHTMLExport(VisBExportKind kind) {

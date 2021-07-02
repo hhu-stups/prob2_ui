@@ -29,6 +29,8 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
 
@@ -56,6 +58,7 @@ public class VisBController {
 	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
 
+	private final ObjectProperty<Path> visBPath;
 	private VisBVisualisation visBVisualisation;
 
 	/**
@@ -74,6 +77,7 @@ public class VisBController {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
+		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.visBVisualisation = new VisBVisualisation();
 
 		LOGGER.debug("Initialise TraceChangeListener");
@@ -85,6 +89,18 @@ public class VisBController {
 				updateVisualisationIfPossible();
 			}
 		});
+	}
+
+	public ObjectProperty<Path> visBPathProperty() {
+		return this.visBPath;
+	}
+
+	public Path getVisBPath() {
+		return this.visBPathProperty().get();
+	}
+
+	public void setVisBPath(final Path visBPath) {
+		this.visBPathProperty().set(visBPath);
 	}
 
 	/**
