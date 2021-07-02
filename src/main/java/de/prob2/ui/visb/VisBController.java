@@ -297,15 +297,8 @@ public class VisBController {
 			return;
 		}
 		currentTrace.removeListener(currentTraceChangeListener);
-		try {
-			this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visBPath);
-			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
-		} catch (ProBError e) {
-			throw e;
-		} catch (RuntimeException e) {
-			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
-			updateInfo("visb.infobox.visualisation.error");
-		}
+		this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visBPath);
+		this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 	}
 
 	public void setupVisualisation(final Path visBPath){
