@@ -5,8 +5,6 @@ public class VisBException extends Exception {
 
 	private String message;
 
-	public VisBException(){}
-
 	public VisBException(String message){
 		this.message = message;
 	}

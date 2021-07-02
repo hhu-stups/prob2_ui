@@ -31,7 +31,6 @@ import de.prob2.ui.project.DefaultPathHandler;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceSelectionView;
 import de.prob2.ui.simulation.SimulatorStage;
-import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.help.UserManualStage;
 
 import javafx.application.Platform;
@@ -273,7 +272,9 @@ public class VisBStage extends Stage {
 
 	private void showJavascriptAlert(String message) {
 		LOGGER.debug("JavaScript ALERT: " + message);
-		alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
+		final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
+		alert.initOwner(this);
+		alert.showAndWait();
 	}
 
 	private void addVisBConnector() {
@@ -356,7 +357,9 @@ public class VisBStage extends Stage {
 	public void loadVisBFile() {
 		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
-			alert(new VisBException(),  "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
+			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
+			alert.initOwner(this);
+			alert.showAndWait();
 			return;
 		}
 		FileChooser fileChooser = new FileChooser();
