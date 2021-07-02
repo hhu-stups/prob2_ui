@@ -27,7 +27,6 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.beans.value.ChangeListener;
@@ -255,14 +254,14 @@ public class VisBController {
 	 * Setting up the html file, it also sets the svg file for internal usage via {@link VisBFileHandler}.
 	 * @param svgPath svg file to be used
 	 */
-	private void setupHTMLFile(final Path svgPath) throws VisBException, IOException{
+	private void setupHTMLFile(final Path svgPath) throws IOException{
 		String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
 		if(!svgContent.isEmpty()) {
 			List<VisBOnClickMustacheItem> clickEvents = generateOnClickItems();
 			this.injector.getInstance(VisBStage.class).initialiseWebView(clickEvents, svgContent);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
-			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
+			throw new IOException(bundle.getString("visb.exception.svg.empty"));
 		}
 	}
 
@@ -313,10 +312,6 @@ public class VisBController {
 		try {
 			setupVisBFile(visBPath);
 			setupHTMLFile(this.visBVisualisation.getSvgPath());
-		} catch(VisBException e) {
-			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
-			updateInfo("visb.infobox.visualisation.error");
-			return;
 		} catch (ProBError e) {
 			// Set VisB Visualisation with VisB file only. This is then used for reload (after the JSON syntax errors are fixed)
 			this.visBVisualisation = new VisBVisualisation(null, null, null, visBPath);
