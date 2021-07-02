@@ -122,7 +122,6 @@ public class TraceTestView extends Stage {
 		private TextField buildPostconditionTextField(Postcondition postcondition) {
 			final TextField textField = new TextField("");
 			HBox.setHgrow(textField, Priority.ALWAYS);
-			//TODO
 			textField.setPrefHeight(fontSize.getFontSize() * 1.5);
 
 			switch (postcondition.getKind()) {
