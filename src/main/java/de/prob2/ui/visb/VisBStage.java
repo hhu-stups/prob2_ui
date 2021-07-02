@@ -239,9 +239,10 @@ public class VisBStage extends Stage {
 	}
 
 	private void setupMachineVisBFile() {
-		if(visBPath.isNotNull().get()) {
+		final Path path = visBPath.get();
+		if (path != null) {
 			VisBController visBController = injector.getInstance(VisBController.class);
-			visBController.setupVisualisation(visBPath.get());
+			visBController.setupVisualisation(path);
 		}
 	}
 

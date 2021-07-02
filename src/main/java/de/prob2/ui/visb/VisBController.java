@@ -266,6 +266,9 @@ public class VisBController {
 	}
 
 	void reloadVisualisation(){
+		if (this.visBVisualisation.getJsonPath() == null) {
+			return;
+		}
 		VisBVisualisation currentVisualisation = this.visBVisualisation;
 		closeCurrentVisualisation();
 		this.visBVisualisation = currentVisualisation;
@@ -293,9 +296,6 @@ public class VisBController {
 	 * @param visBPath JSON / VisB file to be used
 	 */
 	void setupVisBFile(final Path visBPath) {
-		if(visBPath == null){
-			return;
-		}
 		currentTrace.removeListener(currentTraceChangeListener);
 		this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visBPath);
 		this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
