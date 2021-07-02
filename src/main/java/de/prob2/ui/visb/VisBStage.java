@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
@@ -189,6 +190,12 @@ public class VisBStage extends Stage {
 			loadVisBFileFromMachine(to);
 		});
 
+		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
+			if (from == null && to != null && visBController.getVisBPath() == null) {
+				visBController.setVisBPath(this.getPathFromDefinitions(to));
+			}
+		});
+
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
 		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
 		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
@@ -206,20 +213,26 @@ public class VisBStage extends Stage {
 		}
 	}
 
+	private Path getPathFromDefinitions(final StateSpace stateSpace) {
+		ReadVisBPathFromDefinitionsCommand cmd = new ReadVisBPathFromDefinitionsCommand();
+		stateSpace.execute(cmd);
+		return cmd.getPath() == null ? null : currentProject.getLocation().resolve(cmd.getPath());
+	}
+
 	public void loadVisBFileFromMachine(Machine machine) {
 		visBController.setVisBPath(null);
 		if(machine != null) {
-
-			Path pathFromDefinitions = null;
-
-			if(currentTrace.getStateSpace() != null) {
-				ReadVisBPathFromDefinitionsCommand cmd = new ReadVisBPathFromDefinitionsCommand();
-				currentTrace.getStateSpace().execute(cmd);
-				pathFromDefinitions = cmd.getPath() == null ? null : currentProject.getLocation().resolve(cmd.getPath());
+			final Path visBVisualisation = machine.getVisBVisualisation();
+			final StateSpace stateSpace = currentTrace.getStateSpace();
+			final Path visBPath;
+			if (visBVisualisation != null) {
+				visBPath = currentProject.getLocation().resolve(visBVisualisation);
+			} else if (stateSpace != null) {
+				visBPath = this.getPathFromDefinitions(stateSpace);
+			} else {
+				visBPath = null;
 			}
-
-			Path visBVisualisation = machine.getVisBVisualisation();
-			visBController.setVisBPath(visBVisualisation == null ? pathFromDefinitions : currentProject.getLocation().resolve(visBVisualisation));
+			visBController.setVisBPath(visBPath);
 		}
 	}
 
