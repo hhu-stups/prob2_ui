@@ -262,10 +262,6 @@ public class VisBStage extends Stage {
 			String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, svgContent);
 			this.webView.getEngine().loadContent(htmlFile);
 			addVisBConnector();
-			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-			this.webView.getEngine().setOnError(this::treatJavascriptError); // check if we get errors
-			// Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
-			// engine.setConfirmHandler(message -> showConfirm(message));
 		}
 
 	}
@@ -293,9 +289,10 @@ public class VisBStage extends Stage {
 					webView.getEngine().executeScript("activateClickEvents();");
 				}
 			});
-			this.webView.getEngine().setOnError(e -> {
-				alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.error");
-			});
+			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+			this.webView.getEngine().setOnError(this::treatJavascriptError); // check if we get errors
+			// Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
+			// engine.setConfirmHandler(message -> showConfirm(message));
 			LOGGER.debug("VisBConnector was set into globals.");
 		}
 	}
