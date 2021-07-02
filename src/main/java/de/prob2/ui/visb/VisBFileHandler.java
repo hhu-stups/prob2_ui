@@ -56,7 +56,7 @@ public class VisBFileHandler {
 
 		List<VisBItem> items = loadItems();
 
-		return new VisBVisualisation(visBEvents, items, svgPath, jsonPath);
+		return new VisBVisualisation(visBEvents, items, svgPath);
 	}
 
 	public List<VisBItem> loadItems() {

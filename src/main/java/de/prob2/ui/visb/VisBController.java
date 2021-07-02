@@ -282,13 +282,11 @@ public class VisBController {
 	}
 
 	void reloadVisualisation(){
-		if (this.visBVisualisation.getJsonPath() == null) {
+		if (this.getVisBPath() == null) {
 			return;
 		}
-		VisBVisualisation currentVisualisation = this.visBVisualisation;
 		closeCurrentVisualisation();
-		this.visBVisualisation = currentVisualisation;
-		setupVisualisation(this.visBVisualisation.getJsonPath());
+		setupVisualisation(this.getVisBPath());
 		if(!visBVisualisation.isReady()){
 			if(visBVisualisation.getSvgPath() != null) {
 				updateInfo("visb.infobox.visualisation.error");
@@ -322,8 +320,7 @@ public class VisBController {
 			setupVisBFile(visBPath);
 			setupHTMLFile(this.visBVisualisation.getSvgPath());
 		} catch (ProBError e) {
-			// Set VisB Visualisation with VisB file only. This is then used for reload (after the JSON syntax errors are fixed)
-			this.visBVisualisation = new VisBVisualisation(null, null, null, visBPath);
+			this.visBVisualisation = new VisBVisualisation();
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;

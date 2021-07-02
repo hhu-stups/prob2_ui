@@ -13,7 +13,6 @@ import de.prob.animator.domainobjects.VisBItem;
  */
 public class VisBVisualisation {
 	private Path svgPath;
-	private Path jsonPath;
 	private List<VisBEvent> visBEvents;
 	private List<VisBItem> visBItems;
 	private Map<VisBItem.VisBItemKey, VisBItem> visBItemMap;
@@ -22,15 +21,13 @@ public class VisBVisualisation {
 		this.visBEvents = null;
 		this.visBItems = null;
 		this.svgPath = null;
-		this.jsonPath = null;
 		this.visBItemMap = null;
 	}
 
-	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath, Path jsonPath) {
+	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath) {
 		this.visBEvents = visBEvents;
 		this.visBItems = visBItems;
 		this.svgPath = svgPath;
-		this.jsonPath = jsonPath;
 		createItemMap();
 	}
 
@@ -60,10 +57,6 @@ public class VisBVisualisation {
 		return svgPath;
 	}
 
-	public Path getJsonPath() {
-		return jsonPath;
-	}
-
 	public VisBEvent getEventForID(String id){
 		if(visBEvents != null && !visBEvents.isEmpty()){
 			for(VisBEvent visBEvent : visBEvents){
@@ -88,8 +81,6 @@ public class VisBVisualisation {
 		appendListWithNull(stringBuilder, visBItems);
 		stringBuilder.append("SVG: \n");
 		appendObjectWithNull(stringBuilder, svgPath);
-		stringBuilder.append("JSON: \n");
-		appendObjectWithNull(stringBuilder, jsonPath);
 		return stringBuilder.toString();
 	}
 
