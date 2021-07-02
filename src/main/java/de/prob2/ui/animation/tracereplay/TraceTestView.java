@@ -78,12 +78,16 @@ public class TraceTestView extends Stage {
 
 				for(int i = 0; i < tableItem.getPostconditions().size(); i++) {
 					Postcondition postcondition = tableItem.getPostconditions().get(i);
-					final HBox innerBox = buildInnerBox(box, postcondition, false, index, i);
+					final HBox innerBox = buildInnerBox(box, postcondition, false, hasAdditionalPredicateField(postcondition), index, i);
 					box.getChildren().add(box.getChildren().size() - 1, innerBox);
 				}
 
 				this.setGraphic(box);
 			}
+		}
+
+		private boolean hasAdditionalPredicateField(Postcondition postcondition) {
+			return postcondition.getKind() == Postcondition.PostconditionKind.ENABLEDNESS && !((OperationEnabledness) postcondition).getPredicate().isEmpty();
 		}
 
 		private Label buildRemoveButton(VBox box, HBox innerBox, Postcondition postcondition, int index) {
@@ -99,6 +103,20 @@ public class TraceTestView extends Stage {
 				postconditions.get(index).remove(postcondition);
 			});
 			return btRemoveTest;
+		}
+
+		private TextField buildOperationPredicateTextField(Postcondition postcondition) {
+			final TextField textField = new TextField("");
+			HBox.setHgrow(textField, Priority.ALWAYS);
+			textField.setPrefHeight(fontSize.getFontSize() * 1.5);
+			String predicate = ((OperationEnabledness) postcondition).getPredicate();
+			textField.setText(predicate);
+			textField.textProperty().addListener((o, from, to) -> {
+				if (to != null) {
+					((OperationEnabledness) postcondition).setPredicate(to);
+				}
+			});
+			return textField;
 		}
 
 		private TextField buildPostconditionTextField(Postcondition postcondition) {
@@ -119,8 +137,8 @@ public class TraceTestView extends Stage {
 					break;
 				}
 				case ENABLEDNESS: {
-					String predicate = ((OperationEnabledness) postcondition).getOperation();
-					textField.setText(predicate);
+					String operation = ((OperationEnabledness) postcondition).getOperation();
+					textField.setText(operation);
 					textField.textProperty().addListener((o, from, to) -> {
 						if (to != null) {
 							((OperationEnabledness) postcondition).setOperation(to);
@@ -147,25 +165,36 @@ public class TraceTestView extends Stage {
 			btAddTest.getStyleClass().add("icon-dark");
 			MenuItem addPredicate = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.predicate"));
 			MenuItem addOperationEnabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.enabled"));
+			MenuItem addOperationEnabledWithPredicate = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.enabledWithPredicate"));
+
 			addPredicate.setOnAction(e1 -> {
 				PostconditionPredicate postcondition = new PostconditionPredicate();
 				postconditions.get(index).add(postcondition);
-				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
+				final HBox innerBox = buildInnerBox(box, postcondition, true, false, index, postconditions.get(index).size());
 				box.getChildren().add(box.getChildren().size() - 1, innerBox);
 			});
 			addOperationEnabled.setOnAction(e1 -> {
 				OperationEnabledness postcondition = new OperationEnabledness();
 				postconditions.get(index).add(postcondition);
-				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
+				final HBox innerBox = buildInnerBox(box, postcondition, true, false, index, postconditions.get(index).size());
 				box.getChildren().add(box.getChildren().size() - 1, innerBox);
 			});
+
+			addOperationEnabledWithPredicate.setOnAction(e1 -> {
+				OperationEnabledness postcondition = new OperationEnabledness();
+				postconditions.get(index).add(postcondition);
+				final HBox innerBox = buildInnerBox(box, postcondition, true, true, index, postconditions.get(index).size());
+				box.getChildren().add(box.getChildren().size() - 1, innerBox);
+			});
+
 			btAddTest.getItems().add(addPredicate);
 			btAddTest.getItems().add(addOperationEnabled);
+			btAddTest.getItems().add(addOperationEnabledWithPredicate);
 
 			return btAddTest;
 		}
 
-		private HBox buildInnerBox(VBox box, Postcondition postcondition, boolean isNewBox, int index, int postconditionIndex) {
+		private HBox buildInnerBox(VBox box, Postcondition postcondition, boolean isNewBox, boolean hasAdditionalPredicateField, int index, int postconditionIndex) {
 			final HBox innerBox = new HBox();
 			innerBox.setSpacing(2);
 
@@ -195,6 +224,14 @@ public class TraceTestView extends Stage {
 
 			innerBox.getChildren().add(typeLabel);
 			innerBox.getChildren().add(postconditionTextField);
+
+			if(hasAdditionalPredicateField) {
+				final Label withLabel = new Label(bundle.getString("animation.trace.replay.test.postcondition.with"));
+				final TextField predicateTextField = buildOperationPredicateTextField(postcondition);
+				innerBox.getChildren().add(withLabel);
+				innerBox.getChildren().add(predicateTextField);
+			}
+
 			innerBox.getChildren().add(statusIcon);
 			innerBox.getChildren().add(btRemoveTest);
 			return innerBox;
