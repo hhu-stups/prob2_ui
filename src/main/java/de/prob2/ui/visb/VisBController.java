@@ -256,9 +256,6 @@ public class VisBController {
 	 * @param svgPath svg file to be used
 	 */
 	private void setupHTMLFile(final Path svgPath) throws VisBException, IOException{
-		if(svgPath == null || Files.notExists(svgPath)){
-			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
-		}
 		String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
 		if(!svgContent.isEmpty()) {
 			List<VisBOnClickMustacheItem> clickEvents = generateOnClickItems();
