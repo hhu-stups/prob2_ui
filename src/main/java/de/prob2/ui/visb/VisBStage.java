@@ -33,11 +33,9 @@ import de.prob2.ui.sharedviews.TraceSelectionView;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
@@ -175,10 +173,7 @@ public class VisBStage extends Stage {
 		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
 		this.titleProperty().bind(Bindings.createStringBinding(() -> visBController.getVisBPath() == null ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBController.getVisBPath()).toString()), visBController.visBPathProperty()));
 
-		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
-			visBController.setVisBPath(null);
-			visBController.closeCurrentVisualisation();
-		});
+		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> visBController.setVisBPath(null));
 		//Load VisB file from machine, when window is opened and set listener on the current machine
 		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> {
 			updateUIOnMachine(currentProject.getCurrentMachine());
@@ -192,12 +187,6 @@ public class VisBStage extends Stage {
 			manageDefaultVisualisationButton.disableProperty().unbind();
 			updateUIOnMachine(to);
 			loadVisBFileFromMachine(to);
-		});
-
-		this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> {
-			if (to != null && (from == null || !from.getLoadedMachine().equals(to.getLoadedMachine())) && visBController.getVisBPath() != null) {
-				this.setupMachineVisBFile();
-			}
 		});
 
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
@@ -218,7 +207,6 @@ public class VisBStage extends Stage {
 	}
 
 	public void loadVisBFileFromMachine(Machine machine) {
-		clear();
 		visBController.setVisBPath(null);
 		if(machine != null) {
 
@@ -232,16 +220,6 @@ public class VisBStage extends Stage {
 
 			Path visBVisualisation = machine.getVisBVisualisation();
 			visBController.setVisBPath(visBVisualisation == null ? pathFromDefinitions : currentProject.getLocation().resolve(visBVisualisation));
-			if(currentTrace.getStateSpace() != null) {
-				Platform.runLater(this::setupMachineVisBFile);
-			}
-		}
-	}
-
-	private void setupMachineVisBFile() {
-		final Path path = visBController.getVisBPath();
-		if (path != null) {
-			visBController.setupVisualisation(path);
 		}
 	}
 
@@ -371,7 +349,6 @@ public class VisBStage extends Stage {
 		if(path != null) {
 			clear();
 			visBController.setVisBPath(path);
-			visBController.setupVisualisation(path);
 		}
 	}
 
@@ -411,7 +388,6 @@ public class VisBStage extends Stage {
 	@FXML
 	public void closeVisualisation() {
 		visBController.setVisBPath(null);
-		visBController.closeCurrentVisualisation();
 	}
 
 	@FXML

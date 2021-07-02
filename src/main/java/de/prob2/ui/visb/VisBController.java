@@ -25,7 +25,6 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
@@ -52,10 +51,8 @@ public class VisBController {
 
 	private final VisBFileHandler visBFileHandler;
 	private final CurrentTrace currentTrace;
-	private final ChangeListener<Trace> currentTraceChangeListener;
 	private final Injector injector;
 	private final StageManager stageManager;
-	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
 
 	private final ObjectProperty<Path> visBPath;
@@ -65,28 +62,39 @@ public class VisBController {
 	 * The VisBController constructor gets injected with ProB2-UI injector. In this method the final currentTraceListener is initialised as well. There is no further initialisation needed for this class.
 	 * @param injector used for interaction with ProB2-UI
 	 * @param stageManager currently not used
-	 * @param currentProject used to add {@link ChangeListener} for changing machine
 	 * @param currentTrace used to add {@link ChangeListener} for interacting with trace
 	 * @param bundle used to access string resources
 	 */
 	@Inject
-	public VisBController(final VisBFileHandler visBFileHandler, final Injector injector, final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public VisBController(final VisBFileHandler visBFileHandler, final Injector injector, final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		this.visBFileHandler = visBFileHandler;
 		this.injector = injector;
 		this.stageManager = stageManager;
-		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.visBVisualisation = new VisBVisualisation();
 
-		LOGGER.debug("Initialise TraceChangeListener");
-		this.currentTraceChangeListener = ((observable, oldTrace, newTrace) -> {
-			if(newTrace != null){
-				if (oldTrace == null || !oldTrace.getStateSpace().equals(newTrace.getStateSpace())) {
-					reloadVisualisation();
+		this.visBPath.addListener((o, from, to) -> {
+			if (to == null) {
+				this.closeCurrentVisualisation();
+			} else if (currentTrace.get() != null) {
+				this.setupVisualisation(to);
+			}
+		});
+		currentTrace.addListener((o, from, to) -> {
+			final Path visBPath = this.getVisBPath();
+			if (visBPath != null) {
+				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
+					this.closeCurrentVisualisation();
 				}
-				updateVisualisationIfPossible();
+				
+				if (to != null) {
+					if (from == null || !from.getStateSpace().equals(to.getStateSpace())) {
+						this.setupVisualisation(visBPath);
+					}
+					this.updateVisualisationIfPossible();
+				}
 			}
 		});
 	}
@@ -101,19 +109,6 @@ public class VisBController {
 
 	public void setVisBPath(final Path visBPath) {
 		this.visBPathProperty().set(visBPath);
-	}
-
-	/**
-	 * Whenever a new machine is loaded, this method cleans out the visualisation, meaning it resets all current changes.
-	 */
-	private void startVisualisation(){
-		if(currentProject.getCurrentMachine() != null) {
-			currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-				//This prepares VisB for the new Visualisation
-				closeCurrentVisualisation();
-			});
-			currentTrace.addListener(currentTraceChangeListener);
-		}
 	}
 
 	/**
@@ -299,7 +294,6 @@ public class VisBController {
 	}
 
 	void closeCurrentVisualisation(){
-		currentTrace.removeListener(currentTraceChangeListener);
 		this.visBVisualisation = new VisBVisualisation();
 		this.injector.getInstance(VisBStage.class).clear();
 		LOGGER.debug("Current visualisation is cleared and closed.");
@@ -310,7 +304,6 @@ public class VisBController {
 	 * @param visBPath JSON / VisB file to be used
 	 */
 	void setupVisBFile(final Path visBPath) {
-		currentTrace.removeListener(currentTraceChangeListener);
 		this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visBPath);
 		this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 	}
@@ -333,7 +326,6 @@ public class VisBController {
 
 	private void showVisualisationAfterSetup() {
 		if(this.visBVisualisation.isReady()) {
-			startVisualisation();
 			updateVisualisationIfPossible();
 		}
 		if(visBVisualisation.getVisBEvents() == null){
