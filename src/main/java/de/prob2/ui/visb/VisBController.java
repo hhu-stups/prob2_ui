@@ -1,7 +1,9 @@
 package de.prob2.ui.visb;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -25,8 +27,6 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visb.exceptions.VisBException;
-import de.prob2.ui.visb.exceptions.VisBNestedException;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.beans.value.ChangeListener;
@@ -97,7 +97,6 @@ public class VisBController {
 				closeCurrentVisualisation();
 			});
 			currentTrace.addListener(currentTraceChangeListener);
-			injector.getInstance(VisBStage.class).onCloseRequestProperty().setValue(t -> this.clearListeners());
 		}
 	}
 
@@ -130,7 +129,7 @@ public class VisBController {
 
 		injector.getInstance(VisBDebugStage.class).updateItems(visBVisualisation.getVisBItems());
 
-		String svgChanges = buildJQueryForChanges(visBVisualisation.getVisBItems());
+		final List<String> svgChanges = buildJQueryForChanges(visBVisualisation.getVisBItems());
 
 		// TO DO: parse formula once when loading the file to check for syntax errors
 		if(svgChanges.isEmpty()){
@@ -139,37 +138,26 @@ public class VisBController {
 			try {
 				visBStage.runScript("resetDebugMessages()");
 				visBStage.runScript("resetErrorMessages()");
-				visBStage.runScript(svgChanges);
+				visBStage.runScript(String.join("", svgChanges));
 			} catch (JSException e){
 				alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 				updateInfo("visb.infobox.visualisation.error");
 				return;
 			}
 			//LOGGER.debug("Running script: "+svgChanges);
-			updateInfo("visb.infobox.visualisation.updated.nr",countLines(svgChanges));
+			updateInfo("visb.infobox.visualisation.updated.nr", svgChanges.size());
 		}
 	}
 
 	/**
 	 * Uses evaluateFormula to evaluate the visualisation items.
 	 * @param visItems items given by the {@link VisBController}
-	 * @return all needed jQueries in one string
+	 * @return all needed jQueries
 	 */
-	private String buildJQueryForChanges(List<VisBItem> visItems) {
-		StringBuilder jQueryForChanges = new StringBuilder();
-		for(VisBItem visItem : visItems){
-			String jQueryTemp = buildInvocation("changeAttribute", wrapAsString(visItem.getId()), wrapAsString(visItem.getAttribute()), visItem.getValue());
-			jQueryForChanges.append(jQueryTemp);
-		}
-		return jQueryForChanges.toString();
-	}
-
-	/**
-	 * This method removes the ChangeListener on the Trace. It is used, when the VisB Window is closed.
-	 */
-	private void clearListeners(){
-		currentTrace.removeListener(currentTraceChangeListener);
-		this.visBVisualisation = new VisBVisualisation();
+	private static List<String> buildJQueryForChanges(List<VisBItem> visItems) {
+		return visItems.stream()
+			.map(visItem -> buildInvocation("changeAttribute", wrapAsString(visItem.getId()), wrapAsString(visItem.getAttribute()), visItem.getValue()))
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -179,11 +167,6 @@ public class VisBController {
 		Alert exceptionAlert = this.stageManager.makeExceptionAlert(ex, header, message, params);
 		exceptionAlert.initOwner(injector.getInstance(VisBStage.class));
 		exceptionAlert.showAndWait();
-	}
-
-	private static int countLines(String str) {
-	   String[] lines = str.split("\r\n|\r|\n");
-	   return  lines.length;
 	}
 
 	/**
@@ -269,28 +252,27 @@ public class VisBController {
 
 	/**
 	 * Setting up the html file, it also sets the svg file for internal usage via {@link VisBFileHandler}.
-	 * @param svgFile svg file to be used
-	 * @param jsonFile json file to be used
+	 * @param svgPath svg file to be used
 	 */
-	private void setupHTMLFile(File svgFile, File jsonFile) throws VisBException, IOException{
-		if(svgFile == null || !svgFile.exists()){
-			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
-		}
-		String svgContent = this.injector.getInstance(VisBFileHandler.class).fileToString(svgFile);
-		if(svgContent != null && !svgContent.isEmpty()) {
+	private void setupHTMLFile(final Path svgPath) throws IOException{
+		String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
+		if(!svgContent.isEmpty()) {
 			List<VisBOnClickMustacheItem> clickEvents = generateOnClickItems();
-			this.injector.getInstance(VisBStage.class).initialiseWebView(svgFile, clickEvents, jsonFile, svgContent);
+			this.injector.getInstance(VisBStage.class).initialiseWebView(clickEvents, svgContent);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
-			throw new VisBException(bundle.getString("visb.exception.svg.empty"));
+			throw new IOException(bundle.getString("visb.exception.svg.empty"));
 		}
 	}
 
 	void reloadVisualisation(){
+		if (this.visBVisualisation.getJsonPath() == null) {
+			return;
+		}
 		VisBVisualisation currentVisualisation = this.visBVisualisation;
 		closeCurrentVisualisation();
 		this.visBVisualisation = currentVisualisation;
-		setupVisualisation(this.visBVisualisation.getJsonFile());
+		setupVisualisation(this.visBVisualisation.getJsonPath());
 		if(!visBVisualisation.isReady()){
 			if(visBVisualisation.getSvgPath() != null) {
 				updateInfo("visb.infobox.visualisation.error");
@@ -303,43 +285,29 @@ public class VisBController {
 	}
 
 	void closeCurrentVisualisation(){
-		if(visBVisualisation == null) return;
-		this.clearListeners();
+		currentTrace.removeListener(currentTraceChangeListener);
+		this.visBVisualisation = new VisBVisualisation();
 		this.injector.getInstance(VisBStage.class).clear();
 		LOGGER.debug("Current visualisation is cleared and closed.");
 	}
 
 	/**
 	 * Setting up the JSON / VisB file for internal usage via {@link VisBFileHandler}.
-	 * @param visFile JSON / VisB file to be used
+	 * @param visBPath JSON / VisB file to be used
 	 */
-	void setupVisBFile(File visFile) {
-		if(visFile == null){
-			return;
-		}
+	void setupVisBFile(final Path visBPath) {
 		currentTrace.removeListener(currentTraceChangeListener);
-		try {
-			this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visFile);
-			this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
-		} catch (ProBError e) {
-			throw e;
-		} catch (RuntimeException e) {
-			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
-			updateInfo("visb.infobox.visualisation.error");
-		}
+		this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visBPath);
+		this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
 	}
 
-	public void setupVisualisation(File file){
+	public void setupVisualisation(final Path visBPath){
 		try {
-			setupVisBFile(file);
-			setupHTMLFile(new File(this.visBVisualisation.getSvgPath().toUri()), file);
-		} catch(VisBException e) {
-			alert(e, "visb.exception.header", "visb.exception.visb.file.error.header");
-			updateInfo("visb.infobox.visualisation.error");
-			return;
+			setupVisBFile(visBPath);
+			setupHTMLFile(this.visBVisualisation.getSvgPath());
 		} catch (ProBError e) {
 			// Set VisB Visualisation with VisB file only. This is then used for reload (after the JSON syntax errors are fixed)
-			this.visBVisualisation = new VisBVisualisation(null, null, null, file);
+			this.visBVisualisation = new VisBVisualisation(null, null, null, visBPath);
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
@@ -357,7 +325,9 @@ public class VisBController {
 		}
 		if(visBVisualisation.getVisBEvents() == null){
 			updateInfo("visb.infobox.visualisation.error");
-			alert(new VisBException(), "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
+			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
+			alert.initOwner(injector.getInstance(VisBStage.class));
+			alert.showAndWait();
 		} else if (visBVisualisation.getVisBEvents().isEmpty()){
 			//There is no need to load on click functions, if no events are available.
 			updateInfo("visb.infobox.visualisation.events.alert");

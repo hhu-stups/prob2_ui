@@ -1,10 +1,23 @@
 package de.prob2.ui.visb;
 
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import com.google.inject.Injector;
+
 import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
-import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
@@ -18,8 +31,8 @@ import de.prob2.ui.project.DefaultPathHandler;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceSelectionView;
 import de.prob2.ui.simulation.SimulatorStage;
-import de.prob2.ui.visb.exceptions.VisBException;
 import de.prob2.ui.visb.help.UserManualStage;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -33,8 +46,6 @@ import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -45,29 +56,12 @@ import javafx.scene.web.WebErrorEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.stage.WindowEvent;
+
 import netscape.javascript.JSObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 
 /**
@@ -245,10 +239,10 @@ public class VisBStage extends Stage {
 	}
 
 	private void setupMachineVisBFile() {
-		if(visBPath.isNotNull().get()) {
+		final Path path = visBPath.get();
+		if (path != null) {
 			VisBController visBController = injector.getInstance(VisBController.class);
-			File visBfile = visBPath.get().toFile();
-			visBController.setupVisualisation(visBfile);
+			visBController.setupVisualisation(path);
 		}
 	}
 
@@ -260,19 +254,14 @@ public class VisBStage extends Stage {
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
 	 */
-	void initialiseWebView(File file, List<VisBOnClickMustacheItem> clickEvents, File jsonFile, String svgContent) {
+	void initialiseWebView(List<VisBOnClickMustacheItem> clickEvents, String svgContent) {
 		if (svgContent != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
 			String jqueryLink = Main.class.getResource("jquery.js").toExternalForm();
-			String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, jsonFile, svgContent);
+			String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, svgContent);
 			this.webView.getEngine().loadContent(htmlFile);
-			LOGGER.debug("HTML was loaded into WebView with SVG file "+file);
 			addVisBConnector();
-			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-			this.webView.getEngine().setOnError(this::treatJavascriptError); // check if we get errors
-			// Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
-			// engine.setConfirmHandler(message -> showConfirm(message));
 		}
 
 	}
@@ -284,7 +273,9 @@ public class VisBStage extends Stage {
 
 	private void showJavascriptAlert(String message) {
 		LOGGER.debug("JavaScript ALERT: " + message);
-		alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
+		final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
+		alert.initOwner(this);
+		alert.showAndWait();
 	}
 
 	private void addVisBConnector() {
@@ -300,9 +291,10 @@ public class VisBStage extends Stage {
 					webView.getEngine().executeScript("activateClickEvents();");
 				}
 			});
-			this.webView.getEngine().setOnError(e -> {
-				alert(new Exception(), "visb.exception.header", "visb.stage.alert.webview.error");
-			});
+			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+			this.webView.getEngine().setOnError(this::treatJavascriptError); // check if we get errors
+			// Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
+			// engine.setConfirmHandler(message -> showConfirm(message));
 			LOGGER.debug("VisBConnector was set into globals.");
 		}
 	}
@@ -366,7 +358,9 @@ public class VisBStage extends Stage {
 	public void loadVisBFile() {
 		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
-			alert(new VisBException(),  "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
+			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
+			alert.initOwner(this);
+			alert.showAndWait();
 			return;
 		}
 		FileChooser fileChooser = new FileChooser();
@@ -378,9 +372,8 @@ public class VisBStage extends Stage {
 		if(path != null) {
 			clear();
 			visBPath.set(path);
-			File visBfile = path.toFile();
 			VisBController visBController = injector.getInstance(VisBController.class);
-			visBController.setupVisualisation(visBfile);
+			visBController.setupVisualisation(path);
 		}
 	}
 
@@ -447,12 +440,11 @@ public class VisBStage extends Stage {
 		simulatorStage.toFront();
 	}
 
-	private String generateHTMLFileWithSVG(String jqueryLink, List<VisBOnClickMustacheItem> clickEvents, File jsonFile, String svgContent) {
+	private String generateHTMLFileWithSVG(String jqueryLink, List<VisBOnClickMustacheItem> clickEvents, String svgContent) {
 		InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.mustache");
 		MustacheTemplateManager templateManager = new MustacheTemplateManager(inputStream, "visb_html_view");
 		templateManager.put("jqueryLink", jqueryLink);
 		templateManager.put("clickEvents", clickEvents);
-		templateManager.put("jsonFile", jsonFile);
 		templateManager.put("svgContent", svgContent);
 		return templateManager.apply();
 	}
