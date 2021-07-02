@@ -78,23 +78,16 @@ public class VisBController {
 		this.visBPath.addListener((o, from, to) -> {
 			if (to == null) {
 				this.closeCurrentVisualisation();
-			} else if (currentTrace.get() != null) {
+			} else {
 				this.setupVisualisation(to);
 			}
 		});
 		currentTrace.addListener((o, from, to) -> {
-			final Path visBPath = this.getVisBPath();
-			if (visBPath != null) {
+			if (this.getVisBPath() != null) {
 				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
 					this.closeCurrentVisualisation();
 				}
-				
-				if (to != null) {
-					if (from == null || !from.getStateSpace().equals(to.getStateSpace())) {
-						this.setupVisualisation(visBPath);
-					}
-					this.updateVisualisationIfPossible();
-				}
+				this.updateVisualisationIfPossible();
 			}
 		});
 	}

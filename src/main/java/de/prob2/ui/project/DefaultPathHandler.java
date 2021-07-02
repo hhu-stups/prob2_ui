@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.VisBStage;
@@ -30,6 +31,8 @@ public class DefaultPathHandler {
 
 	private final CurrentProject currentProject;
 
+	private final CurrentTrace currentTrace;
+
 	private final ResourceBundle bundle;
 
 	private SimulatorStage simulatorStage;
@@ -37,9 +40,10 @@ public class DefaultPathHandler {
 	private VisBStage visBStage;
 
 	@Inject
-	public DefaultPathHandler(final StageManager stageManager, final CurrentProject currentProject, final ResourceBundle bundle) {
+	public DefaultPathHandler(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final ResourceBundle bundle) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
 		this.bundle = bundle;
 	}
 
@@ -130,7 +134,7 @@ public class DefaultPathHandler {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		switch (kind) {
 			case VISB:
-				visBStage.loadVisBFileFromMachine(currentMachine);
+				visBStage.loadVisBFileFromMachine(currentMachine, currentTrace.getStateSpace());
 				break;
 			case SIMB:
 				simulatorStage.loadSimulationFromMachine(currentMachine);
