@@ -81,6 +81,7 @@ public class VisBStage extends Stage {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final DefaultPathHandler defaultPathHandler;
+	private final VisBController visBController;
 	private boolean connectorSet = false;
 	private final FileChooserManager fileChooserManager;
 	private final ObjectProperty<Path> visBPath;
@@ -141,7 +142,7 @@ public class VisBStage extends Stage {
 	@Inject
 	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
 					 final CurrentTrace currentTrace, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
-					 final DefaultPathHandler defaultPathHandler) {
+					 final DefaultPathHandler defaultPathHandler, final VisBController visBController) {
 		super();
 		this.injector = injector;
 		this.bundle = bundle;
@@ -150,6 +151,7 @@ public class VisBStage extends Stage {
 		this.currentTrace = currentTrace;
 		this.fileChooserManager = fileChooserManager;
 		this.defaultPathHandler = defaultPathHandler;
+		this.visBController = visBController;
 		defaultPathHandler.setVisBStage(this);
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
@@ -177,7 +179,7 @@ public class VisBStage extends Stage {
 
 		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
 			visBPath.set(null);
-			injector.getInstance(VisBController.class).closeCurrentVisualisation();
+			visBController.closeCurrentVisualisation();
 		});
 		//Load VisB file from machine, when window is opened and set listener on the current machine
 		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> {
@@ -241,7 +243,6 @@ public class VisBStage extends Stage {
 	private void setupMachineVisBFile() {
 		final Path path = visBPath.get();
 		if (path != null) {
-			VisBController visBController = injector.getInstance(VisBController.class);
 			visBController.setupVisualisation(path);
 		}
 	}
@@ -372,7 +373,6 @@ public class VisBStage extends Stage {
 		if(path != null) {
 			clear();
 			visBPath.set(path);
-			VisBController visBController = injector.getInstance(VisBController.class);
 			visBController.setupVisualisation(path);
 		}
 	}
@@ -407,13 +407,13 @@ public class VisBStage extends Stage {
 
 	@FXML
 	public void reloadVisualisation() {
-		injector.getInstance(VisBController.class).reloadVisualisation();
+		visBController.reloadVisualisation();
 	}
 
 	@FXML
 	public void closeVisualisation() {
 		visBPath.set(null);
-		injector.getInstance(VisBController.class).closeCurrentVisualisation();
+		visBController.closeCurrentVisualisation();
 	}
 
 	@FXML
