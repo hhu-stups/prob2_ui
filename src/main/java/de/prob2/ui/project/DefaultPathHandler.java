@@ -54,7 +54,6 @@ public class DefaultPathHandler {
 		ButtonType loadButton = null;
 		ButtonType setButton = null;
 		ButtonType resetButton = null;
-		ButtonType buttonTypeCancel = new ButtonType(bundle.getString("common.buttons.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
 		ObjectProperty<Path> pathFromMachine = null;
 		ObjectProperty<Path> path = null;
 		String headerKey = null;
@@ -104,13 +103,13 @@ public class DefaultPathHandler {
 				buttons.add(setButton);
 			}
 			buttons.add(resetButton);
-			buttons.add(buttonTypeCancel);
+			buttons.add(ButtonType.CANCEL);
 			alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, headerKey, contentKey, pathFromMachine.get());
 		} else {
 			if(path.get() != null) {
 				buttons.add(setButton);
 			}
-			buttons.add(buttonTypeCancel);
+			buttons.add(ButtonType.CANCEL);
 			alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, buttons, headerKey, contentKey);
 		}
 
