@@ -1,8 +1,22 @@
 package de.prob2.ui.simulation;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
@@ -14,17 +28,16 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.DefaultPathHandler;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.sharedviews.DefaultPathDialog;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
-import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
-import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.simulation.table.SimulationChoiceDebugItem;
@@ -34,9 +47,8 @@ import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
 import de.prob2.ui.simulation.table.SimulationOperationDebugItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.visb.VisBController;
-import de.prob2.ui.visb.VisBDebugStage;
 import de.prob2.ui.visb.VisBStage;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -47,10 +59,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -64,21 +73,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.controlsfx.glyphfont.FontAwesome;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
+import org.controlsfx.glyphfont.FontAwesome;
 
 
 @FXMLInjected
@@ -238,13 +234,13 @@ public class SimulatorStage extends Stage {
 
 	private final ObjectProperty<RealTimeSimulator> lastSimulator;
 
-	private final DefaultPathHandler defaultPathHandler;
+	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
 						  final SimulationItemHandler simulationItemHandler, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
-						  final StopActions stopActions, final DefaultPathHandler defaultPathHandler) {
+						  final StopActions stopActions, final Provider<DefaultPathDialog> defaultPathDialogProvider) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -253,8 +249,7 @@ public class SimulatorStage extends Stage {
 		this.realTimeSimulator = realTimeSimulator;
 		this.machineLoader = machineLoader;
 		this.simulationItemHandler = simulationItemHandler;
-		this.defaultPathHandler = defaultPathHandler;
-		defaultPathHandler.setSimulatorStage(this);
+		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
@@ -504,7 +499,37 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	public void manageDefaultSimulation() {
-		defaultPathHandler.manageDefault(DefaultPathHandler.DefaultKind.SIMB);
+		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
+		defaultPathDialog.initOwner(this);
+		defaultPathDialog.initStrings(
+			"simulation.defaultSimulation.header",
+			"simulation.defaultSimulation.text",
+			"simulation.noDefaultSimulation.text",
+			"simulation.defaultSimulation.load",
+			"simulation.defaultSimulation.set",
+			"simulation.defaultSimulation.reset"
+		);
+		final Path loadedPathRelative = currentProject.getLocation().relativize(configurationPath.get());
+		final Machine currentMachine = currentProject.getCurrentMachine();
+		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getSimulation());
+		defaultPathDialog.showAndWait().ifPresent(action -> {
+			switch (action) {
+				case LOAD_DEFAULT:
+					this.loadSimulationFromMachine(currentMachine);
+					break;
+				
+				case SET_CURRENT_AS_DEFAULT:
+					currentMachine.setSimulation(loadedPathRelative);
+					break;
+				
+				case UNSET_DEFAULT:
+					currentMachine.setSimulation(null);
+					break;
+				
+				default:
+					throw new AssertionError("Unhandled action: " + action);
+			}
+		});
 	}
 
 	public void loadSimulationFromMachine(Machine machine) {
@@ -520,9 +545,5 @@ public class SimulatorStage extends Stage {
 				loadSimulationItems();
 			}
 		}
-	}
-
-	public ObjectProperty<Path> getConfigurationPath() {
-		return configurationPath;
 	}
 }

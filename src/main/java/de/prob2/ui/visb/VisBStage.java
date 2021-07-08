@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 
 import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
@@ -28,15 +29,14 @@ import de.prob2.ui.internal.MustacheTemplateManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.DefaultPathHandler;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.sharedviews.DefaultPathDialog;
 import de.prob2.ui.sharedviews.TraceSelectionView;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
@@ -79,7 +79,7 @@ public class VisBStage extends Stage {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
-	private final DefaultPathHandler defaultPathHandler;
+	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
 	private boolean connectorSet = false;
 	private final FileChooserManager fileChooserManager;
@@ -140,7 +140,7 @@ public class VisBStage extends Stage {
 	@Inject
 	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
 					 final CurrentTrace currentTrace, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
-					 final DefaultPathHandler defaultPathHandler, final VisBController visBController) {
+					 final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController) {
 		super();
 		this.injector = injector;
 		this.bundle = bundle;
@@ -148,9 +148,8 @@ public class VisBStage extends Stage {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.fileChooserManager = fileChooserManager;
-		this.defaultPathHandler = defaultPathHandler;
+		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.visBController = visBController;
-		defaultPathHandler.setVisBStage(this);
 		this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
 	}
 
@@ -435,11 +434,37 @@ public class VisBStage extends Stage {
 
 	@FXML
 	public void manageDefaultVisualisation() {
-		defaultPathHandler.manageDefault(DefaultPathHandler.DefaultKind.VISB);
-	}
-
-	public ObjectProperty<Path> getVisBPath() {
-		return visBController.visBPathProperty();
+		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
+		defaultPathDialog.initOwner(this);
+		defaultPathDialog.initStrings(
+			"visb.defaultVisualisation.header",
+			"visb.defaultVisualisation.text",
+			"visb.defaultVisualisation.header",
+			"visb.defaultVisualisation.load",
+			"visb.defaultVisualisation.set",
+			"visb.defaultVisualisation.reset"
+		);
+		final Path loadedPathRelative = currentProject.getLocation().relativize(visBController.getVisBPath());
+		final Machine currentMachine = currentProject.getCurrentMachine();
+		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getVisBVisualisation());
+		defaultPathDialog.showAndWait().ifPresent(action -> {
+			switch (action) {
+				case LOAD_DEFAULT:
+					this.loadVisBFileFromMachine(currentMachine, currentTrace.getStateSpace());
+					break;
+				
+				case SET_CURRENT_AS_DEFAULT:
+					currentMachine.setVisBVisualisation(loadedPathRelative);
+					break;
+				
+				case UNSET_DEFAULT:
+					currentMachine.setVisBVisualisation(null);
+					break;
+				
+				default:
+					throw new AssertionError("Unhandled action: " + action);
+			}
+		});
 	}
 
 	public void saveHTMLExport(VisBExportKind kind) {
