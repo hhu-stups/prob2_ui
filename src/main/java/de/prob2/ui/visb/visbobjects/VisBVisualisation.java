@@ -13,10 +13,10 @@ import de.prob.animator.domainobjects.VisBItem;
  * The VisBVisualisation Object contains the functions needed to store all the visualisation information.
  */
 public class VisBVisualisation {
-	private Path svgPath;
-	private List<VisBEvent> visBEvents;
-	private List<VisBItem> visBItems;
-	private Map<VisBItem.VisBItemKey, VisBItem> visBItemMap;
+	private final Path svgPath;
+	private final List<VisBEvent> visBEvents;
+	private final List<VisBItem> visBItems;
+	private final Map<VisBItem.VisBItemKey, VisBItem> visBItemMap;
 
 	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath) {
 		this.visBEvents = Objects.requireNonNull(visBEvents, "visBEvents");
