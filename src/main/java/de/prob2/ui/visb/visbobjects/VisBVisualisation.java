@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
@@ -17,29 +18,15 @@ public class VisBVisualisation {
 	private List<VisBItem> visBItems;
 	private Map<VisBItem.VisBItemKey, VisBItem> visBItemMap;
 
-	public VisBVisualisation(){
-		this.visBEvents = null;
-		this.visBItems = null;
-		this.svgPath = null;
-		this.visBItemMap = null;
-	}
-
 	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath) {
-		this.visBEvents = visBEvents;
-		this.visBItems = visBItems;
-		this.svgPath = svgPath;
+		this.visBEvents = Objects.requireNonNull(visBEvents, "visBEvents");
+		this.visBItems = Objects.requireNonNull(visBItems, "visBItems");
+		this.svgPath = Objects.requireNonNull(svgPath, "svgPath");
 		createItemMap();
 	}
 
 	private void createItemMap() {
-		if(visBItems == null) {
-			visBItemMap = null;
-			return;
-		}
-		if(visBItemMap == null) {
-			visBItemMap = new HashMap<>();
-		}
-		visBItemMap.clear();
+		visBItemMap = new HashMap<>();
 		for(VisBItem item : visBItems) {
 			visBItemMap.put(new VisBItem.VisBItemKey(item.getId(), item.getAttribute()), item);
 		}
@@ -66,10 +53,6 @@ public class VisBVisualisation {
 			}
 		}
 		return null;
-	}
-
-	public boolean isReady(){
-		return svgPath != null;
 	}
 
 	@Override

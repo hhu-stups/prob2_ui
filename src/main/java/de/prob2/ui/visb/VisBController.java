@@ -73,7 +73,7 @@ public class VisBController {
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
-		this.visBVisualisation = new VisBVisualisation();
+		this.visBVisualisation = null;
 
 		this.visBPath.addListener((o, from, to) -> {
 			if (to == null) {
@@ -108,12 +108,10 @@ public class VisBController {
 	 * This method is used for updating the visualisation.
 	 */
 	private void updateVisualisation(){
-		if(this.visBVisualisation.isReady()) {
+		if (this.visBVisualisation != null) {
 			applySVGChanges();
-		} else if(visBVisualisation.getVisBEvents() == null){
-			updateInfo("visb.infobox.visualisation.items.alert");
-		} else if(visBVisualisation.getSvgPath() == null){
-			updateInfo("visb.infobox.visualisation.svg.alert");
+		} else {
+			updateInfo("visb.infobox.visualisation.error");
 		}
 	}
 
@@ -275,19 +273,15 @@ public class VisBController {
 		}
 		closeCurrentVisualisation();
 		setupVisualisation(this.getVisBPath());
-		if(!visBVisualisation.isReady()){
-			if(visBVisualisation.getSvgPath() != null) {
-				updateInfo("visb.infobox.visualisation.error");
-			} else {
-				updateInfo("visb.infoboy.empty.reload");
-			}
+		if (this.visBVisualisation == null) {
+			updateInfo("visb.infobox.visualisation.error");
 			return;
 		}
 		LOGGER.debug("Visualisation has been reloaded.");
 	}
 
 	void closeCurrentVisualisation(){
-		this.visBVisualisation = new VisBVisualisation();
+		this.visBVisualisation = null;
 		this.injector.getInstance(VisBStage.class).clear();
 		LOGGER.debug("Current visualisation is cleared and closed.");
 	}
@@ -306,7 +300,7 @@ public class VisBController {
 			setupVisBFile(visBPath);
 			setupHTMLFile(this.visBVisualisation.getSvgPath());
 		} catch (ProBError e) {
-			this.visBVisualisation = new VisBVisualisation();
+			this.visBVisualisation = null;
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
@@ -318,10 +312,8 @@ public class VisBController {
 	}
 
 	private void showVisualisationAfterSetup() {
-		if(this.visBVisualisation.isReady()) {
-			updateVisualisationIfPossible();
-		}
-		if(visBVisualisation.getVisBEvents() == null){
+		updateVisualisationIfPossible();
+		if (this.visBVisualisation == null) {
 			updateInfo("visb.infobox.visualisation.error");
 			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			alert.initOwner(injector.getInstance(VisBStage.class));
