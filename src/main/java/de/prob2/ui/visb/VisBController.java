@@ -318,9 +318,6 @@ public class VisBController {
 			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			alert.initOwner(injector.getInstance(VisBStage.class));
 			alert.showAndWait();
-		} else if (visBVisualisation.getVisBEvents().isEmpty()){
-			//There is no need to load on click functions, if no events are available.
-			updateInfo("visb.infobox.visualisation.events.alert");
 		} else {
 			updateInfo("visb.infobox.visualisation.initialise");
 		}
