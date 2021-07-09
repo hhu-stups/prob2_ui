@@ -438,7 +438,7 @@ public class VisBStage extends Stage {
 		defaultPathDialog.initStrings(
 			"visb.defaultVisualisation.header",
 			"visb.defaultVisualisation.text",
-			"visb.defaultVisualisation.header",
+			"visb.noDefaultVisualisation.text",
 			"visb.defaultVisualisation.load",
 			"visb.defaultVisualisation.set",
 			"visb.defaultVisualisation.reset"
