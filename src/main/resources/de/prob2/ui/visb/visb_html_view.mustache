@@ -5,21 +5,35 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<script src="{{&jqueryLink}}"></script>
 	<script>
+		function getErrorMessagesNode() {
+			return document.getElementById("visb_error_messages").getElementsByTagName("ul")[0];
+		}
+
+		function appendErrorMessage(message) {
+			console.log(message);
+			const entry = document.createElement("li");
+			entry.appendChild(document.createTextNode(message));
+			getErrorMessagesNode().appendChild(entry);
+			return entry;
+		}
+
+		function getDebugMessagesNode() {
+			return document.getElementById("visb_debug_messages");
+		}
+
 		function checkSvgId(id,ctxt){
-			if(!$(id).length) {
-				$("#visb_error_messages ul").append("<li>Unknown SVG id <b>" + id + "</b> for " + ctxt + "</li>");
-		}}
+			const element = document.getElementById(id);
+			if (element === null) {
+				appendErrorMessage("Unknown SVG id '" + id + "' for " + ctxt);
+			}
+			return element;
+		}
 
 		function changeAttribute(id, attribute, value){
 			$(document).ready(function(){
-				var obj = document.getElementById(id);
+				const obj = checkSvgId(id, "attribute " + attribute);
 				if (obj == null) {
-					console.log("Unknown SVG id " + id + " for attribute " + attribute);
-					var list = document.getElementById('visb_error_messages').getElementsByTagName('ul')[0];
-					console.log("list =" + list);
-					var entry = document.createElement('li');
-					entry.appendChild(document.createTextNode("Unknown SVG id '" + id + "' for attribute " + attribute));
-					list.appendChild(entry);
+					// obj not found (error message has already been displayed by checkSvgId)
 				} else if(attribute=="text") {
 					obj.textContent = value;
 				} else {
@@ -30,7 +44,7 @@
 
 		function activateClickEvents() {
 			{{#clickEvents}}
-			checkSvgId("#{{&eventID}}", "VisB Event");
+			checkSvgId("{{&eventID}}", "VisB Event");
 
 			$("#{{&eventID}}").off("click hover"); {{! remove any previous click functions}}
 
@@ -47,27 +61,28 @@
 			$("#{{&eventID}}").hover(
 				function(ev) {
 					{{&enterAction}}
-					$("#visb_debug_messages").text("{{&eventName}} ");
+					getDebugMessagesNode().textContent = "{{&eventName}}";
 					// comment in this line instead if you wish to see coordinates
-					// $("#visb_debug_messages").text("{{&eventName}} " + ev.pageX + "," + ev.pageY);
+					// getDebugMessagesNode().textContent = "{{&eventName}} " + ev.pageX + "," + ev.pageY;
 				},
 				function() { {{! function when leaving hover}}
 					{{&leaveAction}}
-					$("#visb_debug_messages").text("");
-			});
+					resetDebugMessages();
+				}
+			);
 			{{/clickEvents}}
 		}
 
 		function showModelNotInitialised() {
-			$("#visb_error_messages ul").append('<li style="color:blue">Model not initialised</li>');
+			appendErrorMessage("Model not initialised").style.color = "blue";
 		}
 
 		function resetDebugMessages() {
-			$("#visb_debug_messages").text("");
+			getDebugMessagesNode().textContent = "";
 		}
 
 		function resetErrorMessages() {
-			$("#visb_error_messages ul").empty();
+			getErrorMessagesNode().textContent = "";
 		}
 
 	</script>
