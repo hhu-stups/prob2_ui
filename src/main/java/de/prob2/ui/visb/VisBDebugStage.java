@@ -116,13 +116,6 @@ public class VisBDebugStage extends Stage {
 		}
 	}
 
-	public void updateItems(List<VisBItem> items) {
-		this.visBItems.setItems(FXCollections.observableArrayList(items));
-		if(itemsToEvent.isEmpty()) {
-			fillItemsToEvent(items, visBEvents.getItems());
-		}
-	}
-
 	private void fillItemsToEvent(List<VisBItem> visBItems, List<VisBEvent> visBEvents) {
 		for(VisBItem item : visBItems) {
 			for(VisBEvent event : visBEvents) {

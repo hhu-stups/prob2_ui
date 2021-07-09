@@ -127,8 +127,6 @@ public class VisBController {
 			return;
 		}
 
-		injector.getInstance(VisBDebugStage.class).updateItems(this.getVisBVisualisation().getVisBItems());
-
 		final List<String> svgChanges = buildJQueryForChanges(this.getVisBVisualisation().getVisBItems());
 
 		// TO DO: parse formula once when loading the file to check for syntax errors
