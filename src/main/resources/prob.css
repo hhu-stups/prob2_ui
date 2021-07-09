@@ -1176,11 +1176,11 @@
 
 
 .expression-table-view-row.true-val {
-    -fx-background-color: palegreen;
+	-fx-background-color: palegreen;
 }
 
 .expression-table-view-row.false-val {
-    -fx-background-color: pink;
+	-fx-background-color: pink;
 }
 
 .expression-table-view-column.alignment {

@@ -8,13 +8,13 @@
 <?import javafx.scene.layout.StackPane?>
 
 <fx:root title="VisB User Manual" type="Stage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="500" height="500" minHeight="500" minWidth="500">
-    <scene>
-        <Scene stylesheets="@/prob.css">
-            <BorderPane prefHeight="500.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
-                <center>
-                    <WebView fx:id="userManualWebView" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" StackPane.alignment="CENTER" />
-                </center>
-            </BorderPane>
-        </Scene>
-    </scene>
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<BorderPane prefHeight="500.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+				<center>
+					<WebView fx:id="userManualWebView" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" StackPane.alignment="CENTER" />
+				</center>
+			</BorderPane>
+		</Scene>
+	</scene>
 </fx:root>

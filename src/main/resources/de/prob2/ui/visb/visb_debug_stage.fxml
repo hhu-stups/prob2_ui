@@ -14,8 +14,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.control.ScrollPane?>
 <fx:root title="%visb.debug.title" type="VisBDebugStage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="700" height="300" minHeight="300" minWidth="700">
-    <scene>
-        <Scene stylesheets="@/prob.css">
+	<scene>
+		<Scene stylesheets="@/prob.css">
 			<StackPane>
 				<SplitPane dividerPositions="1.0" orientation="VERTICAL">
 					<VBox>
@@ -41,5 +41,5 @@
 				</SplitPane>
 			</StackPane>
 		</Scene>
-    </scene>
+	</scene>
 </fx:root>

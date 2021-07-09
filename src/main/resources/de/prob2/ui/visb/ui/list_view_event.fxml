@@ -5,9 +5,9 @@
 <?import javafx.scene.layout.VBox?>
 
 <fx:root type="ListCell" stylesheets="@/prob.css" styleClass="machines-item" xmlns:fx="http://javafx.com/fxml/1">
-    <VBox fx:id="eventBox">
-        <Label fx:id="lbID" styleClass="name"/>
-        <Label fx:id="lbEvent" styleClass="location" />
-        <Label fx:id="lbPredicates" styleClass="location" />
-    </VBox>
+	<VBox fx:id="eventBox">
+		<Label fx:id="lbID" styleClass="name"/>
+		<Label fx:id="lbEvent" styleClass="location" />
+		<Label fx:id="lbPredicates" styleClass="location" />
+	</VBox>
 </fx:root>

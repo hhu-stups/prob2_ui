@@ -4,10 +4,10 @@
 <?import javafx.scene.control.ListCell?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="ListCell" stylesheets="@/prob.css" styleClass="visb-item" xmlns:fx="http://javafx.com/fxml/1">
-    <VBox fx:id="itemBox">
-        <Label fx:id="lbID" styleClass="name"/>
-        <Label fx:id="lbAttribute" styleClass="information" />
-        <Label fx:id="lbExpression" styleClass="information" />
-        <Label fx:id="lbValue" styleClass="information" />
-    </VBox>
+	<VBox fx:id="itemBox">
+		<Label fx:id="lbID" styleClass="name"/>
+		<Label fx:id="lbAttribute" styleClass="information" />
+		<Label fx:id="lbExpression" styleClass="information" />
+		<Label fx:id="lbValue" styleClass="information" />
+	</VBox>
 </fx:root>

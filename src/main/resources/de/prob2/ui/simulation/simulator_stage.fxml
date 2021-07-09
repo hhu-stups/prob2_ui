@@ -26,7 +26,7 @@
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<scene>
-        <Scene stylesheets="@/prob.css">
+		<Scene stylesheets="@/prob.css">
 			<ScrollPane prefWidth="900" prefHeight="500" fitToHeight="true" fitToWidth="true">
 				<SplitPane dividerPositions="0.75" orientation="HORIZONTAL">
 					<AnchorPane>
@@ -136,5 +136,5 @@
 				</SplitPane>
 			</ScrollPane>
 		</Scene>
-    </scene>
+	</scene>
 </fx:root>

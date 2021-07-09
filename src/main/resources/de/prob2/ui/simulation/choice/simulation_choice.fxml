@@ -20,10 +20,10 @@
 		 resizable="false" maxWidth="400.0" maxHeight="500.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 
-        <HBox fx:id="timeBox" spacing="5.0">
-            <Label fx:id="lbTime" text="%simulation.choice.time" />
-		    <TextField fx:id="tfTime" VBox.vgrow="NEVER"/>
-        </HBox>
+		<HBox fx:id="timeBox" spacing="5.0">
+			<Label fx:id="lbTime" text="%simulation.choice.time" />
+			<TextField fx:id="tfTime" VBox.vgrow="NEVER"/>
+		</HBox>
 		<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
 		<SimulationHypothesisChoice fx:id="simulationHypothesisChoice"/>
 		<SimulationEstimationChoice fx:id="simulationEstimationChoice"/>
