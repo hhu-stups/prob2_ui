@@ -284,17 +284,9 @@ public class VisBController {
 		LOGGER.debug("Current visualisation is cleared and closed.");
 	}
 
-	/**
-	 * Setting up the JSON / VisB file for internal usage via {@link VisBFileHandler}.
-	 * @param visBPath JSON / VisB file to be used
-	 */
-	void setupVisBFile(final Path visBPath) {
-		this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
-	}
-
 	public void setupVisualisation(final Path visBPath){
 		try {
-			setupVisBFile(visBPath);
+			this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
 			setupHTMLFile(this.getVisBVisualisation().getSvgPath());
 		} catch (IOException | ProBError e) {
 			this.visBVisualisation.set(null);
