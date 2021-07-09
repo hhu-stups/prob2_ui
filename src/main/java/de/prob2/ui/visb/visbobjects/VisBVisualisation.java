@@ -22,13 +22,9 @@ public class VisBVisualisation {
 		this.visBEvents = Objects.requireNonNull(visBEvents, "visBEvents");
 		this.visBItems = Objects.requireNonNull(visBItems, "visBItems");
 		this.svgPath = Objects.requireNonNull(svgPath, "svgPath");
-		createItemMap();
-	}
-
-	private void createItemMap() {
-		visBItemMap = new HashMap<>();
-		for(VisBItem item : visBItems) {
-			visBItemMap.put(new VisBItem.VisBItemKey(item.getId(), item.getAttribute()), item);
+		this.visBItemMap = new HashMap<>();
+		for (VisBItem item : this.visBItems) {
+			this.visBItemMap.put(new VisBItem.VisBItemKey(item.getId(), item.getAttribute()), item);
 		}
 	}
 
@@ -86,11 +82,6 @@ public class VisBVisualisation {
 			sb.append("null");
 		}
 		sb.append("\n");
-	}
-
-	public void setVisBItems(List<VisBItem> visBItems) {
-		this.visBItems = visBItems;
-		createItemMap();
 	}
 
 	public Map<VisBItem.VisBItemKey, VisBItem> getVisBItemMap() {
