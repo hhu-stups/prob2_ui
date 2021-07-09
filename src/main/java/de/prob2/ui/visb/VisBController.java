@@ -288,13 +288,10 @@ public class VisBController {
 		try {
 			setupVisBFile(visBPath);
 			setupHTMLFile(this.visBVisualisation.getSvgPath());
-		} catch (ProBError e) {
+		} catch (IOException | ProBError e) {
 			this.visBVisualisation = null;
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
-			return;
-		} catch(IOException e){
-			alert(e, "visb.exception.header", "visb.exception.io");
 			return;
 		}
 		showVisualisationAfterSetup();
