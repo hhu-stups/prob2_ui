@@ -194,6 +194,9 @@ public class VisBStage extends Stage {
 		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
 		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
 
+		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+		this.webView.getEngine().setOnError(this::treatJavascriptError);
+
 		injector.getInstance(VisBDebugStage.class).initOwner(this);
 	}
 
@@ -272,10 +275,6 @@ public class VisBStage extends Stage {
 					webView.getEngine().executeScript("activateClickEvents();");
 				}
 			});
-			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-			this.webView.getEngine().setOnError(this::treatJavascriptError); // check if we get errors
-			// Note: only called while loading page: https://stackoverflow.com/questions/31391736/for-javafxs-webengine-how-do-i-get-notified-of-javascript-errors
-			// engine.setConfirmHandler(message -> showConfirm(message));
 			LOGGER.debug("VisBConnector was set into globals.");
 		}
 	}
