@@ -21,6 +21,13 @@
 			return document.getElementById("visb_debug_messages");
 		}
 
+		function updateDebugMessages(messages) {
+			const node = getDebugMessagesNode();
+			if (node !== null) {
+				node.textContent = messages;
+			}
+		}
+
 		function checkSvgId(id,ctxt){
 			const element = document.getElementById(id);
 			if (element === null) {
@@ -58,7 +65,7 @@
 				
 				obj.onmouseover = function(ev) {
 					{{&enterAction}}
-					getDebugMessagesNode().textContent = "{{&eventName}}";
+					updateDebugMessages("{{&eventName}}");
 					// comment in this line instead if you wish to see coordinates
 					// getDebugMessagesNode().textContent = "{{&eventName}} " + ev.pageX + "," + ev.pageY;
 				};
@@ -75,7 +82,7 @@
 		}
 
 		function resetDebugMessages() {
-			getDebugMessagesNode().textContent = "";
+			updateDebugMessages("");
 		}
 
 		function resetErrorMessages() {
