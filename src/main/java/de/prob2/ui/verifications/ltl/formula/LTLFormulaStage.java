@@ -13,8 +13,11 @@ import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
+import de.prob2.ui.vomanager.Requirement;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+
+import java.util.stream.Collectors;
 
 public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
@@ -22,6 +25,8 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 	private Button applyButton;
 	
 	private final LTLFormulaChecker formulaChecker;
+
+	private LTLFormulaItem lastItem;
 	
 	@Inject
 	public LTLFormulaStage(
@@ -41,6 +46,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	@FXML
 	private void applyFormula() {
+		lastItem = null;
 		String code = taCode.getText();
 		if(handleItem.getHandleType() == HandleType.ADD) {
 			addItem(currentProject.getCurrentMachine(), new LTLFormulaItem(code, taDescription.getText()));
@@ -54,9 +60,12 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			machine.getLTLFormulas().add(item);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 			formulaChecker.checkFormula(item, this);
+			lastItem = item;
 		} else {
+			LTLFormulaItem checkedItem = machine.getLTLFormulas().stream().filter(item::settingsEqual).collect(Collectors.toList()).get(0);
+			formulaChecker.checkFormula(checkedItem, this);
+			lastItem = checkedItem;
 			this.close();
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
 		}
 	}
 	
@@ -67,6 +76,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			currentProject.setSaved(false);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, result));
 			formulaChecker.checkFormula(result, this);
+			lastItem = result;
 		} else {
 			this.close();
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
@@ -81,4 +91,12 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		this.close();
 	}
 
+	public LTLFormulaItem getLastItem() {
+		return lastItem;
+	}
+
+	public void linkRequirement(Requirement requirement) {
+		taDescription.setText(requirement.getText());
+		taDescription.setDisable(true);
+	}
 }

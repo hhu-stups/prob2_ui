@@ -32,8 +32,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	
 	@Inject
 	public SymbolicCheckingFormulaHandler(final CurrentTrace currentTrace,
-											final SymbolicFormulaChecker symbolicChecker,
-											final SymbolicCheckingResultHandler resultHandler) {
+											final SymbolicFormulaChecker symbolicChecker) {
 		this.currentTrace = currentTrace;
 		this.symbolicChecker = symbolicChecker;
 	}

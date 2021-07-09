@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.Label?>
+
+<?import de.prob2.ui.vomanager.VOManagerStage?>
+
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Button?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+
+<?import javafx.scene.control.TextField?>
+<?import de.prob2.ui.vomanager.RequirementType?>
+
+<fx:root title="VO Manager" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<ScrollPane prefWidth="1200" prefHeight="800" fitToHeight="true" fitToWidth="true">
+				<SplitPane dividerPositions="0.35">
+					<VBox styleClass="border" spacing="20.0" alignment="CENTER_LEFT" >
+						<VBox>
+							<HBox styleClass="border">
+								<padding>
+									<Insets left="5.0"/>
+								</padding>
+								<Button fx:id="btAddOrCancelRequirement" contentDisplay="GRAPHIC_ONLY" onAction="#addOrCancelRequirement">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<!--
+									<tooltip>
+										<Tooltip text="Add Requirement" />
+									</tooltip>
+									!-->
+								</Button>
+							</HBox>
+							<TableView fx:id="tvRequirements">
+								<columnResizePolicy>
+									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+								</columnResizePolicy>
+								<columns>
+									<TableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
+												 minWidth="${fontSize.fontSize * 6}"
+												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+									<TableColumn fx:id="requirementNameColumn" style="-fx-alignment: CENTER;" minWidth="70.0" maxWidth="70.0"
+												 text="Name"/>
+									<TableColumn fx:id="typeColumn" style="-fx-alignment: CENTER;" minWidth="90.0" maxWidth="90.0"
+												 text="Type"/>
+									<TableColumn fx:id="specificationColumn" minWidth="120.0"
+												 text="Specification"/>
+								</columns>
+								<placeholder>
+									<Label text="No Requirements"/>
+								</placeholder>
+							</TableView>
+						</VBox>
+						<TableView fx:id="tvValidationObligations">
+							<columnResizePolicy>
+								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+							</columnResizePolicy>
+							<columns>
+								<TableColumn fx:id="voStatusColumn" style="-fx-alignment: CENTER;"
+											 minWidth="${fontSize.fontSize * 6}"
+											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+								<TableColumn fx:id="voNameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
+											 text="Name"/>
+								<TableColumn fx:id="voConfigurationColumn" minWidth="80.0"
+											 text="Configuration"/>
+							</columns>
+							<placeholder>
+								<Label text="No Validation Obligations"/>
+							</placeholder>
+						</TableView>
+					</VBox>
+					<VBox fx:id="requirementEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
+						<VBox>
+
+							<Label text="Requirement Type:"/>
+							<ChoiceBox fx:id="cbRequirementChoice">
+								<items>
+									<FXCollections fx:factory="observableArrayList">
+										<RequirementType fx:value="INVARIANT"/>
+										<RequirementType fx:value="DEADLOCK_FREEDOM"/>
+										<RequirementType fx:value="SAFETY"/>
+										<RequirementType fx:value="LIVENESS"/>
+										<RequirementType fx:value="FAIRNESS"/>
+										<RequirementType fx:value="USE_CASE"/>
+										<RequirementType fx:value="TIMING"/>
+										<RequirementType fx:value="PROBABILISTIC"/>
+										<RequirementType fx:value="TIMED_PROBABILISTIC"/>
+									</FXCollections>
+								</items>
+							</ChoiceBox>
+						</VBox>
+						<HBox>
+							<Label text="Name:"/>
+							<TextField fx:id="tfName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+						</HBox>
+						<VBox>
+							<Label text="Requirement:"/>
+							<TextArea fx:id="taRequirement" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+						</VBox>
+						<VBox fx:id="taskBox">
+							<HBox>
+								<Label text="Validation Task:"/>
+								<ChoiceBox fx:id="cbTaskChoice"/>
+							</HBox>
+							<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
+						</VBox>
+					</VBox>
+				</SplitPane>
+			</ScrollPane>
+		</Scene>
+	</scene>
+</fx:root>
+

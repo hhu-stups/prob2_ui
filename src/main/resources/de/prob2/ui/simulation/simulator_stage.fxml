@@ -20,7 +20,6 @@
 <?import javafx.scene.Scene?>
 <?import de.prob2.ui.sharedviews.NavigationButtons?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.MenuButton?>
 <fx:root title="Simulator" type="SimulatorStage" width="900" height="500" minHeight="500" minWidth="900" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>

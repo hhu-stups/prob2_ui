@@ -7,6 +7,8 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.vomanager.Requirement;
+import de.prob2.ui.vomanager.RequirementType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -22,9 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ResourceBundle;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @FXMLInjected
-@Singleton
 public class ModelcheckingStage extends Stage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingStage.class);
@@ -75,6 +78,8 @@ public class ModelcheckingStage extends Stage {
 	private final CurrentProject currentProject;
 	
 	private final Modelchecker modelchecker;
+
+	private ModelCheckingItem lastItem;
 
 	@Inject
 	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, 
@@ -133,6 +138,7 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void startModelCheck() {
+		lastItem = null;
 		if (currentTrace.get() != null) {
 			String nLimit = chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-";
 			String tLimit = chooseTimeLimit.isSelected() ? String.valueOf(timeLimit.getValue()) : "-";
@@ -142,10 +148,11 @@ public class ModelcheckingStage extends Stage {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);
 				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
+				lastItem = modelcheckingItem;
 			} else {
-				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.strategy.alreadyChecked");
-				alert.initOwner(this);
-				alert.showAndWait();
+				ModelCheckingItem checkedItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(modelcheckingItem::settingsEqual).collect(Collectors.toList()).get(0);
+				modelchecker.checkItem(checkedItem, true, false);
+				lastItem = checkedItem;
 				this.hide();
 			}
 		} else {
@@ -175,5 +182,43 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private void cancel() {
 		this.hide();
+	}
+
+	public ModelCheckingItem getLastItem() {
+		return lastItem;
+	}
+
+	public void linkRequirement(Requirement requirement) {
+		RequirementType requirementType = requirement.getType();
+		switch (requirementType) {
+			case INVARIANT:
+				findDeadlocks.setSelected(false);
+				findInvViolations.setSelected(true);
+				findBAViolations.setSelected(false);
+				findOtherErrors.setSelected(false);
+				findGoal.setSelected(false);
+				additionalGoal.setSelected(false);
+				stopAtFullCoverage.setSelected(false);
+				break;
+			case DEADLOCK_FREEDOM:
+				findDeadlocks.setSelected(true);
+				findInvViolations.setSelected(false);
+				findBAViolations.setSelected(false);
+				findOtherErrors.setSelected(false);
+				findGoal.setSelected(false);
+				additionalGoal.setSelected(false);
+				stopAtFullCoverage.setSelected(false);
+				break;
+			default:
+				throw new RuntimeException("Given requirement type is not supported for model checking: " + requirementType);
+		}
+
+		findDeadlocks.setDisable(true);
+		findInvViolations.setDisable(true);
+		findBAViolations.setDisable(true);
+		findOtherErrors.setDisable(true);
+		findGoal.setDisable(true);
+		additionalGoal.setDisable(true);
+		stopAtFullCoverage.setDisable(true);
 	}
 }
