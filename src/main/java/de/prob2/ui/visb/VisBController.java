@@ -83,7 +83,7 @@ public class VisBController {
 			}
 		});
 		currentTrace.addListener((o, from, to) -> {
-			if (this.getVisBPath() != null) {
+			if (this.visBVisualisation != null) {
 				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
 					this.closeCurrentVisualisation();
 				}
@@ -102,17 +102,6 @@ public class VisBController {
 
 	public void setVisBPath(final Path visBPath) {
 		this.visBPathProperty().set(visBPath);
-	}
-
-	/**
-	 * This method is used for updating the visualisation.
-	 */
-	private void updateVisualisation(){
-		if (this.visBVisualisation != null) {
-			applySVGChanges();
-		} else {
-			updateInfo("visb.infobox.visualisation.error");
-		}
 	}
 
 	private void applySVGChanges() {
@@ -312,7 +301,6 @@ public class VisBController {
 	}
 
 	private void showVisualisationAfterSetup() {
-		updateVisualisationIfPossible();
 		if (this.visBVisualisation == null) {
 			updateInfo("visb.infobox.visualisation.error");
 			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
@@ -320,6 +308,7 @@ public class VisBController {
 			alert.showAndWait();
 		} else {
 			updateInfo("visb.infobox.visualisation.initialise");
+			updateVisualisationIfPossible();
 		}
 	}
 
@@ -331,7 +320,7 @@ public class VisBController {
 		if(this.currentTrace.getCurrentState() != null && this.currentTrace.getCurrentState().isInitialised()){
 			LOGGER.debug("Reloading visualisation...");
 			//Updates visualisation, only if current state is initialised and visualisation items are not empty
-			updateVisualisation();
+			applySVGChanges();
 		} else {
 			showUpdateVisualisationNotPossible();
 		}
