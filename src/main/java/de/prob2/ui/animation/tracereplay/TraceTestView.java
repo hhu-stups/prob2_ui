@@ -30,6 +30,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -81,7 +82,6 @@ public class TraceTestView extends Stage {
 					final HBox innerBox = buildInnerBox(box, postcondition, false, hasAdditionalPredicateField(postcondition), index, i);
 					box.getChildren().add(box.getChildren().size() - 1, innerBox);
 				}
-
 				this.setGraphic(box);
 			}
 		}
@@ -307,6 +307,23 @@ public class TraceTestView extends Stage {
 
 	@FXML
 	private void initialize() {
+		this.traceTableView.setRowFactory(param -> {
+			final TableRow<PersistentTransition> row = new TableRow<>();
+			row.setOnMouseClicked(event -> {
+				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					injector.getInstance(TraceChecker.class).check(replayTrace, true, () -> {
+						CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
+						int index = row.getIndex();
+						if(index < replayTrace.getPersistentTrace().getTransitionList().size()) {
+							currentTrace.set(currentTrace.get().gotoPosition(index));
+						}
+						traceTableView.refresh();
+					});
+				}
+			});
+			return row;
+		});
+
 		transitionColumn.setCellValueFactory(features -> new SimpleStringProperty(buildTransitionString(features.getValue())));
 		testColumn.setCellFactory(param -> new TestCell());
 		testColumn.setCellValueFactory(features -> new SimpleStringProperty(""));

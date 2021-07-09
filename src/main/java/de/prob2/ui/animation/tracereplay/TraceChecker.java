@@ -66,7 +66,15 @@ public class TraceChecker implements ITraceChecker {
 		replayTrace(replayTrace, setCurrentAnimation);
 	}
 
+	public void check(ReplayTrace replayTrace, final boolean setCurrentAnimation, IAfterTraceReplay afterTraceReplay) {
+		replayTrace(replayTrace, setCurrentAnimation, afterTraceReplay);
+	}
+
 	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
+		replayTrace(replayTrace, setCurrentAnimation, () -> {});
+	}
+
+	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation, IAfterTraceReplay afterTraceReplay) {
 		if(!replayTrace.selected()) {
 			return;
 		}
@@ -87,6 +95,7 @@ public class TraceChecker implements ITraceChecker {
 				} else {
 					currentTrace.set(trace);
 				}
+				afterTraceReplay.apply();
 			}
 			currentJobThreads.remove(Thread.currentThread());
 		}, "Trace Replay Thread");
