@@ -39,6 +39,8 @@ public class VisBDebugStage extends Stage {
 
 	private final ResourceBundle bundle;
 
+	private final VisBController visBController;
+
 	private final Injector injector;
 
 	@FXML
@@ -49,12 +51,13 @@ public class VisBDebugStage extends Stage {
 	private final Map<String, VisBEvent> itemsToEvent;
 
 	@Inject
-	public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final Injector injector) {
+	public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final VisBController visBController, final Injector injector) {
 		super();
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.bundle = bundle;
+		this.visBController = visBController;
 		this.injector = injector;
 		this.itemsToEvent = new HashMap<>();
 		this.stageManager.loadFXML(this, "visb_debug_stage.fxml");
@@ -62,6 +65,8 @@ public class VisBDebugStage extends Stage {
 
 	@FXML
 	public void initialize() {
+		visBController.visBVisualisationProperty().addListener((o, from, to) -> this.initialiseListViews(to));
+		
 		ChangeListener<VisBItem> listener = (observable, from, to) -> {
 			if(from != null) {
 				removeHighlighting(from);
@@ -102,11 +107,13 @@ public class VisBDebugStage extends Stage {
 	 * After loading the JSON/ VisB file and preparing it in the {@link VisBController} the ListViews are initialised.
 	 * @param visBVisualisation is needed to display the items and events in the ListViews
 	 */
-	public void initialiseListViews(VisBVisualisation visBVisualisation){
+	private void initialiseListViews(VisBVisualisation visBVisualisation){
 		clear();
-		this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
-		this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
-		fillItemsToEvent(visBVisualisation.getVisBItems(), visBVisualisation.getVisBEvents());
+		if (visBVisualisation != null) {
+			this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
+			this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
+			fillItemsToEvent(visBVisualisation.getVisBItems(), visBVisualisation.getVisBEvents());
+		}
 	}
 
 	public void updateItems(List<VisBItem> items) {

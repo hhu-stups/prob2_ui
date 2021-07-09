@@ -29,6 +29,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Alert;
@@ -56,7 +57,7 @@ public class VisBController {
 	private final ResourceBundle bundle;
 
 	private final ObjectProperty<Path> visBPath;
-	private VisBVisualisation visBVisualisation;
+	private final ObjectProperty<VisBVisualisation> visBVisualisation;
 
 	/**
 	 * The VisBController constructor gets injected with ProB2-UI injector. In this method the final currentTraceListener is initialised as well. There is no further initialisation needed for this class.
@@ -73,7 +74,7 @@ public class VisBController {
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
-		this.visBVisualisation = null;
+		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 
 		this.visBPath.addListener((o, from, to) -> {
 			if (to == null) {
@@ -83,7 +84,7 @@ public class VisBController {
 			}
 		});
 		currentTrace.addListener((o, from, to) -> {
-			if (this.visBVisualisation != null) {
+			if (this.getVisBVisualisation() != null) {
 				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
 					this.closeCurrentVisualisation();
 				}
@@ -104,12 +105,20 @@ public class VisBController {
 		this.visBPathProperty().set(visBPath);
 	}
 
+	public ReadOnlyObjectProperty<VisBVisualisation> visBVisualisationProperty() {
+		return this.visBVisualisation;
+	}
+
+	public VisBVisualisation getVisBVisualisation() {
+		return this.visBVisualisationProperty().get();
+	}
+
 	private void applySVGChanges() {
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 
 		String stateID = currentTrace.getCurrentState().getId();
 		try {
-			LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID, visBVisualisation.getVisBItemMap());
+			LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID, this.getVisBVisualisation().getVisBItemMap());
 			currentTrace.getStateSpace().execute(setAttributesCmd);
 		} catch (ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
@@ -118,9 +127,9 @@ public class VisBController {
 			return;
 		}
 
-		injector.getInstance(VisBDebugStage.class).updateItems(visBVisualisation.getVisBItems());
+		injector.getInstance(VisBDebugStage.class).updateItems(this.getVisBVisualisation().getVisBItems());
 
-		final List<String> svgChanges = buildJQueryForChanges(visBVisualisation.getVisBItems());
+		final List<String> svgChanges = buildJQueryForChanges(this.getVisBVisualisation().getVisBItems());
 
 		// TO DO: parse formula once when loading the file to check for syntax errors
 		if(svgChanges.isEmpty()){
@@ -182,7 +191,7 @@ public class VisBController {
 			return;
 		}
 		LOGGER.debug("Finding event for id: " + id);
-		VisBEvent event = visBVisualisation.getEventForID(id);
+		VisBEvent event = this.getVisBVisualisation().getEventForID(id);
 		// TO DO: adapt predicates or add predicate for Click Coordinates
 		if(event == null || event.getEvent().equals("")) {
 			updateInfo("visb.infobox.no.events.for.id", id);
@@ -262,7 +271,7 @@ public class VisBController {
 		}
 		closeCurrentVisualisation();
 		setupVisualisation(this.getVisBPath());
-		if (this.visBVisualisation == null) {
+		if (this.getVisBVisualisation() == null) {
 			updateInfo("visb.infobox.visualisation.error");
 			return;
 		}
@@ -270,7 +279,7 @@ public class VisBController {
 	}
 
 	void closeCurrentVisualisation(){
-		this.visBVisualisation = null;
+		this.visBVisualisation.set(null);
 		this.injector.getInstance(VisBStage.class).clear();
 		LOGGER.debug("Current visualisation is cleared and closed.");
 	}
@@ -280,16 +289,15 @@ public class VisBController {
 	 * @param visBPath JSON / VisB file to be used
 	 */
 	void setupVisBFile(final Path visBPath) {
-		this.visBVisualisation = visBFileHandler.constructVisualisationFromJSON(visBPath);
-		this.injector.getInstance(VisBDebugStage.class).initialiseListViews(visBVisualisation);
+		this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
 	}
 
 	public void setupVisualisation(final Path visBPath){
 		try {
 			setupVisBFile(visBPath);
-			setupHTMLFile(this.visBVisualisation.getSvgPath());
+			setupHTMLFile(this.getVisBVisualisation().getSvgPath());
 		} catch (IOException | ProBError e) {
-			this.visBVisualisation = null;
+			this.visBVisualisation.set(null);
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
@@ -298,7 +306,7 @@ public class VisBController {
 	}
 
 	private void showVisualisationAfterSetup() {
-		if (this.visBVisualisation == null) {
+		if (this.getVisBVisualisation() == null) {
 			updateInfo("visb.infobox.visualisation.error");
 			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			alert.initOwner(injector.getInstance(VisBStage.class));
@@ -333,7 +341,7 @@ public class VisBController {
 	 * Checks if on click functionality for the svg items can be added, yet. If not, nothing happens. If it can be added, the JQuery that is needed is built and executed via {@link VisBStage}.
 	 */
 	private List<VisBOnClickMustacheItem> generateOnClickItems(){
-		return this.visBVisualisation.getVisBEvents().stream()
+		return this.getVisBVisualisation().getVisBEvents().stream()
 			.map(VisBController::generateOnClickItem)
 			.collect(Collectors.toList());
 	}
