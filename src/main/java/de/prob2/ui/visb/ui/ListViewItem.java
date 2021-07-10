@@ -39,15 +39,15 @@ public class ListViewItem extends ListCell<VisBItem> {
 
 	private final Injector injector;
 
-	private final Map<String, VisBEvent> itemsToEvent;
+	private final Map<String, VisBEvent> eventsById;
 
-	public ListViewItem(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle, final Injector injector, final Map<String, VisBEvent> itemsToEvent){
+	public ListViewItem(final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle, final Injector injector, final Map<String, VisBEvent> eventsById){
 		stageManager.loadFXML(this,"list_view_item.fxml");
 		this.visBItem = null;
 		this.currentTrace = currentTrace;
 		this.bundle = bundle;
 		this.injector = injector;
-		this.itemsToEvent = itemsToEvent;
+		this.eventsById = eventsById;
 	}
 
 	@FXML
@@ -57,8 +57,8 @@ public class ListViewItem extends ListCell<VisBItem> {
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if(visBItem != null) {
 				String id = visBItem.getId();
-				if(itemsToEvent.containsKey(id)) {
-					for (VisBHover hover : itemsToEvent.get(id).getHovers()) {
+				if(eventsById.containsKey(id)) {
+					for (VisBHover hover : eventsById.get(id).getHovers()) {
 						String invocation = buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), to ? wrapAsString(hover.getHoverEnterVal()) : wrapAsString(hover.getHoverLeaveVal()));
 						injector.getInstance(VisBStage.class).runScript(invocation);
 					}
