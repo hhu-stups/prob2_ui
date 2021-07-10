@@ -6,6 +6,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.check.tracereplay.ITraceChecker;
+import de.prob.check.tracereplay.OperationDisabledness;
 import de.prob.check.tracereplay.OperationEnabledness;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
@@ -200,15 +201,26 @@ public class TraceChecker implements ITraceChecker {
 							sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.predicate"), transition.getOperationName(), ((PostconditionPredicate) postcondition).getPredicate()));
 							sb.append("\n");
 							break;
-						case ENABLEDNESS:
+						case ENABLEDNESS: {
 							String predicate = ((OperationEnabledness) postcondition).getPredicate();
-							if(predicate.isEmpty()) {
+							if (predicate.isEmpty()) {
 								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabled"), transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation()));
 							} else {
 								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabledWithPredicate"), transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation(), predicate));
 							}
 							sb.append("\n");
 							break;
+						}
+						case DISABLEDNESS: {
+							String predicate = ((OperationDisabledness) postcondition).getPredicate();
+							if (predicate.isEmpty()) {
+								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.disabled"), transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation()));
+							} else {
+								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.disabledWithPredicate"), transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation(), predicate));
+							}
+							sb.append("\n");
+							break;
+						}
 						default:
 							throw new RuntimeException("Postcondition kind is unknown: " + postcondition.getKind());
 					}

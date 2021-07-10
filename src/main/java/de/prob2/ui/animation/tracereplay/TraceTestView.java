@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import de.prob.check.tracereplay.OperationDisabledness;
 import de.prob.check.tracereplay.OperationEnabledness;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
@@ -105,13 +106,23 @@ public class TraceTestView extends Stage {
 			final TextField textField = new TextField("");
 			HBox.setHgrow(textField, Priority.ALWAYS);
 			textField.setPrefHeight(fontSize.getFontSize() * 1.5);
-			String predicate = ((OperationEnabledness) postcondition).getPredicate();
-			textField.setText(predicate);
-			textField.textProperty().addListener((o, from, to) -> {
-				if (to != null) {
-					((OperationEnabledness) postcondition).setPredicate(to);
-				}
-			});
+			if(postcondition.getKind() == Postcondition.PostconditionKind.ENABLEDNESS) {
+				String predicate = ((OperationEnabledness) postcondition).getPredicate();
+				textField.setText(predicate);
+				textField.textProperty().addListener((o, from, to) -> {
+					if (to != null) {
+						((OperationEnabledness) postcondition).setPredicate(to);
+					}
+				});
+			} else if(postcondition.getKind() == Postcondition.PostconditionKind.DISABLEDNESS) {
+				String predicate = ((OperationDisabledness) postcondition).getPredicate();
+				textField.setText(predicate);
+				textField.textProperty().addListener((o, from, to) -> {
+					if (to != null) {
+						((OperationDisabledness) postcondition).setPredicate(to);
+					}
+				});
+			}
 			return textField;
 		}
 
@@ -141,6 +152,16 @@ public class TraceTestView extends Stage {
 					});
 					break;
 				}
+				case DISABLEDNESS: {
+					String operation = ((OperationDisabledness) postcondition).getOperation();
+					textField.setText(operation);
+					textField.textProperty().addListener((o, from, to) -> {
+						if (to != null) {
+							((OperationDisabledness) postcondition).setOperation(to);
+						}
+					});
+					break;
+				}
 				default:
 					throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
 			}
@@ -160,7 +181,8 @@ public class TraceTestView extends Stage {
 			btAddTest.getStyleClass().add("icon-dark");
 			MenuItem addPredicate = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.predicate"));
 			MenuItem addOperationEnabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.enabled"));
-			
+			MenuItem addOperationDisabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.disabled"));
+
 			addPredicate.setOnAction(e1 -> {
 				PostconditionPredicate postcondition = new PostconditionPredicate();
 				postconditions.get(index).add(postcondition);
@@ -173,9 +195,16 @@ public class TraceTestView extends Stage {
 				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 				box.getChildren().add(box.getChildren().size() - 1, innerBox);
 			});
+			addOperationDisabled.setOnAction(e1 -> {
+				OperationDisabledness postcondition = new OperationDisabledness();
+				postconditions.get(index).add(postcondition);
+				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
+				box.getChildren().add(box.getChildren().size() - 1, innerBox);
+			});
 
 			btAddTest.getItems().add(addPredicate);
 			btAddTest.getItems().add(addOperationEnabled);
+			btAddTest.getItems().add(addOperationDisabled);
 
 			return btAddTest;
 		}
@@ -191,6 +220,9 @@ public class TraceTestView extends Stage {
 					break;
 				case ENABLEDNESS:
 					typeString = bundle.getString("animation.trace.replay.test.postcondition.enabled");
+					break;
+				case DISABLEDNESS:
+					typeString = bundle.getString("animation.trace.replay.test.postcondition.disabled");
 					break;
 				default:
 					throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
@@ -212,13 +244,12 @@ public class TraceTestView extends Stage {
 			innerBox.getChildren().add(postconditionTextField);
 
 
-			if(postcondition.getKind() == Postcondition.PostconditionKind.ENABLEDNESS) {
+			if(postcondition.getKind() == Postcondition.PostconditionKind.ENABLEDNESS || postcondition.getKind() == Postcondition.PostconditionKind.DISABLEDNESS) {
 				final Label withLabel = new Label(bundle.getString("animation.trace.replay.test.postcondition.with"));
 				final TextField predicateTextField = buildOperationPredicateTextField(postcondition);
 				innerBox.getChildren().add(withLabel);
 				innerBox.getChildren().add(predicateTextField);
 			}
-
 
 			innerBox.getChildren().add(statusIcon);
 			innerBox.getChildren().add(btRemoveTest);
@@ -300,6 +331,7 @@ public class TraceTestView extends Stage {
 			final TableRow<PersistentTransition> row = new TableRow<>();
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					this.saveTrace();
 					injector.getInstance(TraceChecker.class).check(replayTrace, true, () -> {
 						CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 						int index = row.getIndex();
@@ -348,6 +380,12 @@ public class TraceTestView extends Stage {
 
 	@FXML
 	private void applyTest() {
+		this.saveTrace();
+		injector.getInstance(TraceChecker.class).check(replayTrace, true);
+		this.close();
+	}
+
+	public void saveTrace() {
 		List<PersistentTransition> transitions = replayTrace.getPersistentTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
@@ -355,12 +393,7 @@ public class TraceTestView extends Stage {
 			transition.getPostconditions().addAll(postconditions.get(i));
 			transition.setDescription(descriptions.get(i));
 		}
-		this.saveTrace(transitions);
-		injector.getInstance(TraceChecker.class).check(replayTrace, true);
-		this.close();
-	}
 
-	public void saveTrace(List<PersistentTransition> transitions) {
 		Path projectLocation = currentProject.getLocation();
 
 		final Path tempLocation = projectLocation.resolve(replayTrace.getLocation() + ".tmp");
