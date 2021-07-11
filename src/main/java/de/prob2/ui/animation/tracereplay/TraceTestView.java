@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.OperationDisabledness;
 import de.prob.check.tracereplay.OperationEnabledness;
+import de.prob.check.tracereplay.OperationExecutability;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
@@ -106,23 +107,13 @@ public class TraceTestView extends Stage {
 			final TextField textField = new TextField("");
 			HBox.setHgrow(textField, Priority.ALWAYS);
 			textField.setPrefHeight(fontSize.getFontSize() * 1.5);
-			if(postcondition.getKind() == Postcondition.PostconditionKind.ENABLEDNESS) {
-				String predicate = ((OperationEnabledness) postcondition).getPredicate();
-				textField.setText(predicate);
-				textField.textProperty().addListener((o, from, to) -> {
-					if (to != null) {
-						((OperationEnabledness) postcondition).setPredicate(to);
-					}
-				});
-			} else if(postcondition.getKind() == Postcondition.PostconditionKind.DISABLEDNESS) {
-				String predicate = ((OperationDisabledness) postcondition).getPredicate();
-				textField.setText(predicate);
-				textField.textProperty().addListener((o, from, to) -> {
-					if (to != null) {
-						((OperationDisabledness) postcondition).setPredicate(to);
-					}
-				});
-			}
+			String predicate = ((OperationExecutability) postcondition).getPredicate();
+			textField.setText(predicate);
+			textField.textProperty().addListener((o, from, to) -> {
+				if (to != null) {
+					((OperationExecutability) postcondition).setPredicate(to);
+				}
+			});
 			return textField;
 		}
 
@@ -142,22 +133,13 @@ public class TraceTestView extends Stage {
 					});
 					break;
 				}
-				case ENABLEDNESS: {
-					String operation = ((OperationEnabledness) postcondition).getOperation();
-					textField.setText(operation);
-					textField.textProperty().addListener((o, from, to) -> {
-						if (to != null) {
-							((OperationEnabledness) postcondition).setOperation(to);
-						}
-					});
-					break;
-				}
+				case ENABLEDNESS:
 				case DISABLEDNESS: {
-					String operation = ((OperationDisabledness) postcondition).getOperation();
+					String operation = ((OperationExecutability) postcondition).getOperation();
 					textField.setText(operation);
 					textField.textProperty().addListener((o, from, to) -> {
 						if (to != null) {
-							((OperationDisabledness) postcondition).setOperation(to);
+							((OperationExecutability) postcondition).setOperation(to);
 						}
 					});
 					break;
@@ -243,8 +225,7 @@ public class TraceTestView extends Stage {
 			innerBox.getChildren().add(typeLabel);
 			innerBox.getChildren().add(postconditionTextField);
 
-
-			if(postcondition.getKind() == Postcondition.PostconditionKind.ENABLEDNESS || postcondition.getKind() == Postcondition.PostconditionKind.DISABLEDNESS) {
+			if(postcondition instanceof OperationExecutability) {
 				final Label withLabel = new Label(bundle.getString("animation.trace.replay.test.postcondition.with"));
 				final TextField predicateTextField = buildOperationPredicateTextField(postcondition);
 				innerBox.getChildren().add(withLabel);
