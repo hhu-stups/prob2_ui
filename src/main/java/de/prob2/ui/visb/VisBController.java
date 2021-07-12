@@ -83,12 +83,14 @@ public class VisBController {
 		this.visBVisualisation.addListener((o, from, to) -> {
 			if (to == null) {
 				this.attributeValues.clear();
+				this.injector.getInstance(VisBStage.class).clear();
+				LOGGER.debug("Current visualisation is cleared and closed.");
 			}
 		});
 
 		this.visBPath.addListener((o, from, to) -> {
 			if (to == null) {
-				this.closeCurrentVisualisation();
+				this.visBVisualisation.set(null);
 			} else {
 				this.setupVisualisation(to);
 			}
@@ -96,7 +98,7 @@ public class VisBController {
 		currentTrace.addListener((o, from, to) -> {
 			if (this.getVisBVisualisation() != null) {
 				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
-					this.closeCurrentVisualisation();
+					this.visBVisualisation.set(null);
 				}
 				this.updateVisualisationIfPossible();
 			}
@@ -281,19 +283,13 @@ public class VisBController {
 		if (this.getVisBPath() == null) {
 			return;
 		}
-		closeCurrentVisualisation();
+		this.visBVisualisation.set(null);
 		setupVisualisation(this.getVisBPath());
 		if (this.getVisBVisualisation() == null) {
 			updateInfo("visb.infobox.visualisation.error");
 			return;
 		}
 		LOGGER.debug("Visualisation has been reloaded.");
-	}
-
-	void closeCurrentVisualisation(){
-		this.visBVisualisation.set(null);
-		this.injector.getInstance(VisBStage.class).clear();
-		LOGGER.debug("Current visualisation is cleared and closed.");
 	}
 
 	public void setupVisualisation(final Path visBPath){
