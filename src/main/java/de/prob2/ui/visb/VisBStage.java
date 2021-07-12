@@ -197,6 +197,12 @@ public class VisBStage extends Stage {
 		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
 		this.webView.getEngine().setOnError(this::treatJavascriptError);
 
+		this.visBController.visBVisualisationProperty().addListener((o, from, to) -> {
+			if (to == null) {
+				this.clear();
+			}
+		});
+
 		injector.getInstance(VisBDebugStage.class).initOwner(this);
 	}
 

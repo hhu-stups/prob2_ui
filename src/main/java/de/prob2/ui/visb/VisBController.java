@@ -83,8 +83,6 @@ public class VisBController {
 		this.visBVisualisation.addListener((o, from, to) -> {
 			if (to == null) {
 				this.attributeValues.clear();
-				this.injector.getInstance(VisBStage.class).clear();
-				LOGGER.debug("Current visualisation is cleared and closed.");
 			}
 		});
 
