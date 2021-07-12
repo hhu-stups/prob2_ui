@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ import com.google.inject.Injector;
 
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
-import de.prob.animator.command.LoadVisBSetAttributesCommand;
+import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
@@ -32,6 +33,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import javafx.scene.control.Alert;
 
 import netscape.javascript.JSException;
@@ -58,6 +61,7 @@ public class VisBController {
 
 	private final ObjectProperty<Path> visBPath;
 	private final ObjectProperty<VisBVisualisation> visBVisualisation;
+	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
 
 	/**
 	 * The VisBController constructor gets injected with ProB2-UI injector. In this method the final currentTraceListener is initialised as well. There is no further initialisation needed for this class.
@@ -75,6 +79,12 @@ public class VisBController {
 		this.bundle = bundle;
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
+		this.attributeValues = FXCollections.observableHashMap();
+		this.visBVisualisation.addListener((o, from, to) -> {
+			if (to == null) {
+				this.attributeValues.clear();
+			}
+		});
 
 		this.visBPath.addListener((o, from, to) -> {
 			if (to == null) {
@@ -113,13 +123,17 @@ public class VisBController {
 		return this.visBVisualisationProperty().get();
 	}
 
+	public ObservableMap<VisBItem.VisBItemKey, String> getAttributeValues() {
+		return this.attributeValues;
+	}
+
 	private void applySVGChanges() {
 		VisBStage visBStage = injector.getInstance(VisBStage.class);
 
-		String stateID = currentTrace.getCurrentState().getId();
 		try {
-			LoadVisBSetAttributesCommand setAttributesCmd = new LoadVisBSetAttributesCommand(stateID, this.getVisBVisualisation().getVisBItemMap());
-			currentTrace.getStateSpace().execute(setAttributesCmd);
+			final GetVisBAttributeValuesCommand getAttributesCmd = new GetVisBAttributeValuesCommand(currentTrace.getCurrentState());
+			currentTrace.getStateSpace().execute(getAttributesCmd);
+			this.attributeValues.putAll(getAttributesCmd.getValues());
 		} catch (ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 			updateInfo("visb.infobox.visualisation.error");
@@ -127,7 +141,7 @@ public class VisBController {
 			return;
 		}
 
-		final List<String> svgChanges = buildJQueryForChanges(this.getVisBVisualisation().getVisBItems());
+		final List<String> svgChanges = buildJQueryForChanges(this.attributeValues);
 
 		// TO DO: parse formula once when loading the file to check for syntax errors
 		if(svgChanges.isEmpty()){
@@ -149,13 +163,13 @@ public class VisBController {
 
 	/**
 	 * Uses evaluateFormula to evaluate the visualisation items.
-	 * @param visItems items given by the {@link VisBController}
+	 * @param attributeValues new attribute values for all items
 	 * @return all needed jQueries
 	 */
-	private static List<String> buildJQueryForChanges(List<VisBItem> visItems) {
-		return visItems.stream()
-			.map(visItem -> buildInvocation("changeAttribute", wrapAsString(visItem.getId()), wrapAsString(visItem.getAttribute()), visItem.getValue()))
-			.collect(Collectors.toList());
+	private static List<String> buildJQueryForChanges(final Map<VisBItem.VisBItemKey, String> attributeValues) {
+		final List<String> calls = new ArrayList<>();
+		attributeValues.forEach((k, v) -> calls.add(buildInvocation("changeAttribute", wrapAsString(k.getId()), wrapAsString(k.getAttribute()), v)));
+		return calls;
 	}
 
 	/**

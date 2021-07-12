@@ -75,7 +75,7 @@ public class VisBDebugStage extends Stage {
 				applyHighlighting(to);
 			}
 		};
-		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, currentTrace, bundle, injector, eventsById));
+		this.visBItems.setCellFactory(lv -> new ListViewItem(stageManager, bundle, injector, eventsById, visBController.getAttributeValues()));
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, bundle, injector));
 		this.currentTrace.addListener((observable, from, to) -> refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> refresh());
