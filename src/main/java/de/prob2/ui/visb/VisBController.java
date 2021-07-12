@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -141,35 +140,13 @@ public class VisBController {
 			return;
 		}
 
-		final List<String> svgChanges = buildJQueryForChanges(this.attributeValues);
-
-		// TO DO: parse formula once when loading the file to check for syntax errors
-		if(svgChanges.isEmpty()){
-			updateInfo("visb.infobox.no.change");
-		} else {
-			try {
-				visBStage.runScript("resetDebugMessages()");
-				visBStage.runScript("resetErrorMessages()");
-				visBStage.runScript(String.join("", svgChanges));
-			} catch (JSException e){
-				alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
-				updateInfo("visb.infobox.visualisation.error");
-				return;
-			}
-			//LOGGER.debug("Running script: "+svgChanges);
-			updateInfo("visb.infobox.visualisation.updated.nr", svgChanges.size());
+		try {
+			visBStage.runScript("resetDebugMessages()");
+			visBStage.runScript("resetErrorMessages()");
+		} catch (JSException e){
+			alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
+			updateInfo("visb.infobox.visualisation.error");
 		}
-	}
-
-	/**
-	 * Uses evaluateFormula to evaluate the visualisation items.
-	 * @param attributeValues new attribute values for all items
-	 * @return all needed jQueries
-	 */
-	private static List<String> buildJQueryForChanges(final Map<VisBItem.VisBItemKey, String> attributeValues) {
-		final List<String> calls = new ArrayList<>();
-		attributeValues.forEach((k, v) -> calls.add(buildInvocation("changeAttribute", wrapAsString(k.getId()), wrapAsString(k.getAttribute()), v)));
-		return calls;
 	}
 
 	/**
@@ -330,7 +307,7 @@ public class VisBController {
 	}
 	private void showUpdateVisualisationNotPossible(){
 		if("root".equals(this.currentTrace.get().getCurrent().toString())) {
-			updateInfo("visb.infobox.visualisation.updated.nr", 0);
+			updateInfo("visb.infobox.visualisation.updated");
 			injector.getInstance(VisBStage.class).runScript("showModelNotInitialised()");
 		}
 	}

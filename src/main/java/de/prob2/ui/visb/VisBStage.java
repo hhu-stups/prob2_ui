@@ -19,6 +19,7 @@ import com.google.inject.Provider;
 import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
+import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
@@ -39,6 +40,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.MapChangeListener;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -57,10 +59,14 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
+import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 
 
 /**
@@ -200,6 +206,17 @@ public class VisBStage extends Stage {
 		this.visBController.visBVisualisationProperty().addListener((o, from, to) -> {
 			if (to == null) {
 				this.clear();
+			}
+		});
+		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
+			if (change.wasAdded()) {
+				try {
+					this.runScript(buildInvocation("changeAttribute", wrapAsString(change.getKey().getId()), wrapAsString(change.getKey().getAttribute()), change.getValueAdded()));
+					updateInfo(bundle.getString("visb.infobox.visualisation.updated"));
+				} catch (final JSException e) {
+					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
+					updateInfo(bundle.getString("visb.infobox.visualisation.error"));
+				}
 			}
 		});
 
