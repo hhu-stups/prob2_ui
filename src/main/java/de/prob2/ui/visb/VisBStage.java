@@ -213,6 +213,7 @@ public class VisBStage extends Stage {
 					this.changeAttribute(change.getKey().getId(), change.getKey().getAttribute(), change.getValueAdded());
 					updateInfo(bundle.getString("visb.infobox.visualisation.updated"));
 				} catch (final JSException e) {
+					LOGGER.error("JavaScript error while updating VisB attributes", e);
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 					updateInfo(bundle.getString("visb.infobox.visualisation.error"));
 				}
@@ -283,6 +284,10 @@ public class VisBStage extends Stage {
 		alert.showAndWait();
 	}
 
+	private JSObject getJSWindow() {
+		return (JSObject)this.webView.getEngine().executeScript("window");
+	}
+
 	private void addVisBConnector() {
 		if(connectorSet){
 			LOGGER.debug("Connector is already set, no action needed.");
@@ -291,9 +296,9 @@ public class VisBStage extends Stage {
 			connectorSet = true;
 			this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
 				if (newState == Worker.State.SUCCEEDED) {
-					JSObject jsobj = (JSObject) webView.getEngine().executeScript("window");
-					jsobj.setMember("visBConnector", injector.getInstance(VisBConnector.class));
-					webView.getEngine().executeScript("activateClickEvents();");
+					final JSObject window = this.getJSWindow();
+					window.setMember("visBConnector", injector.getInstance(VisBConnector.class));
+					window.call("activateClickEvents");
 				}
 			});
 			LOGGER.debug("VisBConnector was set into globals.");
@@ -349,27 +354,16 @@ public class VisBStage extends Stage {
 		}
 	}
 
-	/**
-	 * Run the given JavaScript code in the {@link WebView}.
-	 * If necessary, this delays running the code until the {@link WebView} has finished loading.
-	 * 
-	 * @param jsCode the JavaScript code to run
-	 */
-	private void runScript(final String jsCode) {
-		LOGGER.debug("Running JavaScript code: {}", jsCode);
-		this.runWhenLoaded(() -> webView.getEngine().executeScript(jsCode));
-	}
-
 	public void changeAttribute(final String id, final String attribute, final String value) {
-		this.runScript(buildInvocation("changeAttribute", wrapAsString(id), wrapAsString(attribute), wrapAsString(value)));
+		this.runWhenLoaded(() -> this.getJSWindow().call("changeAttribute", id, attribute, value));
 	}
 
 	public void showModelNotInitialised() {
-		this.runScript("showModelNotInitialised();");
+		this.runWhenLoaded(() -> this.getJSWindow().call("showModelNotInitialised"));
 	}
 
 	public void resetMessages() {
-		this.runScript("resetMessages();");
+		this.runWhenLoaded(() -> this.getJSWindow().call("resetMessages"));
 	}
 
 	/**
