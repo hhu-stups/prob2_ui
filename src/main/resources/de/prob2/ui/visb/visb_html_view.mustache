@@ -71,7 +71,7 @@
 				};
 				obj.onmouseout = function() {
 					{{&leaveAction}}
-					resetDebugMessages();
+					updateDebugMessages("");
 				};
 			}
 			{{/clickEvents}}
@@ -81,11 +81,8 @@
 			appendErrorMessage("Model not initialised").style.color = "blue";
 		}
 
-		function resetDebugMessages() {
+		function resetMessages() {
 			updateDebugMessages("");
-		}
-
-		function resetErrorMessages() {
 			getErrorMessagesNode().textContent = "";
 		}
 

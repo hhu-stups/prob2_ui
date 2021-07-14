@@ -371,7 +371,7 @@ public class VisBStage extends Stage {
 	}
 
 	public void resetMessages() {
-		this.runScript("resetDebugMessages(); resetErrorMessages();");
+		this.runScript("resetMessages();");
 	}
 
 	/**
