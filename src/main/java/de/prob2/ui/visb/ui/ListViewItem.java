@@ -83,7 +83,7 @@ public class ListViewItem extends ListCell<VisBItem> {
 				bundle.getString("visb.item.value"),
 				Bindings.when(valueBinding.isNull())
 					.then("not initialised")
-					.otherwise(valueBinding)
+					.otherwise(Bindings.format("\"%s\"", valueBinding))
 			));
 			this.setGraphic(this.itemBox);
 			this.setText("");

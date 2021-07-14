@@ -211,7 +211,7 @@ public class VisBStage extends Stage {
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
 			if (change.wasAdded()) {
 				try {
-					this.runScript(buildInvocation("changeAttribute", wrapAsString(change.getKey().getId()), wrapAsString(change.getKey().getAttribute()), change.getValueAdded()));
+					this.runScript(buildInvocation("changeAttribute", wrapAsString(change.getKey().getId()), wrapAsString(change.getKey().getAttribute()), wrapAsString(change.getValueAdded())));
 					updateInfo(bundle.getString("visb.infobox.visualisation.updated"));
 				} catch (final JSException e) {
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
