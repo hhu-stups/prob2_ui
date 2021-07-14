@@ -22,7 +22,6 @@ import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
@@ -265,8 +264,7 @@ public class VisBStage extends Stage {
 		if (svgContent != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
-			String jqueryLink = Main.class.getResource("jquery.js").toExternalForm();
-			String htmlFile = generateHTMLFileWithSVG(jqueryLink, clickEvents, svgContent);
+			String htmlFile = generateHTMLFileWithSVG(clickEvents, svgContent);
 			this.webView.getEngine().loadContent(htmlFile);
 			addVisBConnector();
 		}
@@ -468,10 +466,9 @@ public class VisBStage extends Stage {
 		simulatorStage.toFront();
 	}
 
-	private String generateHTMLFileWithSVG(String jqueryLink, List<VisBOnClickMustacheItem> clickEvents, String svgContent) {
+	private String generateHTMLFileWithSVG(List<VisBOnClickMustacheItem> clickEvents, String svgContent) {
 		InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.mustache");
 		MustacheTemplateManager templateManager = new MustacheTemplateManager(inputStream, "visb_html_view");
-		templateManager.put("jqueryLink", jqueryLink);
 		templateManager.put("clickEvents", clickEvents);
 		templateManager.put("svgContent", svgContent);
 		return templateManager.apply();
