@@ -313,12 +313,17 @@ public class VisBStage extends Stage {
 	}
 
 	/**
-	 * This method runs the jQuery script in the WebView.
-	 * @param jQuery script to be run
+	 * Run the given {@link Runnable} once the {@link WebView} has finished loading.
+	 * If the {@link WebView} is already fully loaded,
+	 * the {@link Runnable} is executed immediately.
+	 * If the {@link WebView} fails to load,
+	 * the {@link Runnable} is never executed.
+	 * 
+	 * @param runnable the code to run once the {@link WebView} has finished loading
 	 */
-	private void runScript(String jQuery) {
+	private void runWhenLoaded(final Runnable runnable) {
 		if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
-			// execute JQuery script once page fully loaded
+			// execute code once page fully loaded
 			// https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
 			webView.getEngine().getLoadWorker().stateProperty().addListener(
 				//Use new constructor instead of lambda expression to access change listener with keyword this
@@ -334,16 +339,27 @@ public class VisBStage extends Stage {
 						if (newValue != Worker.State.SUCCEEDED) {
 							return;
 						}
-						LOGGER.debug("runScript: "+jQuery+"\n-----");
-						webView.getEngine().executeScript(jQuery);
+						LOGGER.debug("WebView finished loading - executing delayed call: {}", runnable);
+						runnable.run();
 					}
 				}
 			);
-			LOGGER.debug("registered runScript as Listener");
+			LOGGER.debug("WebView still loading - delaying call until it is fully loaded: {}", runnable);
 		} else {
-			LOGGER.debug("runScript directly: "+jQuery+"\n-----");
-			this.webView.getEngine().executeScript(jQuery);
+			LOGGER.debug("Executing call: {}", runnable);
+			runnable.run();
 		}
+	}
+
+	/**
+	 * Run the given JavaScript code in the {@link WebView}.
+	 * If necessary, this delays running the code until the {@link WebView} has finished loading.
+	 * 
+	 * @param jsCode the JavaScript code to run
+	 */
+	private void runScript(final String jsCode) {
+		LOGGER.debug("Running JavaScript code: {}", jsCode);
+		this.runWhenLoaded(() -> webView.getEngine().executeScript(jsCode));
 	}
 
 	public void changeAttribute(final String id, final String attribute, final String value) {
