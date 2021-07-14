@@ -64,10 +64,6 @@ import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
-
-
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
  */
