@@ -211,7 +211,7 @@ public class VisBStage extends Stage {
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
 			if (change.wasAdded()) {
 				try {
-					this.runScript(buildInvocation("changeAttribute", wrapAsString(change.getKey().getId()), wrapAsString(change.getKey().getAttribute()), wrapAsString(change.getValueAdded())));
+					this.changeAttribute(change.getKey().getId(), change.getKey().getAttribute(), change.getValueAdded());
 					updateInfo(bundle.getString("visb.infobox.visualisation.updated"));
 				} catch (final JSException e) {
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
@@ -316,7 +316,7 @@ public class VisBStage extends Stage {
 	 * This method runs the jQuery script in the WebView.
 	 * @param jQuery script to be run
 	 */
-	public void runScript(String jQuery) {
+	private void runScript(String jQuery) {
 		if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
 			// execute JQuery script once page fully loaded
 			// https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
@@ -344,6 +344,18 @@ public class VisBStage extends Stage {
 			LOGGER.debug("runScript directly: "+jQuery+"\n-----");
 			this.webView.getEngine().executeScript(jQuery);
 		}
+	}
+
+	public void changeAttribute(final String id, final String attribute, final String value) {
+		this.runScript(buildInvocation("changeAttribute", wrapAsString(id), wrapAsString(attribute), wrapAsString(value)));
+	}
+
+	public void showModelNotInitialised() {
+		this.runScript("showModelNotInitialised();");
+	}
+
+	public void resetMessages() {
+		this.runScript("resetDebugMessages(); resetErrorMessages();");
 	}
 
 	/**

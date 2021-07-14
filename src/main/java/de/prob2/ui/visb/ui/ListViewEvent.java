@@ -1,7 +1,9 @@
 package de.prob2.ui.visb.ui;
 
+import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
+
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob2.ui.internal.StageManager;
@@ -11,11 +13,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
-
-import java.util.ResourceBundle;
-
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
 
 public class ListViewEvent extends ListCell<VisBEvent> {
 	@FXML
@@ -47,10 +44,8 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 		this.getStyleClass().add("visb-item");
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if(visBEvent != null) {
-				String id = visBEvent.getId();
 				for (VisBHover hover : visBEvent.getHovers()) {
-					String invocation = buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), to ? wrapAsString(hover.getHoverEnterVal()) : wrapAsString(hover.getHoverLeaveVal()));
-					injector.getInstance(VisBStage.class).runScript(invocation);
+					injector.getInstance(VisBStage.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 				}
 			}
 		});

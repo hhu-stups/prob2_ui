@@ -25,9 +25,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
-
 @Singleton
 public class VisBDebugStage extends Stage {
 
@@ -87,8 +84,7 @@ public class VisBDebugStage extends Stage {
 		String id = item.getId();
 		if(eventsById.containsKey(id)) {
 			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				String invocation = buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal()));
-				injector.getInstance(VisBStage.class).runScript(invocation);
+				injector.getInstance(VisBStage.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverLeaveVal());
 			}
 		}
 	}
@@ -97,8 +93,7 @@ public class VisBDebugStage extends Stage {
 		String id = item.getId();
 		if(eventsById.containsKey(id)) {
 			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				String invocation = buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal()));
-				injector.getInstance(VisBStage.class).runScript(invocation);
+				injector.getInstance(VisBStage.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverEnterVal());
 			}
 		}
 	}

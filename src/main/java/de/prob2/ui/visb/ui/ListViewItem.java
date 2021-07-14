@@ -19,9 +19,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
-
 public class ListViewItem extends ListCell<VisBItem> {
 	@FXML
 	private VBox itemBox;
@@ -62,8 +59,7 @@ public class ListViewItem extends ListCell<VisBItem> {
 				String id = visBItem.getId();
 				if(eventsById.containsKey(id)) {
 					for (VisBHover hover : eventsById.get(id).getHovers()) {
-						String invocation = buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), to ? wrapAsString(hover.getHoverEnterVal()) : wrapAsString(hover.getHoverLeaveVal()));
-						injector.getInstance(VisBStage.class).runScript(invocation);
+						injector.getInstance(VisBStage.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 					}
 				}
 			}

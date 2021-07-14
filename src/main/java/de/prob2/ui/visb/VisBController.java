@@ -141,8 +141,7 @@ public class VisBController {
 		}
 
 		try {
-			visBStage.runScript("resetDebugMessages()");
-			visBStage.runScript("resetErrorMessages()");
+			visBStage.resetMessages();
 		} catch (JSException e){
 			alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 			updateInfo("visb.infobox.visualisation.error");
@@ -308,7 +307,7 @@ public class VisBController {
 	private void showUpdateVisualisationNotPossible(){
 		if("root".equals(this.currentTrace.get().getCurrent().toString())) {
 			updateInfo("visb.infobox.visualisation.updated");
-			injector.getInstance(VisBStage.class).runScript("showModelNotInitialised()");
+			injector.getInstance(VisBStage.class).showModelNotInitialised();
 		}
 	}
 
