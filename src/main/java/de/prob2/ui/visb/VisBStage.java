@@ -338,14 +338,11 @@ public class VisBStage extends Stage {
 						if (newValue != Worker.State.SUCCEEDED) {
 							return;
 						}
-						LOGGER.debug("WebView finished loading - executing delayed call: {}", runnable);
 						runnable.run();
 					}
 				}
 			);
-			LOGGER.debug("WebView still loading - delaying call until it is fully loaded: {}", runnable);
 		} else {
-			LOGGER.debug("Executing call: {}", runnable);
 			runnable.run();
 		}
 	}
