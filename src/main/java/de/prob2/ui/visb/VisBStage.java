@@ -82,7 +82,6 @@ public class VisBStage extends Stage {
 	private final CurrentTrace currentTrace;
 	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
-	private boolean connectorSet = false;
 	private final FileChooserManager fileChooserManager;
 
 	@FXML
@@ -197,6 +196,13 @@ public class VisBStage extends Stage {
 
 		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
 		this.webView.getEngine().setOnError(this::treatJavascriptError);
+		this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+			if (newState == Worker.State.SUCCEEDED) {
+				final JSObject window = this.getJSWindow();
+				window.setMember("visBConnector", injector.getInstance(VisBConnector.class));
+				window.call("activateClickEvents");
+			}
+		});
 
 		this.visBController.visBVisualisationProperty().addListener((o, from, to) -> {
 			if (to == null) {
@@ -263,7 +269,6 @@ public class VisBStage extends Stage {
 			this.webView.setVisible(true);
 			String htmlFile = generateHTMLFileWithSVG(clickEvents, svgContent);
 			this.webView.getEngine().loadContent(htmlFile);
-			addVisBConnector();
 		}
 
 	}
@@ -282,23 +287,6 @@ public class VisBStage extends Stage {
 
 	private JSObject getJSWindow() {
 		return (JSObject)this.webView.getEngine().executeScript("window");
-	}
-
-	private void addVisBConnector() {
-		if(connectorSet){
-			LOGGER.debug("Connector is already set, no action needed.");
-		} else {
-			LOGGER.debug("VisBConnector is set into globals.");
-			connectorSet = true;
-			this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-				if (newState == Worker.State.SUCCEEDED) {
-					final JSObject window = this.getJSWindow();
-					window.setMember("visBConnector", injector.getInstance(VisBConnector.class));
-					window.call("activateClickEvents");
-				}
-			});
-			LOGGER.debug("VisBConnector was set into globals.");
-		}
 	}
 
 	/**
