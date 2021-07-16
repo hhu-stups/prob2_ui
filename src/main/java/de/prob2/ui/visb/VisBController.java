@@ -41,9 +41,6 @@ import netscape.javascript.JSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.buildInvocation;
-import static de.prob2.ui.internal.JavascriptFunctionInvoker.wrapAsString;
-
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler}.
  * Everything that can be done in Java only and uses interaction with ProB2-UI should be in here, not in the other classes.
@@ -245,8 +242,7 @@ public class VisBController {
 	private void setupHTMLFile(final Path svgPath) throws IOException{
 		String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
 		if(!svgContent.isEmpty()) {
-			List<VisBOnClickMustacheItem> clickEvents = generateOnClickItems();
-			this.injector.getInstance(VisBStage.class).initialiseWebView(clickEvents, svgContent);
+			this.injector.getInstance(VisBStage.class).initialiseWebView(svgContent);
 			updateInfo("visb.infobox.visualisation.svg.loaded");
 		} else{
 			throw new IOException(bundle.getString("visb.exception.svg.empty"));
@@ -309,26 +305,5 @@ public class VisBController {
 			updateInfo("visb.infobox.visualisation.updated");
 			injector.getInstance(VisBStage.class).showModelNotInitialised();
 		}
-	}
-
-	/**
-	 * Checks if on click functionality for the svg items can be added, yet. If not, nothing happens. If it can be added, the JQuery that is needed is built and executed via {@link VisBStage}.
-	 */
-	private List<VisBOnClickMustacheItem> generateOnClickItems(){
-		return this.getVisBVisualisation().getVisBEvents().stream()
-			.map(VisBController::generateOnClickItem)
-			.collect(Collectors.toList());
-	}
-
-	private static VisBOnClickMustacheItem generateOnClickItem(VisBEvent visBEvent) {
-		String enterAction = visBEvent.getHovers().stream()
-				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverEnterVal())))
-				.collect(Collectors.joining("\n"));
-		String leaveAction = visBEvent.getHovers().stream()
-				.map(hover -> buildInvocation("changeAttribute", wrapAsString(hover.getHoverID()), wrapAsString(hover.getHoverAttr()), wrapAsString(hover.getHoverLeaveVal())))
-				.collect(Collectors.joining("\n"));
-		String eventID = visBEvent.getId();
-		String eventName = visBEvent.getEvent();
-		return new VisBOnClickMustacheItem(enterAction, leaveAction, eventID, eventName);
 	}
 }

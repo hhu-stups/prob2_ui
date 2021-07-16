@@ -59,10 +59,8 @@
 			});
 		}
 
-		function activateClickEvents(visBConnector) {
-			let obj;
-			{{#clickEvents}}
-			obj = checkSvgId("{{&eventID}}", "VisB Event");
+		function addClickEvent(visBConnector, id, eventName, hovers) {
+			const obj = checkSvgId(id, "VisB Event " + eventName);
 			if (obj !== null) {
 				obj.onclick = function(event) {
 					visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);
@@ -73,18 +71,34 @@
 				
 				{{! attach mouseover/mouseout event handlers to put event into visb_debug_messages text field}}
 				
+				// Convert Java VisBHover objects into JavaScript objects.
+				// For some reason, trying to use the original VisBHover objects
+				// inside onmouseover/onmouseout sometimes causes errors.
+				const hoversJS = [];
+				for (const hover of hovers) {
+					hoversJS.push({
+						id: hover.getHoverID(),
+						attr: hover.getHoverAttr(),
+						enterVal: hover.getHoverEnterVal(),
+						leaveVal: hover.getHoverLeaveVal(),
+					});
+				}
+				
 				obj.onmouseover = function(ev) {
-					{{&enterAction}}
-					updateDebugMessages("{{&eventName}}");
+					for (const hover of hoversJS) {
+						changeAttribute(hover.id, hover.attr, hover.enterVal);
+					}
+					updateDebugMessages(eventName);
 					// comment in this line instead if you wish to see coordinates
-					// getDebugMessagesNode().textContent = "{{&eventName}} " + ev.pageX + "," + ev.pageY;
+					// getDebugMessagesNode().textContent = eventName + " " + ev.pageX + "," + ev.pageY;
 				};
 				obj.onmouseout = function() {
-					{{&leaveAction}}
+					for (const hover of hoversJS) {
+						changeAttribute(hover.id, hover.attr, hover.leaveVal);
+					}
 					updateDebugMessages("");
 				};
 			}
-			{{/clickEvents}}
 		}
 
 		function showModelNotInitialised() {

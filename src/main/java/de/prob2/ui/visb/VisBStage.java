@@ -19,6 +19,8 @@ import com.google.inject.Provider;
 import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
+import de.prob.animator.domainobjects.VisBEvent;
+import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
@@ -198,7 +200,11 @@ public class VisBStage extends Stage {
 		this.webView.getEngine().setOnError(this::treatJavascriptError);
 		this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
 			if (newState == Worker.State.SUCCEEDED) {
-				this.getJSWindow().call("activateClickEvents", injector.getInstance(VisBConnector.class));
+				final JSObject window = this.getJSWindow();
+				final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
+				for (final VisBEvent event : this.visBController.getVisBVisualisation().getVisBEvents()) {
+					window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
+				}
 			}
 		});
 
@@ -261,11 +267,11 @@ public class VisBStage extends Stage {
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
 	 */
-	void initialiseWebView(List<VisBOnClickMustacheItem> clickEvents, String svgContent) {
+	void initialiseWebView(String svgContent) {
 		if (svgContent != null) {
 			this.placeholder.setVisible(false);
 			this.webView.setVisible(true);
-			String htmlFile = generateHTMLFileWithSVG(clickEvents, svgContent);
+			String htmlFile = generateHTMLFileWithSVG(svgContent);
 			this.webView.getEngine().loadContent(htmlFile);
 		}
 
@@ -439,10 +445,9 @@ public class VisBStage extends Stage {
 		simulatorStage.toFront();
 	}
 
-	private String generateHTMLFileWithSVG(List<VisBOnClickMustacheItem> clickEvents, String svgContent) {
+	private String generateHTMLFileWithSVG(String svgContent) {
 		InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.mustache");
 		MustacheTemplateManager templateManager = new MustacheTemplateManager(inputStream, "visb_html_view");
-		templateManager.put("clickEvents", clickEvents);
 		templateManager.put("svgContent", svgContent);
 		return templateManager.apply();
 	}
