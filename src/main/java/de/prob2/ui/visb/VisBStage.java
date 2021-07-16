@@ -198,9 +198,7 @@ public class VisBStage extends Stage {
 		this.webView.getEngine().setOnError(this::treatJavascriptError);
 		this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
 			if (newState == Worker.State.SUCCEEDED) {
-				final JSObject window = this.getJSWindow();
-				window.setMember("visBConnector", injector.getInstance(VisBConnector.class));
-				window.call("activateClickEvents");
+				this.getJSWindow().call("activateClickEvents", injector.getInstance(VisBConnector.class));
 			}
 		});
 
