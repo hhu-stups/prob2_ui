@@ -4,6 +4,9 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -13,6 +16,7 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.io.CharStreams;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 
@@ -27,7 +31,6 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.MustacheTemplateManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -446,10 +449,15 @@ public class VisBStage extends Stage {
 	}
 
 	private String generateHTMLFileWithSVG(String svgContent) {
-		InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.mustache");
-		MustacheTemplateManager templateManager = new MustacheTemplateManager(inputStream, "visb_html_view");
-		templateManager.put("svgContent", svgContent);
-		return templateManager.apply();
+		final InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.html");
+		if (inputStream == null) {
+			throw new AssertionError("VisB HTML template resource not found - this should never happen");
+		}
+		try (final InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+			return CharStreams.toString(reader).replace("@SVG_CONTENT@", svgContent);
+		} catch (IOException e) {
+			throw new UncheckedIOException("I/O exception while reading VisB HTML template resource - this should never happen", e);
+		}
 	}
 
 	@FXML

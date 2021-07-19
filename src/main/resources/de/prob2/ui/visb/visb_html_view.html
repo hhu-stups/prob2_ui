@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	{{! This is for zooming in and out and scaling the image to the right width and height}}
+	<!-- This is for zooming in and out and scaling the image to the right width and height -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<script>
 		function runWhenLoaded(callback) {
@@ -64,12 +64,12 @@
 			if (obj !== null) {
 				obj.onclick = function(event) {
 					visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);
-					{{! we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp}}
-					{{! event.which: 1=left mouse button, 2, 3}}
-					{{! event.clientX,event.clientY, screenX, screenY : less useful probably}}
+					// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
+					// event.which: 1=left mouse button, 2, 3
+					// event.clientX,event.clientY, screenX, screenY : less useful probably
 				};
 				
-				{{! attach mouseover/mouseout event handlers to put event into visb_debug_messages text field}}
+				// attach mouseover/mouseout event handlers to put event into visb_debug_messages text field
 				
 				// Convert Java VisBHover objects into JavaScript objects.
 				// For some reason, trying to use the original VisBHover objects
@@ -114,8 +114,7 @@
 	</head>
 
 	<body>
-	<div text-align="center"> {{&svgContent}}
-	</div>
+	<div text-align="center">@SVG_CONTENT@</div>
 	<div id="visb_error_messages" style="color:red"><ul></ul>
 	</div>
 	</body>
