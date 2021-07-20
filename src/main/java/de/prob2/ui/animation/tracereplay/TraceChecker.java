@@ -116,12 +116,13 @@ public class TraceChecker implements ITraceChecker {
 	}
 
 	@Override
-	public void setResult(boolean success, List<List<Boolean>> postconditionResults, Map<String, Object> replayInformation) {
+	public void setResult(boolean success, List<List<TraceReplay.PostconditionResult>> postconditionResults, Map<String, Object> replayInformation) {
 		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
 		Platform.runLater(() -> {
 			replayTrace.setPostconditionStatus(postconditionResults.stream()
 					.map(res -> res.stream()
-							.map(innerRes -> innerRes ? Checked.SUCCESS : Checked.FAIL)
+							.map(innerRes -> innerRes == TraceReplay.PostconditionResult.SUCCESS ? Checked.SUCCESS :
+											 innerRes == TraceReplay.PostconditionResult.FAIL ? Checked.FAIL : Checked.PARSE_ERROR)
 							.collect(Collectors.toList()))
 					.collect(Collectors.toList()));
 			if(success) {
@@ -185,20 +186,23 @@ public class TraceChecker implements ITraceChecker {
 
 
 	@Override
-	public void showTestError(PersistentTrace persistentTrace, List<List<Boolean>> postconditionResults) {
+	public void showTestError(PersistentTrace persistentTrace, List<List<TraceReplay.PostconditionResult>> postconditionResults) {
 		StringBuilder sb = new StringBuilder();
 		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
 		boolean failed = false;
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
-			List<Boolean> postconditionTransitionResults = postconditionResults.get(i);
+			List<TraceReplay.PostconditionResult> postconditionTransitionResults = postconditionResults.get(i);
 			for(int j = 0; j < postconditionTransitionResults.size(); j++) {
-				boolean result = postconditionTransitionResults.get(j);
-				if(!result) {
+				TraceReplay.PostconditionResult result = postconditionTransitionResults.get(j);
+				if(result != TraceReplay.PostconditionResult.SUCCESS) {
 					Postcondition postcondition = transition.getPostconditions().get(j);
 					switch (postcondition.getKind()) {
 						case PREDICATE:
 							sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.predicate"), transition.getOperationName(), ((PostconditionPredicate) postcondition).getPredicate()));
+							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
+								sb.append(bundle.getString("animation.trace.replay.test.alert.content.parseError"));
+							}
 							sb.append("\n");
 							break;
 						case ENABLEDNESS: {
@@ -207,6 +211,9 @@ public class TraceChecker implements ITraceChecker {
 								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabled"), transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation()));
 							} else {
 								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabledWithPredicate"), transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation(), predicate));
+							}
+							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
+								sb.append(bundle.getString("animation.trace.replay.test.alert.content.parseError"));
 							}
 							sb.append("\n");
 							break;
@@ -217,6 +224,9 @@ public class TraceChecker implements ITraceChecker {
 								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.disabled"), transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation()));
 							} else {
 								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.disabledWithPredicate"), transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation(), predicate));
+							}
+							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
+								sb.append(bundle.getString("animation.trace.replay.test.alert.content.parseError"));
 							}
 							sb.append("\n");
 							break;

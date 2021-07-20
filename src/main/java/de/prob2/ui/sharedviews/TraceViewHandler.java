@@ -3,6 +3,7 @@ package de.prob2.ui.sharedviews;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.prob.check.tracereplay.TraceReplay;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
@@ -179,7 +180,8 @@ public class TraceViewHandler {
 			traceChecker.showTestError(row.getItem().getPersistentTrace(), replayTrace.getPostconditionStatus()
 					.stream()
 					.map(statuses -> statuses.stream()
-							.map(status -> status == Checked.SUCCESS)
+							.map(status -> status == Checked.SUCCESS ? TraceReplay.PostconditionResult.SUCCESS :
+									       status == Checked.FAIL ? TraceReplay.PostconditionResult.FAIL : TraceReplay.PostconditionResult.PARSE_ERROR)
 							.collect(Collectors.toList()))
 					.collect(Collectors.toList()));
 		});
@@ -266,7 +268,10 @@ public class TraceViewHandler {
 				iconView.setIcon(FontAwesome.Glyph.QUESTION_CIRCLE);
 				iconView.setTextFill(Color.BLUE);
 				break;
-
+			case PARSE_ERROR:
+				iconView.setIcon(FontAwesome.Glyph.WARNING);
+				iconView.setTextFill(Color.ORANGE);
+				break;
 			default:
 				throw new AssertionError("Unhandled status: " + status);
 		}
