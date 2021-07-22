@@ -12,6 +12,6 @@
 		<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RECYCLE" bindableFontSize="${fontSize.fontSize + 2}"/>
 	</graphic>
 	<tooltip>
-		<Tooltip text="%internal.navigationButtons.reload.tooltip"/>
+		<Tooltip text="%animation.tracereplay.view.tooltips.refactorTrace"/>
 	</tooltip>
 </fx:root>
