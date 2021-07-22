@@ -99,14 +99,16 @@ public class TraceViewHandler {
 		};
 
 		currentProject.addListener((observable, from, to) -> {
-			this.machinesToTraces.clear();
-			traces.unbind();
-			noTraces.unbind();
-			traces.setValue(FXCollections.observableArrayList());
-			noTraces.set(true);
-			if(to != null) {
-				fillMachineToTraces(to);
-				bindTraces(currentProject.getCurrentMachine(), listener);
+			if(from == null || to == null || !to.getLocation().equals(from.getLocation())) {
+				this.machinesToTraces.clear();
+				traces.unbind();
+				noTraces.unbind();
+				traces.setValue(FXCollections.observableArrayList());
+				noTraces.set(true);
+				if (to != null) {
+					fillMachineToTraces(to);
+					bindTraces(currentProject.getCurrentMachine(), listener);
+				}
 			}
 		});
 
