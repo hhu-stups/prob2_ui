@@ -5,12 +5,14 @@ import com.google.inject.Injector;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.TraceViewHandler;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class TraceSaver {
 
@@ -44,6 +46,20 @@ public class TraceSaver {
 			}
 		}
 		return null;
+	}
+
+	public void saveTraceAndAddTests(Window window, TraceReplayErrorAlert.Trigger trigger) {
+		Path path = injector.getInstance(TraceSaver.class).saveTrace(window, trigger);
+		if(path != null) {
+			Path relativizedPath = currentProject.getLocation().relativize(path);
+			ReplayTrace replayTrace = injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(currentProject.getCurrentMachine()).get().stream()
+					.filter(t -> t.getLocation().equals(relativizedPath))
+					.collect(Collectors.toList())
+					.get(0);
+			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
+			traceTestView.loadReplayTrace(replayTrace);
+			traceTestView.show();
+		}
 	}
 
 }

@@ -292,19 +292,7 @@ public class SimulatorStage extends Stage {
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR));
-		saveTraceAndAddTestsItem.setOnAction(e -> {
-			Path path = injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
-			if(path != null) {
-				Path relativizedPath = currentProject.getLocation().relativize(path);
-				ReplayTrace replayTrace = injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(currentProject.getCurrentMachine()).get().stream()
-						.filter(t -> t.getLocation().equals(relativizedPath))
-						.collect(Collectors.toList())
-						.get(0);
-				TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
-				traceTestView.loadReplayTrace(replayTrace);
-				traceTestView.show();
-			}
-		});
+		saveTraceAndAddTestsItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTraceAndAddTests(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR));
 		saveTimedTraceItem.setOnAction(e -> {
 			try {
 				injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");

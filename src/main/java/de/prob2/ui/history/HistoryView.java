@@ -148,22 +148,12 @@ public final class HistoryView extends VBox {
 
 	@FXML
 	private void saveTrace() {
-		Path path = injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
-		if(path != null) {
-			Path relativizedPath = currentProject.getLocation().relativize(path);
-			ReplayTrace replayTrace = injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(currentProject.getCurrentMachine()).get().stream()
-					.filter(t -> t.getLocation().equals(relativizedPath))
-					.collect(Collectors.toList())
-					.get(0);
-			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
-			traceTestView.loadReplayTrace(replayTrace);
-			traceTestView.show();
-		}
+		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
 	}
 
 	@FXML
 	private void saveTraceAndAddTests() {
-		saveTrace();
+		injector.getInstance(TraceSaver.class).saveTraceAndAddTests(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
 	}
 
 	@FXML
