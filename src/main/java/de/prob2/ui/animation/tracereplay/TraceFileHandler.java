@@ -173,11 +173,12 @@ public class TraceFileHandler extends ProBFileHandler {
 		traceManager.save(location, traceFile);
 	}
 
-	public void save(Trace trace, Machine machine) throws IOException {
+	public Path save(Trace trace, Machine machine) throws IOException {
 		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION);
 		if (path != null) {
 			save(trace, path, "traceReplay");
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
+		return path;
 	}
 }

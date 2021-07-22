@@ -9,6 +9,7 @@ import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.Collections;
 
 public class TraceSaver {
@@ -28,12 +29,12 @@ public class TraceSaver {
 		this.currentProject = currentProject;
 	}
 
-	public void saveTrace(Window window, TraceReplayErrorAlert.Trigger trigger) {
+	public Path saveTrace(Window window, TraceReplayErrorAlert.Trigger trigger) {
 		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 		Trace possiblyLostTrace = currentTrace.get();
 		if (currentTrace.get() != null) {
 			try {
-				traceSaver.save(possiblyLostTrace, currentProject.getCurrentMachine());
+				return traceSaver.save(possiblyLostTrace, currentProject.getCurrentMachine());
 			} catch (Exception e) {
 				LOGGER.error("", e);
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
@@ -42,6 +43,7 @@ public class TraceSaver {
 				alert.setErrorMessage();
 			}
 		}
+		return null;
 	}
 
 }

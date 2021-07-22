@@ -5,14 +5,17 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
+import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceSelectionView;
+import de.prob2.ui.sharedviews.TraceViewHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.NumberBinding;
@@ -23,13 +26,16 @@ import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -78,7 +84,7 @@ public final class HistoryView extends VBox {
 	@FXML
 	private Button openTraceSelectionButton;
 	@FXML
-	private Button saveTraceButton;
+	private MenuButton saveTraceButton;
 	@FXML
 	private HelpButton helpButton;
 
@@ -142,7 +148,22 @@ public final class HistoryView extends VBox {
 
 	@FXML
 	private void saveTrace() {
-		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
+		Path path = injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
+		if(path != null) {
+			Path relativizedPath = currentProject.getLocation().relativize(path);
+			ReplayTrace replayTrace = injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(currentProject.getCurrentMachine()).get().stream()
+					.filter(t -> t.getLocation().equals(relativizedPath))
+					.collect(Collectors.toList())
+					.get(0);
+			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
+			traceTestView.loadReplayTrace(replayTrace);
+			traceTestView.show();
+		}
+	}
+
+	@FXML
+	private void saveTraceAndAddTests() {
+		saveTrace();
 	}
 
 	@FXML

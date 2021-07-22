@@ -14,6 +14,8 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <fx:root type="HistoryView" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -32,14 +34,19 @@
 				<Tooltip text="%common.buttons.openTraceSelection" />
 			</tooltip>
 		</Button>
-		<Button fx:id="saveTraceButton" onAction="#saveTrace">
+		<MenuButton fx:id="saveTraceButton">
 			<graphic>
 				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 			</graphic>
 			<tooltip>
 				<Tooltip text="%common.buttons.saveTrace" />
 			</tooltip>
-		</Button>
+			<items>
+				<MenuItem fx:id="saveTraceItem" text="%common.buttons.saveTrace" onAction="#saveTrace"/>
+				<MenuItem fx:id="saveTraceAndAddTestsItem" text="%common.buttons.saveTraceAddTests" onAction="#saveTraceAndAddTests"/>
+			</items>
+		</MenuButton>
+
 		<HelpButton fx:id="helpButton" />
 	</HBox>
 	<TableView fx:id="historyTableView" prefHeight="200.0" VBox.vgrow="ALWAYS">
