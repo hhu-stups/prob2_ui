@@ -28,8 +28,10 @@ import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
+import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -37,6 +39,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DefaultPathDialog;
 import de.prob2.ui.sharedviews.TraceSelectionView;
+import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 
@@ -128,6 +131,8 @@ public class VisBStage extends Stage {
 	@FXML
 	private MenuItem saveTraceItem;
 	@FXML
+	private MenuItem saveTraceAndAddTestsItem;
+	@FXML
 	private MenuItem exportHistoryItem;
 	@FXML
 	private MenuItem exportCurrentStateItem;
@@ -196,6 +201,19 @@ public class VisBStage extends Stage {
 		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> loadVisBFileFromMachine(currentProject.getCurrentMachine(), to));
 
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
+		saveTraceAndAddTestsItem.setOnAction(e -> {
+			Path path = injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
+			if(path != null) {
+				Path relativizedPath = currentProject.getLocation().relativize(path);
+				ReplayTrace replayTrace = injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(currentProject.getCurrentMachine()).get().stream()
+						.filter(t -> t.getLocation().equals(relativizedPath))
+						.collect(Collectors.toList())
+						.get(0);
+				TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
+				traceTestView.loadReplayTrace(replayTrace);
+				traceTestView.show();
+			}
+		});
 		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
 		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
 
