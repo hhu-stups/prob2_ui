@@ -99,6 +99,11 @@ public class TraceViewHandler {
 		};
 
 		currentProject.addListener((observable, from, to) -> {
+			//When saving the project, the listener for the current project property is triggered
+			//even though it is the same project. This again resets the status of all traces (which is not the desired behavior).
+			//So this is why there is the additional check for the locations of the previous and the current project
+			//It is also possible for the user to switch to the same project (without saving).
+			//In this case, the statuses of all traces are reset by the current machine property (as no machine is chosen after switching the project).
 			if(from == null || to == null || !to.getLocation().equals(from.getLocation())) {
 				this.machinesToTraces.clear();
 				traces.unbind();
