@@ -36,6 +36,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
@@ -54,6 +55,29 @@ import java.util.stream.Collectors;
 public class TraceTestView extends Stage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceTestView.class);
+
+	private static final class PositionCell extends TableCell<PersistentTransition, String> {
+
+		private PositionCell() {
+			super();
+		}
+
+		@Override
+		protected void updateItem(String item, boolean empty) {
+			super.updateItem(item, empty);
+			this.setGraphic(null);
+
+			if(empty || item == null || this.getTableRow() == null || this.getTableRow().getItem() == null) {
+				this.setGraphic(null);
+			} else {
+				final TableRow<PersistentTransition> tableRow = this.getTableRow();
+				int index = tableRow.getIndex();
+				VBox box = new VBox();
+				box.getChildren().add(new Label(String.valueOf(index)));
+				this.setGraphic(box);
+			}
+		}
+	}
 
 	private final class TestCell extends TableCell<PersistentTransition, String> {
 
@@ -271,6 +295,8 @@ public class TraceTestView extends Stage {
 	@FXML
 	private TableView<PersistentTransition> traceTableView;
 	@FXML
+	private TableColumn<PersistentTransition, String> positionColumn;
+	@FXML
 	private TableColumn<PersistentTransition, String> transitionColumn;
 	@FXML
 	private TableColumn<PersistentTransition, String> testColumn;
@@ -326,6 +352,8 @@ public class TraceTestView extends Stage {
 			return row;
 		});
 
+		positionColumn.setCellFactory(param -> new PositionCell());
+		positionColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
 		transitionColumn.setCellValueFactory(features -> new SimpleStringProperty(buildTransitionString(features.getValue())));
 		testColumn.setCellFactory(param -> new TestCell());
 		testColumn.setCellValueFactory(features -> new SimpleStringProperty(""));

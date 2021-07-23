@@ -23,6 +23,7 @@
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 						</columnResizePolicy>
 						<columns>
+							<TableColumn fx:id="positionColumn" minWidth="80.0" maxWidth="120.0" text="%animation.tracereplay.test.view.columns.position" sortable="false"/>
 							<TableColumn fx:id="transitionColumn" text="%animation.tracereplay.test.view.columns.transition" sortable="false"/>
 							<TableColumn fx:id="testColumn" minWidth="350.0" text="%animation.tracereplay.test.view.columns.test" sortable="false"/>
 							<TableColumn fx:id="descriptionColumn" minWidth="250.0" text="%animation.tracereplay.test.view.columns.description" sortable="false"/>
