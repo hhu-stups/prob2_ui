@@ -16,6 +16,7 @@ import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonMetadata;
+import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.config.FileChooserManager;
@@ -23,6 +24,7 @@ import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.table.SimulationItem;
 
@@ -42,11 +44,15 @@ public class TraceFileHandler extends ProBFileHandler {
 
 	private final TraceManager traceManager;
 
+	private final CurrentTrace currentTrace;
+
 
 	@Inject
-	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject, CurrentTrace currentTrace,
+							StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		super(versionInfo, currentProject, stageManager, fileChooserManager, bundle);
 		this.traceManager = traceManager;
+		this.currentTrace = currentTrace;
 	}
 
 
@@ -160,12 +166,21 @@ public class TraceFileHandler extends ProBFileHandler {
 		}
 	}
 
-
 	public void save(Trace trace, Path location, String createdBy) throws IOException {
+		this.save(trace, location, false, createdBy);
+	}
+
+
+	public void save(Trace trace, Path location, boolean recordTests, String createdBy) throws IOException {
 		JsonMetadata jsonMetadata = updateMetadataBuilder(TraceJsonFile.metadataBuilder())
 			.withCreator(createdBy)
 			.build();
-		TraceJsonFile traceJsonFile = new TraceJsonFile(trace, jsonMetadata);
+		PersistentTrace persistentTrace = new PersistentTrace(trace);
+		if(recordTests) {
+			persistentTrace.recordTests();
+		}
+		LoadedMachine machine = currentTrace.getStateSpace().getLoadedMachine();
+		TraceJsonFile traceJsonFile = new TraceJsonFile(persistentTrace, machine, jsonMetadata);
 		traceManager.save(location, traceJsonFile);
 	}
 
@@ -174,9 +189,13 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public Path save(Trace trace, Machine machine) throws IOException {
+		return save(trace, machine, false);
+	}
+
+	public Path save(Trace trace, Machine machine, boolean recordTests) throws IOException {
 		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION);
 		if (path != null) {
-			save(trace, path, "traceReplay");
+			save(trace, path, recordTests, "traceReplay");
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
 		return path;

@@ -157,6 +157,11 @@ public final class HistoryView extends VBox {
 	}
 
 	@FXML
+	private void saveTraceAndRecordTests() {
+		injector.getInstance(TraceSaver.class).saveTraceAndRecordTests(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
+	}
+
+	@FXML
 	private void openTraceSelection() {
 		TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
 		traceSelectionView.show();
