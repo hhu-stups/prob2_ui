@@ -198,6 +198,9 @@ public class SimulatorStage extends Stage {
 	private MenuItem saveTraceAndAddTestsItem;
 
 	@FXML
+	private MenuItem saveTraceAndRecordTestsItem;
+
+	@FXML
 	private MenuItem saveTimedTraceItem;
 
 	@FXML
@@ -293,6 +296,7 @@ public class SimulatorStage extends Stage {
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR));
 		saveTraceAndAddTestsItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTraceAndAddTests(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR));
+		saveTraceAndRecordTestsItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTraceAndRecordTests(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_SIMULATOR));
 		saveTimedTraceItem.setOnAction(e -> {
 			try {
 				injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");

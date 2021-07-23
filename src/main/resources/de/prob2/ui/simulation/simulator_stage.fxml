@@ -108,6 +108,7 @@
 									<items>
 										<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace"/>
 										<MenuItem fx:id="saveTraceAndAddTestsItem" text="%common.buttons.saveTraceAddTests"/>
+										<MenuItem fx:id="saveTraceAndRecordTestsItem" text="%common.buttons.saveTraceRecordTests"/>
 										<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace"/>
 									</items>
 								</MenuButton>
