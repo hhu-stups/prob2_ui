@@ -140,7 +140,10 @@ public class TraceViewHandler {
 
 	private void bindTraces(Machine machine, SetChangeListener<Path> listener) {
 		if (machine != null) {
-			final ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
+			ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
+			if(machineTraces == null) {
+				machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
+			}
 			traces.bind(machineTraces);
 			noTraces.bind(machine.tracesProperty().emptyProperty());
 			machine.getTraceFiles().addListener(listener);
