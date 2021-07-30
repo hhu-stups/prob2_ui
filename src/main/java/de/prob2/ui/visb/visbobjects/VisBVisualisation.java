@@ -46,32 +46,23 @@ public class VisBVisualisation {
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Visualisation Events List:\n");
-		appendListWithNull(stringBuilder, visBEvents);
+		appendList(stringBuilder, visBEvents);
 		stringBuilder.append("Visualisation Item List:\n");
-		appendListWithNull(stringBuilder, visBItems);
+		appendList(stringBuilder, visBItems);
 		stringBuilder.append("SVG: \n");
-		appendObjectWithNull(stringBuilder, svgPath);
+		appendObject(stringBuilder, svgPath);
 		return stringBuilder.toString();
 	}
 
-	private void appendListWithNull(StringBuilder sb, List<?> list) {
-		if(list != null) {
-			for (Object obj : list) {
-				sb.append(obj);
-				sb.append("\n");
-			}
-		} else {
-			sb.append("null");
+	private static void appendList(StringBuilder sb, List<?> list) {
+		for (Object obj : list) {
+			sb.append(obj);
 			sb.append("\n");
 		}
 	}
 
-	private void appendObjectWithNull(StringBuilder sb, Object obj) {
-		if(obj != null) {
-			sb.append(obj);
-		} else {
-			sb.append("null");
-		}
+	private static void appendObject(StringBuilder sb, Object obj) {
+		sb.append(obj);
 		sb.append("\n");
 	}
 }
