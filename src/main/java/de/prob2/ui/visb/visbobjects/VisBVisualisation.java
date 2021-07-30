@@ -2,7 +2,9 @@ package de.prob2.ui.visb.visbobjects;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
@@ -14,11 +16,14 @@ public class VisBVisualisation {
 	private final Path svgPath;
 	private final List<VisBEvent> visBEvents;
 	private final List<VisBItem> visBItems;
+	private final Map<String, VisBEvent> visBEventsById;
 
 	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath) {
 		this.visBEvents = Objects.requireNonNull(visBEvents, "visBEvents");
 		this.visBItems = Objects.requireNonNull(visBItems, "visBItems");
 		this.svgPath = Objects.requireNonNull(svgPath, "svgPath");
+		this.visBEventsById = this.visBEvents.stream()
+			.collect(Collectors.toMap(VisBEvent::getId, event -> event));
 	}
 
 	public List<VisBEvent> getVisBEvents() {
@@ -33,15 +38,8 @@ public class VisBVisualisation {
 		return svgPath;
 	}
 
-	public VisBEvent getEventForID(String id){
-		if(visBEvents != null && !visBEvents.isEmpty()){
-			for(VisBEvent visBEvent : visBEvents){
-				if(id.equals(visBEvent.getId())){
-					return visBEvent;
-				}
-			}
-		}
-		return null;
+	public Map<String, VisBEvent> getVisBEventsById() {
+		return this.visBEventsById;
 	}
 
 	@Override

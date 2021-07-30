@@ -174,7 +174,7 @@ public class VisBController {
 			return;
 		}
 		LOGGER.debug("Finding event for id: " + id);
-		VisBEvent event = this.getVisBVisualisation().getEventForID(id);
+		VisBEvent event = this.getVisBVisualisation().getVisBEventsById().get(id);
 		// TO DO: adapt predicates or add predicate for Click Coordinates
 		if(event == null || event.getEvent().equals("")) {
 			updateInfo("visb.infobox.no.events.for.id", id);
