@@ -1,6 +1,8 @@
 package de.prob2.ui.simulation.configuration;
 
+import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -21,12 +23,18 @@ import de.prob.statespace.Transition;
 
 public class SimulationFileHandler {
 
+	private static final Gson METADATA_GSON = Converters.registerAll(new GsonBuilder())
+			.disableHtmlEscaping()
+			.serializeNulls()
+			.setPrettyPrinting()
+			.create();
+
 	public static SimulationConfiguration constructConfigurationFromJSON(File inputFile) throws IOException, JsonSyntaxException {
 		Gson gson = new Gson();
 		JsonReader reader = new JsonReader(new FileReader(inputFile));
 		JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
 		List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
-		final JsonMetadata metadata = gson.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
+		final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
 		return new SimulationConfiguration(activationConfigurations, metadata);
 	}
 
