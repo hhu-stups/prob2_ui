@@ -1,9 +1,7 @@
 package de.prob2.ui.visb.visbobjects;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import de.prob.animator.domainobjects.VisBEvent;
@@ -16,16 +14,11 @@ public class VisBVisualisation {
 	private final Path svgPath;
 	private final List<VisBEvent> visBEvents;
 	private final List<VisBItem> visBItems;
-	private final Map<VisBItem.VisBItemKey, VisBItem> visBItemMap;
 
 	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath) {
 		this.visBEvents = Objects.requireNonNull(visBEvents, "visBEvents");
 		this.visBItems = Objects.requireNonNull(visBItems, "visBItems");
 		this.svgPath = Objects.requireNonNull(svgPath, "svgPath");
-		this.visBItemMap = new HashMap<>();
-		for (VisBItem item : this.visBItems) {
-			this.visBItemMap.put(new VisBItem.VisBItemKey(item.getId(), item.getAttribute()), item);
-		}
 	}
 
 	public List<VisBEvent> getVisBEvents() {
@@ -82,9 +75,5 @@ public class VisBVisualisation {
 			sb.append("null");
 		}
 		sb.append("\n");
-	}
-
-	public Map<VisBItem.VisBItemKey, VisBItem> getVisBItemMap() {
-		return visBItemMap;
 	}
 }
