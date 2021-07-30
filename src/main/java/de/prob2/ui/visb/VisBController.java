@@ -301,9 +301,7 @@ public class VisBController {
 		}
 	}
 	private void showUpdateVisualisationNotPossible(){
-		if("root".equals(this.currentTrace.get().getCurrent().toString())) {
-			updateInfo("visb.infobox.visualisation.updated");
-			injector.getInstance(VisBStage.class).showModelNotInitialised();
-		}
+		updateInfo("visb.infobox.visualisation.updated");
+		injector.getInstance(VisBStage.class).showModelNotInitialised();
 	}
 }
