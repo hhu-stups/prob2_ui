@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -28,10 +29,8 @@ import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
-import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -39,7 +38,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DefaultPathDialog;
 import de.prob2.ui.sharedviews.TraceSelectionView;
-import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 
@@ -210,19 +208,24 @@ public class VisBStage extends Stage {
 
 		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
 		this.webView.getEngine().setOnError(this::treatJavascriptError);
-		this.webView.getEngine().getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-			if (newState == Worker.State.SUCCEEDED) {
-				final JSObject window = this.getJSWindow();
-				final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
-				for (final VisBEvent event : this.visBController.getVisBVisualisation().getVisBEvents()) {
-					window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
-				}
-			}
-		});
 
 		this.visBController.visBVisualisationProperty().addListener((o, from, to) -> {
 			if (to == null) {
 				this.clear();
+			} else {
+				try {
+					this.loadSvgFile(to.getSvgPath());
+				} catch (final IOException e) {
+					throw new UncheckedIOException(e);
+				}
+				updateInfo(bundle.getString("visb.infobox.visualisation.svg.loaded"));
+				this.runWhenLoaded(() -> {
+					final JSObject window = this.getJSWindow();
+					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
+					for (final VisBEvent event : to.getVisBEvents()) {
+						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
+					}
+				});
 			}
 		});
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
@@ -279,14 +282,16 @@ public class VisBStage extends Stage {
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
 	 */
-	void initialiseWebView(String svgContent) {
-		if (svgContent != null) {
-			this.placeholder.setVisible(false);
-			this.webView.setVisible(true);
-			String htmlFile = generateHTMLFileWithSVG(svgContent);
-			this.webView.getEngine().loadContent(htmlFile);
-		}
+	private void initialiseWebView(String svgContent) {
+		this.placeholder.setVisible(false);
+		this.webView.setVisible(true);
+		String htmlFile = generateHTMLFileWithSVG(svgContent);
+		this.webView.getEngine().loadContent(htmlFile);
+	}
 
+	private void loadSvgFile(final Path svgPath) throws IOException {
+		final String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
+		this.initialiseWebView(svgContent);
 	}
 
 	private void treatJavascriptError(WebErrorEvent event) {

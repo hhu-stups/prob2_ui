@@ -1,8 +1,6 @@
 package de.prob2.ui.visb;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -233,21 +231,6 @@ public class VisBController {
 			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 		}
 	}
-	
-
-	/**
-	 * Setting up the html file, it also sets the svg file for internal usage via {@link VisBFileHandler}.
-	 * @param svgPath svg file to be used
-	 */
-	private void setupHTMLFile(final Path svgPath) throws IOException{
-		String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
-		if(!svgContent.isEmpty()) {
-			this.injector.getInstance(VisBStage.class).initialiseWebView(svgContent);
-			updateInfo("visb.infobox.visualisation.svg.loaded");
-		} else{
-			throw new IOException(bundle.getString("visb.exception.svg.empty"));
-		}
-	}
 
 	void reloadVisualisation(){
 		if (this.getVisBPath() == null) {
@@ -265,8 +248,7 @@ public class VisBController {
 	public void setupVisualisation(final Path visBPath){
 		try {
 			this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
-			setupHTMLFile(this.getVisBVisualisation().getSvgPath());
-		} catch (IOException | ProBError e) {
+		} catch (UncheckedIOException | ProBError e) {
 			this.visBVisualisation.set(null);
 			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
