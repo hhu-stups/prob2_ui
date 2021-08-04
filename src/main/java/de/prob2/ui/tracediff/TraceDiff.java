@@ -43,7 +43,6 @@ public class TraceDiff extends VBox {
 
 	@FXML private ListView<TraceDiffItem> replayedList;
 	@FXML private ListView<TraceDiffItem> persistentList;
-	@FXML private ListView<TraceDiffItem> currentList;
 
 	@FXML private Button showAlert;
 
@@ -172,7 +171,6 @@ public class TraceDiff extends VBox {
 
 		this.listViews.add(replayedList);
 		this.listViews.add(persistentList);
-		this.listViews.add(currentList);
 
 		// Arrow key and scrollbar synchronicity
 		ChangeListener<? super Number> listViewCL = createChangeListenerForListView();
@@ -230,20 +228,14 @@ public class TraceDiff extends VBox {
 		}
 	}
 
-	final void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
+	final void setLists(Trace replayedOrLost, PersistentTrace persistent) {
 		List<Transition> rTransitions = replayedOrLost.getTransitionList();
 		List<PersistentTransition> pTransitions;
-		List<Transition> cTransitions;
 		// if triggered by HistoryView: No persistent trace available
 		if (persistent == null) {
 			pTransitions = FXCollections.emptyObservableList();
 		} else {
 			pTransitions = persistent.getTransitionList();
-		}
-		if (current == null) {
-			cTransitions = FXCollections.emptyObservableList();
-		} else {
-			cTransitions = current.getTransitionList();
 		}
 
 		maxSize = Math.max(rTransitions.size(), pTransitions.size());
@@ -252,7 +244,6 @@ public class TraceDiff extends VBox {
 		indexLinesMap.clear();
 		translateList(new TraceDiffList(rTransitions), replayedList);
 		translateList(new TraceDiffList(pTransitions), persistentList);
-		translateList(new TraceDiffList(cTransitions), currentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
 	}

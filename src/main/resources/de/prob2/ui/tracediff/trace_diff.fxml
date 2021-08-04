@@ -19,10 +19,10 @@
 			<Label HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.persistent"/>
 			<ListView fx:id="persistentList" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS" editable="false"/>
 		</VBox>
-		<VBox spacing="5" HBox.hgrow="ALWAYS">
+		<!--<VBox spacing="5" HBox.hgrow="ALWAYS">
 			<Label HBox.hgrow="ALWAYS" maxWidth="Infinity" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.current"/>
 			<ListView fx:id="currentList" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS" editable="false"/>
-		</VBox>
+		</VBox>-->
 	</HBox>
 	<HBox fx:id="buttonBox" spacing="5">
 		<Button fx:id="showAlert" styleClass="button-dark2" maxWidth="Infinity" HBox.hgrow="ALWAYS" text="%animation.tracereplay.alerts.traceReplayError.error.traceDiff.showAlert"/>

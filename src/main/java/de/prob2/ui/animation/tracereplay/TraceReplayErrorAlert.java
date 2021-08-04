@@ -140,7 +140,7 @@ public final class TraceReplayErrorAlert extends Alert {
 		} else if (type.get() == showTraceDiff) {
 			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
 			traceDiffStage.setAlert(this);
-			traceDiffStage.setLists(attemptedReplayTrace, storedTrace, history == null ? new Trace(currentTrace.getStateSpace()) : history);
+			traceDiffStage.setLists(attemptedReplayTrace, storedTrace);
 			traceDiffStage.show();
 		}
 	}

@@ -22,8 +22,8 @@ public class TraceDiffStage extends Stage {
 		this.initOwner(injector.getInstance(StageManager.class).getMainStage());
 	}
 
-	public final void setLists(Trace replayed, PersistentTrace persistent, Trace current) {
-		traceDiff.setLists(replayed, persistent, current);
+	public final void setLists(Trace replayed, PersistentTrace persistent) {
+		traceDiff.setLists(replayed, persistent);
 	}
 
 	public void setAlert(TraceReplayErrorAlert alert) {
