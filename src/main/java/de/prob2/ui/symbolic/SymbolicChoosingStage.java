@@ -12,10 +12,9 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
-
 import de.prob2.ui.vomanager.Requirement;
 import de.prob2.ui.vomanager.RequirementType;
-import javafx.collections.FXCollections;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -47,7 +46,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	private VBox formulaInput;
 	
 	@FXML
-	private ChoiceBox<SymbolicExecutionItem> cbChoice;
+	private ChoiceBox<SymbolicExecutionType> cbChoice;
 	
 	private final ResourceBundle bundle;
 	
@@ -81,7 +80,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			if(to == null) {
 				return;
 			}
-			changeGUIType(to.getGUIType());
+			changeGUIType(getGUIType(to));
 			this.sizeToScene();
 		});
 		symbolicModelCheckAlgorithmChoiceBox.getItems().setAll(SymbolicModelcheckCommand.Algorithm.values());
@@ -89,20 +88,43 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		this.setResizable(true);
 	}
 	
+	public SymbolicGUIType getGUIType(final SymbolicExecutionType item) {
+		switch (item) {
+			case CHECK_REFINEMENT:
+			case CHECK_STATIC_ASSERTIONS:
+			case CHECK_DYNAMIC_ASSERTIONS:
+			case CHECK_WELL_DEFINEDNESS:
+			case FIND_REDUNDANT_INVARIANTS:
+				return SymbolicGUIType.NONE;
+			
+			case SEQUENCE:
+				return SymbolicGUIType.TEXT_FIELD;
+			
+			case INVARIANT:
+				return SymbolicGUIType.CHOICE_BOX;
+			
+			case DEADLOCK:
+			case FIND_VALID_STATE:
+				return SymbolicGUIType.PREDICATE;
+			
+			case SYMBOLIC_MODEL_CHECK:
+				return SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM;
+			
+			default:
+				throw new AssertionError();
+		}
+	}
+	
 	public SymbolicGUIType getGUIType() {
-		return cbChoice.getSelectionModel().getSelectedItem().getGUIType();
+		return getGUIType(cbChoice.getSelectionModel().getSelectedItem());
 	}
 	
 	public SymbolicExecutionType getExecutionType() {
-		return cbChoice.getSelectionModel().getSelectedItem().getExecutionType();
+		return cbChoice.getSelectionModel().getSelectedItem();
 	}
 	
 	public void select(SymbolicItem item) {
-		cbChoice.getItems().forEach(choice -> {
-			if(item.getType().equals(choice.getExecutionType())) {
-				cbChoice.getSelectionModel().select(choice);
-			}
-		});
+		cbChoice.getSelectionModel().select(item.getType());
 	}
 	
 	public void reset() {
@@ -247,15 +269,10 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		RequirementType requirementType = requirement.getType();
 		switch (requirementType) {
 			case INVARIANT:
-				cbChoice.getItems().clear();
-				cbChoice.getItems().addAll(FXCollections.observableArrayList(
-						new SymbolicExecutionItem(SymbolicExecutionType.INVARIANT, SymbolicGUIType.CHOICE_BOX),
-						new SymbolicExecutionItem(SymbolicExecutionType.SYMBOLIC_MODEL_CHECK, SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM)));
+				cbChoice.getItems().setAll(SymbolicExecutionType.INVARIANT, SymbolicExecutionType.SYMBOLIC_MODEL_CHECK);
 				break;
 			case DEADLOCK_FREEDOM:
-				cbChoice.getItems().clear();
-				cbChoice.getItems().addAll(FXCollections.observableArrayList(
-						new SymbolicExecutionItem(SymbolicExecutionType.DEADLOCK, SymbolicGUIType.PREDICATE)));
+				cbChoice.getItems().setAll(SymbolicExecutionType.DEADLOCK);
 				break;
 			default:
 				throw new RuntimeException("Given requirement type is not supported for symbolic model checking: " + requirementType);
