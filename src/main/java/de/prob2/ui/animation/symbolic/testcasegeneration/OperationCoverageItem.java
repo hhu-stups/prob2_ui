@@ -17,9 +17,14 @@ public final class OperationCoverageItem extends TestCaseGenerationItem {
 		@JsonProperty("maxDepth") final int maxDepth,
 		@JsonProperty("operations") List<String> operations
 	) {
-		super(TestCaseGenerationType.COVERED_OPERATIONS, maxDepth);
+		super(maxDepth);
 		
 		this.operations = new ArrayList<>(operations);
+	}
+	
+	@Override
+	public TestCaseGenerationType getType() {
+		return TestCaseGenerationType.COVERED_OPERATIONS;
 	}
 	
 	public List<String> getOperations() {

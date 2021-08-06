@@ -18,11 +18,9 @@ import javafx.collections.ObservableList;
 // (to avoid unnecessary reordering when re-saving existing files).
 @JsonPropertyOrder({
 	"maxDepth",
-	"type",
 	"selected",
 })
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
-// The names here *must* match the names of the corresponding TestCaseGenerationType enum constants.
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
 	@JsonSubTypes.Type(value = MCDCItem.class, name = "MCDC"),
 	@JsonSubTypes.Type(value = OperationCoverageItem.class, name = "COVERED_OPERATIONS"),
@@ -37,11 +35,8 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonIgnore
 	private final ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList();
 	
-	private final TestCaseGenerationType type;
-	
-	protected TestCaseGenerationItem(final TestCaseGenerationType type, final int maxDepth) {
+	protected TestCaseGenerationItem(final int maxDepth) {
 		super();
-		this.type = type;
 		this.maxDepth = maxDepth;
 	}
 	
@@ -53,9 +48,8 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.getUncoveredOperations().clear();
 	}
 	
-	public TestCaseGenerationType getType() {
-		return type;
-	}
+	@JsonIgnore
+	public abstract TestCaseGenerationType getType();
 
 	public int getMaxDepth() {
 		return maxDepth;
