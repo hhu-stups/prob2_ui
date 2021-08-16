@@ -1,5 +1,8 @@
 package de.prob2.ui.vomanager;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -9,6 +12,7 @@ import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
@@ -61,7 +65,17 @@ public class VOTaskCreator {
 			}
 			case SYMBOLIC_MODEL_CHECKING: {
 				SymbolicCheckingChoosingStage symbolicStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
-				symbolicStage.linkRequirement(requirement);
+				RequirementType requirementType = requirement.getType();
+				switch (requirementType) {
+					case INVARIANT:
+						symbolicStage.setAvailableTypes(Arrays.asList(SymbolicExecutionType.INVARIANT, SymbolicExecutionType.SYMBOLIC_MODEL_CHECK));
+						break;
+					case DEADLOCK_FREEDOM:
+						symbolicStage.setAvailableTypes(Collections.singletonList(SymbolicExecutionType.DEADLOCK));
+						break;
+					default:
+						throw new RuntimeException("Given requirement type is not supported for symbolic model checking: " + requirementType);
+				}
 				symbolicStage.showAndWait();
 				SymbolicCheckingFormulaItem item = symbolicStage.getLastItem();
 				if (item == null) {

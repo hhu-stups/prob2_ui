@@ -12,8 +12,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
-import de.prob2.ui.vomanager.Requirement;
-import de.prob2.ui.vomanager.RequirementType;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -265,17 +263,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		return lastItem;
 	}
 
-	public void linkRequirement(Requirement requirement) {
-		RequirementType requirementType = requirement.getType();
-		switch (requirementType) {
-			case INVARIANT:
-				cbChoice.getItems().setAll(SymbolicExecutionType.INVARIANT, SymbolicExecutionType.SYMBOLIC_MODEL_CHECK);
-				break;
-			case DEADLOCK_FREEDOM:
-				cbChoice.getItems().setAll(SymbolicExecutionType.DEADLOCK);
-				break;
-			default:
-				throw new RuntimeException("Given requirement type is not supported for symbolic model checking: " + requirementType);
-		}
+	public void setAvailableTypes(final List<SymbolicExecutionType> types) {
+		cbChoice.getItems().setAll(types);
 	}
 }
