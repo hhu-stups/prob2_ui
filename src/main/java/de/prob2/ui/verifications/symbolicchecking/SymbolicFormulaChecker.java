@@ -10,10 +10,9 @@ import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.SymbolicExecutor;
-import de.prob2.ui.symbolic.SymbolicItem;
 
 @Singleton
-public class SymbolicFormulaChecker extends SymbolicExecutor {	
+public class SymbolicFormulaChecker extends SymbolicExecutor<SymbolicCheckingFormulaItem> {
 	
 	@Inject
 	public SymbolicFormulaChecker(final CurrentTrace currentTrace, final SymbolicCheckingResultHandler resultHandler, final Injector injector) {
@@ -21,8 +20,8 @@ public class SymbolicFormulaChecker extends SymbolicExecutor {
 	}
 	
 	@Override
-	protected void updateTrace(SymbolicItem item) {
-		List<Trace> counterExamples = ((SymbolicCheckingFormulaItem) item).getCounterExamples();
+	protected void updateTrace(SymbolicCheckingFormulaItem item) {
+		List<Trace> counterExamples = item.getCounterExamples();
 		if(!counterExamples.isEmpty()) {
 			currentTrace.set(counterExamples.get(0));
 		}

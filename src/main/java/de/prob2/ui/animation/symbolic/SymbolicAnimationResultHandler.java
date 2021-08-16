@@ -23,13 +23,12 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
-import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 
 @Singleton
-public class SymbolicAnimationResultHandler extends AbstractResultHandler implements ISymbolicResultHandler {
+public class SymbolicAnimationResultHandler extends AbstractResultHandler implements ISymbolicResultHandler<SymbolicAnimationItem> {
 
 	private final CurrentTrace currentTrace;
 	
@@ -88,7 +87,8 @@ public class SymbolicAnimationResultHandler extends AbstractResultHandler implem
 		showCheckingResult(item, checked, msgKey, msgKey);
 	}
 	
-	public void handleFormulaResult(SymbolicItem item, Object result) {
+	@Override
+	public void handleFormulaResult(SymbolicAnimationItem item, Object result) {
 		CheckingResultItem resultItem = handleFormulaResult(result);
 		item.setResultItem(resultItem);
 	}
@@ -108,12 +108,13 @@ public class SymbolicAnimationResultHandler extends AbstractResultHandler implem
 		return resultItem;
 	}
 
-	public void handleFormulaResult(SymbolicItem item, AbstractCommand cmd) {
+	@Override
+	public void handleFormulaResult(SymbolicAnimationItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if(item.getType() == SymbolicExecutionType.FIND_VALID_STATE) {
-			handleFindValidState((SymbolicAnimationItem) item, (FindStateCommand) cmd, stateSpace);
+			handleFindValidState(item, (FindStateCommand) cmd, stateSpace);
 		} else if(item.getType() == SymbolicExecutionType.SEQUENCE) {
-			handleSequence((SymbolicAnimationItem) item, (ConstraintBasedSequenceCheckCommand) cmd);
+			handleSequence(item, (ConstraintBasedSequenceCheckCommand) cmd);
 		}
 	}
 	

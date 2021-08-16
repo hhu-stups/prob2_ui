@@ -20,20 +20,20 @@ import javafx.collections.FXCollections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class SymbolicExecutor {
+public abstract class SymbolicExecutor<T extends SymbolicItem> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicExecutor.class);
 	
 	protected final CurrentTrace currentTrace;
 	
-	protected final ISymbolicResultHandler resultHandler;
+	protected final ISymbolicResultHandler<T> resultHandler;
 
 	protected final List<IModelCheckJob> currentJobs;
 	
 	protected final ListProperty<Thread> currentJobThreads;
 	
 	
-	public SymbolicExecutor(final CurrentTrace currentTrace, final ISymbolicResultHandler resultHandler, final Injector injector) {
+	public SymbolicExecutor(final CurrentTrace currentTrace, final ISymbolicResultHandler<T> resultHandler, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.resultHandler = resultHandler;
 		this.currentJobs = new ArrayList<>();
@@ -61,7 +61,7 @@ public abstract class SymbolicExecutor {
 		return this.runningProperty().get();
 	}
 	
-	public void checkItem(SymbolicItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
+	public void checkItem(T item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
 		Thread checkingThread = new Thread(() -> {
 			RuntimeException exception = null;
 			try {
@@ -88,7 +88,7 @@ public abstract class SymbolicExecutor {
 		checkingThread.start();
 	}
 	
-	public void checkItem(IModelCheckJob checker, SymbolicItem item, boolean checkAll) {
+	public void checkItem(IModelCheckJob checker, T item, boolean checkAll) {
 		Thread checkingThread = new Thread(() -> {
 			currentJobs.add(checker);
 			Object result;
@@ -112,5 +112,5 @@ public abstract class SymbolicExecutor {
 		checkingThread.start();
 	}
 	
-	protected abstract void updateTrace(SymbolicItem item);
+	protected abstract void updateTrace(T item);
 }

@@ -92,7 +92,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 
 	protected final Injector injector;
 	
-	protected final SymbolicExecutor executor;
+	protected final SymbolicExecutor<T> executor;
 	
 	protected final SymbolicFormulaHandler<T> formulaHandler;
 
@@ -101,7 +101,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	protected final CheckBox selectAll;
 	
 	public SymbolicView(final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor executor,
+					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor<T> executor,
 					final SymbolicFormulaHandler<T> formulaHandler, final Class<T> clazz) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
