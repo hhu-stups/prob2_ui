@@ -20,6 +20,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stage {
 	@FXML
@@ -80,6 +81,17 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			}
 			changeGUIType(getGUIType(to));
 			this.sizeToScene();
+		});
+		cbChoice.setConverter(new StringConverter<SymbolicExecutionType>() {
+			@Override
+			public String toString(final SymbolicExecutionType object) {
+				return object.getName();
+			}
+			
+			@Override
+			public SymbolicExecutionType fromString(final String string) {
+				throw new UnsupportedOperationException("Conversion from String to SymbolicExecutionType not supported");
+			}
 		});
 		symbolicModelCheckAlgorithmChoiceBox.getItems().setAll(SymbolicModelcheckCommand.Algorithm.values());
 		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
