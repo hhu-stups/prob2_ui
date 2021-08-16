@@ -417,6 +417,39 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			machine.set("requirements", machine.arrayNode());
 		}
 	}
+
+	private static void updateV17Machine(final ObjectNode machine) {
+		final ArrayNode symbolicCheckingFormulas = checkArray(machine.get("symbolicCheckingFormulas"));
+		final ArrayNode symbolicAnimationFormulas = checkArray(machine.get("symbolicAnimationFormulas"));
+		
+		// In the past, some symbolic item types were moved back and forth
+		// between symbolic checking and animation.
+		// If a formula with one of these types was created before the type was moved,
+		// the formula might still be saved under the wrong category.
+		// This doesn't cause an error on loading or saving,
+		// because the two symbolic categories use the same base class and data format.
+		// The error is only detected once the user tries to check/execute the formula.
+		// To fix this, search both lists for formulas of types that have been moved
+		// and move the formulas into the correct list.
+		
+		for (final Iterator<JsonNode> it = symbolicCheckingFormulas.iterator(); it.hasNext();) {
+			final ObjectNode formula = checkObject(it.next());
+			final String type = checkText(formula.get("type"));
+			if ("SEQUENCE".equals(type) || "FIND_VALID_STATE".equals(type)) {
+				symbolicAnimationFormulas.add(formula);
+				it.remove();
+			}
+		}
+		
+		for (final Iterator<JsonNode> it = symbolicAnimationFormulas.iterator(); it.hasNext();) {
+			final ObjectNode formula = checkObject(it.next());
+			final String type = checkText(formula.get("type"));
+			if ("DEADLOCK".equals(type) || "FIND_REDUNDANT_INVARIANTS".equals(type)) {
+				symbolicCheckingFormulas.add(formula);
+				it.remove();
+			}
+		}
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -487,6 +520,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 16) {
 				updateV16Machine(machine);
+			}
+			if (oldVersion <= 17) {
+				updateV17Machine(machine);
 			}
 		});
 		
