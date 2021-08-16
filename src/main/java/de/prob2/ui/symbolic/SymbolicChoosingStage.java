@@ -22,7 +22,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stage {
+public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET extends SymbolicExecutionType> extends Stage {
 	@FXML
 	private Button btAdd;
 	
@@ -45,7 +45,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	private VBox formulaInput;
 	
 	@FXML
-	private ChoiceBox<SymbolicExecutionType> cbChoice;
+	private ChoiceBox<ET> cbChoice;
 	
 	private final ResourceBundle bundle;
 	
@@ -82,14 +82,14 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			changeGUIType(getGUIType(to));
 			this.sizeToScene();
 		});
-		cbChoice.setConverter(new StringConverter<SymbolicExecutionType>() {
+		cbChoice.setConverter(new StringConverter<ET>() {
 			@Override
-			public String toString(final SymbolicExecutionType object) {
+			public String toString(final ET object) {
 				return object.getName();
 			}
 			
 			@Override
-			public SymbolicExecutionType fromString(final String string) {
+			public ET fromString(final String string) {
 				throw new UnsupportedOperationException("Conversion from String to SymbolicExecutionType not supported");
 			}
 		});
@@ -98,38 +98,13 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		this.setResizable(true);
 	}
 	
-	public SymbolicGUIType getGUIType(final SymbolicExecutionType item) {
-		switch (item) {
-			case CHECK_REFINEMENT:
-			case CHECK_STATIC_ASSERTIONS:
-			case CHECK_DYNAMIC_ASSERTIONS:
-			case CHECK_WELL_DEFINEDNESS:
-			case FIND_REDUNDANT_INVARIANTS:
-				return SymbolicGUIType.NONE;
-			
-			case SEQUENCE:
-				return SymbolicGUIType.TEXT_FIELD;
-			
-			case INVARIANT:
-				return SymbolicGUIType.CHOICE_BOX;
-			
-			case DEADLOCK:
-			case FIND_VALID_STATE:
-				return SymbolicGUIType.PREDICATE;
-			
-			case SYMBOLIC_MODEL_CHECK:
-				return SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM;
-			
-			default:
-				throw new AssertionError();
-		}
-	}
+	public abstract SymbolicGUIType getGUIType(final ET item);
 	
 	public SymbolicGUIType getGUIType() {
 		return getGUIType(cbChoice.getSelectionModel().getSelectedItem());
 	}
 	
-	public SymbolicExecutionType getExecutionType() {
+	public ET getExecutionType() {
 		return cbChoice.getSelectionModel().getSelectedItem();
 	}
 	
@@ -271,7 +246,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		return lastItem;
 	}
 
-	public void setAvailableTypes(final List<SymbolicExecutionType> types) {
+	public void setAvailableTypes(final List<ET> types) {
 		cbChoice.getItems().setAll(types);
 	}
 }

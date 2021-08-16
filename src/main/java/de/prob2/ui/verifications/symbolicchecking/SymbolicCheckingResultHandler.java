@@ -28,7 +28,6 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -89,15 +88,15 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 	@Override
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicExecutionType.SYMBOLIC_MODEL_CHECK) {
+		if(item.getType() == SymbolicCheckingType.SYMBOLIC_MODEL_CHECK) {
 			handleSymbolicChecking(item, (SymbolicModelcheckCommand) cmd);
-		} else if(item.getType() == SymbolicExecutionType.CHECK_STATIC_ASSERTIONS || item.getType() == SymbolicExecutionType.CHECK_DYNAMIC_ASSERTIONS) {
+		} else if(item.getType() == SymbolicCheckingType.CHECK_STATIC_ASSERTIONS || item.getType() == SymbolicCheckingType.CHECK_DYNAMIC_ASSERTIONS) {
 			handleAssertionChecking(item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
-		} else if (item.getType() == SymbolicExecutionType.CHECK_WELL_DEFINEDNESS) {
+		} else if (item.getType() == SymbolicCheckingType.CHECK_WELL_DEFINEDNESS) {
 			handleWellDefinednessChecking(item, (CheckWellDefinednessCommand)cmd);
-		} else if(item.getType() == SymbolicExecutionType.CHECK_REFINEMENT) {
+		} else if(item.getType() == SymbolicCheckingType.CHECK_REFINEMENT) {
 			handleRefinementChecking(item, (ConstraintBasedRefinementCheckCommand) cmd);
-		} else if(item.getType() == SymbolicExecutionType.FIND_REDUNDANT_INVARIANTS) {
+		} else if(item.getType() == SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS) {
 			handleFindRedundantInvariants(item, (GetRedundantInvariantsCommand) cmd);
 		}
 	}

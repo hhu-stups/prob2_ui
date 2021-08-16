@@ -22,7 +22,6 @@ import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
@@ -111,9 +110,9 @@ public class SymbolicAnimationResultHandler extends AbstractResultHandler implem
 	@Override
 	public void handleFormulaResult(SymbolicAnimationItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicExecutionType.FIND_VALID_STATE) {
+		if(item.getType() == SymbolicAnimationType.FIND_VALID_STATE) {
 			handleFindValidState(item, (FindStateCommand) cmd, stateSpace);
-		} else if(item.getType() == SymbolicExecutionType.SEQUENCE) {
+		} else if(item.getType() == SymbolicAnimationType.SEQUENCE) {
 			handleSequence(item, (ConstraintBasedSequenceCheckCommand) cmd);
 		}
 	}

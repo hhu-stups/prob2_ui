@@ -11,25 +11,21 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 	"code",
 	"selected",
 })
-public abstract class SymbolicItem extends AbstractCheckableItem {
+public abstract class SymbolicItem<T extends SymbolicExecutionType> extends AbstractCheckableItem {
 	private final String code;
-	private final SymbolicExecutionType type;
 
-	public SymbolicItem(String code, SymbolicExecutionType type) {
+	public SymbolicItem(String code) {
 		super();
 		this.code = code;
-		this.type = type;
 	}
 	
 	public String getCode() {
 		return this.code;
 	}
 	
-	public SymbolicExecutionType getType() {
-		return type;
-	}
+	public abstract T getType();
 	
-	public boolean settingsEqual(final SymbolicItem other) {
+	public boolean settingsEqual(final SymbolicItem<?> other) {
 		return this.getCode().equals(other.getCode())
 			&& this.getType().equals(other.getType());
 	}

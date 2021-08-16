@@ -14,7 +14,6 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 
 @Singleton
@@ -51,8 +50,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		if(!item.selected()) {
 			return;
 		}
-		SymbolicExecutionType type = item.getType();
-		switch(type) {
+		switch(item.getType()) {
 			case SEQUENCE:
 				handleSequence(item, checkAll);
 				break;

@@ -20,7 +20,7 @@ import javafx.collections.FXCollections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class SymbolicExecutor<T extends SymbolicItem> {
+public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicExecutor.class);
 	

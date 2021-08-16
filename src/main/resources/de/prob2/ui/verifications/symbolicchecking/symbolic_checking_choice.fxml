@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.sharedviews.PredicateBuilderView?>
-<?import de.prob2.ui.symbolic.SymbolicExecutionType?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage?>
+<?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -32,14 +32,14 @@
 						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicExecutionType fx:constant="INVARIANT"/>
-									<SymbolicExecutionType fx:constant="DEADLOCK"/>
-									<SymbolicExecutionType fx:constant="CHECK_REFINEMENT"/>
-									<SymbolicExecutionType fx:constant="CHECK_STATIC_ASSERTIONS"/>
-									<SymbolicExecutionType fx:constant="CHECK_DYNAMIC_ASSERTIONS"/>
-									<SymbolicExecutionType fx:constant="CHECK_WELL_DEFINEDNESS"/>
-									<SymbolicExecutionType fx:constant="FIND_REDUNDANT_INVARIANTS"/>
-									<SymbolicExecutionType fx:constant="SYMBOLIC_MODEL_CHECK"/>
+									<SymbolicCheckingType fx:constant="INVARIANT"/>
+									<SymbolicCheckingType fx:constant="DEADLOCK"/>
+									<SymbolicCheckingType fx:constant="CHECK_REFINEMENT"/>
+									<SymbolicCheckingType fx:constant="CHECK_STATIC_ASSERTIONS"/>
+									<SymbolicCheckingType fx:constant="CHECK_DYNAMIC_ASSERTIONS"/>
+									<SymbolicCheckingType fx:constant="CHECK_WELL_DEFINEDNESS"/>
+									<SymbolicCheckingType fx:constant="FIND_REDUNDANT_INVARIANTS"/>
+									<SymbolicCheckingType fx:constant="SYMBOLIC_MODEL_CHECK"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

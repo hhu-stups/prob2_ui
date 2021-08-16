@@ -6,13 +6,13 @@ import java.util.Collections;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
@@ -20,6 +20,8 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
+
 import javafx.stage.Window;
 
 @Singleton
@@ -68,10 +70,10 @@ public class VOTaskCreator {
 				RequirementType requirementType = requirement.getType();
 				switch (requirementType) {
 					case INVARIANT:
-						symbolicStage.setAvailableTypes(Arrays.asList(SymbolicExecutionType.INVARIANT, SymbolicExecutionType.SYMBOLIC_MODEL_CHECK));
+						symbolicStage.setAvailableTypes(Arrays.asList(SymbolicCheckingType.INVARIANT, SymbolicCheckingType.SYMBOLIC_MODEL_CHECK));
 						break;
 					case DEADLOCK_FREEDOM:
-						symbolicStage.setAvailableTypes(Collections.singletonList(SymbolicExecutionType.DEADLOCK));
+						symbolicStage.setAvailableTypes(Collections.singletonList(SymbolicCheckingType.DEADLOCK));
 						break;
 					default:
 						throw new RuntimeException("Given requirement type is not supported for symbolic model checking: " + requirementType);

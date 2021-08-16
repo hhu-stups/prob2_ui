@@ -34,7 +34,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
-public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
+public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane {
 	
 	public abstract class SymbolicCellFactory {
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationChoosingStage?>
+<?import de.prob2.ui.animation.symbolic.SymbolicAnimationType?>
 <?import de.prob2.ui.sharedviews.PredicateBuilderView?>
-<?import de.prob2.ui.symbolic.SymbolicExecutionType?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -32,8 +32,8 @@
 						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicExecutionType fx:constant="SEQUENCE"/>
-									<SymbolicExecutionType fx:constant="FIND_VALID_STATE"/>
+									<SymbolicAnimationType fx:constant="SEQUENCE"/>
+									<SymbolicAnimationType fx:constant="FIND_VALID_STATE"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import de.prob2.ui.project.machines.Machine;
 
-public interface SymbolicFormulaHandler<T extends SymbolicItem> {
+public interface SymbolicFormulaHandler<T extends SymbolicItem<?>> {
 	public List<T> getItems(Machine machine);
 	
 	public default Optional<T> addItem(final Machine machine, final T item) {
