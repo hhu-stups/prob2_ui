@@ -121,10 +121,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		return cbChoice.getSelectionModel().getSelectedItem();
 	}
 	
-	public void select(SymbolicItem item) {
-		cbChoice.getSelectionModel().select(item.getType());
-	}
-	
 	public void reset() {
 		btAdd.setText(bundle.getString("common.buttons.add"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.addAndCheck"));
@@ -215,7 +211,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
 		setChangeListeners(item, resultHandler);
-		this.select(item);
+		cbChoice.getSelectionModel().select(item.getType());
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
 		} else if(this.getGUIType() == SymbolicGUIType.PREDICATE) {
