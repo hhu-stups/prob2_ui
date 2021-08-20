@@ -6,7 +6,7 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.check.TraceCheckerUtils;
 import de.prob.check.tracereplay.check.exploration.ReplayOptions;
-import de.prob.check.tracereplay.check.refinement.RefinementChecker;
+import de.prob.check.tracereplay.check.refinement.TraceRefiner;
 import de.prob.check.tracereplay.check.traceConstruction.AdvancedTraceConstructor;
 import de.prob.check.tracereplay.check.traceConstruction.TraceConstructionError;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
@@ -88,9 +88,9 @@ public class RefactorButton extends Button {
 					break;
 				case REFINEMENT_REPLAY:
 					TraceJsonFile json= traceFileHandler.loadFile(result.getTraceFile());
-					RefinementChecker refinementChecker = new RefinementChecker(injector, json.getTransitionList(), result.getFileAlpha(), result.fileBeta);
+					TraceRefiner refinementChecker = new TraceRefiner(injector, json.getTransitionList(), result.getFileAlpha(), result.fileBeta);
 					try {
-						List<PersistentTransition> resultingTrace = refinementChecker.check();
+						List<PersistentTransition> resultingTrace = refinementChecker.refineTrace();
 						boolean wasSuccessful = resultingTrace.size() == json.getTransitionList().size();
 						String messageText;
 						if(wasSuccessful){
