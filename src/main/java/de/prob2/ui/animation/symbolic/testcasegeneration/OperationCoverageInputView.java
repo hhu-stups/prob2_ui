@@ -92,7 +92,7 @@ public class OperationCoverageInputView extends VBox {
 		operationColumn.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.update(to));
 		this.update(currentTrace.getStateSpace());
-		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
+		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 5));
 		depthSpinner.getEditor().textProperty().addListener((observable, from, to) -> {
 			if(to.isEmpty()) {
 				depthSpinner.getEditor().setText("1");
@@ -100,7 +100,6 @@ public class OperationCoverageInputView extends VBox {
 				depthSpinner.getEditor().setText(from);
 			}
 		});
-		this.reset();
 	}
 
 	private void update(final StateSpace to) {
@@ -122,10 +121,6 @@ public class OperationCoverageInputView extends VBox {
 
 	public int getDepth() {
 		return depthSpinner.getValue();
-	}
-
-	public void reset() {
-		depthSpinner.getValueFactory().setValue(5);
 	}
 
 	public void setItem(OperationCoverageItem item) {
