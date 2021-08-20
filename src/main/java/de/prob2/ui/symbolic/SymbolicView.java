@@ -116,7 +116,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	@FXML
 	public void initialize() {
 		setBindings();
-		setContextMenu();
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
 			tvFormula.itemsProperty().unbind();
 			if(newValue != null) {
@@ -162,8 +161,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 		});
 
 	}
-	
-	protected abstract void setContextMenu();
 	
 	@FXML
 	public void checkMachine() {

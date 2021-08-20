@@ -99,6 +99,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	@Override
 	public void initialize() {
 		super.initialize();
+		tvFormula.setRowFactory(new SymbolicCheckingCellFactory());
 		helpButton.setHelpContent("verification", "Symbolic");
 	}
 	
@@ -109,11 +110,6 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	@Override
 	protected void removeFormula(Machine machine, SymbolicCheckingFormulaItem item) {
 		machine.getSymbolicCheckingFormulas().remove(item);
-	}
-	
-	@Override
-	protected void setContextMenu() {
-		tvFormula.setRowFactory(new SymbolicCheckingCellFactory());
 	}
 	
 	@FXML
