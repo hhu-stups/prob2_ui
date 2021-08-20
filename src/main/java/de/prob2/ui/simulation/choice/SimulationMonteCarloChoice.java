@@ -335,11 +335,6 @@ public class SimulationMonteCarloChoice extends GridPane {
 		this.choosingStage = choosingStage;
 	}
 
-	public void clear() {
-		tfSimulations.clear();
-		tfSteps.clear();
-	}
-
 	public void bindSimulationsProperty(SimpleStringProperty property) {
 		tfSimulations.textProperty().bindBidirectional(property);
 	}
