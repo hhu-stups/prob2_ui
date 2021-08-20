@@ -5,8 +5,6 @@ import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
-import com.google.inject.Singleton;
-
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 
@@ -19,7 +17,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-@Singleton
 public class TestCaseGenerationChoosingStage extends Stage {
 	@FXML
 	private ChoiceBox<TestCaseGenerationType> testChoice;
@@ -151,15 +148,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	
 	public void select(TestCaseGenerationItem item) {
 		testChoice.getSelectionModel().select(item.getType());
-	}
-	
-	public void reset() {
-		btAdd.setText(bundle.getString("common.buttons.add"));
-		btCheck.setText(bundle.getString("testcase.input.buttons.addAndGenerate"));
-		setCheckListeners();
-		mcdcInputView.reset();
-		operationCoverageInputView.reset();
-		testChoice.getSelectionModel().clearSelection();
 	}
 	
 	public void changeItem(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler) {

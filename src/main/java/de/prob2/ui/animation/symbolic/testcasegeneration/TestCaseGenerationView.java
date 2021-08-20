@@ -226,7 +226,6 @@ public class TestCaseGenerationView extends ScrollPane {
 	
 	@FXML
 	public void addTestCase() {
-		injector.getInstance(TestCaseGenerationChoosingStage.class).reset();
 		injector.getInstance(TestCaseGenerationChoosingStage.class).showAndWait();
 	}
 	
