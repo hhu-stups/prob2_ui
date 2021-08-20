@@ -1,6 +1,7 @@
 package de.prob2.ui.symbolic;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.common.base.MoreObjects;
 
 import de.prob2.ui.verifications.AbstractCheckableItem;
 
@@ -32,6 +33,9 @@ public abstract class SymbolicItem<T extends SymbolicExecutionType> extends Abst
 	
 	@Override
 	public String toString() {
-		return String.join(" ", this.getCode(), this.getType().name());
+		return MoreObjects.toStringHelper(this)
+			.add("type", this.getType())
+			.add("code", this.getCode())
+			.toString();
 	}
 }

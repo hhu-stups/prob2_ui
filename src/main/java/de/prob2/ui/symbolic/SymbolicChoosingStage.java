@@ -187,7 +187,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 		} else if (this.getGUIType() == SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM) {
 			formula = symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().getSelectedItem().name();
 		} else {
-			formula = this.getExecutionType().name();
+			formula = "";
 		}
 		return formula;
 	}
