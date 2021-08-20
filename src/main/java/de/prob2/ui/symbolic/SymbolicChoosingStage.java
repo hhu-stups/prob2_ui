@@ -108,17 +108,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 		return cbChoice.getSelectionModel().getSelectedItem();
 	}
 	
-	public void reset() {
-		btAdd.setText(bundle.getString("common.buttons.add"));
-		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.addAndCheck"));
-		setCheckListeners();
-		tfFormula.clear();
-		predicateBuilderView.reset();
-		cbOperations.getSelectionModel().select(this.checkAllOperations);
-		cbChoice.getSelectionModel().clearSelection();
-		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
-	}
-	
 	protected void update() {
 		cbOperations.getItems().setAll(this.checkAllOperations);
 		cbOperations.getSelectionModel().select(this.checkAllOperations);

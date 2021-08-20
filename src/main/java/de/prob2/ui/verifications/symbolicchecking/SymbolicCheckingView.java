@@ -114,7 +114,6 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(SymbolicCheckingChoosingStage.class).reset();
 		injector.getInstance(SymbolicCheckingChoosingStage.class).showAndWait();
 	}
 	

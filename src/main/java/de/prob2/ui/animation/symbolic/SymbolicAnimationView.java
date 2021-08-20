@@ -115,7 +115,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(SymbolicAnimationChoosingStage.class).reset();
 		injector.getInstance(SymbolicAnimationChoosingStage.class).showAndWait();
 	}
 
