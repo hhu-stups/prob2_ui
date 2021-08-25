@@ -25,7 +25,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;

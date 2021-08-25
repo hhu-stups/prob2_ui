@@ -16,7 +16,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;

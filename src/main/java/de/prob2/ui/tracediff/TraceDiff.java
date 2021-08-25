@@ -115,14 +115,18 @@ public class TraceDiff extends VBox {
 			}
 
 			if (!args.isEmpty()) {
-				stringBuilder.append("\n(");
+				/*stringBuilder.append("\n(");
 				stringBuilder.append(String.join(",\n", args));
+				stringBuilder.append(')');*/
+				stringBuilder.append("(");
+				stringBuilder.append(String.join(", ", args));
 				stringBuilder.append(')');
 			}
 
 			if (t.getReturnValues() != null && !t.getReturnValues().isEmpty()) {
 				stringBuilder.append(" → ");
-				stringBuilder.append(String.join(",\n", t.getReturnValues()));
+				//stringBuilder.append(String.join(",\n", t.getReturnValues()));
+				stringBuilder.append(String.join(", ", t.getReturnValues()));
 			}
 
 			return stringBuilder.toString();
@@ -140,14 +144,18 @@ public class TraceDiff extends VBox {
 			}
 
 			if (!args.isEmpty()) {
-				stringBuilder.append("\n(");
+				/*stringBuilder.append("\n(");
 				stringBuilder.append(String.join(",\n", args));
+				stringBuilder.append(')');*/
+				stringBuilder.append("(");
+				stringBuilder.append(String.join(", ", args));
 				stringBuilder.append(')');
 			}
 
 			if (t.getOutputParameters() != null && !t.getOutputParameters().isEmpty()) {
 				stringBuilder.append(" → ");
-				stringBuilder.append(String.join(",\n", t.getOutputParameters().values()));
+				//stringBuilder.append(String.join(",\n", t.getOutputParameters().values()));
+				stringBuilder.append(String.join(", ", t.getOutputParameters().values()));
 			}
 			return stringBuilder.toString();
 		}

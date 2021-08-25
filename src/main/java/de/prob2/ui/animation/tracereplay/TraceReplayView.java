@@ -27,7 +27,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -166,7 +165,7 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	@FXML
-	private void loadTraceFromFile() throws IOException {
+	private void loadTraceFromFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.loadTrace.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());

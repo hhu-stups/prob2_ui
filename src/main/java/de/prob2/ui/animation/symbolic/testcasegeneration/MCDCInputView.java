@@ -8,9 +8,7 @@ import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
-import javafx.util.converter.IntegerStringConverter;
 
 @FXMLInjected
 public class MCDCInputView extends VBox {

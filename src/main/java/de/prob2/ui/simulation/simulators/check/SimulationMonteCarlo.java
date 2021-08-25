@@ -10,20 +10,15 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationError;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.simulators.Simulator;
-import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SimulationMonteCarlo extends Simulator {
 

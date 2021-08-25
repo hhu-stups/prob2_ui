@@ -3,7 +3,6 @@ package de.prob2.ui.simulation;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -13,7 +12,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
-import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationCreator;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -33,7 +31,6 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
 

@@ -1,7 +1,6 @@
 package de.prob2.ui.simulation.simulators.check;
 
 import com.google.inject.Injector;
-import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import org.apache.commons.math3.special.Erf;

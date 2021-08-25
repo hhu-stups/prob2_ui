@@ -6,13 +6,9 @@ import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 @FXMLInjected

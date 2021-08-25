@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import de.prob.check.ModelCheckingOptions;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -24,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ResourceBundle;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @FXMLInjected
