@@ -228,15 +228,9 @@ public class TraceDiff extends VBox {
 		}
 	}
 
-	final void setLists(Trace replayedOrLost, PersistentTrace persistent) {
-		List<Transition> rTransitions = replayedOrLost.getTransitionList();
-		List<PersistentTransition> pTransitions;
-		// if triggered by HistoryView: No persistent trace available
-		if (persistent == null) {
-			pTransitions = FXCollections.emptyObservableList();
-		} else {
-			pTransitions = persistent.getTransitionList();
-		}
+	final void setLists(Trace replayed, PersistentTrace persistent) {
+		List<Transition> rTransitions = replayed.getTransitionList();
+		List<PersistentTransition> pTransitions = persistent.getTransitionList();
 
 		maxSize = Math.max(rTransitions.size(), pTransitions.size());
 		minSize = Math.min(rTransitions.size(), pTransitions.size());
@@ -244,6 +238,20 @@ public class TraceDiff extends VBox {
 		indexLinesMap.clear();
 		translateList(new TraceDiffList(rTransitions), replayedList);
 		translateList(new TraceDiffList(pTransitions), persistentList);
+
+		showAlert.setOnAction(e -> alert.showAlertAgain());
+	}
+
+	final void setLists(Trace lost, Trace history) {
+		List<Transition> lTransitions = lost.getTransitionList();
+		List<Transition> hTransitions = history.getTransitionList();
+
+		maxSize = Math.max(lTransitions.size(), hTransitions.size());
+		minSize = Math.min(lTransitions.size(), hTransitions.size());
+
+		indexLinesMap.clear();
+		translateList(new TraceDiffList(lTransitions), replayedList);
+		translateList(new TraceDiffList(hTransitions), persistentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
 	}

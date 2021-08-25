@@ -56,6 +56,7 @@ public class TraceSaver {
 				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
 				alert.initOwner(window);
 				alert.setAttemptedReplayOrLostTrace(possiblyLostTrace);
+				// TODO set history
 				alert.setErrorMessage();
 			}
 		}

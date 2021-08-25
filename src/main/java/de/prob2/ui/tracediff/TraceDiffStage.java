@@ -26,6 +26,10 @@ public class TraceDiffStage extends Stage {
 		traceDiff.setLists(replayed, persistent);
 	}
 
+	public final void setLists(Trace lost, Trace history) {
+		traceDiff.setLists(lost, history);
+	}
+
 	public void setAlert(TraceReplayErrorAlert alert) {
 		traceDiff.setAlert(alert);
 	}

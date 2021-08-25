@@ -87,8 +87,10 @@ public final class TraceReplayErrorAlert extends Alert {
 			case TRIGGER_SIMULATOR:
 			case TRIGGER_VISB:
 			case TRIGGER_HISTORY_VIEW:
-				this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
-				this.getButtonTypes().addAll(ButtonType.YES, this.showTraceDiff, ButtonType.NO);
+				/*this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
+				this.getButtonTypes().addAll(ButtonType.YES, this.showTraceDiff, ButtonType.NO);*/
+				// TODO Find a way to distinguish between current trace and history (might be not the same if storing failed)
+				this.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
 				break;
 			case TRIGGER_TRACE_CHECKER:
 				this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
@@ -140,7 +142,14 @@ public final class TraceReplayErrorAlert extends Alert {
 		} else if (type.get() == showTraceDiff) {
 			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
 			traceDiffStage.setAlert(this);
-			traceDiffStage.setLists(attemptedReplayTrace, storedTrace);
+			switch (trigger) {
+				case TRIGGER_SIMULATOR:
+				case TRIGGER_VISB:
+				case TRIGGER_HISTORY_VIEW:
+					traceDiffStage.setLists(attemptedReplayTrace, history);
+				default:
+					traceDiffStage.setLists(attemptedReplayTrace, storedTrace);
+			}
 			traceDiffStage.show();
 		}
 	}
