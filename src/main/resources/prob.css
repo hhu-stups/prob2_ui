@@ -511,7 +511,7 @@
 }
 
 .editor .editor_string {
-	-fx-fill:green;
+	-fx-fill:rgb(3, 107, 3);
 }
 
 .editor .editor_unsupported{
