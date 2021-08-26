@@ -519,7 +519,7 @@
 }
 
 .editor .editor_ctrlkeyword {
-	-fx-fill:darkviolet;
+	-fx-fill:rgb(96, 22, 216);
 }
 
 .editor .editor_keyword {
