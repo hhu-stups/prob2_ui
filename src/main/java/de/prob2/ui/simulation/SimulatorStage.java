@@ -392,6 +392,7 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(SimulationChoosingStage.class).setPath(path);
 			lbTime.setText("");
 			this.time = 0;
+			currentProject.getCurrentMachine().getSimulations().forEach(SimulationItem::reset);
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}
