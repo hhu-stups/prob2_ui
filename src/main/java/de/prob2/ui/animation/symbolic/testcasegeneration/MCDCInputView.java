@@ -8,9 +8,7 @@ import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
-import javafx.util.converter.IntegerStringConverter;
 
 @FXMLInjected
 public class MCDCInputView extends VBox {
@@ -29,8 +27,8 @@ public class MCDCInputView extends VBox {
 
 	@FXML
 	private void initialize() {
-		levelSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
-		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
+		levelSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 2));
+		depthSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 5));
 		levelSpinner.getEditor().textProperty().addListener((observable, from, to) -> {
 			if(to.isEmpty()) {
 				levelSpinner.getEditor().setText("0");
@@ -45,7 +43,6 @@ public class MCDCInputView extends VBox {
 				depthSpinner.getEditor().setText(from);
 			}
 		});
-		this.reset();
 	}
 
 	public int getLevel() {
@@ -54,11 +51,6 @@ public class MCDCInputView extends VBox {
 
 	public int getDepth() {
 		return depthSpinner.getValue();
-	}
-
-	public void reset() {
-		levelSpinner.getValueFactory().setValue(2);
-		depthSpinner.getValueFactory().setValue(5);
 	}
 
 	public void setItem(MCDCItem item) {

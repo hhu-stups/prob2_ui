@@ -14,9 +14,14 @@ public final class MCDCItem extends TestCaseGenerationItem {
 		@JsonProperty("maxDepth") final int maxDepth,
 		@JsonProperty("level") final int level
 	) {
-		super(TestCaseGenerationType.MCDC, maxDepth);
+		super(maxDepth);
 		
 		this.level = level;
+	}
+	
+	@Override
+	public TestCaseGenerationType getType() {
+		return TestCaseGenerationType.MCDC;
 	}
 	
 	public int getLevel() {

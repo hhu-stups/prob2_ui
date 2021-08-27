@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationChoosingStage?>
+<?import de.prob2.ui.animation.symbolic.SymbolicAnimationType?>
 <?import de.prob2.ui.sharedviews.PredicateBuilderView?>
-<?import de.prob2.ui.symbolic.SymbolicExecutionItem?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.layout.AnchorPane?>
-
 <fx:root type="SymbolicAnimationChoosingStage" fx:id="cbcChoice" title="%animation.symbolic.choice.title" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<TextField fx:id="tfFormula" VBox.vgrow="NEVER"/>
@@ -33,8 +32,8 @@
 						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicExecutionItem executionType="SEQUENCE" guiType="TEXT_FIELD"/>
-									<SymbolicExecutionItem executionType="FIND_VALID_STATE" guiType="PREDICATE"/>
+									<SymbolicAnimationType fx:constant="SEQUENCE"/>
+									<SymbolicAnimationType fx:constant="FIND_VALID_STATE"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

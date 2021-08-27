@@ -13,9 +13,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
-import de.prob2.ui.vomanager.Requirement;
-import de.prob2.ui.vomanager.RequirementType;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -23,8 +20,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
-public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stage {
+public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET extends SymbolicExecutionType> extends Stage {
 	@FXML
 	private Button btAdd;
 	
@@ -47,7 +45,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 	private VBox formulaInput;
 	
 	@FXML
-	private ChoiceBox<SymbolicExecutionItem> cbChoice;
+	private ChoiceBox<ET> cbChoice;
 	
 	private final ResourceBundle bundle;
 	
@@ -81,39 +79,33 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 			if(to == null) {
 				return;
 			}
-			changeGUIType(to.getGUIType());
+			changeGUIType(getGUIType(to));
 			this.sizeToScene();
+		});
+		cbChoice.setConverter(new StringConverter<ET>() {
+			@Override
+			public String toString(final ET object) {
+				return object.getName();
+			}
+			
+			@Override
+			public ET fromString(final String string) {
+				throw new UnsupportedOperationException("Conversion from String to SymbolicExecutionType not supported");
+			}
 		});
 		symbolicModelCheckAlgorithmChoiceBox.getItems().setAll(SymbolicModelcheckCommand.Algorithm.values());
 		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
 		this.setResizable(true);
 	}
 	
+	public abstract SymbolicGUIType getGUIType(final ET item);
+	
 	public SymbolicGUIType getGUIType() {
-		return cbChoice.getSelectionModel().getSelectedItem().getGUIType();
+		return getGUIType(cbChoice.getSelectionModel().getSelectedItem());
 	}
 	
-	public SymbolicExecutionType getExecutionType() {
-		return cbChoice.getSelectionModel().getSelectedItem().getExecutionType();
-	}
-	
-	public void select(SymbolicItem item) {
-		cbChoice.getItems().forEach(choice -> {
-			if(item.getType().equals(choice.getExecutionType())) {
-				cbChoice.getSelectionModel().select(choice);
-			}
-		});
-	}
-	
-	public void reset() {
-		btAdd.setText(bundle.getString("common.buttons.add"));
-		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.addAndCheck"));
-		setCheckListeners();
-		tfFormula.clear();
-		predicateBuilderView.reset();
-		cbOperations.getSelectionModel().select(this.checkAllOperations);
-		cbChoice.getSelectionModel().clearSelection();
-		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
+	public ET getExecutionType() {
+		return cbChoice.getSelectionModel().getSelectedItem();
 	}
 	
 	protected void update() {
@@ -184,7 +176,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		} else if (this.getGUIType() == SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM) {
 			formula = symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().getSelectedItem().name();
 		} else {
-			formula = this.getExecutionType().name();
+			formula = "";
 		}
 		return formula;
 	}
@@ -195,7 +187,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
 		setChangeListeners(item, resultHandler);
-		this.select(item);
+		cbChoice.getSelectionModel().select(item.getType());
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
 		} else if(this.getGUIType() == SymbolicGUIType.PREDICATE) {
@@ -243,22 +235,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem> extends Stag
 		return lastItem;
 	}
 
-	public void linkRequirement(Requirement requirement) {
-		RequirementType requirementType = requirement.getType();
-		switch (requirementType) {
-			case INVARIANT:
-				cbChoice.getItems().clear();
-				cbChoice.getItems().addAll(FXCollections.observableArrayList(
-						new SymbolicExecutionItem(SymbolicExecutionType.INVARIANT, SymbolicGUIType.CHOICE_BOX),
-						new SymbolicExecutionItem(SymbolicExecutionType.SYMBOLIC_MODEL_CHECK, SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM)));
-				break;
-			case DEADLOCK_FREEDOM:
-				cbChoice.getItems().clear();
-				cbChoice.getItems().addAll(FXCollections.observableArrayList(
-						new SymbolicExecutionItem(SymbolicExecutionType.DEADLOCK, SymbolicGUIType.PREDICATE)));
-				break;
-			default:
-				throw new RuntimeException("Given requirement type is not supported for symbolic model checking: " + requirementType);
-		}
+	public void setAvailableTypes(final List<ET> types) {
+		cbChoice.getItems().setAll(types);
 	}
 }

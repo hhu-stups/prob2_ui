@@ -100,6 +100,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@Override
 	public void initialize() {
 		super.initialize();
+		tvFormula.setRowFactory(new SymbolicAnimationCellFactory());
 		helpButton.setHelpContent("animation", "Symbolic");
 	}
 	
@@ -112,14 +113,8 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		machine.getSymbolicAnimationFormulas().remove(item);
 	}
 	
-	@Override
-	protected void setContextMenu() {
-		tvFormula.setRowFactory(new SymbolicAnimationCellFactory());
-	}
-	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(SymbolicAnimationChoosingStage.class).reset();
 		injector.getInstance(SymbolicAnimationChoosingStage.class).showAndWait();
 	}
 

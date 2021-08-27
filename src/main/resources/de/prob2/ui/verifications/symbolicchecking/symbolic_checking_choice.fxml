@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.sharedviews.PredicateBuilderView?>
-<?import de.prob2.ui.symbolic.SymbolicExecutionItem?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage?>
+<?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -13,7 +13,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-
 <fx:root type="SymbolicCheckingChoosingStage" title="%verifications.symbolicchecking.choice.title" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<TextField fx:id="tfFormula" VBox.vgrow="NEVER"/>
@@ -33,14 +32,14 @@
 						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicExecutionItem executionType="INVARIANT" guiType="CHOICE_BOX"/>
-									<SymbolicExecutionItem executionType="DEADLOCK" guiType="PREDICATE"/>
-									<SymbolicExecutionItem executionType="CHECK_REFINEMENT" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="CHECK_STATIC_ASSERTIONS" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="CHECK_DYNAMIC_ASSERTIONS" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="CHECK_WELL_DEFINEDNESS" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="FIND_REDUNDANT_INVARIANTS" guiType="NONE"/>
-									<SymbolicExecutionItem executionType="SYMBOLIC_MODEL_CHECK" guiType="SYMBOLIC_MODEL_CHECK_ALGORITHM"/>
+									<SymbolicCheckingType fx:constant="INVARIANT"/>
+									<SymbolicCheckingType fx:constant="DEADLOCK"/>
+									<SymbolicCheckingType fx:constant="CHECK_REFINEMENT"/>
+									<SymbolicCheckingType fx:constant="CHECK_STATIC_ASSERTIONS"/>
+									<SymbolicCheckingType fx:constant="CHECK_DYNAMIC_ASSERTIONS"/>
+									<SymbolicCheckingType fx:constant="CHECK_WELL_DEFINEDNESS"/>
+									<SymbolicCheckingType fx:constant="FIND_REDUNDANT_INVARIANTS"/>
+									<SymbolicCheckingType fx:constant="SYMBOLIC_MODEL_CHECK"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>

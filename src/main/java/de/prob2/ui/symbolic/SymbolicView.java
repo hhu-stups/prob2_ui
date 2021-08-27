@@ -34,7 +34,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
-public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
+public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane {
 	
 	public abstract class SymbolicCellFactory {
 
@@ -92,7 +92,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 
 	protected final Injector injector;
 	
-	protected final SymbolicExecutor executor;
+	protected final SymbolicExecutor<T> executor;
 	
 	protected final SymbolicFormulaHandler<T> formulaHandler;
 
@@ -101,7 +101,7 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	protected final CheckBox selectAll;
 	
 	public SymbolicView(final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor executor,
+					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor<T> executor,
 					final SymbolicFormulaHandler<T> formulaHandler, final Class<T> clazz) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
@@ -116,7 +116,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 	@FXML
 	public void initialize() {
 		setBindings();
-		setContextMenu();
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
 			tvFormula.itemsProperty().unbind();
 			if(newValue != null) {
@@ -162,8 +161,6 @@ public abstract class SymbolicView<T extends SymbolicItem> extends ScrollPane {
 		});
 
 	}
-	
-	protected abstract void setContextMenu();
 	
 	@FXML
 	public void checkMachine() {

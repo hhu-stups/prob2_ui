@@ -16,7 +16,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,8 +70,6 @@ public class SimulationChoosingStage extends Stage {
 
 	private final StageManager stageManager;
 
-	private final ResourceBundle bundle;
-
 	private final CurrentProject currentProject;
 
 	private final SimulationItemHandler simulationItemHandler;
@@ -85,7 +82,6 @@ public class SimulationChoosingStage extends Stage {
 	public SimulationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject,
 								   final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
 		this.currentProject = currentProject;
 		this.simulationItemHandler = simulationItemHandler;
 		this.simulationChoiceBindings = simulationChoiceBindings;
@@ -205,14 +201,6 @@ public class SimulationChoosingStage extends Stage {
 	@FXML
 	public void cancel() {
 		this.close();
-	}
-
-	public void reset() {
-		btAdd.setText(bundle.getString("common.buttons.add"));
-		btCheck.setText(bundle.getString("simulation.buttons.addAndCheck"));
-		simulationMonteCarloChoice.clear();
-		simulationHypothesisChoice.clear();
-		simulationEstimationChoice.clear();
 	}
 
 	public void setPath(Path path) {

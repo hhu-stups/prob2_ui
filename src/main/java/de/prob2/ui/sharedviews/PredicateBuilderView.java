@@ -143,8 +143,4 @@ public final class PredicateBuilderView extends VBox {
 		}
 		return builder.toString();
 	}
-	
-	public void reset() {
-		this.setFromPredicate("");
-	}
 }

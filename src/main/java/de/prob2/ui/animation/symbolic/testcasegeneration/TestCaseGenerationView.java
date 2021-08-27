@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -101,7 +103,7 @@ public class TestCaseGenerationView extends ScrollPane {
 			removeItem.setOnAction(e -> removeFormula());
 			
 			MenuItem changeItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e->openItem(row.getItem()));
+			changeItem.setOnAction(e -> changeItem(row.getItem()));
 			
 			MenuItem showDetails = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
@@ -226,8 +228,16 @@ public class TestCaseGenerationView extends ScrollPane {
 	
 	@FXML
 	public void addTestCase() {
-		injector.getInstance(TestCaseGenerationChoosingStage.class).reset();
-		injector.getInstance(TestCaseGenerationChoosingStage.class).showAndWait();
+		final TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
+		choosingStage.showAndWait();
+		final TestCaseGenerationItem newItem = choosingStage.getItem();
+		if (newItem == null) {
+			return;
+		}
+		final Optional<TestCaseGenerationItem> existingItem = itemHandler.addItem(newItem);
+		if (choosingStage.isCheckRequested()) {
+			itemHandler.generateTestCases(existingItem.orElse(newItem));
+		}
 	}
 	
 	private void removeFormula() {
@@ -236,10 +246,22 @@ public class TestCaseGenerationView extends ScrollPane {
 		machine.getTestCases().remove(item);
 	}
 
-	private void openItem(TestCaseGenerationItem item) {
+	private void changeItem(TestCaseGenerationItem item) {
 		TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
-		choosingStage.changeItem(item,
-				injector.getInstance(TestCaseGenerationResultHandler.class));
+		choosingStage.setItem(item);
+		choosingStage.useChangeButtons();
+		choosingStage.showAndWait();
+		final TestCaseGenerationItem newItem = choosingStage.getItem();
+		if (newItem == null) {
+			return;
+		}
+		if(!itemHandler.replaceItem(item, newItem).isPresent()) {
+			if (choosingStage.isCheckRequested()) {
+				itemHandler.generateTestCases(newItem);
+			}
+		} else {
+			injector.getInstance(TestCaseGenerationResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
+		}
 	}
 	
 	@FXML

@@ -5,17 +5,14 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
-import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceSelectionView;
-import de.prob2.ui.sharedviews.TraceViewHandler;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.NumberBinding;
@@ -33,9 +30,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 
-import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton

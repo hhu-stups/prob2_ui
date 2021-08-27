@@ -1,15 +1,16 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
-import com.google.inject.Singleton;
-
-import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -19,7 +20,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-@Singleton
 public class TestCaseGenerationChoosingStage extends Stage {
 	@FXML
 	private ChoiceBox<TestCaseGenerationType> testChoice;
@@ -43,15 +43,19 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	
 	private final ResourceBundle bundle;
 	
-	private final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler;
+	private final ObjectProperty<TestCaseGenerationItem> item;
+	
+	private final BooleanProperty checkRequested;
 	
 	@Inject
-	private TestCaseGenerationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final TestCaseGenerationItemHandler testCaseGenerationFormulaHandler) {
+	private TestCaseGenerationChoosingStage(final StageManager stageManager, final ResourceBundle bundle) {
 		super();
 		
 		this.stageManager = stageManager;
 		this.bundle = bundle;
-		this.testCaseGenerationFormulaHandler = testCaseGenerationFormulaHandler;
+		
+		this.item = new SimpleObjectProperty<>(this, "item", null);
+		this.checkRequested = new SimpleBooleanProperty(this, "checkRequested", false);
 		
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "test_case_generation_choice.fxml");
@@ -60,6 +64,16 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	
 	@FXML
 	public void initialize() {
+		this.itemProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				this.select(to);
+				if(this.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
+					mcdcInputView.setItem((MCDCItem)to);
+				} else if(this.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS) {
+					operationCoverageInputView.setItem((OperationCoverageItem)to);
+				}
+			}
+		});
 		setCheckListeners();
 		input.visibleProperty().bind(testChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		testChoice.getItems().setAll(TestCaseGenerationType.values());
@@ -82,6 +96,26 @@ public class TestCaseGenerationChoosingStage extends Stage {
 			this.sizeToScene();
 		});
 		this.sizeToScene();
+	}
+	
+	public ObjectProperty<TestCaseGenerationItem> itemProperty() {
+		return this.item;
+	}
+	
+	public TestCaseGenerationItem getItem() {
+		return this.itemProperty().get();
+	}
+	
+	public void setItem(final TestCaseGenerationItem item) {
+		this.itemProperty().set(item);
+	}
+	
+	public ReadOnlyBooleanProperty checkRequestedProperty() {
+		return this.checkRequested;
+	}
+	
+	public boolean isCheckRequested() {
+		return this.checkRequestedProperty().get();
 	}
 	
 	private boolean checkValid() {
@@ -118,16 +152,16 @@ public class TestCaseGenerationChoosingStage extends Stage {
 				return;
 			}
 			this.close();
-			testCaseGenerationFormulaHandler.addItem(extractItem());
+			this.setItem(extractItem());
+			this.checkRequested.set(false);
 		});
 		btCheck.setOnAction(e -> {
 			if (!checkValid()) {
 				return;
 			}
 			this.close();
-			final TestCaseGenerationItem newItem = extractItem();
-			final Optional<TestCaseGenerationItem> existingItem = testCaseGenerationFormulaHandler.addItem(newItem);
-			testCaseGenerationFormulaHandler.generateTestCases(existingItem.orElse(newItem));
+			this.setItem(extractItem());
+			this.checkRequested.set(true);
 		});
 	}
 	
@@ -153,58 +187,15 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		testChoice.getSelectionModel().select(item.getType());
 	}
 	
-	public void reset() {
-		btAdd.setText(bundle.getString("common.buttons.add"));
-		btCheck.setText(bundle.getString("testcase.input.buttons.addAndGenerate"));
-		setCheckListeners();
-		mcdcInputView.reset();
-		operationCoverageInputView.reset();
-		testChoice.getSelectionModel().clearSelection();
-	}
-	
-	public void changeItem(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler) {
+	public void useChangeButtons() {
 		btAdd.setText(bundle.getString("testcase.input.buttons.change"));
 		btCheck.setText(bundle.getString("testcase.input.buttons.changeAndGenerate"));
-		setChangeListeners(item, resultHandler);
-		this.select(item);
-		if(this.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
-			mcdcInputView.setItem((MCDCItem)item);
-		} else if(this.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS) {
-			operationCoverageInputView.setItem((OperationCoverageItem)item);
-		}
-		this.show();
 	}
 	
-	private void setChangeListeners(TestCaseGenerationItem item, TestCaseGenerationResultHandler resultHandler) {
-		btAdd.setOnAction(e -> {
-			if (!checkValid()) {
-				return;
-			}
-			//Close stage first so that it does not need to wait for possible Alerts
-			this.close();
-			final TestCaseGenerationItem newItem = extractItem();
-			if (testCaseGenerationFormulaHandler.replaceItem(item, newItem).isPresent()) {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
-			}
-		});
-		
-		btCheck.setOnAction(e-> {
-			if (!checkValid()) {
-				return;
-			}
-			//Close stage first so that it does not need to wait for possible Alerts
-			this.close();
-			final TestCaseGenerationItem newItem = extractItem();
-			if(!testCaseGenerationFormulaHandler.replaceItem(item, newItem).isPresent()) {
-				testCaseGenerationFormulaHandler.generateTestCases(newItem);
-			} else {
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
-			}
-		});
-	}
-		
 	@FXML
 	public void cancel() {
 		this.close();
+		this.setItem(null);
+		this.checkRequested.set(false);
 	}
 }

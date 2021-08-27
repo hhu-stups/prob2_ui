@@ -43,7 +43,6 @@ public class TraceDiff extends VBox {
 
 	@FXML private ListView<TraceDiffItem> replayedList;
 	@FXML private ListView<TraceDiffItem> persistentList;
-	@FXML private ListView<TraceDiffItem> currentList;
 
 	@FXML private Button showAlert;
 
@@ -116,14 +115,18 @@ public class TraceDiff extends VBox {
 			}
 
 			if (!args.isEmpty()) {
-				stringBuilder.append("\n(");
+				/*stringBuilder.append("\n(");
 				stringBuilder.append(String.join(",\n", args));
+				stringBuilder.append(')');*/
+				stringBuilder.append("(");
+				stringBuilder.append(String.join(", ", args));
 				stringBuilder.append(')');
 			}
 
 			if (t.getReturnValues() != null && !t.getReturnValues().isEmpty()) {
 				stringBuilder.append(" → ");
-				stringBuilder.append(String.join(",\n", t.getReturnValues()));
+				//stringBuilder.append(String.join(",\n", t.getReturnValues()));
+				stringBuilder.append(String.join(", ", t.getReturnValues()));
 			}
 
 			return stringBuilder.toString();
@@ -141,14 +144,18 @@ public class TraceDiff extends VBox {
 			}
 
 			if (!args.isEmpty()) {
-				stringBuilder.append("\n(");
+				/*stringBuilder.append("\n(");
 				stringBuilder.append(String.join(",\n", args));
+				stringBuilder.append(')');*/
+				stringBuilder.append("(");
+				stringBuilder.append(String.join(", ", args));
 				stringBuilder.append(')');
 			}
 
 			if (t.getOutputParameters() != null && !t.getOutputParameters().isEmpty()) {
 				stringBuilder.append(" → ");
-				stringBuilder.append(String.join(",\n", t.getOutputParameters().values()));
+				//stringBuilder.append(String.join(",\n", t.getOutputParameters().values()));
+				stringBuilder.append(String.join(", ", t.getOutputParameters().values()));
 			}
 			return stringBuilder.toString();
 		}
@@ -172,7 +179,6 @@ public class TraceDiff extends VBox {
 
 		this.listViews.add(replayedList);
 		this.listViews.add(persistentList);
-		this.listViews.add(currentList);
 
 		// Arrow key and scrollbar synchronicity
 		ChangeListener<? super Number> listViewCL = createChangeListenerForListView();
@@ -230,21 +236,9 @@ public class TraceDiff extends VBox {
 		}
 	}
 
-	final void setLists(Trace replayedOrLost, PersistentTrace persistent, Trace current) {
-		List<Transition> rTransitions = replayedOrLost.getTransitionList();
-		List<PersistentTransition> pTransitions;
-		List<Transition> cTransitions;
-		// if triggered by HistoryView: No persistent trace available
-		if (persistent == null) {
-			pTransitions = FXCollections.emptyObservableList();
-		} else {
-			pTransitions = persistent.getTransitionList();
-		}
-		if (current == null) {
-			cTransitions = FXCollections.emptyObservableList();
-		} else {
-			cTransitions = current.getTransitionList();
-		}
+	final void setLists(Trace replayed, PersistentTrace persistent) {
+		List<Transition> rTransitions = replayed.getTransitionList();
+		List<PersistentTransition> pTransitions = persistent.getTransitionList();
 
 		maxSize = Math.max(rTransitions.size(), pTransitions.size());
 		minSize = Math.min(rTransitions.size(), pTransitions.size());
@@ -252,7 +246,20 @@ public class TraceDiff extends VBox {
 		indexLinesMap.clear();
 		translateList(new TraceDiffList(rTransitions), replayedList);
 		translateList(new TraceDiffList(pTransitions), persistentList);
-		translateList(new TraceDiffList(cTransitions), currentList);
+
+		showAlert.setOnAction(e -> alert.showAlertAgain());
+	}
+
+	final void setLists(Trace lost, Trace history) {
+		List<Transition> lTransitions = lost.getTransitionList();
+		List<Transition> hTransitions = history.getTransitionList();
+
+		maxSize = Math.max(lTransitions.size(), hTransitions.size());
+		minSize = Math.min(lTransitions.size(), hTransitions.size());
+
+		indexLinesMap.clear();
+		translateList(new TraceDiffList(lTransitions), replayedList);
+		translateList(new TraceDiffList(hTransitions), persistentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
 	}

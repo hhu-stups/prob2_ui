@@ -20,7 +20,6 @@ import de.prob.check.CBCInvariantChecker;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 
 @Singleton
@@ -104,8 +103,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		if(!item.selected()) {
 			return;
 		}
-		SymbolicExecutionType type = item.getType();
-		switch(type) {
+		switch(item.getType()) {
 			case INVARIANT:
 				handleInvariant(item, checkAll);
 				break;
@@ -131,7 +129,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 				handleSymbolic(item, checkAll);
 				break;
 			default:
-				throw new AssertionError("Unhandled symbolic checking type: " + type);
+				throw new AssertionError("Unhandled symbolic checking type: " + item.getType());
 		}
 	}
 	

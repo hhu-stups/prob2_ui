@@ -28,15 +28,13 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
-import de.prob2.ui.symbolic.SymbolicItem;
 import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 
 @Singleton
-public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHandler implements ISymbolicResultHandler {
+public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHandler implements ISymbolicResultHandler<SymbolicCheckingFormulaItem> {
 	
 	private final CurrentTrace currentTrace;
 	
@@ -67,7 +65,8 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		return !this.isInterrupted(result) && (result instanceof Throwable || result instanceof CheckError);
 	}
 	
-	public void handleFormulaResult(SymbolicItem item, Object result) {
+	@Override
+	public void handleFormulaResult(SymbolicCheckingFormulaItem item, Object result) {
 		item.setResultItem(handleFormulaResult(result));
 		
 		final List<Trace> counterExamples;
@@ -83,21 +82,22 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		} else {
 			counterExamples = Collections.emptyList();
 		}
-		((SymbolicCheckingFormulaItem)item).getCounterExamples().setAll(counterExamples);
+		item.getCounterExamples().setAll(counterExamples);
 	}
 	
-	public void handleFormulaResult(SymbolicItem item, AbstractCommand cmd) {
+	@Override
+	public void handleFormulaResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicExecutionType.SYMBOLIC_MODEL_CHECK) {
-			handleSymbolicChecking((SymbolicCheckingFormulaItem) item, (SymbolicModelcheckCommand) cmd);
-		} else if(item.getType() == SymbolicExecutionType.CHECK_STATIC_ASSERTIONS || item.getType() == SymbolicExecutionType.CHECK_DYNAMIC_ASSERTIONS) {
-			handleAssertionChecking((SymbolicCheckingFormulaItem) item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
-		} else if (item.getType() == SymbolicExecutionType.CHECK_WELL_DEFINEDNESS) {
-			handleWellDefinednessChecking((SymbolicCheckingFormulaItem)item, (CheckWellDefinednessCommand)cmd);
-		} else if(item.getType() == SymbolicExecutionType.CHECK_REFINEMENT) {
-			handleRefinementChecking((SymbolicCheckingFormulaItem) item, (ConstraintBasedRefinementCheckCommand) cmd);
-		} else if(item.getType() == SymbolicExecutionType.FIND_REDUNDANT_INVARIANTS) {
-			handleFindRedundantInvariants((SymbolicCheckingFormulaItem) item, (GetRedundantInvariantsCommand) cmd);
+		if(item.getType() == SymbolicCheckingType.SYMBOLIC_MODEL_CHECK) {
+			handleSymbolicChecking(item, (SymbolicModelcheckCommand) cmd);
+		} else if(item.getType() == SymbolicCheckingType.CHECK_STATIC_ASSERTIONS || item.getType() == SymbolicCheckingType.CHECK_DYNAMIC_ASSERTIONS) {
+			handleAssertionChecking(item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
+		} else if (item.getType() == SymbolicCheckingType.CHECK_WELL_DEFINEDNESS) {
+			handleWellDefinednessChecking(item, (CheckWellDefinednessCommand)cmd);
+		} else if(item.getType() == SymbolicCheckingType.CHECK_REFINEMENT) {
+			handleRefinementChecking(item, (ConstraintBasedRefinementCheckCommand) cmd);
+		} else if(item.getType() == SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS) {
+			handleFindRedundantInvariants(item, (GetRedundantInvariantsCommand) cmd);
 		}
 	}
 	

@@ -107,9 +107,7 @@ public class VisBDebugStage extends Stage {
 		if (visBVisualisation != null) {
 			this.visBEvents.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBEvents()));
 			this.visBItems.setItems(FXCollections.observableArrayList(visBVisualisation.getVisBItems()));
-			for (final VisBEvent event : visBVisualisation.getVisBEvents()) {
-				eventsById.put(event.getId(), event);
-			}
+			this.eventsById.putAll(visBVisualisation.getVisBEventsById());
 		}
 	}
 

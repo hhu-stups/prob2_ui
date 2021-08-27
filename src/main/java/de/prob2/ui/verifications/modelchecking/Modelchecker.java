@@ -13,7 +13,6 @@ import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.StateSpaceStats;
 import de.prob.model.eventb.EventBModel;
-import de.prob.model.eventb.EventBPackageModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.ITraceDescription;

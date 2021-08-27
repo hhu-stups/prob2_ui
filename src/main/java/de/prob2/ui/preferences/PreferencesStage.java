@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;

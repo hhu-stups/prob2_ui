@@ -4,23 +4,16 @@ import de.prob.check.tracereplay.check.exploration.ReplayOptions;
 import de.prob.statespace.OperationInfo;
 import de.prob2.ui.internal.StageManager;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TitledPane;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ReplayOptionsChoice extends TitledPane{
 

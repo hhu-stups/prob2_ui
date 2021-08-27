@@ -87,11 +87,10 @@ distributions:
   only: 
     - master@stups/prob/prob2_ui
     - develop@stups/prob/prob2_ui
-  image: debian:stable-slim
+  image: alpine:3
   before_script:
-    - export DEBIAN_FRONTEND="noninteractive"
-    - apt-get update
-    - apt-get install --assume-yes lftp
+    - apk update
+    - apk add lftp openssh-client
   variables:
     DEPLOY_REMOTE_BASEDIR: stupshome/stups
   script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set sftp:auto-confirm yes; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/snapshot/; mput -e build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe build/libs/*-multi.jar; exit"

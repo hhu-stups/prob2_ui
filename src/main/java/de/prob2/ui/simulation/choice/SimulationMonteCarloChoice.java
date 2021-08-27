@@ -4,18 +4,15 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
 import javafx.beans.NamedArg;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -333,11 +330,6 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 	public void setSimulationChoosingStage(SimulationChoosingStage choosingStage) {
 		this.choosingStage = choosingStage;
-	}
-
-	public void clear() {
-		tfSimulations.clear();
-		tfSteps.clear();
 	}
 
 	public void bindSimulationsProperty(SimpleStringProperty property) {

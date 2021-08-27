@@ -511,7 +511,7 @@
 }
 
 .editor .editor_string {
-	-fx-fill:green;
+	-fx-fill:rgb(3, 107, 3);
 }
 
 .editor .editor_unsupported{
@@ -519,7 +519,7 @@
 }
 
 .editor .editor_ctrlkeyword {
-	-fx-fill:darkviolet;
+	-fx-fill:rgb(96, 22, 216);
 }
 
 .editor .editor_keyword {
@@ -527,7 +527,7 @@
 }
 
 .editor .editor_comment {
-	-fx-fill: #784e50;
+	-fx-fill: #818181;
 	-fx-font-style: italic
 }
 

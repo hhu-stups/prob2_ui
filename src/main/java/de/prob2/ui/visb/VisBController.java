@@ -174,7 +174,7 @@ public class VisBController {
 			return;
 		}
 		LOGGER.debug("Finding event for id: " + id);
-		VisBEvent event = this.getVisBVisualisation().getEventForID(id);
+		VisBEvent event = this.getVisBVisualisation().getVisBEventsById().get(id);
 		// TO DO: adapt predicates or add predicate for Click Coordinates
 		if(event == null || event.getEvent().equals("")) {
 			updateInfo("visb.infobox.no.events.for.id", id);
@@ -250,23 +250,13 @@ public class VisBController {
 			this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
 		} catch (UncheckedIOException | ProBError e) {
 			this.visBVisualisation.set(null);
-			alert(e, "visb.exception.header", "visb.exception.visb.file.error");
+			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
 		}
-		showVisualisationAfterSetup();
-	}
 
-	private void showVisualisationAfterSetup() {
-		if (this.getVisBVisualisation() == null) {
-			updateInfo("visb.infobox.visualisation.error");
-			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
-			alert.initOwner(injector.getInstance(VisBStage.class));
-			alert.showAndWait();
-		} else {
-			updateInfo("visb.infobox.visualisation.initialise");
-			updateVisualisationIfPossible();
-		}
+		updateInfo("visb.infobox.visualisation.initialise");
+		updateVisualisationIfPossible();
 	}
 
 	/**

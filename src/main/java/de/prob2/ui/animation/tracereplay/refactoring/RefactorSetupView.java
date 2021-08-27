@@ -4,17 +4,11 @@ import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 
 import java.nio.file.Path;

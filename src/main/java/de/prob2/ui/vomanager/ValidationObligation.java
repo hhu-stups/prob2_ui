@@ -13,7 +13,6 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.nio.file.Path;
 import java.util.Objects;
 
 @JsonPropertyOrder({

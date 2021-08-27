@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.ltl.formula;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,7 +12,6 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.ltl.core.parser.LtlParseException;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLChecker;

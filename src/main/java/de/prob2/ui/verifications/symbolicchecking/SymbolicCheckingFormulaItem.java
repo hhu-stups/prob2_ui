@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.statespace.Trace;
-import de.prob2.ui.symbolic.SymbolicExecutionType;
 import de.prob2.ui.symbolic.SymbolicItem;
 
 import javafx.beans.property.ListProperty;
@@ -13,16 +12,24 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class SymbolicCheckingFormulaItem extends SymbolicItem {
+public class SymbolicCheckingFormulaItem extends SymbolicItem<SymbolicCheckingType> {
+	private final SymbolicCheckingType type;
+	
 	@JsonIgnore
 	private final ListProperty<Trace> counterExamples = new SimpleListProperty<>(this, "counterExamples", FXCollections.observableArrayList());
 	
 	@JsonCreator
 	public SymbolicCheckingFormulaItem(
 		@JsonProperty("code") final String code,
-		@JsonProperty("type") final SymbolicExecutionType type
+		@JsonProperty("type") final SymbolicCheckingType type
 	) {
-		super(code, type);
+		super(code);
+		this.type = type;
+	}
+	
+	@Override
+	public SymbolicCheckingType getType() {
+		return this.type;
 	}
 	
 	public ObservableList<Trace> getCounterExamples() {
