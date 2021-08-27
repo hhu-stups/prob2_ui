@@ -70,6 +70,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -340,6 +341,15 @@ public class SimulatorStage extends Stage {
 		simulationItems.setRowFactory(table -> new SimulationItemRow(this));
 
 		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
+
+		simulationItems.setOnMouseClicked(e-> {
+			SimulationItem item = simulationItems.getSelectionModel().getSelectedItem();
+			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null &&
+				configurationPath.get() != null && !simulationItemHandler.runningProperty().get() && lastSimulator.get() != null &&
+				!lastSimulator.get().isRunning()) {
+				simulationItemHandler.checkItem(item, false);
+			}
+		});
 	}
 
 
