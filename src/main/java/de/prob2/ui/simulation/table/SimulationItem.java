@@ -208,7 +208,10 @@ public class SimulationItem implements IExecutableItem {
 	}
 
 	public void reset() {
-		// TODO
+		this.setChecked(Checked.NOT_CHECKED);
+		this.simulationStats = null;
+		this.timestamps.clear();
+		this.traces.clear();
 	}
 
 	public Map<String, Object> getInformation() {
