@@ -14,6 +14,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.preferences.PreferencesStage;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -51,6 +52,7 @@ public class TraceDiff extends VBox {
 	@FXML private HBox listBox;
 	@FXML private HBox buttonBox;
 
+	private final Injector injector;
 	private final ResourceBundle bundle;
 	private TraceReplayErrorAlert alert;
 	private ArrayList<ListView<TraceDiffItem>> listViews = new ArrayList<>();
@@ -58,6 +60,8 @@ public class TraceDiff extends VBox {
 	private static int minSize = -1;
 	private int maxSize = -1;
 	static HashMap<Integer, Integer> indexLinesMap = new HashMap<>();
+	private static String openingBrace;
+	private static String argDelimiter;
 
 	static class TraceDiffList extends ArrayList<TraceDiffItem> {
 		TraceDiffList(List<?> list) {
@@ -115,18 +119,14 @@ public class TraceDiff extends VBox {
 			}
 
 			if (!args.isEmpty()) {
-				/*stringBuilder.append("\n(");
-				stringBuilder.append(String.join(",\n", args));
-				stringBuilder.append(')');*/
-				stringBuilder.append("(");
-				stringBuilder.append(String.join(", ", args));
+				stringBuilder.append(openingBrace);
+				stringBuilder.append(String.join(argDelimiter, args));
 				stringBuilder.append(')');
 			}
 
 			if (t.getReturnValues() != null && !t.getReturnValues().isEmpty()) {
 				stringBuilder.append(" → ");
-				//stringBuilder.append(String.join(",\n", t.getReturnValues()));
-				stringBuilder.append(String.join(", ", t.getReturnValues()));
+				stringBuilder.append(String.join(argDelimiter, t.getReturnValues()));
 			}
 
 			return stringBuilder.toString();
@@ -144,18 +144,14 @@ public class TraceDiff extends VBox {
 			}
 
 			if (!args.isEmpty()) {
-				/*stringBuilder.append("\n(");
-				stringBuilder.append(String.join(",\n", args));
-				stringBuilder.append(')');*/
-				stringBuilder.append("(");
-				stringBuilder.append(String.join(", ", args));
+				stringBuilder.append(openingBrace);
+				stringBuilder.append(String.join(argDelimiter, args));
 				stringBuilder.append(')');
 			}
 
 			if (t.getOutputParameters() != null && !t.getOutputParameters().isEmpty()) {
 				stringBuilder.append(" → ");
-				//stringBuilder.append(String.join(",\n", t.getOutputParameters().values()));
-				stringBuilder.append(String.join(", ", t.getOutputParameters().values()));
+				stringBuilder.append(String.join(argDelimiter, t.getOutputParameters().values()));
 			}
 			return stringBuilder.toString();
 		}
@@ -167,6 +163,7 @@ public class TraceDiff extends VBox {
 
 	@Inject
 	private TraceDiff(StageManager stageManager, Injector injector) {
+		this.injector = injector;
 		this.bundle = injector.getInstance(ResourceBundle.class);
 		stageManager.loadFXML(this,"trace_diff.fxml");
 	}
@@ -190,6 +187,19 @@ public class TraceDiff extends VBox {
 			this.getScene().getWindow().heightProperty().addListener(stageSizeChangelistener);
 			this.getScene().getWindow().widthProperty().addListener(stageSizeChangelistener);
 		});
+
+		String typeOfTraceDiff = injector.getInstance(PreferencesStage.class).getTraceDiffType();
+		switch (typeOfTraceDiff) {
+			case "multipleLines":
+				openingBrace = "\n(";
+				argDelimiter = ",\n";
+				break;
+			case "singleLines":
+			default:
+				openingBrace = "(";
+				argDelimiter = ", ";
+				break;
+		}
 	}
 
 	private void getScrollBars() {
@@ -248,6 +258,7 @@ public class TraceDiff extends VBox {
 		translateList(new TraceDiffList(pTransitions), persistentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
+		System.out.println(argDelimiter.endsWith("\n"));
 	}
 
 	final void setLists(Trace lost, Trace history) {
@@ -262,6 +273,7 @@ public class TraceDiff extends VBox {
 		translateList(new TraceDiffList(hTransitions), persistentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
+		System.out.println(argDelimiter.endsWith("\n"));
 	}
 
 	private void translateList(TraceDiffList stringList, ListView<TraceDiffItem> listView) {

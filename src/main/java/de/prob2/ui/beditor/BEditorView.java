@@ -39,6 +39,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -89,6 +91,9 @@ public class BEditorView extends BorderPane {
 	@FXML 
 	private CheckBox cbUnicode;
 
+	/*@FXML
+	private VirtualizedScrollPane<BEditor> virtualizedScrollPane;*/
+
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final CurrentProject currentProject;
@@ -103,9 +108,15 @@ public class BEditorView extends BorderPane {
 	private Thread watchThread;
 	private WatchKey key;
 	private StyleSpans<Collection<String>> highlighting;
+	//private final HashMap<Path, Double> scrollPositionList = new HashMap<>();
+	//private boolean switched = false;
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
+		/*
+		*	TODO: remember scroll position.
+		*   Getting scrollbar values does not work. Getting estimated y values of Virtualized Scroll Pane does produce weird values (Code area refreshing too often?)
+		*/
 		this.stageManager = stageManager;
 		this.bundle = bundle;
 		this.currentProject = currentProject;
@@ -161,6 +172,7 @@ public class BEditorView extends BorderPane {
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (to == null) {
 				machineChoice.getItems().clear();
+				//scrollPositionList.clear();
 				this.setHint();
 			} else {
 				// The correct list of included machines is available once the machine is fully loaded.
@@ -176,13 +188,38 @@ public class BEditorView extends BorderPane {
 			if(to == null) {
 				return;
 			}
+			/*if (from != null) {
+				System.out.println(from + " " +virtualizedScrollPane.estimatedScrollYProperty().getValue());
+				switched = true;
+				//scrollPositionList.put(from, virtualizedScrollPane.estimatedScrollYProperty().getValue());
+			}*/
 			switchMachine(to);
 		});
 		
 		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
 		
 		helpButton.setHelpContent("mainView.editor", null);
+
+		/*beditor.beingUpdatedProperty().addListener((obs, from, to) -> {
+			if (to && switched) {
+				System.out.println(machineChoice.getSelectionModel().getSelectedItem() + " changed: " + virtualizedScrollPane.estimatedScrollYProperty().getValue());
+				setScrollPosition(machineChoice.getSelectionModel().getSelectedItem());
+			}
+		});*/
 	}
+
+	/*private void setScrollPosition(Path machinePath) {
+		// Set initial scroll position if absent
+		scrollPositionList.putIfAbsent(machinePath, 0.0);
+		// Restore old position if possible
+		Platform.runLater(() -> {
+			System.out.println("set value: " + scrollPositionList.get(machinePath));
+			//virtualizedScrollPane.estimatedScrollYProperty().setValue(scrollPositionList.get(machinePath));
+			System.out.println("scroll Y by " + (scrollPositionList.get(machinePath) - virtualizedScrollPane.getEstimatedScrollY()));
+			beditor.scrollYBy(scrollPositionList.get(machinePath) - beditor.getEstimatedScrollY());
+			//virtualizedScrollPane.scrollYBy(scrollPositionList.get(machinePath) - virtualizedScrollPane.getEstimatedScrollY());
+		});
+	}*/
 	
 	private void updateSaved() {
 		this.saved.set(this.getPath() == null || Objects.equals(this.lastSavedText.get(), this.beditor.getText()));
@@ -205,6 +242,8 @@ public class BEditorView extends BorderPane {
 		registerFile(machinePath);
 		loadText(machinePath);
 		beditor.clearHistory();
+		/*//setScrollPosition(machinePath);
+		switched = false;*/
 	}
 	
 	private void loadText(Path machinePath) {

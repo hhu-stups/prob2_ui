@@ -44,6 +44,10 @@
 									onAction="#selectDefaultLocation" />
 							</HBox>
 							<HBox spacing="10.0" alignment="CENTER_LEFT">
+								<Label text="%preferences.stage.tabs.general.label.traceDiff"/>
+								<ChoiceBox fx:id="traceDiffChoiceBox"/>
+							</HBox>
+							<HBox spacing="10.0" alignment="CENTER_LEFT">
 								<Label text="%preferences.stage.tabs.general.label.localeOverride"/>
 								<ChoiceBox fx:id="localeOverrideBox"/>
 							</HBox>

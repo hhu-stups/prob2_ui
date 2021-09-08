@@ -28,6 +28,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.ProjectManager;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -71,6 +72,7 @@ public final class PreferencesStage extends Stage {
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
 	@FXML private TextField defaultLocationField;
 	@FXML private ChoiceBox<Locale> localeOverrideBox;
+	@FXML private ChoiceBox<String> traceDiffChoiceBox;
 	@FXML private PreferencesView globalPrefsView;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
@@ -168,6 +170,15 @@ public final class PreferencesStage extends Stage {
 		});
 		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
 
+		// TODO: persist tracediffchoice
+		// TODO: change of choice not accepted yet
+		traceDiffChoiceBox.getItems().setAll(FXCollections.observableArrayList(
+				bundle.getString("preferences.stage.tage.general.traceDiffType.singleLines"),
+				bundle.getString("preferences.stage.tage.general.traceDiffType.multipleLines")
+				//,bundle.getString("preferences.stage.tage.general.traceDiffType.treeView")
+		));
+		traceDiffChoiceBox.getSelectionModel().select(0);
+
 		this.globalPrefsView.setState(this.globalPrefsChangeState);
 
 		this.undoButton.disableProperty().bind(this.globalPrefsChangeState.changesAppliedProperty());
@@ -192,6 +203,17 @@ public final class PreferencesStage extends Stage {
 				configData.currentPreference = PersistenceUtils.getCurrentTab(tabPane);
 			}
 		});
+	}
+
+	public String getTraceDiffType() {
+		String s = traceDiffChoiceBox.getSelectionModel().getSelectedItem();
+		String prefix = "preferences.stage.tage.general.traceDiffType.";
+		for (String t : new String[]{"singleLines", "multipleLines", "treeView"}) {
+			if (bundle.getString(prefix + t).equals(s)) {
+				return t;
+			}
+		}
+		return null;
 	}
 
 	@FXML

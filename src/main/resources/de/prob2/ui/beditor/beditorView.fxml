@@ -46,7 +46,7 @@
 		</HBox>
 	</top>
 	<center>
-		<VirtualizedScrollPane hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
+		<VirtualizedScrollPane fx:id="virtualizedScrollPane" hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
 			<content>
 				<BEditor fx:id="beditor" BorderPane.alignment="CENTER" />
 			</content>
