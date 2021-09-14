@@ -33,8 +33,7 @@ if (project != rootProject) {
 }
 
 wrapper {
-	gradleVersion = "6.8.2"
-	distributionType = Wrapper.DistributionType.ALL
+	gradleVersion = "7.2"
 }
 
 
