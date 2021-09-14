@@ -98,8 +98,6 @@ application {
 		applicationDefaultJvmArgs += opens.collect {"--add-opens=${it}=ALL-UNNAMED".toString()}
 	}
 }
-// Workaround for https://github.com/johnrengelman/shadow/issues/609
-mainClassName = application.mainClass.get()
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
