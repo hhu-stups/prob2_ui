@@ -85,6 +85,10 @@ public class TraceViewHandler {
 				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(), injector);
 				lastTrace = replayTrace;
 				Machine machine = currentProject.getCurrentMachine();
+				if(!machinesToTraces.containsKey(machine)) {
+					final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
+					machinesToTraces.put(machine, machineTraces);
+				}
 				ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
 				if(!machineTraces.contains(replayTrace)) {
 					machineTraces.add(replayTrace);
@@ -138,10 +142,11 @@ public class TraceViewHandler {
 
 	private void bindTraces(Machine machine, SetChangeListener<Path> listener) {
 		if (machine != null) {
-			ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
-			if(machineTraces == null) {
-				machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
+			if(!machinesToTraces.containsKey(machine)) {
+				final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
+				machinesToTraces.put(machine, machineTraces);
 			}
+			ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
 			traces.bind(machineTraces);
 			noTraces.bind(machine.tracesProperty().emptyProperty());
 			machine.getTraceFiles().addListener(listener);
