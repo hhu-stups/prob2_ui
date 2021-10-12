@@ -139,6 +139,7 @@ public class MachineLoader {
 			if (currentStateSpace != null) {
 				currentStateSpace.kill();
 			}
+			this.getAnimator().resetProB();
 			return this.getAnimator().createStateSpace();
 		}
 	}
