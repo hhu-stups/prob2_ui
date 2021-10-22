@@ -32,7 +32,8 @@
 							<Label text="Trace is Empty"/>
 						</placeholder>
 					</TableView>
-					<HBox>
+					<HBox spacing="10.0">
+						<Button fx:id="btRecord" text="%animation.trace.replay.test.postcondition.record" styleClass="button-blue" onAction="#recordPostconditions"/>
 						<Button fx:id="btApply" text="%common.buttons.apply" styleClass="button-blue" onAction="#applyTest"/>
 					</HBox>
 				</VBox>

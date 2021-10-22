@@ -167,37 +167,27 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public void save(Trace trace, Path location, String createdBy) throws IOException {
-		this.save(trace, location, false, createdBy);
-	}
-
-
-	public void save(Trace trace, Path location, boolean recordTests, String createdBy) throws IOException {
 		JsonMetadata jsonMetadata = updateMetadataBuilder(TraceJsonFile.metadataBuilder())
-			.withCreator(createdBy)
-			.build();
+				.withCreator(createdBy)
+				.build();
 		PersistentTrace persistentTrace = new PersistentTrace(trace);
-		if(recordTests) {
-			persistentTrace.recordTests();
-		}
 		LoadedMachine machine = currentTrace.getStateSpace().getLoadedMachine();
 		TraceJsonFile traceJsonFile = new TraceJsonFile(persistentTrace, machine, jsonMetadata);
 		traceManager.save(location, traceJsonFile);
 	}
+
 
 	public void save(TraceJsonFile traceFile, Path location) throws IOException {
 		traceManager.save(location, traceFile);
 	}
 
 	public Path save(Trace trace, Machine machine) throws IOException {
-		return save(trace, machine, false);
-	}
-
-	public Path save(Trace trace, Machine machine, boolean recordTests) throws IOException {
 		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION);
 		if (path != null) {
-			save(trace, path, recordTests, "traceReplay");
+			save(trace, path, "traceReplay");
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
 		}
 		return path;
 	}
+
 }

@@ -47,6 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -98,6 +99,7 @@ public class TraceTestView extends Stage {
 
 				final VBox box = new VBox();
 				box.setSpacing(2);
+				transitionBoxes.add(box);
 
 				Node btAddTest = buildAddButton(box, index);
 				box.getChildren().add(btAddTest);
@@ -111,154 +113,6 @@ public class TraceTestView extends Stage {
 			}
 		}
 
-		private Label buildRemoveButton(VBox box, HBox innerBox, Postcondition postcondition, int index) {
-			final Label btRemoveTest = new Label();
-			btRemoveTest.setAlignment(Pos.TOP_CENTER);
-			btRemoveTest.getStyleClass().add("icon-dark");
-			final BindableGlyph minusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE);
-			minusIcon.getStyleClass().add("status-icon");
-			minusIcon.setPrefHeight(fontSize.getFontSize());
-			btRemoveTest.setGraphic(minusIcon);
-			btRemoveTest.setOnMouseClicked(e2 -> {
-				box.getChildren().remove(innerBox);
-				postconditions.get(index).remove(postcondition);
-			});
-			return btRemoveTest;
-		}
-
-		private TextField buildOperationPredicateTextField(Postcondition postcondition) {
-			final TextField textField = new TextField("");
-			HBox.setHgrow(textField, Priority.ALWAYS);
-			textField.setPrefHeight(fontSize.getFontSize() * 1.5);
-			String predicate = ((OperationExecutability) postcondition).getPredicate();
-			textField.setText(predicate);
-			textField.textProperty().addListener((o, from, to) -> {
-				if (to != null) {
-					((OperationExecutability) postcondition).setPredicate(to);
-				}
-			});
-			return textField;
-		}
-
-		private TextField buildPostconditionTextField(Postcondition postcondition) {
-			final TextField textField = new TextField("");
-			HBox.setHgrow(textField, Priority.ALWAYS);
-			textField.setPrefHeight(fontSize.getFontSize() * 1.5);
-
-			switch (postcondition.getKind()) {
-				case PREDICATE: {
-					String predicate = ((PostconditionPredicate) postcondition).getPredicate();
-					textField.setText(predicate);
-					textField.textProperty().addListener((o, from, to) -> {
-						if (to != null) {
-							((PostconditionPredicate) postcondition).setPredicate(to);
-						}
-					});
-					break;
-				}
-				case ENABLEDNESS:
-				case DISABLEDNESS: {
-					String operation = ((OperationExecutability) postcondition).getOperation();
-					textField.setText(operation);
-					textField.textProperty().addListener((o, from, to) -> {
-						if (to != null) {
-							((OperationExecutability) postcondition).setOperation(to);
-						}
-					});
-					break;
-				}
-				default:
-					throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
-			}
-			return textField;
-		}
-
-		private BindableGlyph buildStatusIcon() {
-			final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-			statusIcon.getStyleClass().add("status-icon");
-			statusIcon.setPrefHeight(fontSize.getFontSize());
-			statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
-			return statusIcon;
-		}
-
-		private MenuButton buildAddButton(VBox box, int index) {
-			final MenuButton btAddTest = new MenuButton("", new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
-			btAddTest.getStyleClass().add("icon-dark");
-			MenuItem addPredicate = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.predicate"));
-			MenuItem addOperationEnabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.enabled"));
-			MenuItem addOperationDisabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.disabled"));
-
-			addPredicate.setOnAction(e1 -> {
-				PostconditionPredicate postcondition = new PostconditionPredicate();
-				postconditions.get(index).add(postcondition);
-				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
-				box.getChildren().add(box.getChildren().size() - 1, innerBox);
-			});
-			addOperationEnabled.setOnAction(e1 -> {
-				OperationEnabledness postcondition = new OperationEnabledness();
-				postconditions.get(index).add(postcondition);
-				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
-				box.getChildren().add(box.getChildren().size() - 1, innerBox);
-			});
-			addOperationDisabled.setOnAction(e1 -> {
-				OperationDisabledness postcondition = new OperationDisabledness();
-				postconditions.get(index).add(postcondition);
-				final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
-				box.getChildren().add(box.getChildren().size() - 1, innerBox);
-			});
-
-			btAddTest.getItems().add(addPredicate);
-			btAddTest.getItems().add(addOperationEnabled);
-			btAddTest.getItems().add(addOperationDisabled);
-
-			return btAddTest;
-		}
-
-		private HBox buildInnerBox(VBox box, Postcondition postcondition, boolean isNewBox, int index, int postconditionIndex) {
-			final HBox innerBox = new HBox();
-			innerBox.setSpacing(2);
-
-			String typeString;
-			switch (postcondition.getKind()) {
-				case PREDICATE:
-					typeString = bundle.getString("animation.trace.replay.test.postcondition.predicate");
-					break;
-				case ENABLEDNESS:
-					typeString = bundle.getString("animation.trace.replay.test.postcondition.enabled");
-					break;
-				case DISABLEDNESS:
-					typeString = bundle.getString("animation.trace.replay.test.postcondition.disabled");
-					break;
-				default:
-					throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
-			}
-			final Label typeLabel = new Label(typeString);
-			final TextField postconditionTextField = buildPostconditionTextField(postcondition);
-			final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
-			final BindableGlyph statusIcon = buildStatusIcon();
-
-			if(replayTrace.getPostconditionStatus().isEmpty() || isNewBox) {
-				TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
-			} else {
-				Checked status = replayTrace.getPostconditionStatus().get(index).get(postconditionIndex);
-				replayTrace.checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
-				TraceViewHandler.updateStatusIcon(statusIcon, status);
-			}
-
-			innerBox.getChildren().add(typeLabel);
-			innerBox.getChildren().add(postconditionTextField);
-
-			if(postcondition instanceof OperationExecutability) {
-				final Label withLabel = new Label(bundle.getString("animation.trace.replay.test.postcondition.with"));
-				final TextField predicateTextField = buildOperationPredicateTextField(postcondition);
-				innerBox.getChildren().add(withLabel);
-				innerBox.getChildren().add(predicateTextField);
-			}
-
-			innerBox.getChildren().add(statusIcon);
-			innerBox.getChildren().add(btRemoveTest);
-			return innerBox;
-		}
 	}
 
 	private final class TransitionDescriptionCell extends TableCell<PersistentTransition, String> {
@@ -319,6 +173,8 @@ public class TraceTestView extends Stage {
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
 
 	private final List<String> descriptions = new ArrayList<>();
+
+	private final List<VBox> transitionBoxes = new ArrayList<>();
 
 	@Inject
 	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize,
@@ -419,6 +275,175 @@ public class TraceTestView extends Stage {
 			}
 		}
 
+	}
+
+	@FXML
+	public void recordPostconditions() {
+		List<PersistentTransition> transitions = traceTableView.getItems();
+		for(int i = 0; i < transitions.size(); i++) {
+			PersistentTransition transition = transitions.get(i);
+			for(Map.Entry<String, String> entry : transition.getDestinationStateVariables().entrySet()) {
+				List<Postcondition> postconditionsForTransition = postconditions.get(i);
+				String key = entry.getKey();
+				String value = entry.getValue();
+				PostconditionPredicate postcondition = new PostconditionPredicate(String.format("%s = %s", key, value));
+				if(!postconditionsForTransition.contains(postcondition)) {
+					postconditionsForTransition.add(postcondition);
+					VBox box = transitionBoxes.get(i+1);
+					final HBox innerBox = buildInnerBox(box, postcondition, true, i, postconditionsForTransition.size());
+					box.getChildren().add(box.getChildren().size() - 1, innerBox);
+				}
+			}
+		}
+	}
+
+	private Label buildRemoveButton(VBox box, HBox innerBox, Postcondition postcondition, int index) {
+		final Label btRemoveTest = new Label();
+		btRemoveTest.setAlignment(Pos.TOP_CENTER);
+		btRemoveTest.getStyleClass().add("icon-dark");
+		final BindableGlyph minusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.MINUS_CIRCLE);
+		minusIcon.getStyleClass().add("status-icon");
+		minusIcon.setPrefHeight(fontSize.getFontSize());
+		btRemoveTest.setGraphic(minusIcon);
+		btRemoveTest.setOnMouseClicked(e2 -> {
+			box.getChildren().remove(innerBox);
+			postconditions.get(index).remove(postcondition);
+		});
+		return btRemoveTest;
+	}
+
+	private TextField buildOperationPredicateTextField(Postcondition postcondition) {
+		final TextField textField = new TextField("");
+		HBox.setHgrow(textField, Priority.ALWAYS);
+		textField.setPrefHeight(fontSize.getFontSize() * 1.5);
+		String predicate = ((OperationExecutability) postcondition).getPredicate();
+		textField.setText(predicate);
+		textField.textProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				((OperationExecutability) postcondition).setPredicate(to);
+			}
+		});
+		return textField;
+	}
+
+	private TextField buildPostconditionTextField(Postcondition postcondition) {
+		final TextField textField = new TextField("");
+		HBox.setHgrow(textField, Priority.ALWAYS);
+		textField.setPrefHeight(fontSize.getFontSize() * 1.5);
+
+		switch (postcondition.getKind()) {
+			case PREDICATE: {
+				String predicate = ((PostconditionPredicate) postcondition).getPredicate();
+				textField.setText(predicate);
+				textField.textProperty().addListener((o, from, to) -> {
+					if (to != null) {
+						((PostconditionPredicate) postcondition).setPredicate(to);
+					}
+				});
+				break;
+			}
+			case ENABLEDNESS:
+			case DISABLEDNESS: {
+				String operation = ((OperationExecutability) postcondition).getOperation();
+				textField.setText(operation);
+				textField.textProperty().addListener((o, from, to) -> {
+					if (to != null) {
+						((OperationExecutability) postcondition).setOperation(to);
+					}
+				});
+				break;
+			}
+			default:
+				throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
+		}
+		return textField;
+	}
+
+	private BindableGlyph buildStatusIcon() {
+		final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		statusIcon.getStyleClass().add("status-icon");
+		statusIcon.setPrefHeight(fontSize.getFontSize());
+		statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
+		return statusIcon;
+	}
+
+	private MenuButton buildAddButton(VBox box, int index) {
+		final MenuButton btAddTest = new MenuButton("", new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
+		btAddTest.getStyleClass().add("icon-dark");
+		MenuItem addPredicate = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.predicate"));
+		MenuItem addOperationEnabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.enabled"));
+		MenuItem addOperationDisabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.disabled"));
+
+		addPredicate.setOnAction(e1 -> {
+			PostconditionPredicate postcondition = new PostconditionPredicate();
+			postconditions.get(index).add(postcondition);
+			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
+			box.getChildren().add(box.getChildren().size() - 1, innerBox);
+		});
+		addOperationEnabled.setOnAction(e1 -> {
+			OperationEnabledness postcondition = new OperationEnabledness();
+			postconditions.get(index).add(postcondition);
+			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
+			box.getChildren().add(box.getChildren().size() - 1, innerBox);
+		});
+		addOperationDisabled.setOnAction(e1 -> {
+			OperationDisabledness postcondition = new OperationDisabledness();
+			postconditions.get(index).add(postcondition);
+			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
+			box.getChildren().add(box.getChildren().size() - 1, innerBox);
+		});
+
+		btAddTest.getItems().add(addPredicate);
+		btAddTest.getItems().add(addOperationEnabled);
+		btAddTest.getItems().add(addOperationDisabled);
+
+		return btAddTest;
+	}
+
+	private HBox buildInnerBox(VBox box, Postcondition postcondition, boolean isNewBox, int index, int postconditionIndex) {
+		final HBox innerBox = new HBox();
+		innerBox.setSpacing(2);
+
+		String typeString;
+		switch (postcondition.getKind()) {
+			case PREDICATE:
+				typeString = bundle.getString("animation.trace.replay.test.postcondition.predicate");
+				break;
+			case ENABLEDNESS:
+				typeString = bundle.getString("animation.trace.replay.test.postcondition.enabled");
+				break;
+			case DISABLEDNESS:
+				typeString = bundle.getString("animation.trace.replay.test.postcondition.disabled");
+				break;
+			default:
+				throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
+		}
+		final Label typeLabel = new Label(typeString);
+		final TextField postconditionTextField = buildPostconditionTextField(postcondition);
+		final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
+		final BindableGlyph statusIcon = buildStatusIcon();
+
+		if(replayTrace.getPostconditionStatus().isEmpty() || isNewBox) {
+			TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
+		} else {
+			Checked status = replayTrace.getPostconditionStatus().get(index).get(postconditionIndex);
+			replayTrace.checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
+			TraceViewHandler.updateStatusIcon(statusIcon, status);
+		}
+
+		innerBox.getChildren().add(typeLabel);
+		innerBox.getChildren().add(postconditionTextField);
+
+		if(postcondition instanceof OperationExecutability) {
+			final Label withLabel = new Label(bundle.getString("animation.trace.replay.test.postcondition.with"));
+			final TextField predicateTextField = buildOperationPredicateTextField(postcondition);
+			innerBox.getChildren().add(withLabel);
+			innerBox.getChildren().add(predicateTextField);
+		}
+
+		innerBox.getChildren().add(statusIcon);
+		innerBox.getChildren().add(btRemoveTest);
+		return innerBox;
 	}
 
 }
