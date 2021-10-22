@@ -99,7 +99,7 @@ public class TraceTestView extends Stage {
 
 				final VBox box = new VBox();
 				box.setSpacing(2);
-				transitionBoxes.add(box);
+				transitionBoxes.set(index, box);
 
 				Node btAddTest = buildAddButton(box, index);
 				box.getChildren().add(btAddTest);
@@ -233,12 +233,18 @@ public class TraceTestView extends Stage {
 		this.replayTrace = replayTrace;
 		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 		traceTableView.getItems().clear();
+		transitionBoxes.clear();
 		if(persistentTrace != null) {
 			traceTableView.getItems().addAll(persistentTrace.getTransitionList());
-			persistentTrace.getTransitionList().forEach(transition -> {
+			for(int i = 0; i < persistentTrace.getTransitionList().size(); i++) {
+				PersistentTransition transition = persistentTrace.getTransitionList().get(i);
 				postconditions.add(transition.getPostconditions());
 				descriptions.add(transition.getDescription());
-			});
+				VBox box = new VBox();
+				Node btAddTest = buildAddButton(box, i);
+				box.getChildren().add(btAddTest);
+				transitionBoxes.add(box);
+			}
 		}
 	}
 
@@ -289,7 +295,7 @@ public class TraceTestView extends Stage {
 				PostconditionPredicate postcondition = new PostconditionPredicate(String.format("%s = %s", key, value));
 				if(!postconditionsForTransition.contains(postcondition)) {
 					postconditionsForTransition.add(postcondition);
-					VBox box = transitionBoxes.get(i+1);
+					VBox box = transitionBoxes.get(i);
 					final HBox innerBox = buildInnerBox(box, postcondition, true, i, postconditionsForTransition.size());
 					box.getChildren().add(box.getChildren().size() - 1, innerBox);
 				}
@@ -423,7 +429,7 @@ public class TraceTestView extends Stage {
 		final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
 		final BindableGlyph statusIcon = buildStatusIcon();
 
-		if(replayTrace.getPostconditionStatus().isEmpty() || isNewBox) {
+		if(replayTrace.getPostconditionStatus().isEmpty() || replayTrace.getPostconditionStatus().get(index).isEmpty() || isNewBox) {
 			TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
 		} else {
 			Checked status = replayTrace.getPostconditionStatus().get(index).get(postconditionIndex);
