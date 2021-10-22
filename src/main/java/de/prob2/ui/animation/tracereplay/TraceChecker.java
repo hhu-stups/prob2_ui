@@ -92,7 +92,7 @@ public class TraceChecker implements ITraceChecker {
 			if (setCurrentAnimation) {
 				// set the current trace if no error has occurred. Otherwise leave the decision to the user
 				if (replayTrace.getErrorMessageBundleKey() != null) {
-					showTraceReplayCompleteFailed(trace, replayInformation);
+					showTraceReplayCompleteFailed(trace, replayTrace);
 				} else {
 					currentTrace.set(trace);
 				}
@@ -251,19 +251,17 @@ public class TraceChecker implements ITraceChecker {
 	}
 
 
-	private void showTraceReplayCompleteFailed(Trace trace, Map<String, Object> replayInformation) {
-		ReplayTrace replayTrace = (ReplayTrace) replayInformation.get("replayTrace");
-		final Trace copyFailedTrace = trace;
+	private void showTraceReplayCompleteFailed(Trace trace, final ReplayTrace replayTrace) {
 		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 		Platform.runLater(() -> {
 			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, replayTrace.getErrorMessageParams());
 
 			stageManager.register(alert);
-			alert.setLineNumber(lineNumber(replayTrace, copyFailedTrace.size()));
-			alert.setAttemptedReplayOrLostTrace(copyFailedTrace);
+			alert.setLineNumber(lineNumber(replayTrace, trace.size()));
+			alert.setAttemptedReplayOrLostTrace(trace);
 			alert.setStoredTrace(persistentTrace);
 			alert.setHistory(currentTrace.get());
-			currentTrace.set(copyFailedTrace);
+			currentTrace.set(trace);
 			alert.setErrorMessage();
 		});
 	}
