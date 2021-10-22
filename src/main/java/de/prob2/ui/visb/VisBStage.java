@@ -201,8 +201,6 @@ public class VisBStage extends Stage {
 		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> loadVisBFileFromMachine(currentProject.getCurrentMachine(), to));
 
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
-		saveTraceAndAddTestsItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTraceAndAddTests(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
-		saveTraceAndRecordTestsItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTraceAndRecordTests(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
 		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
 		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
 
