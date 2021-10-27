@@ -23,6 +23,7 @@ import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -78,7 +79,7 @@ public final class HistoryView extends VBox {
 	@FXML
 	private Button openTraceSelectionButton;
 	@FXML
-	private Button saveTraceButton;
+	private MenuButton saveTraceButton;
 	@FXML
 	private HelpButton helpButton;
 
@@ -144,6 +145,12 @@ public final class HistoryView extends VBox {
 	private void saveTrace() {
 		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
 	}
+
+	@FXML
+	private void saveTraceAsTable() {
+		injector.getInstance(TraceSaver.class).saveTraceAsTable(this.getScene().getWindow());
+	}
+
 
 	@FXML
 	private void openTraceSelection() {

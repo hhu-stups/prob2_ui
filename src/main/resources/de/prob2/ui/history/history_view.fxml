@@ -34,14 +34,19 @@
 				<Tooltip text="%common.buttons.openTraceSelection" />
 			</tooltip>
 		</Button>
-		<Button fx:id="saveTraceButton" onAction="#saveTrace">
+		<MenuButton fx:id="saveTraceButton">
 			<graphic>
 				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 			</graphic>
 			<tooltip>
 				<Tooltip text="%common.buttons.saveTrace" />
 			</tooltip>
-		</Button>
+			<items>
+				<MenuItem fx:id="saveTraceItem" text="%common.buttons.saveTrace" onAction="#saveTrace"/>
+				<MenuItem fx:id="saveTraceAsTableItem" text="%history.buttons.saveAsTable" onAction="#saveTraceAsTable"/>
+			</items>
+		</MenuButton>
+
 		<HelpButton fx:id="helpButton" />
 	</HBox>
 	<TableView fx:id="historyTableView" prefHeight="200.0" VBox.vgrow="ALWAYS">

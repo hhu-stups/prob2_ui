@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,11 +19,13 @@ import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -39,6 +42,7 @@ public class TraceFileHandler extends ProBFileHandler {
 	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
 	public static final String SIMULATION_TRACE_PREFIX = "Simulation_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
+	public static final String TRACE_TABLE_EXTENSION = "csv";
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 
@@ -186,6 +190,23 @@ public class TraceFileHandler extends ProBFileHandler {
 		if (path != null) {
 			save(trace, path, "traceReplay");
 			machine.addTraceFile(currentProject.getLocation().relativize(path));
+		}
+		return path;
+	}
+
+	public Path saveAsTable(Trace trace) throws IOException {
+		int i = 1;
+		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_TABLE_EXTENSION);
+		if (path != null) {
+			List<String> rows = new ArrayList<>();
+			rows.add("Position,Transition");
+			for(Transition transition : trace.getTransitionList()) {
+				String name = OperationItem.forTransitionFast(trace.getStateSpace(), transition).toPrettyString(true);
+				String row = String.format("%s,%s", i, name);
+				rows.add(row);
+				i++;
+			}
+			Files.write(path, String.join("\n", rows).getBytes());
 		}
 		return path;
 	}

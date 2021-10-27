@@ -3,9 +3,11 @@ package de.prob2.ui.animation.tracereplay;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceViewHandler;
+import javafx.scene.control.Alert;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,21 @@ public class TraceSaver {
 				alert.setAttemptedReplayOrLostTrace(possiblyLostTrace);
 				// TODO set history
 				alert.setErrorMessage();
+			}
+		}
+		return null;
+	}
+
+	public Path saveTraceAsTable(Window window) {
+		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
+		Trace possiblyLostTrace = currentTrace.get();
+		if (currentTrace.get() != null) {
+			try {
+				return traceSaver.saveAsTable(possiblyLostTrace);
+			} catch (Exception e) {
+				final Alert alert = injector.getInstance(StageManager.class).makeAlert(Alert.AlertType.WARNING, "simulation.error.header.invalid", "simulation.error.body.invalid");
+				alert.initOwner(window);
+				alert.showAndWait();
 			}
 		}
 		return null;
