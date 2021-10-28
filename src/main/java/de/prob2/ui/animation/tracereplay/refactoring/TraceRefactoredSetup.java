@@ -139,9 +139,7 @@ public class TraceRefactoredSetup {
 		stageManager.register(progressStage, null);
 		progressStage.initOwner(stageManager.getMainStage().getOwner());
 		progressStage.initModality(Modality.WINDOW_MODAL);
-		progressStage.setOnCloseRequest(event -> {
-			traceCheckerProcess.interrupt();
-		});
+		progressStage.setOnCloseRequest(event -> traceCheckerProcess.interrupt());
 
 
 		Runnable traceCheckerRunnable = () -> {

@@ -1,5 +1,8 @@
 package de.prob2.ui.animation.tracereplay.refactoring;
 
+import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.scripting.ClassicalBFactory;
+import de.prob.scripting.EventBFactory;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.StageManager;
@@ -56,7 +59,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 
 	@FXML
 	private void initialize() {
-		List<String> classicalB = Arrays.asList("mch", "ref", "imp");
+		List<String> fileExtensions = Arrays.asList(EventBFactory.RODIN_MACHINE_EXTENSION, EventBFactory.ATELIER_B_EXTENSION, ClassicalBFactory.CLASSICAL_B_MACHINE_EXTENSION, ClassicalBFactory.CLASSICAL_B_REFINEMENT_EXTENSION);
 
 		ButtonType buttonTypeA = new ButtonType("Abort", ButtonBar.ButtonData.CANCEL_CLOSE);
 		ButtonType buttonTypeS = new ButtonType("Start", ButtonBar.ButtonData.APPLY);
@@ -66,11 +69,8 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 
 		this.getDialogPane().lookupButton(buttonTypeS).disableProperty().setValue(true);
 
-		Dialog<RefactorSetup> dialog = this;
 
-
-
-		options.setItems(FXCollections.observableArrayList(Arrays.asList("Refactor Trace", "Check Refinement", "Conditional Replay")));
+		options.setItems(FXCollections.observableArrayList(Arrays.asList("Refactor Trace", "Refine Trace", "Conditional Replay")));
 		options.setValue("Select Action");
 
 		options.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
@@ -111,7 +111,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle("Choose: " + firstMachine.getText());
 			fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-			fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.classicalB", classicalB));
+			fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.classicalB", fileExtensions));
 			alpha.setValue(fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent()));
 			if(alpha.getValue() != null){
 				firstMachine.textProperty().setValue(firstMachine.getText() + ": " + alpha.getValue().getFileName());
@@ -122,7 +122,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle("Choose: " + secondMachine.getText());
 			fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-			fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.classicalB", classicalB));
+			fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.classicalB", fileExtensions));
 			beta.setValue(fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent()));
 			if(beta.getValue() != null){
 				secondMachine.textProperty().setValue(secondMachine.getText() + ": " + beta.getValue().getFileName());
