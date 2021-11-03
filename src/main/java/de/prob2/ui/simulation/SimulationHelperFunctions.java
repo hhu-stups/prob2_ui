@@ -2,7 +2,13 @@ package de.prob2.ui.simulation;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.eventb.EventBPackageModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
@@ -19,11 +25,28 @@ import java.util.Map;
 
 public class SimulationHelperFunctions {
 
+	public enum EvaluationMode {
+		CLASSICAL_B, EVENT_B
+	}
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimulationHelperFunctions.class);
 
-	public static AbstractEvalResult evaluateForSimulation(State state, String formula) {
-		// Note: Rodin parser does not have IF-THEN-ELSE nor REAL
-		return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
+	public static EvaluationMode extractMode(AbstractModel model) {
+		// TODO: Handle mode for other formalisms
+		return model instanceof ClassicalBModel ? SimulationHelperFunctions.EvaluationMode.CLASSICAL_B :
+				model instanceof EventBModel? SimulationHelperFunctions.EvaluationMode.EVENT_B : null;
+	}
+
+	public static AbstractEvalResult evaluateForSimulation(State state, String formula, EvaluationMode mode) {
+		// TODO: Handle mode for other formalisms
+		switch (mode) {
+			case CLASSICAL_B:
+				return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
+			case EVENT_B:
+				return state.eval(new EventB(formula, FormulaExpand.TRUNCATE));
+			default:
+				throw new RuntimeException("Evaluation mode is not supported");
+		}
 	}
 
 	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, File file) {

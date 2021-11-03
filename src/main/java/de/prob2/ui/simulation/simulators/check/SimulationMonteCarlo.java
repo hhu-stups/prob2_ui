@@ -8,6 +8,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationError;
+import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.simulators.Simulator;
 import javafx.application.Platform;
@@ -116,7 +117,8 @@ public class SimulationMonteCarlo extends Simulator {
 		} else if(additionalInformation.containsKey("ENDING_PREDICATE")) {
 			String predicate = (String) additionalInformation.get("ENDING_PREDICATE");
 			State state = trace.getCurrentState();
-			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate);
+			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate, mode);
 			if("TRUE".equals(evalResult)) {
 				return true;
 			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
@@ -142,7 +144,8 @@ public class SimulationMonteCarlo extends Simulator {
 		} else if(additionalInformation.containsKey("STARTING_PREDICATE")) {
 			String predicate = (String) additionalInformation.get("STARTING_PREDICATE");
 			State state = trace.getCurrentState();
-			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate);
+			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate, mode);
 			if("TRUE".equals(evalResult)) {
 				setStartingInformation();
 			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {

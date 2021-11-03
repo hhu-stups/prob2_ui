@@ -2,6 +2,8 @@ package de.prob2.ui.simulation.simulators;
 
 
 import de.prob.formula.PredicateBuilder;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -28,10 +30,13 @@ public class SimulationEventHandler {
 
 	private final Simulator simulator;
 
+	private final CurrentTrace currentTrace;
+
 
 	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace) {
 		this.simulator = simulator;
 		this.cache = new SimulatorCache();
+		this.currentTrace = currentTrace;
 		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> cache.clear());
 	}
 
@@ -40,9 +45,10 @@ public class SimulationEventHandler {
 			return "1=1";
 		}
 		PredicateBuilder predicateBuilder = new PredicateBuilder();
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		for(String key : values.keySet()) {
 			String value = values.get(key);
-			String evalResult  = cache.readValueWithCaching(currentState, value);
+			String evalResult  = cache.readValueWithCaching(currentState, value, mode);
 			predicateBuilder.add(key, evalResult);
 		}
 		return predicateBuilder.toString();
@@ -77,11 +83,12 @@ public class SimulationEventHandler {
 			double probabilityMinimum = 0.0;
 			Map<String, String> probabilityValueMap = probabilityMap.get(variable);
 			double randomDouble = random.nextDouble();
+			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 			for(String value : probabilityValueMap.keySet()) {
 				String valueProbability = probabilityValueMap.get(value);
-				double evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, valueProbability));
+				double evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, valueProbability, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
 				if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
-					String evalValue = cache.readValueWithCaching(currentState, value);
+					String evalValue = cache.readValueWithCaching(currentState, value, mode);
 					values.put(variable, evalValue);
 				}
 				probabilityMinimum += evalProbability;
@@ -95,16 +102,28 @@ public class SimulationEventHandler {
 
 	private String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
 		String newExpression;
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
 			newExpression = expression;
 		} else {
-			newExpression = String.format("LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+			switch (mode) {
+				case CLASSICAL_B:
+					newExpression = String.format("LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+					break;
+				case EVENT_B:
+					newExpression = String.format("{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
+					break;
+				default:
+					throw new RuntimeException("Evaluation mode is not supported.");
+			}
+
 		}
-		return cache.readValueWithCaching(state, newExpression);
+		return cache.readValueWithCaching(state, newExpression, mode);
 	}
 
 	private String buildPredicateForTransition(State state, Activation activation) {
-		String additionalGuardsResult = activation.getAdditionalGuards() == null ? "TRUE" : cache.readValueWithCaching(state, activation.getAdditionalGuards());
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		String additionalGuardsResult = activation.getAdditionalGuards() == null ? "TRUE" : cache.readValueWithCaching(state, activation.getAdditionalGuards(), mode);
 		if("FALSE".equals(additionalGuardsResult)) {
 			return "1=2";
 		}
@@ -216,7 +235,7 @@ public class SimulationEventHandler {
 		double randomDouble = random.nextDouble();
 		for(String id : activationChoiceConfiguration.getActivations().keySet()) {
 			ActivationConfiguration activationConfiguration = simulator.getActivationConfigurationMap().get(id);
-			double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, activationChoiceConfiguration.getActivations().get(id)));
+			double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, activationChoiceConfiguration.getActivations().get(id), SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
 			if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
 				handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
 			}

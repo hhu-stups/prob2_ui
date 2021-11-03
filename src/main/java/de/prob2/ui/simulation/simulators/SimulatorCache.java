@@ -22,7 +22,7 @@ public class SimulatorCache {
 
 	private final Map<String, Set<String>> enabledOperationsCache = new HashMap<>();
 
-	public String readValueWithCaching(State bState, String expression) {
+	public String readValueWithCaching(State bState, String expression, SimulationHelperFunctions.EvaluationMode mode) {
 		if(valuesCache.keySet().size() > MAXIMUM_CACHE_SIZE) {
 			valuesCache.clear();
 		}
@@ -38,7 +38,7 @@ public class SimulatorCache {
 			if(!valuesCache.containsKey(stateID)) {
 				valuesCache.put(stateID, new HashMap<>());
 			}
-			AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, expression);
+			AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, expression, mode);
 			value = evalResult.toString();
 			valuesCache.get(stateID).put(expression, value);
 		}

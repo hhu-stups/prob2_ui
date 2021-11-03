@@ -6,6 +6,7 @@ import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 
 import java.util.Map;
@@ -63,11 +64,12 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 	public void checkPredicateInvariant(Trace trace) {
 		boolean invariantOk = true;
 		String invariant = (String) additionalInformation.get("PREDICATE");
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
-				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, invariant);
+				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, invariant, mode);
 				if (i >= startAtStep && "FALSE".equals(evalResult)) {
 					invariantOk = false;
 					break;
@@ -86,7 +88,8 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 		Transition transition = trace.getTransitionList().get(size - 1);
 		State destination = transition.getDestination();
 		if(destination.isInitialised()) {
-			String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, finalPredicate);
+			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, finalPredicate, mode);
 			if ("FALSE".equals(evalResult)) {
 				predicateOk = false;
 			}
@@ -99,11 +102,12 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 	public void checkPredicateEventually(Trace trace) {
 		boolean predicateOk = false;
 		String predicate = (String) additionalInformation.get("PREDICATE");
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
-				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, predicate);
+				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, predicate, mode);
 				if (i >= startAtStep && "TRUE".equals(evalResult)) {
 					predicateOk = true;
 					break;
