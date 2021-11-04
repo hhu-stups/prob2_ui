@@ -477,6 +477,11 @@ public class SimulatorStage extends Stage {
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 						Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 					}
+				} else {
+					Platform.runLater(() -> {
+						stopSimulator(realTimeSimulator);
+						loadSimulationFromMachine(currentProject.getCurrentMachine());
+					});
 				}
 			}
 		}, 100, 100);

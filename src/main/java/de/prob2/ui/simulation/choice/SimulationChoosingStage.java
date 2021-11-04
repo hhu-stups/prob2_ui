@@ -79,7 +79,7 @@ public class SimulationChoosingStage extends Stage {
 	private SimulationItem lastItem;
 
 	@Inject
-	public SimulationChoosingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject,
+	public SimulationChoosingStage(final StageManager stageManager, final CurrentProject currentProject,
 								   final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;

@@ -60,6 +60,8 @@ public abstract class Simulator {
 		this.currentTrace = currentTrace;
 		this.simulationEventHandler = new SimulationEventHandler(this, currentTrace);
 		this.time = new SimpleIntegerProperty(0);
+		this.stepCounter = 0;
+		this.delay = 0;
 		this.noActivationQueued = false;
 
 		this.traceListener = (observable, from, to) -> {
@@ -83,6 +85,7 @@ public abstract class Simulator {
 	public void resetSimulator() {
 		this.configurationToActivation = new HashMap<>();
 		this.activationConfigurationMap = new HashMap<>();
+		this.activationConfigurationsSorted = new ArrayList<>();
 		this.operationToActivations = new HashMap<>();
 		this.timestamps = new ArrayList<>();
 
