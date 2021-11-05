@@ -9,8 +9,11 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 public class Scheduler {
@@ -20,6 +23,8 @@ public class Scheduler {
 	private RealTimeSimulator realTimeSimulator;
 
 	private Timer timer;
+
+	private AtomicInteger runningTasks;
 
 	private final CurrentTrace currentTrace;
 
@@ -31,6 +36,7 @@ public class Scheduler {
 	public Scheduler(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
 		super();
 		this.timer = new Timer(true);
+		this.runningTasks = new AtomicInteger(0);
 		this.currentTrace = currentTrace;
 		this.runningProperty = new SimpleBooleanProperty(false);
 		this.executingOperationProperty = new SimpleBooleanProperty(false);
@@ -59,18 +65,18 @@ public class Scheduler {
 	}
 
 	private void startSimulationLoop() {
-		timer.schedule(new TimerTask() {
+		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				if (realTimeSimulator.isRunning()) {
+				if (realTimeSimulator.isRunning() && runningTasks.get() == 1) {
 					realTimeSimulator.simulate();
-				}
-				if (runningProperty.get()) {
 					startSimulationLoop();
 				}
-
+				runningTasks.getAndDecrement();
 			}
-		}, realTimeSimulator.getDelay());
+		};
+		runningTasks.getAndIncrement();
+		timer.schedule(task, realTimeSimulator.getDelay());
 	}
 
 	public void setSimulator(RealTimeSimulator realTimeSimulator) {
@@ -82,7 +88,7 @@ public class Scheduler {
 		runningProperty.set(false);
 	}
 
-	public BooleanProperty runningPropertyProperty() {
+	public BooleanProperty runningProperty() {
 		return runningProperty;
 	}
 
@@ -105,7 +111,7 @@ public class Scheduler {
 
 	public void stopTimer() {
 		stop();
-		timer.purge();
+		timer.cancel();
 		timer = null;
 	}
 

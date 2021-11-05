@@ -41,7 +41,7 @@ public class RealTimeSimulator extends Simulator {
 	}
 
 	public BooleanProperty runningProperty() {
-		return scheduler.runningPropertyProperty();
+		return scheduler.runningProperty();
 	}
 
 	public boolean isRunning() {

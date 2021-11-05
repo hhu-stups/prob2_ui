@@ -235,6 +235,8 @@ public class SimulatorStage extends Stage {
 
 	private final ObjectProperty<RealTimeSimulator> lastSimulator;
 
+	private ChangeListener<Number> timeListener;
+
 	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 
 	@Inject
@@ -379,6 +381,9 @@ public class SimulatorStage extends Stage {
 		}
 		realTimeSimulator.stop();
 		cancelTimer();
+		if(timeListener != null) {
+			realTimeSimulator.timeProperty().removeListener(timeListener);
+		}
 	}
 
 	@FXML
@@ -453,7 +458,7 @@ public class SimulatorStage extends Stage {
 		cancelTimer();
 		lastSimulator.set(realTimeSimulator);
 		List<Boolean> firstStart = new ArrayList<>(Collections.singletonList(true));
-		realTimeSimulator.timeProperty().addListener((observable, from, to) -> {
+		timeListener = (observable, from, to) -> {
 			if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
 				time = to.intValue();
 				if(time == 0) {
@@ -463,7 +468,8 @@ public class SimulatorStage extends Stage {
 					Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
 				}
 			}
-		});
+		};
+		realTimeSimulator.timeProperty().addListener(timeListener);
 		this.timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			@Override
