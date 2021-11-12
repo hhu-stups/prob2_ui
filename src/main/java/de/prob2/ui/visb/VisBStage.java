@@ -41,6 +41,8 @@ import de.prob2.ui.sharedviews.TraceSelectionView;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 
+import de.prob2.ui.visb.visbobjects.VisBVisualisation;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
@@ -183,31 +185,13 @@ public class VisBStage extends Stage {
 		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
 		this.titleProperty().bind(Bindings.createStringBinding(() -> visBController.getVisBPath() == null ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBController.getVisBPath()).toString()), visBController.visBPathProperty()));
 
-		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> visBController.setVisBPath(null));
-		//Load VisB file from machine, when window is opened and set listener on the current machine
-		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> {
-			updateUIOnMachine(currentProject.getCurrentMachine());
-			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
-		});
-
-		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
-
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			openTraceSelectionButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().unbind();
 			updateUIOnMachine(to);
-		});
+		};
 
-		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> loadVisBFileFromMachine(currentProject.getCurrentMachine(), to));
-
-		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
-		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
-		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
-
-		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-		this.webView.getEngine().setOnError(this::treatJavascriptError);
-
-		this.visBController.visBVisualisationProperty().addListener((o, from, to) -> {
+		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
 			if (to == null) {
 				this.clear();
 			} else {
@@ -225,7 +209,34 @@ public class VisBStage extends Stage {
 					}
 				});
 			}
+		};
+
+		ChangeListener<? super StateSpace> stateSpaceListener = (o, from, to) -> loadVisBFileFromMachine(currentProject.getCurrentMachine(), to);
+
+		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
+			this.currentProject.currentMachineProperty().removeListener(machineListener);
+			this.visBController.visBVisualisationProperty().removeListener(visBListener);
+			this.currentTrace.stateSpaceProperty().removeListener(stateSpaceListener);
+			visBController.setVisBPath(null);
 		});
+		//Load VisB file from machine, when window is opened and set listener on the current machine
+		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> {
+			this.currentProject.currentMachineProperty().addListener(machineListener);
+			this.visBController.visBVisualisationProperty().addListener(visBListener);
+			this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
+			updateUIOnMachine(currentProject.getCurrentMachine());
+			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+		});
+
+		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
+
+		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow(), TraceReplayErrorAlert.Trigger.TRIGGER_VISB));
+		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
+		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
+
+		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+		this.webView.getEngine().setOnError(this::treatJavascriptError);
+
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
 			if (change.wasAdded()) {
 				try {
