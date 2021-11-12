@@ -2,7 +2,6 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Scanner;
@@ -78,16 +77,19 @@ public class TraceChecker {
 			return;
 		}
 		replayTrace.setChecked(Checked.NOT_CHECKED);
+		// ReplayTraceFileCommand doesn't support progress updates yet,
+		// so set an indeterminate status for now.
+		// We cannot use -1, because it is already used to say that no replay is currently running
+		// (this is special-cased in TraceViewHandler).
+		replayTrace.setProgress(-2);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		final Path traceFile = injector.getInstance(CurrentProject.class).getLocation().resolve(replayTrace.getLocation());
 		Thread replayThread = new Thread(() -> {
 			try {
 				final ReplayTraceFileCommand cmd = new ReplayTraceFileCommand(traceFile.toString());
 				stateSpace.execute(cmd);
-				Platform.runLater(() -> {
-					replayTrace.setChecked(Checked.SUCCESS); // TODO
-					replayTrace.setPostconditionStatus(Collections.emptyList()); // TODO
-				});
+				// TODO ReplayTraceFileCommand doesn't check postconditions yet!
+				Platform.runLater(() -> replayTrace.setChecked(Checked.SUCCESS));
 				Trace trace = cmd.getTrace(stateSpace);
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
@@ -100,8 +102,7 @@ public class TraceChecker {
 				}
 			} catch (ProBError e) {
 				Platform.runLater(() -> {
-					replayTrace.setChecked(Checked.FAIL); // TODO
-					replayTrace.setPostconditionStatus(Collections.emptyList()); // TODO
+					replayTrace.setChecked(Checked.FAIL);
 					stageManager.makeExceptionAlert(
 						e,
 						"animation.tracereplay.alerts.traceReplayError.header",
