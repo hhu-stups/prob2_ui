@@ -395,6 +395,7 @@ public class VisBStage extends Stage {
 		if(path != null) {
 			clear();
 			visBController.setVisBPath(path);
+			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
 		}
 	}
 
