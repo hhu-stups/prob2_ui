@@ -246,8 +246,8 @@ final class BLexerSyntaxHighlighting {
 			TRestrictHeadSequence.class, TRestrictTailSequence.class
 			); // short ASCII/Unicode operators
 		addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class,
-		    TImplies.class, TLogicalOr.class, TEquivalence.class, TNot.class,
-		    TBoolCast.class, TBfalse.class); // , TBtrue.class
+			TImplies.class, TLogicalOr.class, TEquivalence.class, TNot.class,
+			TBoolCast.class, TBfalse.class); // , TBtrue.class
 		addBTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
 			TGreaterEqual.class, TLessEqual.class,
 			TNotEqual.class, TGreater.class, TLess.class, 
