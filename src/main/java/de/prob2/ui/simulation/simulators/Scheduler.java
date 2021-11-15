@@ -24,7 +24,7 @@ public class Scheduler {
 
 	private Timer timer;
 
-	private AtomicInteger runningTasks;
+	private final AtomicInteger runningTasks;
 
 	private final CurrentTrace currentTrace;
 
@@ -73,6 +73,9 @@ public class Scheduler {
 					startSimulationLoop();
 				}
 				runningTasks.getAndDecrement();
+				if(realTimeSimulator.hasNoActivationQueued()) {
+					runningTasks.set(0);
+				}
 			}
 		};
 		runningTasks.getAndIncrement();

@@ -272,4 +272,8 @@ public abstract class Simulator {
 	public Map<String, Set<String>> getOperationToActivations() {
 		return operationToActivations;
 	}
+
+	public boolean hasNoActivationQueued() {
+		return noActivationQueued;
+	}
 }
