@@ -491,7 +491,7 @@
 }
 
 .editor .editor_identifier {
-	-fx-fill:black; // alternatives: darkslateblue, darkmagenta
+	-fx-fill:black; /* alternatives: darkslateblue, darkmagenta */
 }
 
 .editor .editor_assignments {

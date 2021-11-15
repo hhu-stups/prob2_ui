@@ -22,7 +22,6 @@ import de.be4.classicalb.core.parser.node.TAssign;
 import de.be4.classicalb.core.parser.node.TBe;
 import de.be4.classicalb.core.parser.node.TBegin;
 import de.be4.classicalb.core.parser.node.TBfalse;
-// import de.be4.classicalb.core.parser.node.TBtrue; // not found ??!!
 import de.be4.classicalb.core.parser.node.TBool;
 import de.be4.classicalb.core.parser.node.TBoolCast;
 import de.be4.classicalb.core.parser.node.TBtree;
