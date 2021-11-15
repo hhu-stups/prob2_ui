@@ -506,6 +506,13 @@
 	-fx-fill:#5883be;
 }
 
+.editor .editor_predicates {
+	-fx-fill:royalblue;
+}
+.editor .editor_operators {
+	-fx-fill:purple;
+}
+
 .editor .editor_types {
 	-fx-fill:darkred;
 }
