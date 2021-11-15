@@ -57,6 +57,7 @@ import de.be4.classicalb.core.parser.node.TFalse;
 import de.be4.classicalb.core.parser.node.TFather;
 import de.be4.classicalb.core.parser.node.TFin;
 import de.be4.classicalb.core.parser.node.TFin1;
+import de.be4.classicalb.core.parser.node.TFloat;
 import de.be4.classicalb.core.parser.node.TForAny;
 import de.be4.classicalb.core.parser.node.TGreater;
 import de.be4.classicalb.core.parser.node.TGreaterEqual;
@@ -122,6 +123,7 @@ import de.be4.classicalb.core.parser.node.TPrefix;
 import de.be4.classicalb.core.parser.node.TPromotes;
 import de.be4.classicalb.core.parser.node.TProperties;
 import de.be4.classicalb.core.parser.node.TRank;
+import de.be4.classicalb.core.parser.node.TReal;
 import de.be4.classicalb.core.parser.node.TRefinement;
 import de.be4.classicalb.core.parser.node.TRefines;
 import de.be4.classicalb.core.parser.node.TRight;
@@ -189,7 +191,7 @@ final class BLexerSyntaxHighlighting {
 			TElementOf.class, TGreaterEqual.class, TLessEqual.class,
 			TNotEqual.class, TGreater.class, TLess.class);
 		addBTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
-			TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class);
+			TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class, TReal.class, TFloat.class);
 		addBTokens("editor_string", TStringLiteral.class);
 		addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
 			TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
