@@ -226,6 +226,10 @@ public class VisBStage extends Stage {
 			this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
 			updateUIOnMachine(currentProject.getCurrentMachine());
 			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+
+			machineListener.changed(null, null, currentProject.getCurrentMachine());
+			visBListener.changed(null, null, visBController.getVisBVisualisation());
+			stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
 		});
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
@@ -406,7 +410,9 @@ public class VisBStage extends Stage {
 		if(path != null) {
 			clear();
 			visBController.setVisBPath(path);
-			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+			for(VisBItem.VisBItemKey key : visBController.getAttributeValues().keySet()) {
+				changeAttribute(key.getId(), key.getAttribute(), visBController.getAttributeValues().get(key));
+			}
 		}
 	}
 
