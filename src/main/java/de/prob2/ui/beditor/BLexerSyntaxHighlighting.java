@@ -21,9 +21,13 @@ import de.be4.classicalb.core.parser.node.TAssertions;
 import de.be4.classicalb.core.parser.node.TAssign;
 import de.be4.classicalb.core.parser.node.TBe;
 import de.be4.classicalb.core.parser.node.TBegin;
+import de.be4.classicalb.core.parser.node.TBfalse;
+// import de.be4.classicalb.core.parser.node.TBtrue; // not found ??!!
 import de.be4.classicalb.core.parser.node.TBool;
+import de.be4.classicalb.core.parser.node.TBoolCast;
 import de.be4.classicalb.core.parser.node.TBtree;
 import de.be4.classicalb.core.parser.node.TCase;
+import de.be4.classicalb.core.parser.node.TCard;
 import de.be4.classicalb.core.parser.node.TChoice;
 import de.be4.classicalb.core.parser.node.TClosure;
 import de.be4.classicalb.core.parser.node.TClosure1;
@@ -36,10 +40,16 @@ import de.be4.classicalb.core.parser.node.TConjunction;
 import de.be4.classicalb.core.parser.node.TConst;
 import de.be4.classicalb.core.parser.node.TConstants;
 import de.be4.classicalb.core.parser.node.TConstraints;
+import de.be4.classicalb.core.parser.node.TConvertIntCeiling;
+import de.be4.classicalb.core.parser.node.TConvertIntFloor;
+import de.be4.classicalb.core.parser.node.TConvertReal;
 import de.be4.classicalb.core.parser.node.TDefinitions;
 import de.be4.classicalb.core.parser.node.TDirectProduct;
 import de.be4.classicalb.core.parser.node.TDivision;
 import de.be4.classicalb.core.parser.node.TDo;
+import de.be4.classicalb.core.parser.node.TDom;
+import de.be4.classicalb.core.parser.node.TDomainRestriction;
+import de.be4.classicalb.core.parser.node.TDomainSubtraction;
 import de.be4.classicalb.core.parser.node.TDoubleColon;
 import de.be4.classicalb.core.parser.node.TDoubleEqual;
 import de.be4.classicalb.core.parser.node.TDoubleVerticalBar;
@@ -68,10 +78,13 @@ import de.be4.classicalb.core.parser.node.TImplies;
 import de.be4.classicalb.core.parser.node.TImports;
 import de.be4.classicalb.core.parser.node.TIn;
 import de.be4.classicalb.core.parser.node.TIncludes;
+import de.be4.classicalb.core.parser.node.TInclusion;
 import de.be4.classicalb.core.parser.node.TInfix;
 import de.be4.classicalb.core.parser.node.TInitialisation;
 import de.be4.classicalb.core.parser.node.TInt;
 import de.be4.classicalb.core.parser.node.TInteger;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
+import de.be4.classicalb.core.parser.node.TIntersection;
 import de.be4.classicalb.core.parser.node.TInterval;
 import de.be4.classicalb.core.parser.node.TInvariant;
 import de.be4.classicalb.core.parser.node.TIseq;
@@ -83,9 +96,11 @@ import de.be4.classicalb.core.parser.node.TLet;
 import de.be4.classicalb.core.parser.node.TLineComment;
 import de.be4.classicalb.core.parser.node.TLogicalOr;
 import de.be4.classicalb.core.parser.node.TMachine;
+import de.be4.classicalb.core.parser.node.TMaplet;
 import de.be4.classicalb.core.parser.node.TMax;
 import de.be4.classicalb.core.parser.node.TMin;
 import de.be4.classicalb.core.parser.node.TMirror;
+import de.be4.classicalb.core.parser.node.TMod;
 import de.be4.classicalb.core.parser.node.TModel;
 import de.be4.classicalb.core.parser.node.TNat;
 import de.be4.classicalb.core.parser.node.TNat1;
@@ -97,6 +112,7 @@ import de.be4.classicalb.core.parser.node.TNotEqual;
 import de.be4.classicalb.core.parser.node.TOf;
 import de.be4.classicalb.core.parser.node.TOperations;
 import de.be4.classicalb.core.parser.node.TOr;
+import de.be4.classicalb.core.parser.node.TOverwriteRelation;
 import de.be4.classicalb.core.parser.node.TOutputParameters;
 import de.be4.classicalb.core.parser.node.TPartialBijection;
 import de.be4.classicalb.core.parser.node.TPartialFunction;
@@ -122,8 +138,12 @@ import de.be4.classicalb.core.parser.node.TPre;
 import de.be4.classicalb.core.parser.node.TPrefix;
 import de.be4.classicalb.core.parser.node.TPromotes;
 import de.be4.classicalb.core.parser.node.TProperties;
+import de.be4.classicalb.core.parser.node.TRan;
+import de.be4.classicalb.core.parser.node.TRangeRestriction;
+import de.be4.classicalb.core.parser.node.TRangeSubtraction;
 import de.be4.classicalb.core.parser.node.TRank;
 import de.be4.classicalb.core.parser.node.TReal;
+import de.be4.classicalb.core.parser.node.TRealLiteral;
 import de.be4.classicalb.core.parser.node.TRefinement;
 import de.be4.classicalb.core.parser.node.TRefines;
 import de.be4.classicalb.core.parser.node.TRight;
@@ -137,6 +157,8 @@ import de.be4.classicalb.core.parser.node.TSizet;
 import de.be4.classicalb.core.parser.node.TSkip;
 import de.be4.classicalb.core.parser.node.TSon;
 import de.be4.classicalb.core.parser.node.TSons;
+import de.be4.classicalb.core.parser.node.TStrictInclusion;
+import de.be4.classicalb.core.parser.node.TStrictNonInclusion;
 import de.be4.classicalb.core.parser.node.TString;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TStruct;
@@ -179,24 +201,38 @@ final class BLexerSyntaxHighlighting {
 			TDoubleVerticalBar.class, TAssert.class,
 			TClosure.class, TClosure1.class, TDirectProduct.class, TDivision.class,
 			TEmptySet.class, TDoubleColon.class,
-			TInterval.class, TUnion.class, TOr.class, TNonInclusion.class,
+			TInterval.class, TUnion.class, TIntersection.class,
+			TOr.class,
+			TInclusion.class, TNonInclusion.class, TStrictInclusion.class, TStrictNonInclusion.class,
 			TTotalBijection.class, TTotalFunction.class, TTotalInjection.class,
 			TTotalRelation.class, TTotalSurjection.class, TFalse.class, TTrue.class,
 			TTotalSurjectionRelation.class, TPartialBijection.class, TPartialFunction.class,
 			TPartialInjection.class, TPartialSurjection.class, TSetRelation.class,
 			TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
-			TIseq1.class);
-		addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class, TImplies.class, TLogicalOr.class, TEquivalence.class, TNot.class);
+			TIseq1.class,
+			TDom.class, TRan.class, TOverwriteRelation.class,
+			TDomainRestriction.class, TDomainSubtraction.class,
+			TRangeRestriction.class, TRangeSubtraction.class, TMaplet.class);
+		addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class,
+		    TImplies.class, TLogicalOr.class, TEquivalence.class, TNot.class,
+		    TBoolCast.class, TBfalse.class); // , TBtrue.class
 		addBTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
 			TElementOf.class, TGreaterEqual.class, TLessEqual.class,
-			TNotEqual.class, TGreater.class, TLess.class);
+			TNotEqual.class, TGreater.class, TLess.class, 
+			TMod.class,
+			TCard.class,
+			TMin.class, TMax.class,
+			TIntegerLiteral.class, TRealLiteral.class,
+			TConvertIntCeiling.class, TConvertIntFloor.class, TConvertReal.class);
 		addBTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
-			TNatural1.class, TStruct.class, TInteger.class, TInt.class, TString.class, TReal.class, TFloat.class);
+			TNatural1.class, TStruct.class,
+			TInteger.class, TInt.class, TString.class, TReal.class, TFloat.class);
 		addBTokens("editor_string", TStringLiteral.class);
 		addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
 			TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
 			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class, TMin.class, TMax.class);
+			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class
+			);
 		addBTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
 			TVar.class, TIn.class, TAny.class, TWhile.class,
 			TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
@@ -204,7 +240,7 @@ final class BLexerSyntaxHighlighting {
 			TChoice.class, TWhere.class, TOf.class, TEnd.class, TTree.class, TLeft.class, TRight.class,
 			TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
 			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class, TMin.class, TMax.class);
+			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
 		addBTokens("editor_keyword", TMachine.class, TOperations.class, TRefinement.class, TImplementation.class,
 			TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
 			TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
