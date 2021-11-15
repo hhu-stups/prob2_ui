@@ -82,6 +82,8 @@ import de.be4.classicalb.core.parser.node.TLet;
 import de.be4.classicalb.core.parser.node.TLineComment;
 import de.be4.classicalb.core.parser.node.TLogicalOr;
 import de.be4.classicalb.core.parser.node.TMachine;
+import de.be4.classicalb.core.parser.node.TMax;
+import de.be4.classicalb.core.parser.node.TMin;
 import de.be4.classicalb.core.parser.node.TMirror;
 import de.be4.classicalb.core.parser.node.TModel;
 import de.be4.classicalb.core.parser.node.TNat;
@@ -192,12 +194,15 @@ final class BLexerSyntaxHighlighting {
 		addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
 			TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
 			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
+			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class, TMin.class, TMax.class);
 		addBTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
 			TVar.class, TIn.class, TAny.class, TWhile.class,
 			TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
 			TCase.class, TSelect.class, TAssert.class, TAssertions.class, TWhen.class, TPre.class, TBegin.class,
-			TChoice.class, TWhere.class, TOf.class, TEnd.class);
+			TChoice.class, TWhere.class, TOf.class, TEnd.class, TTree.class, TLeft.class, TRight.class,
+			TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
+			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
+			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class, TMin.class, TMax.class);
 		addBTokens("editor_keyword", TMachine.class, TOperations.class, TRefinement.class, TImplementation.class,
 			TOperations.class, TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
 			TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
