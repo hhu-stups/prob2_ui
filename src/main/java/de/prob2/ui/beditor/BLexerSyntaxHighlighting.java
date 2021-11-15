@@ -22,7 +22,6 @@ import de.be4.classicalb.core.parser.node.TAssign;
 import de.be4.classicalb.core.parser.node.TBe;
 import de.be4.classicalb.core.parser.node.TBegin;
 import de.be4.classicalb.core.parser.node.TBfalse;
-// import de.be4.classicalb.core.parser.node.TBtrue; // not found ??!!
 import de.be4.classicalb.core.parser.node.TBool;
 import de.be4.classicalb.core.parser.node.TBoolCast;
 import de.be4.classicalb.core.parser.node.TBtree;
@@ -193,6 +192,7 @@ import de.be4.classicalb.core.parser.node.TTotalSurjection;
 import de.be4.classicalb.core.parser.node.TTotalSurjectionRelation;
 import de.be4.classicalb.core.parser.node.TTree;
 import de.be4.classicalb.core.parser.node.TTrue;
+import de.be4.classicalb.core.parser.node.TTruthPredicate;
 import de.be4.classicalb.core.parser.node.TUnion;
 import de.be4.classicalb.core.parser.node.TUnrecognisedPragma;
 import de.be4.classicalb.core.parser.node.TUses;
@@ -247,7 +247,7 @@ final class BLexerSyntaxHighlighting {
 			); // short ASCII/Unicode operators
 		addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class,
 			TImplies.class, TLogicalOr.class, TEquivalence.class, TNot.class,
-			TBoolCast.class, TBfalse.class); // , TBtrue.class
+			TBoolCast.class, TBfalse.class, TTruthPredicate.class);
 		addBTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
 			TGreaterEqual.class, TLessEqual.class,
 			TNotEqual.class, TGreater.class, TLess.class, 
