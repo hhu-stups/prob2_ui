@@ -28,7 +28,7 @@ public class SimulationMonteCarlo extends Simulator {
 		ENDING_PREDICATE("Ending Predicate"),
 		ENDING_TIME("Ending Time");
 
-		private String name;
+		private final String name;
 
 		EndingType(String name) {
 			this.name = name;
@@ -45,7 +45,7 @@ public class SimulationMonteCarlo extends Simulator {
 		STARTING_PREDICATE("Starting Predicate"),
 		STARTING_TIME("Starting Time");
 
-		private String name;
+		private final String name;
 
 		StartingType(String name) {
 			this.name = name;

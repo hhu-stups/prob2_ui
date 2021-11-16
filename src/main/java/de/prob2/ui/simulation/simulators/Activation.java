@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class Activation {
 
-	private String operation;
+	private final String operation;
 
 	private int time;
 

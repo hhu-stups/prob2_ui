@@ -29,11 +29,11 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
 	public static class Distribution {
 
-		private int n;
-		private double p;
-		private double mu;
-		private double sigma;
-		private DistributionFunction dsf;
+		private final int n;
+		private final double p;
+		private final double mu;
+		private final double sigma;
+		private final DistributionFunction dsf;
 
 		public Distribution(int n, double p) {
 			this.n = n;
@@ -97,7 +97,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		RIGHT_TAILED("Right-tailed hypothesis test"),
 		TWO_TAILED("Two-tailed hypothesis test");
 
-		private String name;
+		private final String name;
 
 		HypothesisCheckingType(String name) {
 			this.name = name;

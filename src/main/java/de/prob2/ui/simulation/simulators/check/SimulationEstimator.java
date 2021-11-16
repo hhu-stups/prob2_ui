@@ -13,7 +13,7 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 	public enum EstimationType {
 		MEAN("Mean estimator");
 
-		private String name;
+		private final String name;
 
 		EstimationType(String name) {
 			this.name = name;
