@@ -491,7 +491,7 @@
 }
 
 .editor .editor_identifier {
-	-fx-fill:black;
+	-fx-fill:black; /* alternatives: darkslateblue, darkmagenta */
 }
 
 .editor .editor_assignments {
@@ -504,6 +504,13 @@
 
 .editor .editor_arithmetic{
 	-fx-fill:#5883be;
+}
+
+.editor .editor_predicates {
+	-fx-fill:royalblue;
+}
+.editor .editor_operators {
+	-fx-fill:purple;
 }
 
 .editor .editor_types {
