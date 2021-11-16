@@ -122,6 +122,9 @@ import de.be4.classicalb.core.parser.node.TMinus;
 import de.be4.classicalb.core.parser.node.TMirror;
 import de.be4.classicalb.core.parser.node.TMod;
 import de.be4.classicalb.core.parser.node.TModel;
+import de.be4.classicalb.core.parser.node.TMultilineStringContent;
+import de.be4.classicalb.core.parser.node.TMultilineStringEnd;
+import de.be4.classicalb.core.parser.node.TMultilineStringStart;
 import de.be4.classicalb.core.parser.node.TNat;
 import de.be4.classicalb.core.parser.node.TNat1;
 import de.be4.classicalb.core.parser.node.TNatural;
@@ -243,8 +246,8 @@ final class BLexerSyntaxHighlighting {
 
 	static {
 		addBTokens("editor_identifier", TIdentifierLiteral.class);
-		addBTokens("editor_assignments", TAssign.class, TOutputParameters.class,
-			TDoubleVerticalBar.class, TAssert.class,
+		addBTokens("editor_assignments", TAssign.class, TSkip.class, TOutputParameters.class,
+			TDoubleVerticalBar.class,
 			TClosure.class, TClosure1.class, TIterate.class,
 			TId.class,
 			TEmptySet.class, TDoubleColon.class,
@@ -303,14 +306,15 @@ final class BLexerSyntaxHighlighting {
 			TPow.class, TPow1.class, TFin.class, TFin1.class, 
 			TPerm.class, TSeq.class, TSeq1.class, TIseq.class, TIseq1.class,
 			TInteger.class, TInt.class, TString.class, TReal.class, TFloat.class);
-		addBTokens("editor_string", TStringLiteral.class);
+		addBTokens("editor_string", TStringLiteral.class,
+			TMultilineStringStart.class, TMultilineStringContent.class, TMultilineStringEnd.class);
 		addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
 			TInfix.class, TArity.class, TSubtree.class, 
 			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
 			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class,
 			TBin.class, TBtree.class
 			); // actually they are partially supported by ProB
-		addBTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
+		addBTokens("editor_ctrlkeyword", TLet.class, TBe.class,
 			TVar.class, TIn.class, TAny.class, TWhile.class,
 			TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
 			TCase.class, TSelect.class, TAssert.class, TWhen.class, TPre.class, TBegin.class,
