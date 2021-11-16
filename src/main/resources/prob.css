@@ -495,42 +495,43 @@
 }
 
 .editor .editor_assignments {
-	-fx-fill:darkblue;
+	-fx-fill:#268bd2; /* $blue from https://ethanschoonover.com/solarized/; was darkblue; */
 }
 
 .editor .editor_logical{
-	-fx-fill:tomato;
+	-fx-fill:#cb4b16; /* $orange, was tomato */
 }
 
 .editor .editor_arithmetic{
-	-fx-fill:#5883be;
+	-fx-fill:#2aa198; /* $cyan;  was #5883be; */
 }
 
 .editor .editor_predicates {
-	-fx-fill:royalblue;
+	-fx-fill:#dc322f; /* $red was royalblue; */
 }
 .editor .editor_operators {
-	-fx-fill:purple;
+	-fx-fill:#268bd2; /* $blue was purple; */
 }
 
 .editor .editor_types {
-	-fx-fill:darkred;
+	-fx-fill:#6c71c4; /* $violet; was darkred; */
 }
 
 .editor .editor_string {
-	-fx-fill:rgb(3, 107, 3);
+	-fx-fill:#859900; /* $green; was rgb(3, 107, 3); */
 }
 
 .editor .editor_unsupported{
-	-fx-background-color: yellow;
+    -fx-fill:#b58900; /* $yellow */
+	/* -fx-background-color: yellow; */
 }
 
 .editor .editor_ctrlkeyword {
-	-fx-fill:rgb(96, 22, 216);
+	-fx-fill:#d33682; /* $magenta was rgb(96, 22, 216); */
 }
 
 .editor .editor_keyword {
-	-fx-fill:blue;
+	-fx-fill:#268bd2; /* $blue was blue; */
 }
 
 .editor .editor_comment {
