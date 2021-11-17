@@ -535,8 +535,11 @@
 }
 
 .editor .editor_comment {
-	-fx-fill: #818181;
+	-fx-fill: #93a1a1;
 	-fx-font-style: italic
+}
+.editor .editor_pragma {
+	-fx-fill: #818181
 }
 
 .editor .editor_xtl_functor {

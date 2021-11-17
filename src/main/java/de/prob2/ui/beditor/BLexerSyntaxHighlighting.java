@@ -312,7 +312,8 @@ final class BLexerSyntaxHighlighting {
 			TInfix.class, TArity.class, TSubtree.class, 
 			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
 			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class,
-			TBin.class, TBtree.class
+			TBin.class, TBtree.class,
+			TUnrecognisedPragma.class
 			); // actually they are partially supported by ProB
 		addBTokens("editor_ctrlkeyword", TLet.class, TBe.class,
 			TVar.class, TIn.class, TAny.class, TWhile.class,
@@ -329,10 +330,12 @@ final class BLexerSyntaxHighlighting {
 			TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
 			TConstraints.class, TSets.class, TDefinitions.class, TValue.class);
 		addBTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
-			TLineComment.class, TPragmaDescription.class, TPragmaEnd.class, TPragmaFile.class,
+			TLineComment.class);
+		addBTokens("editor_pragma", 
+			TPragmaDescription.class, TPragmaEnd.class, TPragmaFile.class,
 			TPragmaFreeText.class, TPragmaGenerated.class, TPragmaIdOrString.class, TPragmaIgnoredText.class,
 			TPragmaImportPackage.class, TPragmaLabel.class, TPragmaPackage.class, TPragmaStart.class,
-			TPragmaSymbolic.class, TUnrecognisedPragma.class);
+			TPragmaSymbolic.class);
 	}
 
 	private BLexerSyntaxHighlighting() {
