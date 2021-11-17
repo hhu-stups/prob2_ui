@@ -3,8 +3,6 @@ package de.prob2.ui.chart;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.text.NumberFormat;
-import java.text.ParseException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -404,9 +402,8 @@ public final class HistoryChartStage extends Stage {
 				return 0;
 			} else {
 				try {
-					// return Integer.parseInt(value);
-					return NumberFormat.getInstance().parse(value);
-				} catch (ParseException e) {
+					return Double.parseDouble(value);
+				} catch (NumberFormatException e) {
 					if (showErrors) {
 						final Alert alert = stageManager.makeExceptionAlert(e, "chart.historyChart.alerts.formulaEvalError.header",
 								"chart.historyChart.alerts.formulaEvalError.invalidInteger.content");
