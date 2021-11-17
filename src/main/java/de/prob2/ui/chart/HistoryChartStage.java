@@ -3,6 +3,8 @@ package de.prob2.ui.chart;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -363,9 +365,9 @@ public final class HistoryChartStage extends Stage {
 			if (result instanceof IdentifierNotInitialised) {
 				continue;
 			}
-			final int value;
+			final Number value;
 			try {
-				value = resultToInt(result, showErrors);
+				value = resultToNumber(result, showErrors);
 			} catch (IllegalArgumentException e) {
 				LOGGER.debug("Not convertible to int, ignoring", e);
 				continue;
@@ -393,7 +395,7 @@ public final class HistoryChartStage extends Stage {
 		((NumberAxis) this.singleChart.getXAxis()).setUpperBound(maxXBound);
 	}
 
-	private int resultToInt(final AbstractEvalResult aer, final boolean showErrors) {
+	private Number resultToNumber(final AbstractEvalResult aer, final boolean showErrors) {
 		if (aer instanceof EvalResult) {
 			final String value = ((EvalResult) aer).getValue();
 			if ("TRUE".equals(value)) {
@@ -402,8 +404,9 @@ public final class HistoryChartStage extends Stage {
 				return 0;
 			} else {
 				try {
-					return Integer.parseInt(value);
-				} catch (NumberFormatException e) {
+					// return Integer.parseInt(value);
+					return NumberFormat.getInstance().parse(value);
+				} catch (ParseException e) {
 					if (showErrors) {
 						final Alert alert = stageManager.makeExceptionAlert(e, "chart.historyChart.alerts.formulaEvalError.header",
 								"chart.historyChart.alerts.formulaEvalError.invalidInteger.content");
