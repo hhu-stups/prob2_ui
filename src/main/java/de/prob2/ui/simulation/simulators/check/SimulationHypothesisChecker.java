@@ -13,9 +13,9 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
 	public static class DistributionFunction {
 
-		private double mu;
+		private final double mu;
 
-		private double sigma;
+		private final double sigma;
 
 		public DistributionFunction(double mu, double sigma) {
 			this.mu = mu;

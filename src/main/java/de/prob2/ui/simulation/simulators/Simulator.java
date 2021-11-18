@@ -175,6 +175,7 @@ public abstract class Simulator {
 	}
 
 	public void setupBeforeSimulation(Trace trace) {
+		updateInitialInformation(trace);
 		updateStartingInformation(trace);
 		if(!trace.getCurrentState().isInitialised()) {
 			activateBeforeInitialisation(trace, Transition.SETUP_CONSTANTS_NAME);
@@ -212,6 +213,7 @@ public abstract class Simulator {
 			if (transition != null) {
 				newTrace = newTrace.add(transition);
 				stepCounter++;
+				updateInitialInformation(newTrace);
 				updateStartingInformation(newTrace);
 				List<String> parameterNames = transition.getParameterNames() == null ? new ArrayList<>() : transition.getParameterNames();
 				String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
@@ -220,6 +222,10 @@ public abstract class Simulator {
 			}
 		}
 		return newTrace;
+	}
+
+	public void updateInitialInformation(Trace trace) {
+		// This is used in Monte Carlo Simulation to check when the initial condition is reached
 	}
 
 

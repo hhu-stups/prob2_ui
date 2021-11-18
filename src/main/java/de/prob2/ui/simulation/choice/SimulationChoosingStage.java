@@ -213,9 +213,17 @@ public class SimulationChoosingStage extends Stage {
 		simulationHypothesisChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
 		simulationEstimationChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
 
-		simulationMonteCarloChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
-		simulationHypothesisChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
-		simulationEstimationChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
+		simulationMonteCarloChoice.bindInitialProperty(simulationChoiceBindings.initialStepsProperty(), simulationChoiceBindings.initialPredicateProperty(), simulationChoiceBindings.initialTimeProperty());
+		simulationHypothesisChoice.bindInitialProperty(simulationChoiceBindings.initialStepsProperty(), simulationChoiceBindings.initialPredicateProperty(), simulationChoiceBindings.initialTimeProperty());
+		simulationEstimationChoice.bindInitialProperty(simulationChoiceBindings.initialStepsProperty(), simulationChoiceBindings.initialPredicateProperty(), simulationChoiceBindings.initialTimeProperty());
+
+		simulationMonteCarloChoice.bindInitialItemProperty(simulationChoiceBindings.initialItemProperty());
+		simulationHypothesisChoice.bindInitialItemProperty(simulationChoiceBindings.initialItemProperty());
+		simulationEstimationChoice.bindInitialItemProperty(simulationChoiceBindings.initialItemProperty());
+
+		simulationMonteCarloChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.initialTimeProperty());
+		simulationHypothesisChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.initialTimeProperty());
+		simulationEstimationChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.initialTimeProperty());
 
 		simulationMonteCarloChoice.bindStartingItemProperty(simulationChoiceBindings.startingItemProperty());
 		simulationHypothesisChoice.bindStartingItemProperty(simulationChoiceBindings.startingItemProperty());

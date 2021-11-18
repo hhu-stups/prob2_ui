@@ -71,6 +71,15 @@ public class SimulationItemHandler {
 
 	private Map<String, Object> extractAdditionalInformation(SimulationItem item) {
 		Map<String, Object> additionalInformation = new HashMap<>();
+
+		if(item.containsField("INITIAL_STEPS")) {
+			additionalInformation.put("INITIAL_STEPS", item.getField("INITIAL_STEPS"));
+		} else if(item.containsField("INITIAL_PREDICATE")) {
+			additionalInformation.put("INITIAL_PREDICATE", item.getField("INITIAL_PREDICATE"));
+		} else if(item.containsField("INITIAL_TIME")) {
+			additionalInformation.put("INITIAL_TIME", item.getField("INITIAL_TIME"));
+		}
+
 		if(item.containsField("START_AFTER_STEPS")) {
 			additionalInformation.put("START_AFTER_STEPS", item.getField("START_AFTER_STEPS"));
 		} else if(item.containsField("STARTING_PREDICATE")) {
