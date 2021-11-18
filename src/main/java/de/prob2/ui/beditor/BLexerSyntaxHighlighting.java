@@ -122,6 +122,9 @@ import de.be4.classicalb.core.parser.node.TMinus;
 import de.be4.classicalb.core.parser.node.TMirror;
 import de.be4.classicalb.core.parser.node.TMod;
 import de.be4.classicalb.core.parser.node.TModel;
+import de.be4.classicalb.core.parser.node.TMultilineStringContent;
+import de.be4.classicalb.core.parser.node.TMultilineStringEnd;
+import de.be4.classicalb.core.parser.node.TMultilineStringStart;
 import de.be4.classicalb.core.parser.node.TNat;
 import de.be4.classicalb.core.parser.node.TNat1;
 import de.be4.classicalb.core.parser.node.TNatural;
@@ -243,26 +246,22 @@ final class BLexerSyntaxHighlighting {
 
 	static {
 		addBTokens("editor_identifier", TIdentifierLiteral.class);
-		addBTokens("editor_assignments", TAssign.class, TOutputParameters.class,
-			TDoubleVerticalBar.class, TAssert.class,
+		addBTokens("editor_assignments", TAssign.class, TSkip.class, TOutputParameters.class,
+			TDoubleVerticalBar.class,
 			TClosure.class, TClosure1.class, TIterate.class,
 			TId.class,
 			TEmptySet.class, TDoubleColon.class,
-			TOr.class,
 			TFalse.class, TTrue.class,
-			TFin.class, TFin1.class, TPerm.class, TSeq.class, TSeq1.class, TIseq.class,
-			TIseq1.class,
 			TDom.class, TRan.class,
 			TFnc.class, TRel.class,
 			TQuantifiedInter.class, TQuantifiedUnion.class,
 			TGeneralizedInter.class, TGeneralizedUnion.class,
 			TFinite.class,
-			TLessGreater.class,
+			TLessGreater.class, // empty sequence
 			TRev.class,
 			TFirst.class, TLast.class, TFront.class, TTail.class, TConc.class
 			);
 		addBTokens("editor_predicates", 
-			
 			TNotEqual.class, TGreater.class, TLess.class, 
 			TElementOf.class, TNotBelonging.class,
 			TInclusion.class, TNonInclusion.class, TStrictInclusion.class, TStrictNonInclusion.class
@@ -304,23 +303,24 @@ final class BLexerSyntaxHighlighting {
 			TConvertIntCeiling.class, TConvertIntFloor.class, TConvertReal.class);
 		addBTokens("editor_types", TBool.class, TNat.class, TNat1.class, TNatural.class,
 			TNatural1.class, TStruct.class,
+			TPow.class, TPow1.class, TFin.class, TFin1.class, 
+			TPerm.class, TSeq.class, TSeq1.class, TIseq.class, TIseq1.class,
 			TInteger.class, TInt.class, TString.class, TReal.class, TFloat.class);
-		addBTokens("editor_string", TStringLiteral.class);
+		addBTokens("editor_string", TStringLiteral.class,
+			TMultilineStringStart.class, TMultilineStringContent.class, TMultilineStringEnd.class);
 		addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
-			TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
+			TInfix.class, TArity.class, TSubtree.class, 
 			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class
-			);
-		addBTokens("editor_ctrlkeyword", TSkip.class, TLet.class, TBe.class,
+			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class,
+			TBin.class, TBtree.class,
+			TUnrecognisedPragma.class
+			); // actually they are partially supported by ProB
+		addBTokens("editor_ctrlkeyword", TLet.class, TBe.class,
 			TVar.class, TIn.class, TAny.class, TWhile.class,
 			TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
 			TCase.class, TSelect.class, TAssert.class, TWhen.class, TPre.class, TBegin.class,
-			TChoice.class, TWhere.class, TOf.class, TEnd.class,
-			TTree.class, TLeft.class, TRight.class,
-			TInfix.class, TArity.class, TSubtree.class, TPow.class, TPow1.class,
-			TBin.class,
-			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class, TBtree.class);
+			TChoice.class, TOr.class,
+			TWhere.class, TOf.class, TEnd.class);
 		addBTokens("editor_keyword", TMachine.class, TOperations.class, TLocalOperations.class, 
 		    TRefinement.class, TImplementation.class,
 			TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
@@ -330,10 +330,12 @@ final class BLexerSyntaxHighlighting {
 			TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
 			TConstraints.class, TSets.class, TDefinitions.class, TValue.class);
 		addBTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
-			TLineComment.class, TPragmaDescription.class, TPragmaEnd.class, TPragmaFile.class,
+			TLineComment.class);
+		addBTokens("editor_pragma", 
+			TPragmaDescription.class, TPragmaEnd.class, TPragmaFile.class,
 			TPragmaFreeText.class, TPragmaGenerated.class, TPragmaIdOrString.class, TPragmaIgnoredText.class,
 			TPragmaImportPackage.class, TPragmaLabel.class, TPragmaPackage.class, TPragmaStart.class,
-			TPragmaSymbolic.class, TUnrecognisedPragma.class);
+			TPragmaSymbolic.class);
 	}
 
 	private BLexerSyntaxHighlighting() {
