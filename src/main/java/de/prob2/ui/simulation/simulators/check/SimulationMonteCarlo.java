@@ -77,6 +77,14 @@ public class SimulationMonteCarlo extends Simulator {
 		NOT_FINISHED, SUCCESS, FAIL
 	}
 
+	private static final int MAX_NUMBER_STEPS_BEFORE_CHECKING = 1000;
+	// This could also be a parameter of the hypothesis testing/estimation check.
+	// Up to MAX_NUMBER_STEPS_BEFORE_CHECKING steps are simulated in the beginning before simulating until the initial condition, starting condition, and ending condition,
+	// to check a property between the starting and ending condition.
+	// This is done to vary the length of the simulation.
+	// Otherwise, the property is always checked on traces where starting condition and ending condition are fulfilled once.
+
+
 	protected final Injector injector;
 
 	protected Map<String, List<Integer>> operationExecutions;
@@ -90,6 +98,8 @@ public class SimulationMonteCarlo extends Simulator {
 	protected List<Trace> resultingTraces;
 
 	protected int numberExecutions;
+
+	protected int currentNumberStepsBeforeChecking;
 
 	protected boolean initialConditionReached;
 
@@ -120,6 +130,7 @@ public class SimulationMonteCarlo extends Simulator {
 		this.numberExecutions = numberExecutions;
 		this.initialConditionReached = false;
 		this.startingConditionReached = false;
+		this.currentNumberStepsBeforeChecking = Integer.MAX_VALUE;
 		this.initialStepAt = Integer.MAX_VALUE;
 		this.initialTimeAt = Integer.MAX_VALUE;
 		this.startAtStep = Integer.MAX_VALUE;
@@ -160,7 +171,7 @@ public class SimulationMonteCarlo extends Simulator {
 	@Override
 	public void updateInitialInformation(Trace trace) {
 		super.updateInitialInformation(trace);
-		if(initialConditionReached) {
+		if(stepCounter < currentNumberStepsBeforeChecking || initialConditionReached) {
 			return;
 		}
 		if(additionalInformation.containsKey("INITIAL_STEPS")) {
@@ -240,6 +251,7 @@ public class SimulationMonteCarlo extends Simulator {
 			startTrace.getStateSpace().startTransaction();
 			wallTime = System.currentTimeMillis();
 			for (int i = 0; i < numberExecutions; i++) {
+				currentNumberStepsBeforeChecking = (int) (Math.random() * MAX_NUMBER_STEPS_BEFORE_CHECKING);
 				Trace newTrace = startTrace;
 				setupBeforeSimulation(newTrace);
 				while (!endingConditionReached(newTrace)) {

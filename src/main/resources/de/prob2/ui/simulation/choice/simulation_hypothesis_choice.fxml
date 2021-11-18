@@ -120,8 +120,8 @@
 	</ChoiceBox>
 
 	<Label text="%simulation.choice.probability" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfProbability" GridPane.rowIndex="9" GridPane.columnIndex="2"/>
+	<TextField fx:id="tfProbability" GridPane.rowIndex="11" GridPane.columnIndex="2"/>
 
 	<Label text="%simulation.choice.significance" GridPane.rowIndex="12" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfSignificance" GridPane.rowIndex="10" GridPane.columnIndex="2"/>
+	<TextField fx:id="tfSignificance" GridPane.rowIndex="12" GridPane.columnIndex="2"/>
 </fx:root>

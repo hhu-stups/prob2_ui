@@ -85,6 +85,21 @@ public class SimulationItem implements IExecutableItem {
 			this.information.put("STARTING_TIME", startingTime);
 		}
 
+		@JsonProperty("INITIAL_STEPS")
+		private void setInitialSteps(final int initialSteps) {
+			this.information.put("INITIAL_STEPS", initialSteps);
+		}
+
+		@JsonProperty("INITIAL_PREDICATE")
+		private void setInitialPredicate(final String initialPredicate) {
+			this.information.put("INITIAL_PREDICATE", initialPredicate);
+		}
+
+		@JsonProperty("INITIAL_TIME")
+		private void setInitialTime(final int initialTime) {
+			this.information.put("INITIAL_TIME", initialTime);
+		}
+
 		@JsonProperty("HYPOTHESIS_CHECKING_TYPE")
 		private void setHypothesisCheckingType(final SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType) {
 			this.information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingType);
@@ -121,9 +136,9 @@ public class SimulationItem implements IExecutableItem {
 		}
 	}
 
-	private SimulationType type;
+	private final SimulationType type;
 
-	private Map<String, Object> information;
+	private final Map<String, Object> information;
 
 	@JsonIgnore
 	private ObjectProperty<Checked> checked;
