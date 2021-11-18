@@ -458,6 +458,10 @@ public class SimulationMonteCarloChoice extends GridPane {
 		this.choosingStage = choosingStage;
 	}
 
+	public void bindMaxStepsBeforePropertyProperty(SimpleStringProperty property) {
+		tfMaxStepsBeforeProperty.textProperty().bindBidirectional(property);
+	}
+
 	public void bindSimulationsProperty(SimpleStringProperty property) {
 		tfSimulations.textProperty().bindBidirectional(property);
 	}

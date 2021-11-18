@@ -213,6 +213,10 @@ public class SimulationChoosingStage extends Stage {
 		simulationHypothesisChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
 		simulationEstimationChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
 
+		simulationMonteCarloChoice.bindMaxStepsBeforePropertyProperty(simulationChoiceBindings.maxStepsBeforePropertyProperty());
+		simulationHypothesisChoice.bindMaxStepsBeforePropertyProperty(simulationChoiceBindings.maxStepsBeforePropertyProperty());
+		simulationEstimationChoice.bindMaxStepsBeforePropertyProperty(simulationChoiceBindings.maxStepsBeforePropertyProperty());
+
 		simulationMonteCarloChoice.bindInitialProperty(simulationChoiceBindings.initialStepsProperty(), simulationChoiceBindings.initialPredicateProperty(), simulationChoiceBindings.initialTimeProperty());
 		simulationHypothesisChoice.bindInitialProperty(simulationChoiceBindings.initialStepsProperty(), simulationChoiceBindings.initialPredicateProperty(), simulationChoiceBindings.initialTimeProperty());
 		simulationEstimationChoice.bindInitialProperty(simulationChoiceBindings.initialStepsProperty(), simulationChoiceBindings.initialPredicateProperty(), simulationChoiceBindings.initialTimeProperty());

@@ -13,6 +13,8 @@ public class SimulationChoiceBindings {
 
 	private final SimpleStringProperty simulationsProperty;
 
+	private final SimpleStringProperty maxStepsBeforePropertyProperty;
+
 	private final SimpleStringProperty initialStepsProperty;
 
 	private final SimpleStringProperty initialPredicateProperty;
@@ -46,6 +48,7 @@ public class SimulationChoiceBindings {
 	@Inject
 	public SimulationChoiceBindings() {
 		this.simulationsProperty = new SimpleStringProperty();
+		this.maxStepsBeforePropertyProperty = new SimpleStringProperty();
 		this.initialStepsProperty = new SimpleStringProperty();
 		this.initialPredicateProperty = new SimpleStringProperty();
 		this.initialTimeProperty = new SimpleStringProperty();
@@ -65,6 +68,10 @@ public class SimulationChoiceBindings {
 
 	public SimpleStringProperty simulationsProperty() {
 		return simulationsProperty;
+	}
+
+	public SimpleStringProperty maxStepsBeforePropertyProperty() {
+		return maxStepsBeforePropertyProperty;
 	}
 
 	public SimpleStringProperty initialStepsProperty() {
