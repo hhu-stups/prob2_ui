@@ -53,8 +53,11 @@
 	<Label text="%simulation.choice.numberSimulations" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 	<TextField fx:id="tfSimulations" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.initialCondition" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="initialChoice" GridPane.rowIndex="2" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.maxStepsBeforeProperty" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfMaxStepsBeforeProperty" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+
+	<Label text="%simulation.choice.initialCondition" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="initialChoice" GridPane.rowIndex="3" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationMonteCarloChoice.SimulationInitialItem initialType="NO_CONDITION"/>
@@ -65,8 +68,8 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.startingCondition" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="4" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.startingCondition" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="5" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="NO_CONDITION"/>
@@ -77,8 +80,8 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="6" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="7" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationMonteCarloChoice.SimulationEndingItem endingType="NUMBER_STEPS"/>

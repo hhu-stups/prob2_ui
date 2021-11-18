@@ -132,14 +132,16 @@ public class SimulationItemHandler {
 
 	private void handleMonteCarloSimulation(SimulationItem item, boolean checkAll) {
 		int executions = (int) item.getField("EXECUTIONS");
+		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationMonteCarlo monteCarlo = new SimulationMonteCarlo(injector, currentTrace, executions, additionalInformation);
+		SimulationMonteCarlo monteCarlo = new SimulationMonteCarlo(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), monteCarlo, path.toFile());
 		runAndCheck(item, monteCarlo);
 	}
 
 	private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
 		int executions = (int) item.getField("EXECUTIONS");
+		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
 		SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getField("HYPOTHESIS_CHECKING_TYPE");
@@ -154,7 +156,7 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, currentTrace, executions, checkingType, hypothesisCheckingType, probability, significance, additionalInformation);
+		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, currentTrace, executions, maxStepsBeforeProperty, checkingType, hypothesisCheckingType, probability, significance, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path.toFile());
 		runAndCheck(item, hypothesisChecker);
 	}
@@ -162,6 +164,7 @@ public class SimulationItemHandler {
 	private void handleEstimation(SimulationItem item, boolean checkAll) {
 		Trace trace = currentTrace.get();
 		int executions = (int) item.getField("EXECUTIONS");
+		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
 		SimulationEstimator.EstimationType estimationType = (SimulationEstimator.EstimationType) item.getField("ESTIMATION_TYPE");
@@ -176,7 +179,7 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, currentTrace, executions, checkingType, estimationType, desiredValue, epsilon, additionalInformation);
+		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, currentTrace, executions, maxStepsBeforeProperty, checkingType, estimationType, desiredValue, epsilon, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator, path.toFile());
 		runAndCheck(item, simulationEstimator);
 	}

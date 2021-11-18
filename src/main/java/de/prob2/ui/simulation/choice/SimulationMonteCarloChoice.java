@@ -192,6 +192,9 @@ public class SimulationMonteCarloChoice extends GridPane {
 	protected TextField tfSteps;
 
 	@FXML
+	protected TextField tfMaxStepsBeforeProperty;
+
+	@FXML
 	protected Label lbEndingPredicate;
 
 	@FXML
@@ -233,16 +236,16 @@ public class SimulationMonteCarloChoice extends GridPane {
 					case NO_CONDITION:
 						break;
 					case INITIAL_STEPS:
-						this.add(lbInitialSteps, 1, 3);
-						this.add(tfInitialSteps, 2, 3);
+						this.add(lbInitialSteps, 1, 4);
+						this.add(tfInitialSteps, 2, 4);
 						break;
 					case INITIAL_PREDICATE:
-						this.add(lbInitialPredicate, 1, 3);
-						this.add(tfInitialPredicate, 2, 3);
+						this.add(lbInitialPredicate, 1, 4);
+						this.add(tfInitialPredicate, 2, 4);
 						break;
 					case INITIAL_TIME:
-						this.add(lbInitialTime, 1, 3);
-						this.add(tfInitialTime, 2, 3);
+						this.add(lbInitialTime, 1, 4);
+						this.add(tfInitialTime, 2, 4);
 						break;
 					default:
 						break;
@@ -258,16 +261,16 @@ public class SimulationMonteCarloChoice extends GridPane {
 					case NO_CONDITION:
 						break;
 					case START_AFTER_STEPS:
-						this.add(lbStartAfter, 1, 5);
-						this.add(tfStartAfter, 2, 5);
+						this.add(lbStartAfter, 1, 6);
+						this.add(tfStartAfter, 2, 6);
 						break;
 					case STARTING_PREDICATE:
-						this.add(lbStartingPredicate, 1, 5);
-						this.add(tfStartingPredicate, 2, 5);
+						this.add(lbStartingPredicate, 1, 6);
+						this.add(tfStartingPredicate, 2, 6);
 						break;
 					case STARTING_TIME:
-						this.add(lbStartingTime, 1, 5);
-						this.add(tfStartingTime, 2, 5);
+						this.add(lbStartingTime, 1, 6);
+						this.add(tfStartingTime, 2, 6);
 						break;
 					default:
 						break;
@@ -281,16 +284,16 @@ public class SimulationMonteCarloChoice extends GridPane {
 			if(to != null) {
 				switch (to.getEndingType()) {
 					case NUMBER_STEPS:
-						this.add(lbSteps, 1, 7);
-						this.add(tfSteps, 2, 7);
+						this.add(lbSteps, 1, 8);
+						this.add(tfSteps, 2, 8);
 						break;
 					case ENDING_PREDICATE:
-						this.add(lbEndingPredicate, 1, 7);
-						this.add(tfEndingPredicate, 2, 7);
+						this.add(lbEndingPredicate, 1, 8);
+						this.add(tfEndingPredicate, 2, 8);
 						break;
 					case ENDING_TIME:
-						this.add(lbEndingTime, 1, 7);
-						this.add(tfEndingTime, 2, 7);
+						this.add(lbEndingTime, 1, 8);
+						this.add(tfEndingTime, 2, 8);
 						break;
 					default:
 						break;
@@ -310,7 +313,8 @@ public class SimulationMonteCarloChoice extends GridPane {
 		}
 		try {
 			int numberSimulations = Integer.parseInt(tfSimulations.getText());
-			if(numberSimulations < 0) {
+			int stepsBeforeProperty = Integer.parseInt(tfMaxStepsBeforeProperty.getText());
+			if(numberSimulations < 0 || stepsBeforeProperty < 0) {
 				return false;
 			}
 			switch (initialItem.getInitialType()) {
@@ -391,6 +395,7 @@ public class SimulationMonteCarloChoice extends GridPane {
 	public Map<String, Object> extractInformation() {
 		Map<String, Object> information = new HashMap<>();
 		information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
+		information.put("MAX_STEPS_BEFORE_PROPERTY", Integer.parseInt(tfMaxStepsBeforeProperty.getText()));
 
 		SimulationInitialItem initialItem = initialChoice.getSelectionModel().getSelectedItem();
 		if(initialItem != null) {

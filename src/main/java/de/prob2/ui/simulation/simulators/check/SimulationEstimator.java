@@ -30,9 +30,9 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 
 	private final double epsilon;
 
-	public SimulationEstimator(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, SimulationCheckingType type,
+	public SimulationEstimator(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty, SimulationCheckingType type,
 			final EstimationType estimationType, final double desiredValue, final double epsilon, Map<String, Object> additionalInformation) {
-		super(injector, currentTrace, numberExecutions, type, additionalInformation);
+		super(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 		this.estimationType = estimationType;
 		this.desiredValue = desiredValue;
 		this.epsilon = epsilon;

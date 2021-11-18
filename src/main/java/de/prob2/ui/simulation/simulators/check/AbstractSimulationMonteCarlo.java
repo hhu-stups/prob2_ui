@@ -17,8 +17,9 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 
 	protected int numberSuccess;
 
-	public AbstractSimulationMonteCarlo(Injector injector, CurrentTrace currentTrace, int numberExecutions, SimulationCheckingType type, Map<String, Object> additionalInformation) {
-		super(injector, currentTrace, numberExecutions, additionalInformation);
+	public AbstractSimulationMonteCarlo(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
+										SimulationCheckingType type, Map<String, Object> additionalInformation) {
+		super(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.type = type;
 		this.numberSuccess = 0;
 	}

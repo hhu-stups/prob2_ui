@@ -114,9 +114,9 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 
 	private final double significance;
 
-	public SimulationHypothesisChecker(final Injector injector, final CurrentTrace currentTrace, final int numberExecutions, final SimulationCheckingType type,
+	public SimulationHypothesisChecker(final Injector injector, final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type,
 			final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance, final Map<String, Object> additionalInformation) {
-		super(injector, currentTrace, numberExecutions, type, additionalInformation);
+		super(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.significance = significance;

@@ -450,6 +450,16 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 		}
 	}
+
+	private static void updateV18Machine(final ObjectNode machine) {
+		checkArray(machine.get("simulationItems")).forEach(simulationItemNode -> {
+			final ObjectNode simulationItem = checkObject(simulationItemNode);
+			final ObjectNode additionalInformation = checkObject(simulationItem.get("information"));
+			if (!additionalInformation.has("MAX_STEPS_BEFORE_PROPERTY")) {
+				additionalInformation.put("MAX_STEPS_BEFORE_PROPERTY", 0);
+			}
+		});
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -523,6 +533,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 17) {
 				updateV17Machine(machine);
+			}
+			if (oldVersion <= 18) {
+				updateV18Machine(machine);
 			}
 		});
 		

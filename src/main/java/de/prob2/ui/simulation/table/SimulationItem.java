@@ -50,6 +50,11 @@ public class SimulationItem implements IExecutableItem {
 			this.information.put("EXECUTIONS", executions);
 		}
 
+		@JsonProperty("MAX_STEPS_BEFORE_PROPERTY")
+		private void setMaxStepsBeforeProperty(final int maxStepsBeforeProperty) {
+			this.information.put("MAX_STEPS_BEFORE_PROPERTY", maxStepsBeforeProperty);
+		}
+
 		@JsonProperty("PREDICATE")
 		private void setPredicate(final String predicate) {
 			this.information.put("PREDICATE", predicate);
