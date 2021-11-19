@@ -51,7 +51,8 @@ public final class SimulationStatsView extends Stage {
 			} else {
 				numberSimulations.setText(String.valueOf(to.getNumberSimulations()));
 				numberSuccess.setText(String.valueOf(to.getNumberSuccess()));
-				percentage.setText(String.valueOf(to.getPercentage()));
+				BigDecimal percentageDecimal = BigDecimal.valueOf(100 * to.getPercentage()).setScale(2, RoundingMode.HALF_UP);
+				percentage.setText(String.format("%s%%", percentageDecimal));
 				wallTime.setText(String.format("%s s", to.getWallTime()));
 				buildExtendedStatistics(to.getExtendedStats());
 
