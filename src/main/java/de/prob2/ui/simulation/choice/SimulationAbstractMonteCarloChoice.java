@@ -49,12 +49,12 @@ public class SimulationAbstractMonteCarloChoice extends SimulationMonteCarloChoi
 			this.getChildren().remove(tfPredicate);
 			if(to != null) {
 				if(to.getCheckingType() == SimulationCheckingType.TIMING) {
-					this.add(lbMonteCarloTime, 1, 10);
-					this.add(tfMonteCarloTime, 2, 10);
+					this.add(lbMonteCarloTime, 1, 8);
+					this.add(tfMonteCarloTime, 2, 8);
 				}
 				if(PREDICATE_TYPES.contains(to.getCheckingType())) {
-					this.add(lbPredicate, 1, 10);
-					this.add(tfPredicate, 2, 10);
+					this.add(lbPredicate, 1, 8);
+					this.add(tfPredicate, 2, 8);
 				}
 			}
 			choosingStage.sizeToScene();
