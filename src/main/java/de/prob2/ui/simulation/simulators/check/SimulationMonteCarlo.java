@@ -23,27 +23,11 @@ import java.util.Map;
 
 public class SimulationMonteCarlo extends Simulator {
 
-	public enum InitialType {
-		NO_CONDITION("No Condition"),
-		INITIAL_STEPS("Initial Number of Steps"),
-		INITIAL_PREDICATE("Initial Predicate"),
-		INITIAL_TIME("Initial Time");
-
-		private final String name;
-
-		InitialType(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
-
 	public enum StartingType {
 		NO_CONDITION("No Condition"),
 		START_AFTER_STEPS("Start after Number of Steps"),
 		STARTING_PREDICATE("Starting Predicate"),
+		STARTING_PREDICATE_ACTIVATED("Starting Predicate (activated)"),
 		STARTING_TIME("Starting Time");
 
 		private final String name;
@@ -95,13 +79,7 @@ public class SimulationMonteCarlo extends Simulator {
 
 	protected int currentNumberStepsBeforeChecking;
 
-	protected boolean initialConditionReached;
-
 	protected boolean startingConditionReached;
-
-	protected int initialStepAt;
-
-	protected int initialTimeAt;
 
 	protected int startAtStep;
 
@@ -123,11 +101,8 @@ public class SimulationMonteCarlo extends Simulator {
 		this.resultingTimestamps = new ArrayList<>();
 		this.numberExecutions = numberExecutions;
 		this.maxStepsBeforeProperty = maxStepsBeforeProperty;
-		this.initialConditionReached = false;
 		this.startingConditionReached = false;
 		this.currentNumberStepsBeforeChecking = Integer.MAX_VALUE;
-		this.initialStepAt = Integer.MAX_VALUE;
-		this.initialTimeAt = Integer.MAX_VALUE;
 		this.startAtStep = Integer.MAX_VALUE;
 		this.startAtTime = Integer.MAX_VALUE;
 		this.additionalInformation = additionalInformation;
@@ -140,7 +115,7 @@ public class SimulationMonteCarlo extends Simulator {
 		if(super.endingConditionReached(trace)) {
 			return true;
 		}
-		if(!initialConditionReached || !startingConditionReached) {
+		if(!startingConditionReached) {
 			return false;
 		}
 		if(additionalInformation.containsKey("STEPS_PER_EXECUTION")) {
@@ -164,45 +139,14 @@ public class SimulationMonteCarlo extends Simulator {
 	}
 
 	@Override
-	public void updateInitialInformation(Trace trace) {
-		super.updateInitialInformation(trace);
-		if(stepCounter < currentNumberStepsBeforeChecking || initialConditionReached) {
-			return;
-		}
-		if(additionalInformation.containsKey("INITIAL_STEPS")) {
-			int initialSteps = (int) additionalInformation.get("INITIAL_STEPS");
-			if(stepCounter >= initialSteps) {
-				setInitialInformation();
-			}
-		} else if(additionalInformation.containsKey("INITIAL_PREDICATE")) {
-			String predicate = (String) additionalInformation.get("INITIAL_PREDICATE");
-			State state = trace.getCurrentState();
-			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate, mode);
-			if("TRUE".equals(evalResult)) {
-				setInitialInformation();
-			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
-				throw new SimulationError("Initial predicate is not of type boolean");
-			}
-		} else if(additionalInformation.containsKey("INITIAL_TIME")) {
-			int initialTime = (int) additionalInformation.get("INITIAL_TIME");
-			if(time.get() >= initialTime) {
-				setInitialInformation();
-			}
-		} else {
-			setInitialInformation();
-		}
-	}
-
-	@Override
 	public void updateStartingInformation(Trace trace) {
 		super.updateStartingInformation(trace);
-		if(!initialConditionReached || startingConditionReached) {
+		if(stepCounter < currentNumberStepsBeforeChecking || startingConditionReached) {
 			return;
 		}
 		if(additionalInformation.containsKey("START_AFTER_STEPS")) {
 			int startAfterSteps = (int) additionalInformation.get("START_AFTER_STEPS");
-			if(stepCounter >= startAfterSteps + initialStepAt) {
+			if(stepCounter >= startAfterSteps) {
 				setStartingInformation();
 			}
 		} else if(additionalInformation.containsKey("STARTING_PREDICATE")) {
@@ -210,25 +154,43 @@ public class SimulationMonteCarlo extends Simulator {
 			State state = trace.getCurrentState();
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate, mode);
-			if("TRUE".equals(evalResult)) {
+			if ("TRUE".equals(evalResult)) {
 				setStartingInformation();
-			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
+			} else if (!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
+				throw new SimulationError("Starting predicate is not of type boolean");
+			}
+		} else if(additionalInformation.containsKey("STARTING_PREDICATE_ACTIVATED")) {
+
+			State previousState = trace.getPreviousState();
+
+			if(previousState == null || !previousState.isInitialised()) {
+				return;
+			}
+
+			String predicate = (String) additionalInformation.get("STARTING_PREDICATE_ACTIVATED");
+			SimulationHelperFunctions.EvaluationMode previousMode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			String previousEvalResult = simulationEventHandler.getCache().readValueWithCaching(previousState, predicate, previousMode);
+
+			State currentState = trace.getCurrentState();
+			SimulationHelperFunctions.EvaluationMode currentMode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			String currentEvalResult = simulationEventHandler.getCache().readValueWithCaching(currentState, predicate, currentMode);
+
+
+			if ("TRUE".equals(currentEvalResult)) {
+				if("FALSE".equals(previousEvalResult)) {
+					setStartingInformation();
+				}
+			} else if (!"FALSE".equals(currentEvalResult) && !currentEvalResult.startsWith("NOT-INITIALISED")) {
 				throw new SimulationError("Starting predicate is not of type boolean");
 			}
 		} else if(additionalInformation.containsKey("STARTING_TIME")) {
 			int startingTime = (int) additionalInformation.get("STARTING_TIME");
-			if(time.get() >= startingTime + initialTimeAt) {
+			if(time.get() >= startingTime) {
 				setStartingInformation();
 			}
 		} else {
 			setStartingInformation();
 		}
-	}
-
-	private void setInitialInformation() {
-		initialConditionReached = true;
-		initialStepAt = stepCounter;
-		initialTimeAt = time.get();
 	}
 
 	private void setStartingInformation() {
@@ -319,7 +281,6 @@ public class SimulationMonteCarlo extends Simulator {
 	@Override
 	public void resetSimulator() {
 		super.resetSimulator();
-		this.initialConditionReached = false;
 		this.startingConditionReached = false;
 		this.startAtStep = Integer.MAX_VALUE;
 		this.startAtTime = Integer.MAX_VALUE;

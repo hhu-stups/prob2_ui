@@ -15,12 +15,6 @@ public class SimulationChoiceBindings {
 
 	private final SimpleStringProperty maxStepsBeforePropertyProperty;
 
-	private final SimpleStringProperty initialStepsProperty;
-
-	private final SimpleStringProperty initialPredicateProperty;
-
-	private final SimpleStringProperty initialTimeProperty;
-
 	private final SimpleStringProperty startAfterProperty;
 
 	private final SimpleStringProperty startingPredicateProperty;
@@ -32,8 +26,6 @@ public class SimulationChoiceBindings {
 	private final SimpleStringProperty endingPredicateProperty;
 
 	private final SimpleStringProperty endingTimeProperty;
-
-	private final SimpleObjectProperty<SimulationMonteCarloChoice.SimulationInitialItem> initialItemProperty;
 
 	private final SimpleObjectProperty<SimulationMonteCarloChoice.SimulationStartingItem> startingItemProperty;
 
@@ -49,16 +41,12 @@ public class SimulationChoiceBindings {
 	public SimulationChoiceBindings() {
 		this.simulationsProperty = new SimpleStringProperty();
 		this.maxStepsBeforePropertyProperty = new SimpleStringProperty();
-		this.initialStepsProperty = new SimpleStringProperty();
-		this.initialPredicateProperty = new SimpleStringProperty();
-		this.initialTimeProperty = new SimpleStringProperty();
 		this.startAfterProperty = new SimpleStringProperty();
 		this.startingPredicateProperty = new SimpleStringProperty();
 		this.startingTimeProperty = new SimpleStringProperty();
 		this.stepsProperty = new SimpleStringProperty();
 		this.endingPredicateProperty = new SimpleStringProperty();
 		this.endingTimeProperty = new SimpleStringProperty();
-		this.initialItemProperty = new SimpleObjectProperty<>();
 		this.startingItemProperty = new SimpleObjectProperty<>();
 		this.endingItemProperty = new SimpleObjectProperty<>();
 		this.monteCarloTimeProperty = new SimpleStringProperty();
@@ -72,18 +60,6 @@ public class SimulationChoiceBindings {
 
 	public SimpleStringProperty maxStepsBeforePropertyProperty() {
 		return maxStepsBeforePropertyProperty;
-	}
-
-	public SimpleStringProperty initialStepsProperty() {
-		return initialStepsProperty;
-	}
-
-	public SimpleStringProperty initialPredicateProperty() {
-		return initialPredicateProperty;
-	}
-
-	public SimpleStringProperty initialTimeProperty() {
-		return initialTimeProperty;
 	}
 
 	public SimpleStringProperty startAfterProperty() {
@@ -108,10 +84,6 @@ public class SimulationChoiceBindings {
 
 	public SimpleStringProperty endingTimeProperty() {
 		return endingTimeProperty;
-	}
-
-	public SimpleObjectProperty<SimulationMonteCarloChoice.SimulationInitialItem> initialItemProperty() {
-		return initialItemProperty;
 	}
 
 	public SimpleObjectProperty<SimulationMonteCarloChoice.SimulationStartingItem> startingItemProperty() {

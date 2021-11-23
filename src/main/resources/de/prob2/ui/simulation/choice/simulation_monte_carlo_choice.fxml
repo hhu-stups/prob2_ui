@@ -10,7 +10,6 @@
 
 <!-- Do not remove the following imports as they are detected as unused accidentally -->
 
-<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationInitialItem?>
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationStartingItem?>
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationEndingItem?>
 
@@ -18,14 +17,6 @@
 
 <fx:root type="SimulationMonteCarloChoice" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
-		<Label fx:id="lbInitialSteps" text="%simulation.choice.initialNumberSteps"/>
-		<TextField fx:id="tfInitialSteps"/>
-
-		<Label fx:id="lbInitialPredicate" text="%simulation.choice.initialPredicate"/>
-		<TextField fx:id="tfInitialPredicate"/>
-
-		<Label fx:id="lbInitialTime" text="%simulation.choice.initialTime"/>
-		<TextField fx:id="tfInitialTime"/>
 
 		<Label fx:id="lbStartAfter" text="%simulation.choice.startAfterSteps"/>
 		<TextField fx:id="tfStartAfter"/>
@@ -56,20 +47,8 @@
 	<Label text="%simulation.choice.maxStepsBeforeProperty" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 	<TextField fx:id="tfMaxStepsBeforeProperty" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.initialCondition" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="initialChoice" GridPane.rowIndex="3" GridPane.columnIndex="2">
-		<items>
-			<FXCollections fx:factory="observableArrayList">
-				<SimulationMonteCarloChoice.SimulationInitialItem initialType="NO_CONDITION"/>
-				<SimulationMonteCarloChoice.SimulationInitialItem initialType="INITIAL_STEPS"/>
-				<SimulationMonteCarloChoice.SimulationInitialItem initialType="INITIAL_PREDICATE"/>
-				<SimulationMonteCarloChoice.SimulationInitialItem initialType="INITIAL_TIME"/>
-			</FXCollections>
-		</items>
-	</ChoiceBox>
-
-	<Label text="%simulation.choice.startingCondition" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="5" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.startingCondition" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="3" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="NO_CONDITION"/>
@@ -80,8 +59,8 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="7" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="5" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationMonteCarloChoice.SimulationEndingItem endingType="NUMBER_STEPS"/>

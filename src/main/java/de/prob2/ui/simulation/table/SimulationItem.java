@@ -85,24 +85,15 @@ public class SimulationItem implements IExecutableItem {
 			this.information.put("STARTING_PREDICATE", startingPredicate);
 		}
 
+
+		@JsonProperty("STARTING_PREDICATE_ACTIVATED")
+		private void setStartingPredicateActivated(final String startingPredicateActivated) {
+			this.information.put("STARTING_PREDICATE_ACTIVATED", startingPredicateActivated);
+		}
+
 		@JsonProperty("STARTING_TIME")
 		private void setStartingTime(final int startingTime) {
 			this.information.put("STARTING_TIME", startingTime);
-		}
-
-		@JsonProperty("INITIAL_STEPS")
-		private void setInitialSteps(final int initialSteps) {
-			this.information.put("INITIAL_STEPS", initialSteps);
-		}
-
-		@JsonProperty("INITIAL_PREDICATE")
-		private void setInitialPredicate(final String initialPredicate) {
-			this.information.put("INITIAL_PREDICATE", initialPredicate);
-		}
-
-		@JsonProperty("INITIAL_TIME")
-		private void setInitialTime(final int initialTime) {
-			this.information.put("INITIAL_TIME", initialTime);
 		}
 
 		@JsonProperty("HYPOTHESIS_CHECKING_TYPE")
