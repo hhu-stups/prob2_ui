@@ -2,7 +2,9 @@ package de.prob2.ui.animation.tracereplay;
 
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.exception.ProBError;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
@@ -26,10 +28,10 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	private final ObjectProperty<Checked> status;
 	private final DoubleProperty progress;
 	private final ListProperty<List<Checked>> postconditionStatus;
+	private final ObjectProperty<ReplayedTrace> replayedTrace;
+	private final ObjectProperty<ProBError> replayError;
 	private final Path location;
-	private String errorMessageBundleKey;
 	private BooleanProperty shouldExecute;
-	private Object[] errorMessageParams;
 
 	private final Injector injector;
 
@@ -37,16 +39,11 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.postconditionStatus = new SimpleListProperty<>(this, "postcondition", FXCollections.observableArrayList());
+		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
+		this.replayError = new SimpleObjectProperty<>(this, "replayError", null);
 		this.location = location;
-		this.errorMessageBundleKey = null;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.injector = injector;
-		
-		this.status.addListener((o, from, to) -> {
-			if (to != Checked.FAIL) {
-				this.errorMessageBundleKey = null;
-			}
-		});
 	}
 
 	@Override
@@ -87,24 +84,32 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.progressProperty().set(progress);
 	}
 	
+	public ObjectProperty<ReplayedTrace> replayedTraceProperty() {
+		return this.replayedTrace;
+	}
+	
+	public ReplayedTrace getReplayedTrace() {
+		return this.replayedTraceProperty().get();
+	}
+	
+	public void setReplayedTrace(final ReplayedTrace replayedTrace) {
+		this.replayedTraceProperty().set(replayedTrace);
+	}
+	
+	public ObjectProperty<ProBError> replayErrorProperty() {
+		return this.replayError;
+	}
+	
+	public ProBError getReplayError() {
+		return this.replayErrorProperty().get();
+	}
+	
+	public void setReplayError(final ProBError replayError) {
+		this.replayErrorProperty().set(replayError);
+	}
+	
 	public Path getLocation() {
 		return this.location;
-	}
-
-	public void setErrorMessageBundleKey(String errorMessageBundleKey) {
-		this.errorMessageBundleKey = errorMessageBundleKey;
-	}
-	
-	public String getErrorMessageBundleKey() {
-		return errorMessageBundleKey;
-	}
-	
-	public void setErrorMessageParams(Object... params) {
-		this.errorMessageParams = params;
-	}
-	
-	public Object[] getErrorMessageParams() {
-		return errorMessageParams;
 	}
 	
 	public void setSelected(boolean selected) {

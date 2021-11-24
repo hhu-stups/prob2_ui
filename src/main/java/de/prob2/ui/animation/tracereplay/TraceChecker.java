@@ -18,6 +18,7 @@ import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
 import de.prob.check.tracereplay.PostconditionPredicate;
 import de.prob.check.tracereplay.TraceReplay;
+import de.prob.check.tracereplay.TransitionReplayPrecision;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -77,6 +78,8 @@ public class TraceChecker {
 			return;
 		}
 		replayTrace.setChecked(Checked.NOT_CHECKED);
+		replayTrace.setReplayedTrace(null);
+		replayTrace.setReplayError(null);
 		// ReplayTraceFileCommand doesn't support progress updates yet,
 		// so set an indeterminate status for now.
 		// We cannot use -1, because it is already used to say that no replay is currently running
@@ -87,28 +90,25 @@ public class TraceChecker {
 		Thread replayThread = new Thread(() -> {
 			try {
 				final ReplayTraceFileCommand cmd = new ReplayTraceFileCommand(traceFile.toString());
-				stateSpace.execute(cmd);
-				// TODO ReplayTraceFileCommand doesn't check postconditions yet!
-				Platform.runLater(() -> replayTrace.setChecked(Checked.SUCCESS));
-				Trace trace = cmd.getTrace(stateSpace);
+				try {
+					stateSpace.execute(cmd);
+					// TODO ReplayTraceFileCommand doesn't check postconditions yet!
+					Platform.runLater(() -> replayTrace.setChecked(Checked.SUCCESS));
+				} catch (ProBError e) {
+					replayTrace.setReplayError(e);
+					Platform.runLater(() -> replayTrace.setChecked(Checked.FAIL));
+				}
+				replayTrace.setReplayedTrace(cmd.getTrace());
+				Trace trace = cmd.getTrace().getTrace(stateSpace);
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
-					if (replayTrace.getErrorMessageBundleKey() != null) {
+					if (replayTrace.getReplayError() != null) {
 						showTraceReplayCompleteFailed(trace, replayTrace);
 					} else {
 						currentTrace.set(trace);
 					}
 					afterTraceReplay.apply();
 				}
-			} catch (ProBError e) {
-				Platform.runLater(() -> {
-					replayTrace.setChecked(Checked.FAIL);
-					stageManager.makeExceptionAlert(
-						e,
-						"animation.tracereplay.alerts.traceReplayError.header",
-						"animation.tracereplay.alerts.traceReplayError.content"
-					).show();
-				});
 			} finally {
 				Platform.runLater(() -> replayTrace.setProgress(-1));
 				currentJobThreads.remove(Thread.currentThread());
@@ -186,7 +186,8 @@ public class TraceChecker {
 	private void showTraceReplayCompleteFailed(Trace trace, final ReplayTrace replayTrace) {
 		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 		Platform.runLater(() -> {
-			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, replayTrace.getErrorMessageParams());
+			// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
+			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "common.literal", TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, replayTrace.getReplayError().getMessage());
 
 			stageManager.register(alert);
 			alert.setLineNumber(lineNumber(replayTrace, trace.size()));
@@ -211,8 +212,22 @@ public class TraceChecker {
 		return this.runningProperty().get();
 	}
 
-	private int lineNumber(ReplayTrace replayTrace, int copyFailedTraceLength) {
-		PersistentTransition failedTransition = replayTrace.getPersistentTrace().getTransitionList().get(copyFailedTraceLength);
+	private int lineNumber(ReplayTrace replayTrace, int failedTraceLength) {
+		final List<TransitionReplayPrecision> precisions = replayTrace.getReplayedTrace().getTransitionReplayPrecisions();
+		int firstTransitionWithError = failedTraceLength;
+		for (int i = 0; i < precisions.size(); i++) {
+			if (precisions.get(i) != TransitionReplayPrecision.PRECISE) {
+				firstTransitionWithError = i;
+				break;
+			}
+		}
+		final List<PersistentTransition> transitionList = replayTrace.getPersistentTrace().getTransitionList();
+		if (firstTransitionWithError >= transitionList.size()) {
+			// Every transition was replayed, and each one was precise, but we still got a replay error...
+			// We have no other way to figure out which transition failed, so just give up.
+			return -1;
+		}
+		PersistentTransition failedTransition = transitionList.get(firstTransitionWithError);
 		int lineNumber = 0;
 		int operationNumber = 0;
 		try {
@@ -223,7 +238,7 @@ public class TraceChecker {
 				String nextLine = scanner.nextLine();
 				if (nextLine.contains("name")) {
 					operationNumber++;
-					if (nextLine.contains(failedTransition.getOperationName()) && operationNumber > copyFailedTraceLength) {
+					if (nextLine.contains(failedTransition.getOperationName()) && operationNumber > firstTransitionWithError) {
 						break;
 					}
 				}

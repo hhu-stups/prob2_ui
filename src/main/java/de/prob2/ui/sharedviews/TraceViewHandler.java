@@ -180,8 +180,9 @@ public class TraceViewHandler {
 		});
 		showErrorItem.setOnAction(event -> {
 			ReplayTrace replayTrace = row.getItem();
-			if(row.getItem().getErrorMessageBundleKey() != null) {
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, replayTrace.getErrorMessageParams());
+			if(row.getItem().getReplayError() != null) {
+				// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "common.literal", TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, replayTrace.getReplayError().getMessage());
 				alert.initOwner(scene.getWindow());
 				alert.setErrorMessage();
 			}
@@ -217,6 +218,8 @@ public class TraceViewHandler {
 		traceChecker.cancelReplay();
 		traces.forEach(trace -> {
 			trace.setChecked(Checked.NOT_CHECKED);
+			trace.setReplayedTrace(null);
+			trace.setReplayError(null);
 			trace.setPostconditionStatus(new ArrayList<>());
 		});
 	}
