@@ -60,6 +60,7 @@
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="NO_CONDITION"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="START_AFTER_STEPS"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE"/>
+				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE_ACTIVATED"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_TIME"/>
 			</FXCollections>
 		</items>
@@ -94,6 +95,8 @@
 	<ChoiceBox fx:id="estimationChoice" GridPane.rowIndex="9" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
+				<SimulationEstimationChoice.SimulationEstimationChoiceItem estimationType="MINIMUM"/>
+				<SimulationEstimationChoice.SimulationEstimationChoiceItem estimationType="MAXIMUM"/>
 				<SimulationEstimationChoice.SimulationEstimationChoiceItem estimationType="MEAN"/>
 			</FXCollections>
 		</items>

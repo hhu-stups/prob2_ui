@@ -54,6 +54,7 @@
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="NO_CONDITION"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="START_AFTER_STEPS"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE"/>
+				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE_ACTIVATED"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_TIME"/>
 			</FXCollections>
 		</items>

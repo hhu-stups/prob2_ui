@@ -11,6 +11,8 @@ import java.util.Map;
 public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 
 	public enum EstimationType {
+		MINIMUM("Minimum estimator"),
+		MAXIMUM("Maximum estimator"),
 		MEAN("Mean estimator");
 
 		private final String name;
@@ -38,6 +40,26 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 		this.epsilon = epsilon;
 	}
 
+	private void checkMinimum() {
+		int n = resultingTraces.size();
+		double ratio = (double) numberSuccess / n;
+		if(ratio >= desiredValue - epsilon) {
+			this.result = MonteCarloCheckResult.SUCCESS;
+		} else {
+			this.result = MonteCarloCheckResult.FAIL;
+		}
+	}
+
+	private void checkMaximum() {
+		int n = resultingTraces.size();
+		double ratio = (double) numberSuccess / n;
+		if(ratio <= desiredValue + epsilon) {
+			this.result = MonteCarloCheckResult.SUCCESS;
+		} else {
+			this.result = MonteCarloCheckResult.FAIL;
+		}
+	}
+
 	private void checkMean() {
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
@@ -50,11 +72,16 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 
 	public void check() {
 		switch (estimationType) {
+			case MINIMUM:
+				checkMinimum();
+				break;
+			case MAXIMUM:
+				checkMaximum();
+				break;
 			case MEAN:
 				checkMean();
 				break;
 			default:
-				// TODO: New estimation types
 				break;
 		}
 
