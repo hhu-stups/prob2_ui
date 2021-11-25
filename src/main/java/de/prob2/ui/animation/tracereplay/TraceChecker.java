@@ -19,6 +19,7 @@ import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
 import de.prob.check.tracereplay.PostconditionPredicate;
 import de.prob.check.tracereplay.TraceReplay;
+import de.prob.check.tracereplay.TraceReplayStatus;
 import de.prob.check.tracereplay.TransitionReplayPrecision;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
@@ -93,12 +94,16 @@ public class TraceChecker {
 				final ReplayTraceFileCommand cmd = new ReplayTraceFileCommand(traceFile.toString());
 				try {
 					stateSpace.execute(cmd);
-					Platform.runLater(() -> replayTrace.setChecked(Checked.SUCCESS));
 				} catch (ProBError e) {
 					replayTrace.setReplayError(e);
-					Platform.runLater(() -> replayTrace.setChecked(Checked.FAIL));
 				}
 				replayTrace.setReplayedTrace(cmd.getTrace());
+				// TODO Display replay information for each transition if the replay was not perfect/complete
+				if (replayTrace.getReplayError() == null && cmd.getTrace().getReplayStatus() == TraceReplayStatus.PARTIAL) {
+					// FIXME Should this case be reported as an error on the Prolog side?
+					replayTrace.setReplayError(new ProBError("Trace could not be replayed completely"));
+				}
+				Platform.runLater(() -> replayTrace.setChecked(replayTrace.getReplayError() == null ? Checked.SUCCESS : Checked.FAIL));
 				Trace trace = cmd.getTrace().getTrace(stateSpace);
 				final PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 				final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
