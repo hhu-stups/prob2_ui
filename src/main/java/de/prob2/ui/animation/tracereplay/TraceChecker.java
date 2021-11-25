@@ -123,10 +123,11 @@ public class TraceChecker {
 	}
 
 	public void showTestError(PersistentTrace persistentTrace, List<List<TraceReplay.PostconditionResult>> postconditionResults) {
+		assert persistentTrace.getTransitionList().size() >= postconditionResults.size();
 		StringBuilder sb = new StringBuilder();
 		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
 		boolean failed = false;
-		for(int i = 0; i < transitions.size(); i++) {
+		for(int i = 0; i < postconditionResults.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
 			List<TraceReplay.PostconditionResult> postconditionTransitionResults = postconditionResults.get(i);
 			for(int j = 0; j < postconditionTransitionResults.size(); j++) {

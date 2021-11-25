@@ -186,16 +186,13 @@ public class TraceViewHandler {
 				alert.initOwner(scene.getWindow());
 				alert.setErrorMessage();
 			}
-			// This empty check is needed as a workaround while the new trace replay doesn't check postconditions yet.
-			if (!replayTrace.getPostconditionStatus().isEmpty()) {
-				traceChecker.showTestError(row.getItem().getPersistentTrace(), replayTrace.getPostconditionStatus()
-						.stream()
-						.map(statuses -> statuses.stream()
-								.map(status -> status == Checked.SUCCESS ? TraceReplay.PostconditionResult.SUCCESS :
-										       status == Checked.FAIL ? TraceReplay.PostconditionResult.FAIL : TraceReplay.PostconditionResult.PARSE_ERROR)
-								.collect(Collectors.toList()))
-						.collect(Collectors.toList()));
-			}
+			traceChecker.showTestError(row.getItem().getPersistentTrace(), replayTrace.getPostconditionStatus()
+					.stream()
+					.map(statuses -> statuses.stream()
+							.map(status -> status == Checked.SUCCESS ? TraceReplay.PostconditionResult.SUCCESS :
+									       status == Checked.FAIL ? TraceReplay.PostconditionResult.FAIL : TraceReplay.PostconditionResult.PARSE_ERROR)
+							.collect(Collectors.toList()))
+					.collect(Collectors.toList()));
 		});
 		openInExternalEditorItem.setOnAction(
 				event -> injector.getInstance(ExternalEditor.class).open(currentProject.getLocation().resolve(row.getItem().getLocation())));
