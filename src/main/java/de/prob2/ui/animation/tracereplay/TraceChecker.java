@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Scanner;
@@ -92,7 +93,6 @@ public class TraceChecker {
 				final ReplayTraceFileCommand cmd = new ReplayTraceFileCommand(traceFile.toString());
 				try {
 					stateSpace.execute(cmd);
-					// TODO ReplayTraceFileCommand doesn't check postconditions yet!
 					Platform.runLater(() -> replayTrace.setChecked(Checked.SUCCESS));
 				} catch (ProBError e) {
 					replayTrace.setReplayError(e);
@@ -100,6 +100,10 @@ public class TraceChecker {
 				}
 				replayTrace.setReplayedTrace(cmd.getTrace());
 				Trace trace = cmd.getTrace().getTrace(stateSpace);
+				final PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
+				final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
+				storePostconditionResults(replayTrace, postconditionResults);
+				showTestError(persistentTrace, postconditionResults);
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
 					if (replayTrace.getReplayError() != null) {
@@ -182,6 +186,31 @@ public class TraceChecker {
 		}
 	}
 
+	private static void storePostconditionResults(final ReplayTrace replayTrace, final List<List<TraceReplay.PostconditionResult>> postconditionResults) {
+		final List<List<Checked>> convertedResults = new ArrayList<>();
+		boolean successful = true;
+		for (List<TraceReplay.PostconditionResult> transitionResults : postconditionResults) {
+			final List<Checked> convertedTransitionResults = new ArrayList<>();
+			for (TraceReplay.PostconditionResult result : transitionResults) {
+				final Checked convertedResult;
+				if (result == TraceReplay.PostconditionResult.SUCCESS) {
+					convertedResult = Checked.SUCCESS;
+				} else if (result == TraceReplay.PostconditionResult.FAIL) {
+					convertedResult = Checked.FAIL;
+					successful = false;
+				} else {
+					convertedResult = Checked.PARSE_ERROR;
+					successful = false;
+				}
+				convertedTransitionResults.add(convertedResult);
+			}
+			convertedResults.add(convertedTransitionResults);
+		}
+		replayTrace.setPostconditionStatus(convertedResults);
+		if (!successful) {
+			Platform.runLater(() -> replayTrace.setChecked(Checked.FAIL));
+		}
+	}
 
 	private void showTraceReplayCompleteFailed(Trace trace, final ReplayTrace replayTrace) {
 		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
