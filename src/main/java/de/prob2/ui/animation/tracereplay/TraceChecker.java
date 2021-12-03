@@ -3,25 +3,27 @@ package de.prob2.ui.animation.tracereplay;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.ReplayTraceFileCommand;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.OperationDisabledness;
 import de.prob.check.tracereplay.OperationEnabledness;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
 import de.prob.check.tracereplay.PostconditionPredicate;
+import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob.check.tracereplay.TraceReplayStatus;
 import de.prob.check.tracereplay.TransitionReplayPrecision;
-import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -81,7 +83,6 @@ public class TraceChecker {
 		}
 		replayTrace.setChecked(Checked.NOT_CHECKED);
 		replayTrace.setReplayedTrace(null);
-		replayTrace.setReplayError(null);
 		// ReplayTraceFileCommand doesn't support progress updates yet,
 		// so set an indeterminate status for now.
 		// We cannot use -1, because it is already used to say that no replay is currently running
@@ -91,27 +92,24 @@ public class TraceChecker {
 		final Path traceFile = injector.getInstance(CurrentProject.class).getLocation().resolve(replayTrace.getLocation());
 		Thread replayThread = new Thread(() -> {
 			try {
-				final ReplayTraceFileCommand cmd = new ReplayTraceFileCommand(traceFile.toString());
-				try {
-					stateSpace.execute(cmd);
-				} catch (ProBError e) {
-					replayTrace.setReplayError(e);
-				}
-				replayTrace.setReplayedTrace(cmd.getTrace());
-				// TODO Display replay information for each transition if the replay was not perfect/complete
-				if (replayTrace.getReplayError() == null && cmd.getTrace().getReplayStatus() == TraceReplayStatus.PARTIAL) {
+				ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, traceFile);
+				if (replayed.getErrors().isEmpty() && replayed.getReplayStatus() == TraceReplayStatus.PARTIAL) {
 					// FIXME Should this case be reported as an error on the Prolog side?
-					replayTrace.setReplayError(new ProBError("Trace could not be replayed completely"));
+					final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
+					replayed = replayed.withErrors(Collections.singletonList(error));
 				}
-				Platform.runLater(() -> replayTrace.setChecked(replayTrace.getReplayError() == null ? Checked.SUCCESS : Checked.FAIL));
-				Trace trace = cmd.getTrace().getTrace(stateSpace);
+				final ReplayedTrace replayedFinal = replayed;
+				replayTrace.setReplayedTrace(replayed);
+				// TODO Display replay information for each transition if the replay was not perfect/complete
+				Platform.runLater(() -> replayTrace.setChecked(replayedFinal.getErrors().isEmpty() ? Checked.SUCCESS : Checked.FAIL));
+				Trace trace = replayed.getTrace(stateSpace);
 				final PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 				final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
 				storePostconditionResults(replayTrace, postconditionResults);
 				showTestError(persistentTrace, postconditionResults);
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
-					if (replayTrace.getReplayError() != null) {
+					if (!replayed.getErrors().isEmpty()) {
 						showTraceReplayCompleteFailed(trace, replayTrace);
 					} else {
 						currentTrace.set(trace);
@@ -222,7 +220,10 @@ public class TraceChecker {
 		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
 		Platform.runLater(() -> {
 			// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
-			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "common.literal", TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, replayTrace.getReplayError().getMessage());
+			final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()
+				.map(ErrorItem::toString)
+				.collect(Collectors.joining("\n"));
+			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "common.literal", TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, errorMessage);
 
 			stageManager.register(alert);
 			alert.setLineNumber(lineNumber(replayTrace, trace.size()));

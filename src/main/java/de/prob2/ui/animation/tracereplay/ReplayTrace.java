@@ -29,7 +29,6 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	private final DoubleProperty progress;
 	private final ListProperty<List<Checked>> postconditionStatus;
 	private final ObjectProperty<ReplayedTrace> replayedTrace;
-	private final ObjectProperty<ProBError> replayError;
 	private final Path location;
 	private BooleanProperty shouldExecute;
 
@@ -40,7 +39,6 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.postconditionStatus = new SimpleListProperty<>(this, "postcondition", FXCollections.observableArrayList());
 		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
-		this.replayError = new SimpleObjectProperty<>(this, "replayError", null);
 		this.location = location;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.injector = injector;
@@ -94,18 +92,6 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	
 	public void setReplayedTrace(final ReplayedTrace replayedTrace) {
 		this.replayedTraceProperty().set(replayedTrace);
-	}
-	
-	public ObjectProperty<ProBError> replayErrorProperty() {
-		return this.replayError;
-	}
-	
-	public ProBError getReplayError() {
-		return this.replayErrorProperty().get();
-	}
-	
-	public void setReplayError(final ProBError replayError) {
-		this.replayErrorProperty().set(replayError);
 	}
 	
 	public Path getLocation() {
