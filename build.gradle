@@ -89,10 +89,6 @@ application {
 	// See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
 	mainClass = "de.prob2.ui.Main"
 
-	applicationDefaultJvmArgs += [
-		"-Xss2M",
-	]
-
 	if (JavaVersion.current().java9Compatible) {
 		applicationDefaultJvmArgs += exports.collect {"--add-exports=${it}=ALL-UNNAMED".toString()}
 		applicationDefaultJvmArgs += opens.collect {"--add-opens=${it}=ALL-UNNAMED".toString()}

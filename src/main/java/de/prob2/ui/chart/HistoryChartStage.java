@@ -146,6 +146,8 @@ public final class HistoryChartStage extends Stage {
 	@FXML
 	private CheckBox separateChartsCheckBox;
 	@FXML
+	private CheckBox rectangularLineChartCheckBox;
+	@FXML
 	private ChoiceBox<HistoryItem> startChoiceBox;
 
 	private final StageManager stageManager;
@@ -205,6 +207,11 @@ public final class HistoryChartStage extends Stage {
 			}
 		});
 		this.separateChartsCheckBox.setSelected(true);
+
+		this.rectangularLineChartCheckBox.selectedProperty().addListener((observable, from, to) -> {
+			updateCharts();
+		});
+		this.rectangularLineChartCheckBox.setSelected(true);
 
 		this.startChoiceBox.setConverter(new HistoryItemStringConverter());
 		this.startChoiceBox.valueProperty().addListener((observable, from, to) -> this.updateCharts());
@@ -369,6 +376,10 @@ public final class HistoryChartStage extends Stage {
 			} catch (IllegalArgumentException e) {
 				LOGGER.debug("Not convertible to int, ignoring", e);
 				continue;
+			}
+			// Add additional data point for rectangular shapes in line chart
+			if (rectangularLineChartCheckBox.isSelected()) {
+				newDatas.get(i).add(0, new XYChart.Data<>(xPos + 1, value));
 			}
 			newDatas.get(i).add(0, new XYChart.Data<>(xPos, value));
 		}

@@ -1,13 +1,22 @@
 package de.prob2.ui.sharedviews;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
-import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
+import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
@@ -16,6 +25,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -34,16 +44,10 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @Singleton
 public class TraceViewHandler {
@@ -180,8 +184,12 @@ public class TraceViewHandler {
 		});
 		showErrorItem.setOnAction(event -> {
 			ReplayTrace replayTrace = row.getItem();
-			if(row.getItem().getErrorMessageBundleKey() != null) {
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, replayTrace.getErrorMessageBundleKey(), TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, replayTrace.getErrorMessageParams());
+			if(!row.getItem().getReplayedTrace().getErrors().isEmpty()) {
+				// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
+				final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()
+					.map(ErrorItem::toString)
+					.collect(Collectors.joining("\n"));
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "common.literal", TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, errorMessage);
 				alert.initOwner(scene.getWindow());
 				alert.setErrorMessage();
 			}
@@ -214,6 +222,7 @@ public class TraceViewHandler {
 		traceChecker.cancelReplay();
 		traces.forEach(trace -> {
 			trace.setChecked(Checked.NOT_CHECKED);
+			trace.setReplayedTrace(null);
 			trace.setPostconditionStatus(new ArrayList<>());
 		});
 	}

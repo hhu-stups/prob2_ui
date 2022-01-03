@@ -58,6 +58,7 @@
 									<Insets topRightBottomLeft="10.0" />
 								</padding>
 								<CheckBox fx:id="separateChartsCheckBox" text="%chart.historyChart.separateCharts" />
+								<CheckBox fx:id="rectangularLineChartCheckBox" text="%chart.historyChart.rectangularLineChart" />
 								<VBox spacing="5.0">
 									<Label text="%chart.historyChart.startPosition">
 										<labelFor>
