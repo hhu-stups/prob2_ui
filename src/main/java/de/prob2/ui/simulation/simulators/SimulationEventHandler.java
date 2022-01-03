@@ -60,8 +60,9 @@ public class SimulationEventHandler {
 			return null;
 		}
 		Map<String, String> values = new HashMap<>();
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		for(String parameter : parameters.keySet()) {
-			String value = evaluateWithParameters(currentState, parameters.get(parameter), activation.getFiringTransitionParameters(), activation.getFiringTransitionParametersPredicate());
+			String value = evaluateWithParameters(currentState, parameters.get(parameter), activation.getFiringTransitionParameters(), activation.getFiringTransitionParametersPredicate(), mode);
 			values.put(parameter, value);
 		}
 		return values;
@@ -100,9 +101,8 @@ public class SimulationEventHandler {
 		return values;
 	}
 
-	private String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate) {
+	private String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate, SimulationHelperFunctions.EvaluationMode mode) {
 		String newExpression;
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
 			newExpression = expression;
 		} else {
@@ -259,7 +259,7 @@ public class SimulationEventHandler {
 		String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
 		Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
 		Object probability = activationOperationConfiguration.getProbabilisticVariables();
-		int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates));
+		int evaluatedTime = Integer.parseInt(cache.readValueWithCaching(state, time, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
 
 		switch (activationKind) {
 			case MULTI:

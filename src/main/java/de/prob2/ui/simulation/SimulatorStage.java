@@ -436,14 +436,16 @@ public class SimulatorStage extends Stage {
 	private void loadSimulationItems() {
 		SimulationConfiguration config = realTimeSimulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
-
-		for(ActivationConfiguration activationConfig : config.getActivationConfigurations()) {
-			if(activationConfig instanceof ActivationOperationConfiguration) {
-				observableList.add(createOperationDebugItem(activationConfig));
-			} else {
-				observableList.add(createChoiceDebugItem(activationConfig));
+		if(config != null) {
+			for(ActivationConfiguration activationConfig : config.getActivationConfigurations()) {
+				if(activationConfig instanceof ActivationOperationConfiguration) {
+					observableList.add(createOperationDebugItem(activationConfig));
+				} else {
+					observableList.add(createChoiceDebugItem(activationConfig));
+				}
 			}
 		}
+		
 		simulationDebugItems.setItems(observableList);
 		simulationDebugItems.refresh();
 	}
