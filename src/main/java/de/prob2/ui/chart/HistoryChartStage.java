@@ -186,11 +186,16 @@ public final class HistoryChartStage extends Stage {
 				}
 			}
 			this.updateCharts();
+			this.updateFormulaCodeList();
 		});
 		
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if(from != to) {
-				this.formulaList.getItems().clear();
+				if (!to.getHistoryChartItems().isEmpty()) {
+					to.getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s, FormulaExpand.EXPAND)));
+				} else {
+					this.formulaList.getItems().clear();
+				}
 			}
 		});
 		
@@ -232,11 +237,19 @@ public final class HistoryChartStage extends Stage {
 	private void handleAdd() {
 		this.formulaList.getItems().add(new ClassicalB("0", FormulaExpand.EXPAND));
 		this.formulaList.edit(this.formulaList.getItems().size() - 1);
+		updateFormulaCodeList();
 	}
 
 	@FXML
 	private void handleRemove() {
 		this.formulaList.getItems().remove(this.formulaList.getSelectionModel().getSelectedIndex());
+		updateFormulaCodeList();
+	}
+
+	private void updateFormulaCodeList() {
+		ArrayList<String> formulaCodeList = new ArrayList<>();
+		this.formulaList.getItems().forEach(b -> formulaCodeList.add(b.getCode()));
+		this.currentProject.currentMachineProperty().get().setHistoryChartItems(formulaCodeList);
 	}
 
 	private void removeCharts(final int start, final int end) {
