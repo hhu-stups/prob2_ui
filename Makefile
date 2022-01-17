@@ -20,7 +20,7 @@ clean:
 	rm out.prop
 
 # version of ProB2UI without optional SNAPSHOT suffixes:
-PROB2UI_VERSION=1.1.0
+PROB2UI_VERSION=1.2.0
 DMGPROB2=ProB\ 2\ UI
 DMGFILE=build/distributions/$(DMGPROB2)-$(PROB2UI_VERSION).dmg
 ZIP_FILE=build/distributions/ProB2-UI-ForNotarization.zip
@@ -76,7 +76,7 @@ makejar:
 	jar cvf $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)-mac.jar -C $(JAR_TO_SIGN)/ .
 
 check:
-	@echo "4: Check signing"
+	@echo "4: Check signing (of $(JAR_TO_SIGN))"
 	codesign -dvvv $(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib
 	codesign -vv --deep-verify $(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib
 	codesign -d --entitlements :- $(JAR_TO_SIGN)/com/sun/jna/darwin/libjnidispatch.jnilib
@@ -86,12 +86,12 @@ check:
 
 
 $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(DMGPROB2)
-	@echo "Step 5: Putting APP into a zipfile for Apple's notarization"
+	@echo "Step 5: Putting APP into a zipfile for Apple's notarization (into $(ZIP_FILE))"
 	/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
 	
-NOTVERS = 1.10.2-final
+NOTVERS = 1.2.0-beta1
 notarize-app: $(ZIP_FILE)
-	@echo "Step 6: Sending Notarization request to Apple for APP"
+	@echo "Step 6: Sending Notarization request to Apple for APP (in zipfile $(ZIP_FILE))"
 	xcrun altool --notarize-app\
                --primary-bundle-id "de.hhu.stups.prob2ui.$(NOTVERS).zip"\
                --username $(AC_USERNAME)\
