@@ -55,6 +55,14 @@
 					// obj not found (error message has already been displayed by checkSvgId)
 				} else if(attribute=="text") {
 					obj.textContent = value;
+				} else if(attribute=="class" && value != "") {
+				   if(value[0]=="+") {
+					  obj.classList.add(value.substr(1));
+				   } else if(value[0]=="-") {
+					  obj.classList.remove(value.substr(1));
+				   } else {
+					  obj.setAttribute(attribute, value);
+				   }
 				} else {
 					obj.setAttribute(attribute, value);
 				}
