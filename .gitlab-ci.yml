@@ -27,18 +27,6 @@ stages:
     # pandoc is needed to build the ProB 2 UI docs.
     - apt-get install --assume-yes git pandoc
 
-.test-mac:
-  extends: .test-common
-  before_script:
-    - export JAVA_HOME="/usr/local/jdk/jdk-17/Contents/Home"
-    - export PATH="${JAVA_HOME}/bin:${PATH}"
-
-.test-windows:
-  extends: .test-common
-  before_script:
-    - SET JAVA_HOME=C:\Program Files\Java\jdk-17
-    - SET PATH=%JAVA_HOME%\bin;%PATH%
-
 test:jdk-8-linux:
   extends: .test-linux
   image: openjdk:8-jdk-slim
@@ -66,14 +54,20 @@ test:jdk-17-linux:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
 
 test:jdk-17-macos:
-  extends: .test-mac
+  extends: .test-common
+  before_script:
+    - export JAVA_HOME="/usr/local/jdk/jdk-17/Contents/Home"
+    - export PATH="${JAVA_HOME}/bin:${PATH}"
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
   tags:
     - macos
 
 test:jdk-17-windows64:
-  extends: .test-windows
+  extends: .test-common
+  before_script:
+    - SET JAVA_HOME=C:\Program Files\Java\jdk-17
+    - SET PATH=%JAVA_HOME%\bin;%PATH%
   script:
     - call gradlew %GRADLE_OPTIONS% check jpackage
   tags:
