@@ -30,14 +30,14 @@ stages:
 .test-mac:
   extends: .test-common
   before_script:
-    - export JAVA_HOME="/usr/local/jdk/jdk-14.0.2.jdk/Contents/Home"
+    - export JAVA_HOME="/usr/local/jdk/jdk-17/Contents/Home"
     - export PATH="${JAVA_HOME}/bin:${PATH}"
     - export GRADLE_USER_HOME="${PWD}/.gradle"
 
 .test-windows:
   extends: .test-common
   before_script:
-    - SET JAVA_HOME=C:\Program Files\Java\jdk-14.0.2
+    - SET JAVA_HOME=C:\Program Files\Java\jdk-17
     - SET PATH=%JAVA_HOME%\bin;%PATH%
     - SET GRADLE_USER_HOME=%cd%\.gradle
 
@@ -58,23 +58,23 @@ test:jdk-8-linux:
     - rm -r "libopenjfx-java.deb" "libopenjfx-java"
   script: ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar
 
-test:jdk-14-linux:
+test:jdk-17-linux:
   extends: .test-linux
-  image: openjdk:14-jdk-slim
+  image: openjdk:17-jdk-slim
   before_script:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
 
-test:jdk-14-macos:
+test:jdk-17-macos:
   extends: .test-mac
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
   tags:
     - macos
 
-test:jdk-14-windows64:
+test:jdk-17-windows64:
   extends: .test-windows
   script:
     - call gradlew %GRADLE_OPTIONS% check jpackage
