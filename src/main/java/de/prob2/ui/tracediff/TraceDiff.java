@@ -64,6 +64,8 @@ public class TraceDiff extends VBox {
 	private static String argDelimiter;
 
 	static class TraceDiffList extends ArrayList<TraceDiffItem> {
+		//FIXME Trace Diff does not show (any?) errors since trace "repairs" itself (at least in some cases)
+		//TODO get variables for textual diff -> TraceChecker
 		TraceDiffList(List<?> list) {
 			for (int i = 0; i < list.size(); i++) {
 				String s = getRep(list.get(i));
@@ -258,7 +260,6 @@ public class TraceDiff extends VBox {
 		translateList(new TraceDiffList(pTransitions), persistentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
-		System.out.println(argDelimiter.endsWith("\n"));
 	}
 
 	final void setLists(Trace lost, Trace history) {
@@ -273,7 +274,6 @@ public class TraceDiff extends VBox {
 		translateList(new TraceDiffList(hTransitions), persistentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
-		System.out.println(argDelimiter.endsWith("\n"));
 	}
 
 	private void translateList(TraceDiffList stringList, ListView<TraceDiffItem> listView) {
