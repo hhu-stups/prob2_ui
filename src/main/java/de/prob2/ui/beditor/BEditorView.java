@@ -160,7 +160,7 @@ public class BEditorView extends BorderPane {
 		machineChoice.setConverter(new StringConverter<Path>() {
 			@Override
 			public String toString(final Path object) {
-				return object.getFileName().toString();
+				return object == null ? "" : object.getFileName().toString();
 			}
 			
 			@Override
