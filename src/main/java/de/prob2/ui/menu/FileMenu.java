@@ -1,9 +1,20 @@
 package de.prob2.ui.menu;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
+import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.eventb.EventBPackageModel;
+import de.prob.model.eventb.translate.ModelToXML;
+import de.prob.model.representation.AbstractModel;
+import de.prob.model.representation.XTLModel;
+import de.prob.scripting.Api;
 import de.prob.statespace.FormalismType;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.WarningAlert;
@@ -16,17 +27,28 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
 import javafx.beans.InvalidationListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 public class FileMenu extends Menu {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
+	
 	@FXML
 	private MenuItem preferencesItem;
 	@FXML
@@ -39,6 +61,16 @@ public class FileMenu extends Menu {
 	private MenuItem extendedStaticAnalysisItem;
 	@FXML
 	private MenuItem viewFormattedCodeItem;
+	@FXML
+	private Menu exportAsMenu;
+	@FXML
+	private MenuItem exportAsClassicalBAsciiItem;
+	@FXML
+	private MenuItem exportAsClassicalBUnicodeItem;
+	@FXML
+	private MenuItem exportAsRodinProject;
+	@FXML
+	private MenuItem exportAsEventBProlog;
 	@FXML
 	private MenuItem reloadMachineItem;
 
@@ -80,6 +112,22 @@ public class FileMenu extends Menu {
 
 		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B));
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.isNull());
+		this.exportAsMenu.disableProperty().bind(currentTrace.isNull());
+
+		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				final AbstractModel model = to.getModel();
+				// Pretty-printing is not supported for XTL.
+				final boolean noClassicalBExport = model instanceof XTLModel;
+				// ProB 2's Event-B exporters currently only work with models loaded from a Rodin project, not from an .eventb package.
+				final boolean noEventBExport = !(model instanceof EventBModel) || model instanceof EventBPackageModel;
+				this.exportAsClassicalBAsciiItem.setDisable(noClassicalBExport);
+				this.exportAsClassicalBUnicodeItem.setDisable(noClassicalBExport);
+				this.exportAsRodinProject.setDisable(noEventBExport);
+				this.exportAsEventBProlog.setDisable(noEventBExport);
+			}
+		});
+
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
 	}
@@ -127,6 +175,72 @@ public class FileMenu extends Menu {
 		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
 		stage.show();
 		stage.toFront();
+	}
+
+	@FXML
+	private void handleExportClassicalB(final ActionEvent event) {
+		final FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().addAll(
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.classicalB", "mch"),
+			fileChooserManager.getAllExtensionsFilter()
+		);
+		chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getCurrentMachine().getLocation()) + "_flat.mch");
+		final Path path = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
+		if (path == null) {
+			return;
+		}
+		
+		final StateSpace stateSpace = currentTrace.getStateSpace();
+		final String code;
+		if (event.getSource() == exportAsClassicalBAsciiItem) {
+			final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
+			stateSpace.execute(cmd);
+			code = cmd.getPrettyPrint();
+		} else if (event.getSource() == exportAsClassicalBUnicodeItem) {
+			final GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
+			stateSpace.execute(cmd);
+			code = cmd.getPrettyPrint();
+		} else {
+			throw new AssertionError();
+		}
+
+		try {
+			Files.write(path, Arrays.asList(code.split("\n")));
+		} catch (IOException e) {
+			LOGGER.error("Failed to save pretty-print", e);
+			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path).show();
+		}
+	}
+
+	@FXML
+	private void handleExportRodin() {
+		final Path path = fileChooserManager.showDirectoryChooser(new DirectoryChooser(), FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
+		if (path == null) {
+			return;
+		}
+
+		new ModelToXML().writeToRodin((EventBModel)currentTrace.getStateSpace().getModel(), path.getFileName().toString(), path.getParent().toString());
+	}
+
+	@FXML
+	private void handleExportEventBProlog() {
+		final FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().addAll(
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.eventBPackage", "eventb"),
+			fileChooserManager.getAllExtensionsFilter()
+		);
+		chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getCurrentMachine().getLocation()) + ".eventb");
+		final Path path = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
+		if (path == null) {
+			return;
+		}
+
+		try {
+			injector.getInstance(Api.class).eventb_save(currentTrace.getStateSpace(), path.toString());
+		} catch (IOException e) {
+			LOGGER.error("Failed to save Event-B package", e);
+			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path).show();
+		}
 	}
 
 	@FXML
