@@ -26,6 +26,7 @@ import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.ErrorDisplayFilter;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -35,6 +36,8 @@ import de.prob2.ui.statusbar.StatusBar;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.control.Alert.AlertType;
 
 import org.slf4j.Logger;
@@ -56,7 +59,8 @@ public class MachineLoader {
 	private final ReadOnlyBooleanWrapper loading;
 	private final Object openLock;
 	private final Object currentAnimatorLock;
-	private ReusableAnimator currentAnimator;
+	private final ReadOnlyObjectWrapper<ReusableAnimator> currentAnimator;
+	private final ReadOnlyBooleanWrapper currentAnimatorStarting;
 
 	@Inject
 	public MachineLoader(
@@ -81,7 +85,8 @@ public class MachineLoader {
 		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
 		this.openLock = new Object();
 		this.currentAnimatorLock = new Object();
-		this.currentAnimator = null;
+		this.currentAnimator = new ReadOnlyObjectWrapper<>(this, "currentAnimator", null);
+		this.currentAnimatorStarting = new ReadOnlyBooleanWrapper(this, "currentAnimatorStarting", false);
 	}
 
 	public ReadOnlyBooleanProperty loadingProperty() {
@@ -93,6 +98,29 @@ public class MachineLoader {
 	}
 
 	/**
+	 * For internal use only by {@link PrologOutputStage}.
+	 * In other code, please use {@link #getActiveStateSpace()} instead.
+	 * 
+	 * @return property holding the current shared animator
+	 */
+	public ReadOnlyObjectProperty<ReusableAnimator> currentAnimatorProperty() {
+		return this.currentAnimator.getReadOnlyProperty();
+	}
+
+	public ReadOnlyBooleanProperty currentAnimatorStartingProperty() {
+		return this.currentAnimatorStarting.getReadOnlyProperty();
+	}
+
+	private static void shutdownAnimator(final ReusableAnimator animator) {
+		LOGGER.info("Shutting down animator: {}", animator);
+		final StateSpace currentStateSpace = animator.getCurrentStateSpace();
+		if (currentStateSpace != null) {
+			currentStateSpace.kill();
+		}
+		animator.kill();
+	}
+
+	/**
 	 * Get the single shared animator instance used by the UI.
 	 * If no shared animator instance has been started yet or it is no longer working,
 	 * a new animator is started and saved as the shared animator.
@@ -101,27 +129,28 @@ public class MachineLoader {
 	 */
 	private ReusableAnimator getAnimator() {
 		synchronized (this.currentAnimatorLock) {
-			if (this.currentAnimator != null) {
+			if (this.currentAnimator.get() != null) {
 				// Check that the existing animator is still working,
 				// by executing a command that does nothing and looking for errors.
 				try {
-					this.currentAnimator.execute(new GetVersionCommand());
+					this.currentAnimator.get().execute(new GetVersionCommand());
 				} catch (CliError | ProBError e) {
 					LOGGER.warn("Main animator is no longer working - restarting", e);
-					final StateSpace currentStateSpace = this.currentAnimator.getCurrentStateSpace();
-					if (currentStateSpace != null) {
-						currentStateSpace.kill();
-					}
-					this.currentAnimator.kill();
-					this.currentAnimator = null;
+					shutdownAnimator(this.currentAnimator.get());
+					this.currentAnimator.set(null);
 				}
 			}
-			if (this.currentAnimator == null) {
+			if (this.currentAnimator.get() == null) {
 				// Create a new animator if there is no existing one (or it was not working anymore).
 				LOGGER.info("Starting a new main animator");
-				this.currentAnimator = injector.getInstance(ReusableAnimator.class);
+				this.currentAnimatorStarting.set(true);
+				try {
+					this.currentAnimator.set(injector.getInstance(ReusableAnimator.class));
+				} finally {
+					this.currentAnimatorStarting.set(false);
+				}
 			}
-			return this.currentAnimator;
+			return this.currentAnimator.get();
 		}
 	}
 
@@ -199,8 +228,23 @@ public class MachineLoader {
 	 * so that the user can use the console or load machines more quickly
 	 * than if the animator would be started on demand.
 	 */
-	public void preloadAnimators() {
+	public void startSharedAnimator() {
 		this.getActiveStateSpace();
+	}
+
+	/**
+	 * Shut down the current shared animator (probcli instance), if any.
+	 * This method normally should not be used.
+	 * It is only meant for use by {@link PrologOutputStage},
+	 * to allow the user to manually shut down probcli in case something went wrong.
+	 */
+	public void shutdownSharedAnimator() {
+		synchronized (this.currentAnimatorLock) {
+			if (this.currentAnimator.get() != null) {
+				shutdownAnimator(this.currentAnimator.get());
+				this.currentAnimator.set(null);
+			}
+		}
 	}
 
 	public void loadAsync(Machine machine, Map<String, String> pref) {

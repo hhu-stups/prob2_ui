@@ -255,7 +255,7 @@ public class ProB2 extends Application {
 			});
 		}
 
-		final Thread sharedAnimatorPreloader = new Thread(() -> injector.getInstance(MachineLoader.class).preloadAnimators(), "Shared Animator Preloader");
+		final Thread sharedAnimatorPreloader = new Thread(() -> injector.getInstance(MachineLoader.class).startSharedAnimator(), "Shared Animator Preloader");
 		this.stopActions.add(sharedAnimatorPreloader::interrupt);
 		sharedAnimatorPreloader.start();
 
