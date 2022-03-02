@@ -186,8 +186,10 @@ public class MachineLoader {
 				if (Thread.currentThread().isInterrupted()) {
 					stateSpace.kill();
 				}
+				return stateSpace;
+			} else {
+				return currentStateSpace;
 			}
-			return currentStateSpace;
 		}
 	}
 	
