@@ -15,11 +15,11 @@
 				<VBox>
 					<VirtualizedScrollPane minWidth="200.0" minHeight="200.0" prefWidth="800.0" prefHeight="600.0">
 						<content>
-							<PrologOutput/>
+							<PrologOutput fx:id="prologOutput"/>
 						</content>
 					</VirtualizedScrollPane>
 					<HBox>
-						<Button fx:id="clearButton" styleClass="button-dark2" maxWidth="Infinity" HBox.hgrow="ALWAYS" text="%menu.advanced.items.prologoutput.clear"/>
+						<Button fx:id="clearButton" styleClass="button-dark2" maxWidth="Infinity" HBox.hgrow="ALWAYS" text="%menu.advanced.items.prologoutput.clear" onAction="#doClear"/>
 					</HBox>
 				</VBox>
 			</StackPane>
