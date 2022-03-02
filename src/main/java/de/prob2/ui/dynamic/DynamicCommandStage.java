@@ -157,6 +157,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			this.refresh();
 		});
 		
+		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
+		
 		taFormula.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
 				if (!e.isShiftDown()) {
@@ -254,7 +256,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		interrupt();
 
 		this.updater.execute(() -> {
-			Platform.runLater(this::updatePlaceholderLabel);
 			try {
 				final Trace trace = currentTrace.get();
 				if(trace == null || (item.getArity() > 0 && taFormula.getText().isEmpty())) {
@@ -270,7 +271,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Visualization interrupted", e);
 				Thread.currentThread().interrupt();
-				Platform.runLater(this::updatePlaceholderLabel);
 			} catch (ProBError | EvaluationException e) {
 				LOGGER.error("Visualization failed", e);
 				Platform.runLater(() -> {
