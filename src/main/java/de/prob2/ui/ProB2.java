@@ -1,9 +1,23 @@
 package de.prob2.ui;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import ch.qos.logback.classic.util.ContextInitializer;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.BasicConfig;
@@ -16,7 +30,6 @@ import de.prob2.ui.internal.ConfigFile;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -27,6 +40,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.Event;
@@ -39,6 +53,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -47,19 +62,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ProB2 extends Application {
 	public static final String BUG_REPORT_URL = "https://github.com/hhu-stups/prob-issues/issues/new/choose";
@@ -294,9 +296,6 @@ public class ProB2 extends Application {
 
 		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
 		pluginManager.start();
-
-		PrologOutput prologOutput = injector.getInstance(PrologOutput.class);
-		prologOutput.start();
 	}
 
 	private void updateTitle(final Stage stage) {

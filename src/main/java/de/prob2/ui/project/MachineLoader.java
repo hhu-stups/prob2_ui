@@ -26,6 +26,7 @@ import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.ErrorDisplayFilter;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -52,6 +53,7 @@ public class MachineLoader {
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final ErrorDisplayFilter errorDisplayFilter;
+	private final PrologOutput prologOutput;
 	private final StatusBar statusBar;
 	private final StopActions stopActions;
 	private final Injector injector;
@@ -69,6 +71,7 @@ public class MachineLoader {
 		final CurrentTrace currentTrace,
 		final GlobalPreferences globalPreferences,
 		final ErrorDisplayFilter errorDisplayFilter,
+		final PrologOutput prologOutput,
 		final StatusBar statusBar,
 		final StopActions stopActions,
 		final Injector injector
@@ -78,6 +81,7 @@ public class MachineLoader {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.errorDisplayFilter = errorDisplayFilter;
+		this.prologOutput = prologOutput;
 		this.statusBar = statusBar;
 		this.stopActions = stopActions;
 		this.injector = injector;
@@ -120,6 +124,22 @@ public class MachineLoader {
 		animator.kill();
 	}
 
+	private ReusableAnimator createAnimator() {
+		final ReusableAnimator animator = injector.getInstance(ReusableAnimator.class);
+		animator.addWarningListener(warnings -> {
+			final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
+			if (!filteredWarnings.isEmpty()) {
+				Platform.runLater(() -> {
+					final WarningAlert alert = injector.getInstance(WarningAlert.class);
+					alert.getWarnings().setAll(filteredWarnings);
+					alert.show();
+				});
+			}
+		});
+		animator.addConsoleOutputListener(prologOutput.getOutputListener());
+		return animator;
+	}
+
 	/**
 	 * Get the single shared animator instance used by the UI.
 	 * If no shared animator instance has been started yet or it is no longer working,
@@ -145,7 +165,7 @@ public class MachineLoader {
 				LOGGER.info("Starting a new main animator");
 				this.currentAnimatorStarting.set(true);
 				try {
-					this.currentAnimator.set(injector.getInstance(ReusableAnimator.class));
+					this.currentAnimator.set(createAnimator());
 				} finally {
 					this.currentAnimatorStarting.set(false);
 				}
@@ -173,20 +193,6 @@ public class MachineLoader {
 		}
 	}
 
-	private void initStateSpace(final StateSpace stateSpace, final Map<String, String> preferences) {
-		stateSpace.addWarningListener(warnings -> {
-			final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
-			if (!filteredWarnings.isEmpty()) {
-				Platform.runLater(() -> {
-					final WarningAlert alert = injector.getInstance(WarningAlert.class);
-					alert.getWarnings().setAll(filteredWarnings);
-					alert.show();
-				});
-			}
-		});
-		stateSpace.changePreferences(preferences);
-	}
-
 	/**
 	 * <p>
 	 * Get the shared animator's currently active state space,
@@ -208,7 +214,7 @@ public class MachineLoader {
 			final StateSpace currentStateSpace = this.getAnimator().getCurrentStateSpace();
 			if (currentStateSpace == null || currentStateSpace.isKilled()) {
 				final StateSpace stateSpace = this.createNewStateSpace();
-				initStateSpace(stateSpace, this.globalPreferences);
+				stateSpace.changePreferences(this.globalPreferences);
 				injector.getInstance(ClassicalBFactory.class)
 					.create("empty", "MACHINE empty END")
 					.loadIntoStateSpace(stateSpace);
@@ -307,7 +313,7 @@ public class MachineLoader {
 		try {
 			final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 			allPrefs.putAll(prefs);
-			initStateSpace(stateSpace, allPrefs);
+			stateSpace.changePreferences(allPrefs);
 			if (Thread.currentThread().isInterrupted()) {
 				return;
 			}
