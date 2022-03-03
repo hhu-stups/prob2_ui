@@ -8,6 +8,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.TreeCheckedCell;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -26,7 +27,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -47,19 +53,19 @@ public class VOManagerStage extends Stage {
 	}
 
 	@FXML
-	private TableView<Requirement> tvRequirements;
+	private TreeTableView<Requirement> tvRequirements;
 
 	@FXML
-	private TableColumn<Requirement, Checked> requirementStatusColumn;
+	private TreeTableColumn<Requirement, Checked> requirementStatusColumn;
 
 	@FXML
-	private TableColumn<Requirement, String> requirementNameColumn;
+	private TreeTableColumn<Requirement, String> requirementNameColumn;
 
 	@FXML
-	private TableColumn<Requirement, String> typeColumn;
+	private TreeTableColumn<Requirement, String> typeColumn;
 
 	@FXML
-	private TableColumn<Requirement, String> specificationColumn;
+	private TreeTableColumn<Requirement, String> specificationColumn;
 
 	@FXML
 	private TableView<ValidationObligation> tvValidationObligations;
@@ -118,12 +124,12 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		requirementStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		requirementStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
+		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
 
-		requirementNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		typeColumn.setCellValueFactory(new PropertyValueFactory<>("shortTypeName"));
-		specificationColumn.setCellValueFactory(new PropertyValueFactory<>("text"));
+		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
+		typeColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("shortTypeName"));
+		specificationColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("text"));
 
 		voStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		voStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -131,7 +137,9 @@ public class VOManagerStage extends Stage {
 		voNameColumn.setCellValueFactory(new PropertyValueFactory<>("task"));
 		voConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
 
-		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+		tvRequirements.setShowRoot(false);
+		//tvRequirements.setRoot(createRoot());
+		/*final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvRequirements.itemsProperty().unbind();
 			if(to != null) {
 				voManager.synchronizeMachine(to);
@@ -140,11 +148,11 @@ public class VOManagerStage extends Stage {
 				tvRequirements.setItems(FXCollections.observableArrayList());
 			}
 			editModeProperty.set(EditType.NONE);
-		};
+		};*/
 
 
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
+		//currentProject.currentMachineProperty().addListener(machineChangeListener);
+		//machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
 		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editModeProperty.get() != EditType.NONE, editModeProperty));
 
@@ -160,7 +168,7 @@ public class VOManagerStage extends Stage {
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 
 		tvRequirements.setRowFactory(table -> {
-			final TableRow<Requirement> row = new TableRow<>();
+			final TreeTableRow<Requirement> row = new TreeTableRow<>();
 
 			Menu linkItem = new Menu("Link to Validation Obligation");
 
@@ -187,10 +195,11 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			tvValidationObligations.itemsProperty().unbind();
-			if(to != null) {
+			if(to != null && to.getValue() != null) {
+				Requirement requirement = to.getValue();
 				editModeProperty.set(EditType.EDIT);
-				showRequirement(to);
-				tvValidationObligations.itemsProperty().bind(to.validationObligationsProperty());
+				showRequirement(requirement);
+				tvValidationObligations.itemsProperty().bind(requirement.validationObligationsProperty());
 			} else {
 				tvValidationObligations.itemsProperty().set(FXCollections.observableArrayList());
 				editModeProperty.set(EditType.NONE);
@@ -198,7 +207,8 @@ public class VOManagerStage extends Stage {
 		});
 
 		tvRequirements.setOnMouseClicked(e-> {
-			Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem();
+			TreeItem<Requirement> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
+			Requirement requirement = treeItem == null ? null : treeItem.getValue();
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && requirement != null && currentTrace.get() != null) {
 				requirement.getValidationObligations().forEach(voChecker::check);
 			}
@@ -213,7 +223,7 @@ public class VOManagerStage extends Stage {
 
 			MenuItem removeItem = new MenuItem("Remove VO");
 			removeItem.setOnAction(e -> {
-				Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem();
+				Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem().getValue();
 				requirement.removeValidationObligation(row.getItem());
 			});
 
@@ -230,6 +240,15 @@ public class VOManagerStage extends Stage {
 				voChecker.check(item);
 			}
 		});
+	}
+
+	private void updateRoot() {
+		List<Requirement> requirements = currentProject.getCurrentMachine().getRequirements();
+		TreeItem<Requirement> root = new TreeItem<>();
+		for(Requirement requirement : requirements) {
+			root.getChildren().add(new TreeItem<>(requirement));
+		}
+		tvRequirements.setRoot(root);
 	}
 
 	@FXML
@@ -256,7 +275,7 @@ public class VOManagerStage extends Stage {
 				requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
 				currentProject.getCurrentMachine().getRequirements().add(requirement);
 			} else if(editType == EditType.EDIT) {
-				requirement = tvRequirements.getSelectionModel().getSelectedItem();
+				requirement = tvRequirements.getSelectionModel().getSelectedItem().getValue();
 				requirement.setName(tfName.getText());
 				requirement.setType(cbRequirementChoice.getValue());
 				requirement.setText(taRequirement.getText());
@@ -266,6 +285,7 @@ public class VOManagerStage extends Stage {
 			// TODO: Replace refresh?
 			editModeProperty.set(EditType.NONE);
 			tvRequirements.getSelectionModel().clearSelection();
+			updateRoot();
 			tvRequirements.refresh();
 		} else {
 			// TODO: Show error
@@ -280,8 +300,9 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void removeRequirement() {
-		Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem();
+		Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem().getValue();
 		currentProject.getCurrentMachine().getRequirements().remove(requirement);
+		updateRoot();
 		tvRequirements.refresh();
 	}
 

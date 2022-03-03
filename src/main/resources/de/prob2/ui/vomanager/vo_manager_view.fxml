@@ -23,6 +23,8 @@
 <?import de.prob2.ui.vomanager.RequirementType?>
 
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.control.TreeTableColumn?>
 <fx:root title="VO Manager" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -48,25 +50,25 @@
 									!-->
 								</Button>
 							</HBox>
-							<TableView fx:id="tvRequirements">
+							<TreeTableView fx:id="tvRequirements">
 								<columnResizePolicy>
-									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+									<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 								</columnResizePolicy>
 								<columns>
-									<TableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
+									<TreeTableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
 												 minWidth="${fontSize.fontSize * 6}"
 												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TableColumn fx:id="requirementNameColumn" style="-fx-alignment: CENTER;" minWidth="70.0" maxWidth="70.0"
+									<TreeTableColumn fx:id="requirementNameColumn" style="-fx-alignment: CENTER;" minWidth="70.0" maxWidth="70.0"
 												 text="Name"/>
-									<TableColumn fx:id="typeColumn" style="-fx-alignment: CENTER;" minWidth="90.0" maxWidth="90.0"
+									<TreeTableColumn fx:id="typeColumn" style="-fx-alignment: CENTER;" minWidth="90.0" maxWidth="90.0"
 												 text="Type"/>
-									<TableColumn fx:id="specificationColumn" minWidth="120.0"
-												 text="Specification"/>
+									<TreeTableColumn fx:id="specificationColumn" minWidth="120.0"
+													 text="Specification"/>
 								</columns>
 								<placeholder>
 									<Label text="No Requirements"/>
 								</placeholder>
-							</TableView>
+							</TreeTableView>
 						</VBox>
 						<TableView fx:id="tvValidationObligations">
 							<columnResizePolicy>
