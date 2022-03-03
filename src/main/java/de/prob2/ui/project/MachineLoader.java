@@ -126,6 +126,16 @@ public class MachineLoader {
 
 	private ReusableAnimator createAnimator() {
 		final ReusableAnimator animator = injector.getInstance(ReusableAnimator.class);
+		animator.addWarningListener(warnings -> {
+			final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
+			if (!filteredWarnings.isEmpty()) {
+				Platform.runLater(() -> {
+					final WarningAlert alert = injector.getInstance(WarningAlert.class);
+					alert.getWarnings().setAll(filteredWarnings);
+					alert.show();
+				});
+			}
+		});
 		animator.addConsoleOutputListener(prologOutput.getOutputListener());
 		return animator;
 	}
@@ -183,20 +193,6 @@ public class MachineLoader {
 		}
 	}
 
-	private void initStateSpace(final StateSpace stateSpace, final Map<String, String> preferences) {
-		stateSpace.addWarningListener(warnings -> {
-			final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
-			if (!filteredWarnings.isEmpty()) {
-				Platform.runLater(() -> {
-					final WarningAlert alert = injector.getInstance(WarningAlert.class);
-					alert.getWarnings().setAll(filteredWarnings);
-					alert.show();
-				});
-			}
-		});
-		stateSpace.changePreferences(preferences);
-	}
-
 	/**
 	 * <p>
 	 * Get the shared animator's currently active state space,
@@ -218,7 +214,7 @@ public class MachineLoader {
 			final StateSpace currentStateSpace = this.getAnimator().getCurrentStateSpace();
 			if (currentStateSpace == null || currentStateSpace.isKilled()) {
 				final StateSpace stateSpace = this.createNewStateSpace();
-				initStateSpace(stateSpace, this.globalPreferences);
+				stateSpace.changePreferences(this.globalPreferences);
 				injector.getInstance(ClassicalBFactory.class)
 					.create("empty", "MACHINE empty END")
 					.loadIntoStateSpace(stateSpace);
@@ -317,7 +313,7 @@ public class MachineLoader {
 		try {
 			final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 			allPrefs.putAll(prefs);
-			initStateSpace(stateSpace, allPrefs);
+			stateSpace.changePreferences(allPrefs);
 			if (Thread.currentThread().isInterrupted()) {
 				return;
 			}
