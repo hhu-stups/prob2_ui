@@ -54,7 +54,7 @@ public class PrologOutput extends InlineCssTextArea {
 			while(!message.isEmpty() && message.charAt(0) == 27) {
 				// ANSI escape code found. Warning: If ANSI escape code is not ending with m some parts of messages might be lost!
 				// Warning: If codes are not set at beginning of message, e.g. for changing attributes midmessage, chaos might ensue ;)
-				int indexOfANSIEscapeCodeEnd = s.indexOf('m');
+				int indexOfANSIEscapeCodeEnd = message.indexOf('m');
 				if (indexOfANSIEscapeCodeEnd != -1) {
 					String str = message.substring(1, indexOfANSIEscapeCodeEnd);
 					// Setting supported font color and attributes for output
