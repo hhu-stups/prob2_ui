@@ -138,21 +138,15 @@ public class VOManagerStage extends Stage {
 		voConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
 
 		tvRequirements.setShowRoot(false);
-		//tvRequirements.setRoot(createRoot());
-		/*final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			tvRequirements.itemsProperty().unbind();
+		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			if(to != null) {
 				voManager.synchronizeMachine(to);
-				tvRequirements.itemsProperty().bind(to.requirementsProperty());
-			} else {
-				tvRequirements.setItems(FXCollections.observableArrayList());
 			}
+			updateRoot();
 			editModeProperty.set(EditType.NONE);
-		};*/
-
-
-		//currentProject.currentMachineProperty().addListener(machineChangeListener);
-		//machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
 		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editModeProperty.get() != EditType.NONE, editModeProperty));
 
