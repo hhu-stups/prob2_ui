@@ -155,7 +155,7 @@ public class VOManager {
 				break;
 			case TRACE_REPLAY:
 				validationTask.setExecutable(injector.getInstance(TraceViewHandler.class).getTraces().stream()
-						.filter(item -> item.getLocation().toString().equals(validationTask.getItem()))
+						.filter(item -> item.getLocation().toString().equals(((ReplayTrace) validationTask.getItem()).getLocation().toString()))
 						.findAny()
 						.orElse(null));
 				break;

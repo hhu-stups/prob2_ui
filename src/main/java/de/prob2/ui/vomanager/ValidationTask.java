@@ -4,8 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -92,6 +96,12 @@ public class ValidationTask {
 		return checked;
 	}
 
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+	@JsonSubTypes({
+			@JsonSubTypes.Type(value = ModelCheckingItem.class, name = "ModelCheckingItem"),
+			@JsonSubTypes.Type(value = LTLFormulaItem.class, name = "LTLFormulaItem"),
+			@JsonSubTypes.Type(value = String.class, name = "Path"),
+	})
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

@@ -52,13 +52,6 @@ public class ValidationObligation {
 		return configuration;
 	}
 
-	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-	@JsonSubTypes({
-		@JsonSubTypes.Type(value = ModelCheckingItem.class, name = "ModelCheckingItem"),
-		@JsonSubTypes.Type(value = LTLFormulaItem.class, name = "LTLFormulaItem"),
-		@JsonSubTypes.Type(value = String.class, name = "Path"),
-	})
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
