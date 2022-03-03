@@ -87,6 +87,23 @@
 								<Label text="No Validation Obligations"/>
 							</placeholder>
 						</TableView>
+						<TableView fx:id="tvValidationTasks">
+							<columnResizePolicy>
+								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+							</columnResizePolicy>
+							<columns>
+								<TableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;"
+											 minWidth="${fontSize.fontSize * 6}"
+											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+								<TableColumn fx:id="vtNameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
+											 text="Name"/>
+								<TableColumn fx:id="vtConfigurationColumn" minWidth="80.0"
+											 text="Configuration"/>
+							</columns>
+							<placeholder>
+								<Label text="No Validation Tasks"/>
+							</placeholder>
+						</TableView>
 					</VBox>
 					<VBox fx:id="requirementEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
 						<VBox>

@@ -80,6 +80,18 @@ public class VOManagerStage extends Stage {
 	private TableColumn<ValidationObligation, String> voConfigurationColumn;
 
 	@FXML
+	private TableView<ValidationObligation> tvValidationTasks;
+
+	@FXML
+	private TableColumn<ValidationTask, Checked> vtStatusColumn;
+
+	@FXML
+	private TableColumn<ValidationTask, String> vtNameColumn;
+
+	@FXML
+	private TableColumn<ValidationTask, String> vtConfigurationColumn;
+
+	@FXML
 	private Button btAddOrCancelRequirement;
 
 	@FXML
@@ -130,7 +142,6 @@ public class VOManagerStage extends Stage {
 
 		voStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		voStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-
 		voNameColumn.setCellValueFactory(new PropertyValueFactory<>("task"));
 		voConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
 
