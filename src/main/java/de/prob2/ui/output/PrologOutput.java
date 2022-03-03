@@ -1,42 +1,32 @@
 package de.prob2.ui.output;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.OutputStreamAppender;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.prob.cli.ProBInstance;
-import javafx.application.Platform;
-import org.fxmisc.richtext.InlineCssTextArea;
-import org.slf4j.LoggerFactory;
 
-import java.io.OutputStream;
+import de.prob.animator.IConsoleOutputListener;
+
+import javafx.application.Platform;
+
+import org.fxmisc.richtext.InlineCssTextArea;
 
 @Singleton
 public class PrologOutput extends InlineCssTextArea {
 
-	private static class PrologOutputAppender extends OutputStream {
-		private StringBuilder sb;
+	private static class PrologOutputAppender implements IConsoleOutputListener {
 		private InlineCssTextArea textArea;
 		private PrologOutputAppender(InlineCssTextArea inlineCssTextArea) {
-			this.sb = new StringBuilder();
 			this.textArea = inlineCssTextArea;
 		}
 
 		@Override
-		public void write(int b) {
+		public void lineReceived(final String line) {
 			Platform.runLater(() -> {
-				//Append each character to a StringBuilder until the string terminator and only set the final result in the end.
-				//This avoids the UI from hanging up.
-				sb.append((char) b);
-				if(b == 10) {
-					String[] messageAndStyle = handleOutput(sb.toString());
-					textArea.appendText(messageAndStyle[0]);
-					textArea.setStyle(Math.max(textArea.getLength()-messageAndStyle[0].length(), 0), textArea.getLength(), messageAndStyle[1]);
-					this.sb = new StringBuilder();
-				}
+				// Remove trailing ANSI escape for resetting formatting, if any.
+				// handleOutput already resets the formatting for each new line.
+				final String lineToFormat = line.replaceAll("\\u001b\\[0m$", "") + "\n";
+				String[] messageAndStyle = handleOutput(lineToFormat);
+				textArea.appendText(messageAndStyle[0]);
+				textArea.setStyle(Math.max(textArea.getLength()-messageAndStyle[0].length(), 0), textArea.getLength(), messageAndStyle[1]);
 			});
 		}
 
@@ -168,32 +158,17 @@ public class PrologOutput extends InlineCssTextArea {
 		}
 	}
 
+	private final PrologOutputAppender appender;
+
 	@Inject
 	public PrologOutput() {
+		this.appender = new PrologOutputAppender(this);
 		this.setPrefWidth(Double.MAX_VALUE);
 		this.setWrapText(true);
 		this.setEditable(false);
 	}
 
-	public void start() {
-		PrologOutputAppender prologOutputAppender = new PrologOutputAppender(this);
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-		Thread thread = new Thread(() -> {
-			PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-			encoder.setContext(context);
-			encoder.setPattern("%replace(%msg){'\\u001b\\[0m', ''}%n");
-			encoder.start();
-
-			OutputStreamAppender<ILoggingEvent> outputStreamAppender = new OutputStreamAppender<>();
-			outputStreamAppender.setContext(context);
-			outputStreamAppender.setEncoder(encoder);
-			outputStreamAppender.setOutputStream(prologOutputAppender);
-			outputStreamAppender.start();
-
-			Logger log = (Logger) LoggerFactory.getLogger(ProBInstance.class);
-			log.addAppender(outputStreamAppender);
-		});
-		thread.start();
+	public IConsoleOutputListener getOutputListener() {
+		return this.appender;
 	}
 }

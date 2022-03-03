@@ -26,6 +26,7 @@ import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.ErrorDisplayFilter;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -52,6 +53,7 @@ public class MachineLoader {
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final ErrorDisplayFilter errorDisplayFilter;
+	private final PrologOutput prologOutput;
 	private final StatusBar statusBar;
 	private final StopActions stopActions;
 	private final Injector injector;
@@ -69,6 +71,7 @@ public class MachineLoader {
 		final CurrentTrace currentTrace,
 		final GlobalPreferences globalPreferences,
 		final ErrorDisplayFilter errorDisplayFilter,
+		final PrologOutput prologOutput,
 		final StatusBar statusBar,
 		final StopActions stopActions,
 		final Injector injector
@@ -78,6 +81,7 @@ public class MachineLoader {
 		this.currentTrace = currentTrace;
 		this.globalPreferences = globalPreferences;
 		this.errorDisplayFilter = errorDisplayFilter;
+		this.prologOutput = prologOutput;
 		this.statusBar = statusBar;
 		this.stopActions = stopActions;
 		this.injector = injector;
@@ -120,6 +124,12 @@ public class MachineLoader {
 		animator.kill();
 	}
 
+	private ReusableAnimator createAnimator() {
+		final ReusableAnimator animator = injector.getInstance(ReusableAnimator.class);
+		animator.addConsoleOutputListener(prologOutput.getOutputListener());
+		return animator;
+	}
+
 	/**
 	 * Get the single shared animator instance used by the UI.
 	 * If no shared animator instance has been started yet or it is no longer working,
@@ -145,7 +155,7 @@ public class MachineLoader {
 				LOGGER.info("Starting a new main animator");
 				this.currentAnimatorStarting.set(true);
 				try {
-					this.currentAnimator.set(injector.getInstance(ReusableAnimator.class));
+					this.currentAnimator.set(createAnimator());
 				} finally {
 					this.currentAnimatorStarting.set(false);
 				}
