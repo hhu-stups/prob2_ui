@@ -17,6 +17,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
@@ -88,6 +89,9 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private ChoiceBox<ValidationTaskType> cbTaskChoice;
+
+	@FXML
+	private CheckBox cbLinkTask;
 
 	@FXML
 	private VBox requirementEditingBox;
@@ -164,11 +168,8 @@ public class VOManagerStage extends Stage {
 				btAddOrCancelRequirement.setTooltip(new Tooltip());
 			}
 		});
-
-		// TODO: Implement possibility, just to add requirement without choosing a validation task
-
-		taskBox.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
-		applyButton.visibleProperty().bind(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		taskBox.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull().and(cbLinkTask.selectedProperty()));
+		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 
 		cbRequirementChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			cbTaskChoice.getItems().clear();
@@ -266,28 +267,41 @@ public class VOManagerStage extends Stage {
 	@FXML
 	public void applyRequirement() {
 		EditType editType = editModeProperty.get();
-		Requirement requirement = null;
-		if(editType == EditType.ADD) {
-			requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
-			currentProject.getCurrentMachine().getRequirements().add(requirement);
-		} else if(editType == EditType.EDIT) {
-			requirement = tvRequirements.getSelectionModel().getSelectedItem();
-			requirement.setName(tfName.getText());
-			requirement.setType(cbRequirementChoice.getValue());
-			requirement.setText(taRequirement.getText());
+		boolean requirementIsValid = requirementIsValid(tfName.getText(), taRequirement.getText());
+		boolean linkTaskValid = !cbLinkTask.isSelected() || cbTaskChoice.getValue() != null; // If the user selects to link a task, then the selected value for the task must be valid
+		if(requirementIsValid && linkTaskValid) {
+			Requirement requirement = null;
+			if(editType == EditType.ADD) {
+				requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
+				currentProject.getCurrentMachine().getRequirements().add(requirement);
+			} else if(editType == EditType.EDIT) {
+				requirement = tvRequirements.getSelectionModel().getSelectedItem();
+				requirement.setName(tfName.getText());
+				requirement.setType(cbRequirementChoice.getValue());
+				requirement.setText(taRequirement.getText());
+			}
+			assert requirement != null;
+			if (cbLinkTask.isSelected()) {
+				ValidationTaskType taskType = cbTaskChoice.getSelectionModel().getSelectedItem();
+				ValidationTask validationTask = taskCreator.openTaskWindow(this, requirement, taskType);
+				if (validationTask != null) {
+					requirement.addValidationObligation(new ValidationObligation(validationTask, VOManager.extractConfiguration((IExecutableItem) validationTask.getItem())));
+				}
+			}
+			// TODO: Replace refresh?
+			editModeProperty.set(EditType.NONE);
+			tvRequirements.getSelectionModel().clearSelection();
+			tvRequirements.refresh();
+		} else {
+			// TODO: Show error
 		}
-		assert requirement != null;
+	}
 
-		ValidationTaskType taskType = cbTaskChoice.getSelectionModel().getSelectedItem();
-		ValidationTask validationTask = taskCreator.openTaskWindow(this, requirement, taskType);
-		if(validationTask != null) {
-			requirement.addValidationObligation(new ValidationObligation(validationTask, VOManager.extractConfiguration((IExecutableItem) validationTask.getItem())));
-		}
-
-		// TODO: Replace refresh?
-		editModeProperty.set(EditType.NONE);
-		tvRequirements.getSelectionModel().clearSelection();
-		tvRequirements.refresh();
+	private boolean requirementIsValid(String name, String text) {
+		//isBlank() requires Java version >= 11
+		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
+		String textWithoutWhiteSpaces = text.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
+		return nameWithoutWhiteSpaces.length() > 0 && textWithoutWhiteSpaces.length() > 0;
 	}
 
 	private void removeRequirement() {

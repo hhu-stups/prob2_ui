@@ -22,6 +22,7 @@
 <?import javafx.scene.control.TextField?>
 <?import de.prob2.ui.vomanager.RequirementType?>
 
+<?import javafx.scene.control.CheckBox?>
 <fx:root title="VO Manager" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -106,13 +107,17 @@
 							<Label text="Requirement:"/>
 							<TextArea fx:id="taRequirement" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 						</VBox>
+						<HBox>
+							<Label text="Link Validation Task"/>
+							<CheckBox fx:id="cbLinkTask"/>
+						</HBox>
 						<VBox fx:id="taskBox">
 							<HBox>
 								<Label text="Validation Task:"/>
 								<ChoiceBox fx:id="cbTaskChoice"/>
 							</HBox>
-							<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
 						</VBox>
+						<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
 					</VBox>
 				</SplitPane>
 			</ScrollPane>
