@@ -1,7 +1,5 @@
 package de.prob2.ui.vomanager;
 
-import java.util.Arrays;
-import java.util.Collections;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -24,6 +22,8 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
 
 import javafx.stage.Window;
 
+import java.util.Arrays;
+
 @Singleton
 public class VOTaskCreator {
 
@@ -34,12 +34,12 @@ public class VOTaskCreator {
 		this.injector = injector;
 	}
 
-	public ValidationObligation openTaskWindow(Window currentWindow, Requirement requirement, ValidationTask task) {
-		if(task == null) {
+	public ValidationTask openTaskWindow(Window currentWindow, Requirement requirement, ValidationTaskType taskType) {
+		if(taskType == null) {
 			// TODO: Show error message
 			return null;
 		}
-		switch (task) {
+		switch (taskType) {
 			case MODEL_CHECKING: {
 				ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
 				//stageController.linkRequirement(requirement);
@@ -48,9 +48,9 @@ public class VOTaskCreator {
 				if(item == null) {
 					return null;
 				}
-				ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
-				validationObligation.setExecutable(item);
-				return validationObligation;
+				ValidationTask validationTask = new ValidationTask("MC", "machine", taskType, Arrays.asList(""), item);
+				validationTask.setExecutable(item);
+				return validationTask;
 			}
 			case LTL_MODEL_CHECKING: {
 				LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
@@ -61,31 +61,20 @@ public class VOTaskCreator {
 				if(item == null) {
 					return null;
 				}
-				ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
-				validationObligation.setExecutable(item);
-				return validationObligation;
+				ValidationTask validationTask = new ValidationTask("LTL", "machine", taskType, Arrays.asList(""), item);
+				validationTask.setExecutable(item);
+				return validationTask;
 			}
 			case SYMBOLIC_MODEL_CHECKING: {
 				SymbolicCheckingChoosingStage symbolicStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
-				/*RequirementType requirementType = requirement.getType();
-				switch (requirementType) {
-					case INVARIANT:
-						symbolicStage.setAvailableTypes(Arrays.asList(SymbolicCheckingType.INVARIANT, SymbolicCheckingType.SYMBOLIC_MODEL_CHECK));
-						break;
-					case DEADLOCK_FREEDOM:
-						symbolicStage.setAvailableTypes(Collections.singletonList(SymbolicCheckingType.DEADLOCK));
-						break;
-					default:
-						throw new RuntimeException("Given requirement type is not supported for symbolic model checking: " + requirementType);
-				}*/
 				symbolicStage.showAndWait();
 				SymbolicCheckingFormulaItem item = symbolicStage.getLastItem();
 				if (item == null) {
 					return null;
 				}
-				ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
-				validationObligation.setExecutable(item);
-				return validationObligation;
+				ValidationTask validationTask = new ValidationTask("SMC", "machine", taskType, Arrays.asList(""), item);
+				validationTask.setExecutable(item);
+				return validationTask;
 			}
 			case TRACE_REPLAY: {
 				TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
@@ -94,9 +83,9 @@ public class VOTaskCreator {
 				if (replayTrace == null) {
 					return null;
 				}
-				ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(replayTrace), replayTrace.getLocation().toString());
-				validationObligation.setExecutable(replayTrace);
-				return validationObligation;
+				ValidationTask validationTask = new ValidationTask("TR", "machine", taskType, Arrays.asList(""), replayTrace);
+				validationTask.setExecutable(replayTrace);
+				return validationTask;
 			}
 			case SIMULATION: {
 				SimulationChoosingStage simulationChoosingStage = injector.getInstance(SimulationChoosingStage.class);
@@ -105,9 +94,9 @@ public class VOTaskCreator {
 				if (item == null) {
 					return null;
 				}
-				ValidationObligation validationObligation = new ValidationObligation(task, VOManager.extractConfiguration(item), item);
-				validationObligation.setExecutable(item);
-				return validationObligation;
+				ValidationTask validationTask = new ValidationTask("SIM", "machine", taskType, Arrays.asList(""), item);
+				validationTask.setExecutable(item);
+				return validationTask;
 			}
 			default:
 				throw new RuntimeException("Validation task is not valid");

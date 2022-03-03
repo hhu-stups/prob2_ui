@@ -8,6 +8,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -39,8 +40,8 @@ import java.util.List;
 
 public class VOManagerStage extends Stage {
 
-	private static final List<ValidationTask> tasks = Arrays.asList(ValidationTask.MODEL_CHECKING, ValidationTask.LTL_MODEL_CHECKING, ValidationTask.SYMBOLIC_MODEL_CHECKING,
-				ValidationTask.LTL_MODEL_CHECKING, ValidationTask.TRACE_REPLAY, ValidationTask.SIMULATION);
+	private static final List<ValidationTaskType> tasks = Arrays.asList(ValidationTaskType.MODEL_CHECKING, ValidationTaskType.LTL_MODEL_CHECKING, ValidationTaskType.SYMBOLIC_MODEL_CHECKING,
+			ValidationTaskType.TRACE_REPLAY, ValidationTaskType.SIMULATION);
 
 	private enum EditType {
 		NONE, ADD, EDIT;
@@ -86,7 +87,7 @@ public class VOManagerStage extends Stage {
 	private ChoiceBox<RequirementType> cbRequirementChoice;
 
 	@FXML
-	private ChoiceBox<ValidationTask> cbTaskChoice;
+	private ChoiceBox<ValidationTaskType> cbTaskChoice;
 
 	@FXML
 	private VBox requirementEditingBox;
@@ -277,10 +278,10 @@ public class VOManagerStage extends Stage {
 		}
 		assert requirement != null;
 
-		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
-		ValidationObligation validationObligation = taskCreator.openTaskWindow(this, requirement, task);
-		if(validationObligation != null) {
-			requirement.addValidationObligation(validationObligation);
+		ValidationTaskType taskType = cbTaskChoice.getSelectionModel().getSelectedItem();
+		ValidationTask validationTask = taskCreator.openTaskWindow(this, requirement, taskType);
+		if(validationTask != null) {
+			requirement.addValidationObligation(new ValidationObligation(validationTask, VOManager.extractConfiguration((IExecutableItem) validationTask.getItem())));
 		}
 
 		// TODO: Replace refresh?

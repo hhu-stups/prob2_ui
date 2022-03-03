@@ -1,24 +1,112 @@
 package de.prob2.ui.vomanager;
 
-public enum ValidationTask {
-	MODEL_CHECKING("Model Checking"),
-	LTL_MODEL_CHECKING("LTL Model Checking"),
-	SYMBOLIC_MODEL_CHECKING("Symbolic Model Checking"),
-	TRACE_REPLAY("Trace Replay"),
-	SIMULATION("Simulation");
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
-	private final String name;
+import java.util.List;
+import java.util.Objects;
 
-	ValidationTask(String name) {
-		this.name = name;
+
+@JsonPropertyOrder({
+		"id",
+		"context",
+		"taskType",
+		"parameters",
+		"item"
+})
+public class ValidationTask {
+
+	private final String id;
+
+	private final String context;
+
+	private final ValidationTaskType taskType;
+
+	private final List<String> parameters;
+
+	private final Object item;
+
+	@JsonIgnore
+	private IExecutableItem executable;
+
+	@JsonIgnore
+	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+
+	@JsonCreator
+	public ValidationTask(@JsonProperty("id") String id, @JsonProperty("context") String context,
+						   @JsonProperty("taskType") ValidationTaskType taskType, @JsonProperty("parameters") List<String> parameters,
+						   @JsonProperty("item") Object item) {
+		this.id = id;
+		this.context = context;
+		this.taskType = taskType;
+		this.parameters = parameters;
+		this.item = item;
 	}
 
-	public String getName() {
-		return name;
+	public String getId() {
+		return id;
+	}
+
+	public String getContext() {
+		return context;
+	}
+
+	public ValidationTaskType getTaskType() {
+		return taskType;
+	}
+
+	public List<String> getParameters() {
+		return parameters;
+	}
+
+	public String getRepresentation() {
+		if(parameters.isEmpty()) {
+			return String.format("%s/%s/%s", id, context, taskType);
+		}
+		return String.format("%s/%s/%s: %s", id, context, taskType, String.join(", ", parameters));
+	}
+
+	public void setExecutable(IExecutableItem executable) {
+		this.executable = executable;
+		checked.unbind();
+		if(item != null) {
+			checked.bind(executable.checkedProperty());
+		}
+	}
+
+	public IExecutableItem getExecutable() {
+		return executable;
+	}
+
+	public Object getItem() {
+		return item;
+	}
+
+	public ObjectProperty<Checked> checkedProperty() {
+		return checked;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ValidationTask that = (ValidationTask) o;
+		return Objects.equals(id, that.id) && Objects.equals(context, that.context) && taskType == that.taskType && Objects.equals(parameters, that.parameters);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, context, taskType, parameters);
 	}
 
 	@Override
 	public String toString() {
-		return getName();
+		return getRepresentation();
 	}
 }

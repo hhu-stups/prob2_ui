@@ -17,8 +17,7 @@ import java.util.Objects;
 
 @JsonPropertyOrder({
 	"task",
-	"configuration",
-	"item"
+	"configuration"
 })
 public class ValidationObligation {
 
@@ -26,21 +25,15 @@ public class ValidationObligation {
 
 	private final String configuration;
 
-	private final Object item;
-
-	@JsonIgnore
-	private IExecutableItem executable;
-
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
 	@JsonCreator
 	public ValidationObligation(@JsonProperty("task") ValidationTask task,
-			@JsonProperty("text") String configuration,
-			@JsonProperty("item") Object item) {
+			@JsonProperty("text") String configuration) {
 		this.task = task;
 		this.configuration = configuration;
-		this.item = item;
+		this.checkedProperty().bind(task.checkedProperty());
 	}
 
 	public ObjectProperty<Checked> checkedProperty() {
@@ -64,23 +57,7 @@ public class ValidationObligation {
 		@JsonSubTypes.Type(value = ModelCheckingItem.class, name = "ModelCheckingItem"),
 		@JsonSubTypes.Type(value = LTLFormulaItem.class, name = "LTLFormulaItem"),
 		@JsonSubTypes.Type(value = String.class, name = "Path"),
-
 	})
-	public Object getItem() {
-		return item;
-	}
-
-	public void setExecutable(IExecutableItem executable) {
-		this.executable = executable;
-		checked.unbind();
-		if(item != null) {
-			checked.bind(executable.checkedProperty());
-		}
-	}
-
-	public IExecutableItem getExecutable() {
-		return executable;
-	}
 
 	@Override
 	public boolean equals(Object o) {

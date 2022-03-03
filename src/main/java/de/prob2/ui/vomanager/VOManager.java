@@ -22,6 +22,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,8 +46,9 @@ public class VOManager {
 	public void synchronizeMachine(Machine machine) {
 		for(Requirement requirement : machine.getRequirements()) {
 			for(ValidationObligation validationObligation : requirement.validationObligationsProperty()) {
-				IExecutableItem executable = lookupExecutable(machine, validationObligation.getTask(), validationObligation.getItem());
-				validationObligation.setExecutable(executable);
+				ValidationTask validationTask = validationObligation.getTask();
+				IExecutableItem executable = lookupExecutable(machine, validationTask, validationTask.getItem());
+				validationTask.setExecutable(executable);
 				validationObligation.checkedProperty().addListener((observable, from, to) -> requirement.updateChecked());
 			}
 			requirement.updateChecked();
@@ -54,7 +56,7 @@ public class VOManager {
 	}
 
 	private IExecutableItem lookupExecutable(Machine machine, ValidationTask task, Object executableItem) {
-		switch (task) {
+		switch (task.getTaskType()) {
 			case MODEL_CHECKING:
 				return machine.getModelcheckingItems().stream()
 						.filter(item -> item.getOptions().equals(((ModelCheckingItem) executableItem).getOptions()))
@@ -86,20 +88,23 @@ public class VOManager {
 	}
 
 	private ValidationObligation linkValidationObligation(Object item) {
-		ValidationObligation validationObligation;
+		ValidationTask validationTask;
+
+		// TODO
 		if(item instanceof ModelCheckingItem) {
-			validationObligation = new ValidationObligation(ValidationTask.MODEL_CHECKING, extractConfiguration((IExecutableItem) item), item);
+			validationTask = new ValidationTask("MC", "machine", ValidationTaskType.MODEL_CHECKING, Arrays.asList(""), item);
 		} else if(item instanceof LTLFormulaItem) {
-			validationObligation = new ValidationObligation(ValidationTask.LTL_MODEL_CHECKING, extractConfiguration((IExecutableItem) item), item);
+			validationTask = new ValidationTask("LTL", "machine", ValidationTaskType.LTL_MODEL_CHECKING, Arrays.asList(""), item);
 		} else if(item instanceof SymbolicCheckingFormulaItem) {
-			validationObligation = new ValidationObligation(ValidationTask.SYMBOLIC_MODEL_CHECKING, extractConfiguration((IExecutableItem) item), item);
+			validationTask = new ValidationTask("SMC", "machine", ValidationTaskType.SYMBOLIC_MODEL_CHECKING, Arrays.asList(""), item);
 		} else if(item instanceof SimulationItem) {
-			validationObligation = new ValidationObligation(ValidationTask.SIMULATION, extractConfiguration((IExecutableItem) item), item);
+			validationTask = new ValidationTask("SIM", "machine", ValidationTaskType.SIMULATION, Arrays.asList(""), item);
 		} else if(item instanceof ReplayTrace) {
-			validationObligation = new ValidationObligation(ValidationTask.TRACE_REPLAY, extractConfiguration((IExecutableItem) item), ((ReplayTrace) item).getLocation().toString());
+			validationTask = new ValidationTask("TR", "machine", ValidationTaskType.TRACE_REPLAY, Arrays.asList(""), item);
 		} else {
 			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
 		}
+		ValidationObligation validationObligation = new ValidationObligation(validationTask, extractConfiguration((IExecutableItem) item));
 		updateExecutableInVO(validationObligation);
 		return validationObligation;
 	}
@@ -140,21 +145,22 @@ public class VOManager {
 	}
 
 	private void updateExecutableInVO(ValidationObligation validationObligation) {
-		switch (validationObligation.getTask()) {
+		ValidationTask validationTask = validationObligation.getTask();
+		switch (validationTask.getTaskType()) {
 			case MODEL_CHECKING:
 			case LTL_MODEL_CHECKING:
 			case SYMBOLIC_MODEL_CHECKING:
 			case SIMULATION:
-				validationObligation.setExecutable((IExecutableItem) validationObligation.getItem());
+				validationTask.setExecutable((IExecutableItem) validationTask.getItem());
 				break;
 			case TRACE_REPLAY:
-				validationObligation.setExecutable(injector.getInstance(TraceViewHandler.class).getTraces().stream()
-						.filter(item -> item.getLocation().toString().equals(validationObligation.getItem()))
+				validationTask.setExecutable(injector.getInstance(TraceViewHandler.class).getTraces().stream()
+						.filter(item -> item.getLocation().toString().equals(validationTask.getItem()))
 						.findAny()
 						.orElse(null));
 				break;
 			default:
-				throw new RuntimeException("Validation task is invalid: " + validationObligation.getTask());
+				throw new RuntimeException("Validation task is invalid: " + validationTask.getTaskType());
 		}
 	}
 

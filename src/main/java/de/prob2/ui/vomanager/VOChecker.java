@@ -39,9 +39,10 @@ public class VOChecker {
 
 
 	public void check(ValidationObligation validationObligation) {
-		ValidationTask task = validationObligation.getTask();
-		IExecutableItem executable = validationObligation.getExecutable();
-		switch (task) {
+		ValidationTask validationTask = validationObligation.getTask();;
+		ValidationTaskType taskType = validationTask.getTaskType();
+		IExecutableItem executable = validationTask.getExecutable();
+		switch (taskType) {
 			case MODEL_CHECKING:
 				modelchecker.checkItem((ModelCheckingItem) executable, false, false);
 				break;
@@ -58,7 +59,7 @@ public class VOChecker {
 				simulationItemHandler.checkItem((SimulationItem) executable, false);
 				break;
 			default:
-				throw new RuntimeException("Validation task is not valid: " + task);
+				throw new RuntimeException("Validation task is not valid: " + taskType);
 		}
 	}
 
