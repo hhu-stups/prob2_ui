@@ -445,7 +445,7 @@ public class SimulatorStage extends Stage {
 				}
 			}
 		}
-		
+
 		simulationDebugItems.setItems(observableList);
 		simulationDebugItems.refresh();
 	}

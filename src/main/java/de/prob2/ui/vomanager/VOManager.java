@@ -231,34 +231,13 @@ public class VOManager {
 	}
 
 	private List<Observable> dependentPropertiesFromRequirement(Requirement requirement) {
-		RequirementType requirementType = requirement.getType();
 		List<Observable> lists = new ArrayList<>();
 		Machine machine = currentProject.getCurrentMachine();
-		switch (requirementType) {
-			case INVARIANT:
-			case DEADLOCK_FREEDOM:
-				lists.add(machine.modelcheckingItemsProperty());
-				lists.add(machine.ltlFormulasProperty());
-				lists.add(machine.symbolicCheckingFormulasProperty());
-				break;
-			case SAFETY:
-				lists.add(machine.ltlFormulasProperty());
-				break;
-			case LIVENESS:
-			case FAIRNESS:
-				lists.add(machine.ltlFormulasProperty());
-				break;
-			case USE_CASE:
-				lists.add(injector.getInstance(TraceViewHandler.class).getTraces());
-				break;
-			case TIMING:
-			case PROBABILISTIC:
-			case TIMED_PROBABILISTIC:
-				lists.add(machine.simulationItemsProperty());
-				break;
-			default:
-				throw new RuntimeException("Requirement type is invalid: " + requirementType);
-		}
+		lists.add(machine.modelcheckingItemsProperty());
+		lists.add(machine.ltlFormulasProperty());
+		lists.add(machine.symbolicCheckingFormulasProperty());
+		lists.add(injector.getInstance(TraceViewHandler.class).getTraces());
+		lists.add(machine.simulationItemsProperty());
 		return lists;
 	}
 }

@@ -185,38 +185,5 @@ public class ModelcheckingStage extends Stage {
 	public ModelCheckingItem getLastItem() {
 		return lastItem;
 	}
-
-	public void linkRequirement(Requirement requirement) {
-		RequirementType requirementType = requirement.getType();
-		switch (requirementType) {
-			case INVARIANT:
-				findDeadlocks.setSelected(false);
-				findInvViolations.setSelected(true);
-				findBAViolations.setSelected(false);
-				findOtherErrors.setSelected(false);
-				findGoal.setSelected(false);
-				additionalGoal.setSelected(false);
-				stopAtFullCoverage.setSelected(false);
-				break;
-			case DEADLOCK_FREEDOM:
-				findDeadlocks.setSelected(true);
-				findInvViolations.setSelected(false);
-				findBAViolations.setSelected(false);
-				findOtherErrors.setSelected(false);
-				findGoal.setSelected(false);
-				additionalGoal.setSelected(false);
-				stopAtFullCoverage.setSelected(false);
-				break;
-			default:
-				throw new RuntimeException("Given requirement type is not supported for model checking: " + requirementType);
-		}
-
-		findDeadlocks.setDisable(true);
-		findInvViolations.setDisable(true);
-		findBAViolations.setDisable(true);
-		findOtherErrors.setDisable(true);
-		findGoal.setDisable(true);
-		additionalGoal.setDisable(true);
-		stopAtFullCoverage.setDisable(true);
-	}
+	
 }

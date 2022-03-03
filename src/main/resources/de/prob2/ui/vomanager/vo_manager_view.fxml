@@ -92,15 +92,8 @@
 							<ChoiceBox fx:id="cbRequirementChoice">
 								<items>
 									<FXCollections fx:factory="observableArrayList">
-										<RequirementType fx:value="INVARIANT"/>
-										<RequirementType fx:value="DEADLOCK_FREEDOM"/>
-										<RequirementType fx:value="SAFETY"/>
-										<RequirementType fx:value="LIVENESS"/>
-										<RequirementType fx:value="FAIRNESS"/>
-										<RequirementType fx:value="USE_CASE"/>
-										<RequirementType fx:value="TIMING"/>
-										<RequirementType fx:value="PROBABILISTIC"/>
-										<RequirementType fx:value="TIMED_PROBABILISTIC"/>
+										<RequirementType fx:value="FUNCTIONAL"/>
+										<RequirementType fx:value="NON_FUNCTIONAL"/>
 									</FXCollections>
 								</items>
 							</ChoiceBox>

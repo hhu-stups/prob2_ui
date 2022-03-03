@@ -33,10 +33,14 @@ import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class VOManagerStage extends Stage {
+
+	private static final List<ValidationTask> tasks = Arrays.asList(ValidationTask.MODEL_CHECKING, ValidationTask.LTL_MODEL_CHECKING, ValidationTask.SYMBOLIC_MODEL_CHECKING,
+				ValidationTask.LTL_MODEL_CHECKING, ValidationTask.TRACE_REPLAY, ValidationTask.SIMULATION);
 
 	private enum EditType {
 		NONE, ADD, EDIT;
@@ -168,7 +172,6 @@ public class VOManagerStage extends Stage {
 		cbRequirementChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			cbTaskChoice.getItems().clear();
 			if(to != null) {
-				List<ValidationTask> tasks = VOTemplateGenerator.generate(to);
 				cbTaskChoice.getItems().addAll(tasks);
 			}
 		});

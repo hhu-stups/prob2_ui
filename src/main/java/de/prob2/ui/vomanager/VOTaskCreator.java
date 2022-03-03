@@ -42,7 +42,7 @@ public class VOTaskCreator {
 		switch (task) {
 			case MODEL_CHECKING: {
 				ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
-				stageController.linkRequirement(requirement);
+				//stageController.linkRequirement(requirement);
 				stageController.showAndWait();
 				ModelCheckingItem item = stageController.getLastItem();
 				if(item == null) {
@@ -67,7 +67,7 @@ public class VOTaskCreator {
 			}
 			case SYMBOLIC_MODEL_CHECKING: {
 				SymbolicCheckingChoosingStage symbolicStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
-				RequirementType requirementType = requirement.getType();
+				/*RequirementType requirementType = requirement.getType();
 				switch (requirementType) {
 					case INVARIANT:
 						symbolicStage.setAvailableTypes(Arrays.asList(SymbolicCheckingType.INVARIANT, SymbolicCheckingType.SYMBOLIC_MODEL_CHECK));
@@ -77,7 +77,7 @@ public class VOTaskCreator {
 						break;
 					default:
 						throw new RuntimeException("Given requirement type is not supported for symbolic model checking: " + requirementType);
-				}
+				}*/
 				symbolicStage.showAndWait();
 				SymbolicCheckingFormulaItem item = symbolicStage.getLastItem();
 				if (item == null) {
