@@ -8,7 +8,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -17,7 +16,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
@@ -88,16 +86,7 @@ public class VOManagerStage extends Stage {
 	private ChoiceBox<RequirementType> cbRequirementChoice;
 
 	@FXML
-	private ChoiceBox<ValidationTaskType> cbTaskChoice;
-
-	@FXML
-	private CheckBox cbLinkTask;
-
-	@FXML
 	private VBox requirementEditingBox;
-
-	@FXML
-	private VBox taskBox;
 
 	@FXML
 	private Button applyButton;
@@ -168,15 +157,7 @@ public class VOManagerStage extends Stage {
 				btAddOrCancelRequirement.setTooltip(new Tooltip());
 			}
 		});
-		taskBox.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull().and(cbLinkTask.selectedProperty()));
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
-
-		cbRequirementChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			cbTaskChoice.getItems().clear();
-			if(to != null) {
-				cbTaskChoice.getItems().addAll(tasks);
-			}
-		});
 
 		tvRequirements.setRowFactory(table -> {
 			final TableRow<Requirement> row = new TableRow<>();
@@ -268,8 +249,8 @@ public class VOManagerStage extends Stage {
 	public void applyRequirement() {
 		EditType editType = editModeProperty.get();
 		boolean requirementIsValid = requirementIsValid(tfName.getText(), taRequirement.getText());
-		boolean linkTaskValid = !cbLinkTask.isSelected() || cbTaskChoice.getValue() != null; // If the user selects to link a task, then the selected value for the task must be valid
-		if(requirementIsValid && linkTaskValid) {
+
+		if(requirementIsValid) {
 			Requirement requirement = null;
 			if(editType == EditType.ADD) {
 				requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
@@ -281,13 +262,7 @@ public class VOManagerStage extends Stage {
 				requirement.setText(taRequirement.getText());
 			}
 			assert requirement != null;
-			if (cbLinkTask.isSelected()) {
-				ValidationTaskType taskType = cbTaskChoice.getSelectionModel().getSelectedItem();
-				ValidationTask validationTask = taskCreator.openTaskWindow(this, requirement, taskType);
-				if (validationTask != null) {
-					requirement.addValidationObligation(new ValidationObligation(validationTask, VOManager.extractConfiguration((IExecutableItem) validationTask.getItem())));
-				}
-			}
+
 			// TODO: Replace refresh?
 			editModeProperty.set(EditType.NONE);
 			tvRequirements.getSelectionModel().clearSelection();
