@@ -52,6 +52,10 @@ public class ValidationObligation {
 		return configuration;
 	}
 
+	public void reset() {
+		// TODO: Implement
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

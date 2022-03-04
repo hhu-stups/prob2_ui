@@ -466,6 +466,15 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			machine.set("historyChartItems", machine.arrayNode());
 		}
 	}
+
+	private static void updateV20Machine(final ObjectNode machine) {
+		if(!machine.has("validationObligations")) {
+			machine.set("validationObligations", machine.arrayNode());
+		}
+		if(!machine.has("validationTasks")) {
+			machine.set("validationTasks", machine.arrayNode());
+		}
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -545,6 +554,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 19) {
 				updateV19Machine(machine);
+			}
+			if (oldVersion <= 20) {
+				updateV20Machine(machine);
 			}
 		});
 		

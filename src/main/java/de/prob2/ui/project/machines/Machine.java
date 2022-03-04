@@ -29,6 +29,8 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
 import de.prob2.ui.vomanager.Requirement;
+import de.prob2.ui.vomanager.ValidationObligation;
+import de.prob2.ui.vomanager.ValidationTask;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
@@ -55,6 +57,8 @@ import javafx.collections.ObservableSet;
 	"location",
 	"lastUsedPreferenceName",
 	"requirements",
+	"validationObligations",
+	"validationTasks",
 	"ltlFormulas",
 	"ltlPatterns",
 	"symbolicCheckingFormulas",
@@ -127,6 +131,8 @@ public class Machine implements DescriptionView.Describable {
 	private final Path location;
 	private final StringProperty lastUsedPreferenceName;
 	private final ListProperty<Requirement> requirements;
+	private final ListProperty<ValidationObligation> validationObligations;
+	private final ListProperty<ValidationTask> validationTasks;
 	private final ListProperty<LTLFormulaItem> ltlFormulas;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
@@ -157,6 +163,8 @@ public class Machine implements DescriptionView.Describable {
 		this.location = location;
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
 		this.requirements = new SimpleListProperty<>(this, "requirements", FXCollections.observableArrayList());
+		this.validationObligations = new SimpleListProperty<>(this, "validationObligations", FXCollections.observableArrayList());
+		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
@@ -227,6 +235,8 @@ public class Machine implements DescriptionView.Describable {
 		this.descriptionProperty().addListener(changedListener);
 		this.lastUsedPreferenceNameProperty().addListener(changedListener);
 		this.requirementsProperty().addListener(changedListener);
+		this.validationObligations.addListener(changedListener);
+		this.validationTasks.addListener(changedListener);
 		this.ltlFormulasProperty().addListener(changedListener);
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicCheckingFormulasProperty().addListener(changedListener);
@@ -275,6 +285,8 @@ public class Machine implements DescriptionView.Describable {
 	
 	public void resetStatus() {
 		requirements.forEach(Requirement::reset);
+		validationObligations.forEach(ValidationObligation::reset);
+		validationTasks.forEach(ValidationTask::reset);
 		ltlFormulas.forEach(LTLFormulaItem::reset);
 		ltlPatterns.forEach(LTLPatternItem::reset);
 		patternManager = new PatternManager();
@@ -369,6 +381,34 @@ public class Machine implements DescriptionView.Describable {
 	@JsonProperty("requirements")
 	public void setRequirements(final List<Requirement> requirements) {
 		this.requirements.setAll(requirements);
+	}
+
+	public ListProperty<ValidationObligation> validationObligationsProperty() {
+		return validationObligations;
+	}
+
+	@JsonProperty("validationObligations")
+	public List<ValidationObligation> getValidationObligations() {
+		return validationObligations.get();
+	}
+
+	@JsonProperty("validationObligations")
+	public void setValidationObligations(final List<ValidationObligation> validationObligations) {
+		this.validationObligations.setAll(validationObligations);
+	}
+
+	public ListProperty<ValidationTask> validationTasksProperty() {
+		return validationTasks;
+	}
+
+	@JsonProperty("validationTasks")
+	public List<ValidationTask> getValidationTasks() {
+		return validationTasks.get();
+	}
+
+	@JsonProperty("validationTasks")
+	public void setValidationTasks(final List<ValidationTask> validationTasks) {
+		this.validationTasks.setAll(validationTasks);
 	}
 
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {

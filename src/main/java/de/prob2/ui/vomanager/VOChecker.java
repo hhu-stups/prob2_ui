@@ -39,7 +39,10 @@ public class VOChecker {
 
 
 	public void check(ValidationObligation validationObligation) {
-		ValidationTask validationTask = validationObligation.getTask();;
+		check(validationObligation.getTask());
+	}
+
+	public void check(ValidationTask validationTask) {
 		ValidationTaskType taskType = validationTask.getTaskType();
 		IExecutableItem executable = validationTask.getExecutable();
 		switch (taskType) {

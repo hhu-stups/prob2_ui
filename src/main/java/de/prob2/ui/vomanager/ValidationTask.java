@@ -96,6 +96,10 @@ public class ValidationTask {
 		return checked;
 	}
 
+	public void reset() {
+		// TODO: Implement
+	}
+
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 	@JsonSubTypes({
 			@JsonSubTypes.Type(value = ModelCheckingItem.class, name = "ModelCheckingItem"),

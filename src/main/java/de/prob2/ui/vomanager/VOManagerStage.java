@@ -80,7 +80,7 @@ public class VOManagerStage extends Stage {
 	private TableColumn<ValidationObligation, String> voConfigurationColumn;
 
 	@FXML
-	private TableView<ValidationObligation> tvValidationTasks;
+	private TableView<ValidationTask> tvValidationTasks;
 
 	@FXML
 	private TableColumn<ValidationTask, Checked> vtStatusColumn;
@@ -147,8 +147,12 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.setShowRoot(false);
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			tvValidationObligations.itemsProperty().unbind();
+			tvValidationTasks.itemsProperty().unbind();
 			if(to != null) {
 				voManager.synchronizeMachine(to);
+				tvValidationObligations.itemsProperty().bind(to.validationObligationsProperty());
+				tvValidationTasks.itemsProperty().bind(to.validationTasksProperty());
 			}
 			updateRoot();
 			editModeProperty.set(EditType.NONE);
@@ -172,12 +176,12 @@ public class VOManagerStage extends Stage {
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<Requirement> row = new TreeTableRow<>();
 
-			Menu linkItem = new Menu("Link to Validation Obligation");
+			//Menu linkItem = new Menu("Link to Validation Obligation");
 
-			row.itemProperty().addListener((observable, from, to) -> {
-				final InvalidationListener linkingListener = o -> voManager.showPossibleLinkings(linkItem, to);
-				voManager.updateLinkingListener(linkItem, from, to, linkingListener);
-			});
+			//row.itemProperty().addListener((observable, from, to) -> {
+			//	final InvalidationListener linkingListener = o -> voManager.showPossibleLinkings(linkItem, to);
+			//	voManager.updateLinkingListener(linkItem, from, to, linkingListener);
+			//});
 
 			MenuItem checkItem = new MenuItem("Check Requirement");
 			checkItem.setOnAction(e -> {
@@ -191,19 +195,16 @@ public class VOManagerStage extends Stage {
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(linkItem, checkItem, removeItem)));
+							.otherwise(new ContextMenu(checkItem, removeItem)));
 			return row;
 		});
 
 		tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			tvValidationObligations.itemsProperty().unbind();
 			if(to != null && to.getValue() != null) {
 				Requirement requirement = to.getValue();
 				editModeProperty.set(EditType.EDIT);
 				showRequirement(requirement);
-				tvValidationObligations.itemsProperty().bind(requirement.validationObligationsProperty());
 			} else {
-				tvValidationObligations.itemsProperty().set(FXCollections.observableArrayList());
 				editModeProperty.set(EditType.NONE);
 			}
 		});
@@ -225,8 +226,33 @@ public class VOManagerStage extends Stage {
 
 			MenuItem removeItem = new MenuItem("Remove VO");
 			removeItem.setOnAction(e -> {
-				Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem().getValue();
-				requirement.removeValidationObligation(row.getItem());
+				ValidationObligation validationObligation = row.getItem();
+				Machine currentMachine = currentProject.getCurrentMachine();
+				currentMachine.getValidationObligations().remove(validationObligation);
+				for(Requirement requirement : currentMachine.getRequirements()) {
+					requirement.getValidationObligations().remove(validationObligation);
+				}
+			});
+
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(checkItem, removeItem)));
+			return row;
+		});
+
+		tvValidationTasks.setRowFactory(table -> {
+			final TableRow<ValidationTask> row = new TableRow<>();
+
+			MenuItem checkItem = new MenuItem("Check VT");
+			checkItem.setOnAction(e -> voChecker.check(row.getItem()));
+
+			MenuItem removeItem = new MenuItem("Remove VT");
+			removeItem.setOnAction(e -> {
+				ValidationTask validationTask = row.getItem();
+				Machine currentMachine = currentProject.getCurrentMachine();
+				currentMachine.getValidationTasks().remove(validationTask);
+				// TODO: Implement dependency between VO and VT
 			});
 
 			row.contextMenuProperty().bind(
@@ -238,6 +264,13 @@ public class VOManagerStage extends Stage {
 
 		tvValidationObligations.setOnMouseClicked(e-> {
 			ValidationObligation item = tvValidationObligations.getSelectionModel().getSelectedItem();
+			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
+				voChecker.check(item);
+			}
+		});
+
+		tvValidationTasks.setOnMouseClicked(e-> {
+			ValidationTask item = tvValidationTasks.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
 				voChecker.check(item);
 			}

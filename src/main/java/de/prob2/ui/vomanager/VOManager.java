@@ -166,7 +166,7 @@ public class VOManager {
 
 	public void showPossibleLinkings(Menu linkItem, Requirement requirement) {
 		linkItem.getItems().clear();
-		List<Observable> dependentProperties = dependentPropertiesFromRequirement(requirement);
+		List<Observable> dependentProperties = allValidationTasks();
 		for(Observable observable : dependentProperties) {
 			if(observable instanceof SetProperty) {
 				((SetProperty<?>) observable).forEach(obj -> createLinkingItem(linkItem, requirement, obj));
@@ -204,7 +204,7 @@ public class VOManager {
 		}
 	}
 
-	public void updateLinkingListener(Menu linkItem, Requirement from, Requirement to, InvalidationListener linkingListener) {
+	/*public void updateLinkingListener(Menu linkItem, Requirement from, Requirement to, InvalidationListener linkingListener) {
 		if (from != null) {
 			List<Observable> dependentProperties = dependentPropertiesFromRequirement(from);
 			for (Observable observable : dependentProperties) {
@@ -234,9 +234,9 @@ public class VOManager {
 
 			linkingListener.invalidated(null);
 		}
-	}
+	}*/
 
-	private List<Observable> dependentPropertiesFromRequirement(Requirement requirement) {
+	private List<Observable> allValidationTasks() {
 		List<Observable> lists = new ArrayList<>();
 		Machine machine = currentProject.getCurrentMachine();
 		lists.add(machine.modelcheckingItemsProperty());
