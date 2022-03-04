@@ -22,9 +22,9 @@
 <?import javafx.scene.control.TextField?>
 <?import de.prob2.ui.vomanager.RequirementType?>
 
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.layout.StackPane?>
 <fx:root title="VO Manager" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -33,7 +33,7 @@
 		<Scene stylesheets="@/prob.css">
 			<ScrollPane prefWidth="1200" prefHeight="800" fitToHeight="true" fitToWidth="true">
 				<SplitPane dividerPositions="0.35">
-					<VBox styleClass="border" spacing="20.0" alignment="CENTER_LEFT" >
+					<VBox styleClass="border" spacing="20.0" alignment="CENTER_LEFT">
 						<VBox>
 							<HBox styleClass="border">
 								<padding>
@@ -43,11 +43,6 @@
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
 									</graphic>
-									<!--
-									<tooltip>
-										<Tooltip text="Add Requirement" />
-									</tooltip>
-									!-->
 								</Button>
 							</HBox>
 							<TreeTableView fx:id="tvRequirements">
@@ -70,65 +65,72 @@
 								</placeholder>
 							</TreeTableView>
 						</VBox>
-						<TableView fx:id="tvValidationObligations">
-							<columnResizePolicy>
-								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-							</columnResizePolicy>
-							<columns>
-								<TableColumn fx:id="voStatusColumn" style="-fx-alignment: CENTER;"
-											 minWidth="${fontSize.fontSize * 6}"
-											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-								<TableColumn fx:id="voNameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
-											 text="Name"/>
-								<TableColumn fx:id="voConfigurationColumn" minWidth="80.0"
-											 text="Configuration"/>
-							</columns>
-							<placeholder>
-								<Label text="No Validation Obligations"/>
-							</placeholder>
-						</TableView>
-						<TableView fx:id="tvValidationTasks">
-							<columnResizePolicy>
-								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-							</columnResizePolicy>
-							<columns>
-								<TableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;"
-											 minWidth="${fontSize.fontSize * 6}"
-											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-								<TableColumn fx:id="vtNameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
-											 text="Name"/>
-								<TableColumn fx:id="vtConfigurationColumn" minWidth="80.0"
-											 text="Configuration"/>
-							</columns>
-							<placeholder>
-								<Label text="No Validation Tasks"/>
-							</placeholder>
-						</TableView>
-					</VBox>
-					<VBox fx:id="requirementEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
 						<VBox>
-
-							<Label text="Requirement Type:"/>
-							<ChoiceBox fx:id="cbRequirementChoice">
-								<items>
-									<FXCollections fx:factory="observableArrayList">
-										<RequirementType fx:value="FUNCTIONAL"/>
-										<RequirementType fx:value="NON_FUNCTIONAL"/>
-									</FXCollections>
-								</items>
-							</ChoiceBox>
+							<HBox styleClass="border">
+								<padding>
+									<Insets left="5.0"/>
+								</padding>
+								<Button fx:id="btAddVT" contentDisplay="GRAPHIC_ONLY" onAction="#addVT">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+								</Button>
+							</HBox>
+							<TableView fx:id="tvValidationTasks">
+								<columnResizePolicy>
+									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+								</columnResizePolicy>
+								<columns>
+									<TableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;"
+												 minWidth="${fontSize.fontSize * 6}"
+												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+									<TableColumn fx:id="vtNameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
+												 text="Name"/>
+									<TableColumn fx:id="vtConfigurationColumn" minWidth="80.0"
+												 text="Configuration"/>
+								</columns>
+								<placeholder>
+									<Label text="No Validation Tasks"/>
+								</placeholder>
+							</TableView>
 						</VBox>
-						<HBox>
-							<Label text="Name:"/>
-							<TextField fx:id="tfName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-						</HBox>
-						<VBox>
-							<Label text="Requirement:"/>
-							<TextArea fx:id="taRequirement" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-						</VBox>
-
-						<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
 					</VBox>
+					<StackPane>
+						<VBox fx:id="requirementEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
+							<VBox>
+
+								<Label text="Requirement Type:"/>
+								<ChoiceBox fx:id="cbRequirementChoice">
+									<items>
+										<FXCollections fx:factory="observableArrayList">
+											<RequirementType fx:value="FUNCTIONAL"/>
+											<RequirementType fx:value="NON_FUNCTIONAL"/>
+										</FXCollections>
+									</items>
+								</ChoiceBox>
+							</VBox>
+							<HBox>
+								<Label text="Name:"/>
+								<TextField fx:id="tfName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+							</HBox>
+							<VBox>
+								<Label text="Requirement:"/>
+								<TextArea fx:id="taRequirement" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+							</VBox>
+							<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
+						</VBox>
+						<VBox fx:id="voEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
+							<HBox>
+								<Label text="Name:"/>
+								<TextField fx:id="tfVOName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+							</HBox>
+							<VBox>
+								<Label text="VO Predicate:"/>
+								<TextArea fx:id="taVOPredicate" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+							</VBox>
+							<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVO"/>
+						</VBox>
+					</StackPane>
 				</SplitPane>
 			</ScrollPane>
 		</Scene>
