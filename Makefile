@@ -29,9 +29,11 @@ VOLUME=/Volumes/$(DMGPROB2)/
 DMGAPPFILE=$(VOLUME)$(DMGPROB2).app
 BUILDDIR=build/distributions/
 APPFILE=$(BUILDDIR)ProB2-UI.app
-AC_USERNAME = "EMAIL FOR SIGNING <---------------------- REPLACE"
-ADC_CERTIFICATE_NAME = "ADC APP SIGNING CERTIFICATE <--------------- REPLACE"
+AC_USERNAME = "michael.leuschel@hhu.de"
+ADC_CERTIFICATE_NAME = "Michael Leuschel (794LFG5T52)"
 
+dmg: $(DMGFILE)
+	@echo "Trying to create macOS DMG file"
 
 $(DMGFILE): build.gradle src/main/java/de/prob2/ui/*.java src/main/java/de/prob2/ui/*/*.java src/main/java/de/prob2/ui/*/*/*.java
 	@echo "Step 0: creating a DMG including the macOS App"
