@@ -94,16 +94,25 @@ public class VOManagerStage extends Stage {
 	private ChoiceBox<RequirementType> cbRequirementChoice;
 
 	@FXML
+	private ChoiceBox<ValidationTaskType> cbValidationTaskChoice;
+
+	@FXML
 	private TextField tfVOName;
 
 	@FXML
 	private TextArea taVOPredicate;
 
 	@FXML
+	private TextField tfVTName;
+
+	@FXML
 	private VBox requirementEditingBox;
 
 	@FXML
 	private VBox voEditingBox;
+
+	@FXML
+	private VBox vtEditingBox;
 
 	@FXML
 	private Button applyButton;
@@ -157,18 +166,27 @@ public class VOManagerStage extends Stage {
 
 		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && editModeProperty.get() == EditMode.REQUIREMENT, editTypeProperty, editModeProperty));
 		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && editModeProperty.get() == EditMode.VO, editTypeProperty, editModeProperty));
+		vtEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && editModeProperty.get() == EditMode.VT, editTypeProperty, editModeProperty));
 
-		editTypeProperty.addListener((observable, from, to) -> {
-			if(to != EditType.NONE) {
+		editModeProperty.addListener((observable, from, to) -> {
+			if(to == EditMode.REQUIREMENT ||to == EditMode.VO) {
 				btAddOrCancelRequirement.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
 				btAddOrCancelRequirement.setTooltip(new Tooltip());
 			} else {
-				if(editModeProperty.get() == EditMode.REQUIREMENT) {
-					btAddOrCancelRequirement.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
-					btAddOrCancelRequirement.setTooltip(new Tooltip());
-				}
+				btAddOrCancelRequirement.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
+				btAddOrCancelRequirement.setTooltip(new Tooltip());
+			}
+
+			if(to == EditMode.VT) {
+				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
+				btAddVT.setTooltip(new Tooltip());
+			} else {
+				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
+				btAddVT.setTooltip(new Tooltip());
 			}
 		});
+
+
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 
 		tvRequirements.setRowFactory(table -> {
@@ -238,6 +256,17 @@ public class VOManagerStage extends Stage {
 			return row;
 		});
 
+		tvValidationTasks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to != null) {
+				editTypeProperty.set(EditType.EDIT);
+				editModeProperty.set(EditMode.VT);
+				// TODO: Show validation task similar to showing requirement
+			} else {
+				editTypeProperty.set(EditType.NONE);
+				editModeProperty.set(EditMode.NONE);
+			}
+		});
+
 		tvValidationTasks.setOnMouseClicked(e-> {
 			ValidationTask item = tvValidationTasks.getSelectionModel().getSelectedItem();
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
@@ -261,7 +290,7 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	public void addOrCancelRequirement() {
-		if(editTypeProperty.get() == EditType.NONE) {
+		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.REQUIREMENT) {
 			cbRequirementChoice.getSelectionModel().clearSelection();
 			taRequirement.clear();
 			tfName.clear();
@@ -333,7 +362,18 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void addVT() {
-
+		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.VT) {
+			editTypeProperty.set(EditType.ADD);
+			editModeProperty.set(EditMode.VT);
+		} else {
+			editTypeProperty.set(EditType.NONE);
+			editModeProperty.set(EditMode.NONE);
+		}
+		tvValidationTasks.getSelectionModel().clearSelection();
 	}
 
+	@FXML
+	private void applyVT() {
+
+	}
 }

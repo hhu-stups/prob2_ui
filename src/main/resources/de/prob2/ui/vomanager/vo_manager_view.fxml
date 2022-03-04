@@ -25,6 +25,7 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.layout.StackPane?>
+<?import de.prob2.ui.vomanager.ValidationTaskType?>
 <fx:root title="VO Manager" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -98,7 +99,6 @@
 					<StackPane>
 						<VBox fx:id="requirementEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
 							<VBox>
-
 								<Label text="Requirement Type:"/>
 								<ChoiceBox fx:id="cbRequirementChoice">
 									<items>
@@ -129,6 +129,29 @@
 								<TextArea fx:id="taVOPredicate" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 							</VBox>
 							<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVO"/>
+						</VBox>
+						<VBox fx:id="vtEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
+							<HBox>
+								<Label text="Name:"/>
+								<TextField fx:id="tfVTName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+							</HBox>
+							<VBox>
+								<Label text="Validation Task:"/>
+								<ChoiceBox fx:id="cbValidationTaskChoice">
+									<items>
+										<FXCollections fx:factory="observableArrayList">
+											<ValidationTaskType fx:value="MODEL_CHECKING"/>
+											<ValidationTaskType fx:value="LTL_MODEL_CHECKING"/>
+											<ValidationTaskType fx:value="SYMBOLIC_MODEL_CHECKING"/>
+											<ValidationTaskType fx:value="TRACE_REPLAY"/>
+											<ValidationTaskType fx:value="SIMULATION"/>
+											<ValidationTaskType fx:value="PARALLEL"/>
+											<ValidationTaskType fx:value="SEQUENTIAL"/>
+										</FXCollections>
+									</items>
+								</ChoiceBox>
+							</VBox>
+							<Button fx:id="applyVTButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVT"/>
 						</VBox>
 					</StackPane>
 				</SplitPane>
