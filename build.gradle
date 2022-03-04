@@ -340,7 +340,9 @@ task jpackage(type: Exec) {
 		]
 	} else if (osdetector.os == "osx") {
 		args += [
-			        "--icon", new File(jpackageIconsDir, "prob2-ui.icns")
+			//"--mac-sign", "--mac-signing-key-user-name", "Michael Leuschel (794LFG5T52)",
+			//"--mac-package-signing-prefix", "de.prob2.ui",
+			"--icon", new File(jpackageIconsDir, "prob2-ui.icns")
 		]
 	} else if (osdetector.os == "linux") {
 		args += [
