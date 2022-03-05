@@ -34,6 +34,7 @@ import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import javax.inject.Inject;
@@ -191,6 +192,17 @@ public class VOManagerStage extends Stage {
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		applyVTButton.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull().and(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull()));
 
+		cbTaskChoice.setConverter(new StringConverter<ValidationTask>() {
+			@Override
+			public String toString(ValidationTask object) {
+				return object.getParameters();
+			}
+
+			@Override
+			public ValidationTask fromString(String string) {
+				return null;
+			}
+		});
 		cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to == null) {
 				return;

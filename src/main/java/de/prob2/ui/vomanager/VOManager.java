@@ -173,6 +173,7 @@ public class VOManager {
 				break;
 			case PARALLEL:
 			case SEQUENTIAL:
+				break;
 			default:
 				throw new RuntimeException("Validation technique not valid: " + validationTechnique);
 		}

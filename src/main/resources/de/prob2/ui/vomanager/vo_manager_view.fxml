@@ -152,7 +152,7 @@
 								</ChoiceBox>
 							</VBox>
 							<VBox fx:id="validationTaskBox">
-								<Label text="Validation Task:"/>
+								<Label text="Validation Parameters:"/>
 								<ChoiceBox fx:id="cbTaskChoice"/>
 							</VBox>
 							<Button fx:id="applyVTButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVT"/>
