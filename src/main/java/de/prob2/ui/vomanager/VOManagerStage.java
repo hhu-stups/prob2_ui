@@ -167,7 +167,7 @@ public class VOManagerStage extends Stage {
 		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 
-		vtNameColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+		vtNameColumn.setCellValueFactory(new PropertyValueFactory<>("prefix"));
 		vtConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("parameters"));
 
 		tvRequirements.setShowRoot(false);
@@ -425,6 +425,7 @@ public class VOManagerStage extends Stage {
 			return;
 		}
 		Machine machine = currentProject.getCurrentMachine();
+		task.setId(tfVTName.getText());
 		machine.getValidationTasks().add(task);
 	}
 }

@@ -90,15 +90,15 @@ public class VOManager {
 	private ValidationTask createValidationTask(Object item) {
 		ValidationTask validationTask;
 		if(item instanceof ModelCheckingItem) {
-			validationTask = new ValidationTask("MC", "machine", ValidationTechnique.MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask("machine", ValidationTechnique.MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof LTLFormulaItem) {
-			validationTask = new ValidationTask("LTL", "machine", ValidationTechnique.LTL_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask("machine", ValidationTechnique.LTL_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof SymbolicCheckingFormulaItem) {
-			validationTask = new ValidationTask("SMC", "machine", ValidationTechnique.SYMBOLIC_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask("machine", ValidationTechnique.SYMBOLIC_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof SimulationItem) {
-			validationTask = new ValidationTask("SIM", "machine", ValidationTechnique.SIMULATION, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask("machine", ValidationTechnique.SIMULATION, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof ReplayTrace) {
-			validationTask = new ValidationTask("TR", "machine", ValidationTechnique.TRACE_REPLAY, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask("machine", ValidationTechnique.TRACE_REPLAY, voTaskCreator.extractParameters(item), item);
 		} else {
 			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
 		}

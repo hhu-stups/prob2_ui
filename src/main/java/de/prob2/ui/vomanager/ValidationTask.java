@@ -26,7 +26,7 @@ import java.util.Objects;
 })
 public class ValidationTask {
 
-	private final String id;
+	private String id;
 
 	private final String context;
 
@@ -46,11 +46,20 @@ public class ValidationTask {
 	public ValidationTask(@JsonProperty("id") String id, @JsonProperty("context") String context,
 						  @JsonProperty("validationTechnique") ValidationTechnique validationTechnique, @JsonProperty("parameters") String parameters,
 						  @JsonProperty("item") Object item) {
+		this(context, validationTechnique, parameters, item);
 		this.id = id;
+	}
+
+	public ValidationTask(String context, ValidationTechnique validationTechnique, String parameters,
+						  Object item) {
 		this.context = context;
 		this.validationTechnique = validationTechnique;
 		this.parameters = parameters;
 		this.item = item;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getId() {
@@ -69,11 +78,15 @@ public class ValidationTask {
 		return parameters;
 	}
 
+	public String getPrefix() {
+		return String.format("%s/%s/%s", id, context, validationTechnique.getId());
+	}
+
 	public String getRepresentation() {
 		if(parameters.isEmpty()) {
-			return String.format("%s/%s/%s", id, context, validationTechnique);
+			return String.format("%s/%s/%s", id, context, validationTechnique.getId());
 		}
-		return String.format("%s/%s/%s: %s", id, context, validationTechnique, String.join(", ", parameters));
+		return String.format("%s/%s/%s: %s", id, context, validationTechnique.getId(), String.join(", ", parameters));
 	}
 
 	public void setExecutable(IExecutableItem executable) {
