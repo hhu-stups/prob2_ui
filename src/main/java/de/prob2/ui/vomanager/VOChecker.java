@@ -43,9 +43,9 @@ public class VOChecker {
 	}
 
 	public void check(ValidationTask validationTask) {
-		ValidationTaskType taskType = validationTask.getTaskType();
+		ValidationTechnique validationTechnique = validationTask.getValidationTechnique();
 		IExecutableItem executable = validationTask.getExecutable();
-		switch (taskType) {
+		switch (validationTechnique) {
 			case MODEL_CHECKING:
 				modelchecker.checkItem((ModelCheckingItem) executable, false, false);
 				break;
@@ -62,7 +62,7 @@ public class VOChecker {
 				simulationItemHandler.checkItem((SimulationItem) executable, false);
 				break;
 			default:
-				throw new RuntimeException("Validation task is not valid: " + taskType);
+				throw new RuntimeException("Validation technique is not valid: " + validationTechnique);
 		}
 	}
 

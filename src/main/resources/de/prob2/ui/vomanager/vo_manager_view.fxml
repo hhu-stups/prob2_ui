@@ -25,7 +25,7 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.layout.StackPane?>
-<?import de.prob2.ui.vomanager.ValidationTaskType?>
+<?import de.prob2.ui.vomanager.ValidationTechnique?>
 <fx:root title="VO Manager" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -136,17 +136,17 @@
 								<TextField fx:id="tfVTName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 							</HBox>
 							<VBox>
-								<Label text="Validation Task:"/>
-								<ChoiceBox fx:id="cbValidationTaskChoice">
+								<Label text="Validation Technique:"/>
+								<ChoiceBox fx:id="cbValidationTechniqueChoice">
 									<items>
 										<FXCollections fx:factory="observableArrayList">
-											<ValidationTaskType fx:value="MODEL_CHECKING"/>
-											<ValidationTaskType fx:value="LTL_MODEL_CHECKING"/>
-											<ValidationTaskType fx:value="SYMBOLIC_MODEL_CHECKING"/>
-											<ValidationTaskType fx:value="TRACE_REPLAY"/>
-											<ValidationTaskType fx:value="SIMULATION"/>
-											<ValidationTaskType fx:value="PARALLEL"/>
-											<ValidationTaskType fx:value="SEQUENTIAL"/>
+											<ValidationTechnique fx:value="MODEL_CHECKING"/>
+											<ValidationTechnique fx:value="LTL_MODEL_CHECKING"/>
+											<ValidationTechnique fx:value="SYMBOLIC_MODEL_CHECKING"/>
+											<ValidationTechnique fx:value="TRACE_REPLAY"/>
+											<ValidationTechnique fx:value="SIMULATION"/>
+											<ValidationTechnique fx:value="PARALLEL"/>
+											<ValidationTechnique fx:value="SEQUENTIAL"/>
 										</FXCollections>
 									</items>
 								</ChoiceBox>

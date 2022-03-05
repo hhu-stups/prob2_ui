@@ -1,6 +1,6 @@
 package de.prob2.ui.vomanager;
 
-public enum ValidationTaskType {
+public enum ValidationTechnique {
 	MODEL_CHECKING("Model Checking"),
 	LTL_MODEL_CHECKING("LTL Model Checking"),
 	SYMBOLIC_MODEL_CHECKING("Symbolic Model Checking"),
@@ -11,7 +11,7 @@ public enum ValidationTaskType {
 
 	private final String name;
 
-	ValidationTaskType(String name) {
+	ValidationTechnique(String name) {
 		this.name = name;
 	}
 

@@ -30,7 +30,7 @@ public class ValidationTask {
 
 	private final String context;
 
-	private final ValidationTaskType taskType;
+	private final ValidationTechnique validationTechnique;
 
 	private final List<String> parameters;
 
@@ -44,11 +44,11 @@ public class ValidationTask {
 
 	@JsonCreator
 	public ValidationTask(@JsonProperty("id") String id, @JsonProperty("context") String context,
-						   @JsonProperty("taskType") ValidationTaskType taskType, @JsonProperty("parameters") List<String> parameters,
-						   @JsonProperty("item") Object item) {
+						  @JsonProperty("validationTechnique") ValidationTechnique validationTechnique, @JsonProperty("parameters") List<String> parameters,
+						  @JsonProperty("item") Object item) {
 		this.id = id;
 		this.context = context;
-		this.taskType = taskType;
+		this.validationTechnique = validationTechnique;
 		this.parameters = parameters;
 		this.item = item;
 	}
@@ -61,8 +61,8 @@ public class ValidationTask {
 		return context;
 	}
 
-	public ValidationTaskType getTaskType() {
-		return taskType;
+	public ValidationTechnique getValidationTechnique() {
+		return validationTechnique;
 	}
 
 	public List<String> getParameters() {
@@ -71,9 +71,9 @@ public class ValidationTask {
 
 	public String getRepresentation() {
 		if(parameters.isEmpty()) {
-			return String.format("%s/%s/%s", id, context, taskType);
+			return String.format("%s/%s/%s", id, context, validationTechnique);
 		}
-		return String.format("%s/%s/%s: %s", id, context, taskType, String.join(", ", parameters));
+		return String.format("%s/%s/%s: %s", id, context, validationTechnique, String.join(", ", parameters));
 	}
 
 	public void setExecutable(IExecutableItem executable) {
@@ -111,12 +111,12 @@ public class ValidationTask {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ValidationTask that = (ValidationTask) o;
-		return Objects.equals(id, that.id) && Objects.equals(context, that.context) && taskType == that.taskType && Objects.equals(parameters, that.parameters);
+		return Objects.equals(id, that.id) && Objects.equals(context, that.context) && validationTechnique == that.validationTechnique && Objects.equals(parameters, that.parameters);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, context, taskType, parameters);
+		return Objects.hash(id, context, validationTechnique, parameters);
 	}
 
 	@Override

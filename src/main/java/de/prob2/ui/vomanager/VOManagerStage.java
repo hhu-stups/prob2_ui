@@ -40,8 +40,8 @@ import java.util.List;
 
 public class VOManagerStage extends Stage {
 
-	private static final List<ValidationTaskType> tasks = Arrays.asList(ValidationTaskType.MODEL_CHECKING, ValidationTaskType.LTL_MODEL_CHECKING, ValidationTaskType.SYMBOLIC_MODEL_CHECKING,
-			ValidationTaskType.TRACE_REPLAY, ValidationTaskType.SIMULATION);
+	private static final List<ValidationTechnique> tasks = Arrays.asList(ValidationTechnique.MODEL_CHECKING, ValidationTechnique.LTL_MODEL_CHECKING, ValidationTechnique.SYMBOLIC_MODEL_CHECKING,
+			ValidationTechnique.TRACE_REPLAY, ValidationTechnique.SIMULATION);
 
 	private enum EditType {
 		NONE, ADD, EDIT;
@@ -94,7 +94,7 @@ public class VOManagerStage extends Stage {
 	private ChoiceBox<RequirementType> cbRequirementChoice;
 
 	@FXML
-	private ChoiceBox<ValidationTaskType> cbValidationTaskChoice;
+	private ChoiceBox<ValidationTechnique> cbValidationTaskChoice;
 
 	@FXML
 	private TextField tfVOName;

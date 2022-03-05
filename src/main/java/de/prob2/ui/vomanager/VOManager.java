@@ -12,10 +12,7 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SetProperty;
 import javafx.scene.control.Menu;
@@ -56,7 +53,7 @@ public class VOManager {
 	}
 
 	private IExecutableItem lookupExecutable(Machine machine, ValidationTask task, Object executableItem) {
-		switch (task.getTaskType()) {
+		switch (task.getValidationTechnique()) {
 			case MODEL_CHECKING:
 				return machine.getModelcheckingItems().stream()
 						.filter(item -> item.getOptions().equals(((ModelCheckingItem) executableItem).getOptions()))
@@ -92,15 +89,15 @@ public class VOManager {
 
 		// TODO
 		if(item instanceof ModelCheckingItem) {
-			validationTask = new ValidationTask("MC", "machine", ValidationTaskType.MODEL_CHECKING, Arrays.asList(""), item);
+			validationTask = new ValidationTask("MC", "machine", ValidationTechnique.MODEL_CHECKING, Arrays.asList(""), item);
 		} else if(item instanceof LTLFormulaItem) {
-			validationTask = new ValidationTask("LTL", "machine", ValidationTaskType.LTL_MODEL_CHECKING, Arrays.asList(""), item);
+			validationTask = new ValidationTask("LTL", "machine", ValidationTechnique.LTL_MODEL_CHECKING, Arrays.asList(""), item);
 		} else if(item instanceof SymbolicCheckingFormulaItem) {
-			validationTask = new ValidationTask("SMC", "machine", ValidationTaskType.SYMBOLIC_MODEL_CHECKING, Arrays.asList(""), item);
+			validationTask = new ValidationTask("SMC", "machine", ValidationTechnique.SYMBOLIC_MODEL_CHECKING, Arrays.asList(""), item);
 		} else if(item instanceof SimulationItem) {
-			validationTask = new ValidationTask("SIM", "machine", ValidationTaskType.SIMULATION, Arrays.asList(""), item);
+			validationTask = new ValidationTask("SIM", "machine", ValidationTechnique.SIMULATION, Arrays.asList(""), item);
 		} else if(item instanceof ReplayTrace) {
-			validationTask = new ValidationTask("TR", "machine", ValidationTaskType.TRACE_REPLAY, Arrays.asList(""), item);
+			validationTask = new ValidationTask("TR", "machine", ValidationTechnique.TRACE_REPLAY, Arrays.asList(""), item);
 		} else {
 			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
 		}
@@ -146,7 +143,7 @@ public class VOManager {
 
 	private void updateExecutableInVO(ValidationObligation validationObligation) {
 		ValidationTask validationTask = validationObligation.getTask();
-		switch (validationTask.getTaskType()) {
+		switch (validationTask.getValidationTechnique()) {
 			case MODEL_CHECKING:
 			case LTL_MODEL_CHECKING:
 			case SYMBOLIC_MODEL_CHECKING:
@@ -160,7 +157,7 @@ public class VOManager {
 						.orElse(null));
 				break;
 			default:
-				throw new RuntimeException("Validation task is invalid: " + validationTask.getTaskType());
+				throw new RuntimeException("Validation task is invalid: " + validationTask.getValidationTechnique());
 		}
 	}
 

@@ -18,7 +18,6 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
 
 import javafx.stage.Window;
 
@@ -34,12 +33,8 @@ public class VOTaskCreator {
 		this.injector = injector;
 	}
 
-	public ValidationTask openTaskWindow(Window currentWindow, Requirement requirement, ValidationTaskType taskType) {
-		if(taskType == null) {
-			// TODO: Show error message
-			return null;
-		}
-		switch (taskType) {
+	public ValidationTask openTaskWindow(Window currentWindow, Requirement requirement, ValidationTechnique validationTechnique) {
+		switch (validationTechnique) {
 			case MODEL_CHECKING: {
 				ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
 				//stageController.linkRequirement(requirement);
@@ -48,7 +43,7 @@ public class VOTaskCreator {
 				if(item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("MC", "machine", taskType, Arrays.asList(""), item);
+				ValidationTask validationTask = new ValidationTask("MC", "machine", validationTechnique, Arrays.asList(""), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -61,7 +56,7 @@ public class VOTaskCreator {
 				if(item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("LTL", "machine", taskType, Arrays.asList(""), item);
+				ValidationTask validationTask = new ValidationTask("LTL", "machine", validationTechnique, Arrays.asList(""), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -72,7 +67,7 @@ public class VOTaskCreator {
 				if (item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("SMC", "machine", taskType, Arrays.asList(""), item);
+				ValidationTask validationTask = new ValidationTask("SMC", "machine", validationTechnique, Arrays.asList(""), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -83,7 +78,7 @@ public class VOTaskCreator {
 				if (replayTrace == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("TR", "machine", taskType, Arrays.asList(""), replayTrace);
+				ValidationTask validationTask = new ValidationTask("TR", "machine", validationTechnique, Arrays.asList(""), replayTrace);
 				validationTask.setExecutable(replayTrace);
 				return validationTask;
 			}
@@ -94,7 +89,7 @@ public class VOTaskCreator {
 				if (item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("SIM", "machine", taskType, Arrays.asList(""), item);
+				ValidationTask validationTask = new ValidationTask("SIM", "machine", validationTechnique, Arrays.asList(""), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
