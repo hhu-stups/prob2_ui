@@ -32,11 +32,14 @@ public class VOManager {
 
 	private final VOChecker voChecker;
 
+	private final VOTaskCreator voTaskCreator;
+
 	@Inject
-	public VOManager(final CurrentProject currentProject, final Injector injector, final VOChecker voChecker) {
+	public VOManager(final CurrentProject currentProject, final Injector injector, final VOChecker voChecker, final VOTaskCreator voTaskCreator) {
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.voChecker = voChecker;
+		this.voTaskCreator = voTaskCreator;
 	}
 
 
@@ -84,61 +87,22 @@ public class VOManager {
 		}
 	}
 
-	private ValidationObligation linkValidationObligation(Object item) {
+	private ValidationTask createValidationTask(Object item) {
 		ValidationTask validationTask;
-
-		// TODO
 		if(item instanceof ModelCheckingItem) {
-			validationTask = new ValidationTask("MC", "machine", ValidationTechnique.MODEL_CHECKING, Arrays.asList(""), item);
+			validationTask = new ValidationTask("MC", "machine", ValidationTechnique.MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof LTLFormulaItem) {
-			validationTask = new ValidationTask("LTL", "machine", ValidationTechnique.LTL_MODEL_CHECKING, Arrays.asList(""), item);
+			validationTask = new ValidationTask("LTL", "machine", ValidationTechnique.LTL_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof SymbolicCheckingFormulaItem) {
-			validationTask = new ValidationTask("SMC", "machine", ValidationTechnique.SYMBOLIC_MODEL_CHECKING, Arrays.asList(""), item);
+			validationTask = new ValidationTask("SMC", "machine", ValidationTechnique.SYMBOLIC_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof SimulationItem) {
-			validationTask = new ValidationTask("SIM", "machine", ValidationTechnique.SIMULATION, Arrays.asList(""), item);
+			validationTask = new ValidationTask("SIM", "machine", ValidationTechnique.SIMULATION, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof ReplayTrace) {
-			validationTask = new ValidationTask("TR", "machine", ValidationTechnique.TRACE_REPLAY, Arrays.asList(""), item);
+			validationTask = new ValidationTask("TR", "machine", ValidationTechnique.TRACE_REPLAY, voTaskCreator.extractParameters(item), item);
 		} else {
 			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
 		}
-		ValidationObligation validationObligation = new ValidationObligation(validationTask, extractConfiguration((IExecutableItem) item));
-		updateExecutableInVO(validationObligation);
-		return validationObligation;
-	}
-
-	public static String extractConfiguration(IExecutableItem item) {
-		if(item instanceof ModelCheckingItem) {
-			return ((ModelCheckingItem) item).getOptions().getPrologOptions().stream().map(Enum::toString).collect(Collectors.joining(", "));
-		} else if(item instanceof LTLFormulaItem) {
-			return ((LTLFormulaItem) item).getCode();
-		} else if(item instanceof SymbolicCheckingFormulaItem) {
-			SymbolicCheckingFormulaItem symbolicItem = ((SymbolicCheckingFormulaItem) item);
-			switch (symbolicItem.getType()) {
-				case INVARIANT:
-					if (symbolicItem.getCode().isEmpty()) {
-						return String.format("%s(%s)", symbolicItem.getType().name(), "all");
-					} else {
-						return String.format("%s(%s)", symbolicItem.getType().name(), symbolicItem.getCode());
-					}
-				case DEADLOCK:
-					return String.format("%s(%s)", symbolicItem.getType().name(), symbolicItem.getCode());
-				case SYMBOLIC_MODEL_CHECK:
-					return symbolicItem.getCode();
-				case CHECK_DYNAMIC_ASSERTIONS:
-				case CHECK_STATIC_ASSERTIONS:
-				case CHECK_REFINEMENT:
-				case CHECK_WELL_DEFINEDNESS:
-				case FIND_REDUNDANT_INVARIANTS:
-				default:
-					return symbolicItem.getType().name();
-			}
-		} else if(item instanceof SimulationItem) {
-			return ((SimulationItem) item).getConfiguration();
-		} else if(item instanceof ReplayTrace) {
-			return ((ReplayTrace) item).getName();
-		} else {
-			throw new RuntimeException("Class for extracting configuration is invalid: " + item.getClass());
-		}
+		return validationTask;
 	}
 
 	private void updateExecutableInVO(ValidationObligation validationObligation) {
@@ -161,7 +125,7 @@ public class VOManager {
 		}
 	}
 
-	private String generateVOName(Object item) {
+	/*private String generateVOName(Object item) {
 		if(item instanceof ModelCheckingItem) {
 			return String.format("MC(%s)", extractConfiguration((IExecutableItem) item));
 		} else if(item instanceof LTLFormulaItem) {
@@ -175,7 +139,7 @@ public class VOManager {
 		} else {
 			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
 		}
-	}
+	}*/
 
 	private List<Observable> allValidationTasks() {
 		List<Observable> lists = new ArrayList<>();
@@ -188,24 +152,24 @@ public class VOManager {
 		return lists;
 	}
 
-	private List<IExecutableItem> allTasks(ValidationTechnique validationTechnique) {
-		List<IExecutableItem> executableItems = new ArrayList<>();
+	public List<ValidationTask> allTasks(ValidationTechnique validationTechnique) {
+		List<ValidationTask> executableItems = new ArrayList<>();
 		Machine machine = currentProject.getCurrentMachine();
 		switch (validationTechnique) {
 			case MODEL_CHECKING:
-				executableItems.addAll(machine.getModelcheckingItems());
+				executableItems.addAll(machine.getModelcheckingItems().stream().map(this::createValidationTask).collect(Collectors.toList()));
 				break;
 			case LTL_MODEL_CHECKING:
-				executableItems.addAll(machine.getLTLFormulas());
+				executableItems.addAll(machine.getLTLFormulas().stream().map(this::createValidationTask).collect(Collectors.toList()));
 				break;
 			case SYMBOLIC_MODEL_CHECKING:
-				executableItems.addAll(machine.getSymbolicCheckingFormulas());
+				executableItems.addAll(machine.getSymbolicCheckingFormulas().stream().map(this::createValidationTask).collect(Collectors.toList()));
 				break;
 			case TRACE_REPLAY:
-				executableItems.addAll(injector.getInstance(TraceViewHandler.class).getTraces());
+				executableItems.addAll(injector.getInstance(TraceViewHandler.class).getTraces().stream().map(this::createValidationTask).collect(Collectors.toList()));
 				break;
 			case SIMULATION:
-				executableItems.addAll(machine.getSimulations());
+				executableItems.addAll(machine.getSimulations().stream().map(this::createValidationTask).collect(Collectors.toList()));
 				break;
 			case PARALLEL:
 			case SEQUENTIAL:

@@ -32,7 +32,7 @@ public class ValidationTask {
 
 	private final ValidationTechnique validationTechnique;
 
-	private final List<String> parameters;
+	private final String parameters;
 
 	private final Object item;
 
@@ -44,7 +44,7 @@ public class ValidationTask {
 
 	@JsonCreator
 	public ValidationTask(@JsonProperty("id") String id, @JsonProperty("context") String context,
-						  @JsonProperty("validationTechnique") ValidationTechnique validationTechnique, @JsonProperty("parameters") List<String> parameters,
+						  @JsonProperty("validationTechnique") ValidationTechnique validationTechnique, @JsonProperty("parameters") String parameters,
 						  @JsonProperty("item") Object item) {
 		this.id = id;
 		this.context = context;
@@ -65,7 +65,7 @@ public class ValidationTask {
 		return validationTechnique;
 	}
 
-	public List<String> getParameters() {
+	public String getParameters() {
 		return parameters;
 	}
 
@@ -90,6 +90,10 @@ public class ValidationTask {
 
 	public Object getItem() {
 		return item;
+	}
+
+	public Checked getChecked() {
+		return checked.get();
 	}
 
 	public ObjectProperty<Checked> checkedProperty() {

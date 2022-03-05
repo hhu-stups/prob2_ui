@@ -7,6 +7,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.TreeCheckedCell;
 import javafx.beans.binding.Bindings;
@@ -28,6 +29,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
@@ -98,7 +100,7 @@ public class VOManagerStage extends Stage {
 	private ChoiceBox<ValidationTechnique> cbValidationTechniqueChoice;
 
 	@FXML
-	private ChoiceBox<IExecutableItem> cbTaskChoice;
+	private ChoiceBox<ValidationTask> cbTaskChoice;
 
 	@FXML
 	private TextField tfVOName;
@@ -160,6 +162,13 @@ public class VOManagerStage extends Stage {
 		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		typeColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("shortTypeName"));
 		specificationColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("text"));
+
+		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+
+		vtNameColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+		vtConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("parameters"));
+
 		tvRequirements.setShowRoot(false);
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvValidationTasks.itemsProperty().unbind();
@@ -182,6 +191,17 @@ public class VOManagerStage extends Stage {
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		applyVTButton.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull().and(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull()));
 
+		cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			cbTaskChoice.getItems().clear();
+			List<ValidationTask> tasks = voManager.allTasks(to);
+			if(tasks == null) {
+				return;
+			}
+			cbTaskChoice.getItems().addAll(tasks);
+		});
 
 		editModeProperty.addListener((observable, from, to) -> {
 			if(to == EditMode.REQUIREMENT ||to == EditMode.VO) {
@@ -388,6 +408,11 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void applyVT() {
-
+		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
+		if(task == null) {
+			return;
+		}
+		Machine machine = currentProject.getCurrentMachine();
+		machine.getValidationTasks().add(task);
 	}
 }

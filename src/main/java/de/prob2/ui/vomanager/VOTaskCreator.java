@@ -22,6 +22,7 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import javafx.stage.Window;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Singleton
 public class VOTaskCreator {
@@ -43,7 +44,7 @@ public class VOTaskCreator {
 				if(item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("MC", "machine", validationTechnique, Arrays.asList(""), item);
+				ValidationTask validationTask = new ValidationTask("MC", "machine", validationTechnique, extractParameters(item), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -56,7 +57,7 @@ public class VOTaskCreator {
 				if(item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("LTL", "machine", validationTechnique, Arrays.asList(""), item);
+				ValidationTask validationTask = new ValidationTask("LTL", "machine", validationTechnique, extractParameters(item), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -67,7 +68,7 @@ public class VOTaskCreator {
 				if (item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("SMC", "machine", validationTechnique, Arrays.asList(""), item);
+				ValidationTask validationTask = new ValidationTask("SMC", "machine", validationTechnique, extractParameters(item), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -78,7 +79,7 @@ public class VOTaskCreator {
 				if (replayTrace == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("TR", "machine", validationTechnique, Arrays.asList(""), replayTrace);
+				ValidationTask validationTask = new ValidationTask("TR", "machine", validationTechnique, extractParameters(replayTrace), replayTrace);
 				validationTask.setExecutable(replayTrace);
 				return validationTask;
 			}
@@ -89,12 +90,47 @@ public class VOTaskCreator {
 				if (item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("SIM", "machine", validationTechnique, Arrays.asList(""), item);
+				ValidationTask validationTask = new ValidationTask("SIM", "machine", validationTechnique, extractParameters(item), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
 			default:
 				throw new RuntimeException("Validation task is not valid");
+		}
+	}
+
+	public String extractParameters(Object item) {
+		if(item instanceof ModelCheckingItem) {
+			return ((ModelCheckingItem) item).getOptions().getPrologOptions().stream().map(Enum::toString).collect(Collectors.joining(", "));
+		} else if(item instanceof LTLFormulaItem) {
+			return ((LTLFormulaItem) item).getCode();
+		} else if(item instanceof SymbolicCheckingFormulaItem) {
+			SymbolicCheckingFormulaItem symbolicItem = ((SymbolicCheckingFormulaItem) item);
+			switch (symbolicItem.getType()) {
+				case INVARIANT:
+					if (symbolicItem.getCode().isEmpty()) {
+						return String.format("%s(%s)", symbolicItem.getType().name(), "all");
+					} else {
+						return String.format("%s(%s)", symbolicItem.getType().name(), symbolicItem.getCode());
+					}
+				case DEADLOCK:
+					return String.format("%s(%s)", symbolicItem.getType().name(), symbolicItem.getCode());
+				case SYMBOLIC_MODEL_CHECK:
+					return symbolicItem.getCode();
+				case CHECK_DYNAMIC_ASSERTIONS:
+				case CHECK_STATIC_ASSERTIONS:
+				case CHECK_REFINEMENT:
+				case CHECK_WELL_DEFINEDNESS:
+				case FIND_REDUNDANT_INVARIANTS:
+				default:
+					return symbolicItem.getType().name();
+			}
+		} else if(item instanceof SimulationItem) {
+			return ((SimulationItem) item).getConfiguration();
+		} else if(item instanceof ReplayTrace) {
+			return ((ReplayTrace) item).getName();
+		} else {
+			throw new RuntimeException("Class for extracting configuration is invalid: " + item.getClass());
 		}
 	}
 
