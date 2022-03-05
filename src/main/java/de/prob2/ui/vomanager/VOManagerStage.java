@@ -427,5 +427,9 @@ public class VOManagerStage extends Stage {
 		Machine machine = currentProject.getCurrentMachine();
 		task.setId(tfVTName.getText());
 		machine.getValidationTasks().add(task);
+		editTypeProperty.set(EditType.NONE);
+		editModeProperty.set(EditMode.NONE);
+		tvValidationTasks.getSelectionModel().clearSelection();
+		tvValidationTasks.refresh();
 	}
 }
