@@ -7,6 +7,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.TreeCheckedCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -94,7 +95,10 @@ public class VOManagerStage extends Stage {
 	private ChoiceBox<RequirementType> cbRequirementChoice;
 
 	@FXML
-	private ChoiceBox<ValidationTechnique> cbValidationTaskChoice;
+	private ChoiceBox<ValidationTechnique> cbValidationTechniqueChoice;
+
+	@FXML
+	private ChoiceBox<IExecutableItem> cbTaskChoice;
 
 	@FXML
 	private TextField tfVOName;
@@ -115,7 +119,13 @@ public class VOManagerStage extends Stage {
 	private VBox vtEditingBox;
 
 	@FXML
+	private VBox validationTaskBox;
+
+	@FXML
 	private Button applyButton;
+
+	@FXML
+	private Button applyVTButton;
 
 	private final CurrentProject currentProject;
 
@@ -168,6 +178,11 @@ public class VOManagerStage extends Stage {
 		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && editModeProperty.get() == EditMode.VO, editTypeProperty, editModeProperty));
 		vtEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && editModeProperty.get() == EditMode.VT, editTypeProperty, editModeProperty));
 
+		validationTaskBox.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		applyVTButton.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull().and(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull()));
+
+
 		editModeProperty.addListener((observable, from, to) -> {
 			if(to == EditMode.REQUIREMENT ||to == EditMode.VO) {
 				btAddOrCancelRequirement.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
@@ -187,7 +202,6 @@ public class VOManagerStage extends Stage {
 		});
 
 
-		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<Requirement> row = new TreeTableRow<>();

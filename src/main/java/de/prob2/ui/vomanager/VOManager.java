@@ -161,30 +161,6 @@ public class VOManager {
 		}
 	}
 
-	public void showPossibleLinkings(Menu linkItem, Requirement requirement) {
-		linkItem.getItems().clear();
-		List<Observable> dependentProperties = allValidationTasks();
-		for(Observable observable : dependentProperties) {
-			if(observable instanceof SetProperty) {
-				((SetProperty<?>) observable).forEach(obj -> createLinkingItem(linkItem, requirement, obj));
-			} else if(observable instanceof ListProperty) {
-				((ListProperty<?>) observable).forEach(obj -> createLinkingItem(linkItem, requirement, obj));
-			}
-		}
-	}
-
-	private void createLinkingItem(Menu linkItem, Requirement requirement, Object voExecutable) {
-		MenuItem voItem = new MenuItem(generateVOName(voExecutable));
-		voItem.setMnemonicParsing(false);
-		voItem.setOnAction(e -> {
-			ValidationObligation validationObligation = linkValidationObligation(voExecutable);
-			requirement.addValidationObligation(validationObligation);
-			validationObligation.checkedProperty().addListener((o, from, to) -> requirement.updateChecked());
-			voChecker.check(validationObligation);
-		});
-		linkItem.getItems().add(voItem);
-	}
-
 	private String generateVOName(Object item) {
 		if(item instanceof ModelCheckingItem) {
 			return String.format("MC(%s)", extractConfiguration((IExecutableItem) item));
@@ -201,38 +177,6 @@ public class VOManager {
 		}
 	}
 
-	/*public void updateLinkingListener(Menu linkItem, Requirement from, Requirement to, InvalidationListener linkingListener) {
-		if (from != null) {
-			List<Observable> dependentProperties = dependentPropertiesFromRequirement(from);
-			for (Observable observable : dependentProperties) {
-				observable.removeListener(linkingListener);
-			}
-		}
-
-		if(to != null) {
-			List<Observable> dependentProperties = dependentPropertiesFromRequirement(to);
-			Observable[] dependentPropertiesAsArray = dependentProperties.toArray(new Observable[0]);
-			BooleanBinding emptyProperty = Bindings.createBooleanBinding(() -> {
-				boolean result = true;
-				for(Observable observable : dependentPropertiesAsArray) {
-					if(observable instanceof SetProperty) {
-						result = result && ((SetProperty<?>) observable).emptyProperty().get();
-					} else if(observable instanceof ListProperty) {
-						result = result && ((ListProperty<?>) observable).emptyProperty().get();
-					}
-				}
-				return result;
-			}, dependentPropertiesAsArray);
-
-			for (Observable observable : dependentProperties) {
-				linkItem.disableProperty().bind(emptyProperty);
-				observable.addListener(linkingListener);
-			}
-
-			linkingListener.invalidated(null);
-		}
-	}*/
-
 	private List<Observable> allValidationTasks() {
 		List<Observable> lists = new ArrayList<>();
 		Machine machine = currentProject.getCurrentMachine();
@@ -242,5 +186,32 @@ public class VOManager {
 		lists.add(injector.getInstance(TraceViewHandler.class).getTraces());
 		lists.add(machine.simulationItemsProperty());
 		return lists;
+	}
+
+	private List<IExecutableItem> allTasks(ValidationTechnique validationTechnique) {
+		List<IExecutableItem> executableItems = new ArrayList<>();
+		Machine machine = currentProject.getCurrentMachine();
+		switch (validationTechnique) {
+			case MODEL_CHECKING:
+				executableItems.addAll(machine.getModelcheckingItems());
+				break;
+			case LTL_MODEL_CHECKING:
+				executableItems.addAll(machine.getLTLFormulas());
+				break;
+			case SYMBOLIC_MODEL_CHECKING:
+				executableItems.addAll(machine.getSymbolicCheckingFormulas());
+				break;
+			case TRACE_REPLAY:
+				executableItems.addAll(injector.getInstance(TraceViewHandler.class).getTraces());
+				break;
+			case SIMULATION:
+				executableItems.addAll(machine.getSimulations());
+				break;
+			case PARALLEL:
+			case SEQUENTIAL:
+			default:
+				throw new RuntimeException("Validation technique not valid: " + validationTechnique);
+		}
+		return executableItems;
 	}
 }
