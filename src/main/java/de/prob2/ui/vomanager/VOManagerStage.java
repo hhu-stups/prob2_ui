@@ -41,6 +41,7 @@ import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VOManagerStage extends Stage {
 
@@ -359,9 +360,16 @@ public class VOManagerStage extends Stage {
 
 		if(requirementIsValid) {
 			Requirement requirement = null;
+			Machine machine = currentProject.getCurrentMachine();
+			if(machine.getRequirements().stream()
+					.map(Requirement::getName)
+					.collect(Collectors.toList())
+					.contains(tfName.getText())) {
+				return;
+			}
 			if(editType == EditType.ADD) {
 				requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
-				currentProject.getCurrentMachine().getRequirements().add(requirement);
+				machine.getRequirements().add(requirement);
 			} else if(editType == EditType.EDIT) {
 				requirement = tvRequirements.getSelectionModel().getSelectedItem().getValue();
 				requirement.setName(tfName.getText());
@@ -442,11 +450,14 @@ public class VOManagerStage extends Stage {
 		EditType editType = editTypeProperty.get();
 		if(taskIsValid) {
 			ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
-			if(task == null) {
+			Machine machine = currentProject.getCurrentMachine();
+			if(task == null || machine.getValidationTasks().stream()
+					.map(ValidationTask::getId)
+					.collect(Collectors.toList())
+					.contains(tfVTName.getText())) {
 				return;
 			}
 			if(editType == EditType.ADD) {
-				Machine machine = currentProject.getCurrentMachine();
 				task.setId(tfVTName.getText());
 				machine.getValidationTasks().add(task);
 			} else if(editType == EditType.EDIT) {
