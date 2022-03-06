@@ -385,6 +385,12 @@ public class VOManagerStage extends Stage {
 		return nameWithoutWhiteSpaces.length() > 0 && textWithoutWhiteSpaces.length() > 0;
 	}
 
+	private boolean taskIsValid(String name) {
+		//isBlank() requires Java version >= 11
+		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
+		return nameWithoutWhiteSpaces.length() > 0;
+	}
+
 	private void removeRequirement() {
 		Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem().getValue();
 		currentProject.getCurrentMachine().getRequirements().remove(requirement);
@@ -424,12 +430,17 @@ public class VOManagerStage extends Stage {
 		if(task == null) {
 			return;
 		}
-		Machine machine = currentProject.getCurrentMachine();
-		task.setId(tfVTName.getText());
-		machine.getValidationTasks().add(task);
-		editTypeProperty.set(EditType.NONE);
-		editModeProperty.set(EditMode.NONE);
-		tvValidationTasks.getSelectionModel().clearSelection();
-		tvValidationTasks.refresh();
+		boolean taskIsValid = taskIsValid(tfVTName.getText());
+		if(taskIsValid) {
+			Machine machine = currentProject.getCurrentMachine();
+			task.setId(tfVTName.getText());
+			machine.getValidationTasks().add(task);
+			editTypeProperty.set(EditType.NONE);
+			editModeProperty.set(EditMode.NONE);
+			tvValidationTasks.getSelectionModel().clearSelection();
+			tvValidationTasks.refresh();
+		} else {
+			// TODO: Show message
+		}
 	}
 }
