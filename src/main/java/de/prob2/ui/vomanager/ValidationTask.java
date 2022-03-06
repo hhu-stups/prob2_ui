@@ -56,6 +56,7 @@ public class ValidationTask {
 		this.validationTechnique = validationTechnique;
 		this.parameters = parameters;
 		this.item = item;
+		setExecutable((IExecutableItem) item);
 	}
 
 	public void setId(String id) {
