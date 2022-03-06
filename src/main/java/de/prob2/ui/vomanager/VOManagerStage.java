@@ -435,6 +435,9 @@ public class VOManagerStage extends Stage {
 	@FXML
 	private void addVT() {
 		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.VT) {
+			tfVTName.clear();
+			cbValidationTechniqueChoice.getSelectionModel().clearSelection();
+			cbTaskChoice.getItems().clear();
 			editTypeProperty.set(EditType.ADD);
 			editModeProperty.set(EditMode.VT);
 		} else {
