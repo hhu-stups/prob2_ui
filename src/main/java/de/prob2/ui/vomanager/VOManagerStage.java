@@ -465,6 +465,6 @@ public class VOManagerStage extends Stage {
 		} else {
 			// TODO: Show message
 		}
-		
+
 	}
 }

@@ -30,15 +30,12 @@ public class VOManager {
 
 	private final Injector injector;
 
-	private final VOChecker voChecker;
-
 	private final VOTaskCreator voTaskCreator;
 
 	@Inject
-	public VOManager(final CurrentProject currentProject, final Injector injector, final VOChecker voChecker, final VOTaskCreator voTaskCreator) {
+	public VOManager(final CurrentProject currentProject, final Injector injector, final VOTaskCreator voTaskCreator) {
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.voChecker = voChecker;
 		this.voTaskCreator = voTaskCreator;
 	}
 
@@ -103,53 +100,6 @@ public class VOManager {
 			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
 		}
 		return validationTask;
-	}
-
-	private void updateExecutableInVO(ValidationObligation validationObligation) {
-		ValidationTask validationTask = validationObligation.getTask();
-		switch (validationTask.getValidationTechnique()) {
-			case MODEL_CHECKING:
-			case LTL_MODEL_CHECKING:
-			case SYMBOLIC_MODEL_CHECKING:
-			case SIMULATION:
-				validationTask.setExecutable((IExecutableItem) validationTask.getItem());
-				break;
-			case TRACE_REPLAY:
-				validationTask.setExecutable(injector.getInstance(TraceViewHandler.class).getTraces().stream()
-						.filter(item -> item.getLocation().toString().equals(((ReplayTrace) validationTask.getItem()).getLocation().toString()))
-						.findAny()
-						.orElse(null));
-				break;
-			default:
-				throw new RuntimeException("Validation task is invalid: " + validationTask.getValidationTechnique());
-		}
-	}
-
-	/*private String generateVOName(Object item) {
-		if(item instanceof ModelCheckingItem) {
-			return String.format("MC(%s)", extractConfiguration((IExecutableItem) item));
-		} else if(item instanceof LTLFormulaItem) {
-			return String.format("LTL(%s)", extractConfiguration((IExecutableItem) item));
-		} else if(item instanceof SymbolicCheckingFormulaItem) {
-			return String.format("SMC(%s)", extractConfiguration((IExecutableItem) item));
-		} else if(item instanceof ReplayTrace) {
-			return String.format("TR(%s)", extractConfiguration((IExecutableItem) item));
-		} else if(item instanceof SimulationItem) {
-			return String.format("SIM(%s)", extractConfiguration((IExecutableItem) item));
-		} else {
-			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
-		}
-	}*/
-
-	private List<Observable> allValidationTasks() {
-		List<Observable> lists = new ArrayList<>();
-		Machine machine = currentProject.getCurrentMachine();
-		lists.add(machine.modelcheckingItemsProperty());
-		lists.add(machine.ltlFormulasProperty());
-		lists.add(machine.symbolicCheckingFormulasProperty());
-		lists.add(injector.getInstance(TraceViewHandler.class).getTraces());
-		lists.add(machine.simulationItemsProperty());
-		return lists;
 	}
 
 	public List<ValidationTask> allTasks(ValidationTechnique validationTechnique) {
