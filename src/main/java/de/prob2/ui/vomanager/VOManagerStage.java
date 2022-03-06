@@ -138,18 +138,21 @@ public class VOManagerStage extends Stage {
 
 	private final VOChecker voChecker;
 
+	private final VOTaskCreator voTaskCreator;
+
 	private final ObjectProperty<EditType> editTypeProperty;
 
 	private final ObjectProperty<EditMode> editModeProperty;
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
-			final VOManager voManager, final VOChecker voChecker) {
+			final VOManager voManager, final VOChecker voChecker, final VOTaskCreator voTaskCreator) {
 		super();
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voManager = voManager;
 		this.voChecker = voChecker;
+		this.voTaskCreator = voTaskCreator;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.editModeProperty = new SimpleObjectProperty<>(EditMode.NONE);
 		stageManager.loadFXML(this, "vo_manager_view.fxml");
@@ -306,7 +309,7 @@ public class VOManagerStage extends Stage {
 			if(to != null) {
 				editTypeProperty.set(EditType.EDIT);
 				editModeProperty.set(EditMode.VT);
-				// TODO: Show validation task similar to showing requirement
+				showValidationTask(to);
 			} else {
 				editTypeProperty.set(EditType.NONE);
 				editModeProperty.set(EditMode.NONE);
@@ -407,6 +410,15 @@ public class VOManagerStage extends Stage {
 		taRequirement.setText(requirement.getText());
 	}
 
+	private void showValidationTask(ValidationTask validationTask) {
+		if(validationTask == null) {
+			return;
+		}
+		tfVTName.setText(validationTask.getId());
+		cbValidationTechniqueChoice.getSelectionModel().select(validationTask.getValidationTechnique());
+		cbTaskChoice.getSelectionModel().select(validationTask);
+	}
+
 	@FXML
 	private void applyVO() {
 
@@ -426,15 +438,26 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void applyVT() {
-		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
-		if(task == null) {
-			return;
-		}
 		boolean taskIsValid = taskIsValid(tfVTName.getText());
+		EditType editType = editTypeProperty.get();
 		if(taskIsValid) {
-			Machine machine = currentProject.getCurrentMachine();
-			task.setId(tfVTName.getText());
-			machine.getValidationTasks().add(task);
+			ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
+			if(task == null) {
+				return;
+			}
+			if(editType == EditType.ADD) {
+				Machine machine = currentProject.getCurrentMachine();
+				task.setId(tfVTName.getText());
+				machine.getValidationTasks().add(task);
+			} else if(editType == EditType.EDIT) {
+				ValidationTask currentTask = tvValidationTasks.getSelectionModel().getSelectedItem();
+				currentTask.setId(tfVTName.getText());
+				currentTask.setExecutable(task.getExecutable());
+				currentTask.setContext("machine"); //TODO:
+				currentTask.setItem(task.getItem());
+				currentTask.setParameters(voTaskCreator.extractParameters(task.getItem()));
+			}
+
 			editTypeProperty.set(EditType.NONE);
 			editModeProperty.set(EditMode.NONE);
 			tvValidationTasks.getSelectionModel().clearSelection();
@@ -442,5 +465,6 @@ public class VOManagerStage extends Stage {
 		} else {
 			// TODO: Show message
 		}
+		
 	}
 }

@@ -28,13 +28,13 @@ public class ValidationTask {
 
 	private String id;
 
-	private final String context;
+	private String context;
 
-	private final ValidationTechnique validationTechnique;
+	private ValidationTechnique validationTechnique;
 
-	private final String parameters;
+	private String parameters;
 
-	private final Object item;
+	private Object item;
 
 	@JsonIgnore
 	private IExecutableItem executable;
@@ -75,8 +75,16 @@ public class ValidationTask {
 		return validationTechnique;
 	}
 
+	public void setValidationTechnique(ValidationTechnique validationTechnique) {
+		this.validationTechnique = validationTechnique;
+	}
+
 	public String getParameters() {
 		return parameters;
+	}
+
+	public void setParameters(String parameters) {
+		this.parameters = parameters;
 	}
 
 	public String getPrefix() {
@@ -104,6 +112,15 @@ public class ValidationTask {
 
 	public Object getItem() {
 		return item;
+	}
+
+	public void setItem(Object item) {
+		this.item = item;
+		setExecutable((IExecutableItem) item);
+	}
+
+	public void setContext(String context) {
+		this.context = context;
 	}
 
 	public Checked getChecked() {
