@@ -409,6 +409,7 @@ public class VOManagerStage extends Stage {
 			Machine machine = currentProject.getCurrentMachine();
 			tfVOName.clear();
 			taVOPredicate.clear();
+			cbLinkRequirementChoice.getItems().clear();
 			cbLinkRequirementChoice.getItems().addAll(machine.getRequirements());
 			editTypeProperty.set(EditType.ADD);
 			editModeProperty.set(EditMode.VO);
@@ -523,8 +524,6 @@ public class VOManagerStage extends Stage {
 		tfVOName.setText(validationObligation.getId());
 		taVOPredicate.setText(validationObligation.getPredicate());
 		Machine machine = currentProject.getCurrentMachine();
-		System.out.println(validationObligation.getRequirement());
-		System.out.println(machine.getRequirements().stream().map(Requirement::getName).collect(Collectors.toList()));
 		Requirement requirement = machine.getRequirements().stream()
 				.filter(req -> req.getName().equals(validationObligation.getRequirement()))
 				.collect(Collectors.toList()).get(0);
