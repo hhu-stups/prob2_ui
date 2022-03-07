@@ -18,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -84,7 +85,7 @@ public class VOManagerStage extends Stage {
 	private TableColumn<ValidationTask, String> vtConfigurationColumn;
 
 	@FXML
-	private Button btAddOrCancelRequirement;
+	private MenuButton btAddRequirementVO;
 
 	@FXML
 	private Button btAddVT;
@@ -199,6 +200,9 @@ public class VOManagerStage extends Stage {
 		cbTaskChoice.setConverter(new StringConverter<ValidationTask>() {
 			@Override
 			public String toString(ValidationTask object) {
+				if(object == null) {
+					return "null";
+				}
 				return object.getParameters();
 			}
 
@@ -220,14 +224,6 @@ public class VOManagerStage extends Stage {
 		});
 
 		editModeProperty.addListener((observable, from, to) -> {
-			if(to == EditMode.REQUIREMENT ||to == EditMode.VO) {
-				btAddOrCancelRequirement.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
-				btAddOrCancelRequirement.setTooltip(new Tooltip());
-			} else {
-				btAddOrCancelRequirement.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
-				btAddOrCancelRequirement.setTooltip(new Tooltip());
-			}
-
 			if(to == EditMode.VT) {
 				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
 				btAddVT.setTooltip(new Tooltip());
@@ -339,13 +335,27 @@ public class VOManagerStage extends Stage {
 	}
 
 	@FXML
-	public void addOrCancelRequirement() {
+	public void addRequirement() {
 		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.REQUIREMENT) {
 			cbRequirementChoice.getSelectionModel().clearSelection();
 			taRequirement.clear();
 			tfName.clear();
 			editTypeProperty.set(EditType.ADD);
 			editModeProperty.set(EditMode.REQUIREMENT);
+		} else {
+			editTypeProperty.set(EditType.NONE);
+			editModeProperty.set(EditMode.NONE);
+		}
+		tvRequirements.getSelectionModel().clearSelection();
+	}
+
+	@FXML
+	public void addVO() {
+		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.VO) {
+			tfVOName.clear();
+			taVOPredicate.clear();
+			editTypeProperty.set(EditType.ADD);
+			editModeProperty.set(EditMode.VO);
 		} else {
 			editTypeProperty.set(EditType.NONE);
 			editModeProperty.set(EditMode.NONE);

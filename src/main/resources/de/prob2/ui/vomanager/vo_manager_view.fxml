@@ -26,6 +26,8 @@
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.layout.StackPane?>
 <?import de.prob2.ui.vomanager.ValidationTechnique?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <fx:root title="VO Manager" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -40,11 +42,15 @@
 								<padding>
 									<Insets left="5.0"/>
 								</padding>
-								<Button fx:id="btAddOrCancelRequirement" contentDisplay="GRAPHIC_ONLY" onAction="#addOrCancelRequirement">
+								<MenuButton fx:id="btAddRequirementVO">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
 									</graphic>
-								</Button>
+									<items>
+										<MenuItem fx:id="btAddRequirement" text="Add Requirement" onAction="#addRequirement"/>
+										<MenuItem fx:id="btAddVO" text="Add VO" onAction="#addVO"/>
+									</items>
+								</MenuButton>
 							</HBox>
 							<TreeTableView fx:id="tvRequirements">
 								<columnResizePolicy>
