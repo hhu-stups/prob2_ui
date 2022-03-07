@@ -173,7 +173,7 @@ public class VOManagerStage extends Stage {
 
 		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		typeColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("shortTypeName"));
-		specificationColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("text"));
+		specificationColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("configuration"));
 
 		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -181,7 +181,6 @@ public class VOManagerStage extends Stage {
 		vtNameColumn.setCellValueFactory(new PropertyValueFactory<>("prefix"));
 		vtConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("parameters"));
 
-		tvRequirements.setShowRoot(false);
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			btAddVO.disableProperty().unbind();
 
@@ -355,7 +354,8 @@ public class VOManagerStage extends Stage {
 		List<Requirement> requirements = currentProject.getCurrentMachine().getRequirements();
 		TreeItem<IAbstractRequirement> root = new TreeItem<>();
 		for(Requirement requirement : requirements) {
-			root.getChildren().add(new TreeItem<>(requirement));
+			TreeItem<IAbstractRequirement> treeItem = new TreeItem<>(requirement);
+			root.getChildren().add(treeItem);
 		}
 		tvRequirements.setRoot(root);
 	}
@@ -488,6 +488,14 @@ public class VOManagerStage extends Stage {
 			if(editType == EditType.ADD) {
 				validationObligation = new ValidationObligation(tfVOName.getText(), taVOPredicate.getText());
 				machine.getValidationObligations().add(validationObligation);
+				for(TreeItem<IAbstractRequirement> treeItem : tvRequirements.getRoot().getChildren()) {
+					Requirement requirement = (Requirement) treeItem.getValue();
+					if(requirement.equals(cbLinkRequirementChoice.getValue())) {
+						requirement.addValidationObligation(validationObligation);
+						treeItem.getChildren().add(new TreeItem<>(validationObligation));
+						break;
+					}
+				}
 			} else if(editType == EditType.EDIT) {
 				validationObligation = (ValidationObligation) tvRequirements.getSelectionModel().getSelectedItem().getValue();
 				validationObligation.setId(tfVOName.getText());

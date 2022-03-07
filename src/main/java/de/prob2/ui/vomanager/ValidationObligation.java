@@ -59,6 +59,16 @@ public class ValidationObligation implements IAbstractRequirement {
 		this.predicate = predicate;
 	}
 
+	@JsonIgnore
+	public String getName() {
+		return getId();
+	}
+
+	@JsonIgnore
+	public String getConfiguration() {
+		return getPredicate();
+	}
+
 	public void reset() {
 		// TODO: Implement
 	}

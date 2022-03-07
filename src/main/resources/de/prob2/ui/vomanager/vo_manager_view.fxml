@@ -52,7 +52,7 @@
 									</items>
 								</MenuButton>
 							</HBox>
-							<TreeTableView fx:id="tvRequirements">
+							<TreeTableView fx:id="tvRequirements" showRoot="false">
 								<columnResizePolicy>
 									<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 								</columnResizePolicy>

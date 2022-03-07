@@ -93,6 +93,11 @@ public class Requirement implements IAbstractRequirement {
 		return type.name();
 	}
 
+	@JsonIgnore
+	public String getConfiguration() {
+		return getText();
+	}
+
 	public String getText() {
 		return text;
 	}
