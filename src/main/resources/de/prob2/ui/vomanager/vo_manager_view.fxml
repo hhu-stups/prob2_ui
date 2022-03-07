@@ -130,6 +130,10 @@
 								<Label text="Name:"/>
 								<TextField fx:id="tfVOName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 							</HBox>
+							<HBox>
+								<Label text="Link to Requirement:"/>
+								<ChoiceBox fx:id="cbLinkRequirementChoice"/>
+							</HBox>
 							<VBox>
 								<Label text="VO Predicate:"/>
 								<TextArea fx:id="taVOPredicate" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>

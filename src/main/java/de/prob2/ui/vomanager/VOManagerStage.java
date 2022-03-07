@@ -58,19 +58,19 @@ public class VOManagerStage extends Stage {
 	}
 
 	@FXML
-	private TreeTableView<Requirement> tvRequirements;
+	private TreeTableView<IAbstractRequirement> tvRequirements;
 
 	@FXML
-	private TreeTableColumn<Requirement, Checked> requirementStatusColumn;
+	private TreeTableColumn<IAbstractRequirement, Checked> requirementStatusColumn;
 
 	@FXML
-	private TreeTableColumn<Requirement, String> requirementNameColumn;
+	private TreeTableColumn<IAbstractRequirement, String> requirementNameColumn;
 
 	@FXML
-	private TreeTableColumn<Requirement, String> typeColumn;
+	private TreeTableColumn<IAbstractRequirement, String> typeColumn;
 
 	@FXML
-	private TreeTableColumn<Requirement, String> specificationColumn;
+	private TreeTableColumn<IAbstractRequirement, String> specificationColumn;
 
 	@FXML
 	private TableView<ValidationTask> tvValidationTasks;
@@ -88,6 +88,9 @@ public class VOManagerStage extends Stage {
 	private MenuButton btAddRequirementVO;
 
 	@FXML
+	private MenuItem btAddVO;
+
+	@FXML
 	private Button btAddVT;
 
 	@FXML
@@ -101,6 +104,9 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private ChoiceBox<ValidationTechnique> cbValidationTechniqueChoice;
+
+	@FXML
+	private ChoiceBox<Requirement> cbLinkRequirementChoice;
 
 	@FXML
 	private ChoiceBox<ValidationTask> cbTaskChoice;
@@ -177,10 +183,13 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.setShowRoot(false);
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			btAddVO.disableProperty().unbind();
+
 			tvValidationTasks.itemsProperty().unbind();
 			if(to != null) {
-				voManager.synchronizeMachine(to);
+				//voManager.synchronizeMachine(to);
 				tvValidationTasks.itemsProperty().bind(to.validationTasksProperty());
+				btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
 			}
 			updateRoot();
 			editTypeProperty.set(EditType.NONE);
@@ -197,11 +206,13 @@ public class VOManagerStage extends Stage {
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		applyVTButton.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull().and(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull()));
 
+
+
 		cbTaskChoice.setConverter(new StringConverter<ValidationTask>() {
 			@Override
 			public String toString(ValidationTask object) {
 				if(object == null) {
-					return "null";
+					return "";
 				}
 				return object.getParameters();
 			}
@@ -223,6 +234,21 @@ public class VOManagerStage extends Stage {
 			cbTaskChoice.getItems().addAll(tasks);
 		});
 
+		cbLinkRequirementChoice.setConverter(new StringConverter<Requirement>() {
+			@Override
+			public String toString(Requirement object) {
+				if(object == null) {
+					return "";
+				}
+				return object.getName();
+			}
+
+			@Override
+			public Requirement fromString(String string) {
+				return null;
+			}
+		});
+
 		editModeProperty.addListener((observable, from, to) -> {
 			if(to == EditMode.VT) {
 				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
@@ -236,7 +262,7 @@ public class VOManagerStage extends Stage {
 
 
 		tvRequirements.setRowFactory(table -> {
-			final TreeTableRow<Requirement> row = new TreeTableRow<>();
+			final TreeTableRow<IAbstractRequirement> row = new TreeTableRow<>();
 
 			//Menu linkItem = new Menu("Link to Validation Obligation");
 
@@ -247,7 +273,7 @@ public class VOManagerStage extends Stage {
 
 			MenuItem checkItem = new MenuItem("Check Requirement");
 			checkItem.setOnAction(e -> {
-				Requirement requirement = row.getItem();
+				Requirement requirement = (Requirement) row.getItem();
 				requirement.getValidationObligations().forEach(voChecker::check);
 			});
 
@@ -263,7 +289,7 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null && to.getValue() != null) {
-				Requirement requirement = to.getValue();
+				Requirement requirement = (Requirement) to.getValue();
 				editTypeProperty.set(EditType.EDIT);
 				editModeProperty.set(EditMode.REQUIREMENT);
 				showRequirement(requirement);
@@ -274,8 +300,8 @@ public class VOManagerStage extends Stage {
 		});
 
 		tvRequirements.setOnMouseClicked(e-> {
-			TreeItem<Requirement> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-			Requirement requirement = treeItem == null ? null : treeItem.getValue();
+			TreeItem<IAbstractRequirement> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
+			Requirement requirement = treeItem == null ? null : (Requirement) treeItem.getValue();
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && requirement != null && currentTrace.get() != null) {
 				requirement.getValidationObligations().forEach(voChecker::check);
 			}
@@ -327,7 +353,7 @@ public class VOManagerStage extends Stage {
 			return;
 		}
 		List<Requirement> requirements = currentProject.getCurrentMachine().getRequirements();
-		TreeItem<Requirement> root = new TreeItem<>();
+		TreeItem<IAbstractRequirement> root = new TreeItem<>();
 		for(Requirement requirement : requirements) {
 			root.getChildren().add(new TreeItem<>(requirement));
 		}
@@ -352,11 +378,14 @@ public class VOManagerStage extends Stage {
 	@FXML
 	public void addVO() {
 		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.VO) {
+			Machine machine = currentProject.getCurrentMachine();
 			tfVOName.clear();
 			taVOPredicate.clear();
+			cbLinkRequirementChoice.getItems().addAll(machine.getRequirements());
 			editTypeProperty.set(EditType.ADD);
 			editModeProperty.set(EditMode.VO);
 		} else {
+			cbLinkRequirementChoice.getItems().clear();
 			editTypeProperty.set(EditType.NONE);
 			editModeProperty.set(EditMode.NONE);
 		}
@@ -381,7 +410,7 @@ public class VOManagerStage extends Stage {
 				requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
 				machine.getRequirements().add(requirement);
 			} else if(editType == EditType.EDIT) {
-				requirement = tvRequirements.getSelectionModel().getSelectedItem().getValue();
+				requirement = (Requirement) tvRequirements.getSelectionModel().getSelectedItem().getValue();
 				requirement.setName(tfName.getText());
 				requirement.setType(cbRequirementChoice.getValue());
 				requirement.setText(taRequirement.getText());
@@ -412,8 +441,14 @@ public class VOManagerStage extends Stage {
 		return nameWithoutWhiteSpaces.length() > 0;
 	}
 
+	private boolean voIsValid(String name) {
+		//isBlank() requires Java version >= 11
+		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
+		return nameWithoutWhiteSpaces.length() > 0;
+	}
+
 	private void removeRequirement() {
-		Requirement requirement = tvRequirements.getSelectionModel().getSelectedItem().getValue();
+		Requirement requirement = (Requirement) tvRequirements.getSelectionModel().getSelectedItem().getValue();
 		currentProject.getCurrentMachine().getRequirements().remove(requirement);
 		updateRoot();
 		tvRequirements.refresh();
@@ -439,6 +474,33 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void applyVO() {
+		boolean voIsValid = voIsValid(tfVOName.getText());
+		EditType editType = editTypeProperty.get();
+		if(voIsValid) {
+			Machine machine = currentProject.getCurrentMachine();
+			if(machine.getValidationObligations().stream()
+					.map(ValidationObligation::getId)
+					.collect(Collectors.toList())
+					.contains(tfVOName.getText())) {
+				return;
+			}
+			ValidationObligation validationObligation;
+			if(editType == EditType.ADD) {
+				validationObligation = new ValidationObligation(tfVOName.getText(), taVOPredicate.getText());
+				machine.getValidationObligations().add(validationObligation);
+			} else if(editType == EditType.EDIT) {
+				validationObligation = (ValidationObligation) tvRequirements.getSelectionModel().getSelectedItem().getValue();
+				validationObligation.setId(tfVOName.getText());
+				validationObligation.setPredicate(taVOPredicate.getText());
+			}
+
+			editTypeProperty.set(EditType.NONE);
+			editModeProperty.set(EditMode.NONE);
+			tvRequirements.getSelectionModel().clearSelection();
+			tvRequirements.refresh();
+		} else {
+			// TODO: Show message
+		}
 
 	}
 

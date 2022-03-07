@@ -16,24 +16,23 @@ import javafx.beans.property.SimpleObjectProperty;
 import java.util.Objects;
 
 @JsonPropertyOrder({
-	"task",
-	"configuration"
+	"id",
+	"predicate"
 })
-public class ValidationObligation {
+public class ValidationObligation implements IAbstractRequirement {
 
-	private final ValidationTask task;
+	private String id;
 
-	private final String configuration;
+	private String predicate;
 
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
 	@JsonCreator
-	public ValidationObligation(@JsonProperty("task") ValidationTask task,
-			@JsonProperty("text") String configuration) {
-		this.task = task;
-		this.configuration = configuration;
-		this.checkedProperty().bind(task.checkedProperty());
+	public ValidationObligation(@JsonProperty("id") String id,
+			@JsonProperty("predicate") String predicate) {
+		this.id = id;
+		this.predicate = id;
 	}
 
 	public ObjectProperty<Checked> checkedProperty() {
@@ -44,12 +43,20 @@ public class ValidationObligation {
 		return checked.get();
 	}
 
-	public ValidationTask getTask() {
-		return task;
+	public String getId() {
+		return id;
 	}
 
-	public String getConfiguration() {
-		return configuration;
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getPredicate() {
+		return predicate;
+	}
+
+	public void setPredicate(String predicate) {
+		this.predicate = predicate;
 	}
 
 	public void reset() {
@@ -61,17 +68,17 @@ public class ValidationObligation {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ValidationObligation that = (ValidationObligation) o;
-		return task == that.task && Objects.equals(configuration, that.configuration);
+		return Objects.equals(id, that.id) && Objects.equals(predicate, that.predicate);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(task, configuration);
+		return Objects.hash(id, predicate);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("ValidationObligation{checked = %s, task = %s, configuration = %s}", checked, task, configuration);
+		return String.format("ValidationObligation{checked = %s, id = %s, predicate = %s}", checked, id, predicate);
 	}
 
 }

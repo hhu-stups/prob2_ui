@@ -39,7 +39,7 @@ public class VOChecker {
 
 
 	public void check(ValidationObligation validationObligation) {
-		check(validationObligation.getTask());
+		// TODO:
 	}
 
 	public void check(ValidationTask validationTask) {

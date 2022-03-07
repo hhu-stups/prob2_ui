@@ -40,10 +40,9 @@ public class VOManager {
 	}
 
 
-	public void synchronizeMachine(Machine machine) {
+	/*public void synchronizeMachine(Machine machine) {
 		for(Requirement requirement : machine.getRequirements()) {
 			for(ValidationObligation validationObligation : requirement.validationObligationsProperty()) {
-				ValidationTask validationTask = validationObligation.getTask();
 				IExecutableItem executable = lookupExecutable(machine, validationTask, validationTask.getItem());
 				validationTask.setExecutable(executable);
 				validationObligation.checkedProperty().addListener((observable, from, to) -> requirement.updateChecked());
@@ -82,7 +81,7 @@ public class VOManager {
 			default:
 				throw new RuntimeException("Validation task is not valid: " + task);
 		}
-	}
+	}*/
 
 	private ValidationTask createValidationTask(Object item) {
 		ValidationTask validationTask;

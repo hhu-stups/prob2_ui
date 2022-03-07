@@ -21,7 +21,7 @@ import java.util.Objects;
 	"text",
 	"validationObligations"
 })
-public class Requirement {
+public class Requirement implements IAbstractRequirement {
 
 	private String name;
 
