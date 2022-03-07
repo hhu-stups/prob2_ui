@@ -270,14 +270,27 @@ public class VOManagerStage extends Stage {
 			//	voManager.updateLinkingListener(linkItem, from, to, linkingListener);
 			//});
 
-			MenuItem checkItem = new MenuItem("Check Requirement");
+			MenuItem checkItem = new MenuItem("Check");
 			checkItem.setOnAction(e -> {
-				Requirement requirement = (Requirement) row.getItem();
-				requirement.getValidationObligations().forEach(voChecker::check);
+				IAbstractRequirement item = row.getItem();
+				if(item instanceof Requirement) {
+					Requirement requirement = (Requirement) item;
+					requirement.getValidationObligations().forEach(voChecker::check);
+				} else if(item instanceof ValidationObligation) {
+					ValidationObligation validationObligation = (ValidationObligation) item;
+					voChecker.check(validationObligation);
+				}
 			});
 
-			MenuItem removeItem = new MenuItem("Remove Requirement");
-			removeItem.setOnAction(e -> removeRequirement());
+			MenuItem removeItem = new MenuItem("Remove");
+			removeItem.setOnAction(e -> {
+				IAbstractRequirement item = row.getItem();
+				if(item instanceof Requirement) {
+					removeRequirement();
+				} else if(item instanceof ValidationObligation) {
+					removeValidationObligation();
+				}
+			});
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
@@ -288,10 +301,18 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null && to.getValue() != null) {
-				Requirement requirement = (Requirement) to.getValue();
-				editTypeProperty.set(EditType.EDIT);
-				editModeProperty.set(EditMode.REQUIREMENT);
-				showRequirement(requirement);
+				IAbstractRequirement item = to.getValue();
+				if(item instanceof Requirement) {
+					Requirement requirement = (Requirement) item;
+					editTypeProperty.set(EditType.EDIT);
+					editModeProperty.set(EditMode.REQUIREMENT);
+					showRequirement(requirement);
+				} else if(item instanceof ValidationObligation) {
+					ValidationObligation validationObligation = (ValidationObligation) item;
+					editTypeProperty.set(EditType.EDIT);
+					editModeProperty.set(EditMode.VO);
+					showValidationObligation(validationObligation);
+				}
 			} else {
 				editTypeProperty.set(EditType.NONE);
 				editModeProperty.set(EditMode.NONE);
@@ -300,9 +321,16 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.setOnMouseClicked(e-> {
 			TreeItem<IAbstractRequirement> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-			Requirement requirement = treeItem == null ? null : (Requirement) treeItem.getValue();
-			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && requirement != null && currentTrace.get() != null) {
-				requirement.getValidationObligations().forEach(voChecker::check);
+			IAbstractRequirement abstractRequirement = treeItem == null ? null : treeItem.getValue();
+
+			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && abstractRequirement != null && currentTrace.get() != null) {
+				if(abstractRequirement instanceof Requirement) {
+					Requirement requirement = (Requirement) abstractRequirement;
+					requirement.getValidationObligations().forEach(voChecker::check);
+				} else if(abstractRequirement instanceof ValidationObligation) {
+					ValidationObligation validationObligation = (ValidationObligation) abstractRequirement;
+					voChecker.check(validationObligation);
+				}
 			}
 		});
 
@@ -454,6 +482,31 @@ public class VOManagerStage extends Stage {
 		tvRequirements.refresh();
 	}
 
+	private void removeValidationObligation() {
+		ValidationObligation validationObligation = (ValidationObligation) tvRequirements.getSelectionModel().getSelectedItem().getValue();
+		Machine machine = currentProject.getCurrentMachine();
+		String requirementID = validationObligation.getRequirement();
+		for(Requirement requirement : machine.getRequirements()) {
+			if(requirement.getName().equals(requirementID)) {
+				requirement.removeValidationObligation(validationObligation);
+				break;
+			}
+		}
+		for(TreeItem<IAbstractRequirement> treeItem : tvRequirements.getRoot().getChildren()) {
+			Requirement requirement = (Requirement) treeItem.getValue();
+			if(requirement.equals(cbLinkRequirementChoice.getValue())) {
+				for(TreeItem<IAbstractRequirement> children : treeItem.getChildren()) {
+					ValidationObligation treeItemVO = (ValidationObligation) children.getValue();
+					if(treeItemVO.equals(validationObligation)) {
+						treeItem.getChildren().remove(children);
+						break;
+					}
+				}
+			}
+		}
+		tvRequirements.refresh();
+	}
+
 	private void showRequirement(Requirement requirement) {
 		if(requirement == null) {
 			return;
@@ -461,6 +514,21 @@ public class VOManagerStage extends Stage {
 		tfName.setText(requirement.getName());
 		cbRequirementChoice.getSelectionModel().select(requirement.getType());
 		taRequirement.setText(requirement.getText());
+	}
+
+	private void showValidationObligation(ValidationObligation validationObligation) {
+		if(validationObligation == null) {
+			return;
+		}
+		tfVOName.setText(validationObligation.getId());
+		taVOPredicate.setText(validationObligation.getPredicate());
+		Machine machine = currentProject.getCurrentMachine();
+		System.out.println(validationObligation.getRequirement());
+		System.out.println(machine.getRequirements().stream().map(Requirement::getName).collect(Collectors.toList()));
+		Requirement requirement = machine.getRequirements().stream()
+				.filter(req -> req.getName().equals(validationObligation.getRequirement()))
+				.collect(Collectors.toList()).get(0);
+		cbLinkRequirementChoice.getSelectionModel().select(requirement);
 	}
 
 	private void showValidationTask(ValidationTask validationTask) {
@@ -486,7 +554,7 @@ public class VOManagerStage extends Stage {
 			}
 			ValidationObligation validationObligation;
 			if(editType == EditType.ADD) {
-				validationObligation = new ValidationObligation(tfVOName.getText(), taVOPredicate.getText());
+				validationObligation = new ValidationObligation(tfVOName.getText(), taVOPredicate.getText(), cbLinkRequirementChoice.getValue().getName());
 				machine.getValidationObligations().add(validationObligation);
 				for(TreeItem<IAbstractRequirement> treeItem : tvRequirements.getRoot().getChildren()) {
 					Requirement requirement = (Requirement) treeItem.getValue();
@@ -500,6 +568,7 @@ public class VOManagerStage extends Stage {
 				validationObligation = (ValidationObligation) tvRequirements.getSelectionModel().getSelectedItem().getValue();
 				validationObligation.setId(tfVOName.getText());
 				validationObligation.setPredicate(taVOPredicate.getText());
+				validationObligation.setRequirement(cbLinkRequirementChoice.getValue().getName());
 			}
 
 			editTypeProperty.set(EditType.NONE);

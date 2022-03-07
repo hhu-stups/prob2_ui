@@ -25,14 +25,18 @@ public class ValidationObligation implements IAbstractRequirement {
 
 	private String predicate;
 
+	private String requirement;
+
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
 	@JsonCreator
 	public ValidationObligation(@JsonProperty("id") String id,
-			@JsonProperty("predicate") String predicate) {
+								@JsonProperty("predicate") String predicate,
+								@JsonProperty("requirement") String requirement) {
 		this.id = id;
 		this.predicate = id;
+		this.requirement = requirement;
 	}
 
 	public ObjectProperty<Checked> checkedProperty() {
@@ -69,8 +73,22 @@ public class ValidationObligation implements IAbstractRequirement {
 		return getPredicate();
 	}
 
+	@JsonIgnore
+	public String getShortTypeName() {
+		return "";
+	}
+
+
 	public void reset() {
 		// TODO: Implement
+	}
+
+	public void setRequirement(String requirement) {
+		this.requirement = requirement;
+	}
+
+	public String getRequirement() {
+		return requirement;
 	}
 
 	@Override
