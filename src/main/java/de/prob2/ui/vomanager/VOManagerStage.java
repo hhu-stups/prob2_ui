@@ -450,6 +450,9 @@ public class VOManagerStage extends Stage {
 				requirement.setName(tfName.getText());
 				requirement.setType(cbRequirementChoice.getValue());
 				requirement.setText(taRequirement.getText());
+				for(ValidationObligation validationObligation : requirement.getValidationObligations()) {
+					validationObligation.setRequirement(requirement.getName());
+				}
 			}
 			assert requirement != null;
 
