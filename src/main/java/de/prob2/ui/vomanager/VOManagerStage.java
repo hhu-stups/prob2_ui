@@ -384,6 +384,9 @@ public class VOManagerStage extends Stage {
 		for(Requirement requirement : requirements) {
 			TreeItem<IAbstractRequirement> treeItem = new TreeItem<>(requirement);
 			root.getChildren().add(treeItem);
+			for(ValidationObligation validationObligation : requirement.getValidationObligations()) {
+				treeItem.getChildren().add(new TreeItem<>(validationObligation));
+			}
 		}
 		tvRequirements.setRoot(root);
 	}
@@ -567,7 +570,6 @@ public class VOManagerStage extends Stage {
 					Requirement requirement = (Requirement) treeItem.getValue();
 					if(requirement.equals(cbLinkRequirementChoice.getValue())) {
 						requirement.addValidationObligation(validationObligation);
-						treeItem.getChildren().add(new TreeItem<>(validationObligation));
 						break;
 					}
 				}
@@ -584,11 +586,11 @@ public class VOManagerStage extends Stage {
 			editTypeProperty.set(EditType.NONE);
 			editModeProperty.set(EditMode.NONE);
 			tvRequirements.getSelectionModel().clearSelection();
+			updateRoot();
 			tvRequirements.refresh();
 		} else {
 			// TODO: Show message
 		}
-
 	}
 
 	@FXML
