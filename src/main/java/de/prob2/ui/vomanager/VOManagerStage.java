@@ -428,14 +428,14 @@ public class VOManagerStage extends Stage {
 
 		if(requirementIsValid) {
 			Requirement requirement = null;
-			Machine machine = currentProject.getCurrentMachine();
-			if(machine.getRequirements().stream()
-					.map(Requirement::getName)
-					.collect(Collectors.toList())
-					.contains(tfName.getText())) {
-				return;
-			}
 			if(editType == EditType.ADD) {
+				Machine machine = currentProject.getCurrentMachine();
+				if(machine.getRequirements().stream()
+						.map(Requirement::getName)
+						.collect(Collectors.toList())
+						.contains(tfName.getText())) {
+					return;
+				}
 				requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
 				machine.getRequirements().add(requirement);
 			} else if(editType == EditType.EDIT) {
@@ -470,8 +470,11 @@ public class VOManagerStage extends Stage {
 		return nameWithoutWhiteSpaces.length() > 0;
 	}
 
-	private boolean voIsValid(String name) {
+	private boolean voIsValid(String name, Requirement requirement) {
 		//isBlank() requires Java version >= 11
+		if(requirement == null) {
+			return false;
+		}
 		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
 		return nameWithoutWhiteSpaces.length() > 0;
 	}
@@ -541,18 +544,18 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void applyVO() {
-		boolean voIsValid = voIsValid(tfVOName.getText());
+		boolean voIsValid = voIsValid(tfVOName.getText(), cbLinkRequirementChoice.getValue());
 		EditType editType = editTypeProperty.get();
 		if(voIsValid) {
-			Machine machine = currentProject.getCurrentMachine();
-			if(machine.getValidationObligations().stream()
-					.map(ValidationObligation::getId)
-					.collect(Collectors.toList())
-					.contains(tfVOName.getText())) {
-				return;
-			}
 			ValidationObligation validationObligation;
 			if(editType == EditType.ADD) {
+				Machine machine = currentProject.getCurrentMachine();
+				if(machine.getValidationObligations().stream()
+						.map(ValidationObligation::getId)
+						.collect(Collectors.toList())
+						.contains(tfVOName.getText())) {
+					return;
+				}
 				validationObligation = new ValidationObligation(tfVOName.getText(), taVOPredicate.getText(), cbLinkRequirementChoice.getValue().getName());
 				machine.getValidationObligations().add(validationObligation);
 				for(TreeItem<IAbstractRequirement> treeItem : tvRequirements.getRoot().getChildren()) {
