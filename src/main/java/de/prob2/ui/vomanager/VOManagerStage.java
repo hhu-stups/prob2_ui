@@ -428,18 +428,22 @@ public class VOManagerStage extends Stage {
 
 		if(requirementIsValid) {
 			Requirement requirement = null;
+			Machine machine = currentProject.getCurrentMachine();
+			boolean nameExists = machine.getRequirements().stream()
+					.map(Requirement::getName)
+					.collect(Collectors.toList())
+					.contains(tfName.getText());
 			if(editType == EditType.ADD) {
-				Machine machine = currentProject.getCurrentMachine();
-				if(machine.getRequirements().stream()
-						.map(Requirement::getName)
-						.collect(Collectors.toList())
-						.contains(tfName.getText())) {
+				if(nameExists) {
 					return;
 				}
 				requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
 				machine.getRequirements().add(requirement);
 			} else if(editType == EditType.EDIT) {
 				requirement = (Requirement) tvRequirements.getSelectionModel().getSelectedItem().getValue();
+				if(nameExists && !requirement.getName().equals(tfName.getText())) {
+					return;
+				}
 				requirement.setName(tfName.getText());
 				requirement.setType(cbRequirementChoice.getValue());
 				requirement.setText(taRequirement.getText());
@@ -548,12 +552,13 @@ public class VOManagerStage extends Stage {
 		EditType editType = editTypeProperty.get();
 		if(voIsValid) {
 			ValidationObligation validationObligation;
+			Machine machine = currentProject.getCurrentMachine();
+			boolean nameExists = machine.getValidationObligations().stream()
+					.map(ValidationObligation::getId)
+					.collect(Collectors.toList())
+					.contains(tfVOName.getText());
 			if(editType == EditType.ADD) {
-				Machine machine = currentProject.getCurrentMachine();
-				if(machine.getValidationObligations().stream()
-						.map(ValidationObligation::getId)
-						.collect(Collectors.toList())
-						.contains(tfVOName.getText())) {
+				if(nameExists) {
 					return;
 				}
 				validationObligation = new ValidationObligation(tfVOName.getText(), taVOPredicate.getText(), cbLinkRequirementChoice.getValue().getName());
@@ -568,6 +573,9 @@ public class VOManagerStage extends Stage {
 				}
 			} else if(editType == EditType.EDIT) {
 				validationObligation = (ValidationObligation) tvRequirements.getSelectionModel().getSelectedItem().getValue();
+				if(nameExists && !validationObligation.getName().equals(tfVOName.getText())) {
+					return;
+				}
 				validationObligation.setId(tfVOName.getText());
 				validationObligation.setPredicate(taVOPredicate.getText());
 				validationObligation.setRequirement(cbLinkRequirementChoice.getValue().getName());
@@ -604,18 +612,25 @@ public class VOManagerStage extends Stage {
 		EditType editType = editTypeProperty.get();
 		if(taskIsValid) {
 			ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
-			Machine machine = currentProject.getCurrentMachine();
-			if(task == null || machine.getValidationTasks().stream()
-					.map(ValidationTask::getId)
-					.collect(Collectors.toList())
-					.contains(tfVTName.getText())) {
+			if(task == null) {
 				return;
 			}
+			Machine machine = currentProject.getCurrentMachine();
+			boolean nameExists = machine.getValidationTasks().stream()
+					.map(ValidationTask::getId)
+					.collect(Collectors.toList())
+					.contains(tfVTName.getText());
 			if(editType == EditType.ADD) {
+				if(nameExists) {
+					return;
+				}
 				task.setId(tfVTName.getText());
 				machine.getValidationTasks().add(task);
 			} else if(editType == EditType.EDIT) {
 				ValidationTask currentTask = tvValidationTasks.getSelectionModel().getSelectedItem();
+				if(nameExists && !currentTask.getId().equals(tfVTName.getText())) {
+					return;
+				}
 				currentTask.setId(tfVTName.getText());
 				currentTask.setExecutable(task.getExecutable());
 				currentTask.setContext("machine"); //TODO:
