@@ -93,8 +93,8 @@
 												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
 									<TableColumn fx:id="vtNameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
 												 text="Name"/>
-									<TableColumn fx:id="vtConfigurationColumn" minWidth="80.0"
-												 text="Configuration"/>
+									<TableColumn fx:id="vtParametersColumn" minWidth="80.0"
+												 text="VT Parameters"/>
 								</columns>
 								<placeholder>
 									<Label text="No Validation Tasks"/>

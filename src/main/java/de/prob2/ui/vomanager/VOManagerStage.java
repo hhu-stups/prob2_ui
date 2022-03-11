@@ -82,7 +82,7 @@ public class VOManagerStage extends Stage {
 	private TableColumn<ValidationTask, String> vtNameColumn;
 
 	@FXML
-	private TableColumn<ValidationTask, String> vtConfigurationColumn;
+	private TableColumn<ValidationTask, String> vtParametersColumn;
 
 	@FXML
 	private MenuButton btAddRequirementVO;
@@ -179,7 +179,7 @@ public class VOManagerStage extends Stage {
 		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 
 		vtNameColumn.setCellValueFactory(new PropertyValueFactory<>("prefix"));
-		vtConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("parameters"));
+		vtParametersColumn.setCellValueFactory(new PropertyValueFactory<>("parameters"));
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			btAddVO.disableProperty().unbind();
