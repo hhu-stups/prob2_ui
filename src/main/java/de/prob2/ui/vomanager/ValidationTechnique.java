@@ -5,9 +5,7 @@ public enum ValidationTechnique {
 	LTL_MODEL_CHECKING("LTL Model Checking", "LTL"),
 	SYMBOLIC_MODEL_CHECKING("Symbolic Model Checking", "SMC"),
 	TRACE_REPLAY("Trace Replay", "TR"),
-	SIMULATION("Simulation", "SIM"),
-	PARALLEL("Parallel Composition", "PAR"),
-	SEQUENTIAL("Sequential Composition", "SEQ");
+	SIMULATION("Simulation", "SIM");
 
 	private final String name;
 

@@ -155,8 +155,6 @@
 											<ValidationTechnique fx:value="SYMBOLIC_MODEL_CHECKING"/>
 											<ValidationTechnique fx:value="TRACE_REPLAY"/>
 											<ValidationTechnique fx:value="SIMULATION"/>
-											<ValidationTechnique fx:value="PARALLEL"/>
-											<ValidationTechnique fx:value="SEQUENTIAL"/>
 										</FXCollections>
 									</items>
 								</ChoiceBox>

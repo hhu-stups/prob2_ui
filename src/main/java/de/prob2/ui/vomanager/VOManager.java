@@ -117,9 +117,6 @@ public class VOManager {
 			case SIMULATION:
 				executableItems.addAll(machine.getSimulations().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
 				break;
-			case PARALLEL:
-			case SEQUENTIAL:
-				break;
 			default:
 				throw new RuntimeException("Validation technique not valid: " + validationTechnique);
 		}
