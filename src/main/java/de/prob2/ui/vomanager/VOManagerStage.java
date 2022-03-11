@@ -568,13 +568,24 @@ public class VOManagerStage extends Stage {
 					}
 				}
 			} else if(editType == EditType.EDIT) {
-				validationObligation = (ValidationObligation) tvRequirements.getSelectionModel().getSelectedItem().getValue();
+				TreeItem<IAbstractRequirement> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
+				validationObligation = (ValidationObligation) treeItem.getValue();
 				if(nameExists && !validationObligation.getName().equals(tfVOName.getText())) {
 					return;
+				}
+				for(Requirement req : machine.getRequirements()) {
+					if(req.getName().equals(validationObligation.getRequirement())) {
+						req.getValidationObligations().remove(validationObligation);
+					}
+					if(req.getName().equals(cbLinkRequirementChoice.getValue().getName())) {
+						req.getValidationObligations().add(validationObligation);
+					}
 				}
 				validationObligation.setId(tfVOName.getText());
 				validationObligation.setExpression(taVOExpression.getText());
 				validationObligation.setRequirement(cbLinkRequirementChoice.getValue().getName());
+
+
 			}
 
 			editTypeProperty.set(EditType.NONE);
