@@ -396,9 +396,9 @@ public class VOManagerStage extends Stage {
 		cbRequirementChoice.getSelectionModel().clearSelection();
 		taRequirement.clear();
 		tfName.clear();
+		tvRequirements.getSelectionModel().clearSelection();
 		editTypeProperty.set(EditType.ADD);
 		editModeProperty.set(EditMode.REQUIREMENT);
-		tvRequirements.getSelectionModel().clearSelection();
 	}
 
 	@FXML
@@ -408,9 +408,9 @@ public class VOManagerStage extends Stage {
 		taVOPredicate.clear();
 		cbLinkRequirementChoice.getItems().clear();
 		cbLinkRequirementChoice.getItems().addAll(machine.getRequirements());
+		tvRequirements.getSelectionModel().clearSelection();
 		editTypeProperty.set(EditType.ADD);
 		editModeProperty.set(EditMode.VO);
-		tvRequirements.getSelectionModel().clearSelection();
 	}
 
 	@FXML
