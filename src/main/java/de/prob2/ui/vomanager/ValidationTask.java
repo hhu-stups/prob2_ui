@@ -20,7 +20,7 @@ import java.util.Objects;
 @JsonPropertyOrder({
 		"id",
 		"context",
-		"taskType",
+		"validationTechnique",
 		"parameters",
 		"item"
 })
@@ -87,10 +87,12 @@ public class ValidationTask {
 		this.parameters = parameters;
 	}
 
+	@JsonIgnore
 	public String getPrefix() {
 		return String.format("%s/%s/%s", id, context, validationTechnique.getId());
 	}
 
+	@JsonIgnore
 	public String getRepresentation() {
 		if(parameters.isEmpty()) {
 			return String.format("%s/%s/%s", id, context, validationTechnique.getId());
@@ -110,6 +112,7 @@ public class ValidationTask {
 		return executable;
 	}
 
+	@JsonIgnore
 	public Object getItem() {
 		return item;
 	}

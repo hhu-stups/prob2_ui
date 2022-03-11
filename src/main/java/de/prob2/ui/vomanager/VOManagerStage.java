@@ -186,7 +186,7 @@ public class VOManagerStage extends Stage {
 
 			tvValidationTasks.itemsProperty().unbind();
 			if(to != null) {
-				//voManager.synchronizeMachine(to);
+				voManager.synchronizeMachine(to);
 				tvValidationTasks.itemsProperty().bind(to.validationTasksProperty());
 				btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
 			}

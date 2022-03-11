@@ -40,48 +40,45 @@ public class VOManager {
 	}
 
 
-	/*public void synchronizeMachine(Machine machine) {
-		for(Requirement requirement : machine.getRequirements()) {
-			for(ValidationObligation validationObligation : requirement.validationObligationsProperty()) {
-				IExecutableItem executable = lookupExecutable(machine, validationTask, validationTask.getItem());
-				validationTask.setExecutable(executable);
-				validationObligation.checkedProperty().addListener((observable, from, to) -> requirement.updateChecked());
-			}
-			requirement.updateChecked();
+	public void synchronizeMachine(Machine machine) {
+		for(ValidationTask validationTask : machine.getValidationTasks()) {
+			IExecutableItem executable = lookupExecutable(machine, validationTask);
+			validationTask.setExecutable(executable);
+			validationTask.checkedProperty().bind(executable.checkedProperty());
 		}
 	}
 
-	private IExecutableItem lookupExecutable(Machine machine, ValidationTask task, Object executableItem) {
+	private IExecutableItem lookupExecutable(Machine machine, ValidationTask task) {
 		switch (task.getValidationTechnique()) {
 			case MODEL_CHECKING:
 				return machine.getModelcheckingItems().stream()
-						.filter(item -> item.getOptions().equals(((ModelCheckingItem) executableItem).getOptions()))
+						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
 						.findAny()
 						.orElse(null);
 			case LTL_MODEL_CHECKING:
 				return machine.getLTLFormulas().stream()
-						.filter(item -> item.settingsEqual((LTLFormulaItem) executableItem))
+						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
 						.findAny()
 						.orElse(null);
 			case SYMBOLIC_MODEL_CHECKING:
 				return machine.getSymbolicCheckingFormulas().stream()
-						.filter(item -> item.settingsEqual((SymbolicCheckingFormulaItem) executableItem))
+						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
 						.findAny()
 						.orElse(null);
 			case TRACE_REPLAY:
 				return injector.getInstance(TraceViewHandler.class).getTraces().stream()
-						.filter(item -> item.getLocation().toString().equals(executableItem))
+						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
 						.findAny()
 						.orElse(null);
 			case SIMULATION:
 				return machine.getSimulations().stream()
-						.filter(item -> item.equals(executableItem))
+						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
 						.findAny()
 						.orElse(null);
 			default:
 				throw new RuntimeException("Validation task is not valid: " + task);
 		}
-	}*/
+	}
 
 	private ValidationTask createValidationTask(Object item, Machine machine) {
 		ValidationTask validationTask;

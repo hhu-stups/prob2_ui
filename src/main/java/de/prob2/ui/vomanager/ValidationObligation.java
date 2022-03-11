@@ -35,7 +35,7 @@ public class ValidationObligation implements IAbstractRequirement {
 								@JsonProperty("predicate") String predicate,
 								@JsonProperty("requirement") String requirement) {
 		this.id = id;
-		this.predicate = id;
+		this.predicate = predicate;
 		this.requirement = requirement;
 	}
 
@@ -72,12 +72,6 @@ public class ValidationObligation implements IAbstractRequirement {
 	public String getConfiguration() {
 		return getPredicate();
 	}
-
-	@JsonIgnore
-	public String getShortTypeName() {
-		return "";
-	}
-
 
 	public void reset() {
 		// TODO: Implement
