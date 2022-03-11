@@ -529,6 +529,8 @@ public class VOManagerStage extends Stage {
 		Requirement requirement = machine.getRequirements().stream()
 				.filter(req -> req.getName().equals(validationObligation.getRequirement()))
 				.collect(Collectors.toList()).get(0);
+		cbLinkRequirementChoice.getItems().clear();
+		cbLinkRequirementChoice.getItems().addAll(machine.getRequirements());
 		cbLinkRequirementChoice.getSelectionModel().select(requirement);
 	}
 
