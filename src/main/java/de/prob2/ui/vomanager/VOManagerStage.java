@@ -115,7 +115,7 @@ public class VOManagerStage extends Stage {
 	private TextField tfVOName;
 
 	@FXML
-	private TextArea taVOPredicate;
+	private TextArea taVOExpression;
 
 	@FXML
 	private TextField tfVTName;
@@ -405,7 +405,7 @@ public class VOManagerStage extends Stage {
 	public void addVO() {
 		Machine machine = currentProject.getCurrentMachine();
 		tfVOName.clear();
-		taVOPredicate.clear();
+		taVOExpression.clear();
 		cbLinkRequirementChoice.getItems().clear();
 		cbLinkRequirementChoice.getItems().addAll(machine.getRequirements());
 		tvRequirements.getSelectionModel().clearSelection();
@@ -524,7 +524,7 @@ public class VOManagerStage extends Stage {
 			return;
 		}
 		tfVOName.setText(validationObligation.getId());
-		taVOPredicate.setText(validationObligation.getPredicate());
+		taVOExpression.setText(validationObligation.getExpression());
 		Machine machine = currentProject.getCurrentMachine();
 		Requirement requirement = machine.getRequirements().stream()
 				.filter(req -> req.getName().equals(validationObligation.getRequirement()))
@@ -556,7 +556,7 @@ public class VOManagerStage extends Stage {
 				if(nameExists) {
 					return;
 				}
-				validationObligation = new ValidationObligation(tfVOName.getText(), taVOPredicate.getText(), cbLinkRequirementChoice.getValue().getName());
+				validationObligation = new ValidationObligation(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
 				machine.getValidationObligations().add(validationObligation);
 				for(TreeItem<IAbstractRequirement> treeItem : tvRequirements.getRoot().getChildren()) {
 					Requirement requirement = (Requirement) treeItem.getValue();
@@ -571,7 +571,7 @@ public class VOManagerStage extends Stage {
 					return;
 				}
 				validationObligation.setId(tfVOName.getText());
-				validationObligation.setPredicate(taVOPredicate.getText());
+				validationObligation.setExpression(taVOExpression.getText());
 				validationObligation.setRequirement(cbLinkRequirementChoice.getValue().getName());
 			}
 

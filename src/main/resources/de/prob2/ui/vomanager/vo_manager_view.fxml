@@ -135,8 +135,8 @@
 								<ChoiceBox fx:id="cbLinkRequirementChoice"/>
 							</HBox>
 							<VBox>
-								<Label text="VO Predicate:"/>
-								<TextArea fx:id="taVOPredicate" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+								<Label text="VO Expression:"/>
+								<TextArea fx:id="taVOExpression" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 							</VBox>
 							<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVO"/>
 						</VBox>

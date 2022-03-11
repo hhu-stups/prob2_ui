@@ -17,14 +17,14 @@ import java.util.Objects;
 
 @JsonPropertyOrder({
 	"id",
-	"predicate",
+	"expression",
 	"requirement"
 })
 public class ValidationObligation implements IAbstractRequirement {
 
 	private String id;
 
-	private String predicate;
+	private String expression;
 
 	private String requirement;
 
@@ -33,10 +33,10 @@ public class ValidationObligation implements IAbstractRequirement {
 
 	@JsonCreator
 	public ValidationObligation(@JsonProperty("id") String id,
-								@JsonProperty("predicate") String predicate,
+								@JsonProperty("expression") String expression,
 								@JsonProperty("requirement") String requirement) {
 		this.id = id;
-		this.predicate = predicate;
+		this.expression = expression;
 		this.requirement = requirement;
 	}
 
@@ -56,12 +56,12 @@ public class ValidationObligation implements IAbstractRequirement {
 		this.id = id;
 	}
 
-	public String getPredicate() {
-		return predicate;
+	public String getExpression() {
+		return expression;
 	}
 
-	public void setPredicate(String predicate) {
-		this.predicate = predicate;
+	public void setExpression(String expression) {
+		this.expression = expression;
 	}
 
 	@JsonIgnore
@@ -71,7 +71,7 @@ public class ValidationObligation implements IAbstractRequirement {
 
 	@JsonIgnore
 	public String getConfiguration() {
-		return getPredicate();
+		return getExpression();
 	}
 
 	public void reset() {
@@ -99,17 +99,17 @@ public class ValidationObligation implements IAbstractRequirement {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ValidationObligation that = (ValidationObligation) o;
-		return Objects.equals(id, that.id) && Objects.equals(predicate, that.predicate);
+		return Objects.equals(id, that.id) && Objects.equals(expression, that.expression);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, predicate);
+		return Objects.hash(id, expression);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("ValidationObligation{checked = %s, id = %s, predicate = %s}", checked, id, predicate);
+		return String.format("ValidationObligation{checked = %s, id = %s, expression = %s}", checked, id, expression);
 	}
 
 }
