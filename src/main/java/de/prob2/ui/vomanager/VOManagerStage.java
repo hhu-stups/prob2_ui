@@ -393,34 +393,23 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	public void addRequirement() {
-		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.REQUIREMENT) {
-			cbRequirementChoice.getSelectionModel().clearSelection();
-			taRequirement.clear();
-			tfName.clear();
-			editTypeProperty.set(EditType.ADD);
-			editModeProperty.set(EditMode.REQUIREMENT);
-		} else {
-			editTypeProperty.set(EditType.NONE);
-			editModeProperty.set(EditMode.NONE);
-		}
+		cbRequirementChoice.getSelectionModel().clearSelection();
+		taRequirement.clear();
+		tfName.clear();
+		editTypeProperty.set(EditType.ADD);
+		editModeProperty.set(EditMode.REQUIREMENT);
 		tvRequirements.getSelectionModel().clearSelection();
 	}
 
 	@FXML
 	public void addVO() {
-		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.VO) {
-			Machine machine = currentProject.getCurrentMachine();
-			tfVOName.clear();
-			taVOPredicate.clear();
-			cbLinkRequirementChoice.getItems().clear();
-			cbLinkRequirementChoice.getItems().addAll(machine.getRequirements());
-			editTypeProperty.set(EditType.ADD);
-			editModeProperty.set(EditMode.VO);
-		} else {
-			cbLinkRequirementChoice.getItems().clear();
-			editTypeProperty.set(EditType.NONE);
-			editModeProperty.set(EditMode.NONE);
-		}
+		Machine machine = currentProject.getCurrentMachine();
+		tfVOName.clear();
+		taVOPredicate.clear();
+		cbLinkRequirementChoice.getItems().clear();
+		cbLinkRequirementChoice.getItems().addAll(machine.getRequirements());
+		editTypeProperty.set(EditType.ADD);
+		editModeProperty.set(EditMode.VO);
 		tvRequirements.getSelectionModel().clearSelection();
 	}
 
