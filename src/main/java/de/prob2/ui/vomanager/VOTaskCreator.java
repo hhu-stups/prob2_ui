@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -34,7 +35,9 @@ public class VOTaskCreator {
 		this.injector = injector;
 	}
 
-	public ValidationTask openTaskWindow(Window currentWindow, Requirement requirement, ValidationTechnique validationTechnique) {
+	// Remark: Will eventually be used to create ProB2-UI tasks from UI directly
+	@Deprecated
+	public ValidationTask openTaskWindow(Window currentWindow, Machine machine, Requirement requirement, ValidationTechnique validationTechnique) {
 		switch (validationTechnique) {
 			case MODEL_CHECKING: {
 				ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
@@ -44,7 +47,7 @@ public class VOTaskCreator {
 				if(item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("MC", "machine", validationTechnique, extractParameters(item), item);
+				ValidationTask validationTask = new ValidationTask("MC", machine.getName(), validationTechnique, extractParameters(item), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -57,7 +60,7 @@ public class VOTaskCreator {
 				if(item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("LTL", "machine", validationTechnique, extractParameters(item), item);
+				ValidationTask validationTask = new ValidationTask("LTL", machine.getName(), validationTechnique, extractParameters(item), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -68,7 +71,7 @@ public class VOTaskCreator {
 				if (item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("SMC", "machine", validationTechnique, extractParameters(item), item);
+				ValidationTask validationTask = new ValidationTask("SMC", machine.getName(), validationTechnique, extractParameters(item), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}
@@ -79,7 +82,7 @@ public class VOTaskCreator {
 				if (replayTrace == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("TR", "machine", validationTechnique, extractParameters(replayTrace), replayTrace);
+				ValidationTask validationTask = new ValidationTask("TR", machine.getName(), validationTechnique, extractParameters(replayTrace), replayTrace);
 				validationTask.setExecutable(replayTrace);
 				return validationTask;
 			}
@@ -90,7 +93,7 @@ public class VOTaskCreator {
 				if (item == null) {
 					return null;
 				}
-				ValidationTask validationTask = new ValidationTask("SIM", "machine", validationTechnique, extractParameters(item), item);
+				ValidationTask validationTask = new ValidationTask("SIM", machine.getName(), validationTechnique, extractParameters(item), item);
 				validationTask.setExecutable(item);
 				return validationTask;
 			}

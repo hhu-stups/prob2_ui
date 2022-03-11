@@ -627,7 +627,7 @@ public class VOManagerStage extends Stage {
 				}
 				currentTask.setId(tfVTName.getText());
 				currentTask.setExecutable(task.getExecutable());
-				currentTask.setContext("machine"); //TODO:
+				currentTask.setContext(machine.getName());
 				currentTask.setItem(task.getItem());
 				currentTask.setParameters(voTaskCreator.extractParameters(task.getItem()));
 			}

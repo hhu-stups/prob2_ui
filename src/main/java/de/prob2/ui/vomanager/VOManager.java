@@ -83,18 +83,18 @@ public class VOManager {
 		}
 	}*/
 
-	private ValidationTask createValidationTask(Object item) {
+	private ValidationTask createValidationTask(Object item, Machine machine) {
 		ValidationTask validationTask;
 		if(item instanceof ModelCheckingItem) {
-			validationTask = new ValidationTask("machine", ValidationTechnique.MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof LTLFormulaItem) {
-			validationTask = new ValidationTask("machine", ValidationTechnique.LTL_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.LTL_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof SymbolicCheckingFormulaItem) {
-			validationTask = new ValidationTask("machine", ValidationTechnique.SYMBOLIC_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.SYMBOLIC_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof SimulationItem) {
-			validationTask = new ValidationTask("machine", ValidationTechnique.SIMULATION, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.SIMULATION, voTaskCreator.extractParameters(item), item);
 		} else if(item instanceof ReplayTrace) {
-			validationTask = new ValidationTask("machine", ValidationTechnique.TRACE_REPLAY, voTaskCreator.extractParameters(item), item);
+			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.TRACE_REPLAY, voTaskCreator.extractParameters(item), item);
 		} else {
 			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
 		}
@@ -106,19 +106,19 @@ public class VOManager {
 		Machine machine = currentProject.getCurrentMachine();
 		switch (validationTechnique) {
 			case MODEL_CHECKING:
-				executableItems.addAll(machine.getModelcheckingItems().stream().map(this::createValidationTask).collect(Collectors.toList()));
+				executableItems.addAll(machine.getModelcheckingItems().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
 				break;
 			case LTL_MODEL_CHECKING:
-				executableItems.addAll(machine.getLTLFormulas().stream().map(this::createValidationTask).collect(Collectors.toList()));
+				executableItems.addAll(machine.getLTLFormulas().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
 				break;
 			case SYMBOLIC_MODEL_CHECKING:
-				executableItems.addAll(machine.getSymbolicCheckingFormulas().stream().map(this::createValidationTask).collect(Collectors.toList()));
+				executableItems.addAll(machine.getSymbolicCheckingFormulas().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
 				break;
 			case TRACE_REPLAY:
-				executableItems.addAll(injector.getInstance(TraceViewHandler.class).getTraces().stream().map(this::createValidationTask).collect(Collectors.toList()));
+				executableItems.addAll(injector.getInstance(TraceViewHandler.class).getTraces().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
 				break;
 			case SIMULATION:
-				executableItems.addAll(machine.getSimulations().stream().map(this::createValidationTask).collect(Collectors.toList()));
+				executableItems.addAll(machine.getSimulations().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
 				break;
 			case PARALLEL:
 			case SEQUENTIAL:
