@@ -17,7 +17,8 @@ import java.util.Objects;
 
 @JsonPropertyOrder({
 	"id",
-	"predicate"
+	"predicate",
+	"requirement"
 })
 public class ValidationObligation implements IAbstractRequirement {
 
@@ -83,6 +84,14 @@ public class ValidationObligation implements IAbstractRequirement {
 
 	public String getRequirement() {
 		return requirement;
+	}
+
+	/*
+	* This function is used for the requirements table view
+	*/
+	@JsonIgnore
+	public String getShortTypeName() {
+		return "";
 	}
 
 	@Override
