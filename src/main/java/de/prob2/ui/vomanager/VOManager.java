@@ -20,11 +20,24 @@ import javafx.scene.control.MenuItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class VOManager {
+
+	private static final Map<Class<? extends IExecutableItem>, ValidationTechnique> classToTechnique = new HashMap<>();
+
+	static {
+		classToTechnique.put(ModelCheckingItem.class, ValidationTechnique.MODEL_CHECKING);
+		classToTechnique.put(LTLFormulaItem.class, ValidationTechnique.LTL_MODEL_CHECKING);
+		classToTechnique.put(SymbolicCheckingFormulaItem.class, ValidationTechnique.SYMBOLIC_MODEL_CHECKING);
+		classToTechnique.put(SimulationItem.class, ValidationTechnique.SIMULATION);
+		classToTechnique.put(ReplayTrace.class, ValidationTechnique.TRACE_REPLAY);
+	}
 
 	private final CurrentProject currentProject;
 
@@ -48,78 +61,38 @@ public class VOManager {
 		}
 	}
 
-	private IExecutableItem lookupExecutable(Machine machine, ValidationTask task) {
-		switch (task.getValidationTechnique()) {
+
+	private Stream<? extends IExecutableItem> getExecutableStream(Machine machine, ValidationTechnique validationTechnique) {
+		switch (validationTechnique) {
 			case MODEL_CHECKING:
-				return machine.getModelcheckingItems().stream()
-						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
-						.findAny()
-						.orElse(null);
+				return machine.getModelcheckingItems().stream();
 			case LTL_MODEL_CHECKING:
-				return machine.getLTLFormulas().stream()
-						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
-						.findAny()
-						.orElse(null);
+				return machine.getLTLFormulas().stream();
 			case SYMBOLIC_MODEL_CHECKING:
-				return machine.getSymbolicCheckingFormulas().stream()
-						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
-						.findAny()
-						.orElse(null);
+				return machine.getSymbolicCheckingFormulas().stream();
 			case TRACE_REPLAY:
-				return injector.getInstance(TraceViewHandler.class).getTraces().stream()
-						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
-						.findAny()
-						.orElse(null);
+				return injector.getInstance(TraceViewHandler.class).getTraces().stream();
 			case SIMULATION:
-				return machine.getSimulations().stream()
-						.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
-						.findAny()
-						.orElse(null);
+				return machine.getSimulations().stream();
 			default:
-				throw new RuntimeException("Validation task is not valid: " + task);
+				throw new RuntimeException("Validation technique is not valid: " + validationTechnique);
 		}
+	}
+
+	private IExecutableItem lookupExecutable(Machine machine, ValidationTask task) {
+		Stream<? extends IExecutableItem> stream = getExecutableStream(machine, task.getValidationTechnique());
+		return stream.filter(item -> voTaskCreator.extractParameters(item).equals(task.getParameters()))
+				.findAny()
+				.orElse(null);
 	}
 
 	private ValidationTask createValidationTask(Object item, Machine machine) {
-		ValidationTask validationTask;
-		if(item instanceof ModelCheckingItem) {
-			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
-		} else if(item instanceof LTLFormulaItem) {
-			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.LTL_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
-		} else if(item instanceof SymbolicCheckingFormulaItem) {
-			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.SYMBOLIC_MODEL_CHECKING, voTaskCreator.extractParameters(item), item);
-		} else if(item instanceof SimulationItem) {
-			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.SIMULATION, voTaskCreator.extractParameters(item), item);
-		} else if(item instanceof ReplayTrace) {
-			validationTask = new ValidationTask(machine.getName(), ValidationTechnique.TRACE_REPLAY, voTaskCreator.extractParameters(item), item);
-		} else {
-			throw new RuntimeException("Validation item is not valid. Class is: " + item.getClass());
-		}
-		return validationTask;
+		return new ValidationTask(machine.getName(), classToTechnique.get(item.getClass()), voTaskCreator.extractParameters(item), item);
 	}
 
 	public List<ValidationTask> allTasks(ValidationTechnique validationTechnique) {
-		List<ValidationTask> executableItems = new ArrayList<>();
 		Machine machine = currentProject.getCurrentMachine();
-		switch (validationTechnique) {
-			case MODEL_CHECKING:
-				executableItems.addAll(machine.getModelcheckingItems().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
-				break;
-			case LTL_MODEL_CHECKING:
-				executableItems.addAll(machine.getLTLFormulas().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
-				break;
-			case SYMBOLIC_MODEL_CHECKING:
-				executableItems.addAll(machine.getSymbolicCheckingFormulas().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
-				break;
-			case TRACE_REPLAY:
-				executableItems.addAll(injector.getInstance(TraceViewHandler.class).getTraces().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
-				break;
-			case SIMULATION:
-				executableItems.addAll(machine.getSimulations().stream().map(task -> createValidationTask(task, machine)).collect(Collectors.toList()));
-				break;
-			default:
-				throw new RuntimeException("Validation technique not valid: " + validationTechnique);
-		}
-		return executableItems;
+		Stream<? extends IExecutableItem> stream = getExecutableStream(machine, validationTechnique);
+		return stream.map(task -> createValidationTask(task, machine)).collect(Collectors.toList());
 	}
 }
