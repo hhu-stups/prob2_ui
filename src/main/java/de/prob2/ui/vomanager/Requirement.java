@@ -14,6 +14,7 @@ import javafx.collections.FXCollections;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @JsonPropertyOrder({
 	"name",
@@ -54,16 +55,11 @@ public class Requirement implements IAbstractRequirement {
 		if (validationObligations.isEmpty()) {
 			this.checked.set(Checked.NOT_CHECKED);
 		} else {
-			final boolean failed = validationObligations.stream()
-					.map(ValidationObligation::getChecked)
-					.anyMatch(Checked.FAIL::equals);
-			final boolean success = !failed && validationObligations.stream()
-					.map(ValidationObligation::getChecked)
-					.allMatch(Checked.SUCCESS::equals);
-			final boolean timeout = !failed && validationObligations.stream()
-					.map(ValidationObligation::getChecked)
-					.anyMatch(Checked.TIMEOUT::equals);
-
+			Stream<Checked> checkedStream = validationObligations.stream()
+					.map(ValidationObligation::getChecked);
+			final boolean failed = checkedStream.anyMatch(Checked.FAIL::equals);
+			final boolean success = !failed && checkedStream.allMatch(Checked.SUCCESS::equals);
+			final boolean timeout = !failed && checkedStream.anyMatch(Checked.TIMEOUT::equals);
 			if (success) {
 				this.checked.set(Checked.SUCCESS);
 			} else if (failed) {

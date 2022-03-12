@@ -64,6 +64,14 @@ public class ValidationObligation implements IAbstractRequirement {
 		this.expression = expression;
 	}
 
+	public void setRequirement(String requirement) {
+		this.requirement = requirement;
+	}
+
+	public String getRequirement() {
+		return requirement;
+	}
+
 	@JsonIgnore
 	public String getName() {
 		return getId();
@@ -76,14 +84,6 @@ public class ValidationObligation implements IAbstractRequirement {
 
 	public void reset() {
 		// TODO: Implement
-	}
-
-	public void setRequirement(String requirement) {
-		this.requirement = requirement;
-	}
-
-	public String getRequirement() {
-		return requirement;
 	}
 
 	/*
@@ -99,17 +99,17 @@ public class ValidationObligation implements IAbstractRequirement {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ValidationObligation that = (ValidationObligation) o;
-		return Objects.equals(id, that.id) && Objects.equals(expression, that.expression);
+		return Objects.equals(id, that.id) && Objects.equals(expression, that.expression) && Objects.equals(requirement, that.requirement);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, expression);
+		return Objects.hash(id, expression, requirement);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("ValidationObligation{checked = %s, id = %s, expression = %s}", checked, id, expression);
+		return String.format("ValidationObligation{checked = %s, id = %s, expression = %s, requirement = %s}", checked, id, expression, requirement);
 	}
 
 }
