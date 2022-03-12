@@ -274,11 +274,9 @@ public class VOManagerStage extends Stage {
 			checkItem.setOnAction(e -> {
 				IAbstractRequirement item = row.getItem();
 				if(item instanceof Requirement) {
-					Requirement requirement = (Requirement) item;
-					requirement.getValidationObligations().forEach(voChecker::check);
+					voChecker.check((Requirement) item);
 				} else if(item instanceof ValidationObligation) {
-					ValidationObligation validationObligation = (ValidationObligation) item;
-					voChecker.check(validationObligation);
+					voChecker.check((ValidationObligation) item);
 				}
 			});
 

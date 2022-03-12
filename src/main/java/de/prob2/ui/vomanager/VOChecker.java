@@ -37,6 +37,10 @@ public class VOChecker {
 		this.simulationItemHandler = simulationItemHandler;
 	}
 
+	public void check(Requirement requirement) {
+		requirement.getValidationObligations().forEach(this::check);
+	}
+
 
 	public void check(ValidationObligation validationObligation) {
 		// TODO:
