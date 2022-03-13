@@ -50,16 +50,19 @@ public class Requirement implements IAbstractRequirement {
 		initListeners();;
 	}
 
+	private Stream<Checked> getVOStream() {
+		return validationObligations.stream()
+				.map(ValidationObligation::getChecked);
+	}
+
 	public void updateChecked() {
 		List<ValidationObligation> validationObligations = this.validationObligationsProperty();
 		if (validationObligations.isEmpty()) {
 			this.checked.set(Checked.NOT_CHECKED);
 		} else {
-			Stream<Checked> checkedStream = validationObligations.stream()
-					.map(ValidationObligation::getChecked);
-			final boolean failed = checkedStream.anyMatch(Checked.FAIL::equals);
-			final boolean success = !failed && checkedStream.allMatch(Checked.SUCCESS::equals);
-			final boolean timeout = !failed && checkedStream.anyMatch(Checked.TIMEOUT::equals);
+			final boolean failed = getVOStream().anyMatch(Checked.FAIL::equals);
+			final boolean success = !failed && getVOStream().allMatch(Checked.SUCCESS::equals);
+			final boolean timeout = !failed && getVOStream().anyMatch(Checked.TIMEOUT::equals);
 			if (success) {
 				this.checked.set(Checked.SUCCESS);
 			} else if (failed) {
