@@ -146,21 +146,18 @@ public class VOManagerStage extends Stage {
 
 	private final VOChecker voChecker;
 
-	private final VOTaskCreator voTaskCreator;
-
 	private final ObjectProperty<EditType> editTypeProperty;
 
 	private final ObjectProperty<EditMode> editModeProperty;
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
-			final VOManager voManager, final VOChecker voChecker, final VOTaskCreator voTaskCreator) {
+			final VOManager voManager, final VOChecker voChecker) {
 		super();
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voManager = voManager;
 		this.voChecker = voChecker;
-		this.voTaskCreator = voTaskCreator;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.editModeProperty = new SimpleObjectProperty<>(EditMode.NONE);
 		stageManager.loadFXML(this, "vo_manager_view.fxml");
@@ -640,7 +637,7 @@ public class VOManagerStage extends Stage {
 				currentTask.setExecutable(task.getExecutable());
 				currentTask.setContext(machine.getName());
 				currentTask.setItem(task.getItem());
-				currentTask.setParameters(voTaskCreator.extractParameters(task.getItem()));
+				currentTask.setParameters(voManager.extractParameters(task.getItem()));
 			}
 
 			editTypeProperty.set(EditType.NONE);
