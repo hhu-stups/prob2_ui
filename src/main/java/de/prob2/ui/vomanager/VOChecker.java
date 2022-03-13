@@ -37,6 +37,14 @@ public class VOChecker {
 		this.simulationItemHandler = simulationItemHandler;
 	}
 
+	public void check(IAbstractRequirement requirement) {
+		if(requirement instanceof Requirement) {
+			check((Requirement) requirement);
+		} else if(requirement instanceof ValidationObligation) {
+			check((ValidationObligation) requirement);
+		}
+	}
+
 	public void check(Requirement requirement) {
 		requirement.getValidationObligations().forEach(this::check);
 	}

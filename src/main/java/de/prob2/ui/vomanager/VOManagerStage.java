@@ -46,9 +46,6 @@ import java.util.stream.Collectors;
 
 public class VOManagerStage extends Stage {
 
-	private static final List<ValidationTechnique> tasks = Arrays.asList(ValidationTechnique.MODEL_CHECKING, ValidationTechnique.LTL_MODEL_CHECKING, ValidationTechnique.SYMBOLIC_MODEL_CHECKING,
-			ValidationTechnique.TRACE_REPLAY, ValidationTechnique.SIMULATION);
-
 	private enum EditType {
 		NONE, ADD, EDIT;
 	}
@@ -218,6 +215,7 @@ public class VOManagerStage extends Stage {
 				return null;
 			}
 		});
+
 		cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to == null) {
 				return;
@@ -259,33 +257,12 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<IAbstractRequirement> row = new TreeTableRow<>();
-
-			//Menu linkItem = new Menu("Link to Validation Obligation");
-
-			//row.itemProperty().addListener((observable, from, to) -> {
-			//	final InvalidationListener linkingListener = o -> voManager.showPossibleLinkings(linkItem, to);
-			//	voManager.updateLinkingListener(linkItem, from, to, linkingListener);
-			//});
-
+			
 			MenuItem checkItem = new MenuItem("Check");
-			checkItem.setOnAction(e -> {
-				IAbstractRequirement item = row.getItem();
-				if(item instanceof Requirement) {
-					voChecker.check((Requirement) item);
-				} else if(item instanceof ValidationObligation) {
-					voChecker.check((ValidationObligation) item);
-				}
-			});
+			checkItem.setOnAction(e -> voChecker.check(row.getItem()));
 
 			MenuItem removeItem = new MenuItem("Remove");
-			removeItem.setOnAction(e -> {
-				IAbstractRequirement item = row.getItem();
-				if(item instanceof Requirement) {
-					removeRequirement();
-				} else if(item instanceof ValidationObligation) {
-					removeValidationObligation();
-				}
-			});
+			removeItem.setOnAction(e -> removeRequirement(row.getItem()));
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
@@ -473,15 +450,21 @@ public class VOManagerStage extends Stage {
 		return nameWithoutWhiteSpaces.length() > 0;
 	}
 
-	private void removeRequirement() {
-		Requirement requirement = (Requirement) tvRequirements.getSelectionModel().getSelectedItem().getValue();
+	private void removeRequirement(IAbstractRequirement requirement) {
+		if(requirement instanceof Requirement) {
+			removeRequirement((Requirement) requirement);
+		} else if(requirement instanceof ValidationObligation) {
+			removeValidationObligation((ValidationObligation) requirement);
+		}
+	}
+
+	private void removeRequirement(Requirement requirement) {
 		currentProject.getCurrentMachine().getRequirements().remove(requirement);
 		updateRoot();
 		tvRequirements.refresh();
 	}
 
-	private void removeValidationObligation() {
-		ValidationObligation validationObligation = (ValidationObligation) tvRequirements.getSelectionModel().getSelectedItem().getValue();
+	private void removeValidationObligation(ValidationObligation validationObligation) {
 		Machine machine = currentProject.getCurrentMachine();
 		String requirementID = validationObligation.getRequirement();
 		for(Requirement requirement : machine.getRequirements()) {
