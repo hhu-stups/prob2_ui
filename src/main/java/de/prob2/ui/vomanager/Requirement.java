@@ -119,6 +119,12 @@ public class Requirement implements IAbstractRequirement {
 		validationObligationsProperty().remove(validationObligation);
 	}
 
+	public void updateValidationObligations() {
+		for(ValidationObligation validationObligation : this.getValidationObligations()) {
+			validationObligation.setRequirement(this.getName());
+		}
+	}
+
 	public ListProperty<ValidationObligation> validationObligationsProperty() {
 		return validationObligations;
 	}
@@ -145,6 +151,12 @@ public class Requirement implements IAbstractRequirement {
 
 	public void reset() {
 		// TODO: Implement
+	}
+
+	public void setData(String name, RequirementType type, String text) {
+		this.name = name;
+		this.type = type;
+		this.text = text;
 	}
 
 	@Override

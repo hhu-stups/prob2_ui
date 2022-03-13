@@ -378,35 +378,26 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	public void applyRequirement() {
-		EditType editType = editTypeProperty.get();
-		boolean requirementIsValid = requirementIsValid(tfName.getText(), taRequirement.getText());
-
-		if(requirementIsValid) {
-			Requirement requirement = null;
+		if(requirementIsValid(tfName.getText(), taRequirement.getText())) {
 			Machine machine = currentProject.getCurrentMachine();
 			boolean nameExists = machine.getRequirements().stream()
 					.map(Requirement::getName)
 					.collect(Collectors.toList())
 					.contains(tfName.getText());
+			EditType editType = editTypeProperty.get();
 			if(editType == EditType.ADD) {
 				if(nameExists) {
 					return;
 				}
-				requirement = new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList());
-				machine.getRequirements().add(requirement);
+				machine.getRequirements().add(new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList()));
 			} else if(editType == EditType.EDIT) {
-				requirement = (Requirement) tvRequirements.getSelectionModel().getSelectedItem().getValue();
+				Requirement requirement = (Requirement) tvRequirements.getSelectionModel().getSelectedItem().getValue();
 				if(nameExists && !requirement.getName().equals(tfName.getText())) {
 					return;
 				}
-				requirement.setName(tfName.getText());
-				requirement.setType(cbRequirementChoice.getValue());
-				requirement.setText(taRequirement.getText());
-				for(ValidationObligation validationObligation : requirement.getValidationObligations()) {
-					validationObligation.setRequirement(requirement.getName());
-				}
+				requirement.setData(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText());
+				requirement.updateValidationObligations();
 			}
-			assert requirement != null;
 
 			// TODO: Replace refresh?
 			switchMode(EditType.NONE, EditMode.NONE);
