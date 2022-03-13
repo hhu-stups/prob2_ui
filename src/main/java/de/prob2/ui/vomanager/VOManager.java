@@ -104,68 +104,50 @@ public class VOManager {
 	// Remark: Will eventually be used to create ProB2-UI tasks from UI directly
 	@Deprecated
 	public ValidationTask openTaskWindow(Window currentWindow, Machine machine, Requirement requirement, ValidationTechnique validationTechnique) {
+		IExecutableItem item;
 		switch (validationTechnique) {
 			case MODEL_CHECKING: {
 				ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
 				//stageController.linkRequirement(requirement);
 				stageController.showAndWait();
-				ModelCheckingItem item = stageController.getLastItem();
-				if(item == null) {
-					return null;
-				}
-				ValidationTask validationTask = new ValidationTask("MC", machine.getName(), validationTechnique, extractParameters(item), item);
-				validationTask.setExecutable(item);
-				return validationTask;
+				item = stageController.getLastItem();
+				break;
 			}
 			case LTL_MODEL_CHECKING: {
 				LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
 				formulaStage.linkRequirement(requirement);
 				formulaStage.setHandleItem(new LTLHandleItem<>(LTLHandleItem.HandleType.ADD, null));
 				formulaStage.showAndWait();
-				LTLFormulaItem item = formulaStage.getLastItem();
-				if(item == null) {
-					return null;
-				}
-				ValidationTask validationTask = new ValidationTask("LTL", machine.getName(), validationTechnique, extractParameters(item), item);
-				validationTask.setExecutable(item);
-				return validationTask;
+				item = formulaStage.getLastItem();
+				break;
 			}
 			case SYMBOLIC_MODEL_CHECKING: {
 				SymbolicCheckingChoosingStage symbolicStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
 				symbolicStage.showAndWait();
-				SymbolicCheckingFormulaItem item = symbolicStage.getLastItem();
-				if (item == null) {
-					return null;
-				}
-				ValidationTask validationTask = new ValidationTask("SMC", machine.getName(), validationTechnique, extractParameters(item), item);
-				validationTask.setExecutable(item);
-				return validationTask;
+				item = symbolicStage.getLastItem();
+				break;
 			}
 			case TRACE_REPLAY: {
 				TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
 				traceSaver.saveTrace(currentWindow, TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
-				ReplayTrace replayTrace = injector.getInstance(TraceViewHandler.class).getLastTrace();
-				if (replayTrace == null) {
-					return null;
-				}
-				ValidationTask validationTask = new ValidationTask("TR", machine.getName(), validationTechnique, extractParameters(replayTrace), replayTrace);
-				validationTask.setExecutable(replayTrace);
-				return validationTask;
+				item = injector.getInstance(TraceViewHandler.class).getLastTrace();
+				break;
 			}
 			case SIMULATION: {
 				SimulationChoosingStage simulationChoosingStage = injector.getInstance(SimulationChoosingStage.class);
 				simulationChoosingStage.showAndWait();
-				SimulationItem item = simulationChoosingStage.getLastItem();
-				if (item == null) {
-					return null;
-				}
-				ValidationTask validationTask = new ValidationTask("SIM", machine.getName(), validationTechnique, extractParameters(item), item);
-				validationTask.setExecutable(item);
-				return validationTask;
+				item = simulationChoosingStage.getLastItem();
+				break;
 			}
 			default:
 				throw new RuntimeException("Validation task is not valid");
 		}
+		if(item == null) {
+			return null;
+		}
+		ValidationTask validationTask = new ValidationTask(validationTechnique.getId(), machine.getName(), validationTechnique, extractParameters(item), item);
+		validationTask.setExecutable(item);
+		return validationTask;
 	}
 
 	public String extractParameters(Object item) {
