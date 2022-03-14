@@ -536,7 +536,6 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void editVOInView(Machine machine, ValidationObligation validationObligation) {
-		machine.getValidationObligations().add(validationObligation);
 		for(Requirement req : machine.getRequirements()) {
 			if(req.getName().equals(validationObligation.getRequirement())) {
 				req.getValidationObligations().remove(validationObligation);
@@ -555,7 +554,8 @@ public class VOManagerStage extends Stage {
 		if(voIsValid) {
 			ValidationObligation validationObligation;
 			Machine machine = currentProject.getCurrentMachine();
-			boolean nameExists = machine.getValidationObligations().stream()
+			boolean nameExists = machine.getRequirements().stream()
+					.flatMap(requirement -> requirement.getValidationObligations().stream())
 					.map(ValidationObligation::getId)
 					.collect(Collectors.toList())
 					.contains(tfVOName.getText());

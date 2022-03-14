@@ -57,7 +57,6 @@ import javafx.collections.ObservableSet;
 	"location",
 	"lastUsedPreferenceName",
 	"requirements",
-	"validationObligations",
 	"validationTasks",
 	"ltlFormulas",
 	"ltlPatterns",
@@ -131,7 +130,6 @@ public class Machine implements DescriptionView.Describable {
 	private final Path location;
 	private final StringProperty lastUsedPreferenceName;
 	private final ListProperty<Requirement> requirements;
-	private final ListProperty<ValidationObligation> validationObligations;
 	private final ListProperty<ValidationTask> validationTasks;
 	private final ListProperty<LTLFormulaItem> ltlFormulas;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
@@ -163,7 +161,6 @@ public class Machine implements DescriptionView.Describable {
 		this.location = location;
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
 		this.requirements = new SimpleListProperty<>(this, "requirements", FXCollections.observableArrayList());
-		this.validationObligations = new SimpleListProperty<>(this, "validationObligations", FXCollections.observableArrayList());
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
@@ -235,8 +232,7 @@ public class Machine implements DescriptionView.Describable {
 		this.descriptionProperty().addListener(changedListener);
 		this.lastUsedPreferenceNameProperty().addListener(changedListener);
 		this.requirementsProperty().addListener(changedListener);
-		this.validationObligations.addListener(changedListener);
-		this.validationTasks.addListener(changedListener);
+		this.validationTasksProperty().addListener(changedListener);
 		this.ltlFormulasProperty().addListener(changedListener);
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicCheckingFormulasProperty().addListener(changedListener);
@@ -285,7 +281,6 @@ public class Machine implements DescriptionView.Describable {
 	
 	public void resetStatus() {
 		requirements.forEach(Requirement::reset);
-		validationObligations.forEach(ValidationObligation::reset);
 		validationTasks.forEach(ValidationTask::reset);
 		ltlFormulas.forEach(LTLFormulaItem::reset);
 		ltlPatterns.forEach(LTLPatternItem::reset);
@@ -381,20 +376,6 @@ public class Machine implements DescriptionView.Describable {
 	@JsonProperty("requirements")
 	public void setRequirements(final List<Requirement> requirements) {
 		this.requirements.setAll(requirements);
-	}
-
-	public ListProperty<ValidationObligation> validationObligationsProperty() {
-		return validationObligations;
-	}
-
-	@JsonProperty("validationObligations")
-	public List<ValidationObligation> getValidationObligations() {
-		return validationObligations.get();
-	}
-
-	@JsonProperty("validationObligations")
-	public void setValidationObligations(final List<ValidationObligation> validationObligations) {
-		this.validationObligations.setAll(validationObligations);
 	}
 
 	public ListProperty<ValidationTask> validationTasksProperty() {

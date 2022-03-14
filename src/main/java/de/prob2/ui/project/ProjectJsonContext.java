@@ -475,6 +475,12 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			machine.set("validationTasks", machine.arrayNode());
 		}
 	}
+
+	private static void updateV21Machine(final ObjectNode machine) {
+		if(machine.has("validationObligations")) {
+			machine.remove("validationObligations");
+		}
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -557,6 +563,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 20) {
 				updateV20Machine(machine);
+			}
+			if (oldVersion <= 21) {
+				updateV21Machine(machine);
 			}
 		});
 		
