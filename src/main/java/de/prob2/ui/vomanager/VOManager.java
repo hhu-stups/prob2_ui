@@ -91,7 +91,7 @@ public class VOManager {
 				.orElse(null);
 	}
 
-	private ValidationTask createValidationTask(Object item, Machine machine) {
+	private ValidationTask createValidationTask(IExecutableItem item, Machine machine) {
 		return new ValidationTask(machine.getName(), classToTechnique.get(item.getClass()), extractParameters(item), item);
 	}
 

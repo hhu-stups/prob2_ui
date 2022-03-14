@@ -84,7 +84,7 @@ public class ValidationObligation implements IAbstractRequirement {
 	}
 
 	public void reset() {
-		// TODO: Implement
+
 	}
 
 	/*

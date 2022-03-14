@@ -13,7 +13,6 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.util.List;
 import java.util.Objects;
 
 
@@ -34,9 +33,6 @@ public class ValidationTask {
 	private String parameters;
 
 	@JsonIgnore
-	private Object item;
-
-	@JsonIgnore
 	private IExecutableItem executable;
 
 	@JsonIgnore
@@ -48,17 +44,16 @@ public class ValidationTask {
 		this(id, context, validationTechnique, parameters, null);
 	}
 
-	public ValidationTask(String context, ValidationTechnique validationTechnique, String parameters, Object item) {
-		this(null, context, validationTechnique, parameters, item);
+	public ValidationTask(String context, ValidationTechnique validationTechnique, String parameters, IExecutableItem executable) {
+		this(null, context, validationTechnique, parameters, executable);
 	}
 
-	public ValidationTask(String id, String context, ValidationTechnique validationTechnique, String parameters,  Object item) {
+	public ValidationTask(String id, String context, ValidationTechnique validationTechnique, String parameters, IExecutableItem executable) {
 		this.id = id;
 		this.context = context;
 		this.validationTechnique = validationTechnique;
 		this.parameters = parameters;
-		this.item = item;
-		setExecutable((IExecutableItem) item);
+		setExecutable(executable);
 	}
 
 	public void setId(String id) {
@@ -105,23 +100,13 @@ public class ValidationTask {
 	public void setExecutable(IExecutableItem executable) {
 		this.executable = executable;
 		checked.unbind();
-		if(item != null) {
+		if(executable != null) {
 			checked.bind(executable.checkedProperty());
 		}
 	}
 
 	public IExecutableItem getExecutable() {
 		return executable;
-	}
-
-	@JsonIgnore
-	public Object getItem() {
-		return item;
-	}
-
-	public void setItem(Object item) {
-		this.item = item;
-		setExecutable((IExecutableItem) item);
 	}
 
 	public void setContext(String context) {
@@ -140,12 +125,11 @@ public class ValidationTask {
 		this.id = id;
 		this.executable = executable;
 		this.context = context;
-		this.item = item;
 		this.parameters = parameters;
 	}
 
 	public void reset() {
-		// TODO: Implement
+
 	}
 
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")

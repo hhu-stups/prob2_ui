@@ -150,7 +150,7 @@ public class Requirement implements IAbstractRequirement {
 	}
 
 	public void reset() {
-		// TODO: Implement
+
 	}
 
 	public void setData(String name, RequirementType type, String text) {

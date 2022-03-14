@@ -623,7 +623,7 @@ public class VOManagerStage extends Stage {
 				if(nameExists && !currentTask.getId().equals(tfVTName.getText())) {
 					return;
 				}
-				currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getItem(), voManager.extractParameters(task.getItem()));
+				currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
 			}
 			switchMode(EditType.NONE, EditMode.NONE);
 			tvValidationTasks.getSelectionModel().clearSelection();
