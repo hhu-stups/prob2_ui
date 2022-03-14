@@ -67,6 +67,12 @@ public class ValidationObligation implements IAbstractRequirement {
 		return requirement;
 	}
 
+	public void setData(String id, String expression, String requirement) {
+		this.id = id;
+		this.expression = expression;
+		this.requirement = requirement;
+	}
+
 	@JsonIgnore
 	public String getName() {
 		return getId();

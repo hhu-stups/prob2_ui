@@ -134,6 +134,14 @@ public class ValidationTask {
 		return checked;
 	}
 
+	public void setData(String id, IExecutableItem executable, String context, Object item, String parameters) {
+		this.id = id;
+		this.executable = executable;
+		this.context = context;
+		this.item = item;
+		this.parameters = parameters;
+	}
+
 	public void reset() {
 		// TODO: Implement
 	}
