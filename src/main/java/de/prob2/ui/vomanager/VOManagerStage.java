@@ -8,13 +8,13 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.TreeCheckedCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -39,7 +39,6 @@ import javafx.util.StringConverter;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +49,7 @@ public class VOManagerStage extends Stage {
 		NONE, ADD, EDIT;
 	}
 
-	private enum EditMode {
+	private enum Mode {
 		NONE, REQUIREMENT, VO, VT
 	}
 
@@ -135,6 +134,8 @@ public class VOManagerStage extends Stage {
 	@FXML
 	private Button applyVTButton;
 
+	private final StageManager stageManager;
+
 	private final CurrentProject currentProject;
 
 	private final CurrentTrace currentTrace;
@@ -145,18 +146,19 @@ public class VOManagerStage extends Stage {
 
 	private final ObjectProperty<EditType> editTypeProperty;
 
-	private final ObjectProperty<EditMode> editModeProperty;
+	private final ObjectProperty<Mode> modeProperty;
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
 			final VOManager voManager, final VOChecker voChecker) {
 		super();
+		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voManager = voManager;
 		this.voChecker = voChecker;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
-		this.editModeProperty = new SimpleObjectProperty<>(EditMode.NONE);
+		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		stageManager.loadFXML(this, "vo_manager_view.fxml");
 	}
 
@@ -185,14 +187,14 @@ public class VOManagerStage extends Stage {
 				btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
 			}
 			updateRoot();
-			switchMode(EditType.NONE, EditMode.NONE);
+			switchMode(EditType.NONE, Mode.NONE);
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
-		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && editModeProperty.get() == EditMode.REQUIREMENT, editTypeProperty, editModeProperty));
-		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && editModeProperty.get() == EditMode.VO, editTypeProperty, editModeProperty));
-		vtEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && editModeProperty.get() == EditMode.VT, editTypeProperty, editModeProperty));
+		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.REQUIREMENT, editTypeProperty, modeProperty));
+		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VO, editTypeProperty, modeProperty));
+		vtEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VT, editTypeProperty, modeProperty));
 
 		validationTaskBox.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
@@ -242,8 +244,8 @@ public class VOManagerStage extends Stage {
 			}
 		});
 
-		editModeProperty.addListener((observable, from, to) -> {
-			if(to == EditMode.VT) {
+		modeProperty.addListener((observable, from, to) -> {
+			if(to == Mode.VT) {
 				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
 				btAddVT.setTooltip(new Tooltip());
 			} else {
@@ -251,8 +253,6 @@ public class VOManagerStage extends Stage {
 				btAddVT.setTooltip(new Tooltip());
 			}
 		});
-
-
 
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<IAbstractRequirement> row = new TreeTableRow<>();
@@ -275,7 +275,7 @@ public class VOManagerStage extends Stage {
 				IAbstractRequirement item = to.getValue();
 				showRequirement(item, true);
 			} else {
-				switchMode(EditType.NONE, EditMode.NONE);
+				switchMode(EditType.NONE, Mode.NONE);
 			}
 		});
 
@@ -311,10 +311,10 @@ public class VOManagerStage extends Stage {
 
 		tvValidationTasks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null) {
-				switchMode(EditType.EDIT, EditMode.VT);
+				switchMode(EditType.EDIT, Mode.VT);
 				showValidationTask(to);
 			} else {
-				switchMode(EditType.NONE, EditMode.NONE);
+				switchMode(EditType.NONE, Mode.NONE);
 			}
 		});
 
@@ -326,9 +326,9 @@ public class VOManagerStage extends Stage {
 		});
 	}
 
-	private void switchMode(EditType editType, EditMode editMode) {
+	private void switchMode(EditType editType, Mode mode) {
 		editTypeProperty.set(editType);
-		editModeProperty.set(editMode);
+		modeProperty.set(mode);
 	}
 
 	private void updateRoot() {
@@ -358,7 +358,7 @@ public class VOManagerStage extends Stage {
 	@FXML
 	public void addRequirement() {
 		resetRequirementEditing();
-		switchMode(EditType.ADD, EditMode.REQUIREMENT);
+		switchMode(EditType.ADD, Mode.REQUIREMENT);
 	}
 
 	private void resetVOEditing() {
@@ -373,7 +373,7 @@ public class VOManagerStage extends Stage {
 	@FXML
 	public void addVO() {
 		resetVOEditing();
-		switchMode(EditType.ADD, EditMode.VO);
+		switchMode(EditType.ADD, Mode.VO);
 	}
 
 	@FXML
@@ -387,12 +387,14 @@ public class VOManagerStage extends Stage {
 			EditType editType = editTypeProperty.get();
 			if(editType == EditType.ADD) {
 				if(nameExists) {
+					warnAlreadyExists(Mode.REQUIREMENT);
 					return;
 				}
 				machine.getRequirements().add(new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptyList()));
 			} else if(editType == EditType.EDIT) {
 				Requirement requirement = (Requirement) tvRequirements.getSelectionModel().getSelectedItem().getValue();
 				if(nameExists && !requirement.getName().equals(tfName.getText())) {
+					warnAlreadyExists(Mode.REQUIREMENT);
 					return;
 				}
 				requirement.setData(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText());
@@ -400,12 +402,12 @@ public class VOManagerStage extends Stage {
 			}
 
 			// TODO: Replace refresh?
-			switchMode(EditType.NONE, EditMode.NONE);
+			switchMode(EditType.NONE, Mode.NONE);
 			tvRequirements.getSelectionModel().clearSelection();
 			updateRoot();
 			tvRequirements.refresh();
 		} else {
-			// TODO: Show error
+			warnNotValid(Mode.REQUIREMENT);
 		}
 	}
 
@@ -488,7 +490,7 @@ public class VOManagerStage extends Stage {
 
 	private void showRequirement(Requirement requirement, boolean edit) {
 		if(edit) {
-			switchMode(EditType.EDIT, EditMode.REQUIREMENT);
+			switchMode(EditType.EDIT, Mode.REQUIREMENT);
 		}
 		if(requirement == null) {
 			return;
@@ -500,7 +502,7 @@ public class VOManagerStage extends Stage {
 
 	private void showValidationObligation(ValidationObligation validationObligation, boolean edit) {
 		if(edit) {
-			switchMode(EditType.EDIT, EditMode.VO);
+			switchMode(EditType.EDIT, Mode.VO);
 		}
 		if(validationObligation == null) {
 			return;
@@ -561,6 +563,7 @@ public class VOManagerStage extends Stage {
 					.contains(tfVOName.getText());
 			if(editType == EditType.ADD) {
 				if(nameExists) {
+					warnAlreadyExists(Mode.VO);
 					return;
 				}
 				addVOInView(new ValidationObligation(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName()));
@@ -568,16 +571,17 @@ public class VOManagerStage extends Stage {
 				TreeItem<IAbstractRequirement> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
 				validationObligation = (ValidationObligation) treeItem.getValue();
 				if(nameExists && !validationObligation.getName().equals(tfVOName.getText())) {
+					warnAlreadyExists(Mode.VO);
 					return;
 				}
 				editVOInView(machine, validationObligation);
 			}
-			switchMode(EditType.NONE, EditMode.NONE);
+			switchMode(EditType.NONE, Mode.NONE);
 			tvRequirements.getSelectionModel().clearSelection();
 			updateRoot();
 			tvRequirements.refresh();
 		} else {
-			// TODO: Show message
+			warnNotValid(Mode.VO);
 		}
 	}
 
@@ -589,11 +593,11 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void addVT() {
-		if(editTypeProperty.get() == EditType.NONE || editModeProperty.get() != EditMode.VT) {
+		if(editTypeProperty.get() == EditType.NONE || modeProperty.get() != Mode.VT) {
 			resetVTEditing();
-			switchMode(EditType.ADD, EditMode.VT);
+			switchMode(EditType.ADD, Mode.VT);
 		} else {
-			switchMode(EditType.NONE, EditMode.NONE);
+			switchMode(EditType.NONE, Mode.NONE);
 		}
 		tvValidationTasks.getSelectionModel().clearSelection();
 	}
@@ -614,6 +618,7 @@ public class VOManagerStage extends Stage {
 					.contains(tfVTName.getText());
 			if(editType == EditType.ADD) {
 				if(nameExists) {
+					warnAlreadyExists(Mode.VT);
 					return;
 				}
 				task.setId(tfVTName.getText());
@@ -621,16 +626,50 @@ public class VOManagerStage extends Stage {
 			} else if(editType == EditType.EDIT) {
 				ValidationTask currentTask = tvValidationTasks.getSelectionModel().getSelectedItem();
 				if(nameExists && !currentTask.getId().equals(tfVTName.getText())) {
+					warnAlreadyExists(Mode.VT);
 					return;
 				}
 				currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
 			}
-			switchMode(EditType.NONE, EditMode.NONE);
+			switchMode(EditType.NONE, Mode.NONE);
 			tvValidationTasks.getSelectionModel().clearSelection();
 			tvValidationTasks.refresh();
 		} else {
-			// TODO: Show message
+			warnNotValid(Mode.VT);
 		}
 
 	}
+
+	public void warnNotValid(Mode mode) {
+		switch(mode) {
+			case REQUIREMENT:
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Requirement not valid", "Requirement is not valid").show();
+				break;
+			case VO:
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Validation obligation not valid", "Validation obligation is not valid").show();
+				break;
+			case VT:
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Validation task not valid", "Validation task is not valid").show();
+				break;
+			default:
+				throw new RuntimeException("Mode is not valid");
+		}
+	}
+
+	public void warnAlreadyExists(Mode mode) {
+		switch(mode) {
+			case REQUIREMENT:
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Requirement already exists", "Requirement with given name already exists").show();
+				break;
+			case VO:
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Validation obligation already eixsts", "Validation obligation with given id already exists").show();
+				break;
+			case VT:
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Validation task already exists", "Validation task with given id already exists").show();
+				break;
+			default:
+				throw new RuntimeException("Mode is not valid");
+		}
+	}
+
 }
