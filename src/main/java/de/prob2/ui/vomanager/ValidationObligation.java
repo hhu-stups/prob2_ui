@@ -43,6 +43,10 @@ public class ValidationObligation implements IAbstractRequirement {
 		return checked.get();
 	}
 
+	public void setChecked(Checked checked) {
+		this.checked.set(checked);
+	}
+
 	public String getId() {
 		return id;
 	}

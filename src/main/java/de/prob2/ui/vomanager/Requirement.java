@@ -47,7 +47,7 @@ public class Requirement implements IAbstractRequirement {
 		this.type = type;
 		this.text = text;
 		this.validationObligations.get().addAll(validationObligations);
-		initListeners();;
+		initListeners();
 	}
 
 	private Stream<Checked> getVOStream() {
@@ -77,6 +77,9 @@ public class Requirement implements IAbstractRequirement {
 
 	private void initListeners() {
 		this.validationObligationsProperty().addListener((o, from, to) -> updateChecked());
+		for(ValidationObligation validationObligation : validationObligations) {
+			validationObligation.checkedProperty().addListener((observable, from, to) -> updateChecked());
+		}
 	}
 
 	public String getName() {
