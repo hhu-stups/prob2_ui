@@ -145,9 +145,7 @@ public class VOManager {
 		if(item == null) {
 			return null;
 		}
-		ValidationTask validationTask = new ValidationTask(validationTechnique.getId(), machine.getName(), validationTechnique, extractParameters(item), item);
-		validationTask.setExecutable(item);
-		return validationTask;
+		return new ValidationTask(validationTechnique.getId(), machine.getName(), validationTechnique, extractParameters(item), item);
 	}
 
 	public String extractParameters(Object item) {

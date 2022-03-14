@@ -21,8 +21,7 @@ import java.util.Objects;
 		"id",
 		"context",
 		"validationTechnique",
-		"parameters",
-		"item"
+		"parameters"
 })
 public class ValidationTask {
 
@@ -34,6 +33,7 @@ public class ValidationTask {
 
 	private String parameters;
 
+	@JsonIgnore
 	private Object item;
 
 	@JsonIgnore
@@ -44,14 +44,16 @@ public class ValidationTask {
 
 	@JsonCreator
 	public ValidationTask(@JsonProperty("id") String id, @JsonProperty("context") String context,
-						  @JsonProperty("validationTechnique") ValidationTechnique validationTechnique, @JsonProperty("parameters") String parameters,
-						  @JsonProperty("item") Object item) {
-		this(context, validationTechnique, parameters, item);
-		this.id = id;
+						  @JsonProperty("validationTechnique") ValidationTechnique validationTechnique, @JsonProperty("parameters") String parameters) {
+		this(id, context, validationTechnique, parameters, null);
 	}
 
-	public ValidationTask(String context, ValidationTechnique validationTechnique, String parameters,
-						  Object item) {
+	public ValidationTask(String context, ValidationTechnique validationTechnique, String parameters, Object item) {
+		this(null, context, validationTechnique, parameters, item);
+	}
+
+	public ValidationTask(String id, String context, ValidationTechnique validationTechnique, String parameters,  Object item) {
+		this.id = id;
 		this.context = context;
 		this.validationTechnique = validationTechnique;
 		this.parameters = parameters;
