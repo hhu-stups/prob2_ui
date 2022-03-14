@@ -41,6 +41,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class VOManagerStage extends Stage {
@@ -144,19 +145,22 @@ public class VOManagerStage extends Stage {
 
 	private final VOChecker voChecker;
 
+	private final ResourceBundle bundle;
+
 	private final ObjectProperty<EditType> editTypeProperty;
 
 	private final ObjectProperty<Mode> modeProperty;
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
-			final VOManager voManager, final VOChecker voChecker) {
+						  final VOManager voManager, final VOChecker voChecker, final ResourceBundle bundle) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voManager = voManager;
 		this.voChecker = voChecker;
+		this.bundle = bundle;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		stageManager.loadFXML(this, "vo_manager_view.fxml");
@@ -257,10 +261,10 @@ public class VOManagerStage extends Stage {
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<IAbstractRequirement> row = new TreeTableRow<>();
 
-			MenuItem checkItem = new MenuItem("Check");
+			MenuItem checkItem = new MenuItem(bundle.getString("common.buttons.check"));
 			checkItem.setOnAction(e -> voChecker.check(row.getItem()));
 
-			MenuItem removeItem = new MenuItem("Remove");
+			MenuItem removeItem = new MenuItem(bundle.getString("common.buttons.remove"));
 			removeItem.setOnAction(e -> removeRequirement(row.getItem()));
 
 			row.contextMenuProperty().bind(
@@ -291,10 +295,10 @@ public class VOManagerStage extends Stage {
 		tvValidationTasks.setRowFactory(table -> {
 			final TableRow<ValidationTask> row = new TableRow<>();
 
-			MenuItem checkItem = new MenuItem("Check VT");
+			MenuItem checkItem = new MenuItem(bundle.getString("vomanager.menu.items.checkVT"));
 			checkItem.setOnAction(e -> voChecker.check(row.getItem()));
 
-			MenuItem removeItem = new MenuItem("Remove VT");
+			MenuItem removeItem = new MenuItem(bundle.getString("vomanager.menu.items.removeVT"));
 			removeItem.setOnAction(e -> {
 				ValidationTask validationTask = row.getItem();
 				Machine currentMachine = currentProject.getCurrentMachine();
@@ -643,13 +647,13 @@ public class VOManagerStage extends Stage {
 	public void warnNotValid(Mode mode) {
 		switch(mode) {
 			case REQUIREMENT:
-				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Requirement not valid", "Requirement is not valid").show();
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.requirement.notValid.header"), bundle.getString("vomanager.warnings.requirement.notValid.content")).show();
 				break;
 			case VO:
-				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Validation obligation not valid", "Validation obligation is not valid").show();
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.vo.notValid.header"), bundle.getString("vomanager.warnings.vo.notValid.content")).show();
 				break;
 			case VT:
-				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Validation task not valid", "Validation task is not valid").show();
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.vt.notValid.header"), bundle.getString("vomanager.warnings.vt.notValid.content")).show();
 				break;
 			default:
 				throw new RuntimeException("Mode is not valid");
@@ -659,13 +663,13 @@ public class VOManagerStage extends Stage {
 	public void warnAlreadyExists(Mode mode) {
 		switch(mode) {
 			case REQUIREMENT:
-				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Requirement already exists", "Requirement with given name already exists").show();
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.requirement.alreadyExists.header"), bundle.getString("vomanager.warnings.requirement.alreadyExists.content")).show();
 				break;
 			case VO:
-				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Validation obligation already eixsts", "Validation obligation with given id already exists").show();
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.vo.alreadyExists.header"), bundle.getString("vomanager.warnings.vo.alreadyExists.content")).show();
 				break;
 			case VT:
-				stageManager.makeAlert(Alert.AlertType.INFORMATION, "Validation task already exists", "Validation task with given id already exists").show();
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.vt.alreadyExists.header"), bundle.getString("vomanager.warnings.vt.alreadyExists.content")).show();
 				break;
 			default:
 				throw new RuntimeException("Mode is not valid");
