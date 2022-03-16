@@ -85,6 +85,9 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 		cbChoice.setConverter(new StringConverter<ET>() {
 			@Override
 			public String toString(final ET object) {
+				if(object == null) {
+					return "";
+				}
 				return object.getName();
 			}
 			
