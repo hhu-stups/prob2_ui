@@ -60,12 +60,8 @@
 									<TreeTableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
 												 minWidth="${fontSize.fontSize * 6}"
 												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TreeTableColumn fx:id="requirementNameColumn" style="-fx-alignment: CENTER;" minWidth="70.0" maxWidth="70.0"
+									<TreeTableColumn fx:id="requirementNameColumn" style="-fx-alignment: LEFT;" minWidth="70.0"
 												 text="%vomanager.table.requirements.column.name"/>
-									<TreeTableColumn fx:id="typeColumn" style="-fx-alignment: CENTER;" minWidth="90.0" maxWidth="90.0"
-												 text="%vomanager.table.requirements.column.type"/>
-									<TreeTableColumn fx:id="specificationColumn" minWidth="120.0"
-													 text="%vomanager.table.requirements.column.specification"/>
 								</columns>
 								<placeholder>
 									<Label text="%vomanager.table.requirements.placeholder"/>
@@ -91,10 +87,8 @@
 									<TableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;"
 												 minWidth="${fontSize.fontSize * 6}"
 												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TableColumn fx:id="vtNameColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
+									<TableColumn fx:id="vtNameColumn" style="-fx-alignment: LEFT;" minWidth="140.0"
 												 text="%vomanager.table.vt.column.name"/>
-									<TableColumn fx:id="vtParametersColumn" minWidth="80.0"
-												 text="%vomanager.table.vt.column.parameters"/>
 								</columns>
 								<placeholder>
 									<Label text="%vomanager.table.vt.placeholder"/>

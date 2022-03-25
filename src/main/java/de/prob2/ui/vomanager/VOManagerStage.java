@@ -64,12 +64,6 @@ public class VOManagerStage extends Stage {
 	private TreeTableColumn<IAbstractRequirement, String> requirementNameColumn;
 
 	@FXML
-	private TreeTableColumn<IAbstractRequirement, String> typeColumn;
-
-	@FXML
-	private TreeTableColumn<IAbstractRequirement, String> specificationColumn;
-
-	@FXML
 	private TableView<ValidationTask> tvValidationTasks;
 
 	@FXML
@@ -78,8 +72,6 @@ public class VOManagerStage extends Stage {
 	@FXML
 	private TableColumn<ValidationTask, String> vtNameColumn;
 
-	@FXML
-	private TableColumn<ValidationTask, String> vtParametersColumn;
 
 	@FXML
 	private MenuButton btAddRequirementVO;
@@ -170,16 +162,12 @@ public class VOManagerStage extends Stage {
 	public void initialize() {
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
-
 		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-		typeColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("shortTypeName"));
-		specificationColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("configuration"));
 
 		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 
 		vtNameColumn.setCellValueFactory(new PropertyValueFactory<>("prefix"));
-		vtParametersColumn.setCellValueFactory(new PropertyValueFactory<>("parameters"));
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			btAddVO.disableProperty().unbind();
