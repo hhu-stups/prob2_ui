@@ -226,11 +226,7 @@ public class VOManagerStage extends Stage {
 			if(to == null) {
 				return;
 			}
-			ValidationTechnique validationTechnique = cbValidationTechniqueChoice.getSelectionModel().getSelectedItem();
-			if(validationTechnique == null) {
-				return;
-			}
-			updateTaskChoice(validationTechnique);
+			updateTaskChoice(cbValidationTechniqueChoice.getSelectionModel().getSelectedItem());
 		});
 
 		cbLinkRequirementChoice.setConverter(new StringConverter<Requirement>() {
@@ -690,7 +686,7 @@ public class VOManagerStage extends Stage {
 	private void updateTaskChoice(ValidationTechnique validationTechnique) {
 		cbTaskChoice.getItems().clear();
 		Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
-		if(machine == null) {
+		if(validationTechnique == null || machine == null) {
 			return;
 		}
 		List<ValidationTask> tasks = voManager.allTasks(validationTechnique, machine);
