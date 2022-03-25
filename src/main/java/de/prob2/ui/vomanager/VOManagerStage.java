@@ -5,6 +5,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
@@ -72,7 +73,6 @@ public class VOManagerStage extends Stage {
 	@FXML
 	private TableColumn<ValidationTask, String> vtNameColumn;
 
-
 	@FXML
 	private MenuButton btAddRequirementVO;
 
@@ -96,6 +96,12 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private ChoiceBox<Requirement> cbLinkRequirementChoice;
+
+	@FXML
+	private ChoiceBox<Machine> cbVOLinkMachineChoice;
+
+	@FXML
+	private ChoiceBox<Machine> cbVTLinkMachineChoice;
 
 	@FXML
 	private ChoiceBox<ValidationTask> cbTaskChoice;
@@ -235,6 +241,16 @@ public class VOManagerStage extends Stage {
 				return null;
 			}
 		});
+
+		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
+			cbVOLinkMachineChoice.getItems().clear();
+			cbVTLinkMachineChoice.getItems().clear();
+			cbVOLinkMachineChoice.getItems().addAll(to.getMachines());
+			cbVTLinkMachineChoice.getItems().addAll(to.getMachines());
+		};
+
+		projectChangeListener.changed(null, null, currentProject.get());
+		currentProject.addListener(projectChangeListener);
 
 		modeProperty.addListener((observable, from, to) -> {
 			if(to == Mode.VT) {
@@ -614,6 +630,7 @@ public class VOManagerStage extends Stage {
 					return;
 				}
 				task.setId(tfVTName.getText());
+				task.setContext(cbVTLinkMachineChoice.getSelectionModel().getSelectedItem().getName());
 				machine.getValidationTasks().add(task);
 			} else if(editType == EditType.EDIT) {
 				ValidationTask currentTask = tvValidationTasks.getSelectionModel().getSelectedItem();
@@ -621,7 +638,7 @@ public class VOManagerStage extends Stage {
 					warnAlreadyExists(Mode.VT);
 					return;
 				}
-				currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
+				currentTask.setData(tfVTName.getText(), task.getExecutable(), cbVTLinkMachineChoice.getSelectionModel().getSelectedItem().getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
 			}
 			switchMode(EditType.NONE, Mode.NONE);
 			tvValidationTasks.getSelectionModel().clearSelection();

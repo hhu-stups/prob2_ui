@@ -128,6 +128,10 @@
 								<Label text="%vomanager.edit.vo.linkRequirement"/>
 								<ChoiceBox fx:id="cbLinkRequirementChoice"/>
 							</HBox>
+							<HBox>
+								<Label text="%vomanager.edit.vo.linkMachine"/>
+								<ChoiceBox fx:id="cbVOLinkMachineChoice"/>
+							</HBox>
 							<VBox>
 								<Label text="%vomanager.edit.vo.expression"/>
 								<TextArea fx:id="taVOExpression" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
@@ -138,6 +142,10 @@
 							<HBox>
 								<Label text="%vomanager.edit.vt.name"/>
 								<TextField fx:id="tfVTName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+							</HBox>
+							<HBox>
+								<Label text="%vomanager.edit.vt.linkMachine"/>
+								<ChoiceBox fx:id="cbVTLinkMachineChoice"/>
 							</HBox>
 							<VBox>
 								<Label text="%vomanager.edit.vt.technique"/>

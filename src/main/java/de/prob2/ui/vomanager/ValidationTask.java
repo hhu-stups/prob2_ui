@@ -44,8 +44,8 @@ public class ValidationTask {
 		this(id, context, validationTechnique, parameters, null);
 	}
 
-	public ValidationTask(String context, ValidationTechnique validationTechnique, String parameters, IExecutableItem executable) {
-		this(null, context, validationTechnique, parameters, executable);
+	public ValidationTask(ValidationTechnique validationTechnique, String parameters, IExecutableItem executable) {
+		this(null, null, validationTechnique, parameters, executable);
 	}
 
 	public ValidationTask(String id, String context, ValidationTechnique validationTechnique, String parameters, IExecutableItem executable) {

@@ -91,14 +91,15 @@ public class VOManager {
 				.orElse(null);
 	}
 
-	private ValidationTask createValidationTask(IExecutableItem item, Machine machine) {
-		return new ValidationTask(machine.getName(), classToTechnique.get(item.getClass()), extractParameters(item), item);
+	private ValidationTask createValidationTask(IExecutableItem item) {
+		return new ValidationTask(classToTechnique.get(item.getClass()), extractParameters(item), item);
 	}
 
 	public List<ValidationTask> allTasks(ValidationTechnique validationTechnique) {
+		// TODO: Check this
 		Machine machine = currentProject.getCurrentMachine();
 		Stream<? extends IExecutableItem> stream = getExecutableStream(machine, validationTechnique);
-		return stream.map(task -> createValidationTask(task, machine)).collect(Collectors.toList());
+		return stream.map(this::createValidationTask).collect(Collectors.toList());
 	}
 
 	// Remark: Will eventually be used to create ProB2-UI tasks from UI directly
