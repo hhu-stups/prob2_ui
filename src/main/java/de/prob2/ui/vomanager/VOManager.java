@@ -19,15 +19,9 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import javafx.beans.Observable;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SetProperty;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.stage.Window;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,9 +89,8 @@ public class VOManager {
 		return new ValidationTask(classToTechnique.get(item.getClass()), extractParameters(item), item);
 	}
 
-	public List<ValidationTask> allTasks(ValidationTechnique validationTechnique) {
+	public List<ValidationTask> allTasks(ValidationTechnique validationTechnique, Machine machine) {
 		// TODO: Check this
-		Machine machine = currentProject.getCurrentMachine();
 		Stream<? extends IExecutableItem> stream = getExecutableStream(machine, validationTechnique);
 		return stream.map(this::createValidationTask).collect(Collectors.toList());
 	}

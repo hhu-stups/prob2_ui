@@ -219,12 +219,18 @@ public class VOManagerStage extends Stage {
 			if(to == null) {
 				return;
 			}
-			cbTaskChoice.getItems().clear();
-			List<ValidationTask> tasks = voManager.allTasks(to);
-			if(tasks == null) {
+			updateTaskChoice(to);
+		});
+
+		cbVTLinkMachineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to == null) {
 				return;
 			}
-			cbTaskChoice.getItems().addAll(tasks);
+			ValidationTechnique validationTechnique = cbValidationTechniqueChoice.getSelectionModel().getSelectedItem();
+			if(validationTechnique == null) {
+				return;
+			}
+			updateTaskChoice(validationTechnique);
 		});
 
 		cbLinkRequirementChoice.setConverter(new StringConverter<Requirement>() {
@@ -679,6 +685,19 @@ public class VOManagerStage extends Stage {
 			default:
 				throw new RuntimeException("Mode is not valid");
 		}
+	}
+
+	private void updateTaskChoice(ValidationTechnique validationTechnique) {
+		cbTaskChoice.getItems().clear();
+		Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
+		if(machine == null) {
+			return;
+		}
+		List<ValidationTask> tasks = voManager.allTasks(validationTechnique, machine);
+		if(tasks == null) {
+			return;
+		}
+		cbTaskChoice.getItems().addAll(tasks);
 	}
 
 }
