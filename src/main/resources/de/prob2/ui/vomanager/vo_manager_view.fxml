@@ -60,7 +60,7 @@
 									<TreeTableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
 												 minWidth="${fontSize.fontSize * 6}"
 												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TreeTableColumn fx:id="requirementNameColumn" style="-fx-alignment: LEFT;" minWidth="70.0"
+									<TreeTableColumn fx:id="requirementNameColumn" minWidth="70.0"
 												 text="%vomanager.table.requirements.column.name"/>
 								</columns>
 								<placeholder>
@@ -87,7 +87,7 @@
 									<TableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;"
 												 minWidth="${fontSize.fontSize * 6}"
 												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TableColumn fx:id="vtNameColumn" style="-fx-alignment: LEFT;" minWidth="140.0"
+									<TableColumn fx:id="vtNameColumn" minWidth="140.0"
 												 text="%vomanager.table.vt.column.name"/>
 								</columns>
 								<placeholder>
