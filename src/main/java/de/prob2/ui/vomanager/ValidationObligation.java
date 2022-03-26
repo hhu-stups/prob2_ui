@@ -15,7 +15,7 @@ import java.util.Objects;
 	"expression",
 	"requirement"
 })
-public class ValidationObligation implements IAbstractRequirement {
+public class ValidationObligation implements IAbstractRequirement, INameable {
 
 	private String id;
 
@@ -77,6 +77,7 @@ public class ValidationObligation implements IAbstractRequirement {
 		this.requirement = requirement;
 	}
 
+	@Override
 	@JsonIgnore
 	public String getName() {
 		return getId();

@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 	"text",
 	"validationObligations"
 })
-public class Requirement implements IAbstractRequirement {
+public class Requirement implements IAbstractRequirement, INameable {
 
 	private String name;
 
@@ -82,6 +82,7 @@ public class Requirement implements IAbstractRequirement {
 		}
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}

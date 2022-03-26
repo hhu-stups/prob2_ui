@@ -79,21 +79,21 @@
 									</graphic>
 								</Button>
 							</HBox>
-							<TableView fx:id="tvValidationTasks">
+							<TreeTableView fx:id="tvValidationTasks" showRoot="false">
 								<columnResizePolicy>
-									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+									<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 								</columnResizePolicy>
 								<columns>
-									<TableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;"
+									<TreeTableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;"
 												 minWidth="${fontSize.fontSize * 6}"
 												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TableColumn fx:id="vtNameColumn" minWidth="140.0"
+									<TreeTableColumn fx:id="vtNameColumn" minWidth="140.0"
 												 text="%vomanager.table.vt.column.name"/>
 								</columns>
 								<placeholder>
 									<Label text="%vomanager.table.vt.placeholder"/>
 								</placeholder>
-							</TableView>
+							</TreeTableView>
 						</VBox>
 					</VBox>
 					<StackPane>

@@ -65,13 +65,13 @@ public class VOManagerStage extends Stage {
 	private TreeTableColumn<IAbstractRequirement, String> requirementNameColumn;
 
 	@FXML
-	private TableView<ValidationTask> tvValidationTasks;
+	private TreeTableView<INameable> tvValidationTasks;
 
 	@FXML
-	private TableColumn<ValidationTask, Checked> vtStatusColumn;
+	private TreeTableColumn<INameable, Checked> vtStatusColumn;
 
 	@FXML
-	private TableColumn<ValidationTask, String> vtNameColumn;
+	private TreeTableColumn<INameable, String> vtNameColumn;
 
 	@FXML
 	private MenuButton btAddRequirementVO;
@@ -170,25 +170,11 @@ public class VOManagerStage extends Stage {
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
 		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 
-		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		vtStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
+		vtStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
 
-		vtNameColumn.setCellValueFactory(new PropertyValueFactory<>("prefix"));
+		vtNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 
-		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			btAddVO.disableProperty().unbind();
-
-			tvValidationTasks.itemsProperty().unbind();
-			if(to != null) {
-				voManager.synchronizeMachine(to);
-				tvValidationTasks.itemsProperty().bind(to.validationTasksProperty());
-				btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
-			}
-			updateRoot();
-			switchMode(EditType.NONE, Mode.NONE);
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
 		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.REQUIREMENT, editTypeProperty, modeProperty));
 		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VO, editTypeProperty, modeProperty));
@@ -245,14 +231,28 @@ public class VOManagerStage extends Stage {
 		});
 
 		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
+			btAddVO.disableProperty().unbind();
+
 			cbVOLinkMachineChoice.getItems().clear();
 			cbVTLinkMachineChoice.getItems().clear();
 			cbVOLinkMachineChoice.getItems().addAll(to.getMachines());
 			cbVTLinkMachineChoice.getItems().addAll(to.getMachines());
-		};
 
-		projectChangeListener.changed(null, null, currentProject.get());
+			//TODO
+			//tvValidationTasks.itemsProperty().unbind();
+
+			if(to != null) {
+				voManager.synchronizeProject(to);
+				//tvValidationTasks.itemsProperty().bind(to.validationTasksProperty());
+				//btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
+			}
+			updateRequirementsTable();
+			updateValidationTasksTable();
+			switchMode(EditType.NONE, Mode.NONE);
+		};
 		currentProject.addListener(projectChangeListener);
+		projectChangeListener.changed(null, null, currentProject.get());
+
 
 		modeProperty.addListener((observable, from, to) -> {
 			if(to == Mode.VT) {
@@ -299,14 +299,24 @@ public class VOManagerStage extends Stage {
 		});
 
 		tvValidationTasks.setRowFactory(table -> {
-			final TableRow<ValidationTask> row = new TableRow<>();
+			final TreeTableRow<INameable> row = new TreeTableRow<>();
 
 			MenuItem checkItem = new MenuItem(bundle.getString("vomanager.menu.items.checkVT"));
-			checkItem.setOnAction(e -> voChecker.check(row.getItem()));
+			checkItem.setOnAction(e -> {
+				INameable item = row.getItem();
+				if(item instanceof Machine) {
+					return;
+				}
+				voChecker.check((ValidationTask) item);
+			});
 
 			MenuItem removeItem = new MenuItem(bundle.getString("vomanager.menu.items.removeVT"));
 			removeItem.setOnAction(e -> {
-				ValidationTask validationTask = row.getItem();
+				INameable item = row.getItem();
+				if(item instanceof Machine) {
+					return;
+				}
+				ValidationTask validationTask = (ValidationTask) item;
 				Machine currentMachine = currentProject.getCurrentMachine();
 				currentMachine.getValidationTasks().remove(validationTask);
 				// TODO: Implement dependency between VO and VT
@@ -320,16 +330,27 @@ public class VOManagerStage extends Stage {
 		});
 
 		tvValidationTasks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to != null) {
+			if(to.getValue() instanceof Machine) {
+				return;
+			}
+			ValidationTask task = (ValidationTask) to.getValue();
+			if(task != null) {
 				switchMode(EditType.EDIT, Mode.VT);
-				showValidationTask(to);
+				showValidationTask(task);
 			} else {
 				switchMode(EditType.NONE, Mode.NONE);
 			}
 		});
 
 		tvValidationTasks.setOnMouseClicked(e-> {
-			ValidationTask item = tvValidationTasks.getSelectionModel().getSelectedItem();
+			TreeItem<INameable> treeItem = tvValidationTasks.getSelectionModel().getSelectedItem();
+			if(treeItem == null) {
+				return;
+			}
+			if(treeItem.getValue() instanceof Machine) {
+				return;
+			}
+			ValidationTask item = (ValidationTask) treeItem.getValue();
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
 				voChecker.check(item);
 			}
@@ -341,7 +362,7 @@ public class VOManagerStage extends Stage {
 		modeProperty.set(mode);
 	}
 
-	private void updateRoot() {
+	private void updateRequirementsTable() {
 		Machine currentMachine = currentProject.getCurrentMachine();
 		if(currentMachine == null) {
 			return;
@@ -356,6 +377,19 @@ public class VOManagerStage extends Stage {
 			}
 		}
 		tvRequirements.setRoot(root);
+	}
+
+	private void updateValidationTasksTable() {
+		TreeItem<INameable> root = new TreeItem<>();
+		for(Machine machine : currentProject.getMachines()) {
+			TreeItem<INameable> machineItem = new TreeItem<>(machine);
+			root.getChildren().add(machineItem);
+			for(ValidationTask validationTask : machine.getValidationTasks()) {
+				TreeItem<INameable> validationTaskItem = new TreeItem<>(validationTask);
+				machineItem.getChildren().add(validationTaskItem);
+			}
+		}
+		tvValidationTasks.setRoot(root);
 	}
 
 	private void resetRequirementEditing() {
@@ -414,7 +448,7 @@ public class VOManagerStage extends Stage {
 			// TODO: Replace refresh?
 			switchMode(EditType.NONE, Mode.NONE);
 			tvRequirements.getSelectionModel().clearSelection();
-			updateRoot();
+			updateRequirementsTable();
 			tvRequirements.refresh();
 		} else {
 			warnNotValid(Mode.REQUIREMENT);
@@ -453,7 +487,7 @@ public class VOManagerStage extends Stage {
 
 	private void removeRequirement(Requirement requirement) {
 		currentProject.getCurrentMachine().getRequirements().remove(requirement);
-		updateRoot();
+		updateRequirementsTable();
 		tvRequirements.refresh();
 	}
 
@@ -565,7 +599,7 @@ public class VOManagerStage extends Stage {
 		EditType editType = editTypeProperty.get();
 		if(voIsValid) {
 			ValidationObligation validationObligation;
-			Machine machine = currentProject.getCurrentMachine();
+			Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
 			boolean nameExists = machine.getRequirements().stream()
 					.flatMap(requirement -> requirement.getValidationObligations().stream())
 					.map(ValidationObligation::getId)
@@ -588,7 +622,7 @@ public class VOManagerStage extends Stage {
 			}
 			switchMode(EditType.NONE, Mode.NONE);
 			tvRequirements.getSelectionModel().clearSelection();
-			updateRoot();
+			updateRequirementsTable();
 			tvRequirements.refresh();
 		} else {
 			warnNotValid(Mode.VO);
@@ -621,7 +655,7 @@ public class VOManagerStage extends Stage {
 			if(task == null) {
 				return;
 			}
-			Machine machine = currentProject.getCurrentMachine();
+			Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
 			boolean nameExists = machine.getValidationTasks().stream()
 					.map(ValidationTask::getId)
 					.collect(Collectors.toList())
@@ -632,18 +666,23 @@ public class VOManagerStage extends Stage {
 					return;
 				}
 				task.setId(tfVTName.getText());
-				task.setContext(cbVTLinkMachineChoice.getSelectionModel().getSelectedItem().getName());
+				task.setContext(machine.getName());
 				machine.getValidationTasks().add(task);
 			} else if(editType == EditType.EDIT) {
-				ValidationTask currentTask = tvValidationTasks.getSelectionModel().getSelectedItem();
+				TreeItem<INameable> treeItem = tvValidationTasks.getSelectionModel().getSelectedItem();
+				if(treeItem.getValue() instanceof Machine) {
+					return;
+				}
+				ValidationTask currentTask = (ValidationTask) treeItem.getValue();
 				if(nameExists && !currentTask.getId().equals(tfVTName.getText())) {
 					warnAlreadyExists(Mode.VT);
 					return;
 				}
-				currentTask.setData(tfVTName.getText(), task.getExecutable(), cbVTLinkMachineChoice.getSelectionModel().getSelectedItem().getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
+				currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
 			}
 			switchMode(EditType.NONE, Mode.NONE);
 			tvValidationTasks.getSelectionModel().clearSelection();
+			updateValidationTasksTable();
 			tvValidationTasks.refresh();
 		} else {
 			warnNotValid(Mode.VT);

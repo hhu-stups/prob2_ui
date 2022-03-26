@@ -7,6 +7,7 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
@@ -41,22 +42,21 @@ public class VOManager {
 		classToTechnique.put(ReplayTrace.class, ValidationTechnique.TRACE_REPLAY);
 	}
 
-	private final CurrentProject currentProject;
-
 	private final Injector injector;
 
 	@Inject
-	public VOManager(final CurrentProject currentProject, final Injector injector) {
-		this.currentProject = currentProject;
+	public VOManager(final Injector injector) {
 		this.injector = injector;
 	}
 
 
-	public void synchronizeMachine(Machine machine) {
-		for(ValidationTask validationTask : machine.getValidationTasks()) {
-			IExecutableItem executable = lookupExecutable(machine, validationTask);
-			validationTask.setExecutable(executable);
-			validationTask.checkedProperty().bind(executable.checkedProperty());
+	public void synchronizeProject(Project project) {
+		for(Machine machine : project.getMachines()) {
+			for (ValidationTask validationTask : machine.getValidationTasks()) {
+				IExecutableItem executable = lookupExecutable(machine, validationTask);
+				validationTask.setExecutable(executable);
+				validationTask.checkedProperty().bind(executable.checkedProperty());
+			}
 		}
 	}
 

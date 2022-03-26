@@ -22,7 +22,7 @@ import java.util.Objects;
 		"validationTechnique",
 		"parameters"
 })
-public class ValidationTask {
+public class ValidationTask implements INameable {
 
 	private String id;
 
@@ -84,8 +84,9 @@ public class ValidationTask {
 		this.parameters = parameters;
 	}
 
+	@Override
 	@JsonIgnore
-	public String getPrefix() {
+	public String getName() {
 		return String.format("%s/%s/%s", id, context, validationTechnique.getId());
 	}
 

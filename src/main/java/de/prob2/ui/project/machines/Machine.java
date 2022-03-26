@@ -28,8 +28,8 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
+import de.prob2.ui.vomanager.INameable;
 import de.prob2.ui.vomanager.Requirement;
-import de.prob2.ui.vomanager.ValidationObligation;
 import de.prob2.ui.vomanager.ValidationTask;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -70,7 +70,7 @@ import javafx.collections.ObservableSet;
 	"visBVisualisation",
 	"historyChartItems"
 })
-public class Machine implements DescriptionView.Describable {
+public class Machine implements DescriptionView.Describable, INameable {
 	public enum CheckingStatus {
 		UNKNOWN, SUCCESSFUL, FAILED, NONE
 	}
@@ -261,6 +261,14 @@ public class Machine implements DescriptionView.Describable {
 	public void setChanged(final boolean changed) {
 		this.changedProperty().set(changed);
 	}
+
+	public Checked getChecked() {
+		return null;
+	}
+
+	public ObjectProperty<Checked> checkedProperty() {
+		return null;
+	}
 	
 	@JsonIgnore
 	public Class<? extends ModelFactory<?>> getModelFactoryClass() {
@@ -343,7 +351,8 @@ public class Machine implements DescriptionView.Describable {
 	public StringProperty nameProperty() {
 		return this.name;
 	}
-	
+
+	@Override
 	public String getName() {
 		return this.nameProperty().get();
 	}
