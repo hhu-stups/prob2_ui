@@ -239,11 +239,8 @@ public class VOManagerStage extends Stage {
 			cbVTLinkMachineChoice.getItems().addAll(to.getMachines());
 
 			//TODO
-			//tvValidationTasks.itemsProperty().unbind();
-
 			if(to != null) {
 				voManager.synchronizeProject(to);
-				//tvValidationTasks.itemsProperty().bind(to.validationTasksProperty());
 				//btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
 			}
 			updateRequirementsTable();
