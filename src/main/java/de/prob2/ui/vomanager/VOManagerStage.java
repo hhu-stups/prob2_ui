@@ -567,6 +567,11 @@ public class VOManagerStage extends Stage {
 			return;
 		}
 		tfVTName.setText(validationTask.getId());
+		Machine linkedMachine = currentProject.getMachines().stream()
+				.filter(machine -> machine.getName().equals(validationTask.getContext()))
+				.findAny()
+				.orElse(null);
+		cbVTLinkMachineChoice.getSelectionModel().select(linkedMachine);
 		cbValidationTechniqueChoice.getSelectionModel().select(validationTask.getValidationTechnique());
 		cbTaskChoice.getSelectionModel().select(validationTask);
 	}
