@@ -3,8 +3,6 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.Label?>
 
 <?import de.prob2.ui.vomanager.VOManagerStage?>
