@@ -47,12 +47,32 @@ import java.util.stream.Collectors;
 
 public class VOManagerStage extends Stage {
 
-	private enum EditType {
+	private static enum EditType {
 		NONE, ADD, EDIT;
 	}
 
-	private enum Mode {
+	private static enum Mode {
 		NONE, REQUIREMENT, VO, VT
+	}
+
+	public static enum ViewSetting {
+		MACHINE("Machine"),
+		REQUIREMENT("Requirement");
+
+		private final String name;
+
+		private ViewSetting(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
 	}
 
 	@FXML
@@ -132,6 +152,9 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private Button applyVTButton;
+
+	@FXML
+	private ChoiceBox<ViewSetting> cbViewSetting;
 
 	private final StageManager stageManager;
 
@@ -359,6 +382,9 @@ public class VOManagerStage extends Stage {
 				voChecker.check(item);
 			}
 		});
+
+		cbViewSetting.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateRequirementsTable());
+		cbViewSetting.getSelectionModel().select(ViewSetting.MACHINE);
 	}
 
 	private void switchMode(EditType editType, Mode mode) {
@@ -367,18 +393,38 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void updateRequirementsTable() {
-		// Hierarchy for now: Machine, Requirements, VO as default
+		ViewSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
+
 		TreeItem<INameable> root = new TreeItem<>();
-		List<Requirement> requirements = currentProject.getRequirements();
-		for(Machine machine : currentProject.getMachines()) {
-			TreeItem<INameable> machineItem = new TreeItem<>(machine);
-			root.getChildren().add(machineItem);
+		if(setting == ViewSetting.MACHINE) {
+			// Hierarchy for now: Machine, Requirements, VO as default
+			List<Requirement> requirements = currentProject.getRequirements();
+			for (Machine machine : currentProject.getMachines()) {
+				TreeItem<INameable> machineItem = new TreeItem<>(machine);
+				root.getChildren().add(machineItem);
+				for (Requirement requirement : requirements) {
+					TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
+					machineItem.getChildren().add(requirementItem);
+					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
+						if (validationObligation.getRequirement().equals(requirement.getName())) {
+							requirementItem.getChildren().add(new TreeItem<>(validationObligation));
+						}
+					}
+				}
+			}
+		} else if(setting == ViewSetting.REQUIREMENT) {
+			List<Requirement> requirements = currentProject.getRequirements();
+
 			for(Requirement requirement : requirements) {
 				TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-				machineItem.getChildren().add(requirementItem);
-				for(ValidationObligation validationObligation : machine.getValidationObligations()) {
-					if(validationObligation.getRequirement().equals(requirement.getName())) {
-						requirementItem.getChildren().add(new TreeItem<>(validationObligation));
+				root.getChildren().add(requirementItem);
+				for(Machine machine : currentProject.getMachines()) {
+					TreeItem<INameable> machineItem = new TreeItem<>(machine);
+					requirementItem.getChildren().add(machineItem);
+					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
+						if (validationObligation.getRequirement().equals(requirement.getName())) {
+							machineItem.getChildren().add(new TreeItem<>(validationObligation));
+						}
 					}
 				}
 			}

@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 
 <?import de.prob2.ui.vomanager.VOManagerStage?>
+<?import de.prob2.ui.vomanager.VOManagerStage.ViewSetting?>
 
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.HBox?>
@@ -49,6 +50,14 @@
 										<MenuItem fx:id="btAddVO" text="%vomanager.menu.vo.add" onAction="#addVO"/>
 									</items>
 								</MenuButton>
+								<ChoiceBox fx:id="cbViewSetting">
+									<items>
+										<FXCollections fx:factory="observableArrayList">
+											<VOManagerStage.ViewSetting fx:value="MACHINE"/>
+											<VOManagerStage.ViewSetting fx:value="REQUIREMENT"/>
+										</FXCollections>
+									</items>
+								</ChoiceBox>
 							</HBox>
 							<TreeTableView fx:id="tvRequirements" showRoot="false">
 								<columnResizePolicy>
