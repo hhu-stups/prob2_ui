@@ -22,6 +22,7 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 
+import de.prob2.ui.vomanager.Requirement;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -36,6 +37,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
@@ -45,6 +47,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StringProperty name;
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
+	private final ListProperty<Requirement> requirements;
 	private final ListProperty<Preference> preferences;
 	private final ObjectProperty<JsonMetadata> metadata;
 	private final ObjectProperty<Machine> currentMachine;
@@ -72,6 +75,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.name = new SimpleStringProperty(this, "name", "");
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
+		this.requirements = new SimpleListProperty<>(this, "requirements", FXCollections.observableArrayList());
 		this.metadata = new SimpleObjectProperty<>(this, "metadata", null);
 		this.preferences = new SimpleListProperty<>(this, "preferences", FXCollections.observableArrayList());
 		this.currentMachine = new SimpleObjectProperty<>(this, "currentMachine", null);
@@ -87,6 +91,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				this.name.set(to.getName());
 				this.description.set(to.getDescription());
 				this.machines.setAll(to.getMachines());
+				this.requirements.setAll(to.getRequirements());
 				this.preferences.setAll(to.getPreferences());
 				this.metadata.set(to.getMetadata());
 				this.location.set(to.getLocation());
@@ -137,6 +142,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.name.set("");
 		this.description.set("");
 		this.machines.clear();
+		this.requirements.clear();
 		this.preferences.clear();
 		this.metadata.set(null);
 		this.location.set(null);
@@ -169,7 +175,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void addMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.add(machine);
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getMetadata(), this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getRequirements(), this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
 	public void removeMachine(Machine machine) {
@@ -180,13 +186,13 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			this.currentTrace.set(null);
 			this.updateCurrentMachine(null, null);
 		}
-		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getPreferences(), this.getMetadata(), this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getRequirements(), this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getMetadata(), this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getRequirements(), preferencesList, this.getMetadata(), this.getLocation()));
 	}
 
 	public void removePreference(Preference preference) {
@@ -196,7 +202,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			.forEach(machine -> machine.setLastUsedPreferenceName(Preference.DEFAULT.getName()));
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
-		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), preferencesList, this.getMetadata(), this.getLocation()));
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getRequirements(), preferencesList, this.getMetadata(), this.getLocation()));
 	}
 
 	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
@@ -217,11 +223,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public void changeName(String newName) {
 		this.setNewProject(true);
-		this.set(new Project(newName, this.getDescription(), this.getMachines(), this.getPreferences(), this.getMetadata(), this.getLocation()));
+		this.set(new Project(newName, this.getDescription(), this.getMachines(), this.getRequirements(), this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
 	public void changeDescription(String newDescription) {
-		this.set(new Project(this.getName(), newDescription, this.getMachines(), this.getPreferences(), this.getMetadata(), this.getLocation()));
+		this.set(new Project(this.getName(), newDescription, this.getMachines(), this.getRequirements(), this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
 	public void switchTo(Project project, boolean newProject) {
@@ -271,6 +277,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public List<Machine> getMachines() {
 		return this.machinesProperty().get();
+	}
+
+	public ListProperty<Requirement> requirementsProperty() {
+		return requirements;
+	}
+
+	public List<Requirement> getRequirements() {
+		return requirements.get();
 	}
 
 	public ReadOnlyListProperty<Preference> preferencesProperty() {

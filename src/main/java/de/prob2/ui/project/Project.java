@@ -15,14 +15,16 @@ import de.prob.json.JsonMetadata;
 import de.prob.json.JsonMetadataBuilder;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.vomanager.Requirement;
 
 public class Project implements HasMetadata {
 	public static final String FILE_TYPE = "Project";
-	public static final int CURRENT_FORMAT_VERSION = 22;
+	public static final int CURRENT_FORMAT_VERSION = 23;
 	
 	private String name;
 	private String description;
 	private List<Machine> machines;
+	private List<Requirement> requirements;
 	private List<Preference> preferences;
 	private JsonMetadata metadata;
 	@JsonIgnore
@@ -33,6 +35,7 @@ public class Project implements HasMetadata {
 		@JsonProperty("name") final String name,
 		@JsonProperty("description") final String description,
 		@JsonProperty("machines") final List<Machine> machines,
+		@JsonProperty("requirements") final List<Requirement> requirements,
 		@JsonProperty("preferences") final List<Preference> preferences,
 		@JsonProperty("metadata") final JsonMetadata metadata,
 		@JsonProperty("location") final Path location
@@ -40,6 +43,7 @@ public class Project implements HasMetadata {
 		this.name = name;
 		this.description = description;
 		this.machines = new ArrayList<>(machines);
+		this.requirements = new ArrayList<>(requirements);
 		this.preferences = new ArrayList<>(preferences);
 		this.metadata = metadata;
 		this.location = location;
@@ -111,7 +115,15 @@ public class Project implements HasMetadata {
 		}
 		throw new NoSuchElementException("Could not find preference with name " + name);
 	}
-	
+
+	public List<Requirement> getRequirements() {
+		return requirements;
+	}
+
+	public void setRequirements(List<Requirement> requirements) {
+		this.requirements = requirements;
+	}
+
 	@Override
 	public JsonMetadata getMetadata() {
 		return this.metadata;
@@ -123,6 +135,7 @@ public class Project implements HasMetadata {
 			this.getName(),
 			this.getDescription(),
 			this.getMachines(),
+			this.getRequirements(),
 			this.getPreferences(),
 			metadata,
 			this.getLocation()
@@ -161,6 +174,7 @@ public class Project implements HasMetadata {
 		return otherProject.name.equals(this.name) &&
 				otherProject.description.equals(this.description) &&
 				otherProject.machines.equals(this.machines) &&
+				otherProject.requirements.equals(this.requirements) &&
 				otherProject.preferences.equals(this.preferences) &&
 				otherProject.metadata.equals(this.metadata) &&
 				otherProject.location.equals(this.location);
@@ -168,6 +182,6 @@ public class Project implements HasMetadata {
 
 	@Override
 	public int hashCode() {
-		 return Objects.hash(name, description, machines, preferences, metadata, location);
+		 return Objects.hash(name, description, machines, requirements, preferences, metadata, location);
 	}
 }

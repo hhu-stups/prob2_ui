@@ -186,6 +186,7 @@ public class ProjectManager {
 			name,
 			project.getDescription(),
 			project.getMachines(),
+			project.getRequirements(),
 			project.getPreferences(),
 			Project.metadataBuilder().build(),
 			project.getLocation()
@@ -281,7 +282,7 @@ public class ProjectManager {
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if(replacingProject) {
-			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
+			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 			currentProject.startAnimation(machine, Preference.DEFAULT);
 		}
 	}

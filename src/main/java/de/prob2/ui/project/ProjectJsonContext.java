@@ -481,6 +481,35 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			machine.remove("validationObligations");
 		}
 	}
+
+	private static void updateV22Project(final ObjectNode project) {
+		ArrayNode machines = checkArray(project.get("machines"));
+		ArrayNode projectRequirements = project.arrayNode();
+		machines.forEach(machineNode -> {
+			final ObjectNode machine = checkObject(machineNode);
+			if(!machine.has("requirements")) {
+				machine.set("requirements", machine.arrayNode());
+			}
+			ArrayNode requirements = checkArray(machine.get("requirements"));
+			projectRequirements.addAll(requirements);
+			machine.remove("requirements");
+			ArrayNode machineVOs = project.arrayNode();
+			requirements.forEach(requirementNode -> {
+				final ObjectNode requirement = checkObject(requirementNode);
+				ArrayNode validationObligations = checkArray(requirement.get("validationObligations"));
+				machineVOs.addAll(validationObligations);
+				requirement.remove("validationObligations");
+			});
+			if (!machine.has("validationObligations")) {
+				machine.set("validationObligations", machineVOs);
+			}
+		});
+		if (!project.has("requirements")) {
+			project.set("requirements", projectRequirements);
+		}
+		System.out.println(project);
+		System.out.println("-------------");
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -566,6 +595,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 21) {
 				updateV21Machine(machine);
+			}
+			if (oldVersion <= 22) {
+				updateV22Project(oldObject);
 			}
 		});
 		

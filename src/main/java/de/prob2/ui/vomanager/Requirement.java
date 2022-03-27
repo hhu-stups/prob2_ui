@@ -19,8 +19,7 @@ import java.util.stream.Stream;
 @JsonPropertyOrder({
 	"name",
 	"type",
-	"text",
-	"validationObligations"
+	"text"
 })
 public class Requirement implements IAbstractRequirement, INameable {
 
@@ -30,32 +29,25 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 	private String text;
 
-	private final ListProperty<ValidationObligation> validationObligations = new SimpleListProperty<>(FXCollections.observableArrayList());
-
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
-	@JsonIgnore
-	private final ChangeListener<Checked> listener = (observable, from, to) -> updateChecked();
+	// TODO: Move to VO Manager
+	//@JsonIgnore
+	//private final ChangeListener<Checked> listener = (observable, from, to) -> updateChecked();
 
 	@JsonCreator
 	public Requirement(@JsonProperty("name") String name,
 			@JsonProperty("type") RequirementType type,
-			@JsonProperty("text") String text,
-			@JsonProperty("validationObligations") List<ValidationObligation> validationObligations) {
+			@JsonProperty("text") String text) {
 		this.name = name;
 		this.type = type;
 		this.text = text;
-		this.validationObligations.get().addAll(validationObligations);
-		initListeners();
 	}
 
-	private Stream<Checked> getVOStream() {
-		return validationObligations.stream()
-				.map(ValidationObligation::getChecked);
-	}
 
-	public void updateChecked() {
+	// TODO: Move to VO Manager
+	/*public void updateChecked() {
 		List<ValidationObligation> validationObligations = this.validationObligationsProperty();
 		if (validationObligations.isEmpty()) {
 			this.checked.set(Checked.NOT_CHECKED);
@@ -80,7 +72,7 @@ public class Requirement implements IAbstractRequirement, INameable {
 		for(ValidationObligation validationObligation : validationObligations) {
 			validationObligation.checkedProperty().addListener((observable, from, to) -> updateChecked());
 		}
-	}
+	}*/
 
 	@Override
 	public String getName() {
@@ -111,30 +103,6 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 	public Checked getChecked() {
 		return checked.get();
-	}
-
-	public void addValidationObligation(ValidationObligation validationObligation) {
-		validationObligationsProperty().add(validationObligation);
-		validationObligation.checkedProperty().addListener(listener);
-	}
-
-	public void removeValidationObligation(ValidationObligation validationObligation) {
-		validationObligation.checkedProperty().removeListener(listener);
-		validationObligationsProperty().remove(validationObligation);
-	}
-
-	public void updateValidationObligations() {
-		for(ValidationObligation validationObligation : this.getValidationObligations()) {
-			validationObligation.setRequirement(this.getName());
-		}
-	}
-
-	public ListProperty<ValidationObligation> validationObligationsProperty() {
-		return validationObligations;
-	}
-
-	public List<ValidationObligation> getValidationObligations() {
-		return validationObligations.get();
 	}
 
 	public void setChecked(Checked checked) {
@@ -178,6 +146,6 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 	@Override
 	public String toString() {
-		return String.format("Requirement{checked = %s, name = %s, type = %s, text = %s, validationObligations = %s}", checked, name, type, text, validationObligations.get());
+		return String.format("Requirement{checked = %s, name = %s, type = %s, text = %s}", checked, name, type, text);
 	}
 }

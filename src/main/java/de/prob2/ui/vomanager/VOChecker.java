@@ -49,9 +49,11 @@ public class VOChecker {
 		}
 	}
 
+	// TODO:
+	// Unclear whether requirement is checked for a machine or for multiple machine (depends on view)
 	public void check(Requirement requirement) {
-		requirement.getValidationObligations().forEach(this::check);
-		requirement.updateChecked();
+		//requirement.getValidationObligations().forEach(this::check);
+		//requirement.updateChecked();
 	}
 
 

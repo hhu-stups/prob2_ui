@@ -73,7 +73,7 @@ public class NewProjectStage extends Stage {
 			errorExplanationLabel.setText(bundle.getString("project.newProjectStage.invalidLocationError"));
 			return;
 		}
-		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), dir);
+		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), dir);
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if(replacingProject) {
 			currentProject.switchTo(newProject, true);
