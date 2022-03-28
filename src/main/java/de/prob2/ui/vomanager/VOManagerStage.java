@@ -636,7 +636,7 @@ public class VOManagerStage extends Stage {
 		}
 	}
 
-	private void editVOInView(Machine machine, ValidationObligation validationObligation) {
+	private void editVOInView(ValidationObligation validationObligation) {
 		validationObligation.setData(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
 	}
 
@@ -667,7 +667,7 @@ public class VOManagerStage extends Stage {
 					warnAlreadyExists(Mode.VO);
 					return;
 				}
-				editVOInView(machine, validationObligation);
+				editVOInView(validationObligation);
 			}
 			switchMode(EditType.NONE, Mode.NONE);
 			tvRequirements.getSelectionModel().clearSelection();
