@@ -164,111 +164,13 @@ public class VOManagerStage extends Stage {
 		stageManager.loadFXML(this, "vo_manager_view.fxml");
 	}
 
-	@FXML
-	public void initialize() {
+	private void initializeTables() {
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
 		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-
 		vtStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		vtStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
-
 		vtNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-
-
-		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.REQUIREMENT, editTypeProperty, modeProperty));
-		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VO, editTypeProperty, modeProperty));
-		vtEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VT, editTypeProperty, modeProperty));
-
-		validationTaskBox.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull());
-		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
-		applyVTButton.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull().and(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull()));
-
-
-
-		cbTaskChoice.setConverter(new StringConverter<ValidationTask>() {
-			@Override
-			public String toString(ValidationTask object) {
-				if(object == null) {
-					return "";
-				}
-				return object.getParameters();
-			}
-
-			@Override
-			public ValidationTask fromString(String string) {
-				return null;
-			}
-		});
-
-		cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to == null) {
-				return;
-			}
-			updateTaskChoice(to);
-		});
-
-		cbVTLinkMachineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to == null) {
-				return;
-			}
-			updateTaskChoice(cbValidationTechniqueChoice.getSelectionModel().getSelectedItem());
-		});
-
-		cbLinkRequirementChoice.setConverter(new StringConverter<Requirement>() {
-			@Override
-			public String toString(Requirement object) {
-				if(object == null) {
-					return "";
-				}
-				return object.getName();
-			}
-
-			@Override
-			public Requirement fromString(String string) {
-				return null;
-			}
-		});
-
-		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
-			btAddVO.disableProperty().unbind();
-
-			cbVOLinkMachineChoice.getItems().clear();
-			cbVTLinkMachineChoice.getItems().clear();
-			cbVOLinkMachineChoice.getItems().addAll(to.getMachines());
-			cbVTLinkMachineChoice.getItems().addAll(to.getMachines());
-
-			voManager.synchronizeProject(to);
-			btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
-
-			if(from != null) {
-				for (Requirement requirement : from.getRequirements()) {
-					requirementHandler.resetListeners(from, requirement);
-				}
-			}
-
-			for(Requirement requirement : to.getRequirements()) {
-				// TODO: Distinguish between two views for tvRequirements
-				requirementHandler.initListeners(to, null, requirement, VOManagerSetting.REQUIREMENT);
-			}
-
-			updateRequirementsTable();
-			updateValidationTasksTable();
-			switchMode(EditType.NONE, Mode.NONE);
-		};
-		currentProject.addListener(projectChangeListener);
-		projectChangeListener.changed(null, null, currentProject.get());
-
-
-		modeProperty.addListener((observable, from, to) -> {
-			if(to == Mode.VT) {
-				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
-				btAddVT.setTooltip(new Tooltip());
-			} else {
-				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
-				btAddVT.setTooltip(new Tooltip());
-			}
-		});
 
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<INameable> row = new TreeTableRow<>();
@@ -385,9 +287,117 @@ public class VOManagerStage extends Stage {
 				voChecker.checkVT(item);
 			}
 		});
+	}
+
+	private void initializeEditingBoxes() {
+		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.REQUIREMENT, editTypeProperty, modeProperty));
+		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VO, editTypeProperty, modeProperty));
+		vtEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VT, editTypeProperty, modeProperty));
+	}
+
+	private void initializeChoiceBoxes() {
+		cbTaskChoice.setConverter(new StringConverter<ValidationTask>() {
+			@Override
+			public String toString(ValidationTask object) {
+				if(object == null) {
+					return "";
+				}
+				return object.getParameters();
+			}
+
+			@Override
+			public ValidationTask fromString(String string) {
+				return null;
+			}
+		});
+
+		cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			updateTaskChoice(to);
+		});
+
+		cbVTLinkMachineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			updateTaskChoice(cbValidationTechniqueChoice.getSelectionModel().getSelectedItem());
+		});
+
+		cbLinkRequirementChoice.setConverter(new StringConverter<Requirement>() {
+			@Override
+			public String toString(Requirement object) {
+				if(object == null) {
+					return "";
+				}
+				return object.getName();
+			}
+
+			@Override
+			public Requirement fromString(String string) {
+				return null;
+			}
+		});
+
+		validationTaskBox.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		applyVTButton.visibleProperty().bind(cbValidationTechniqueChoice.getSelectionModel().selectedItemProperty().isNotNull().and(cbTaskChoice.getSelectionModel().selectedItemProperty().isNotNull()));
 
 		cbViewSetting.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateRequirementsTable());
 		cbViewSetting.getSelectionModel().select(VOManagerSetting.MACHINE);
+	}
+
+	private void initializeListenerOnProjectChange() {
+		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
+			btAddVO.disableProperty().unbind();
+
+			cbVOLinkMachineChoice.getItems().clear();
+			cbVTLinkMachineChoice.getItems().clear();
+			cbVOLinkMachineChoice.getItems().addAll(to.getMachines());
+			cbVTLinkMachineChoice.getItems().addAll(to.getMachines());
+
+			voManager.synchronizeProject(to);
+			btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
+
+			if(from != null) {
+				for (Requirement requirement : from.getRequirements()) {
+					requirementHandler.resetListeners(from, requirement);
+				}
+			}
+
+			for(Requirement requirement : to.getRequirements()) {
+				// TODO: Distinguish between two views for tvRequirements
+				requirementHandler.initListeners(to, null, requirement, VOManagerSetting.REQUIREMENT);
+			}
+
+			updateRequirementsTable();
+			updateValidationTasksTable();
+			switchMode(EditType.NONE, Mode.NONE);
+		};
+		currentProject.addListener(projectChangeListener);
+		projectChangeListener.changed(null, null, currentProject.get());
+	}
+
+	private void initializeListenerOnMode() {
+		modeProperty.addListener((observable, from, to) -> {
+			if(to == Mode.VT) {
+				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
+				btAddVT.setTooltip(new Tooltip());
+			} else {
+				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
+				btAddVT.setTooltip(new Tooltip());
+			}
+		});
+	}
+
+	@FXML
+	public void initialize() {
+		initializeTables();
+		initializeEditingBoxes();
+		initializeChoiceBoxes();
+		initializeListenerOnProjectChange();
+		initializeListenerOnMode();
 	}
 
 	private void switchMode(EditType editType, Mode mode) {
