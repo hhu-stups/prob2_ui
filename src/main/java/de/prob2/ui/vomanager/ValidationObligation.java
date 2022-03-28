@@ -92,14 +92,6 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 
 	}
 
-	/*
-	* This function is used for the requirements table view
-	*/
-	@JsonIgnore
-	public String getShortTypeName() {
-		return "";
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

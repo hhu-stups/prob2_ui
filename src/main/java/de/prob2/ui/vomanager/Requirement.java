@@ -84,11 +84,6 @@ public class Requirement implements IAbstractRequirement, INameable {
 	}
 
 	@JsonIgnore
-	public String getShortTypeName() {
-		return type.name();
-	}
-
-	@JsonIgnore
 	public String getConfiguration() {
 		return getText();
 	}
