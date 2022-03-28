@@ -47,8 +47,8 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 
 	// TODO: Move to VO Manager
-	/*public void updateChecked() {
-		List<ValidationObligation> validationObligations = this.validationObligationsProperty();
+	public void updateChecked() {
+		/*List<ValidationObligation> validationObligations = this.validationObligationsProperty();
 		if (validationObligations.isEmpty()) {
 			this.checked.set(Checked.NOT_CHECKED);
 		} else {
@@ -64,15 +64,15 @@ public class Requirement implements IAbstractRequirement, INameable {
 			} else {
 				this.checked.set(Checked.NOT_CHECKED);
 			}
-		}
+		}*/
 	}
 
 	private void initListeners() {
-		this.validationObligationsProperty().addListener((o, from, to) -> updateChecked());
+		/*this.validationObligationsProperty().addListener((o, from, to) -> updateChecked());
 		for(ValidationObligation validationObligation : validationObligations) {
 			validationObligation.checkedProperty().addListener((observable, from, to) -> updateChecked());
-		}
-	}*/
+		}*/
+	}
 
 	@Override
 	public String getName() {

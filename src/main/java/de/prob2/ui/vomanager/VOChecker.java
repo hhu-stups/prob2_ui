@@ -48,6 +48,7 @@ public class VOChecker {
 		} else if(setting == VOManagerSetting.MACHINE) {
 			checkRequirementOnMachineView(requirement, machine);
 		}
+		requirement.updateChecked();
 	}
 
 	private void checkRequirementOnRequirementView(Requirement requirement) {
@@ -66,7 +67,6 @@ public class VOChecker {
 				this.checkVO(validationObligation);
 			}
 		}
-		//requirement.updateChecked();
 	}
 
 
