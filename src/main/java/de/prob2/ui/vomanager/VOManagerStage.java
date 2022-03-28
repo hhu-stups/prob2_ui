@@ -140,6 +140,8 @@ public class VOManagerStage extends Stage {
 
 	private final VOChecker voChecker;
 
+	private final RequirementHandler requirementHandler;
+
 	private final ResourceBundle bundle;
 
 	private final ObjectProperty<EditType> editTypeProperty;
@@ -148,13 +150,14 @@ public class VOManagerStage extends Stage {
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
-						  final VOManager voManager, final VOChecker voChecker, final ResourceBundle bundle) {
+						  final VOManager voManager, final VOChecker voChecker, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voManager = voManager;
 		this.voChecker = voChecker;
+		this.requirementHandler = requirementHandler;
 		this.bundle = bundle;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
@@ -237,6 +240,18 @@ public class VOManagerStage extends Stage {
 
 			voManager.synchronizeProject(to);
 			btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
+
+			if(from != null) {
+				for (Requirement requirement : from.getRequirements()) {
+					requirementHandler.resetListeners(from, requirement);
+				}
+			}
+
+			for(Requirement requirement : to.getRequirements()) {
+				// TODO: Distinguish between two views for tvRequirements
+				requirementHandler.initListeners(to, null, requirement, VOManagerSetting.REQUIREMENT);
+			}
+
 			updateRequirementsTable();
 			updateValidationTasksTable();
 			switchMode(EditType.NONE, Mode.NONE);

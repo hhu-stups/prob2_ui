@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @Singleton
 public class RequirementHandler {
 
-	private Map<Requirement, ChangeListener<Checked>> listenerMap = new HashMap<>();
+	private final Map<Requirement, ChangeListener<Checked>> listenerMap = new HashMap<>();
 
 	private Stream<Checked> getVOStream(Project project, Machine machine, Requirement requirement, VOManagerSetting setting) {
 		return getValidationObligations(project, machine, requirement, setting).stream()
@@ -61,6 +61,15 @@ public class RequirementHandler {
 				requirement.setChecked(Checked.NOT_CHECKED);
 			}
 		}
+	}
+
+	public void resetListeners(Project project, Requirement requirement) {
+		for(Machine machine : project.getMachines()) {
+			for(ValidationObligation validationObligation : machine.getValidationObligations()) {
+				validationObligation.checkedProperty().removeListener(listenerMap.get(requirement));
+			}
+		}
+		listenerMap.remove(requirement);
 	}
 
 	public void initListeners(Project project, Machine machine, Requirement requirement, VOManagerSetting setting) {
