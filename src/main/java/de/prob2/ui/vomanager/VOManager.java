@@ -90,7 +90,6 @@ public class VOManager {
 	}
 
 	public List<ValidationTask> allTasks(ValidationTechnique validationTechnique, Machine machine) {
-		// TODO: Check this
 		Stream<? extends IExecutableItem> stream = getExecutableStream(machine, validationTechnique);
 		return stream.map(this::createValidationTask).collect(Collectors.toList());
 	}
