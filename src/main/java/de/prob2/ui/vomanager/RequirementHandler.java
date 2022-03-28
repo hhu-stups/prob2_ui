@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Singleton
@@ -25,22 +26,18 @@ public class RequirementHandler {
 	private List<ValidationObligation> getValidationObligations(Project project, Machine machine, Requirement requirement, VOManagerSetting setting) {
 		List<ValidationObligation> validationObligations = new ArrayList<>();
 		if(setting == VOManagerSetting.REQUIREMENT) {
-			// Machine is not used here
-			for(Machine mch : project.getMachines()) {
-				for(ValidationObligation validationObligation : mch.getValidationObligations()) {
-					if(validationObligation.getRequirement().equals(requirement.getName())) {
-						validationObligations.add(validationObligation);
-					}
-				}
-			}
+			// machine is not used here
+			project.getMachines().forEach(mch -> validationObligations.addAll(getVOsFromMachine(mch, requirement)));
 		} else if(setting == VOManagerSetting.MACHINE) {
-			for(ValidationObligation validationObligation : machine.getValidationObligations()) {
-				if(validationObligation.getRequirement().equals(requirement.getName())) {
-					validationObligations.add(validationObligation);
-				}
-			}
+			validationObligations.addAll(getVOsFromMachine(machine, requirement));
 		}
 		return validationObligations;
+	}
+
+	private List<ValidationObligation> getVOsFromMachine(Machine machine, Requirement requirement) {
+		return machine.getValidationObligations().stream()
+				.filter(vo -> vo.getRequirement().equals(requirement.getName()))
+				.collect(Collectors.toList());
 	}
 
 	public void updateChecked(Project project, Machine machine, Requirement requirement, VOManagerSetting setting) {
