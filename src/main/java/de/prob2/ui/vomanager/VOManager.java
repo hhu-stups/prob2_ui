@@ -174,4 +174,27 @@ public class VOManager {
 			throw new RuntimeException("Class for extracting configuration is invalid: " + item.getClass());
 		}
 	}
+
+	public boolean requirementIsValid(String name, String text) {
+		//isBlank() requires Java version >= 11
+		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
+		String textWithoutWhiteSpaces = text.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
+		return nameWithoutWhiteSpaces.length() > 0 && textWithoutWhiteSpaces.length() > 0;
+	}
+
+	public boolean taskIsValid(String name) {
+		//isBlank() requires Java version >= 11
+		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
+		return nameWithoutWhiteSpaces.length() > 0;
+	}
+
+	public boolean voIsValid(String name, Requirement requirement) {
+		//isBlank() requires Java version >= 11
+		if(requirement == null) {
+			return false;
+		}
+		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
+		return nameWithoutWhiteSpaces.length() > 0;
+	}
+
 }

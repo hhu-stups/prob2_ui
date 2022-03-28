@@ -490,7 +490,7 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	public void applyRequirement() {
-		if(requirementIsValid(tfName.getText(), taRequirement.getText())) {
+		if(voManager.requirementIsValid(tfName.getText(), taRequirement.getText())) {
 			boolean nameExists = currentProject.getRequirements().stream()
 					.map(Requirement::getName)
 					.collect(Collectors.toList())
@@ -529,28 +529,6 @@ public class VOManagerStage extends Stage {
 		} else {
 			warnNotValid(Mode.REQUIREMENT);
 		}
-	}
-
-	private boolean requirementIsValid(String name, String text) {
-		//isBlank() requires Java version >= 11
-		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
-		String textWithoutWhiteSpaces = text.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
-		return nameWithoutWhiteSpaces.length() > 0 && textWithoutWhiteSpaces.length() > 0;
-	}
-
-	private boolean taskIsValid(String name) {
-		//isBlank() requires Java version >= 11
-		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
-		return nameWithoutWhiteSpaces.length() > 0;
-	}
-
-	private boolean voIsValid(String name, Requirement requirement) {
-		//isBlank() requires Java version >= 11
-		if(requirement == null) {
-			return false;
-		}
-		String nameWithoutWhiteSpaces = name.replaceAll("\t", "").replaceAll(" ", "").replaceAll("\n", "");
-		return nameWithoutWhiteSpaces.length() > 0;
 	}
 
 	private void removeRequirement(IAbstractRequirement requirement) {
@@ -670,7 +648,7 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void applyVO() {
-		boolean voIsValid = voIsValid(tfVOName.getText(), cbLinkRequirementChoice.getValue());
+		boolean voIsValid = voManager.voIsValid(tfVOName.getText(), cbLinkRequirementChoice.getValue());
 		EditType editType = editTypeProperty.get();
 		if(voIsValid) {
 			ValidationObligation validationObligation;
@@ -725,7 +703,7 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void applyVT() {
-		boolean taskIsValid = taskIsValid(tfVTName.getText());
+		boolean taskIsValid = voManager.taskIsValid(tfVTName.getText());
 		EditType editType = editTypeProperty.get();
 		if(taskIsValid) {
 			ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
