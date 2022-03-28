@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -41,23 +42,35 @@ public class VOChecker {
 		this.simulationItemHandler = simulationItemHandler;
 	}
 
-	public void check(IAbstractRequirement requirement) {
-		if(requirement instanceof Requirement) {
-			check((Requirement) requirement);
-		} else if(requirement instanceof ValidationObligation) {
-			check((ValidationObligation) requirement);
+	public void checkRequirement(Requirement requirement, Machine machine, VOManagerSetting setting) {
+		if(setting == VOManagerSetting.REQUIREMENT) {
+			checkRequirementOnRequirementView(requirement);
+		} else if(setting == VOManagerSetting.MACHINE) {
+			checkRequirementOnMachineView(requirement, machine);
 		}
 	}
 
-	// TODO:
-	// Unclear whether requirement is checked for a machine or for multiple machine (depends on view)
-	public void check(Requirement requirement) {
-		//requirement.getValidationObligations().forEach(this::check);
+	private void checkRequirementOnRequirementView(Requirement requirement) {
+		for(Machine machine : currentProject.getMachines()) {
+			for (ValidationObligation validationObligation : machine.getValidationObligations()) {
+				if(validationObligation.getRequirement().equals(requirement.getName())) {
+					this.checkVO(validationObligation);
+				}
+			}
+		}
+	}
+
+	private void checkRequirementOnMachineView(Requirement requirement, Machine machine) {
+		for (ValidationObligation validationObligation : machine.getValidationObligations()) {
+			if(validationObligation.getRequirement().equals(requirement.getName())) {
+				this.checkVO(validationObligation);
+			}
+		}
 		//requirement.updateChecked();
 	}
 
 
-	public void check(ValidationObligation validationObligation) {
+	public void checkVO(ValidationObligation validationObligation) {
 		// TODO: Implement for composed Validation Obligation
 		// Currently assumes that a VO consists of one VT
 		String voExpression = validationObligation.getExpression();
@@ -65,13 +78,13 @@ public class VOChecker {
 		for(ValidationTask validationTask : currentProject.getCurrentMachine().getValidationTasks()) {
 			if(validationTask.getId().equals(voExpression)) {
 				validationObligation.checkedProperty().bind(validationTask.checkedProperty());
-				check(validationTask);
+				checkVT(validationTask);
 				return;
 			}
 		}
 	}
 
-	public void check(ValidationTask validationTask) {
+	public void checkVT(ValidationTask validationTask) {
 		ValidationTechnique validationTechnique = validationTask.getValidationTechnique();
 		IExecutableItem executable = validationTask.getExecutable();
 		switch (validationTechnique) {

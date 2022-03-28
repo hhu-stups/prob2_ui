@@ -8,7 +8,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.TreeCheckedCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -21,9 +20,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -31,7 +27,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
@@ -40,7 +35,6 @@ import javafx.util.StringConverter;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -53,26 +47,6 @@ public class VOManagerStage extends Stage {
 
 	private static enum Mode {
 		NONE, REQUIREMENT, VO, VT
-	}
-
-	public static enum ViewSetting {
-		MACHINE("Machine"),
-		REQUIREMENT("Requirement");
-
-		private final String name;
-
-		private ViewSetting(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		@Override
-		public String toString() {
-			return name;
-		}
 	}
 
 	@FXML
@@ -154,7 +128,7 @@ public class VOManagerStage extends Stage {
 	private Button applyVTButton;
 
 	@FXML
-	private ChoiceBox<ViewSetting> cbViewSetting;
+	private ChoiceBox<VOManagerSetting> cbViewSetting;
 
 	private final StageManager stageManager;
 
@@ -292,7 +266,17 @@ public class VOManagerStage extends Stage {
 			}
 
 			MenuItem checkItem = new MenuItem(bundle.getString("common.buttons.check"));
-			checkItem.setOnAction(e -> voChecker.check((IAbstractRequirement) row.getItem()));
+			checkItem.setOnAction(e -> {
+				IAbstractRequirement item = (IAbstractRequirement) row.getItem();
+				if(item instanceof Requirement) {
+					VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
+					Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) row.getTreeItem().getParent().getValue() : null;
+					voChecker.checkRequirement((Requirement) item, machine, setting);
+				} else if(item instanceof ValidationObligation) {
+					voChecker.checkVO((ValidationObligation) item);
+				}
+
+			});
 
 			MenuItem removeItem = new MenuItem(bundle.getString("common.buttons.remove"));
 			removeItem.setOnAction(e -> removeRequirement((IAbstractRequirement) row.getItem()));
@@ -318,9 +302,16 @@ public class VOManagerStage extends Stage {
 		tvRequirements.setOnMouseClicked(e-> {
 			TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
 			INameable nameable = treeItem == null ? null : treeItem.getValue();
-			if(nameable instanceof Requirement || nameable instanceof ValidationTask) {
-				if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && currentTrace.get() != null) {
-					voChecker.check((IAbstractRequirement) nameable);
+			if(nameable == null) {
+				return;
+			}
+			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && currentTrace.get() != null) {
+				if (nameable instanceof Requirement) {
+					VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
+					Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) treeItem.getParent().getValue() : null;
+					voChecker.checkRequirement((Requirement) nameable, machine, setting);
+				} else if (nameable instanceof ValidationObligation) {
+					voChecker.checkVO((ValidationObligation) nameable);
 				}
 			}
 		});
@@ -334,7 +325,7 @@ public class VOManagerStage extends Stage {
 				if(item instanceof Machine) {
 					return;
 				}
-				voChecker.check((ValidationTask) item);
+				voChecker.checkVT((ValidationTask) item);
 			});
 
 			MenuItem removeItem = new MenuItem(bundle.getString("vomanager.menu.items.removeVT"));
@@ -379,12 +370,12 @@ public class VOManagerStage extends Stage {
 			}
 			ValidationTask item = (ValidationTask) treeItem.getValue();
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
-				voChecker.check(item);
+				voChecker.checkVT(item);
 			}
 		});
 
 		cbViewSetting.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateRequirementsTable());
-		cbViewSetting.getSelectionModel().select(ViewSetting.MACHINE);
+		cbViewSetting.getSelectionModel().select(VOManagerSetting.MACHINE);
 	}
 
 	private void switchMode(EditType editType, Mode mode) {
@@ -393,10 +384,10 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void updateRequirementsTable() {
-		ViewSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
+		VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
 
 		TreeItem<INameable> root = new TreeItem<>();
-		if(setting == ViewSetting.MACHINE) {
+		if(setting == VOManagerSetting.MACHINE) {
 			// Hierarchy for now: Machine, Requirements, VO as default
 			List<Requirement> requirements = currentProject.getRequirements();
 			for (Machine machine : currentProject.getMachines()) {
@@ -412,7 +403,7 @@ public class VOManagerStage extends Stage {
 					}
 				}
 			}
-		} else if(setting == ViewSetting.REQUIREMENT) {
+		} else if(setting == VOManagerSetting.REQUIREMENT) {
 			List<Requirement> requirements = currentProject.getRequirements();
 
 			for(Requirement requirement : requirements) {

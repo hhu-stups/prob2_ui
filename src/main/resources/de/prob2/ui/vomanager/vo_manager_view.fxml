@@ -6,7 +6,7 @@
 <?import javafx.scene.control.Label?>
 
 <?import de.prob2.ui.vomanager.VOManagerStage?>
-<?import de.prob2.ui.vomanager.VOManagerStage.ViewSetting?>
+<?import de.prob2.ui.vomanager.VOManagerSetting?>
 
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.HBox?>
@@ -53,8 +53,8 @@
 								<ChoiceBox fx:id="cbViewSetting">
 									<items>
 										<FXCollections fx:factory="observableArrayList">
-											<VOManagerStage.ViewSetting fx:value="MACHINE"/>
-											<VOManagerStage.ViewSetting fx:value="REQUIREMENT"/>
+											<VOManagerSetting fx:value="MACHINE"/>
+											<VOManagerSetting fx:value="REQUIREMENT"/>
 										</FXCollections>
 									</items>
 								</ChoiceBox>
