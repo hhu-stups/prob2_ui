@@ -5,16 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob2.ui.verifications.Checked;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 @JsonPropertyOrder({
 	"name",
@@ -32,10 +26,6 @@ public class Requirement implements IAbstractRequirement, INameable {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
-	// TODO: Move to VO Manager
-	//@JsonIgnore
-	//private final ChangeListener<Checked> listener = (observable, from, to) -> updateChecked();
-
 	@JsonCreator
 	public Requirement(@JsonProperty("name") String name,
 			@JsonProperty("type") RequirementType type,
@@ -45,34 +35,6 @@ public class Requirement implements IAbstractRequirement, INameable {
 		this.text = text;
 	}
 
-
-	// TODO: Move to VO Manager
-	public void updateChecked() {
-		/*List<ValidationObligation> validationObligations = this.validationObligationsProperty();
-		if (validationObligations.isEmpty()) {
-			this.checked.set(Checked.NOT_CHECKED);
-		} else {
-			final boolean failed = getVOStream().anyMatch(Checked.FAIL::equals);
-			final boolean success = !failed && getVOStream().allMatch(Checked.SUCCESS::equals);
-			final boolean timeout = !failed && getVOStream().anyMatch(Checked.TIMEOUT::equals);
-			if (success) {
-				this.checked.set(Checked.SUCCESS);
-			} else if (failed) {
-				this.checked.set(Checked.FAIL);
-			} else if (timeout) {
-				this.checked.set(Checked.TIMEOUT);
-			} else {
-				this.checked.set(Checked.NOT_CHECKED);
-			}
-		}*/
-	}
-
-	private void initListeners() {
-		/*this.validationObligationsProperty().addListener((o, from, to) -> updateChecked());
-		for(ValidationObligation validationObligation : validationObligations) {
-			validationObligation.checkedProperty().addListener((observable, from, to) -> updateChecked());
-		}*/
-	}
 
 	@Override
 	public String getName() {

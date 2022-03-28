@@ -21,6 +21,8 @@ public class VOChecker {
 
 	private final CurrentProject currentProject;
 
+	private final RequirementHandler requirementHandler;
+
 	private final Modelchecker modelchecker;
 
 	private final LTLFormulaChecker ltlChecker;
@@ -32,9 +34,11 @@ public class VOChecker {
 	private final SimulationItemHandler simulationItemHandler;
 
 	@Inject
-	public VOChecker(final CurrentProject currentProject, final Modelchecker modelchecker, final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
+	public VOChecker(final CurrentProject currentProject, final RequirementHandler requirementHandler, final Modelchecker modelchecker,
+					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
 					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
 		this.currentProject = currentProject;
+		this.requirementHandler = requirementHandler;
 		this.modelchecker = modelchecker;
 		this.ltlChecker = ltlChecker;
 		this.symbolicChecker = symbolicChecker;
@@ -48,7 +52,7 @@ public class VOChecker {
 		} else if(setting == VOManagerSetting.MACHINE) {
 			checkRequirementOnMachineView(requirement, machine);
 		}
-		requirement.updateChecked();
+		requirementHandler.updateChecked(currentProject.get(), machine, requirement, setting);
 	}
 
 	private void checkRequirementOnRequirementView(Requirement requirement) {
