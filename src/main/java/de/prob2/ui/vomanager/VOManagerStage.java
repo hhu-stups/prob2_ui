@@ -480,8 +480,17 @@ public class VOManagerStage extends Stage {
 					warnAlreadyExists(Mode.REQUIREMENT);
 					return;
 				}
+				String oldName = requirement.getName();
 				requirement.setData(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText());
-				// TODO: Update validation obligations, this means update VO of ids that are affected
+
+				// Update validation obligations, this means update VO of ids that are affected
+				for (Machine machine : currentProject.getMachines()) {
+					for(ValidationObligation validationObligation : machine.getValidationObligations()) {
+						if(validationObligation.getRequirement().equals(oldName)) {
+							validationObligation.setRequirement(tfName.getText());
+						}
+					}
+				}
 			}
 
 			// TODO: Replace refresh?
