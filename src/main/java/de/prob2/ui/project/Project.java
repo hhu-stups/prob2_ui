@@ -16,6 +16,10 @@ import de.prob.json.JsonMetadataBuilder;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.vomanager.Requirement;
+import de.prob2.ui.vomanager.ValidationTask;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 
 public class Project implements HasMetadata {
 	public static final String FILE_TYPE = "Project";
@@ -24,7 +28,7 @@ public class Project implements HasMetadata {
 	private String name;
 	private String description;
 	private List<Machine> machines;
-	private List<Requirement> requirements;
+	private final ListProperty<Requirement> requirements;
 	private List<Preference> preferences;
 	private JsonMetadata metadata;
 	@JsonIgnore
@@ -43,7 +47,8 @@ public class Project implements HasMetadata {
 		this.name = name;
 		this.description = description;
 		this.machines = new ArrayList<>(machines);
-		this.requirements = new ArrayList<>(requirements);
+		this.requirements = new SimpleListProperty<>(this, "requirements", FXCollections.observableArrayList());
+		this.requirements.setAll(requirements);
 		this.preferences = new ArrayList<>(preferences);
 		this.metadata = metadata;
 		this.location = location;
@@ -116,12 +121,16 @@ public class Project implements HasMetadata {
 		throw new NoSuchElementException("Could not find preference with name " + name);
 	}
 
-	public List<Requirement> getRequirements() {
+	public ListProperty<Requirement> requirementsProperty() {
 		return requirements;
 	}
 
+	public List<Requirement> getRequirements() {
+		return requirements.get();
+	}
+
 	public void setRequirements(List<Requirement> requirements) {
-		this.requirements = requirements;
+		this.requirements.setAll(requirements);
 	}
 
 	@Override
