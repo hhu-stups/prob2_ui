@@ -407,42 +407,45 @@ public class VOManagerStage extends Stage {
 
 	private void updateRequirementsTable() {
 		VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
-
 		TreeItem<INameable> root = new TreeItem<>();
 		if(setting == VOManagerSetting.MACHINE) {
-			// Hierarchy for now: Machine, Requirements, VO as default
-			List<Requirement> requirements = currentProject.getRequirements();
-			for (Machine machine : currentProject.getMachines()) {
-				TreeItem<INameable> machineItem = new TreeItem<>(machine);
-				root.getChildren().add(machineItem);
-				for (Requirement requirement : requirements) {
-					TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-					machineItem.getChildren().add(requirementItem);
-					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
-						if (validationObligation.getRequirement().equals(requirement.getName())) {
-							requirementItem.getChildren().add(new TreeItem<>(validationObligation));
-						}
-					}
-				}
-			}
+			updateMachineRequirementsTable(root);
 		} else if(setting == VOManagerSetting.REQUIREMENT) {
-			List<Requirement> requirements = currentProject.getRequirements();
+			updateRequirementsMachineTable(root);
+		}
+		tvRequirements.setRoot(root);
+	}
 
-			for(Requirement requirement : requirements) {
+	private void updateMachineRequirementsTable(TreeItem<INameable> root) {
+		for (Machine machine : currentProject.getMachines()) {
+			TreeItem<INameable> machineItem = new TreeItem<>(machine);
+			root.getChildren().add(machineItem);
+			for (Requirement requirement : currentProject.getRequirements()) {
 				TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-				root.getChildren().add(requirementItem);
-				for(Machine machine : currentProject.getMachines()) {
-					TreeItem<INameable> machineItem = new TreeItem<>(machine);
-					requirementItem.getChildren().add(machineItem);
-					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
-						if (validationObligation.getRequirement().equals(requirement.getName())) {
-							machineItem.getChildren().add(new TreeItem<>(validationObligation));
-						}
+				machineItem.getChildren().add(requirementItem);
+				for (ValidationObligation validationObligation : machine.getValidationObligations()) {
+					if (validationObligation.getRequirement().equals(requirement.getName())) {
+						requirementItem.getChildren().add(new TreeItem<>(validationObligation));
 					}
 				}
 			}
 		}
-		tvRequirements.setRoot(root);
+	}
+
+	private void updateRequirementsMachineTable(TreeItem<INameable> root) {
+		for(Requirement requirement : currentProject.getRequirements()) {
+			TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
+			root.getChildren().add(requirementItem);
+			for(Machine machine : currentProject.getMachines()) {
+				TreeItem<INameable> machineItem = new TreeItem<>(machine);
+				requirementItem.getChildren().add(machineItem);
+				for (ValidationObligation validationObligation : machine.getValidationObligations()) {
+					if (validationObligation.getRequirement().equals(requirement.getName())) {
+						machineItem.getChildren().add(new TreeItem<>(validationObligation));
+					}
+				}
+			}
+		}
 	}
 
 	private void updateValidationTasksTable() {
