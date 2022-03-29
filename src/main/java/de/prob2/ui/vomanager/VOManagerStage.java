@@ -394,26 +394,8 @@ public class VOManagerStage extends Stage {
 		machine.getValidationObligations().remove(validationObligation);
 	}
 
-	private void removeVOFromView(ValidationObligation validationObligation) {
-		for(TreeItem<INameable> machineItem : tvRequirements.getRoot().getChildren()) {
-			for (TreeItem<INameable> requirementItem : machineItem.getChildren()) {
-				Requirement requirement = (Requirement) requirementItem.getValue();
-				if (requirement.equals(voEditingBox.getLinkedRequirement())) {
-					for (TreeItem<INameable> children : requirementItem.getChildren()) {
-						ValidationObligation treeItemVO = (ValidationObligation) children.getValue();
-						if (treeItemVO.equals(validationObligation)) {
-							requirementItem.getChildren().remove(children);
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-
 	private void removeValidationObligation(ValidationObligation validationObligation) {
 		removeVOFromMachine(validationObligation);
-		removeVOFromView(validationObligation);
 		tvRequirements.refresh();
 	}
 
@@ -422,19 +404,6 @@ public class VOManagerStage extends Stage {
 			requirementEditingBox.showRequirement((Requirement) requirement, edit);
 		} else if(requirement instanceof ValidationObligation) {
 			voEditingBox.showValidationObligation((ValidationObligation) requirement, edit);
-		}
-	}
-
-	public void addVOInView(ValidationObligation validationObligation) {
-		for(TreeItem<INameable> machineItem : tvRequirements.getRoot().getChildren()) {
-			Machine machine = (Machine) machineItem.getValue();
-			for (TreeItem<INameable> requirementItem : machineItem.getChildren()) {
-				Requirement requirement = (Requirement) requirementItem.getValue();
-				if (requirement.equals(voEditingBox.getLinkedRequirement()) && machine.getName().equals(voEditingBox.getLinkedMachine().getName())) {
-					requirementItem.getChildren().add(new TreeItem<>(validationObligation));
-					break;
-				}
-			}
 		}
 	}
 

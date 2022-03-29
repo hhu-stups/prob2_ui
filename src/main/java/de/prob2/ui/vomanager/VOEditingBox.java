@@ -132,7 +132,6 @@ public class VOEditingBox extends VBox {
 		Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
 		ValidationObligation validationObligation = new ValidationObligation(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
 		machine.getValidationObligations().add(validationObligation);
-		voManagerStage.addVOInView(validationObligation);
 	}
 
 	private void editVO(boolean nameExists) {
