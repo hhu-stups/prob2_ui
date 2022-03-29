@@ -200,6 +200,7 @@ public class VOManagerStage extends Stage {
 				ValidationTask validationTask = (ValidationTask) item;
 				Machine currentMachine = currentProject.getCurrentMachine();
 				currentMachine.getValidationTasks().remove(validationTask);
+				updateValidationTasksTable();
 				// TODO: Implement dependency between VO and VT
 			});
 
@@ -211,7 +212,7 @@ public class VOManagerStage extends Stage {
 		});
 
 		tvValidationTasks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to.getValue() instanceof Machine) {
+			if(to == null || to.getValue() instanceof Machine) {
 				return;
 			}
 			ValidationTask task = (ValidationTask) to.getValue();
