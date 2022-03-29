@@ -449,14 +449,6 @@ public class VOManagerStage extends Stage {
 		tvValidationTasks.getSelectionModel().clearSelection();
 	}
 
-	public void refreshRequirementsTable() {
-		tvRequirements.refresh();
-	}
-
-	public void refreshVTTable() {
-		tvValidationTasks.refresh();
-	}
-
 	public EditType getEditType() {
 		return editTypeProperty.get();
 	}
@@ -477,5 +469,20 @@ public class VOManagerStage extends Stage {
 		return tvValidationTasks.getSelectionModel().getSelectedItem().getValue();
 	}
 
+	public void refreshRequirementsTable() {
+		// TODO: Replace refresh?
+		this.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
+		this.clearRequirementsSelection();
+		this.updateRequirementsTable();
+		tvRequirements.refresh();
+	}
+
+	public void refreshVTTable() {
+		// TODO: Replace refresh?
+		this.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
+		this.clearVTsSelection();
+		this.updateValidationTasksTable();
+		tvValidationTasks.refresh();
+	}
 
 }

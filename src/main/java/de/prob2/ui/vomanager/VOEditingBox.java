@@ -118,7 +118,7 @@ public class VOEditingBox extends VBox {
 			} else if(editType == VOManagerStage.EditType.EDIT) {
 				editVO(nameExists);
 			}
-			updateVOManagerStage();
+			voManagerStage.refreshRequirementsTable();
 		} else {
 			warnNotValid();
 		}
@@ -142,13 +142,6 @@ public class VOEditingBox extends VBox {
 			return;
 		}
 		validationObligation.setData(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
-	}
-
-	private void updateVOManagerStage() {
-		voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
-		voManagerStage.clearRequirementsSelection();
-		voManagerStage.updateRequirementsTable();
-		voManagerStage.refreshRequirementsTable();
 	}
 
 	private void warnNotValid() {

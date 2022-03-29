@@ -136,7 +136,7 @@ public class VTEditingBox extends VBox {
 			} else if(editType == VOManagerStage.EditType.EDIT) {
 				editVT(nameExists);
 			}
-			updateVOManagerStage();
+			voManagerStage.refreshVTTable();
 		} else {
 			warnNotValid();
 		}
@@ -167,13 +167,6 @@ public class VTEditingBox extends VBox {
 		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
 		Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
 		currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
-	}
-
-	private void updateVOManagerStage() {
-		voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
-		voManagerStage.clearVTsSelection();
-		voManagerStage.updateValidationTasksTable();
-		voManagerStage.refreshVTTable();
 	}
 
 	private void updateTaskChoice(ValidationTechnique validationTechnique) {

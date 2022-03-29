@@ -72,7 +72,7 @@ public class RequirementsEditingBox extends VBox {
 			} else if(editType == VOManagerStage.EditType.EDIT) {
 				editRequirement(nameExists);
 			}
-			updateVOManagerStage();
+			voManagerStage.refreshRequirementsTable();
 		} else {
 			warnNotValid();
 		}
@@ -103,14 +103,6 @@ public class RequirementsEditingBox extends VBox {
 				}
 			}
 		}
-	}
-
-	private void updateVOManagerStage() {
-		// TODO: Replace refresh?
-		voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
-		voManagerStage.clearRequirementsSelection();
-		voManagerStage.updateRequirementsTable();
-		voManagerStage.refreshRequirementsTable();
 	}
 
 	public void resetRequirementEditing() {
