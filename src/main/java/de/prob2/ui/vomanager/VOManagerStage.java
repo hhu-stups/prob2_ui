@@ -1,9 +1,12 @@
 package de.prob2.ui.vomanager;
 
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
+import de.prob.statespace.StateSpace;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -39,6 +42,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+
+@FXMLInjected
+@Singleton
 public class VOManagerStage extends Stage {
 
 	public static enum EditType {
@@ -104,7 +110,7 @@ public class VOManagerStage extends Stage {
 
 	private final ObjectProperty<Mode> modeProperty;
 
-	private Map<String, List<String>> refinementChain;
+	private final Map<String, List<String>> refinementChain;
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
@@ -123,7 +129,6 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void initializeTables() {
-
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
 		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
@@ -248,10 +253,17 @@ public class VOManagerStage extends Stage {
 			}
 		});
 
-		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			// TODO: experimental;
-			this.resolveRefinementHierarchy();
-		});
+		currentTrace.stateSpaceProperty().addListener((o, from, to) -> initializeRefinementHierarchy(to));
+		initializeRefinementHierarchy(currentTrace.getStateSpace());
+	}
+
+	private void initializeRefinementHierarchy(StateSpace stateSpace) {
+		if(stateSpace == null) {
+			return;
+		}
+		this.resolveRefinementHierarchy(stateSpace.getModel());
+		updateRequirementsTable();
+		tvRequirements.refresh();
 	}
 
 	private void initializeEditingBoxes() {
@@ -340,11 +352,13 @@ public class VOManagerStage extends Stage {
 			TreeItem<INameable> machineItem = new TreeItem<>(machine);
 			root.getChildren().add(machineItem);
 			for (Requirement requirement : currentProject.getRequirements()) {
-				TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-				machineItem.getChildren().add(requirementItem);
-				for (ValidationObligation validationObligation : machine.getValidationObligations()) {
-					if (validationObligation.getRequirement().equals(requirement.getName())) {
-						requirementItem.getChildren().add(new TreeItem<>(validationObligation));
+				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
+					TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
+					machineItem.getChildren().add(requirementItem);
+					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
+						if (validationObligation.getRequirement().equals(requirement.getName())) {
+							requirementItem.getChildren().add(new TreeItem<>(validationObligation));
+						}
 					}
 				}
 			}
@@ -356,11 +370,13 @@ public class VOManagerStage extends Stage {
 			TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
 			root.getChildren().add(requirementItem);
 			for(Machine machine : currentProject.getMachines()) {
-				TreeItem<INameable> machineItem = new TreeItem<>(machine);
-				requirementItem.getChildren().add(machineItem);
-				for (ValidationObligation validationObligation : machine.getValidationObligations()) {
-					if (validationObligation.getRequirement().equals(requirement.getName())) {
-						machineItem.getChildren().add(new TreeItem<>(validationObligation));
+				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
+					TreeItem<INameable> machineItem = new TreeItem<>(machine);
+					requirementItem.getChildren().add(machineItem);
+					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
+						if (validationObligation.getRequirement().equals(requirement.getName())) {
+							machineItem.getChildren().add(new TreeItem<>(validationObligation));
+						}
 					}
 				}
 			}
@@ -471,8 +487,7 @@ public class VOManagerStage extends Stage {
 		tvValidationTasks.refresh();
 	}
 
-	public void resolveRefinementHierarchy() {
-		AbstractModel model = currentTrace.getModel();
+	private void resolveRefinementHierarchy(AbstractModel model) {
 		if(model == null) {
 			return;
 		}
@@ -486,11 +501,9 @@ public class VOManagerStage extends Stage {
 					.collect(Collectors.toList());
 			for(int i = 0; i < machines.size(); i++) {
 				String machine = machines.get(i);
-				List<String> refinedMachines = machines.subList(0, i);
+				List<String> refinedMachines = machines.subList(0, i+1);
 				refinementChain.put(machine, refinedMachines);
 			}
-			System.out.println(refinementChain);
-			System.out.println("----------------");
 		}
 	}
 
