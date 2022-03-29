@@ -10,10 +10,12 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.plugin.ProBPluginManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 
 import de.prob2.ui.vomanager.VOManagerStage;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -35,23 +37,34 @@ public class AdvancedMenu extends Menu {
 	@FXML
 	private MenuItem detachVisualisationItem;
 
+	@FXML
+	private MenuItem openVOManagerItem;
+
 	private final ProBPluginManager proBPluginManager;
 	private final VisualisationController visualisationController;
 	private final Injector injector;
+	private final CurrentProject currentProject;
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdvancedMenu.class);
 
 
 	@Inject
 	public AdvancedMenu(final StageManager stageManager, final ProBPluginManager proBPluginManager,
-						   final VisualisationController visualisationController, final Injector injector) {
+						final VisualisationController visualisationController, final Injector injector,
+						final CurrentProject currentProject) {
 		this.proBPluginManager = proBPluginManager;
 		this.injector = injector;
+		this.currentProject = currentProject;
 		stageManager.loadFXML(this, "advancedMenu.fxml");
 		this.visualisationController = visualisationController;
 		openVisualisationItem.disableProperty().bind(visualisationController.currentMachineProperty().isNull());
 		stopVisualisationItem.disableProperty().bind(visualisationController.visualisationProperty().isNull());
 		detachVisualisationItem.disableProperty()
 				.bind(visualisationController.visualisationProperty().isNull().or(visualisationController.detachProperty()));
+	}
+
+	@FXML
+	private void initialize() {
+		openVOManagerItem.disableProperty().bind(Bindings.createBooleanBinding(() -> currentProject.get() == null, currentProject));
 	}
 
 	@FXML

@@ -58,7 +58,6 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;

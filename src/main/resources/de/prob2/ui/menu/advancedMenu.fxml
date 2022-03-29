@@ -5,7 +5,7 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 
 <fx:root type="Menu" text="%menu.advanced" xmlns:fx="http://javafx.com/fxml/1">
-	<MenuItem text="%menu.advanced.items.vomanager" onAction="#openVOManager"/>
+	<MenuItem fx:id="openVOManagerItem" text="%menu.advanced.items.vomanager" onAction="#openVOManager"/>
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.groovy" onAction="#handleGroovyConsole" />
 	<MenuItem text="%menu.advanced.items.proBCoreConsole" onAction="#handlePrologOutput" />
