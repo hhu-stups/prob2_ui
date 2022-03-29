@@ -287,6 +287,9 @@ public class BEditorView extends BorderPane {
 		if (model instanceof ClassicalBModel) {
 			machineChoice.getItems().setAll(((ClassicalBModel)model).getLoadedMachineFiles());
 		} else {
+			// TODO: We could extract the refinement hierarchy via model.getMachines() or model.calculateDependencies on the EventBModel.
+			// Here, we have the problem that the current project might not include all of them refined machines
+			// Still, could we assume that the machine is located in the same folder as the loaded machine? If yes, then it might still be possible to implement this feature
 			machineChoice.getItems().setAll(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
 		}
 		machineChoice.getSelectionModel().selectFirst();
