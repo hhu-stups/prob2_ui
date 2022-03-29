@@ -507,8 +507,6 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		if (!project.has("requirements")) {
 			project.set("requirements", projectRequirements);
 		}
-		System.out.println(project);
-		System.out.println("-------------");
 	}
 	
 	@Override
