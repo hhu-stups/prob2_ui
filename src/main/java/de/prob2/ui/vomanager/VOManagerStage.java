@@ -1,6 +1,9 @@
 package de.prob2.ui.vomanager;
 
 import com.google.inject.Injector;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -30,7 +33,11 @@ import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 
 import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class VOManagerStage extends Stage {
 
@@ -97,6 +104,8 @@ public class VOManagerStage extends Stage {
 
 	private final ObjectProperty<Mode> modeProperty;
 
+	private Map<String, List<String>> refinementChain;
+
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
 						  final VOManager voManager, final VOChecker voChecker, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
@@ -109,6 +118,7 @@ public class VOManagerStage extends Stage {
 		this.bundle = bundle;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
+		this.refinementChain = new HashMap<>();
 		stageManager.loadFXML(this, "vo_manager_view.fxml");
 	}
 
@@ -237,6 +247,11 @@ public class VOManagerStage extends Stage {
 				voChecker.checkVT(item);
 			}
 		});
+
+		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
+			// TODO: experimental;
+			this.resolveRefinementHierarchy();
+		});
 	}
 
 	private void initializeEditingBoxes() {
@@ -257,6 +272,7 @@ public class VOManagerStage extends Stage {
 	private void initializeListenerOnProjectChange() {
 		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
 			btAddVO.disableProperty().unbind();
+			requirementEditingBox.updateLinkedMachines(to.getMachines());
 			voEditingBox.updateLinkedMachines(to.getMachines());
 			vtEditingBox.updateLinkedMachines(to.getMachines());
 
@@ -453,6 +469,29 @@ public class VOManagerStage extends Stage {
 		this.clearVTsSelection();
 		this.updateValidationTasksTable();
 		tvValidationTasks.refresh();
+	}
+
+	public void resolveRefinementHierarchy() {
+		AbstractModel model = currentTrace.getModel();
+		if(model == null) {
+			return;
+		}
+		if(model instanceof ClassicalBModel) {
+			// TODO
+		} else if(model instanceof EventBModel) {
+			refinementChain.clear();
+			// TODO: Implement parsing project without considering the loaded machine
+			List<String> machines = ((EventBModel) model).getMachines().stream()
+					.map(de.prob.model.representation.Machine::getName)
+					.collect(Collectors.toList());
+			for(int i = 0; i < machines.size(); i++) {
+				String machine = machines.get(i);
+				List<String> refinedMachines = machines.subList(0, i);
+				refinementChain.put(machine, refinedMachines);
+			}
+			System.out.println(refinementChain);
+			System.out.println("----------------");
+		}
 	}
 
 }

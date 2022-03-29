@@ -25,6 +25,10 @@
 		<Label text="%vomanager.edit.requirement.name"/>
 		<TextField fx:id="tfName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 	</HBox>
+	<HBox>
+		<Label text="%vomanager.edit.vt.linkMachine"/>
+		<ChoiceBox fx:id="cbRequirementLinkMachineChoice"/>
+	</HBox>
 	<VBox>
 		<Label text="%vomanager.edit.requirement.content"/>
 		<TextArea fx:id="taRequirement" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>

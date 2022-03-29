@@ -14,6 +14,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,9 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private ChoiceBox<RequirementType> cbRequirementChoice;
+
+	@FXML
+	private ChoiceBox<Machine> cbRequirementLinkMachineChoice;
 
 	@FXML
 	private Button applyButton;
@@ -83,7 +87,7 @@ public class RequirementsEditingBox extends VBox {
 			warnAlreadyExists();
 			return;
 		}
-		currentProject.getRequirements().add(new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText()));
+		currentProject.getRequirements().add(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText()));
 	}
 
 	private void editRequirement(boolean nameExists) {
@@ -93,7 +97,7 @@ public class RequirementsEditingBox extends VBox {
 			return;
 		}
 		String oldName = requirement.getName();
-		requirement.setData(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText());
+		requirement.setData(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText());
 
 		// Update validation obligations, this means update VO of ids that are affected
 		for (Machine machine : currentProject.getMachines()) {
@@ -119,7 +123,13 @@ public class RequirementsEditingBox extends VBox {
 		if(requirement == null) {
 			return;
 		}
+		String machineName = requirement.getIntroducedAt();
+		Machine linkedMachine = currentProject.getMachines().stream()
+				.filter(mch -> mch.getName().equals(machineName))
+				.findAny()
+				.orElse(null);
 		tfName.setText(requirement.getName());
+		cbRequirementLinkMachineChoice.getSelectionModel().select(linkedMachine);
 		cbRequirementChoice.getSelectionModel().select(requirement.getType());
 		taRequirement.setText(requirement.getText());
 	}
@@ -135,4 +145,10 @@ public class RequirementsEditingBox extends VBox {
 	public void setVoManagerStage(VOManagerStage voManagerStage) {
 		this.voManagerStage = voManagerStage;
 	}
+
+	public void updateLinkedMachines(List<Machine> machines) {
+		cbRequirementLinkMachineChoice.getItems().clear();
+		cbRequirementLinkMachineChoice.getItems().addAll(machines);
+	}
+
 }

@@ -12,12 +12,15 @@ import java.util.Objects;
 
 @JsonPropertyOrder({
 	"name",
+	"introducedAt",
 	"type",
 	"text"
 })
 public class Requirement implements IAbstractRequirement, INameable {
 
 	private String name;
+
+	private String introducedAt; // machine where the requirement is first introduced
 
 	private RequirementType type;
 
@@ -28,9 +31,11 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 	@JsonCreator
 	public Requirement(@JsonProperty("name") String name,
+			@JsonProperty("introducedAt") String introducedAt,
 			@JsonProperty("type") RequirementType type,
 			@JsonProperty("text") String text) {
 		this.name = name;
+		this.introducedAt = introducedAt;
 		this.type = type;
 		this.text = text;
 	}
@@ -39,6 +44,10 @@ public class Requirement implements IAbstractRequirement, INameable {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	public String getIntroducedAt() {
+		return introducedAt;
 	}
 
 	public RequirementType getType() {
@@ -70,6 +79,10 @@ public class Requirement implements IAbstractRequirement, INameable {
 		this.name = name;
 	}
 
+	public void setIntroducedAt(String introducedAt) {
+		this.introducedAt = introducedAt;
+	}
+
 	public void setType(RequirementType type) {
 		this.type = type;
 	}
@@ -82,8 +95,9 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 	}
 
-	public void setData(String name, RequirementType type, String text) {
+	public void setData(String name, String introducedAt, RequirementType type, String text) {
 		this.name = name;
+		this.introducedAt = introducedAt;
 		this.type = type;
 		this.text = text;
 	}
@@ -93,16 +107,16 @@ public class Requirement implements IAbstractRequirement, INameable {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Requirement that = (Requirement) o;
-		return Objects.equals(name, that.name) && type == that.type && Objects.equals(text, that.text);
+		return Objects.equals(name, that.name) && Objects.equals(introducedAt, that.introducedAt) && type == that.type && Objects.equals(text, that.text);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, type, text);
+		return Objects.hash(name, introducedAt, type, text);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Requirement{checked = %s, name = %s, type = %s, text = %s}", checked, name, type, text);
+		return String.format("Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s}", checked, name, introducedAt, type, text);
 	}
 }
