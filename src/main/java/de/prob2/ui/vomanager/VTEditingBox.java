@@ -132,32 +132,48 @@ public class VTEditingBox extends VBox {
 					.collect(Collectors.toList())
 					.contains(tfVTName.getText());
 			if(editType == VOManagerStage.EditType.ADD) {
-				if(nameExists) {
-					warnAlreadyExists();
-					return;
-				}
-				task.setId(tfVTName.getText());
-				task.setContext(machine.getName());
-				machine.getValidationTasks().add(task);
+				addVT(nameExists);
 			} else if(editType == VOManagerStage.EditType.EDIT) {
-				INameable taskItem = voManagerStage.getSelectedVT();
-				if(taskItem instanceof Machine) {
-					return;
-				}
-				ValidationTask currentTask = (ValidationTask) taskItem;
-				if(nameExists && !currentTask.getId().equals(tfVTName.getText())) {
-					warnAlreadyExists();
-					return;
-				}
-				currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
+				editVT(nameExists);
 			}
-			voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
-			voManagerStage.clearVTsSelection();
-			voManagerStage.updateValidationTasksTable();
-			voManagerStage.refreshVTTable();
+			updateVOManagerStage();
 		} else {
 			warnNotValid();
 		}
+	}
+
+	private void addVT(boolean nameExists) {
+		if(nameExists) {
+			warnAlreadyExists();
+			return;
+		}
+		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
+		Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
+		task.setId(tfVTName.getText());
+		task.setContext(machine.getName());
+		machine.getValidationTasks().add(task);
+	}
+
+	private void editVT(boolean nameExists) {
+		INameable taskItem = voManagerStage.getSelectedVT();
+		if(taskItem instanceof Machine) {
+			return;
+		}
+		ValidationTask currentTask = (ValidationTask) taskItem;
+		if(nameExists && !currentTask.getId().equals(tfVTName.getText())) {
+			warnAlreadyExists();
+			return;
+		}
+		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
+		Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
+		currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
+	}
+
+	private void updateVOManagerStage() {
+		voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
+		voManagerStage.clearVTsSelection();
+		voManagerStage.updateValidationTasksTable();
+		voManagerStage.refreshVTTable();
 	}
 
 	private void updateTaskChoice(ValidationTechnique validationTechnique) {

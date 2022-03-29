@@ -68,38 +68,49 @@ public class RequirementsEditingBox extends VBox {
 					.contains(tfName.getText());
 			VOManagerStage.EditType editType = voManagerStage.getEditType();
 			if(editType == VOManagerStage.EditType.ADD) {
-				if(nameExists) {
-					warnAlreadyExists();
-					return;
-				}
-				currentProject.getRequirements().add(new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText()));
+				addRequirement(nameExists);
 			} else if(editType == VOManagerStage.EditType.EDIT) {
-				Requirement requirement = (Requirement) voManagerStage.getSelectedRequirement();
-				if(nameExists && !requirement.getName().equals(tfName.getText())) {
-					warnAlreadyExists();
-					return;
-				}
-				String oldName = requirement.getName();
-				requirement.setData(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText());
-
-				// Update validation obligations, this means update VO of ids that are affected
-				for (Machine machine : currentProject.getMachines()) {
-					for(ValidationObligation validationObligation : machine.getValidationObligations()) {
-						if(validationObligation.getRequirement().equals(oldName)) {
-							validationObligation.setRequirement(tfName.getText());
-						}
-					}
-				}
+				editRequirement(nameExists);
 			}
-
-			// TODO: Replace refresh?
-			voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
-			voManagerStage.clearRequirementsSelection();
-			voManagerStage.updateRequirementsTable();
-			voManagerStage.refreshRequirementsTable();
+			updateVOManagerStage();
 		} else {
 			warnNotValid();
 		}
+	}
+
+	private void addRequirement(boolean nameExists) {
+		if(nameExists) {
+			warnAlreadyExists();
+			return;
+		}
+		currentProject.getRequirements().add(new Requirement(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText()));
+	}
+
+	private void editRequirement(boolean nameExists) {
+		Requirement requirement = (Requirement) voManagerStage.getSelectedRequirement();
+		if(nameExists && !requirement.getName().equals(tfName.getText())) {
+			warnAlreadyExists();
+			return;
+		}
+		String oldName = requirement.getName();
+		requirement.setData(tfName.getText(), cbRequirementChoice.getValue(), taRequirement.getText());
+
+		// Update validation obligations, this means update VO of ids that are affected
+		for (Machine machine : currentProject.getMachines()) {
+			for(ValidationObligation validationObligation : machine.getValidationObligations()) {
+				if(validationObligation.getRequirement().equals(oldName)) {
+					validationObligation.setRequirement(tfName.getText());
+				}
+			}
+		}
+	}
+
+	private void updateVOManagerStage() {
+		// TODO: Replace refresh?
+		voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
+		voManagerStage.clearRequirementsSelection();
+		voManagerStage.updateRequirementsTable();
+		voManagerStage.refreshRequirementsTable();
 	}
 
 	public void resetRequirementEditing() {

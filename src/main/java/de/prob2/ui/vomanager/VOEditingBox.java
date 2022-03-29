@@ -5,14 +5,12 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TreeItem;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
@@ -105,45 +103,52 @@ public class VOEditingBox extends VBox {
 		cbLinkRequirementChoice.getSelectionModel().select(requirement);
 	}
 
-	private void editVOInView(ValidationObligation validationObligation) {
-		validationObligation.setData(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
-	}
-
 	@FXML
 	private void applyVO() {
 		boolean voIsValid = voManager.voIsValid(tfVOName.getText(), cbLinkRequirementChoice.getValue());
 		VOManagerStage.EditType editType = voManagerStage.getEditType();
 		if(voIsValid) {
-			ValidationObligation validationObligation;
-			Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
 			boolean nameExists = currentProject.getMachines().stream()
 					.flatMap(m -> m.getValidationObligations().stream())
 					.map(ValidationObligation::getId)
 					.collect(Collectors.toList())
 					.contains(tfVOName.getText());
 			if(editType == VOManagerStage.EditType.ADD) {
-				if(nameExists) {
-					warnAlreadyExists();
-					return;
-				}
-				validationObligation = new ValidationObligation(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
-				machine.getValidationObligations().add(validationObligation);
-				voManagerStage.addVOInView(validationObligation);
+				addVO(nameExists);
 			} else if(editType == VOManagerStage.EditType.EDIT) {
-				validationObligation = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				if(nameExists && !validationObligation.getName().equals(tfVOName.getText())) {
-					warnAlreadyExists();
-					return;
-				}
-				editVOInView(validationObligation);
+				editVO(nameExists);
 			}
-			voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
-			voManagerStage.clearRequirementsSelection();
-			voManagerStage.updateRequirementsTable();
-			voManagerStage.refreshRequirementsTable();
+			updateVOManagerStage();
 		} else {
 			warnNotValid();
 		}
+	}
+
+	private void addVO(boolean nameExists) {
+		if(nameExists) {
+			warnAlreadyExists();
+			return;
+		}
+		Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
+		ValidationObligation validationObligation = new ValidationObligation(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
+		machine.getValidationObligations().add(validationObligation);
+		voManagerStage.addVOInView(validationObligation);
+	}
+
+	private void editVO(boolean nameExists) {
+		ValidationObligation validationObligation = (ValidationObligation) voManagerStage.getSelectedRequirement();
+		if(nameExists && !validationObligation.getName().equals(tfVOName.getText())) {
+			warnAlreadyExists();
+			return;
+		}
+		validationObligation.setData(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
+	}
+
+	private void updateVOManagerStage() {
+		voManagerStage.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
+		voManagerStage.clearRequirementsSelection();
+		voManagerStage.updateRequirementsTable();
+		voManagerStage.refreshRequirementsTable();
 	}
 
 	private void warnNotValid() {
