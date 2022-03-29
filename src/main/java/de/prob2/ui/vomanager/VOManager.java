@@ -69,7 +69,7 @@ public class VOManager {
 			case SYMBOLIC_MODEL_CHECKING:
 				return machine.getSymbolicCheckingFormulas().stream();
 			case TRACE_REPLAY:
-				return injector.getInstance(TraceViewHandler.class).getTraces().stream();
+				return injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(machine).stream();
 			case SIMULATION:
 				return machine.getSimulations().stream();
 			default:
