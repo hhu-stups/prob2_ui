@@ -10,7 +10,6 @@
 
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.collections.FXCollections?>
@@ -18,15 +17,16 @@
 <?import javafx.scene.control.Button?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 
-<?import javafx.scene.control.TextField?>
-<?import de.prob2.ui.vomanager.RequirementType?>
 
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.layout.StackPane?>
-<?import de.prob2.ui.vomanager.ValidationTechnique?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import de.prob2.ui.vomanager.VTEditingBox?>
+<?import de.prob2.ui.vomanager.VOEditingBox?>
+<?import de.prob2.ui.vomanager.RequirementsEditingBox?>
+
 <fx:root title="%vomanager.title" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -104,76 +104,9 @@
 						</VBox>
 					</VBox>
 					<StackPane>
-						<VBox fx:id="requirementEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
-							<VBox>
-								<Label text="Requirement Type:"/>
-								<ChoiceBox fx:id="cbRequirementChoice">
-									<items>
-										<FXCollections fx:factory="observableArrayList">
-											<RequirementType fx:value="FUNCTIONAL"/>
-											<RequirementType fx:value="NON_FUNCTIONAL"/>
-										</FXCollections>
-									</items>
-								</ChoiceBox>
-							</VBox>
-							<HBox>
-								<Label text="%vomanager.edit.requirement.name"/>
-								<TextField fx:id="tfName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-							</HBox>
-							<VBox>
-								<Label text="%vomanager.edit.requirement.content"/>
-								<TextArea fx:id="taRequirement" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-							</VBox>
-							<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
-						</VBox>
-						<VBox fx:id="voEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
-							<HBox>
-								<Label text="%vomanager.edit.vo.name"/>
-								<TextField fx:id="tfVOName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-							</HBox>
-							<HBox>
-								<Label text="%vomanager.edit.vo.linkRequirement"/>
-								<ChoiceBox fx:id="cbLinkRequirementChoice"/>
-							</HBox>
-							<HBox>
-								<Label text="%vomanager.edit.vo.linkMachine"/>
-								<ChoiceBox fx:id="cbVOLinkMachineChoice"/>
-							</HBox>
-							<VBox>
-								<Label text="%vomanager.edit.vo.expression"/>
-								<TextArea fx:id="taVOExpression" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-							</VBox>
-							<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVO"/>
-						</VBox>
-						<VBox fx:id="vtEditingBox" spacing="20.0" styleClass="border" alignment="TOP_LEFT" VBox.vgrow="NEVER">
-							<HBox>
-								<Label text="%vomanager.edit.vt.name"/>
-								<TextField fx:id="tfVTName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-							</HBox>
-							<HBox>
-								<Label text="%vomanager.edit.vt.linkMachine"/>
-								<ChoiceBox fx:id="cbVTLinkMachineChoice"/>
-							</HBox>
-							<VBox>
-								<Label text="%vomanager.edit.vt.technique"/>
-								<ChoiceBox fx:id="cbValidationTechniqueChoice">
-									<items>
-										<FXCollections fx:factory="observableArrayList">
-											<ValidationTechnique fx:value="MODEL_CHECKING"/>
-											<ValidationTechnique fx:value="LTL_MODEL_CHECKING"/>
-											<ValidationTechnique fx:value="SYMBOLIC_MODEL_CHECKING"/>
-											<ValidationTechnique fx:value="TRACE_REPLAY"/>
-											<ValidationTechnique fx:value="SIMULATION"/>
-										</FXCollections>
-									</items>
-								</ChoiceBox>
-							</VBox>
-							<VBox fx:id="validationTaskBox">
-								<Label text="%vomanager.edit.vt.parameters"/>
-								<ChoiceBox fx:id="cbTaskChoice"/>
-							</VBox>
-							<Button fx:id="applyVTButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVT"/>
-						</VBox>
+						<RequirementsEditingBox fx:id="requirementEditingBox" VBox.vgrow="NEVER"/>
+						<VOEditingBox fx:id="voEditingBox" VBox.vgrow="NEVER"/>
+						<VTEditingBox fx:id="vtEditingBox" VBox.vgrow="NEVER"/>
 					</StackPane>
 				</SplitPane>
 			</ScrollPane>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<?import javafx.collections.FXCollections?>
+<?import de.prob2.ui.vomanager.ValidationTechnique?>
+<?import de.prob2.ui.vomanager.VTEditingBox?>
+
+<fx:root type="VTEditingBox" styleClass="border" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1">
+	<HBox>
+		<Label text="%vomanager.edit.vt.name"/>
+		<TextField fx:id="tfVTName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+	</HBox>
+	<HBox>
+		<Label text="%vomanager.edit.vt.linkMachine"/>
+		<ChoiceBox fx:id="cbVTLinkMachineChoice"/>
+	</HBox>
+	<VBox>
+		<Label text="%vomanager.edit.vt.technique"/>
+		<ChoiceBox fx:id="cbValidationTechniqueChoice">
+			<items>
+				<FXCollections fx:factory="observableArrayList">
+					<ValidationTechnique fx:value="MODEL_CHECKING"/>
+					<ValidationTechnique fx:value="LTL_MODEL_CHECKING"/>
+					<ValidationTechnique fx:value="SYMBOLIC_MODEL_CHECKING"/>
+					<ValidationTechnique fx:value="TRACE_REPLAY"/>
+					<ValidationTechnique fx:value="SIMULATION"/>
+				</FXCollections>
+			</items>
+		</ChoiceBox>
+	</VBox>
+	<VBox fx:id="validationTaskBox">
+		<Label text="%vomanager.edit.vt.parameters"/>
+		<ChoiceBox fx:id="cbTaskChoice"/>
+	</VBox>
+	<Button fx:id="applyVTButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVT"/>
+</fx:root>
