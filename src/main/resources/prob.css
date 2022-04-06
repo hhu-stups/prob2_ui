@@ -1210,10 +1210,10 @@
 	-fx-text-fill: black;
 }
 
-.trace-diff-cell.faulty {
+.trace-diff-cell.FAULTY {
 	-fx-text-fill: red;
 }
 
-.trace-diff-cell.following {
+.trace-diff-cell.FOLLOWING {
 	-fx-text-fill: blue;
 }

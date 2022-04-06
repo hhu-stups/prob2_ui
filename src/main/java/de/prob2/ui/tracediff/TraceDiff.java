@@ -256,8 +256,7 @@ public class TraceDiff extends VBox {
 		minSize = Math.min(rTransitions.size(), pTransitions.size());
 
 		indexLinesMap.clear();
-		translateList(new TraceDiffList(rTransitions), replayedList);
-		translateList(new TraceDiffList(pTransitions), persistentList);
+		translateLists(new TraceDiffList(rTransitions), replayedList, new TraceDiffList(pTransitions), persistentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
 	}
@@ -270,20 +269,44 @@ public class TraceDiff extends VBox {
 		minSize = Math.min(lTransitions.size(), hTransitions.size());
 
 		indexLinesMap.clear();
-		translateList(new TraceDiffList(lTransitions), replayedList);
-		translateList(new TraceDiffList(hTransitions), persistentList);
+		translateLists(new TraceDiffList(lTransitions), replayedList, new TraceDiffList(hTransitions), persistentList);
 
 		showAlert.setOnAction(e -> alert.showAlertAgain());
 	}
 
-	private void translateList(TraceDiffList stringList, ListView<TraceDiffItem> listView) {
+	private void translateLists(TraceDiffList replayedList, ListView<TraceDiffItem> replayedView, TraceDiffList persistentList, ListView<TraceDiffItem> persistentView) {
 		//Add "empty" entries to ensure same length (needed for synchronized scrolling)
-		while (stringList.size() < maxSize) {
-			stringList.add("");
+		while (replayedList.size() < maxSize) {
+			replayedList.add("");
 		}
-		// Mark faulty operation index red and following operation indices blue -> TraceDiffCell
-		listView.setCellFactory(param -> new TraceDiffCell());
-		listView.setItems(FXCollections.observableList(stringList));
+		while (persistentList.size() < maxSize) {
+			persistentList.add("");
+		}
+
+		//Compare entries of the lists to determine colour (lists are now same length)
+		for (int i = 0; i < persistentList.size(); i++) {
+			TraceDiffItem replayedItem = replayedList.get(i);
+			TraceDiffItem persistentItem = persistentList.get(i);
+			//Blue if different size (empty entries on one side as generated above)
+			if (replayedItem.getString().isEmpty()) {
+				persistentItem.setStyle(TraceDiffCell.TraceDiffCellStyle.FOLLOWING);
+				continue;
+			}
+			if (persistentItem.getString().isEmpty()) {
+				replayedItem.setStyle(TraceDiffCell.TraceDiffCellStyle.FOLLOWING);
+				continue;
+			}
+			//Red if different entries
+			if (!persistentItem.getString().equals(replayedItem.getString())) {
+				persistentItem.setStyle(TraceDiffCell.TraceDiffCellStyle.FAULTY);
+				replayedItem.setStyle(TraceDiffCell.TraceDiffCellStyle.FAULTY);
+			}
+		}
+		//Set Cell Factories and fill List Views
+		replayedView.setCellFactory(param -> new TraceDiffCell());
+		replayedView.setItems(FXCollections.observableList(replayedList));
+		persistentView.setCellFactory(param -> new TraceDiffCell());
+		persistentView.setItems(FXCollections.observableList(persistentList));
 	}
 
 	void setAlert(TraceReplayErrorAlert alert) {
