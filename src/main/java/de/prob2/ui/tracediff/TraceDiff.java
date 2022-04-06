@@ -64,7 +64,6 @@ public class TraceDiff extends VBox {
 	private static String argDelimiter;
 
 	static class TraceDiffList extends ArrayList<TraceDiffItem> {
-		//FIXME Trace Diff does not show (any?) errors since trace "repairs" itself (at least in some cases)
 		//TODO get variables for textual diff -> TraceChecker
 		TraceDiffList(List<?> list) {
 			for (int i = 0; i < list.size(); i++) {
