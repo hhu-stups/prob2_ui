@@ -3,6 +3,7 @@ package de.prob2.ui.internal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javafx.scene.input.KeyCombination;
@@ -48,11 +49,11 @@ public final class MultiKeyCombination extends KeyCombination {
 		}
 
 		MultiKeyCombination that = (MultiKeyCombination) o;
-		return combinations.equals(that.combinations);
+		return representation.equals(that.representation) && combinations.equals(that.combinations);
 	}
 
 	@Override
 	public int hashCode() {
-		return combinations.hashCode();
+		return Objects.hash(representation, combinations);
 	}
 }
