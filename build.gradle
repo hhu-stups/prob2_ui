@@ -135,6 +135,11 @@ if (!project.hasProperty("javafxVersion")) {
 	}
 }
 
+// Split off everything starting at the first non-digit (e. g. "11.0.2" -> "11", "17" -> "17", "18-ea+12" -> "18").
+// Used when creating a multi-release jar below (multiPlatformShadowJar) -
+// the major version of OpenJFX is equal to its minimum required Java version.
+final javafxMajorVersion = javafxVersion.split(/\D/, 2)[0]
+
 final javafxModules = [
 	"javafx.base",
 	"javafx.controls",
@@ -274,7 +279,7 @@ task multiPlatformShadowJar(type: ShadowJar) {
 	// We don't bundle OpenJFX for older Java versions,
 	// because they usually have JavaFX preinstalled,
 	// and there are no easily usable standalone versions of OpenJFX < 11 that we could use anyway.
-	into("META-INF/versions/11") {
+	into("META-INF/versions/${javafxMajorVersion}") {
 		from(project.configurations.javafxAllPlatforms.collect {zipTree(it)})
 	}
 }
