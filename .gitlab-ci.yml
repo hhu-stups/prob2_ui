@@ -51,7 +51,7 @@ test:jdk-17-linux:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
   script:
-    - ./gradlew ${GRADLE_OPTIONS} check jpackage
+    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.2 check jpackage
 
 test:jdk-17-macos:
   extends: .test-common
@@ -59,7 +59,7 @@ test:jdk-17-macos:
     - export JAVA_HOME="/usr/local/jdk/jdk-17/Contents/Home"
     - export PATH="${JAVA_HOME}/bin:${PATH}"
   script:
-    - ./gradlew ${GRADLE_OPTIONS} check jpackage
+    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.2 check jpackage
   tags:
     - macos
 
@@ -69,7 +69,7 @@ test:jdk-17-windows64:
     - SET JAVA_HOME=C:\Program Files\Java\jdk-17
     - SET PATH=%JAVA_HOME%\bin;%PATH%
   script:
-    - call gradlew %GRADLE_OPTIONS% check jpackage
+    - call gradlew %GRADLE_OPTIONS% -PjavafxVersion=17.0.2 check jpackage
   tags:
     - prob
     - win64

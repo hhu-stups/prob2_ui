@@ -127,8 +127,19 @@ dependencies {
 	testImplementation('org.junit.jupiter:junit-jupiter')
 }
 
-final javafxVersion = "11.0.2"
-final javafxArmVersion = "17.0.2"
+if (!project.hasProperty("javafxVersion")) {
+	if (System.getProperty("os.arch") == "aarch64") {
+		ext.javafxVersion = "17.0.2"
+	} else {
+		ext.javafxVersion = "11.0.2"
+	}
+}
+
+// Split off everything starting at the first non-digit (e. g. "11.0.2" -> "11", "17" -> "17", "18-ea+12" -> "18").
+// Used when creating a multi-release jar below (multiPlatformShadowJar) -
+// the major version of OpenJFX is equal to its minimum required Java version.
+final javafxMajorVersion = javafxVersion.split(/\D/, 2)[0]
+
 final javafxModules = [
 	"javafx.base",
 	"javafx.controls",
@@ -139,15 +150,7 @@ final javafxModules = [
 	"javafx.web",
 ]
 
-def arch = System.getProperty("os.arch");
-
-if("aarch64".equals(arch)) {
-	apply plugin: "org.openjfx.javafxplugin"
-	javafx {
-		version = javafxArmVersion
-		modules = javafxModules
-	}
-} else if (JavaVersion.current().java11Compatible) {
+if (JavaVersion.current().java11Compatible) {
 	apply plugin: "org.openjfx.javafxplugin"
 	javafx {
 		version = javafxVersion
@@ -276,7 +279,7 @@ task multiPlatformShadowJar(type: ShadowJar) {
 	// We don't bundle OpenJFX for older Java versions,
 	// because they usually have JavaFX preinstalled,
 	// and there are no easily usable standalone versions of OpenJFX < 11 that we could use anyway.
-	into("META-INF/versions/11") {
+	into("META-INF/versions/${javafxMajorVersion}") {
 		from(project.configurations.javafxAllPlatforms.collect {zipTree(it)})
 	}
 }
@@ -289,7 +292,8 @@ if (project.hasProperty("probHome")) {
 	}
 }
 
-// Assumes that Java 14 is installed correctly
+// Assumes that the correct version of jpackage is on the PATH.
+// This task does not respect JAVA_HOME or other non-default JDK locations!
 task jpackage(type: Exec) {
 	// Use single-platform shadowJar
 	dependsOn 'shadowJar'
