@@ -80,6 +80,9 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		testChoice.setConverter(new StringConverter<TestCaseGenerationType>() {
 			@Override
 			public String toString(final TestCaseGenerationType object) {
+				if(object == null) {
+					return "";
+				}
 				return object.getName();
 			}
 			
