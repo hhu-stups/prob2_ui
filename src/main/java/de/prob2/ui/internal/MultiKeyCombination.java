@@ -13,13 +13,15 @@ public final class MultiKeyCombination extends KeyCombination {
 	private final KeyCombination representation;
 	private final Set<KeyCombination> combinations;
 
-	public MultiKeyCombination(KeyCombination... combinations) {
-		this(Arrays.asList(combinations));
+	public MultiKeyCombination(KeyCombination representation, KeyCombination... combinations) {
+		this(representation, Arrays.asList(combinations));
 	}
 
-	public MultiKeyCombination(Collection<? extends KeyCombination> combinations) {
-		this.representation = combinations.iterator().next();
+	public MultiKeyCombination(KeyCombination representation, Collection<? extends KeyCombination> combinations) {
+		super(representation.getShift(), representation.getControl(), representation.getAlt(), representation.getMeta(), representation.getShortcut());
+		this.representation = representation;
 		this.combinations = new HashSet<>(combinations);
+		this.combinations.add(representation);
 	}
 
 	@Override
