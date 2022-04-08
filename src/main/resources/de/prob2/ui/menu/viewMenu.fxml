@@ -8,9 +8,9 @@
 	<MenuItem fx:id="viewMenu_default" text="%menu.view.items.zoomDefault"
 		onAction="#handleDefaultFontSize" accelerator="Shortcut+'0'" />
 	<MenuItem fx:id="viewMenu_bigger" text="%menu.view.items.zoomIn"
-		accelerator="Shortcut + '+'" onAction="#handleIncreaseFontSize" />
+		accelerator="Shortcut+Plus" onAction="#handleIncreaseFontSize" />
 	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.items.zoomOut"
-		accelerator="Shortcut + '-'" onAction="#handleDecreaseFontSize" />
+		accelerator="Shortcut+Minus" onAction="#handleDecreaseFontSize" />
 	<SeparatorMenuItem />
 	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.items.enterFullScreen"
 		onAction="#handleFullScreen" accelerator="Shortcut+Ctrl+F" />

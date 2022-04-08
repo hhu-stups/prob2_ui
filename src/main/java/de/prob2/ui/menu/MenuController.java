@@ -52,7 +52,6 @@ public final class MenuController extends MenuBar {
 			// Remove Preferences menu item from FileMenu
 			MenuItem preferencesItem = fileMenu.getPreferencesItem();
 			fileMenu.getItems().remove(preferencesItem);
-			preferencesItem.setAccelerator(KeyCombination.valueOf("Shortcut+,"));
 
 			// Create Mac-style application menu
 			MenuItem quit = menuToolkit.createQuitMenuItem(bundle.getString("common.prob2"));
