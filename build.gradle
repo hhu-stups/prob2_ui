@@ -127,8 +127,14 @@ dependencies {
 	testImplementation('org.junit.jupiter:junit-jupiter')
 }
 
-final javafxVersion = "11.0.2"
-final javafxArmVersion = "17.0.2"
+if (!project.hasProperty("javafxVersion")) {
+	if (System.getProperty("os.arch") == "aarch64") {
+		ext.javafxVersion = "17.0.2"
+	} else {
+		ext.javafxVersion = "11.0.2"
+	}
+}
+
 final javafxModules = [
 	"javafx.base",
 	"javafx.controls",
@@ -139,15 +145,7 @@ final javafxModules = [
 	"javafx.web",
 ]
 
-def arch = System.getProperty("os.arch");
-
-if("aarch64".equals(arch)) {
-	apply plugin: "org.openjfx.javafxplugin"
-	javafx {
-		version = javafxArmVersion
-		modules = javafxModules
-	}
-} else if (JavaVersion.current().java11Compatible) {
+if (JavaVersion.current().java11Compatible) {
 	apply plugin: "org.openjfx.javafxplugin"
 	javafx {
 		version = javafxVersion
