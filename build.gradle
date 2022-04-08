@@ -287,7 +287,8 @@ if (project.hasProperty("probHome")) {
 	}
 }
 
-// Assumes that Java 14 is installed correctly
+// Assumes that the correct version of jpackage is on the PATH.
+// This task does not respect JAVA_HOME or other non-default JDK locations!
 task jpackage(type: Exec) {
 	// Use single-platform shadowJar
 	dependsOn 'shadowJar'
