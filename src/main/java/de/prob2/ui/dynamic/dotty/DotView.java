@@ -21,6 +21,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.MultiKeyCombination;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -35,11 +36,15 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.input.KeyCharacterCombination;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,21 +57,30 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	@FXML
 	private MenuBar menuBar;
-	
+
 	@FXML
 	private Button zoomOutButton;
-	
+
 	@FXML
 	private Button zoomInButton;
-	
+
 	@FXML
 	private HBox zoomBox;
-	
+
 	@FXML
 	private Button saveButton;
-	
+
 	@FXML
 	private HelpButton helpButton;
+
+	@FXML
+	private MenuItem zoomResetMenuButton;
+
+	@FXML
+	private MenuItem zoomInMenuButton;
+
+	@FXML
+	private MenuItem zoomOutMenuButton;
 
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
@@ -75,14 +89,24 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private String dotEngine;
 	private final ObjectProperty<byte[]> currentDotContent;
 
+	private final KeyCombination zoomResetChar = new KeyCharacterCombination("0", KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
+	private final KeyCombination zoomResetCode = new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
+	private final KeyCombination zoomResetKeypad = new KeyCodeCombination(KeyCode.NUMPAD0, KeyCombination.SHORTCUT_DOWN);
+	private final KeyCombination zoomInChar = new KeyCharacterCombination("+", KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
+	private final KeyCombination zoomInCode = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
+	private final KeyCombination zoomInKeypad = new KeyCodeCombination(KeyCode.ADD, KeyCombination.SHORTCUT_DOWN);
+	private final KeyCombination zoomOutChar = new KeyCharacterCombination("-", KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
+	private final KeyCombination zoomOutCode = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
+	private final KeyCombination zoomOutKeypad = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.SHORTCUT_DOWN);
+
 	@Inject
 	public DotView(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+				   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
 		super(preferencesStageProvider, currentTrace, currentProject, bundle, stopActions, "Graph Visualizer");
-		
+
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		
+
 		this.dot = null;
 		this.dotEngine = null;
 		this.currentDotContent = new SimpleObjectProperty<>(this, "currentDotContent", null);
@@ -96,12 +120,15 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		stageManager.setMacMenuBar(this, this.menuBar);
 		saveButton.disableProperty().bind(currentDotContent.isNull());
 		helpButton.setHelpContent("graphVisualisation", null);
-		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>)c -> {
+		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
 			Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
 			for (Node scrollBar : scrollBars) {
 				scrollBar.setStyle("-fx-opacity: 0.5;");
 			}
 		});
+		zoomResetMenuButton.setAccelerator(new MultiKeyCombination(zoomResetChar, zoomResetCode, zoomResetKeypad));
+		zoomInMenuButton.setAccelerator(new MultiKeyCombination(zoomInChar, zoomInCode, zoomInKeypad));
+		zoomOutMenuButton.setAccelerator(new MultiKeyCombination(zoomOutChar, zoomOutCode, zoomOutKeypad));
 	}
 
 	@Override
@@ -113,14 +140,14 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
 		this.dot = item.getState().getStateSpace().getCurrentPreference("DOT");
 		this.dotEngine = item.getPreferredDotLayoutEngine()
-			.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
+				.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
 		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
-		if(!Thread.currentThread().isInterrupted()) {
+		if (!Thread.currentThread().isInterrupted()) {
 			final byte[] svgData = new DotCall(this.dot)
-				.layoutEngine(this.dotEngine)
-				.outputFormat(DotOutputFormat.SVG)
-				.input(this.currentDotContent.get())
-				.call();
+					.layoutEngine(this.dotEngine)
+					.outputFormat(DotOutputFormat.SVG)
+					.input(this.currentDotContent.get())
+					.call();
 			loadGraph(new String(svgData, StandardCharsets.UTF_8));
 		}
 	}
@@ -137,7 +164,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 			}
 		});
 	}
-	
+
 	@FXML
 	private void save() {
 		final FileChooser fileChooser = new FileChooser();
@@ -152,7 +179,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 			return;
 		}
 		FileChooser.ExtensionFilter selectedFilter = fileChooser.getSelectedExtensionFilter();
-		if(selectedFilter.equals(dotFilter)) {
+		if (selectedFilter.equals(dotFilter)) {
 			saveDot(path);
 		} else {
 			final String format = getTargetFormat(selectedFilter, svgFilter, pngFilter, pdfFilter);
@@ -161,11 +188,11 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	private String getTargetFormat(FileChooser.ExtensionFilter selectedFilter, FileChooser.ExtensionFilter svgFilter, FileChooser.ExtensionFilter pngFilter, FileChooser.ExtensionFilter pdfFilter) {
-		if(selectedFilter.equals(svgFilter)) {
+		if (selectedFilter.equals(svgFilter)) {
 			return DotOutputFormat.SVG;
-		} else if(selectedFilter.equals(pngFilter)) {
+		} else if (selectedFilter.equals(pngFilter)) {
 			return DotOutputFormat.PNG;
-		} else if(selectedFilter.equals(pdfFilter)) {
+		} else if (selectedFilter.equals(pdfFilter)) {
 			return DotOutputFormat.PDF;
 		} else {
 			throw new RuntimeException("Target Format cannot be extracted from selected filter: " + selectedFilter);
@@ -183,10 +210,10 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private void saveConverted(String format, final Path path) {
 		try {
 			Files.write(path, new DotCall(this.dot)
-				.layoutEngine(this.dotEngine)
-				.outputFormat(format)
-				.input(this.currentDotContent.get())
-				.call());
+					.layoutEngine(this.dotEngine)
+					.outputFormat(format)
+					.input(this.currentDotContent.get())
+					.call());
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}
@@ -230,7 +257,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		}
 		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y + ")");
 	}
-	
+
 	@Override
 	protected void clearContent() {
 		this.dot = null;

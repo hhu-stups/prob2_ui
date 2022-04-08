@@ -6,11 +6,11 @@
 
 <fx:root type="Menu" text="%menu.view" xmlns:fx="http://javafx.com/fxml/1">
 	<MenuItem fx:id="viewMenu_default" text="%menu.view.items.zoomDefault"
-		onAction="#handleDefaultFontSize" accelerator="Shortcut+'0'" />
+		onAction="#handleDefaultFontSize" mnemonicParsing="false" />
 	<MenuItem fx:id="viewMenu_bigger" text="%menu.view.items.zoomIn"
-		accelerator="Shortcut+Plus" onAction="#handleIncreaseFontSize" />
+		onAction="#handleIncreaseFontSize" mnemonicParsing="false" />
 	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.items.zoomOut"
-		accelerator="Shortcut+Minus" onAction="#handleDecreaseFontSize" />
+		onAction="#handleDecreaseFontSize" mnemonicParsing="false" />
 	<SeparatorMenuItem />
 	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.items.enterFullScreen"
 		onAction="#handleFullScreen" accelerator="Shortcut+Ctrl+F" />

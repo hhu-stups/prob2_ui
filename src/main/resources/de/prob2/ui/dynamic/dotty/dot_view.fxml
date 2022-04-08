@@ -31,9 +31,9 @@
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
 						<Menu text="%menu.view">
-							<MenuItem text="%menu.view.items.zoomDefault" accelerator="Shortcut+'0'" onAction="#defaultSize" />
-							<MenuItem text="%menu.view.items.zoomIn" accelerator="Shortcut+Plus" onAction="#zoomIn" />
-							<MenuItem text="%menu.view.items.zoomOut" accelerator="Shortcut+Minus" onAction="#zoomOut" />
+							<MenuItem fx:id="zoomResetMenuButton" text="%menu.view.items.zoomDefault" onAction="#defaultSize" />
+							<MenuItem fx:id="zoomInMenuButton" text="%menu.view.items.zoomIn" onAction="#zoomIn" />
+							<MenuItem fx:id="zoomOutMenuButton" text="%menu.view.items.zoomOut" onAction="#zoomOut" />
 							<SeparatorMenuItem/>
 							<CloseWindowMenuItem/>
 						</Menu>

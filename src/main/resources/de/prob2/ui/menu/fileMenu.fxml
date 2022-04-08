@@ -26,7 +26,7 @@
 	<MenuItem fx:id="reloadMachineItem" text="%menu.file.items.reloadMachine"
 		accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 	<MenuItem fx:id="preferencesItem" text="%menu.file.items.preferences"
-			  accelerator="Shortcut+Comma" onAction="#handlePreferences" />
+			  accelerator="Shortcut+," onAction="#handlePreferences" />
 	<SeparatorMenuItem/>
 	<CloseWindowMenuItem/>
 </fx:root>
