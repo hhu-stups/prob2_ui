@@ -3,6 +3,7 @@ package de.prob2.ui.visb;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -16,10 +17,12 @@ import com.google.inject.Injector;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.command.GetVisBAttributeValuesCommand;
+import de.prob.animator.command.VisBPerformClickCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.exception.ProBError;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
@@ -168,22 +171,34 @@ public class VisBController {
 	 * This method is used by the {@link VisBConnector} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
-	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey){
+	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
 		if(!currentTrace.getCurrentState().isInitialised()){
 			executeBeforeInitialisation();
 			return;
 		}
 		LOGGER.debug("Finding event for id: " + id);
 		VisBEvent event = this.getVisBVisualisation().getVisBEventsById().get(id);
-		// TO DO: adapt predicates or add predicate for Click Coordinates
-		if(event == null || event.getEvent().equals("")) {
-			updateInfo("visb.infobox.no.events.for.id", id);
-		} else {
-			try {
-				executeEvent(event, currentTrace.get(), id, pageX, pageY, shiftKey, metaKey);
-			} catch (Exception e) {
-				handleExecuteOperationError(e, event, id);
+
+		try {
+			StateSpace stateSpace = currentTrace.getStateSpace();
+			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(stateSpace, id, Collections.emptyList(), currentTrace.getCurrentState().getId());
+			stateSpace.execute(performClickCommand);
+			List<String> transIDS = performClickCommand.getTransIDS();
+
+			if (transIDS.isEmpty()) {
+				updateInfo("visb.infobox.no.events.for.id", id);
+			} else {
+				LOGGER.debug("Executing event for id: "+id + " and preds = " + event.getPredicates());
+				Trace trace = currentTrace.get();
+				for(String transID : transIDS) {
+					trace = trace.add(transID);
+				}
+				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + event.getPredicates());
+				currentTrace.set(trace);
+				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			}
+		} catch (Exception e) {
+			handleExecuteOperationError(e, event, id);
 		}
 	}
 
@@ -198,6 +213,8 @@ public class VisBController {
 		}
 	}
 
+	// This should be implemented in the provided meta information to Prolog
+	@Deprecated
 	private void executeEvent(VisBEvent event, Trace trace, String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
 		// perform replacements to transmit event information:
 		List<String> preds = event.getPredicates();
@@ -207,11 +224,6 @@ public class VisBController {
 					.replace("%pageX", Integer.toString(pageX))
 					.replace("%pageY", Integer.toString(pageY)));
 		}
-		LOGGER.debug("Executing event for id: "+id + " and preds = " + preds);
-		trace = trace.execute(event.getEvent(), preds);
-		LOGGER.debug("Finished executed event for id: "+id + " and preds = " + preds);
-		currentTrace.set(trace);
-		updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 	}
 
 	private void handleExecuteOperationError(Exception e, VisBEvent event, String id) {
