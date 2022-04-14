@@ -71,8 +71,7 @@ test:jdk-17-windows64:
   script:
     - call gradlew %GRADLE_OPTIONS% -PjavafxVersion=17.0.2 check jpackage
   tags:
-    - prob
-    - win64
+    - windows
 
 distributions:
   stage: deploy
