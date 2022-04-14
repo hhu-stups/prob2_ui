@@ -260,14 +260,6 @@ public class VisBStage extends Stage {
 		});
 
 		injector.getInstance(VisBDebugStage.class).initOwner(this);
-
-		currentTrace.addListener(((observable, oldValue, newValue) -> {
-			VisBVisualisation visBVisualisation = visBController.getVisBVisualisation();
-			if(visBVisualisation == null) {
-				return;
-			}
-			//updateDynamicSVGObjects(visBVisualisation);
-		}));
 	}
 
 	private void updateUIOnMachine(Machine machine) {
