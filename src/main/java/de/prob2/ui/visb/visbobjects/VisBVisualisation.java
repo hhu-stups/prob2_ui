@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
+import de.prob.animator.domainobjects.VisBSVGObject;
 
 /**
  * The VisBVisualisation Object contains the functions needed to store all the visualisation information.
@@ -17,13 +18,15 @@ public class VisBVisualisation {
 	private final List<VisBEvent> visBEvents;
 	private final List<VisBItem> visBItems;
 	private final Map<String, VisBEvent> visBEventsById;
+	private final List<VisBSVGObject> visBSVGObjects;
 
-	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath) {
+	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath, List<VisBSVGObject> visBSVGObjects) {
 		this.visBEvents = Objects.requireNonNull(visBEvents, "visBEvents");
 		this.visBItems = Objects.requireNonNull(visBItems, "visBItems");
 		this.svgPath = Objects.requireNonNull(svgPath, "svgPath");
 		this.visBEventsById = this.visBEvents.stream()
 			.collect(Collectors.toMap(VisBEvent::getId, event -> event));
+		this.visBSVGObjects = Objects.requireNonNull(visBSVGObjects, "visBSVGObjects");
 	}
 
 	public List<VisBEvent> getVisBEvents() {
@@ -42,6 +45,10 @@ public class VisBVisualisation {
 		return this.visBEventsById;
 	}
 
+	public List<VisBSVGObject> getVisBSVGObjects() {
+		return visBSVGObjects;
+	}
+
 	@Override
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
@@ -51,6 +58,8 @@ public class VisBVisualisation {
 		appendList(stringBuilder, visBItems);
 		stringBuilder.append("SVG: \n");
 		appendObject(stringBuilder, svgPath);
+		stringBuilder.append("Visualisation Dynamics SVG Objects: \n");
+		appendObject(stringBuilder, visBSVGObjects);
 		return stringBuilder.toString();
 	}
 
