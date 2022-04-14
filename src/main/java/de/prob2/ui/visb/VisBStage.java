@@ -211,6 +211,7 @@ public class VisBStage extends Stage {
 					for (final VisBEvent event : to.getVisBEvents()) {
 						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 					}
+					updateDynamicSVGObjects(visBController.getVisBVisualisation());
 				});
 			}
 		};
@@ -265,7 +266,7 @@ public class VisBStage extends Stage {
 			if(visBVisualisation == null) {
 				return;
 			}
-			updateDynamicSVGObjects(visBVisualisation);
+			//updateDynamicSVGObjects(visBVisualisation);
 		}));
 	}
 
