@@ -312,7 +312,7 @@ public class VisBStage extends Stage {
 		// TODO: Maybe use templates
 		if(!visBSVGObjects.isEmpty()) {
 			StringBuilder scriptString = new StringBuilder();
-			scriptString.append("if(document.querySelector(\"svg\") != null) {");
+			scriptString.append("if(document.querySelector(\"svg\") != null) {\n");
 			for(VisBSVGObject visBSVGObject : visBSVGObjects) {
 				String id = visBSVGObject.getId();
 				String object = visBSVGObject.getObject();
@@ -320,9 +320,9 @@ public class VisBStage extends Stage {
 				scriptString.append(String.format("var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
 				scriptString.append(String.format("new__%s.setAttribute(\"id\",\"%s\");\n", id, id));
 				for(Map.Entry<String, String> entry : attributes.entrySet()) {
-					scriptString.append(String.format("new__%s.setAttribute(\"%s\",\"%s\");\n", id, entry.getKey(), entry.getKey()));
+					scriptString.append(String.format("new__%s.setAttribute(\"%s\",\"%s\");\n", id, entry.getKey(), entry.getValue()));
 				}
-				scriptString.append(String.format("document.querySelector(\"svg\").appendChild(new__%s);", id));
+				scriptString.append(String.format("document.querySelector(\"svg\").appendChild(new__%s);\n", id));
 			}
 			scriptString.append("}");
 			webView.getEngine().executeScript(scriptString.toString());
