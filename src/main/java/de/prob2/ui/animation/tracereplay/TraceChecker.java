@@ -81,6 +81,12 @@ public class TraceChecker {
 		if(!replayTrace.selected()) {
 			return;
 		}
+
+		final Path traceFile = injector.getInstance(TraceFileHandler.class).resolveAndCheckFileExists(replayTrace.getLocation());
+		if (traceFile == null) {
+			return;
+		}
+
 		replayTrace.setChecked(Checked.NOT_CHECKED);
 		replayTrace.setReplayedTrace(null);
 		// ReplayTraceFileCommand doesn't support progress updates yet,
@@ -89,7 +95,6 @@ public class TraceChecker {
 		// (this is special-cased in TraceViewHandler).
 		replayTrace.setProgress(-2);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		final Path traceFile = injector.getInstance(CurrentProject.class).getLocation().resolve(replayTrace.getLocation());
 		Thread replayThread = new Thread(() -> {
 			try {
 				ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, traceFile);

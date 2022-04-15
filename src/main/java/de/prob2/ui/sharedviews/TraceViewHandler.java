@@ -15,6 +15,7 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -201,8 +202,12 @@ public class TraceViewHandler {
 							.collect(Collectors.toList()))
 					.collect(Collectors.toList()));
 		});
-		openInExternalEditorItem.setOnAction(
-				event -> injector.getInstance(ExternalEditor.class).open(currentProject.getLocation().resolve(row.getItem().getLocation())));
+		openInExternalEditorItem.setOnAction(event -> {
+			Path realPath = injector.getInstance(TraceFileHandler.class).resolveAndCheckFileExists(row.getItem().getLocation());
+			if (realPath != null) {
+				injector.getInstance(ExternalEditor.class).open(realPath);
+			}
+		});
 		row.itemProperty().addListener((observable, from, to) -> {
 			showErrorItem.disableProperty().unbind();
 			if (to != null) {

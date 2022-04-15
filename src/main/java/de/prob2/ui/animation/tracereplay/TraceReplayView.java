@@ -123,12 +123,17 @@ public class TraceReplayView extends ScrollPane {
 			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showErrorItem, openInExternalEditorItem);
 			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 			recheckTraceItem.setOnAction(event -> {
+				Path realPath = traceFileHandler.resolveAndCheckFileExists(row.getItem().getLocation());
+				if (realPath == null) {
+					return;
+				}
+
 				Path currentMachinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
-					TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(row.getItem(), currentTrace.getStateSpace(), currentMachinePath, injector, currentProject, stageManager);
-					traceRefactoredSetup.executeCheck(true);
-					List<Path> persistentTraceList = traceRefactoredSetup.evaluateResults();
-					persistentTraceList.remove(row.getItem().getLocation());
-					addPathsToProject(persistentTraceList);
+				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(row.getItem(), currentTrace.getStateSpace(), currentMachinePath, injector, currentProject, stageManager);
+				traceRefactoredSetup.executeCheck(true);
+				List<Path> persistentTraceList = traceRefactoredSetup.evaluateResults();
+				persistentTraceList.remove(row.getItem().getLocation());
+				addPathsToProject(persistentTraceList);
 			});
 			showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 

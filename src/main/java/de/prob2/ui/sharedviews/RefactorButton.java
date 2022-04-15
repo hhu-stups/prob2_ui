@@ -86,9 +86,15 @@ public class RefactorButton extends Button {
 		this.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()).or(realTimeSimulator.runningProperty()));
 
 		this.setOnAction(event -> {
-
 			RefactorSetup result = new RefactorSetupView(stageManager, currentProject, bundle, fileChooserManager).showAndWait().get();
-			TraceJsonFile fileObject= traceFileHandler.loadFile(result.getTraceFile());
+			if (result.whatToDo == RefactorSetup.WhatToDo.NOTHING) {
+				return;
+			}
+
+			TraceJsonFile fileObject = traceFileHandler.loadFile(result.getTraceFile());
+			if (fileObject == null) {
+				return;
+			}
 
 			switch (result.whatToDo){
 				case REFACTOR_TRACE:
