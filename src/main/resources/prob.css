@@ -163,7 +163,7 @@
 .list-view .color-picker > .label,
 .tree-table-view .color-picker > .label {
 	-fx-padding: 0.02em 0.5em 0.02em 0.5em;
-	-fx-font-size: 0.8em;
+	-fx-font-size: 0.95em;
 }
 .table-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
 .list-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
@@ -239,7 +239,7 @@
 .table-view .combo-box > .list-cell,
 .list-view .combo-box > .list-cell,
 .tree-table-view .combo-box > .list-cell {
-	-fx-font-size: 0.8em;
+	-fx-font-size: 0.95em;
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
 }
 .table-view .combo-box-base > *.arrow-button,
@@ -432,7 +432,7 @@
 .table-view .spinner > .text-field,
 .list-view .spinner > .text-field,
 .tree-table-view .spinner > .text-field {
-	-fx-font-size: 0.8em;
+	-fx-font-size: 0.95em;
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
 }
 .table-view .spinner .increment-arrow-button .increment-arrow,
@@ -665,7 +665,7 @@
 .list-view .text-field,
 .tree-table-view .text-field {
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
-	-fx-font-size: 0.8em;
+	-fx-font-size: 0.95em;
 }
 
 /************************************************************************************
