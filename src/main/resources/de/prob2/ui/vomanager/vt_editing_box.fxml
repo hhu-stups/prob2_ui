@@ -17,14 +17,14 @@
 		</padding>
 		<Label fx:id="vtTitleLabel" text="%vomanager.title.VT" styleClass="title" maxWidth="Infinity"/>
 	</HBox>
-	<HBox>
+	<VBox>
 		<Label text="%vomanager.edit.vt.name"/>
-		<TextField fx:id="tfVTName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-	</HBox>
-	<HBox>
+		<TextField fx:id="tfVTName" maxWidth="200.0" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+	</VBox>
+	<VBox>
 		<Label text="%vomanager.edit.vt.linkMachine"/>
 		<ChoiceBox fx:id="cbVTLinkMachineChoice"/>
-	</HBox>
+	</VBox>
 	<VBox>
 		<Label text="%vomanager.edit.vt.technique"/>
 		<ChoiceBox fx:id="cbValidationTechniqueChoice">

@@ -19,18 +19,18 @@
 		</padding>
 		<Label fx:id="voTitleLabel" text="%vomanager.title.VO" styleClass="title" maxWidth="Infinity"/>
 	</HBox>
-	<HBox>
+	<VBox>
 		<Label text="%vomanager.edit.vo.name"/>
-		<TextField fx:id="tfVOName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-	</HBox>
-	<HBox>
+		<TextField fx:id="tfVOName" maxWidth="200.0" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+	</VBox>
+	<VBox>
 		<Label text="%vomanager.edit.vo.linkRequirement"/>
 		<ChoiceBox fx:id="cbLinkRequirementChoice"/>
-	</HBox>
-	<HBox>
+	</VBox>
+	<VBox>
 		<Label text="%vomanager.edit.vo.linkMachine"/>
 		<ChoiceBox fx:id="cbVOLinkMachineChoice"/>
-	</HBox>
+	</VBox>
 	<VBox>
 		<Label text="%vomanager.edit.vo.expression"/>
 		<TextArea fx:id="taVOExpression" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
