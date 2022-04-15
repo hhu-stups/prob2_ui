@@ -144,11 +144,11 @@ public class VOEditingBox extends VBox {
 	}
 
 	private void warnNotValid() {
-		stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.vo.notValid.header"), bundle.getString("vomanager.warnings.vo.notValid.content")).show();
+		stageManager.makeAlert(Alert.AlertType.INFORMATION, "vomanager.warnings.vo.notValid.header", "vomanager.warnings.vo.notValid.content").show();
 	}
 
 	private void warnAlreadyExists() {
-		stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.vo.alreadyExists.header"), bundle.getString("vomanager.warnings.vo.alreadyExists.content")).show();
+		stageManager.makeAlert(Alert.AlertType.INFORMATION, "vomanager.warnings.vo.alreadyExists.header", "vomanager.warnings.vo.alreadyExists.content").show();
 	}
 
 	public void setVoManagerStage(VOManagerStage voManagerStage) {
