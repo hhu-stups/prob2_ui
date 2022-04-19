@@ -9,7 +9,14 @@
 
 <?import de.prob2.ui.vomanager.RequirementsEditingBox?>
 
+<?import javafx.geometry.Insets?>
 <fx:root type="RequirementsEditingBox" styleClass="border" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1">
+	<HBox styleClass="border">
+		<padding>
+			<Insets left="5.0"/>
+		</padding>
+		<Label fx:id="requirementTitleLabel" text="%vomanager.title.requirement" styleClass="title" maxWidth="Infinity"/>
+	</HBox>
 	<VBox>
 		<Label text="Requirement Type:"/>
 		<ChoiceBox fx:id="cbRequirementChoice">
@@ -21,14 +28,14 @@
 			</items>
 		</ChoiceBox>
 	</VBox>
-	<HBox>
+	<VBox>
 		<Label text="%vomanager.edit.requirement.name"/>
-		<TextField fx:id="tfName" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
-	</HBox>
-	<HBox>
+		<TextField fx:id="tfName" maxWidth="200.0" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+	</VBox>
+	<VBox>
 		<Label text="%vomanager.edit.vt.linkMachine"/>
 		<ChoiceBox fx:id="cbRequirementLinkMachineChoice"/>
-	</HBox>
+	</VBox>
 	<VBox>
 		<Label text="%vomanager.edit.requirement.content"/>
 		<TextArea fx:id="taRequirement" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>

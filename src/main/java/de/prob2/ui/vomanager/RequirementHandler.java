@@ -63,7 +63,9 @@ public class RequirementHandler {
 	public void resetListeners(Project project, Requirement requirement) {
 		for(Machine machine : project.getMachines()) {
 			for(ValidationObligation validationObligation : machine.getValidationObligations()) {
-				validationObligation.checkedProperty().removeListener(listenerMap.get(requirement));
+				if(listenerMap.containsKey(requirement)) {
+					validationObligation.checkedProperty().removeListener(listenerMap.get(requirement));
+				}
 			}
 		}
 		listenerMap.remove(requirement);

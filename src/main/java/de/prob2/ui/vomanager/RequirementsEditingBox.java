@@ -135,11 +135,11 @@ public class RequirementsEditingBox extends VBox {
 	}
 
 	private void warnNotValid() {
-		stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.requirement.notValid.header"), bundle.getString("vomanager.warnings.requirement.notValid.content")).show();
+		stageManager.makeAlert(Alert.AlertType.INFORMATION, "vomanager.warnings.requirement.notValid.header", "vomanager.warnings.requirement.notValid.content").show();
 	}
 
 	private void warnAlreadyExists() {
-		stageManager.makeAlert(Alert.AlertType.INFORMATION, bundle.getString("vomanager.warnings.requirement.alreadyExists.header"), bundle.getString("vomanager.warnings.requirement.alreadyExists.content")).show();
+		stageManager.makeAlert(Alert.AlertType.INFORMATION, "vomanager.warnings.requirement.alreadyExists.header", "vomanager.warnings.requirement.alreadyExists.content").show();
 	}
 
 	public void setVoManagerStage(VOManagerStage voManagerStage) {

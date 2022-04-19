@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -23,10 +24,12 @@ import com.google.inject.Provider;
 
 import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
+import de.prob.animator.command.GetVisBSVGObjectsCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
+import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
@@ -60,6 +63,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebErrorEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -196,7 +200,7 @@ public class VisBStage extends Stage {
 				this.clear();
 			} else {
 				try {
-					this.loadSvgFile(to.getSvgPath());
+					this.loadSvgFile(to);
 				} catch (final IOException e) {
 					throw new UncheckedIOException(e);
 				}
@@ -207,6 +211,7 @@ public class VisBStage extends Stage {
 					for (final VisBEvent event : to.getVisBEvents()) {
 						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 					}
+					updateDynamicSVGObjects(visBController.getVisBVisualisation());
 				});
 			}
 		};
@@ -302,8 +307,30 @@ public class VisBStage extends Stage {
 		this.webView.getEngine().loadContent(htmlFile);
 	}
 
-	private void loadSvgFile(final Path svgPath) throws IOException {
-		final String svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
+	private void updateDynamicSVGObjects(VisBVisualisation visBVisualisation) {
+		List<VisBSVGObject> visBSVGObjects = visBVisualisation.getVisBSVGObjects();
+		// TODO: Maybe use templates
+		if(!visBSVGObjects.isEmpty()) {
+			StringBuilder scriptString = new StringBuilder();
+			scriptString.append("if(document.querySelector(\"svg\") != null) {\n");
+			for(VisBSVGObject visBSVGObject : visBSVGObjects) {
+				String id = visBSVGObject.getId();
+				String object = visBSVGObject.getObject();
+				Map<String, String> attributes = visBSVGObject.getAttributes();
+				scriptString.append(String.format("var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
+				scriptString.append(String.format("new__%s.setAttribute(\"id\",\"%s\");\n", id, id));
+				for(Map.Entry<String, String> entry : attributes.entrySet()) {
+					scriptString.append(String.format("new__%s.setAttribute(\"%s\",\"%s\");\n", id, entry.getKey(), entry.getValue()));
+				}
+				scriptString.append(String.format("document.querySelector(\"svg\").appendChild(new__%s);\n", id));
+			}
+			scriptString.append("}");
+			webView.getEngine().executeScript(scriptString.toString());
+		}
+	}
+
+	private void loadSvgFile(final VisBVisualisation visBVisualisation) throws IOException {
+		String svgContent = new String(Files.readAllBytes(visBVisualisation.getSvgPath()), StandardCharsets.UTF_8);
 		this.initialiseWebView(svgContent);
 	}
 

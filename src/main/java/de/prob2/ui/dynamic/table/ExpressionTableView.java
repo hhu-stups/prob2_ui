@@ -175,9 +175,16 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		// unless that would make the columns too narrow.
 		final double columnWidth = Math.max(tableView.getWidth() / header.size(), MINIMUM_TABLE_COLUMN_WIDTH);
 		for (int i = 0; i < header.size(); i++) {
-			final int j = i;
+			final int columnIndex = i;
 			final TableColumn<ObservableList<String>, String> column = new TableColumn<>(header.get(i));
-			column.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().get(j)));
+			column.setCellValueFactory(param -> {
+				ObservableList<String> row = param.getValue();
+				if (columnIndex >= row.size()) {
+					return new ReadOnlyObjectWrapper<>("");
+				}
+
+				return new ReadOnlyObjectWrapper<>(row.get(columnIndex));
+			});
 			tableView.getColumns().add(column);
 			column.setPrefWidth(columnWidth);
 			column.getStyleClass().add("expression-table-view-column");

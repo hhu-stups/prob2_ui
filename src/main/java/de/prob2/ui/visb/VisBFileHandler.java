@@ -7,12 +7,14 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetVisBSVGObjectsCommand;
 import de.prob.animator.command.LoadVisBCommand;
 import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
+import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
@@ -53,10 +55,13 @@ public class VisBFileHandler {
 		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
 		currentTrace.getStateSpace().execute(readEventsCmd);
 		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
-
 		List<VisBItem> items = loadItems();
 
-		return new VisBVisualisation(visBEvents, items, svgPath);
+		GetVisBSVGObjectsCommand command = new GetVisBSVGObjectsCommand();
+		currentTrace.getStateSpace().execute(command);
+		List<VisBSVGObject> visBSVGObjects = command.getSvgObjects();
+
+		return new VisBVisualisation(visBEvents, items, svgPath, visBSVGObjects);
 	}
 
 	public List<VisBItem> loadItems() {
