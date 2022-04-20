@@ -22,14 +22,14 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.ChoiceBox?>
-<fx:root title="Simulator" type="SimulatorStage" width="900" height="500" minHeight="500" minWidth="900" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root title="Simulator" type="SimulatorStage" width="1200" height="500" minHeight="500" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<ScrollPane prefWidth="900" prefHeight="500" fitToHeight="true" fitToWidth="true">
-				<SplitPane dividerPositions="0.75" orientation="HORIZONTAL">
+			<ScrollPane prefWidth="1200" prefHeight="500" fitToHeight="true" fitToWidth="true">
+				<SplitPane dividerPositions="0.6" orientation="HORIZONTAL">
 					<AnchorPane>
 						<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
@@ -125,8 +125,19 @@
 							</ScrollPane>
 						</VBox>
 					</AnchorPane>
-					<VBox>
-						<ChoiceBox fx:id="cbSimulation"/>
+					<VBox spacing="5.0">
+						<Label text="%simulation.label.model"/>
+						<HBox>
+							<ChoiceBox fx:id="cbSimulation"/>
+							<Button fx:id="btRemoveSimulation" onAction="#removeSimulation">
+								<graphic>
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 1.5}" />
+								</graphic>
+								<tooltip>
+									<Tooltip text="%common.buttons.cancel" />
+								</tooltip>
+							</Button>
+						</HBox>
 						<ListView fx:id="simulationDebugItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
 					</VBox>
 				</SplitPane>

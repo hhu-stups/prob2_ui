@@ -210,6 +210,9 @@ public class SimulatorStage extends Stage {
 	@FXML
 	private ChoiceBox<SimulationModel> cbSimulation;
 
+	@FXML
+	private Button btRemoveSimulation;
+
 	private final StageManager stageManager;
 
 	private final CurrentProject currentProject;
@@ -338,6 +341,11 @@ public class SimulatorStage extends Stage {
 		});
 
 		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			configurationPath.set(null);
+			simulationDebugItems.getItems().clear();
+			simulationItems.itemsProperty().unbind();
+			noSimulations.unbind();
+
 			this.loadSimulationIntoSimulator(to);
 			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
 			if(to != null) {
@@ -348,6 +356,8 @@ public class SimulatorStage extends Stage {
 				simulationItems.setItems(FXCollections.observableArrayList());
 			}
 		});
+
+		btRemoveSimulation.disableProperty().bind(cbSimulation.getSelectionModel().selectedItemProperty().isNull());
 	}
 
 
@@ -502,7 +512,6 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private void checkMachine() {
-		Machine machine = currentProject.getCurrentMachine();
 		simulationItemHandler.handleMachine(cbSimulation.getSelectionModel().getSelectedItem());
 	}
 
@@ -538,6 +547,15 @@ public class SimulatorStage extends Stage {
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}
+	}
+
+	@FXML
+	private void removeSimulation() {
+		SimulationModel simulationModel = cbSimulation.getSelectionModel().getSelectedItem();
+		if(simulationModel == null) {
+			return;
+		}
+		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
 	}
 
 
