@@ -5,14 +5,13 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 
 <fx:root type="Menu" text="%menu.view" xmlns:fx="http://javafx.com/fxml/1">
-	<MenuItem fx:id="viewMenu_default" text="%menu.view.items.zoomDefault"
-		onAction="#handleDefaultFontSize" accelerator="Shortcut+'0'" />
-	<MenuItem fx:id="viewMenu_bigger" text="%menu.view.items.zoomIn"
-		accelerator="Shortcut + '+'" onAction="#handleIncreaseFontSize" />
-	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.items.zoomOut"
-		accelerator="Shortcut + '-'" onAction="#handleDecreaseFontSize" />
+	<MenuItem fx:id="viewMenu_default" text="%menu.view.items.zoomDefault" visible="false" onAction="#handleDefaultFontSize" mnemonicParsing="false" />
+	<MenuItem fx:id="fake_viewMenu_default" text="%menu.view.items.zoomDefault" accelerator="Shortcut+'0'" onAction="#handleDefaultFontSize" mnemonicParsing="false" />
+	<MenuItem fx:id="viewMenu_bigger" text="%menu.view.items.zoomIn" visible="false" onAction="#handleIncreaseFontSize" mnemonicParsing="false" />
+	<MenuItem fx:id="fake_viewMenu_bigger" text="%menu.view.items.zoomIn" accelerator="Shortcut+'+'" onAction="#handleIncreaseFontSize" mnemonicParsing="false" />
+	<MenuItem fx:id="viewMenu_smaller" text="%menu.view.items.zoomOut" visible="false" onAction="#handleDecreaseFontSize" mnemonicParsing="false" />
+	<MenuItem fx:id="fake_viewMenu_smaller" text="%menu.view.items.zoomOut" accelerator="Shortcut+'-'" onAction="#handleDecreaseFontSize" mnemonicParsing="false" />
 	<SeparatorMenuItem />
-	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.items.enterFullScreen"
-		onAction="#handleFullScreen" accelerator="Shortcut+Ctrl+F" />
+	<MenuItem fx:id="fullScreenMenuItem" text="%menu.view.items.enterFullScreen" onAction="#handleFullScreen" accelerator="Shortcut+Ctrl+F" />
 </fx:root>
 
