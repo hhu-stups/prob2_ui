@@ -399,13 +399,7 @@ public class SimulatorStage extends Stage {
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
-			configurationPath.set(path);
-			injector.getInstance(SimulationChoosingStage.class).setPath(path);
-			lbTime.setText("");
-			this.time = 0;
-			currentProject.getCurrentMachine().getSimulations().forEach(SimulationModel::reset);
-			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
-			loadSimulationItems();
+			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(path, Collections.emptyList()));
 		}
 	}
 
@@ -540,6 +534,7 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
 			lbTime.setText("");
 			this.time = 0;
+			simulation.reset();
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}
