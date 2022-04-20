@@ -12,6 +12,7 @@ import javafx.collections.FXCollections;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 @JsonPropertyOrder({
 		"path",
@@ -80,5 +81,18 @@ public class SimulationModel {
 			return "";
 		}
 		return path.get().toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		SimulationModel that = (SimulationModel) o;
+		return Objects.equals(path, that.path);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(path);
 	}
 }

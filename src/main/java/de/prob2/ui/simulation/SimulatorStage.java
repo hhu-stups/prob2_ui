@@ -64,6 +64,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -111,6 +112,24 @@ public class SimulatorStage extends Stage {
 
 				menuItems.add(checkItem);
 				menuItems.add(removeItem);
+
+				Menu copyMenu = new Menu(bundle.getString("simulation.contextMenu.copy"));
+				copyMenu.getItems().clear();
+				for(SimulationModel model : currentProject.getCurrentMachine().getSimulations()) {
+					SimulationModel simulationModel = cbSimulation.getSelectionModel().getSelectedItem();
+					if(simulationModel.equals(model)) {
+						continue;
+					}
+					MenuItem menuItem = new MenuItem(model.getPath().toString());
+					menuItem.setOnAction(e -> {
+						if(!model.getSimulationItems().contains(item)) {
+							model.getSimulationItems().add(item);
+						}
+					});
+					copyMenu.getItems().add(menuItem);
+				}
+				menuItems.add(copyMenu);
+				copyMenu.setDisable(copyMenu.getItems().isEmpty());
 
 				MenuItem showTraces = new MenuItem(bundle.getString("simulation.contextMenu.showTraces"));
 				showTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
