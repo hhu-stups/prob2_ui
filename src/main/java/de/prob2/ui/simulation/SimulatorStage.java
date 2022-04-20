@@ -60,6 +60,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -177,9 +178,6 @@ public class SimulatorStage extends Stage {
 	private Button btAddSimulation;
 
 	@FXML
-	private Button btManageDefaultSimulation;
-
-	@FXML
 	private Label lbTime;
 
 	@FXML
@@ -208,6 +206,9 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private TableColumn<SimulationItem, String> simulationConfigurationColumn;
+
+	@FXML
+	private ChoiceBox<Path> cbSimulation;
 
 	private final StageManager stageManager;
 
@@ -305,11 +306,9 @@ public class SimulatorStage extends Stage {
 			resetSimulator();
 		});
 
-		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadSimulationFromMachine(currentProject.getCurrentMachine()));
+		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadSimulationsFromMachine(currentProject.getCurrentMachine()));
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			btManageDefaultSimulation.disableProperty().unbind();
-			btManageDefaultSimulation.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(configurationPath.isNull()));
 			configurationPath.set(null);
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
@@ -321,7 +320,6 @@ public class SimulatorStage extends Stage {
 				noSimulations.set(true);
 				simulationItems.setItems(FXCollections.observableArrayList());
 			}
-			loadSimulationFromMachine(to);
 		};
 
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -344,6 +342,9 @@ public class SimulatorStage extends Stage {
 				simulationItemHandler.checkItem(item, false);
 			}
 		});
+
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> loadSimulationsFromMachine(to));
+		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> this.loadSimulationIntoSimulator(to));
 	}
 
 
@@ -399,7 +400,7 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(SimulationChoosingStage.class).setPath(path);
 			lbTime.setText("");
 			this.time = 0;
-			currentProject.getCurrentMachine().getSimulations().forEach(SimulationItem::reset);
+			currentProject.getCurrentMachine().getSimulationItems().forEach(SimulationItem::reset);
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}
@@ -488,7 +489,7 @@ public class SimulatorStage extends Stage {
 				} else {
 					Platform.runLater(() -> {
 						stopSimulator(realTimeSimulator);
-						loadSimulationFromMachine(currentProject.getCurrentMachine());
+						loadSimulationIntoSimulator(cbSimulation.getSelectionModel().getSelectedItem());
 					});
 				}
 			}
@@ -521,53 +522,25 @@ public class SimulatorStage extends Stage {
 		visBStage.toFront();
 	}
 
-	@FXML
-	public void manageDefaultSimulation() {
-		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
-		defaultPathDialog.initOwner(this);
-		defaultPathDialog.initStrings(
-			"simulation.defaultSimulation.header",
-			"simulation.defaultSimulation.text",
-			"simulation.noDefaultSimulation.text",
-			"simulation.defaultSimulation.load",
-			"simulation.defaultSimulation.set",
-			"simulation.defaultSimulation.reset"
-		);
-		final Path loadedPathRelative = currentProject.getLocation().relativize(configurationPath.get());
-		final Machine currentMachine = currentProject.getCurrentMachine();
-		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getSimulation());
-		defaultPathDialog.showAndWait().ifPresent(action -> {
-			switch (action) {
-				case LOAD_DEFAULT:
-					this.loadSimulationFromMachine(currentMachine);
-					break;
-				
-				case SET_CURRENT_AS_DEFAULT:
-					currentMachine.setSimulation(loadedPathRelative);
-					break;
-				
-				case UNSET_DEFAULT:
-					currentMachine.setSimulation(null);
-					break;
-				
-				default:
-					throw new AssertionError("Unhandled action: " + action);
-			}
-		});
+	// TODO: And loading simulation into simulator
+
+	public void loadSimulationsFromMachine(Machine machine) {
+		if(machine == null) {
+			return;
+		}
+		cbSimulation.itemsProperty().unbind();
+		cbSimulation.itemsProperty().bind(machine.simulationsProperty());
 	}
 
-	public void loadSimulationFromMachine(Machine machine) {
+	public void loadSimulationIntoSimulator(Path simulation) {
 		configurationPath.set(null);
-		if(machine != null) {
-			Path simulation = machine.getSimulation();
-			configurationPath.set(simulation == null ? null : currentProject.getLocation().resolve(simulation));
-			if(simulation != null) {
-				injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
-				lbTime.setText("");
-				this.time = 0;
-				SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
-				loadSimulationItems();
-			}
+		configurationPath.set(simulation == null ? null : currentProject.getLocation().resolve(simulation));
+		if(simulation != null) {
+			injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
+			lbTime.setText("");
+			this.time = 0;
+			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
+			loadSimulationItems();
 		}
 	}
 }

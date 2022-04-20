@@ -71,7 +71,7 @@ public class VOManager {
 			case TRACE_REPLAY:
 				return injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(machine).stream();
 			case SIMULATION:
-				return machine.getSimulations().stream();
+				return machine.getSimulationItems().stream();
 			default:
 				throw new RuntimeException("Validation technique is not valid: " + validationTechnique);
 		}

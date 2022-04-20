@@ -52,7 +52,7 @@ public class SimulationItemHandler {
 	}
 
 	public List<SimulationItem> getItems(final Machine machine) {
-		return machine.getSimulations();
+		return machine.getSimulationItems();
 	}
 
 	public Optional<SimulationItem> addItem(final Machine machine, final SimulationItem item) {
@@ -201,7 +201,7 @@ public class SimulationItemHandler {
 
 	public void handleMachine(Machine machine) {
 		Thread thread = new Thread(() -> {
-			for (SimulationItem item : machine.getSimulations()) {
+			for (SimulationItem item : machine.getSimulationItems()) {
 				this.checkItem(item, true);
 				if(Thread.currentThread().isInterrupted()) {
 					break;

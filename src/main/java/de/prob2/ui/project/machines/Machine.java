@@ -1,6 +1,5 @@
 package de.prob2.ui.project.machines;
 
-import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.io.MoreFiles;
 
-import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
@@ -29,7 +27,6 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
 import de.prob2.ui.vomanager.INameable;
-import de.prob2.ui.vomanager.Requirement;
 import de.prob2.ui.vomanager.ValidationObligation;
 import de.prob2.ui.vomanager.ValidationTask;
 import javafx.application.Platform;
@@ -66,7 +63,7 @@ import javafx.collections.ObservableSet;
 	"testCases",
 	"traces",
 	"modelcheckingItems",
-	"simulation",
+	"simulations",
 	"visBVisualisation",
 	"historyChartItems"
 })
@@ -139,7 +136,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
-	private final ObjectProperty<Path> simulation;
+	private final ListProperty<Path> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
 	@JsonIgnore
@@ -170,7 +167,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-		this.simulation = new SimpleObjectProperty<>(this, "simulation", null);
+		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
 		this.initListeners();
@@ -241,7 +238,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
-		this.simulationProperty().addListener(changedListener);
+		this.simulationsProperty().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.historyChartItemsProperty().addListener(changedListener);
 
@@ -461,7 +458,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 	}
 
 	@JsonProperty("simulationItems")
-	public List<SimulationItem> getSimulations() {
+	public List<SimulationItem> getSimulationItems() {
 		return simulationItems.get();
 	}
 
@@ -528,16 +525,19 @@ public class Machine implements DescriptionView.Describable, INameable {
 		return this.location;
 	}
 
-	public ObjectProperty<Path> simulationProperty() {
-		return simulation;
+	public ListProperty<Path> simulationsProperty() {
+		return simulations;
 	}
 
-	public Path getSimulation() {
-		return simulation.get();
+	@JsonProperty("simulations")
+	public List<Path> getSimulations() {
+		return simulations.get();
 	}
 
-	public void setSimulation(Path simulation) {
-		this.simulationProperty().set(simulation);
+	@JsonProperty
+	public void setSimulations(List<Path> simulations) {
+		this.simulationsProperty().clear();
+		this.simulationsProperty().addAll(simulations);
 	}
 
 	public ObjectProperty<Path> visBVisualizationProperty() {

@@ -508,6 +508,21 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			project.set("requirements", projectRequirements);
 		}
 	}
+
+	private static void updateV23Machine(final ObjectNode machine) {
+		ArrayNode simulations = machine.arrayNode();
+		if(machine.has("simulation")) {
+			JsonNode jsonNode = machine.get("simulation");
+			machine.remove("simulation");
+			if(!jsonNode.isNull()) {
+				String simulation = checkText(jsonNode);
+				if(!simulation.isEmpty()) {
+					simulations.add(simulation);
+				}
+			}
+		}
+		machine.set("simulations", simulations);
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -596,6 +611,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 22) {
 				updateV22Project(oldObject);
+			}
+			if (oldVersion <= 23) {
+				updateV23Machine(machine);
 			}
 		});
 		

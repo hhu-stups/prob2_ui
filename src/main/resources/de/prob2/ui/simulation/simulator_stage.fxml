@@ -21,6 +21,7 @@
 <?import de.prob2.ui.sharedviews.NavigationButtons?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.ChoiceBox?>
 <fx:root title="Simulator" type="SimulatorStage" width="900" height="500" minHeight="500" minWidth="900" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -66,14 +67,6 @@
 									</graphic>
 									<tooltip>
 										<Tooltip text="%common.buttons.cancel" />
-									</tooltip>
-								</Button>
-								<Button fx:id="btManageDefaultSimulation" onAction="#manageDefaultSimulation">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG" bindableFontSize="${fontSize.fontSize + 2}" />
-									</graphic>
-									<tooltip>
-										<Tooltip text="%simulation.button.manageDefaultSimulation" />
 									</tooltip>
 								</Button>
 								<Spacer/>
@@ -132,7 +125,10 @@
 							</ScrollPane>
 						</VBox>
 					</AnchorPane>
-					<ListView fx:id="simulationDebugItems" styleClass="list-view"/>
+					<VBox>
+						<ChoiceBox fx:id="cbSimulation"/>
+						<ListView fx:id="simulationDebugItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
+					</VBox>
 				</SplitPane>
 			</ScrollPane>
 		</Scene>
