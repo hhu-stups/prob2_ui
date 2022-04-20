@@ -139,9 +139,9 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
-	private ObjectProperty<Path> simulation;
-	private ObjectProperty<Path> visBVisualisation;
-	private ListProperty<String> historyChartItems;
+	private final ObjectProperty<Path> simulation;
+	private final ObjectProperty<Path> visBVisualisation;
+	private final ListProperty<String> historyChartItems;
 	@JsonIgnore
 	private PatternManager patternManager = new PatternManager();
 	@JsonIgnore
