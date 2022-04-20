@@ -4,8 +4,12 @@ package de.prob2.ui.simulation.choice;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.SimulationItemHandler;
+import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.beans.NamedArg;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -18,6 +22,7 @@ import javafx.stage.Stage;
 import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -76,6 +81,8 @@ public class SimulationChoosingStage extends Stage {
 
 	private final SimulationChoiceBindings simulationChoiceBindings;
 
+	private SimulationModel simulation;
+
 	private SimulationItem lastItem;
 
 	@Inject
@@ -115,7 +122,7 @@ public class SimulationChoosingStage extends Stage {
 				return;
 			}
 			lastItem = this.extractItem();
-			this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), lastItem);
+			this.simulationItemHandler.addItem(simulation, lastItem);
 			this.close();
 		});
 		btCheck.setOnAction(e -> {
@@ -126,7 +133,7 @@ public class SimulationChoosingStage extends Stage {
 				return;
 			}
 			final SimulationItem newItem = this.extractItem();
-			final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(currentProject.getCurrentMachine(), newItem);
+			final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(simulation, newItem);
 			lastItem = existingItem.orElse(newItem);
 			this.close();
 			this.simulationItemHandler.checkItem(existingItem.orElse(newItem), false);
@@ -245,5 +252,9 @@ public class SimulationChoosingStage extends Stage {
 
 	public SimulationItem getLastItem() {
 		return lastItem;
+	}
+
+	public void setSimulation(SimulationModel simulation) {
+		this.simulation = simulation;
 	}
 }

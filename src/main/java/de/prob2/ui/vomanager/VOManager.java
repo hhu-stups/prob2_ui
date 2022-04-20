@@ -9,6 +9,7 @@ import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.TraceViewHandler;
+import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -71,7 +72,7 @@ public class VOManager {
 			case TRACE_REPLAY:
 				return injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(machine).stream();
 			case SIMULATION:
-				return machine.getSimulationItems().stream();
+				return machine.getSimulations().stream().flatMap(model -> model.getSimulationItems().stream());
 			default:
 				throw new RuntimeException("Validation technique is not valid: " + validationTechnique);
 		}

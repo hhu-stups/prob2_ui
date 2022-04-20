@@ -523,6 +523,31 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 		machine.set("simulations", simulations);
 	}
+
+	private static void updateV24Machine(final ObjectNode machine) {
+		ArrayNode simulations = machine.arrayNode();
+		if(machine.has("simulations")) {
+			ArrayNode arrayNode = checkArray(machine.get("simulations"));
+			int i = 0;
+			for(JsonNode jsonNode : arrayNode) {
+				ObjectNode objectNode = machine.objectNode();
+				objectNode.set("path", jsonNode);
+				if(i == 0) {
+					// Adapt simulation items from machine
+					// In earlier versions of machine, there was only one SimB file
+					objectNode.set("simulationItems", checkArray(machine.get("simulationItems")));
+				} else {
+					objectNode.set("simulationItems", machine.arrayNode());
+				}
+				simulations.add(objectNode);
+				i++;
+			}
+		}
+		if(machine.has("simulationItems")) {
+			machine.remove("simulationItems");
+		}
+		machine.set("simulations", simulations);
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -614,6 +639,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 23) {
 				updateV23Machine(machine);
+			}
+			if (oldVersion <= 24) {
+				updateV24Machine(machine);
 			}
 		});
 		

@@ -51,12 +51,12 @@ public class SimulationItemHandler {
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
-	public List<SimulationItem> getItems(final Machine machine) {
-		return machine.getSimulationItems();
+	public List<SimulationItem> getItems(final SimulationModel simulationModel) {
+		return simulationModel.getSimulationItems();
 	}
 
-	public Optional<SimulationItem> addItem(final Machine machine, final SimulationItem item) {
-		final List<SimulationItem> items = this.getItems(machine);
+	public Optional<SimulationItem> addItem(final SimulationModel simulationModel, final SimulationItem item) {
+		final List<SimulationItem> items = this.getItems(simulationModel);
 		final Optional<SimulationItem> existingItem = items.stream().filter(item::equals).findAny();
 		if(!existingItem.isPresent()) {
 			items.add(item);
@@ -64,8 +64,8 @@ public class SimulationItemHandler {
 		return existingItem;
 	}
 
-	public void removeItem(final Machine machine, SimulationItem item) {
-		final List<SimulationItem> items = this.getItems(machine);
+	public void removeItem(final SimulationModel simulationModel, SimulationItem item) {
+		final List<SimulationItem> items = this.getItems(simulationModel);
 		items.remove(item);
 	}
 
@@ -199,9 +199,9 @@ public class SimulationItemHandler {
 		}
 	}
 
-	public void handleMachine(Machine machine) {
+	public void handleMachine(SimulationModel simulationModel) {
 		Thread thread = new Thread(() -> {
-			for (SimulationItem item : machine.getSimulationItems()) {
+			for (SimulationItem item : simulationModel.getSimulationItems()) {
 				this.checkItem(item, true);
 				if(Thread.currentThread().isInterrupted()) {
 					break;

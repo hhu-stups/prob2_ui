@@ -107,7 +107,7 @@ public class SimulatorStage extends Stage {
 				checkItem.setOnAction(e-> simulationItemHandler.checkItem(this.getItem(), false));
 
 				MenuItem removeItem = new MenuItem(bundle.getString("simulation.contextMenu.remove"));
-				removeItem.setOnAction(e -> simulationItemHandler.removeItem(currentProject.getCurrentMachine(), this.getItem()));
+				removeItem.setOnAction(e -> simulationItemHandler.removeItem(cbSimulation.getSelectionModel().getSelectedItem(), this.getItem()));
 
 				menuItems.add(checkItem);
 				menuItems.add(removeItem);
@@ -208,7 +208,7 @@ public class SimulatorStage extends Stage {
 	private TableColumn<SimulationItem, String> simulationConfigurationColumn;
 
 	@FXML
-	private ChoiceBox<Path> cbSimulation;
+	private ChoiceBox<SimulationModel> cbSimulation;
 
 	private final StageManager stageManager;
 
@@ -313,13 +313,7 @@ public class SimulatorStage extends Stage {
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 			noSimulations.unbind();
-			if(to != null) {
-				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
-				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
-			} else {
-				noSimulations.set(true);
-				simulationItems.setItems(FXCollections.observableArrayList());
-			}
+			loadSimulationsFromMachine(to);
 		};
 
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -343,8 +337,17 @@ public class SimulatorStage extends Stage {
 			}
 		});
 
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> loadSimulationsFromMachine(to));
-		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> this.loadSimulationIntoSimulator(to));
+		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			this.loadSimulationIntoSimulator(to);
+			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
+			if(to != null) {
+				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
+				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
+			} else {
+				noSimulations.set(true);
+				simulationItems.setItems(FXCollections.observableArrayList());
+			}
+		});
 	}
 
 
@@ -400,7 +403,7 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(SimulationChoosingStage.class).setPath(path);
 			lbTime.setText("");
 			this.time = 0;
-			currentProject.getCurrentMachine().getSimulationItems().forEach(SimulationItem::reset);
+			currentProject.getCurrentMachine().getSimulations().forEach(SimulationModel::reset);
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
 			loadSimulationItems();
 		}
@@ -506,7 +509,7 @@ public class SimulatorStage extends Stage {
 	@FXML
 	private void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
-		simulationItemHandler.handleMachine(machine);
+		simulationItemHandler.handleMachine(cbSimulation.getSelectionModel().getSelectedItem());
 	}
 
 	@FXML
@@ -522,8 +525,6 @@ public class SimulatorStage extends Stage {
 		visBStage.toFront();
 	}
 
-	// TODO: And loading simulation into simulator
-
 	public void loadSimulationsFromMachine(Machine machine) {
 		if(machine == null) {
 			return;
@@ -532,9 +533,9 @@ public class SimulatorStage extends Stage {
 		cbSimulation.itemsProperty().bind(machine.simulationsProperty());
 	}
 
-	public void loadSimulationIntoSimulator(Path simulation) {
+	public void loadSimulationIntoSimulator(SimulationModel simulation) {
 		configurationPath.set(null);
-		configurationPath.set(simulation == null ? null : currentProject.getLocation().resolve(simulation));
+		configurationPath.set(simulation == null ? null : currentProject.getLocation().resolve(simulation.getPath()));
 		if(simulation != null) {
 			injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
 			lbTime.setText("");
@@ -543,4 +544,6 @@ public class SimulatorStage extends Stage {
 			loadSimulationItems();
 		}
 	}
+
+
 }

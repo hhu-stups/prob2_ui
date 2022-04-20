@@ -18,6 +18,7 @@ import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
+import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -59,7 +60,6 @@ import javafx.collections.ObservableSet;
 	"ltlPatterns",
 	"symbolicCheckingFormulas",
 	"symbolicAnimationFormulas",
-	"simulationItems",
 	"testCases",
 	"traces",
 	"modelcheckingItems",
@@ -132,11 +132,10 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
-	private final ListProperty<SimulationItem> simulationItems;
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final SetProperty<Path> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
-	private final ListProperty<Path> simulations;
+	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
 	@JsonIgnore
@@ -163,7 +162,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
 		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
-		this.simulationItems = new SimpleListProperty<>(this, "simulationItems", FXCollections.observableArrayList());
+
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleSetProperty<>(this, "traces", FXCollections.observableSet());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
@@ -234,7 +233,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicCheckingFormulasProperty().addListener(changedListener);
 		this.symbolicAnimationFormulasProperty().addListener(changedListener);
-		this.simulationItemsProperty().addListener(changedListener);
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
@@ -293,7 +291,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		patternManager = new PatternManager();
 		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::reset);
 		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
-		simulationItems.forEach(SimulationItem::reset);
+		simulations.forEach(SimulationModel::reset);
 		testCases.forEach(TestCaseGenerationItem::reset);
 		modelcheckingItems.forEach(ModelCheckingItem::reset);
 	}
@@ -453,20 +451,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.symbolicAnimationFormulasProperty().setAll(symbolicAnimationFormulas);
 	}
 
-	public ListProperty<SimulationItem> simulationItemsProperty() {
-		return simulationItems;
-	}
-
-	@JsonProperty("simulationItems")
-	public List<SimulationItem> getSimulationItems() {
-		return simulationItems.get();
-	}
-
-	@JsonProperty
-	private void setSimulationItems(final List<SimulationItem> simulationItems) {
-		this.simulationItemsProperty().setAll(simulationItems);
-	}
-
 	public ListProperty<TestCaseGenerationItem> testCasesProperty() {
 		return testCases;
 	}
@@ -525,17 +509,17 @@ public class Machine implements DescriptionView.Describable, INameable {
 		return this.location;
 	}
 
-	public ListProperty<Path> simulationsProperty() {
+	public ListProperty<SimulationModel> simulationsProperty() {
 		return simulations;
 	}
 
 	@JsonProperty("simulations")
-	public List<Path> getSimulations() {
+	public List<SimulationModel> getSimulations() {
 		return simulations.get();
 	}
 
 	@JsonProperty
-	public void setSimulations(List<Path> simulations) {
+	public void setSimulations(List<SimulationModel> simulations) {
 		this.simulationsProperty().clear();
 		this.simulationsProperty().addAll(simulations);
 	}
