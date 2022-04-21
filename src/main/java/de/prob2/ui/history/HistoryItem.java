@@ -5,6 +5,7 @@ import java.util.List;
 
 import de.prob.statespace.Trace;
 
+import de.prob.statespace.TraceElement;
 import de.prob2.ui.operations.OperationItem;
 
 public class HistoryItem {
@@ -15,11 +16,15 @@ public class HistoryItem {
 		this.trace = trace;
 		this.index = index;
 	}
+
+	public static HistoryItem extractItem(final Trace trace, int index) {
+		return new HistoryItem(trace, index);
+	}
 	
 	public static List<HistoryItem> itemsForTrace(final Trace trace) {
 		final List<HistoryItem> items = new ArrayList<>();
 		for (int i = -1; i <= trace.getHead().getIndex(); i++) {
-			items.add(new HistoryItem(trace, i));
+			items.add(extractItem(trace, i));
 		}
 		return items;
 	}

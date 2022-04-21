@@ -335,9 +335,9 @@ public final class HistoryChartStage extends Stage {
 		final Trace trace = currentTrace.get();
 		if (trace != null) {
 			final HistoryItem startItem = this.startChoiceBox.getValue();
-			final List<HistoryItem> items = HistoryItem.itemsForTrace(trace);
-			this.startChoiceBox.getItems().setAll(items);
-			this.startChoiceBox.setValue(startItem == null ? items.get(items.size()-1) : startItem);
+			final HistoryItem item = HistoryItem.extractItem(trace, trace.size() - 1);
+			this.startChoiceBox.getItems().add(item);
+			this.startChoiceBox.setValue(startItem == null ? item : startItem);
 		} else {
 			this.startChoiceBox.getItems().setAll((HistoryItem)null);
 			this.startChoiceBox.setValue(null);
