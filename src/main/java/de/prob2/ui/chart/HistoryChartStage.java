@@ -190,6 +190,10 @@ public final class HistoryChartStage extends Stage {
 		});
 		
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if(to == null) {
+				this.formulaList.getItems().clear();
+				return;
+			}
 			if(from != to) {
 				if (!to.getHistoryChartItems().isEmpty()) {
 					to.getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s, FormulaExpand.EXPAND)));
