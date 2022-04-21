@@ -209,10 +209,11 @@ public final class HistoryChartStage extends Stage {
 				.bind(Bindings.isEmpty(this.formulaList.getSelectionModel().getSelectedIndices()));
 
 		this.separateChartsCheckBox.selectedProperty().addListener((observable, from, to) -> {
+			this.chartsPane.getChildren().clear();
 			if (to) {
-				this.chartsPane.getChildren().setAll(this.separateCharts);
+				this.chartsPane.getChildren().addAll(this.separateCharts);
 			} else {
-				this.chartsPane.getChildren().setAll(this.singleChart);
+				this.chartsPane.getChildren().addAll(this.singleChart);
 			}
 		});
 		this.separateChartsCheckBox.setSelected(true);
@@ -375,7 +376,8 @@ public final class HistoryChartStage extends Stage {
 		for (int i = 0; i < newDatas.size(); i++) {
 			final List<XYChart.Data<Number, Number>> newData = newDatas.get(i);
 			moveXValues(elementCounter, newData);
-			this.singleChart.getData().get(i).getData().setAll(newData);
+			this.singleChart.getData().get(i).getData().clear();
+			this.singleChart.getData().get(i).getData().addAll(newData);
 		}
 		updateMaxXBound(newDatas);
 	}
