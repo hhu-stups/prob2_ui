@@ -34,7 +34,6 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -147,8 +146,6 @@ public final class HistoryChartStage extends Stage {
 	private CheckBox separateChartsCheckBox;
 	@FXML
 	private CheckBox rectangularLineChartCheckBox;
-	@FXML
-	private ChoiceBox<HistoryItem> startChoiceBox;
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -223,19 +220,16 @@ public final class HistoryChartStage extends Stage {
 		});
 		this.rectangularLineChartCheckBox.setSelected(true);
 
-		this.startChoiceBox.setConverter(new HistoryItemStringConverter());
-		this.startChoiceBox.valueProperty().addListener((observable, from, to) -> this.updateCharts());
-
 		this.singleChart.prefWidthProperty().bind(this.chartsScrollPane.widthProperty().subtract(5));
 		this.singleChart.prefHeightProperty().bind(this.chartsScrollPane.heightProperty().subtract(5));
 
 		this.showingProperty().addListener((observable, from, to) -> {
 			if (to) {
-				this.updateStartChoiceBox();
+				this.updateCharts();
 			}
 		});
-		this.currentTrace.addListener((observable, from, to) -> this.updateStartChoiceBox());
-		this.updateStartChoiceBox();
+		this.currentTrace.addListener((observable, from, to) -> this.updateCharts());
+		this.updateCharts();
 	}
 
 	@FXML
@@ -328,25 +322,6 @@ public final class HistoryChartStage extends Stage {
 		}
 	}
 
-	private void updateStartChoiceBox() {
-		if (!this.isShowing()) {
-			return;
-		}
-		
-		final Trace trace = currentTrace.get();
-		if (trace != null) {
-			final HistoryItem startItem = this.startChoiceBox.getValue();
-			final HistoryItem item = HistoryItem.extractItem(trace, trace.size() - 1);
-			this.startChoiceBox.getItems().add(item);
-			this.startChoiceBox.setValue(startItem == null ? item : startItem);
-		} else {
-			this.startChoiceBox.getItems().setAll((HistoryItem)null);
-			this.startChoiceBox.setValue(null);
-		}
-
-		this.updateCharts();
-	}
-
 	private void updateCharts() {
 		if (!this.isShowing()) {
 			return;
@@ -360,11 +335,10 @@ public final class HistoryChartStage extends Stage {
 		int elementCounter = 0;
 		final Trace trace = this.currentTrace.get();
 		if (trace != null) {
-			final int startIndex = this.startChoiceBox.getValue().getIndex();
 
 			TraceElement element = trace.getCurrent();
 			boolean showErrors = true;
-			while (element != null && element.getIndex() >= startIndex) {
+			while (element != null && element.getIndex() >= 0) {
 				tryEvalFormulas(newDatas, elementCounter, element, showErrors);
 				element = element.getPrevious();
 				elementCounter++;
