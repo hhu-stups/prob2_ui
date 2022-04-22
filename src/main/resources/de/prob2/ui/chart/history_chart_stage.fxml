@@ -21,8 +21,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+<?import javafx.scene.control.Spinner?>
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1" title="%chart.historyChart.stage.title"
-	minWidth="320" minHeight="240">
+		 minWidth="320" minHeight="240">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
@@ -62,10 +63,10 @@
 								<VBox spacing="5.0">
 									<Label text="%chart.historyChart.startPosition">
 										<labelFor>
-											<ChoiceBox fx:id="startChoiceBox" />
+											<Spinner fx:id="startSpinner" min="0" max="0" editable="true"/>
 										</labelFor>
 									</Label>
-									<fx:reference source="startChoiceBox" />
+									<fx:reference source="startSpinner" />
 								</VBox>
 							</VBox>
 						</bottom>

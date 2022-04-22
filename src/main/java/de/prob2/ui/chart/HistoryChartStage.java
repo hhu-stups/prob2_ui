@@ -37,6 +37,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
@@ -146,6 +148,8 @@ public final class HistoryChartStage extends Stage {
 	private CheckBox separateChartsCheckBox;
 	@FXML
 	private CheckBox rectangularLineChartCheckBox;
+	@FXML
+	private Spinner<Integer> startSpinner;
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
@@ -228,7 +232,15 @@ public final class HistoryChartStage extends Stage {
 				this.updateCharts();
 			}
 		});
-		this.currentTrace.addListener((observable, from, to) -> this.updateCharts());
+		this.currentTrace.addListener((observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			SpinnerValueFactory<Integer> currentSpinnerFactory = startSpinner.getValueFactory();
+			startSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, to.size(), currentSpinnerFactory.getValue()));
+			this.updateCharts();
+		});
+		startSpinner.valueProperty().addListener((observable, from, to) -> this.updateCharts());
 		this.updateCharts();
 	}
 
@@ -338,7 +350,7 @@ public final class HistoryChartStage extends Stage {
 
 			TraceElement element = trace.getCurrent();
 			boolean showErrors = true;
-			while (element != null && element.getIndex() >= 0) {
+			while (element != null && element.getIndex() >= startSpinner.getValue()) {
 				tryEvalFormulas(newDatas, elementCounter, element, showErrors);
 				element = element.getPrevious();
 				elementCounter++;
