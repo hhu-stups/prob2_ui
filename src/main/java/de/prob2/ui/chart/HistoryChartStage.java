@@ -21,6 +21,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import de.prob2.ui.project.machines.Machine;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -43,6 +44,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
@@ -189,18 +191,16 @@ public final class HistoryChartStage extends Stage {
 			this.updateCharts();
 			this.updateFormulaCodeList();
 		});
-		
+
+		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadFormulas(currentProject.getCurrentMachine()));
+
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if(to == null) {
 				this.formulaList.getItems().clear();
 				return;
 			}
 			if(from != to) {
-				if (!to.getHistoryChartItems().isEmpty()) {
-					to.getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s, FormulaExpand.EXPAND)));
-				} else {
-					this.formulaList.getItems().clear();
-				}
+				loadFormulas(to);
 			}
 		});
 		
@@ -260,7 +260,11 @@ public final class HistoryChartStage extends Stage {
 	private void updateFormulaCodeList() {
 		ArrayList<String> formulaCodeList = new ArrayList<>();
 		this.formulaList.getItems().forEach(b -> formulaCodeList.add(b.getCode()));
-		this.currentProject.currentMachineProperty().get().setHistoryChartItems(formulaCodeList);
+		Machine machine = this.currentProject.currentMachineProperty().get();
+		if(machine == null) {
+			return;
+		}
+		machine.setHistoryChartItems(formulaCodeList);
 	}
 
 	private void removeCharts(final int start, final int end) {
@@ -331,6 +335,17 @@ public final class HistoryChartStage extends Stage {
 			if (this.separateChartsCheckBox.isSelected()) {
 				this.chartsPane.getChildren().add(i, separateChart);
 			}
+		}
+	}
+
+	private void loadFormulas(Machine machine) {
+		if(machine == null) {
+			return;
+		}
+		if (!machine.getHistoryChartItems().isEmpty()) {
+			machine.getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s, FormulaExpand.EXPAND)));
+		} else {
+			this.formulaList.getItems().clear();
 		}
 	}
 

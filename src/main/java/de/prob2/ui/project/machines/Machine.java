@@ -228,7 +228,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.descriptionProperty().addListener(changedListener);
 		this.lastUsedPreferenceNameProperty().addListener(changedListener);
 		this.validationTasksProperty().addListener(changedListener);
-		this.validationObligations.addListener(changedListener);
+		this.validationObligationsProperty().addListener(changedListener);
 		this.ltlFormulasProperty().addListener(changedListener);
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicCheckingFormulasProperty().addListener(changedListener);
@@ -518,7 +518,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		return simulations.get();
 	}
 
-	@JsonProperty
+	@JsonProperty("simulations")
 	public void setSimulations(List<SimulationModel> simulations) {
 		this.simulationsProperty().clear();
 		this.simulationsProperty().addAll(simulations);
@@ -540,11 +540,12 @@ public class Machine implements DescriptionView.Describable, INameable {
 		return historyChartItems;
 	}
 
+	@JsonProperty("historyChartItems")
 	public List<String> getHistoryChartItems() {
 		return historyChartItems.get();
 	}
 
-	@JsonProperty
+	@JsonProperty("historyChartItems")
 	public void setHistoryChartItems(ArrayList<String> historyChartItems) {
 		this.historyChartItems.setValue(FXCollections.observableArrayList(historyChartItems));
 	}
