@@ -193,18 +193,7 @@ public final class HistoryChartStage extends Stage {
 		});
 
 		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadFormulas(currentProject.getCurrentMachine()));
-
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if(to == null) {
-				this.formulaList.getItems().clear();
-				return;
-			}
-			if(from != to) {
-				loadFormulas(to);
-			}
-		});
-		
-		
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> loadFormulas(to));
 
 		this.removeButton.disableProperty()
 				.bind(Bindings.isEmpty(this.formulaList.getSelectionModel().getSelectedIndices()));
@@ -339,13 +328,12 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void loadFormulas(Machine machine) {
+		this.formulaList.getItems().clear();
 		if(machine == null) {
 			return;
 		}
 		if (!machine.getHistoryChartItems().isEmpty()) {
 			machine.getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s, FormulaExpand.EXPAND)));
-		} else {
-			this.formulaList.getItems().clear();
 		}
 	}
 
