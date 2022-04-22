@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
+import com.google.gson.JsonObject;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 
@@ -548,6 +549,23 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 		machine.set("simulations", simulations);
 	}
+
+	private static void updateV25Machine(final ObjectNode machine, final Path projectLocation) {
+		if(machine.has("simulations")) {
+			ArrayNode simulations = checkArray(machine.get("simulations"));
+			for(JsonNode simulation : simulations) {
+				ObjectNode simulationObject = checkObject(simulation);
+				if(!simulationObject.isNull()) {
+					Path simBLocation = Paths.get(checkText(simulationObject.get("path")));
+					if(simBLocation.isAbsolute()) {
+						Path newSimBLocation = projectLocation.getParent().relativize(simBLocation);
+						simulationObject.remove("path");
+						simulationObject.put("path", newSimBLocation.toString());
+					}
+				}
+			}
+		}
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -642,6 +660,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 24) {
 				updateV24Machine(machine);
+			}
+			if (oldVersion <= 25) {
+				updateV25Machine(machine, this.location);
 			}
 		});
 		
