@@ -1,5 +1,9 @@
 package de.prob2.ui.chart;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -15,6 +19,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryItem;
 import de.prob2.ui.internal.StageManager;
@@ -28,27 +33,37 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
 
 @Singleton
 public final class HistoryChartStage extends Stage {
@@ -156,17 +171,20 @@ public final class HistoryChartStage extends Stage {
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
+	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 
 	private final ObservableList<LineChart<Number, Number>> separateCharts;
 
 	@Inject
-	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle) {
+	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+							  final FileChooserManager fileChooserManager, final ResourceBundle bundle) {
 		super();
 
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 
 		this.separateCharts = FXCollections.observableArrayList();
@@ -231,6 +249,56 @@ public final class HistoryChartStage extends Stage {
 		});
 		startSpinner.valueProperty().addListener((observable, from, to) -> this.updateCharts());
 		this.updateCharts();
+		addChartMenu(singleChart);
+	}
+
+	private void addChartMenu(LineChart<Number, Number> chart) {
+		final MenuItem saveImageItem = new MenuItem("Save as Image...");
+		saveImageItem.setOnAction(e -> {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Save History Chart as Image...");
+			fileChooser.getExtensionFilters().addAll(
+					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "png")
+			);
+			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
+			WritableImage image = chart.snapshot(new SnapshotParameters(), null);
+			try {
+				ImageIO.write(SwingFXUtils.fromFXImage(image, null), "PNG", path.toFile());
+			} catch (IOException ex) {
+				// TODO: Show error message
+				ex.printStackTrace();
+			}
+		});
+
+		final MenuItem saveCSVItem = new MenuItem("Save as CSV...");
+		saveCSVItem.setOnAction(e -> {
+			List<String> rows = new ArrayList<>();
+			for(XYChart.Series<Number, Number> series : chart.getData()) {
+				for (XYChart.Data<Number, Number> entry : series.getData()) {
+					rows.add(String.format("%s,%s", entry.getXValue(), entry.getYValue()));
+				}
+			}
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Save History Chart as CSV...");
+			fileChooser.getExtensionFilters().addAll(
+					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "csv")
+			);
+			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
+			try {
+				Files.write(path, rows);
+			} catch (IOException ex) {
+				// TODO: Handle exception
+				ex.printStackTrace();
+			}
+		});
+
+		final ContextMenu menu = new ContextMenu(saveImageItem, saveCSVItem);
+
+		chart.setOnMouseClicked(e -> {
+			if (MouseButton.SECONDARY.equals(e.getButton())) {
+				menu.show(chart.getScene().getWindow(), e.getScreenX(), e.getScreenY());
+			}
+		});
 	}
 
 	@FXML
@@ -281,6 +349,7 @@ public final class HistoryChartStage extends Stage {
 			final LineChart<Number, Number> separateChart = new LineChart<>(separateXAxis, separateYAxis,
 					FXCollections.singletonObservableList(seriesSeparate));
 			separateChart.getStyleClass().add("history-chart");
+			addChartMenu(separateChart);
 
 			seriesSingle.getData().addListener((ListChangeListener<XYChart.Data<Number, Number>>) change -> {
 				// Update the separate chart series whenever the single chart
