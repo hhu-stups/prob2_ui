@@ -253,14 +253,17 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void addChartMenu(LineChart<Number, Number> chart) {
-		final MenuItem saveImageItem = new MenuItem("Save as Image...");
+		final MenuItem saveImageItem = new MenuItem(bundle.getString("chart.historyChart.menus.item.saveAsImage"));
 		saveImageItem.setOnAction(e -> {
 			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle("Save History Chart as Image...");
+			fileChooser.setTitle(bundle.getString("chart.historyChart.fileChooser.saveAsImage"));
 			fileChooser.getExtensionFilters().addAll(
-					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "png")
+					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
 			);
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
+			if(path == null) {
+				return;
+			}
 			WritableImage image = chart.snapshot(new SnapshotParameters(), null);
 			try {
 				ImageIO.write(SwingFXUtils.fromFXImage(image, null), "PNG", path.toFile());
@@ -270,7 +273,7 @@ public final class HistoryChartStage extends Stage {
 			}
 		});
 
-		final MenuItem saveCSVItem = new MenuItem("Save as CSV...");
+		final MenuItem saveCSVItem = new MenuItem(bundle.getString("chart.historyChart.menus.item.saveAsCSV"));
 		saveCSVItem.setOnAction(e -> {
 			List<String> rows = new ArrayList<>();
 			for(XYChart.Series<Number, Number> series : chart.getData()) {
@@ -279,11 +282,14 @@ public final class HistoryChartStage extends Stage {
 				}
 			}
 			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle("Save History Chart as CSV...");
+			fileChooser.setTitle(bundle.getString("chart.historyChart.fileChooser.saveAsCSV"));
 			fileChooser.getExtensionFilters().addAll(
-					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "csv")
+					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv")
 			);
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
+			if(path == null) {
+				return;
+			}
 			try {
 				Files.write(path, rows);
 			} catch (IOException ex) {
