@@ -49,7 +49,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 		this.fontSize = fontSize;
 		this.resultHandler = resultHandler;
 		this.builtinsStage = builtinsStage;
-		this.initModality(Modality.APPLICATION_MODAL);
 	}
 	
 	@FXML
