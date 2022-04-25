@@ -244,10 +244,17 @@ public final class HistoryChartStage extends Stage {
 				return;
 			}
 			SpinnerValueFactory<Integer> currentSpinnerFactory = startSpinner.getValueFactory();
-			startSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, to.size(), currentSpinnerFactory.getValue()));
+			startSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, to.size(), currentSpinnerFactory.getValue() == null ? 0 : currentSpinnerFactory.getValue()));
 			this.updateCharts();
 		});
-		startSpinner.valueProperty().addListener((observable, from, to) -> this.updateCharts());
+		startSpinner.valueProperty().addListener((observable, from, to) -> {
+			// Workaround for a NPE in JavaFX
+			if(to == null) {
+				startSpinner.getValueFactory().setValue(0);
+				return;
+			}
+			this.updateCharts();
+		});
 		this.updateCharts();
 		addChartMenu(singleChart);
 	}
@@ -428,7 +435,8 @@ public final class HistoryChartStage extends Stage {
 
 			TraceElement element = trace.getCurrent();
 			boolean showErrors = true;
-			while (element != null && element.getIndex() >= startSpinner.getValue()) {
+			int value = startSpinner.getValue() == null ? 0 : startSpinner.getValue();
+			while (element != null && element.getIndex() >= value) {
 				tryEvalFormulas(newDatas, elementCounter, element, showErrors);
 				element = element.getPrevious();
 				elementCounter++;
