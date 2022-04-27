@@ -350,17 +350,21 @@ public class VOManagerStage extends Stage {
 	private void updateMachineRequirementsTable(TreeItem<INameable> root) {
 		for (Machine machine : currentProject.getMachines()) {
 			TreeItem<INameable> machineItem = new TreeItem<>(machine);
-			root.getChildren().add(machineItem);
 			for (Requirement requirement : currentProject.getRequirements()) {
 				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
 					TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-					machineItem.getChildren().add(requirementItem);
 					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
 						if (validationObligation.getRequirement().equals(requirement.getName())) {
 							requirementItem.getChildren().add(new TreeItem<>(validationObligation));
 						}
 					}
+					if (!requirementItem.getChildren().isEmpty()) {
+						machineItem.getChildren().add(requirementItem);
+					}
 				}
+			}
+			if (!machineItem.getChildren().isEmpty()) {
+				root.getChildren().add(machineItem);
 			}
 		}
 	}
@@ -368,17 +372,21 @@ public class VOManagerStage extends Stage {
 	private void updateRequirementsMachineTable(TreeItem<INameable> root) {
 		for(Requirement requirement : currentProject.getRequirements()) {
 			TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-			root.getChildren().add(requirementItem);
 			for(Machine machine : currentProject.getMachines()) {
 				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
 					TreeItem<INameable> machineItem = new TreeItem<>(machine);
-					requirementItem.getChildren().add(machineItem);
 					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
 						if (validationObligation.getRequirement().equals(requirement.getName())) {
 							machineItem.getChildren().add(new TreeItem<>(validationObligation));
 						}
 					}
+					if (!machineItem.getChildren().isEmpty()) {
+						requirementItem.getChildren().add(machineItem);
+					}
 				}
+			}
+			if (!requirementItem.getChildren().isEmpty()) {
+				root.getChildren().add(requirementItem);
 			}
 		}
 	}
@@ -386,6 +394,9 @@ public class VOManagerStage extends Stage {
 	public void updateValidationTasksTable() {
 		TreeItem<INameable> root = new TreeItem<>();
 		for(Machine machine : currentProject.getMachines()) {
+			if (machine.getValidationTasks().isEmpty()) {
+				continue;
+			}
 			TreeItem<INameable> machineItem = new TreeItem<>(machine);
 			root.getChildren().add(machineItem);
 			for(ValidationTask validationTask : machine.getValidationTasks()) {
