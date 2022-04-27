@@ -27,7 +27,7 @@
 <?import de.prob2.ui.vomanager.VOEditingBox?>
 <?import de.prob2.ui.vomanager.RequirementsEditingBox?>
 
-<fx:root title="%vomanager.title" type="VOManagerStage" width="1200" height="800" minHeight="800" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root title="%vomanager.title" type="VOManagerStage" width="1200" height="800" minHeight="600" minWidth="800" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
