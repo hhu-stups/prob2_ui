@@ -9,7 +9,7 @@
 		 resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<AnchorPane>
+			<AnchorPane prefWidth="600">
 				<VBox spacing="5" AnchorPane.topAnchor="25"
 					AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
 					AnchorPane.rightAnchor="0">
@@ -55,9 +55,9 @@
 						</VBox.margin>
 					</ButtonBar>
 				</VBox>
-				<Label fx:id="errorExplanationLabel" textFill="#B77300"
+				<Label fx:id="errorExplanationLabel" textFill="#FF0000"
 					AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="20"
-					AnchorPane.rightAnchor="200" />
+					AnchorPane.rightAnchor="50" style="-fx-font-weight: bold; -fx-font-size: 1.5em"/>
 			</AnchorPane>
 		</Scene>
 	</scene>
