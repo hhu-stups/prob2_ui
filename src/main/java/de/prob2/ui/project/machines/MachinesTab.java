@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -271,7 +272,89 @@ public class MachinesTab extends Tab {
 		}
 		
 		try {
-			Files.write(selected, Arrays.asList("MACHINE " + machineName, "END"));
+			final String extension = MoreFiles.getFileExtension(relative);
+			List<String> content = Collections.EMPTY_LIST;
+			switch (extension) {
+				// Classical B
+				case "mch":
+					content = Arrays.asList("MACHINE " + machineName, "END");
+					break;
+				case "ref":
+					// TODO Throws "expecting identifier" error since no machine has been named -> useful?
+					content = Arrays.asList("REFINEMENT " + machineName, "REFINES", "END");
+					break;
+				case "imp":
+					// TODO Throws "expecting identifier" error since no machine has been named -> useful?
+					content = Arrays.asList("IMPLEMENTATION " + machineName, "REFINES", "END");
+					break;
+				case "sys":
+					// TODO Treated as Event-B -> error? (ALLOW_NEW_OPERATIONS_IN_REFINEMENT to TRUE)
+					content = Arrays.asList("SYSTEM", "    " + machineName, "END");
+					break;
+				case "def":
+					// TODO Throws "Expecting identifier literal, double quotation" error (expects to include definitions?)
+					content = Collections.singletonList("DEFINITIONS");
+					break;
+
+				// Event-B
+				// TODO Creating Event-B files not working without errors (Is it useful to invest in translating?)
+				case "bum":
+					// (Missing bcm error atm)
+				case "buc":
+					// (Missing bcc error atm)
+				case "eventb":
+					// (No proper load event atm)
+					break;
+
+				// CSP
+				case "csp":
+				case "cspm":
+					break;
+
+				// TLA
+				case "tla":
+					content = Arrays.asList("---- MODULE " + machineName + " ----", "====");
+					break;
+
+				// B Rules
+				case "rmch":
+					content = Arrays.asList("RULES_MACHINE " + machineName, "END//RULES_MACHINE");
+					break;
+
+				// XTL Prolog
+				case "P":
+				case "pl":
+					content = Collections.singletonList("start(0).");
+					break;
+
+				// Z
+				case "zed":
+					// TODO Fix syntax error (some problem with \end)
+					// content = Arrays.asList("\\documentclass{article}", "\\usepackage{oz}", "\\begin{document}", "\\begin{zed}", "\\end{zed}", "\\begin{schema}{schemaname}", "\\end{schema}","\\end{document}");
+					// ("No Schema" error atm)
+					break;
+				case "tex":
+					// TODO Fix syntax error (some problem with \end)
+					// content = Arrays.asList("\\documentclass{article}", "\\usepackage{fuzz}", "\\begin{document}", "\\begin{zed}", "\\end{zed}", "\\begin{schema}{schemaname}", "\\end{schema}","\\end{document}");
+					// ("No Schema" error atm)
+					break;
+
+				// Fuzz
+				case "fuzz":
+					// TODO Fix unexpected expression error (in mode top given)
+					// content = Arrays.asList("(GIVEN 0", "  )", "(SDEF 0", "  (SHEAD 0", "    )", "  (BODY 0", "    ))");
+					// ("No Schema" error atm)
+					break;
+
+				// Alloy
+				case "als":
+					break;
+
+				// Unknown
+				default:
+					break;
+			}
+			Files.write(selected, content);
 		} catch (IOException e) {
 			LOGGER.error("Could not create machine file", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCreateMachine.content");
