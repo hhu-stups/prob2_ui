@@ -213,8 +213,8 @@ public class VOManagerStage extends Stage {
 					return;
 				}
 				ValidationTask validationTask = (ValidationTask) item;
-				Machine currentMachine = currentProject.getCurrentMachine();
-				currentMachine.getValidationTasks().remove(validationTask);
+				final Machine machine = (Machine)row.getTreeItem().getParent().getValue();
+				machine.getValidationTasks().remove(validationTask);
 				updateValidationTasksTable();
 				// TODO: Implement dependency between VO and VT
 			});
