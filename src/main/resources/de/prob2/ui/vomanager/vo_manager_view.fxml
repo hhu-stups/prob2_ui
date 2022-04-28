@@ -1,39 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.layout.FontSize?>
-<?import javafx.scene.Scene?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Label?>
-
-<?import de.prob2.ui.vomanager.VOManagerStage?>
-<?import de.prob2.ui.vomanager.VOManagerSetting?>
-
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.collections.FXCollections?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.control.Button?>
 <?import de.prob2.ui.layout.BindableGlyph?>
-
-
-<?import javafx.scene.control.TreeTableView?>
-<?import javafx.scene.control.TreeTableColumn?>
-<?import javafx.scene.layout.StackPane?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.vomanager.RequirementsEditingBox?>
+<?import de.prob2.ui.vomanager.VOEditingBox?>
+<?import de.prob2.ui.vomanager.VOManagerSetting?>
+<?import de.prob2.ui.vomanager.VOManagerStage?>
+<?import de.prob2.ui.vomanager.VTEditingBox?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
-<?import de.prob2.ui.vomanager.VTEditingBox?>
-<?import de.prob2.ui.vomanager.VOEditingBox?>
-<?import de.prob2.ui.vomanager.RequirementsEditingBox?>
-
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Scene?>
 <fx:root title="%vomanager.title" type="VOManagerStage" width="1200" height="800" minHeight="600" minWidth="800" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
-			<ScrollPane prefWidth="1200" prefHeight="800" fitToHeight="true" fitToWidth="true">
+			<StackPane>
 				<SplitPane dividerPositions="0.35">
 					<VBox styleClass="border" spacing="20.0" alignment="CENTER_LEFT">
 						<VBox>
@@ -109,7 +103,7 @@
 						<VTEditingBox fx:id="vtEditingBox" VBox.vgrow="NEVER"/>
 					</StackPane>
 				</SplitPane>
-			</ScrollPane>
+			</StackPane>
 		</Scene>
 	</scene>
 </fx:root>
