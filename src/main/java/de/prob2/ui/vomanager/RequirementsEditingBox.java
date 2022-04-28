@@ -87,7 +87,7 @@ public class RequirementsEditingBox extends VBox {
 			warnAlreadyExists();
 			return;
 		}
-		currentProject.getRequirements().add(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText()));
+		currentProject.addRequirement(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText()));
 	}
 
 	private void editRequirement(boolean nameExists) {

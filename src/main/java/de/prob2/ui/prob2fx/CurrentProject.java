@@ -189,6 +189,18 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getRequirements(), this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
+	public void addRequirement(Requirement requirement) {
+		List<Requirement> requirementsList = this.getRequirements();
+		requirementsList.add(requirement);
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), requirementsList, this.getPreferences(), this.getMetadata(), this.getLocation()));
+	}
+
+	public void removeRequirement(Requirement requirement) {
+		List<Requirement> requirementsList = this.getRequirements();
+		requirementsList.remove(requirement);
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), requirementsList, this.getPreferences(), this.getMetadata(), this.getLocation()));
+	}
+
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);
@@ -279,7 +291,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.machinesProperty().get();
 	}
 
-	public ListProperty<Requirement> requirementsProperty() {
+	public ReadOnlyListProperty<Requirement> requirementsProperty() {
 		return requirements;
 	}
 

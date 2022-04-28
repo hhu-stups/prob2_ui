@@ -428,7 +428,7 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void removeRequirement(Requirement requirement) {
-		currentProject.getRequirements().remove(requirement);
+		currentProject.removeRequirement(requirement);
 		updateRequirementsTable();
 		tvRequirements.refresh();
 	}
