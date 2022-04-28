@@ -358,7 +358,9 @@ public class VOManagerStage extends Stage {
 							requirementItem.getChildren().add(new TreeItem<>(validationObligation));
 						}
 					}
-					if (!requirementItem.getChildren().isEmpty()) {
+					// Show the requirement under the machine where it was introduced
+					// and under any other machines that have corresponding VOs.
+					if (requirement.getIntroducedAt().equals(machine.getName()) || !requirementItem.getChildren().isEmpty()) {
 						machineItem.getChildren().add(requirementItem);
 					}
 				}
@@ -385,9 +387,7 @@ public class VOManagerStage extends Stage {
 					}
 				}
 			}
-			if (!requirementItem.getChildren().isEmpty()) {
-				root.getChildren().add(requirementItem);
-			}
+			root.getChildren().add(requirementItem);
 		}
 	}
 
