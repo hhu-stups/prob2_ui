@@ -2,10 +2,10 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 plugins {
-	id "com.github.johnrengelman.shadow" version "7.0.0"
+	id "com.github.johnrengelman.shadow" version "7.1.2"
 	id "com.google.osdetector" version "1.7.0"
 	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
-	id "org.openjfx.javafxplugin" version "0.0.11" apply false
+	id "org.openjfx.javafxplugin" version "0.0.13" apply false
 }
 
 apply plugin: 'application'
