@@ -92,7 +92,7 @@ public class RequirementsEditingBox extends VBox {
 
 	private void editRequirement(boolean nameExists) {
 		Requirement requirement = (Requirement) voManagerStage.getSelectedRequirement();
-		if(nameExists && !requirement.getName().equals(tfName.getText())) {
+		if(nameExists && requirement.getName().equals(tfName.getText())) {
 			warnAlreadyExists();
 			return;
 		}

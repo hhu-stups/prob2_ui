@@ -136,7 +136,7 @@ public class VOEditingBox extends VBox {
 
 	private void editVO(boolean nameExists) {
 		ValidationObligation validationObligation = (ValidationObligation) voManagerStage.getSelectedRequirement();
-		if(nameExists && !validationObligation.getName().equals(tfVOName.getText())) {
+		if(nameExists && validationObligation.getName().equals(tfVOName.getText())) {
 			warnAlreadyExists();
 			return;
 		}
