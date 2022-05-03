@@ -43,18 +43,14 @@ public class RequirementsEditingBox extends VBox {
 
 	private final VOManager voManager;
 
-	private final ResourceBundle bundle;
-
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOManager voManager,
-								  final ResourceBundle bundle) {
+	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOManager voManager) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.voManager = voManager;
-		this.bundle = bundle;
 		stageManager.loadFXML(this, "requirements_editing_box.fxml");
 	}
 

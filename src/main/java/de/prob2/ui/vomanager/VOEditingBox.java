@@ -39,19 +39,14 @@ public class VOEditingBox extends VBox {
 	private final CurrentProject currentProject;
 
 	private final VOManager voManager;
-
-	private final ResourceBundle bundle;
-
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOManager voManager,
-						final ResourceBundle bundle) {
+	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOManager voManager) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.voManager = voManager;
-		this.bundle = bundle;
 		stageManager.loadFXML(this, "vo_editing_box.fxml");
 	}
 
