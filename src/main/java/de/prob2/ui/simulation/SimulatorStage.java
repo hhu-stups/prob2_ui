@@ -14,7 +14,6 @@ import java.util.TimerTask;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -30,7 +29,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.sharedviews.DefaultPathDialog;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
@@ -260,13 +258,11 @@ public class SimulatorStage extends Stage {
 
 	private ChangeListener<Number> timeListener;
 
-	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
-
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
 						  final SimulationItemHandler simulationItemHandler, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
-						  final StopActions stopActions, final Provider<DefaultPathDialog> defaultPathDialogProvider) {
+						  final StopActions stopActions) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -275,7 +271,6 @@ public class SimulatorStage extends Stage {
 		this.realTimeSimulator = realTimeSimulator;
 		this.machineLoader = machineLoader;
 		this.simulationItemHandler = simulationItemHandler;
-		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
@@ -428,7 +423,7 @@ public class SimulatorStage extends Stage {
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
-			Path resolvedPath = currentProject.getLocation().resolve(path);
+			Path resolvedPath = currentProject.getLocation().relativize(path);
 			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
 	}
