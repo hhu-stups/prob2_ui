@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
@@ -148,6 +149,9 @@ public class SimulationItem implements IExecutableItem {
 	@JsonIgnore
 	private ListProperty<List<Integer>> timestamps;
 
+	@JsonIgnore
+	private SimulationModel simulationModel;
+
 	public SimulationItem(SimulationType type, Map<String, Object> information) {
 		this.type = type;
 		this.information = information;
@@ -277,6 +281,16 @@ public class SimulationItem implements IExecutableItem {
 
 	public SimulationStats getSimulationStats() {
 		return simulationStats;
+	}
+
+	@JsonIgnore
+	public void setSimulationModel(SimulationModel simulationModel) {
+		this.simulationModel = simulationModel;
+	}
+
+	@JsonIgnore
+	public SimulationModel getSimulationModel() {
+		return simulationModel;
 	}
 
 	public String createdByForMetadata() {

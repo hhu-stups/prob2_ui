@@ -522,6 +522,11 @@ public class Machine implements DescriptionView.Describable, INameable {
 	public void setSimulations(List<SimulationModel> simulations) {
 		this.simulationsProperty().clear();
 		this.simulationsProperty().addAll(simulations);
+		for(SimulationModel simulationModel : simulations) {
+			for(SimulationItem simulationItem : simulationModel.getSimulationItems()) {
+				simulationItem.setSimulationModel(simulationModel);
+			}
+		}
 	}
 
 	public ObjectProperty<Path> visBVisualizationProperty() {

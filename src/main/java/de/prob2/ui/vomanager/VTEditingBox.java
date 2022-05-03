@@ -6,6 +6,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.table.SimulationItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -15,7 +16,6 @@ import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 
@@ -47,18 +47,14 @@ public class VTEditingBox extends VBox {
 
 	private final VOManager voManager;
 
-	private final ResourceBundle bundle;
-
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public VTEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOManager voManager,
-						final ResourceBundle bundle) {
+	public VTEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOManager voManager) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.voManager = voManager;
-		this.bundle = bundle;
 		stageManager.loadFXML(this, "vt_editing_box.fxml");
 	}
 
@@ -69,6 +65,10 @@ public class VTEditingBox extends VBox {
 			public String toString(ValidationTask object) {
 				if(object == null) {
 					return "";
+				}
+				if(object.getValidationTechnique() == ValidationTechnique.SIMULATION) {
+					SimulationItem simulationItem = (SimulationItem) object.getExecutable();
+					return String.format("%s:\n%s", simulationItem.getSimulationModel().getPath(), object.getParameters());
 				}
 				return object.getParameters();
 			}

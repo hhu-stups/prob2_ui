@@ -160,7 +160,9 @@ public class SimulationChoosingStage extends Stage {
 
 
 	private SimulationItem extractItem() {
-		return new SimulationItem(this.extractType(), this.extractInformation());
+		SimulationItem simulationItem = new SimulationItem(this.extractType(), this.extractInformation());
+		simulationItem.setSimulationModel(simulation);
+		return simulationItem;
 	}
 
 	private SimulationType extractType() {
