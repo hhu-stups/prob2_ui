@@ -356,6 +356,7 @@ public class SimulatorStage extends Stage {
 
 		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			configurationPath.set(null);
+			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 			noSimulations.unbind();

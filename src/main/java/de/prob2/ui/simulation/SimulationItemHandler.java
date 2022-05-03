@@ -52,6 +52,9 @@ public class SimulationItemHandler {
 	}
 
 	public List<SimulationItem> getItems(final SimulationModel simulationModel) {
+		if(simulationModel == null) {
+			return new ArrayList<>();
+		}
 		return simulationModel.getSimulationItems();
 	}
 

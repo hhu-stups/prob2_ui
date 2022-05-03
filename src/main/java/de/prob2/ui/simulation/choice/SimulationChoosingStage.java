@@ -75,8 +75,6 @@ public class SimulationChoosingStage extends Stage {
 
 	private final StageManager stageManager;
 
-	private final CurrentProject currentProject;
-
 	private final SimulationItemHandler simulationItemHandler;
 
 	private final SimulationChoiceBindings simulationChoiceBindings;
@@ -86,10 +84,8 @@ public class SimulationChoosingStage extends Stage {
 	private SimulationItem lastItem;
 
 	@Inject
-	public SimulationChoosingStage(final StageManager stageManager, final CurrentProject currentProject,
-								   final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
+	public SimulationChoosingStage(final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
 		this.stageManager = stageManager;
-		this.currentProject = currentProject;
 		this.simulationItemHandler = simulationItemHandler;
 		this.simulationChoiceBindings = simulationChoiceBindings;
 		this.initModality(Modality.APPLICATION_MODAL);
