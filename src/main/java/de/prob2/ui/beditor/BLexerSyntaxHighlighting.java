@@ -366,6 +366,11 @@ final class BLexerSyntaxHighlighting {
 		} catch (LexerException | IOException e) {
 			LOGGER.info("Failed to lex", e);
 		}
-		return spansBuilder.create();
+
+		try {
+			return spansBuilder.create();
+		} catch (IllegalStateException ignored) {
+			return StyleSpans.singleton(Collections.emptySet(), text.length());
+		}
 	}
 }

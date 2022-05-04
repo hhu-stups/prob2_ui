@@ -187,7 +187,12 @@ final class RegexSyntaxHighlighting {
 				currentText = currentText.substring(length);
 			}
 		}
-		return spansBuilder.create();
+
+		try {
+			return spansBuilder.create();
+		} catch (IllegalStateException ignored) {
+			return StyleSpans.singleton(Collections.emptySet(), text.length());
+		}
 	}
 
 	static StyleSpans<Collection<String>> computeHighlighting(final Class<? extends ModelFactory<?>> modelFactoryClass, final String text) {
