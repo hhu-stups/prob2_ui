@@ -273,7 +273,7 @@ public class MachinesTab extends Tab {
 		
 		try {
 			final String extension = MoreFiles.getFileExtension(relative);
-			List<String> content = Collections.EMPTY_LIST;
+			List<String> content = Collections.emptyList();
 			switch (extension) {
 				// Classical B
 				case "mch":
