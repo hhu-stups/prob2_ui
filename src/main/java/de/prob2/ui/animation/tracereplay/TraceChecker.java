@@ -24,6 +24,7 @@ import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob.check.tracereplay.TraceReplayStatus;
 import de.prob.check.tracereplay.TransitionReplayPrecision;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -82,8 +83,17 @@ public class TraceChecker {
 			return;
 		}
 
-		final Path traceFile = injector.getInstance(TraceFileHandler.class).resolveAndCheckFileExists(replayTrace.getLocation());
+		TraceFileHandler traceFileHandler = injector.getInstance(TraceFileHandler.class);
+
+		// check if file exists
+		final Path traceFile = traceFileHandler.resolveAndCheckFileExists(replayTrace.getLocation());
 		if (traceFile == null) {
+			return;
+		}
+
+		// check if file is a valid Trace JSON file
+		final TraceJsonFile traceJsonFile = traceFileHandler.loadFile(replayTrace.getLocation());
+		if (traceJsonFile == null) {
 			return;
 		}
 
