@@ -133,7 +133,7 @@ public class LTLFormulaChecker {
 				//TODO
 				//LTLError error = (LTLError) res;
 				//errorMarkers.add(new LTLMarker("error", res.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), error.getMessage()));
-				errorMarkers.add(new LTLMarker("error", 0, 0, res.getMessage().length(), res.getMessage()));
+				errorMarkers.add(new LTLMarker("error", 0, 0, ((LTLError) res).getCode().length(), res.getMessage()));
 			}
 			return res;
 		} catch (ProBError error) {
