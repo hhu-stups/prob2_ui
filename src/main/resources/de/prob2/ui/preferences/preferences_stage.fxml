@@ -23,7 +23,7 @@
 			<!-- TabPane *obviously* does not extend Pane, so we have to wrap it in
 				a StackPane so we can add the menu bar to it on Mac. -->
 			<StackPane>
-				<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+				<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" tabMinWidth="100">
 					<Tab fx:id="tabGeneral" id="general" text="%preferences.stage.tabs.general">
 						<VBox spacing="10.0">
 							<padding>
@@ -51,7 +51,7 @@
 								<Label text="%preferences.stage.tabs.general.label.localeOverride"/>
 								<ChoiceBox fx:id="localeOverrideBox"/>
 							</HBox>
-							<Label text="%preferences.stage.tabs.general.localeChangeWarning"/>
+							<Label style="-fx-text-fill: #FF0000" text="%preferences.stage.tabs.general.localeChangeWarning"/>
 						</VBox>
 					</Tab>
 					<Tab fx:id="tabPreferences" id="preferences" text="%preferences.stage.tabs.globalPreferences">
