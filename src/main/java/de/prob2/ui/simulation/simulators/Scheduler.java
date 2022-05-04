@@ -78,8 +78,12 @@ public class Scheduler {
 				}
 			}
 		};
-		runningTasks.getAndIncrement();
-		timer.schedule(task, realTimeSimulator.getDelay());
+
+		try {
+			timer.schedule(task, realTimeSimulator.getDelay());
+			runningTasks.getAndIncrement();
+		} catch (IllegalStateException ignored) {
+		}
 	}
 
 	public void setSimulator(RealTimeSimulator realTimeSimulator) {
