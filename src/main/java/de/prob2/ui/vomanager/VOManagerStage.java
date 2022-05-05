@@ -1,7 +1,17 @@
 package de.prob2.ui.vomanager;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
@@ -15,6 +25,7 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.TreeCheckedCell;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -33,15 +44,8 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
+
 import org.controlsfx.glyphfont.FontAwesome;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 
 @FXMLInjected
 @Singleton
@@ -125,7 +129,7 @@ public class VOManagerStage extends Stage {
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.refinementChain = new HashMap<>();
-		stageManager.loadFXML(this, "vo_manager_view.fxml");
+		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
 	}
 
 	private void initializeTables() {
@@ -284,12 +288,10 @@ public class VOManagerStage extends Stage {
 	private void initializeListenerOnProjectChange() {
 		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
 			btAddVO.disableProperty().unbind();
-			requirementEditingBox.updateLinkedMachines(to.getMachines());
-			voEditingBox.updateLinkedMachines(to.getMachines());
-			vtEditingBox.updateLinkedMachines(to.getMachines());
-
-			voManager.synchronizeProject(to);
-			btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
+			final List<Machine> machines = to == null ? Collections.emptyList() : to.getMachines();
+			requirementEditingBox.updateLinkedMachines(machines);
+			voEditingBox.updateLinkedMachines(machines);
+			vtEditingBox.updateLinkedMachines(machines);
 
 			if(from != null) {
 				for (Requirement requirement : from.getRequirements()) {
@@ -297,14 +299,26 @@ public class VOManagerStage extends Stage {
 				}
 			}
 
-			for(Requirement requirement : to.getRequirements()) {
-				// TODO: Distinguish between two views for tvRequirements
-				requirementHandler.initListeners(to, null, requirement, VOManagerSetting.REQUIREMENT);
+			if (to != null) {
+				voManager.synchronizeProject(to);
+
+				btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
+
+				for(Requirement requirement : to.getRequirements()) {
+					// TODO: Distinguish between two views for tvRequirements
+					requirementHandler.initListeners(to, null, requirement, VOManagerSetting.REQUIREMENT);
+				}
+
+				updateRequirementsTable();
+				updateValidationTasksTable();
+			} else {
+				tvRequirements.setRoot(null);
+				tvValidationTasks.setRoot(null);
 			}
 
-			updateRequirementsTable();
-			updateValidationTasksTable();
 			switchMode(EditType.NONE, Mode.NONE);
+			btAddRequirementVO.setDisable(to == null);
+			btAddVT.setDisable(to == null);
 		};
 		currentProject.addListener(projectChangeListener);
 		projectChangeListener.changed(null, null, currentProject.get());
