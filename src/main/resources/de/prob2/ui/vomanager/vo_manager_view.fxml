@@ -32,10 +32,11 @@
 				<SplitPane dividerPositions="0.35">
 					<VBox styleClass="border" spacing="20.0" alignment="CENTER_LEFT">
 						<VBox>
-							<HBox styleClass="border">
+							<HBox styleClass="border" spacing="5.0" alignment="CENTER_LEFT">
 								<padding>
 									<Insets left="5.0"/>
 								</padding>
+								<Label text="%vomanager.table.requirements.groupBy"/>
 								<ChoiceBox fx:id="cbViewSetting">
 									<items>
 										<FXCollections fx:factory="observableArrayList">
