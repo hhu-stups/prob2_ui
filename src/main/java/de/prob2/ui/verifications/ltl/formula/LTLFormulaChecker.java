@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.ltl.formula;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,6 +11,7 @@ import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ClassicalBParser;
 import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.ltl.core.parser.LtlParseException;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLChecker;
@@ -112,6 +112,41 @@ public class LTLFormulaChecker {
 		checkingThread.start();
 	}
 	
+	private static String ltlErrorTypeFromProB(final ErrorItem.Type type) {
+		switch (type) {
+			case MESSAGE:
+			case WARNING:
+				return "warning";
+			
+			case ERROR:
+			case INTERNAL_ERROR:
+			default:
+				return "error";
+		}
+	}
+	
+	private static List<LTLMarker> ltlMarkersFromErrorItems(final List<ErrorItem> errors) {
+		final List<LTLMarker> markers = new ArrayList<>();
+		for (final ErrorItem error : errors) {
+			final String type = ltlErrorTypeFromProB(error.getType());
+			if (error.getLocations().isEmpty()) {
+				markers.add(new LTLMarker(type, 0, 0, 1, error.getMessage()));
+			} else {
+				for (final ErrorItem.Location location : error.getLocations()) {
+					final int length;
+					if (location.getStartLine() == location.getEndLine()) {
+						length = location.getEndColumn() - location.getStartColumn();
+					} else {
+						// Don't have the original LTL formula here to calculate the length of multi-line spans...
+						length = 1;
+					}
+					markers.add(new LTLMarker(type, location.getStartLine() - 1, location.getStartColumn(), length, error.getMessage()));
+				}
+			}
+		}
+		return markers;
+	}
+	
 	private Object getResult(LtlParser parser, List<LTLMarker> errorMarkers, LTLFormulaItem item) {
 		LTLParseListener parseListener = parseFormula(parser);
 		errorMarkers.addAll(parseListener.getErrorMarkers());
@@ -130,10 +165,7 @@ public class LTLFormulaChecker {
 			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
 			final IModelCheckingResult res = checker.call();
 			if(res instanceof LTLError) {
-				//TODO
-				//LTLError error = (LTLError) res;
-				//errorMarkers.add(new LTLMarker("error", res.getTokenLine(), parseError.getTokenColumn(), parseError.getMessage().length(), error.getMessage()));
-				errorMarkers.add(new LTLMarker("error", 0, 0, ((LTLError) res).getCode().length(), res.getMessage()));
+				errorMarkers.addAll(ltlMarkersFromErrorItems(((LTLError)res).getErrors()));
 			}
 			return res;
 		} catch (ProBError error) {
@@ -141,10 +173,7 @@ public class LTLFormulaChecker {
 			if(error.getErrors() == null) {
 				errorMarkers.add(new LTLMarker("error", 0, 0, error.getMessage().length(), error.getMessage()));
 			} else {
-				error.getErrors().stream()
-						.flatMap(err -> err.getLocations().stream())
-						.map(location -> new LTLMarker("error", location.getStartLine(), location.getStartColumn(), location.getEndColumn() - location.getStartColumn(), error.getMessage()))
-						.collect(Collectors.toCollection(() -> errorMarkers));
+				errorMarkers.addAll(ltlMarkersFromErrorItems(error.getErrors()));
 			}
 			return error;
 		} catch (LtlParseException error) {
