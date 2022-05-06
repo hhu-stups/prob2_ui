@@ -93,7 +93,8 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 			if (!errorMarkers.isEmpty()) {
 				// TODO Implement proper error highlighting like in BEditor
 				final LTLMark mark = errorMarkers.get(0).getMark();
-				taCode.selectRange(mark.getLine(), mark.getPos(), mark.getLine(), mark.getPos() + mark.getLength());
+				final int line = mark.getLine() - 1;
+				taCode.selectRange(line, mark.getPos(), line, mark.getPos() + mark.getLength());
 			}
 		}
 	}

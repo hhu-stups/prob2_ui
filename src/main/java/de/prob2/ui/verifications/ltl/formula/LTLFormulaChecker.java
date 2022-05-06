@@ -130,7 +130,7 @@ public class LTLFormulaChecker {
 		for (final ErrorItem error : errors) {
 			final String type = ltlErrorTypeFromProB(error.getType());
 			if (error.getLocations().isEmpty()) {
-				markers.add(new LTLMarker(type, 0, 0, 1, error.getMessage()));
+				markers.add(new LTLMarker(type, 1, 0, 1, error.getMessage()));
 			} else {
 				for (final ErrorItem.Location location : error.getLocations()) {
 					final int length;
@@ -140,7 +140,7 @@ public class LTLFormulaChecker {
 						// Don't have the original LTL formula here to calculate the length of multi-line spans...
 						length = 1;
 					}
-					markers.add(new LTLMarker(type, location.getStartLine() - 1, location.getStartColumn(), length, error.getMessage()));
+					markers.add(new LTLMarker(type, location.getStartLine(), location.getStartColumn(), length, error.getMessage()));
 				}
 			}
 		}
@@ -171,7 +171,7 @@ public class LTLFormulaChecker {
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
 			if(error.getErrors() == null) {
-				errorMarkers.add(new LTLMarker("error", 0, 0, error.getMessage().length(), error.getMessage()));
+				errorMarkers.add(new LTLMarker("error", 1, 0, error.getMessage().length(), error.getMessage()));
 			} else {
 				errorMarkers.addAll(ltlMarkersFromErrorItems(error.getErrors()));
 			}
