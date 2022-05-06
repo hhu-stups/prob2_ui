@@ -1,7 +1,9 @@
 package de.prob2.ui.verifications.ltl.formula;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -125,6 +127,20 @@ public class LTLFormulaChecker {
 		}
 	}
 	
+	private static ErrorItem.Type proBErrorTypeFromLtl(final String type) {
+		switch (type) {
+			case "warning":
+				return ErrorItem.Type.WARNING;
+			
+			case "error":
+				return ErrorItem.Type.ERROR;
+			
+			default:
+				logger.warn("Unhandled LTL error type: {}", type);
+				return ErrorItem.Type.INTERNAL_ERROR;
+		}
+	}
+	
 	private static List<LTLMarker> ltlMarkersFromErrorItems(final List<ErrorItem> errors) {
 		final List<LTLMarker> markers = new ArrayList<>();
 		for (final ErrorItem error : errors) {
@@ -147,6 +163,12 @@ public class LTLFormulaChecker {
 		return markers;
 	}
 	
+	private static List<ErrorItem> errorItemsFromLtlMarkers(final List<LTLMarker> markers) {
+		return markers.stream()
+			.map(marker -> new ErrorItem(marker.getMsg(), proBErrorTypeFromLtl(marker.getType()), Collections.emptyList()))
+			.collect(Collectors.toList());
+	}
+	
 	private Object getResult(LtlParser parser, List<LTLMarker> errorMarkers, LTLFormulaItem item) {
 		LTLParseListener parseListener = parseFormula(parser);
 		errorMarkers.addAll(parseListener.getErrorMarkers());
@@ -161,6 +183,10 @@ public class LTLFormulaChecker {
 				formula = new LTL(item.getCode(), new ClassicalBParser(bParser));
 			} else {
 				formula = new LTL(item.getCode(), new ClassicalBParser(bParser), parser);
+				if(!parseListener.getErrorMarkers().isEmpty()) {
+					errorMarkers.addAll(parseListener.getErrorMarkers());
+					return new LTLError(formula, errorItemsFromLtlMarkers(parseListener.getErrorMarkers()));
+				}
 			}
 			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
 			final IModelCheckingResult res = checker.call();
