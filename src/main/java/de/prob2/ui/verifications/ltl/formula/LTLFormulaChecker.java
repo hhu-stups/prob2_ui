@@ -197,14 +197,14 @@ public class LTLFormulaChecker {
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
 			if(error.getErrors() == null) {
-				errorMarkers.add(new LTLMarker("error", 1, 0, error.getMessage().length(), error.getMessage()));
+				errorMarkers.add(new LTLMarker("error", 1, 0, 1, error.getMessage()));
 			} else {
 				errorMarkers.addAll(ltlMarkersFromErrorItems(error.getErrors()));
 			}
 			return error;
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
-			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.toString().length(), error.toString()));
+			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getTokenString().length(), error.toString()));
 			return error;
 		}
 	}
