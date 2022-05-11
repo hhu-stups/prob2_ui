@@ -49,10 +49,6 @@ public class ValidationTask implements INameable {
 		setExecutable(executable);
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	public String getId() {
 		return id;
 	}
@@ -65,16 +61,8 @@ public class ValidationTask implements INameable {
 		return validationTechnique;
 	}
 
-	public void setValidationTechnique(ValidationTechnique validationTechnique) {
-		this.validationTechnique = validationTechnique;
-	}
-
 	public String getParameters() {
 		return parameters;
-	}
-
-	public void setParameters(String parameters) {
-		this.parameters = parameters;
 	}
 
 	@Override
@@ -103,10 +91,6 @@ public class ValidationTask implements INameable {
 		return executable;
 	}
 
-	public void setContext(String context) {
-		this.context = context;
-	}
-
 	public Checked getChecked() {
 		return checked.get();
 	}
@@ -120,10 +104,6 @@ public class ValidationTask implements INameable {
 		this.executable = executable;
 		this.context = context;
 		this.parameters = parameters;
-	}
-
-	public void reset() {
-
 	}
 
 	@Override

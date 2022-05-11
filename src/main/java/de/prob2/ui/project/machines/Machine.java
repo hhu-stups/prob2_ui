@@ -284,7 +284,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 	}
 	
 	public void resetStatus() {
-		validationTasks.forEach(ValidationTask::reset);
 		validationObligations.forEach(ValidationObligation::reset);
 		ltlFormulas.forEach(LTLFormulaItem::reset);
 		ltlPatterns.forEach(LTLPatternItem::reset);
