@@ -55,7 +55,7 @@ public class FileChooserManager {
 		map.put(ZFactory.class, "common.fileChooser.fileTypes.z");
 		map.put(ZFuzzFactory.class, "common.fileChooser.fileTypes.zFuzz");
 		map.put(AlloyFactory.class, "common.fileChooser.fileTypes.alloy");
-		FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(map);
+		FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(new HashMap<>(map));
 		// Remove unsupported file types for creating new machines
 		map.remove(EventBFactory.class);
 		map.remove(EventBPackageFactory.class);
