@@ -166,7 +166,7 @@ public class VTEditingBox extends VBox {
 		}
 		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
 		Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
-		currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), task.getExecutable(), voManager.extractParameters(task.getExecutable()));
+		currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), voManager.extractParameters(task.getExecutable()));
 	}
 
 	private void updateTaskChoice(ValidationTechnique validationTechnique) {

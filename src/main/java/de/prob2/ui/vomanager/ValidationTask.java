@@ -119,7 +119,7 @@ public class ValidationTask implements INameable {
 		return checked;
 	}
 
-	public void setData(String id, IExecutableItem executable, String context, Object item, String parameters) {
+	public void setData(String id, IExecutableItem executable, String context, String parameters) {
 		this.id = id;
 		this.executable = executable;
 		this.context = context;
