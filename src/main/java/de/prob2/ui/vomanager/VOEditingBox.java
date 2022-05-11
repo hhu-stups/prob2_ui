@@ -9,13 +9,12 @@ import de.prob2.ui.project.machines.Machine;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @FXMLInjected
@@ -26,7 +25,7 @@ public class VOEditingBox extends VBox {
 	private TextField tfVOName;
 
 	@FXML
-	private TextArea taVOExpression;
+	private ComboBox<String> cbVOExpression;
 
 	@FXML
 	private ChoiceBox<Requirement> cbLinkRequirementChoice;
@@ -66,13 +65,25 @@ public class VOEditingBox extends VBox {
 				return null;
 			}
 		});
+
+		cbVOLinkMachineChoice.valueProperty().addListener((o, from, to) -> {
+			if (to == null) {
+				cbVOExpression.getItems().clear();
+			} else {
+				cbVOExpression.getItems().setAll(to.getValidationTasks().stream()
+					.map(ValidationTask::getId)
+					.collect(Collectors.toList()));
+			}
+		});
 	}
 
 	public void resetVOEditing() {
 		tfVOName.clear();
-		taVOExpression.clear();
+		cbVOExpression.setValue("");
+		cbVOExpression.getItems().clear();
 		cbLinkRequirementChoice.getItems().clear();
 		cbLinkRequirementChoice.getItems().addAll(currentProject.getRequirements());
+		cbVOLinkMachineChoice.getSelectionModel().clearSelection();
 		voManagerStage.clearRequirementsSelection();
 	}
 
@@ -84,7 +95,7 @@ public class VOEditingBox extends VBox {
 			return;
 		}
 		tfVOName.setText(validationObligation.getId());
-		taVOExpression.setText(validationObligation.getExpression());
+		cbVOExpression.setValue(validationObligation.getExpression());
 		Requirement requirement = currentProject.getRequirements().stream()
 				.filter(req -> req.getName().equals(validationObligation.getRequirement()))
 				.collect(Collectors.toList()).get(0);
@@ -125,7 +136,7 @@ public class VOEditingBox extends VBox {
 			return;
 		}
 		Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
-		ValidationObligation validationObligation = new ValidationObligation(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
+		ValidationObligation validationObligation = new ValidationObligation(tfVOName.getText(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
 		machine.getValidationObligations().add(validationObligation);
 	}
 
@@ -134,11 +145,11 @@ public class VOEditingBox extends VBox {
 		if(nameExists &&
 				validationObligation.getName().equals(tfVOName.getText()) &&
 				validationObligation.getRequirement().equals(cbLinkRequirementChoice.getValue().getName()) &&
-				validationObligation.getExpression().equals(taVOExpression.getText())) {
+				validationObligation.getExpression().equals(cbVOExpression.getValue())) {
 			warnAlreadyExists();
 			return;
 		}
-		validationObligation.setData(tfVOName.getText(), taVOExpression.getText(), cbLinkRequirementChoice.getValue().getName());
+		validationObligation.setData(tfVOName.getText(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
 	}
 
 	private void warnNotValid() {
