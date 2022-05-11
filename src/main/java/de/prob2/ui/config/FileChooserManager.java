@@ -86,12 +86,9 @@ public class FileChooserManager {
 			final String name;
 			if (FACTORY_TO_TYPE_KEY_MAP.containsKey(factory)) {
 				name = bundle.getString(FACTORY_TO_TYPE_KEY_MAP.get(factory));
-				System.out.println(FACTORY_TO_TYPE_KEY_MAP.get(factory) + " bundle");
 			} else {
 				name = factory.getSimpleName();
-				System.out.println(factory.getSimpleName() + " simple");
 			}
-			extensions.forEach(System.out::println);
 			this.machineExtensionFilters.add(getExtensionFilterUnlocalized(name, extensions));
 		});
 
@@ -300,16 +297,12 @@ public class FileChooserManager {
 			final String name;
 			if (NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.containsKey(factory)) {
 				name = bundle.getString(NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.get(factory));
-				System.out.println(NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.get(factory) + " bundle");
 			} else {
-				/*name = factory.getSimpleName();
-				System.out.println(factory.getSimpleName() + " simple");*/
 				return;
 			}
 			if (factory.equals(ClassicalBFactory.class)) {
 				supportedNewMachineExtenionFilters.add(getExtensionFilterUnlocalized(name, Collections.singletonList("mch")));
 			} else {
-				extensions.forEach(System.out::println);
 				supportedNewMachineExtenionFilters.add(getExtensionFilterUnlocalized(name, extensions));
 			}
 		});
