@@ -28,6 +28,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,7 +210,7 @@ public final class StageManager {
 			if (stageId != null) {
 				if (to) {
 					final BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
-					if (box != null) {
+					if (box != null && !Screen.getScreensForRectangle(box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()).isEmpty()) {
 						stage.setX(box.getMinX());
 						stage.setY(box.getMinY());
 						stage.setWidth(box.getWidth());
