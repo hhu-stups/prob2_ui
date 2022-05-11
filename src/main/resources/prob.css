@@ -221,7 +221,6 @@
 
 .combo-box-popup > .list-view {
 	-fx-background-color: -prob-grey-75;
-	-fx-background-radius: 3.0em 3.0em 3.0em 3.0em;
 }
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
 	-fx-background: transparent;
