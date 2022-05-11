@@ -41,10 +41,6 @@ public class ValidationTask implements INameable {
 		this(id, context, validationTechnique, parameters, null);
 	}
 
-	public ValidationTask(ValidationTechnique validationTechnique, String parameters, IExecutableItem executable) {
-		this(null, null, validationTechnique, parameters, executable);
-	}
-
 	public ValidationTask(String id, String context, ValidationTechnique validationTechnique, String parameters, IExecutableItem executable) {
 		this.id = id;
 		this.context = context;

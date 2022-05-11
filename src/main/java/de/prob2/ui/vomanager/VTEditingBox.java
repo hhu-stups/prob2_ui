@@ -1,12 +1,18 @@
 package de.prob2.ui.vomanager;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.verifications.IExecutableItem;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -14,10 +20,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 
 @FXMLInjected
 @Singleton
@@ -30,7 +32,7 @@ public class VTEditingBox extends VBox {
 	private ChoiceBox<Machine> cbVTLinkMachineChoice;
 
 	@FXML
-	private ChoiceBox<ValidationTask> cbTaskChoice;
+	private ChoiceBox<IExecutableItem> cbTaskChoice;
 
 	@FXML
 	private TextField tfVTName;
@@ -60,22 +62,23 @@ public class VTEditingBox extends VBox {
 
 	@FXML
 	private void initialize() {
-		cbTaskChoice.setConverter(new StringConverter<ValidationTask>() {
+		cbTaskChoice.setConverter(new StringConverter<IExecutableItem>() {
 			@Override
-			public String toString(ValidationTask object) {
+			public String toString(IExecutableItem object) {
 				if(object == null) {
 					return "";
 				}
-				if(object.getValidationTechnique() == ValidationTechnique.SIMULATION) {
-					SimulationItem simulationItem = (SimulationItem) object.getExecutable();
-					return String.format("%s:\n%s", simulationItem.getSimulationModel().getPath(), object.getParameters());
+				final String parameters = voManager.extractParameters(object);
+				if(object instanceof SimulationItem) {
+					SimulationItem simulationItem = (SimulationItem)object;
+					return String.format("%s:\n%s", simulationItem.getSimulationModel().getPath(), parameters);
 				}
-				return object.getParameters();
+				return parameters;
 			}
 
 			@Override
-			public ValidationTask fromString(String string) {
-				return null;
+			public IExecutableItem fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to IExecutableItem not supported");
 			}
 		});
 
@@ -108,7 +111,7 @@ public class VTEditingBox extends VBox {
 				.orElse(null);
 		cbVTLinkMachineChoice.getSelectionModel().select(linkedMachine);
 		cbValidationTechniqueChoice.getSelectionModel().select(validationTask.getValidationTechnique());
-		cbTaskChoice.getSelectionModel().select(validationTask);
+		cbTaskChoice.getSelectionModel().select(validationTask.getExecutable());
 	}
 
 	public void resetVTEditing() {
@@ -122,8 +125,8 @@ public class VTEditingBox extends VBox {
 		boolean taskIsValid = voManager.taskIsValid(tfVTName.getText());
 		VOManagerStage.EditType editType = voManagerStage.getEditType();
 		if(taskIsValid) {
-			ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
-			if(task == null) {
+			IExecutableItem executable = cbTaskChoice.getSelectionModel().getSelectedItem();
+			if(executable == null) {
 				return;
 			}
 			Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
@@ -147,10 +150,9 @@ public class VTEditingBox extends VBox {
 			warnAlreadyExists();
 			return;
 		}
-		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
+		IExecutableItem executable = cbTaskChoice.getSelectionModel().getSelectedItem();
 		Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
-		task.setId(tfVTName.getText());
-		task.setContext(machine.getName());
+		ValidationTask task = new ValidationTask(tfVTName.getText(), machine.getName(), cbValidationTechniqueChoice.getValue(), voManager.extractParameters(executable), executable);
 		machine.getValidationTasks().add(task);
 	}
 
@@ -164,9 +166,9 @@ public class VTEditingBox extends VBox {
 			warnAlreadyExists();
 			return;
 		}
-		ValidationTask task = cbTaskChoice.getSelectionModel().getSelectedItem();
+		IExecutableItem executable = cbTaskChoice.getSelectionModel().getSelectedItem();
 		Machine machine = cbVTLinkMachineChoice.getSelectionModel().getSelectedItem();
-		currentTask.setData(tfVTName.getText(), task.getExecutable(), machine.getName(), voManager.extractParameters(task.getExecutable()));
+		currentTask.setData(tfVTName.getText(), executable, machine.getName(), voManager.extractParameters(executable));
 	}
 
 	private void updateTaskChoice(ValidationTechnique validationTechnique) {
@@ -175,11 +177,7 @@ public class VTEditingBox extends VBox {
 		if(validationTechnique == null || machine == null) {
 			return;
 		}
-		List<ValidationTask> tasks = voManager.allTasks(validationTechnique, machine);
-		if(tasks == null) {
-			return;
-		}
-		cbTaskChoice.getItems().addAll(tasks);
+		cbTaskChoice.getItems().addAll(voManager.getExecutables(machine, validationTechnique));
 	}
 
 	private void warnNotValid() {
