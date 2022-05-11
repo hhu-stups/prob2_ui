@@ -99,11 +99,12 @@ public class ValidationTask implements INameable {
 		return checked;
 	}
 
-	public void setData(String id, IExecutableItem executable, String context, String parameters) {
+	public void setData(String id, String context, ValidationTechnique validationTechnique, String parameters, IExecutableItem executable) {
 		this.id = id;
-		this.executable = executable;
 		this.context = context;
+		this.validationTechnique = validationTechnique;
 		this.parameters = parameters;
+		this.setExecutable(executable);
 	}
 
 	@Override
