@@ -108,6 +108,7 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 			validValues = Arrays.asList(PrefConstants.VALID_TYPE_VALUES.get(typeName));
 		}
 		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(validValues));
+		comboBox.setEditable(true);
 		comboBox.getSelectionModel().select(pti.getValue());
 		comboBox.setOnAction(event -> this.setPreferenceValue(pti.getPreferenceInfo().name, comboBox.getValue()));
 		this.setText(null);
