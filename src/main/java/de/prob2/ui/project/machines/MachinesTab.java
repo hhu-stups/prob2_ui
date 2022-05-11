@@ -274,12 +274,13 @@ public class MachinesTab extends Tab {
 		try {
 			final String extension = MoreFiles.getFileExtension(relative);
 			List<String> content = Collections.emptyList();
+			// FIXME Nonworking formalisms/file extensions have been removed as unsupported from FileChooserManager. Issues with formalisms are left here intentionally if support will be added in future
 			switch (extension) {
 				// Classical B
 				case "mch":
 					content = Arrays.asList("MACHINE " + machineName, "END");
 					break;
-				case "ref":
+				/*case "ref":
 					// TODO Throws "expecting identifier" error since no machine has been named -> useful?
 					content = Arrays.asList("REFINEMENT " + machineName, "REFINES", "END");
 					break;
@@ -294,9 +295,9 @@ public class MachinesTab extends Tab {
 				case "def":
 					// TODO Throws "Expecting identifier literal, double quotation" error (expects to include definitions?)
 					content = Collections.singletonList("DEFINITIONS");
-					break;
+					break;*/
 
-				// Event-B
+				/*// Event-B
 				// TODO Creating Event-B files not working without errors (Is it useful to invest in translating?)
 				case "bum":
 					// (Missing bcm error atm)
@@ -304,7 +305,7 @@ public class MachinesTab extends Tab {
 					// (Missing bcc error atm)
 				case "eventb":
 					// (No proper load event atm)
-					break;
+					break;*/
 
 				// CSP
 				case "csp":
@@ -327,24 +328,22 @@ public class MachinesTab extends Tab {
 					content = Collections.singletonList("start(0).");
 					break;
 
-				// Z
+				/*// Z
 				case "zed":
 					// TODO Fix syntax error (some problem with \end)
 					// content = Arrays.asList("\\documentclass{article}", "\\usepackage{oz}", "\\begin{document}", "\\begin{zed}", "\\end{zed}", "\\begin{schema}{schemaname}", "\\end{schema}","\\end{document}");
-					// ("No Schema" error atm)
 					break;
 				case "tex":
 					// TODO Fix syntax error (some problem with \end)
 					// content = Arrays.asList("\\documentclass{article}", "\\usepackage{fuzz}", "\\begin{document}", "\\begin{zed}", "\\end{zed}", "\\begin{schema}{schemaname}", "\\end{schema}","\\end{document}");
-					// ("No Schema" error atm)
-					break;
+					break;*/
 
-				// Fuzz
+				/*// Fuzz
 				case "fuzz":
 					// TODO Fix unexpected expression error (in mode top given)
 					// content = Arrays.asList("(GIVEN 0", "  )", "(SDEF 0", "  (SHEAD 0", "    )", "  (BODY 0", "    ))");
 					// ("No Schema" error atm)
-					break;
+					break;*/
 
 				// Alloy
 				case "als":

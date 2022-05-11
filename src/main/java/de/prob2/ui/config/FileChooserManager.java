@@ -42,6 +42,7 @@ public class FileChooserManager {
 
 	public static final String EXTENSION_PATTERN_PREFIX = "*.";
 	private static final Map<Class<? extends ModelFactory<?>>, String> FACTORY_TO_TYPE_KEY_MAP;
+	private static final Map<Class<? extends ModelFactory<?>>, String> NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP;
 	static {
 		final Map<Class<? extends ModelFactory<?>>, String> map = new HashMap<>();
 		map.put(ClassicalBFactory.class, "common.fileChooser.fileTypes.classicalB");
@@ -55,6 +56,12 @@ public class FileChooserManager {
 		map.put(ZFuzzFactory.class, "common.fileChooser.fileTypes.zFuzz");
 		map.put(AlloyFactory.class, "common.fileChooser.fileTypes.alloy");
 		FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(map);
+		// Remove unsupported file types for creating new machines
+		map.remove(EventBFactory.class);
+		map.remove(EventBPackageFactory.class);
+		map.remove(ZFactory.class);
+		map.remove(ZFuzzFactory.class);
+		NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(map);
 	}
 
 	private final ResourceBundle bundle;
@@ -79,9 +86,12 @@ public class FileChooserManager {
 			final String name;
 			if (FACTORY_TO_TYPE_KEY_MAP.containsKey(factory)) {
 				name = bundle.getString(FACTORY_TO_TYPE_KEY_MAP.get(factory));
+				System.out.println(FACTORY_TO_TYPE_KEY_MAP.get(factory) + " bundle");
 			} else {
 				name = factory.getSimpleName();
+				System.out.println(factory.getSimpleName() + " simple");
 			}
+			extensions.forEach(System.out::println);
 			this.machineExtensionFilters.add(getExtensionFilterUnlocalized(name, extensions));
 		});
 
@@ -273,12 +283,41 @@ public class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showSaveMachineChooser(final Window window) {
+		// remove all unsupported ProB file types:
+		// Classical B: ref, imp, sys, def;
+		// Event-B: all (eventb, bum, buc);
+		// Z: all (zed, tex);
+		// Fuzz: all (fuzz).
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
-		fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
+
+		List<String> supportedNewMachineExtensionPatterns = new ArrayList<>(this.machineExtensionPatterns);
+		String[] notSupported = {"*.ref", "*.imp", "*.sys", "*.def", "*.bum", "*.buc", "*.eventb", "*.zed", "*.tex", "*.fuzz"};
+		supportedNewMachineExtensionPatterns.removeAll(Arrays.asList(notSupported));
+
+		List<FileChooser.ExtensionFilter> supportedNewMachineExtenionFilters = new ArrayList<>();
+		FactoryProvider.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
+			final String name;
+			if (NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.containsKey(factory)) {
+				name = bundle.getString(NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.get(factory));
+				System.out.println(NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.get(factory) + " bundle");
+			} else {
+				/*name = factory.getSimpleName();
+				System.out.println(factory.getSimpleName() + " simple");*/
+				return;
+			}
+			if (factory.equals(ClassicalBFactory.class)) {
+				supportedNewMachineExtenionFilters.add(getExtensionFilterUnlocalized(name, Collections.singletonList("mch")));
+			} else {
+				extensions.forEach(System.out::println);
+				supportedNewMachineExtenionFilters.add(getExtensionFilterUnlocalized(name, extensions));
+			}
+		});
+
+		fileChooser.getExtensionFilters().addAll(supportedNewMachineExtenionFilters);
 		// This extension filter is created manually instead of with getExtensionFilter,
 		// so that the list of extensions doesn't get appended (it would be very long).
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), this.machineExtensionPatterns));
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allSupportedProB"), supportedNewMachineExtensionPatterns));
 		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.NEW_MACHINE, window);
 	}
 
