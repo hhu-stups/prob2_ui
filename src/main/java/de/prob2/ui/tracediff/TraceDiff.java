@@ -311,7 +311,7 @@ public class TraceDiff extends VBox {
 
 	void setAlert(TraceReplayErrorAlert alert) {
 		this.alert = alert;
-		if (alert.getTrigger().equals(TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW)) {
+		if (alert.getTrigger().equals(TraceReplayErrorAlert.Trigger.TRIGGER_SAVE_TRACE)) {
 			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
 			if (listBox.getChildren().contains(persistentBox)) {
 				listBox.getChildren().remove(persistentBox);

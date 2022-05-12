@@ -20,7 +20,7 @@ import javafx.scene.text.Text;
 
 public final class TraceReplayErrorAlert extends Alert {
 	public enum Trigger {
-		TRIGGER_VISB, TRIGGER_SIMULATOR, TRIGGER_HISTORY_VIEW, TRIGGER_TRACE_CHECKER, TRIGGER_TRACE_REPLAY_VIEW
+		TRIGGER_SAVE_TRACE, TRIGGER_TRACE_CHECKER, TRIGGER_TRACE_REPLAY_VIEW
 	}
 
 	@FXML
@@ -84,9 +84,7 @@ public final class TraceReplayErrorAlert extends Alert {
 			case TRIGGER_TRACE_REPLAY_VIEW:
 				this.getButtonTypes().add(ButtonType.CLOSE);
 				break;
-			case TRIGGER_SIMULATOR:
-			case TRIGGER_VISB:
-			case TRIGGER_HISTORY_VIEW:
+			case TRIGGER_SAVE_TRACE:
 				/*this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
 				this.getButtonTypes().addAll(ButtonType.YES, this.showTraceDiff, ButtonType.NO);*/
 				// TODO Find a way to distinguish between current trace and history (might be not the same if storing failed)
@@ -103,9 +101,7 @@ public final class TraceReplayErrorAlert extends Alert {
 
 	public void setErrorMessage() {
 		switch (trigger) {
-			case TRIGGER_SIMULATOR:
-			case TRIGGER_VISB:
-			case TRIGGER_HISTORY_VIEW:
+			case TRIGGER_SAVE_TRACE:
 				this.setHeaderText(bundle.getString("traceSave.buttons.saveTrace.error"));
 				error.setText(bundle.getString("traceSave.buttons.saveTrace.error.msg"));
 				this.getDialogPane().setExpandableContent(null);
@@ -142,13 +138,10 @@ public final class TraceReplayErrorAlert extends Alert {
 		} else if (type.get() == showTraceDiff) {
 			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
 			traceDiffStage.setAlert(this);
-			switch (trigger) {
-				case TRIGGER_SIMULATOR:
-				case TRIGGER_VISB:
-				case TRIGGER_HISTORY_VIEW:
-					traceDiffStage.setLists(attemptedReplayTrace, history);
-				default:
-					traceDiffStage.setLists(attemptedReplayTrace, storedTrace);
+			if (trigger == Trigger.TRIGGER_SAVE_TRACE) {
+				traceDiffStage.setLists(attemptedReplayTrace, history);
+			} else {
+				traceDiffStage.setLists(attemptedReplayTrace, storedTrace);
 			}
 			traceDiffStage.show();
 		}

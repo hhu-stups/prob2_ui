@@ -1,10 +1,16 @@
 package de.prob2.ui.vomanager;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
@@ -19,14 +25,8 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelcheckingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingChoosingStage;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+
 import javafx.stage.Window;
-
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 public class VOManager {
@@ -116,7 +116,7 @@ public class VOManager {
 			}
 			case TRACE_REPLAY: {
 				TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
-				traceSaver.saveTrace(currentWindow, TraceReplayErrorAlert.Trigger.TRIGGER_HISTORY_VIEW);
+				traceSaver.saveTrace(currentWindow);
 				item = injector.getInstance(TraceViewHandler.class).getLastTrace();
 				break;
 			}

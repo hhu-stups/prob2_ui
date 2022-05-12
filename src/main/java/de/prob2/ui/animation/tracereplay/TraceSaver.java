@@ -6,7 +6,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.sharedviews.TraceViewHandler;
+
 import javafx.scene.control.Alert;
 import javafx.stage.Window;
 import org.slf4j.Logger;
@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 public class TraceSaver {
 
@@ -33,7 +32,7 @@ public class TraceSaver {
 		this.currentProject = currentProject;
 	}
 
-	public Path saveTrace(Window window, TraceReplayErrorAlert.Trigger trigger) {
+	public Path saveTrace(Window window) {
 		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 		Trace possiblyLostTrace = currentTrace.get();
 		if (currentTrace.get() != null) {
@@ -41,7 +40,7 @@ public class TraceSaver {
 				return traceSaver.save(possiblyLostTrace, currentProject.getCurrentMachine());
 			} catch (Exception e) {
 				LOGGER.error("", e);
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", trigger, Collections.EMPTY_LIST);
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_SAVE_TRACE, Collections.EMPTY_LIST);
 				alert.initOwner(window);
 				alert.setAttemptedReplayOrLostTrace(possiblyLostTrace);
 				// TODO set history
