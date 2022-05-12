@@ -59,23 +59,9 @@ public class TraceFileHandler extends ProBFileHandler {
 		this.currentTrace = currentTrace;
 	}
 
-	public Path resolveAndCheckFileExists(Path path) {
-		if (path == null) {
-			return null;
-		}
-
-		try {
-			return currentProject.getLocation().resolve(path).toRealPath();
-		} catch (IOException e) {
-			this.showLoadError(path, e);
-			return null;
-		}
-	}
-
 	public TraceJsonFile loadFile(Path path) {
 		try {
-			Path realPath = resolveAndCheckFileExists(path);
-			return realPath != null ? traceManager.load(realPath) : null;
+			return path != null ? traceManager.load(path) : null;
 		} catch (IOException e) {
 			this.showLoadError(path, e);
 			return null;

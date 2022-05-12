@@ -44,7 +44,7 @@ public class TraceReplayView extends ScrollPane {
 	private final Injector injector;
 	private final TraceViewHandler traceViewHandler;
 	private final CheckBox selectAll;
-	private final TraceFileHandler traceFileHandler;
+
 	@FXML
 	private TableView<ReplayTrace> traceTableView;
 	@FXML
@@ -71,7 +71,7 @@ public class TraceReplayView extends ScrollPane {
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
 							final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
-							final FileChooserManager fileChooserManager, final Injector injector, final TraceViewHandler traceViewHandler, TraceFileHandler traceFileHandler) {
+							final FileChooserManager fileChooserManager, final Injector injector, final TraceViewHandler traceViewHandler) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -81,7 +81,6 @@ public class TraceReplayView extends ScrollPane {
 		this.injector = injector;
 		this.traceViewHandler = traceViewHandler;
 		this.selectAll = new CheckBox();
-		this.traceFileHandler = traceFileHandler;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
@@ -123,11 +122,6 @@ public class TraceReplayView extends ScrollPane {
 			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showErrorItem, openInExternalEditorItem);
 			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 			recheckTraceItem.setOnAction(event -> {
-				Path realPath = traceFileHandler.resolveAndCheckFileExists(row.getItem().getLocation());
-				if (realPath == null) {
-					return;
-				}
-
 				Path currentMachinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
 				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(row.getItem(), currentTrace.getStateSpace(), currentMachinePath, injector, currentProject, stageManager);
 				traceRefactoredSetup.executeCheck(true);

@@ -29,17 +29,19 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	private final DoubleProperty progress;
 	private final ListProperty<List<Checked>> postconditionStatus;
 	private final ObjectProperty<ReplayedTrace> replayedTrace;
-	private final Path location;
+	private final Path location; // relative to project location
+	private final Path absoluteLocation;
 	private BooleanProperty shouldExecute;
 
 	private final Injector injector;
 
-	public ReplayTrace(Path location, Injector injector) {
+	public ReplayTrace(Path location, Path absoluteLocation, Injector injector) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.postconditionStatus = new SimpleListProperty<>(this, "postcondition", FXCollections.observableArrayList());
 		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
 		this.location = location;
+		this.absoluteLocation = absoluteLocation;
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.injector = injector;
 	}
@@ -98,6 +100,10 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		return this.location;
 	}
 	
+	public Path getAbsoluteLocation() {
+		return this.absoluteLocation;
+	}
+	
 	@Override
 	public void setSelected(boolean selected) {
 		this.shouldExecute.set(selected);
@@ -133,8 +139,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		TraceJsonFile file = getTraceJsonFile();
 		if (file.getTransitionList() != null) {
 			try {
-				injector.getInstance(TraceFileHandler.class)
-					.save(file.changeDescription(description),injector.getInstance(CurrentProject.class).getLocation().resolve(location));
+				injector.getInstance(TraceFileHandler.class).save(file.changeDescription(description), this.getAbsoluteLocation());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -142,11 +147,11 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	}
 
 	public TraceJsonFile getTraceJsonFile() {
-		return injector.getInstance(TraceFileHandler.class).loadFile(this.getLocation());
+		return injector.getInstance(TraceFileHandler.class).loadFile(this.getAbsoluteLocation());
 	}
 
 	public PersistentTrace getPersistentTrace() {
-		return injector.getInstance(TraceFileHandler.class).load(this.getLocation());
+		return injector.getInstance(TraceFileHandler.class).load(this.getAbsoluteLocation());
 	}
 	
 	@Override

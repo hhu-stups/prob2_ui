@@ -59,7 +59,7 @@ public class TraceRefactoredSetup {
 
 	public TraceRefactoredSetup(ReplayTrace replayTrace, StateSpace stateSpace, Path machineA,
 									Injector injector, CurrentProject currentProject, StageManager stageManager)  {
-		this(replayTrace.getTraceJsonFile(), machineA, null, replayTrace.getLocation(), stateSpace, injector, currentProject, stageManager);
+		this(replayTrace.getTraceJsonFile(), machineA, null, replayTrace.getAbsoluteLocation(), stateSpace, injector, currentProject, stageManager);
 	}
 
 

@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +29,6 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 
@@ -85,14 +83,8 @@ public class TraceChecker {
 
 		TraceFileHandler traceFileHandler = injector.getInstance(TraceFileHandler.class);
 
-		// check if file exists
-		final Path traceFile = traceFileHandler.resolveAndCheckFileExists(replayTrace.getLocation());
-		if (traceFile == null) {
-			return;
-		}
-
 		// check if file is a valid Trace JSON file
-		final TraceJsonFile traceJsonFile = traceFileHandler.loadFile(replayTrace.getLocation());
+		final TraceJsonFile traceJsonFile = traceFileHandler.loadFile(replayTrace.getAbsoluteLocation());
 		if (traceJsonFile == null) {
 			return;
 		}
@@ -107,7 +99,7 @@ public class TraceChecker {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		Thread replayThread = new Thread(() -> {
 			try {
-				ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, traceFile);
+				ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
 				if (replayed.getErrors().isEmpty() && replayed.getReplayStatus() == TraceReplayStatus.PARTIAL) {
 					// FIXME Should this case be reported as an error on the Prolog side?
 					final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
@@ -263,7 +255,7 @@ public class TraceChecker {
 		return this.runningProperty().get();
 	}
 
-	private int lineNumber(ReplayTrace replayTrace, int failedTraceLength) {
+	private static int lineNumber(ReplayTrace replayTrace, int failedTraceLength) {
 		final List<TransitionReplayPrecision> precisions = replayTrace.getReplayedTrace().getTransitionReplayPrecisions();
 		int firstTransitionWithError = failedTraceLength;
 		for (int i = 0; i < precisions.size(); i++) {
@@ -282,7 +274,7 @@ public class TraceChecker {
 		int lineNumber = 0;
 		int operationNumber = 0;
 		try {
-			Scanner scanner = new Scanner(injector.getInstance(CurrentProject.class).getLocation().resolve(replayTrace.getLocation()));
+			Scanner scanner = new Scanner(replayTrace.getAbsoluteLocation());
 			while (scanner.hasNext()) {
 				// Error messages should have already been set at this point so there is no possibility of a NPE
 				lineNumber++;

@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -158,8 +159,6 @@ public class TraceTestView extends Stage {
 	@FXML
 	private SplitPane splitPane;
 
-	private final CurrentProject currentProject;
-
 	private final StageManager stageManager;
 
 	private final FontSize fontSize;
@@ -177,9 +176,8 @@ public class TraceTestView extends Stage {
 	private final List<VBox> transitionBoxes = new ArrayList<>();
 
 	@Inject
-	public TraceTestView(final CurrentProject currentProject, final StageManager stageManager, final FontSize fontSize,
+	public TraceTestView(final StageManager stageManager, final FontSize fontSize,
 						 final ResourceBundle bundle, final Injector injector) {
-		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
 		this.bundle = bundle;
@@ -264,13 +262,11 @@ public class TraceTestView extends Stage {
 			transition.setDescription(descriptions.get(i));
 		}
 
-		Path projectLocation = currentProject.getLocation();
-
-		final Path tempLocation = projectLocation.resolve(replayTrace.getLocation() + ".tmp");
+		final Path tempLocation = Paths.get(replayTrace.getAbsoluteLocation() + ".tmp");
 		try {
 			TraceJsonFile traceJsonFile = new TraceJsonFile(new PersistentTrace(replayTrace.getDescription(), transitions), injector.getInstance(CurrentTrace.class).getStateSpace().getLoadedMachine(), TraceJsonFile.metadataBuilder().build());
 			injector.getInstance(TraceFileHandler.class).save(traceJsonFile, tempLocation);
-			Files.move(tempLocation, projectLocation.resolve(replayTrace.getLocation()), StandardCopyOption.REPLACE_EXISTING);
+			Files.move(tempLocation, replayTrace.getAbsoluteLocation(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
 			stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();

@@ -15,7 +15,6 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -87,7 +86,8 @@ public class TraceViewHandler {
 		final SetChangeListener<Path> listener = c -> {
 			lastTrace = null;
 			if (c.wasAdded()) {
-				ReplayTrace replayTrace = new ReplayTrace(c.getElementAdded(), injector);
+				final Path trace = c.getElementAdded();
+				ReplayTrace replayTrace = new ReplayTrace(trace, currentProject.getLocation().resolve(trace), injector);
 				lastTrace = replayTrace;
 				Machine machine = currentProject.getCurrentMachine();
 				if(!machinesToTraces.containsKey(machine)) {
@@ -140,7 +140,7 @@ public class TraceViewHandler {
 		project.getMachines().forEach(machine -> {
 			final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
 			machinesToTraces.put(machine, machineTraces);
-			machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, injector)));
+			machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, project.getLocation().resolve(tracePath), injector)));
 			Machine.addCheckingStatusListener(machineTraces, machine.traceReplayStatusProperty());
 		});
 	}
@@ -202,12 +202,9 @@ public class TraceViewHandler {
 							.collect(Collectors.toList()))
 					.collect(Collectors.toList()));
 		});
-		openInExternalEditorItem.setOnAction(event -> {
-			Path realPath = injector.getInstance(TraceFileHandler.class).resolveAndCheckFileExists(row.getItem().getLocation());
-			if (realPath != null) {
-				injector.getInstance(ExternalEditor.class).open(realPath);
-			}
-		});
+		openInExternalEditorItem.setOnAction(event ->
+			injector.getInstance(ExternalEditor.class).open(row.getItem().getAbsoluteLocation())
+		);
 		row.itemProperty().addListener((observable, from, to) -> {
 			showErrorItem.disableProperty().unbind();
 			if (to != null) {
