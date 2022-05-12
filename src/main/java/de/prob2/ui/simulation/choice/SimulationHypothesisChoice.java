@@ -75,6 +75,7 @@ public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoi
 		return true;
 	}
 
+	@Override
 	public Map<String, Object> extractInformation() {
 		Map<String, Object> information = super.extractInformation();
 		information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());

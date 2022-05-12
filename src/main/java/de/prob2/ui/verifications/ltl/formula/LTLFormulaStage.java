@@ -38,6 +38,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		stageManager.loadFXML(this, "ltlformula_stage.fxml");
 	}
 
+	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();

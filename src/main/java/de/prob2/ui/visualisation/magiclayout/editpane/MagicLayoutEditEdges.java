@@ -49,6 +49,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 		addMachineElements();
 	}
 
+	@Override
 	void addMachineElements() {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if (stateSpace != null) {

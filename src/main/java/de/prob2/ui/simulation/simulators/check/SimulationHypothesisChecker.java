@@ -122,6 +122,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		this.significance = significance;
 	}
 
+	@Override
 	public void check() {
 		Distribution distribution = new Distribution(resultingTraces.size(), probability);
 		double coverage;
@@ -150,6 +151,7 @@ public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
 		this.stats = new SimulationStats(n, numberSuccess, ratio, wallTime, calculateExtendedStats());
 	}
 
+	@Override
 	public SimulationStats getStats() {
 		return stats;
 	}

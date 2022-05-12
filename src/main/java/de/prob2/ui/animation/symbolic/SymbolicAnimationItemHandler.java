@@ -46,6 +46,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 
+	@Override
 	public void handleItem(SymbolicAnimationItem item, boolean checkAll) {
 		if(!item.selected()) {
 			return;
@@ -62,6 +63,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		}
 	}
 	
+	@Override
 	public void handleMachine(Machine machine) {
 		machine.getSymbolicAnimationFormulas().forEach(item -> handleItem(item, true));
 	}

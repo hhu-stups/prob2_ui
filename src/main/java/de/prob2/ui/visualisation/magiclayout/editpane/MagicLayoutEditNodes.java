@@ -76,6 +76,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 		addMachineElements();
 	}
 
+	@Override
 	void addMachineElements() {
 		if (currentTrace.getStateSpace() != null) {
 			List<String> setNames = currentTrace.getStateSpace().getLoadedMachine().getSetNames();

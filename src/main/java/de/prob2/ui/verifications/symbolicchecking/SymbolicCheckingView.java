@@ -103,6 +103,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		helpButton.setHelpContent("verification", "Symbolic");
 	}
 	
+	@Override
 	protected ListProperty<SymbolicCheckingFormulaItem> formulasProperty(Machine machine) {
 		return machine.symbolicCheckingFormulasProperty();
 	}

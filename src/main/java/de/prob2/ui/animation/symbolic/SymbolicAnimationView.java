@@ -104,6 +104,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		helpButton.setHelpContent("animation", "Symbolic");
 	}
 	
+	@Override
 	protected ListProperty<SymbolicAnimationItem> formulasProperty(Machine machine) {
 		return machine.symbolicAnimationFormulasProperty();
 	}

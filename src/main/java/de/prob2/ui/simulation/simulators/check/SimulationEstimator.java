@@ -70,6 +70,7 @@ public class SimulationEstimator extends AbstractSimulationMonteCarlo {
 		}
 	}
 
+	@Override
 	public void check() {
 		switch (estimationType) {
 			case MINIMUM:

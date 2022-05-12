@@ -192,10 +192,12 @@ public class SimulationItem implements IExecutableItem {
 
 	}
 
+	@Override
 	public ObjectProperty<Checked> checkedProperty() {
 		return checked;
 	}
 
+	@Override
 	public Checked getChecked() {
 		return checked.get();
 	}

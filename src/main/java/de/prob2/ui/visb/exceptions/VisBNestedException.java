@@ -14,6 +14,7 @@ public class VisBNestedException extends Exception {
 		this.innerException = innerException;
 	}
 
+	@Override
 	public String getMessage(){
 		return message + innerException.getMessage();
 	}

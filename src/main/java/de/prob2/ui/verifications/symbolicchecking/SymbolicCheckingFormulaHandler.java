@@ -99,6 +99,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		symbolicChecker.checkItem(item, cmd, stateSpace, checkAll);
 	}
 	
+	@Override
 	public void handleItem(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		if(!item.selected()) {
 			return;
@@ -133,6 +134,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		}
 	}
 	
+	@Override
 	public void handleMachine(Machine machine) {
 		machine.getSymbolicCheckingFormulas().forEach(item -> handleItem(item, true));
 	}

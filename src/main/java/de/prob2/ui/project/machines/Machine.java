@@ -360,10 +360,12 @@ public class Machine implements DescriptionView.Describable, INameable {
 		return this.description;
 	}
 
+	@Override
 	public String getDescription() {
 		return this.descriptionProperty().get();
 	}
 	
+	@Override
 	public void setDescription(final String description) {
 		this.descriptionProperty().set(description);
 	}

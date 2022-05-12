@@ -30,6 +30,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		this.setResultItem(null);
 	}
 	
+	@Override
 	public void setSelected(boolean selected) {
 		this.selected.set(selected);
 	}
@@ -40,6 +41,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		return selected.get();
 	}
 	
+	@Override
 	public BooleanProperty selectedProperty() {
 		return selected;
 	}

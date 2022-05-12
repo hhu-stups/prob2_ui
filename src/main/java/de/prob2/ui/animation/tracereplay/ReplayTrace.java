@@ -98,6 +98,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		return this.location;
 	}
 	
+	@Override
 	public void setSelected(boolean selected) {
 		this.shouldExecute.set(selected);
 	}
@@ -107,14 +108,17 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		return shouldExecute.get();
 	}
 	
+	@Override
 	public BooleanProperty selectedProperty() {
 		return shouldExecute;
 	}
 
+	@Override
 	public String getName() {
 		return location.getFileName().toString();
 	}
 
+	@Override
 	public String getDescription() {
 		PersistentTrace trace = getPersistentTrace();
 		if(trace != null) {
@@ -124,6 +128,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		}
 	}
 
+	@Override
 	public void setDescription(String description) {
 		TraceJsonFile file = getTraceJsonFile();
 		if (file.getTransitionList() != null) {

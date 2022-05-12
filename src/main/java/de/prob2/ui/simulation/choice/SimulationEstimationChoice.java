@@ -73,6 +73,7 @@ public class SimulationEstimationChoice extends SimulationAbstractMonteCarloChoi
 		return true;
 	}
 
+	@Override
 	public Map<String, Object> extractInformation() {
 		Map<String, Object> information = super.extractInformation();
 		information.put("ESTIMATION_TYPE", estimationChoice.getSelectionModel().getSelectedItem().getEstimationType());

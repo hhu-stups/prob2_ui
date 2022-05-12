@@ -48,6 +48,7 @@ public class RealTimeSimulator extends Simulator {
 		return scheduler.isRunning();
 	}
 
+	@Override
 	public void resetSimulator() {
 		super.resetSimulator();
 		scheduler.stop();

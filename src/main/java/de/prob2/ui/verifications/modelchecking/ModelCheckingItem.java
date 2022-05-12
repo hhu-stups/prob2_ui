@@ -111,6 +111,7 @@ public class ModelCheckingItem implements IExecutableItem {
 		return this.options;
 	}
 	
+	@Override
 	@JsonProperty("shouldExecute")
 	public void setSelected(boolean selected) {
 		this.shouldExecute.set(selected);
@@ -122,6 +123,7 @@ public class ModelCheckingItem implements IExecutableItem {
 		return shouldExecute.get();
 	}
 	
+	@Override
 	public BooleanProperty selectedProperty() {
 		return shouldExecute;
 	}

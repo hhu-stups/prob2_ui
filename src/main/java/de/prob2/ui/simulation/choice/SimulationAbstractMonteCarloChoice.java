@@ -39,6 +39,7 @@ public class SimulationAbstractMonteCarloChoice extends SimulationMonteCarloChoi
 		stageManager.loadFXML(this, fxmlResource);
 	}
 
+	@Override
 	@FXML
 	protected void initialize() {
 		super.initialize();
