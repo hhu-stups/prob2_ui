@@ -13,11 +13,9 @@ import java.util.ResourceBundle;
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
 
-import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.json.JsonMetadata;
-import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
@@ -27,7 +25,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.table.SimulationItem;
 
@@ -48,15 +45,11 @@ public class TraceFileHandler extends ProBFileHandler {
 
 	private final TraceManager traceManager;
 
-	private final CurrentTrace currentTrace;
-
-
 	@Inject
-	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject, CurrentTrace currentTrace,
+	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject,
 							StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
 		super(versionInfo, currentProject, stageManager, fileChooserManager, bundle);
 		this.traceManager = traceManager;
-		this.currentTrace = currentTrace;
 	}
 
 	public TraceJsonFile loadFile(Path path) {
@@ -66,14 +59,6 @@ public class TraceFileHandler extends ProBFileHandler {
 			this.showLoadError(path, e);
 			return null;
 		}
-	}
-
-	public PersistentTrace load(Path path) {
-		TraceJsonFile traceJsonFile = this.loadFile(path);
-		if(traceJsonFile == null) {
-			return null;
-		}
-		return new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
 	}
 
 	public void showLoadError(Path path, Exception e) {
@@ -173,10 +158,7 @@ public class TraceFileHandler extends ProBFileHandler {
 		JsonMetadata jsonMetadata = updateMetadataBuilder(TraceJsonFile.metadataBuilder())
 				.withCreator(createdBy)
 				.build();
-		PersistentTrace persistentTrace = new PersistentTrace(trace);
-		LoadedMachine machine = currentTrace.getStateSpace().getLoadedMachine();
-		TraceJsonFile traceJsonFile = new TraceJsonFile(persistentTrace, machine, jsonMetadata);
-		traceManager.save(location, traceJsonFile);
+		traceManager.save(location, new TraceJsonFile(trace, jsonMetadata));
 	}
 
 

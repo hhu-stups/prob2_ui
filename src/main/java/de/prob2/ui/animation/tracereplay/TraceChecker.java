@@ -110,10 +110,10 @@ public class TraceChecker {
 				// TODO Display replay information for each transition if the replay was not perfect/complete
 				Platform.runLater(() -> replayTrace.setChecked(replayedFinal.getErrors().isEmpty() ? Checked.SUCCESS : Checked.FAIL));
 				Trace trace = replayed.getTrace(stateSpace);
-				final PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
+				final PersistentTrace persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
 				final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
 				storePostconditionResults(replayTrace, postconditionResults);
-				showTestError(persistentTrace, postconditionResults);
+				showTestError(traceJsonFile.getTransitionList(), postconditionResults);
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
 					if (!replayed.getErrors().isEmpty()) {
@@ -132,10 +132,9 @@ public class TraceChecker {
 		replayThread.start();
 	}
 
-	public void showTestError(PersistentTrace persistentTrace, List<List<TraceReplay.PostconditionResult>> postconditionResults) {
-		assert persistentTrace.getTransitionList().size() >= postconditionResults.size();
+	public void showTestError(List<PersistentTransition> transitions, List<List<TraceReplay.PostconditionResult>> postconditionResults) {
+		assert transitions.size() >= postconditionResults.size();
 		StringBuilder sb = new StringBuilder();
-		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
 		boolean failed = false;
 		for(int i = 0; i < postconditionResults.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
@@ -224,7 +223,7 @@ public class TraceChecker {
 	}
 
 	private void showTraceReplayCompleteFailed(Trace trace, final ReplayTrace replayTrace) {
-		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
+		TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
 		Platform.runLater(() -> {
 			// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
 			final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()
@@ -235,7 +234,7 @@ public class TraceChecker {
 			stageManager.register(alert);
 			alert.setLineNumber(lineNumber(replayTrace, trace.size()));
 			alert.setAttemptedReplayOrLostTrace(trace);
-			alert.setStoredTrace(persistentTrace);
+			alert.setStoredTrace(traceJsonFile);
 			alert.setHistory(currentTrace.get());
 			currentTrace.set(trace);
 			alert.setErrorMessage();
@@ -264,7 +263,7 @@ public class TraceChecker {
 				break;
 			}
 		}
-		final List<PersistentTransition> transitionList = replayTrace.getPersistentTrace().getTransitionList();
+		final List<PersistentTransition> transitionList = replayTrace.getTraceJsonFile().getTransitionList();
 		if (firstTransitionWithError >= transitionList.size()) {
 			// Every transition was replayed, and each one was precise, but we still got a replay error...
 			// We have no other way to figure out which transition failed, so just give up.

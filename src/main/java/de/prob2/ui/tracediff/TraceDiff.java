@@ -1,11 +1,18 @@
 package de.prob2.ui.tracediff;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.exception.ProBError;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
@@ -15,12 +22,12 @@ import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -28,12 +35,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.HashMap;
-import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -247,9 +248,9 @@ public class TraceDiff extends VBox {
 		}
 	}
 
-	final void setLists(Trace replayed, PersistentTrace persistent) {
+	final void setLists(Trace replayed, TraceJsonFile stored) {
 		List<Transition> rTransitions = replayed.getTransitionList();
-		List<PersistentTransition> pTransitions = persistent.getTransitionList();
+		List<PersistentTransition> pTransitions = stored.getTransitionList();
 
 		maxSize = Math.max(rTransitions.size(), pTransitions.size());
 		minSize = Math.min(rTransitions.size(), pTransitions.size());

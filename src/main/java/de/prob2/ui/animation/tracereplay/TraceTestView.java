@@ -1,11 +1,22 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob.check.tracereplay.OperationDisabledness;
 import de.prob.check.tracereplay.OperationEnabledness;
 import de.prob.check.tracereplay.OperationExecutability;
-import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
 import de.prob.check.tracereplay.PostconditionPredicate;
@@ -14,10 +25,10 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.Checked;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -37,20 +48,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 public class TraceTestView extends Stage {
@@ -195,7 +196,7 @@ public class TraceTestView extends Stage {
 					injector.getInstance(TraceChecker.class).check(replayTrace, true, () -> {
 						CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 						int index = row.getIndex();
-						if(index < replayTrace.getPersistentTrace().getTransitionList().size()) {
+						if(index < replayTrace.getTraceJsonFile().getTransitionList().size()) {
 							currentTrace.set(currentTrace.get().gotoPosition(index));
 						}
 						traceTableView.refresh();
@@ -229,13 +230,14 @@ public class TraceTestView extends Stage {
 		this.setTitle(String.format(this.getTitle(), replayTrace.getName()));
 		this.postconditions.clear();
 		this.replayTrace = replayTrace;
-		PersistentTrace persistentTrace = replayTrace.getPersistentTrace();
+		TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
 		traceTableView.getItems().clear();
 		transitionBoxes.clear();
-		if(persistentTrace != null) {
-			traceTableView.getItems().addAll(persistentTrace.getTransitionList());
-			for(int i = 0; i < persistentTrace.getTransitionList().size(); i++) {
-				PersistentTransition transition = persistentTrace.getTransitionList().get(i);
+		if(traceJsonFile != null) {
+			final List<PersistentTransition> transitions = traceJsonFile.getTransitionList();
+			traceTableView.getItems().addAll(transitions);
+			for(int i = 0; i < transitions.size(); i++) {
+				PersistentTransition transition = transitions.get(i);
 				postconditions.add(transition.getPostconditions());
 				descriptions.add(transition.getDescription());
 				VBox box = new VBox();
@@ -254,7 +256,8 @@ public class TraceTestView extends Stage {
 	}
 
 	public void saveTrace() {
-		List<PersistentTransition> transitions = replayTrace.getPersistentTrace().getTransitionList();
+		final TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
+		List<PersistentTransition> transitions = traceJsonFile.getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
@@ -264,8 +267,7 @@ public class TraceTestView extends Stage {
 
 		final Path tempLocation = Paths.get(replayTrace.getAbsoluteLocation() + ".tmp");
 		try {
-			TraceJsonFile traceJsonFile = new TraceJsonFile(new PersistentTrace(replayTrace.getDescription(), transitions), injector.getInstance(CurrentTrace.class).getStateSpace().getLoadedMachine(), TraceJsonFile.metadataBuilder().build());
-			injector.getInstance(TraceFileHandler.class).save(traceJsonFile, tempLocation);
+			injector.getInstance(TraceFileHandler.class).save(traceJsonFile.changeTrace(transitions), tempLocation);
 			Files.move(tempLocation, replayTrace.getAbsoluteLocation(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project (caused by saving a trace)", exc);

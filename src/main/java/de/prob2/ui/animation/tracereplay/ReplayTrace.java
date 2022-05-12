@@ -1,14 +1,18 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
+
 import com.google.inject.Injector;
-import de.prob.check.tracereplay.PersistentTrace;
+
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.exception.ProBError;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ListProperty;
@@ -18,11 +22,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
 
 public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
 	private final ObjectProperty<Checked> status;
@@ -126,7 +125,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 
 	@Override
 	public String getDescription() {
-		PersistentTrace trace = getPersistentTrace();
+		TraceJsonFile trace = getTraceJsonFile();
 		if(trace != null) {
 			return trace.getDescription();
 		} else {
@@ -148,10 +147,6 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 
 	public TraceJsonFile getTraceJsonFile() {
 		return injector.getInstance(TraceFileHandler.class).loadFile(this.getAbsoluteLocation());
-	}
-
-	public PersistentTrace getPersistentTrace() {
-		return injector.getInstance(TraceFileHandler.class).load(this.getAbsoluteLocation());
 	}
 	
 	@Override

@@ -1,22 +1,22 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
-import de.prob.check.tracereplay.PersistentTrace;
+
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.tracediff.TraceDiffStage;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
-
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 
 public final class TraceReplayErrorAlert extends Alert {
 	public enum Trigger {
@@ -38,7 +38,7 @@ public final class TraceReplayErrorAlert extends Alert {
 	private int lineNumber = -1;
 	private ButtonType showTraceDiff;
 	private Trace attemptedReplayTrace = null;
-	private PersistentTrace storedTrace = null;
+	private TraceJsonFile storedTrace = null;
 	private Trace history = null;
 
 	public TraceReplayErrorAlert(final Injector injector, final String contentBundleKey, Trigger trigger, final Object... contentParams) {
@@ -59,9 +59,9 @@ public final class TraceReplayErrorAlert extends Alert {
 		this.attemptedReplayTraceSize = copyFailedTrace.getTransitionList().size();
 	}
 
-	void setStoredTrace(PersistentTrace persistentTrace) {
-		this.storedTrace = persistentTrace;
-		this.storedTraceSize = persistentTrace.getTransitionList().size();
+	void setStoredTrace(TraceJsonFile traceJsonFile) {
+		this.storedTrace = traceJsonFile;
+		this.storedTraceSize = traceJsonFile.getTransitionList().size();
 	}
 
 	void setHistory(Trace history) {
