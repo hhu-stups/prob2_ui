@@ -1,10 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -196,7 +192,7 @@ public class TraceTestView extends Stage {
 					injector.getInstance(TraceChecker.class).check(replayTrace, true, () -> {
 						CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 						int index = row.getIndex();
-						if(index < replayTrace.getTraceJsonFile().getTransitionList().size()) {
+						if(index < replayTrace.getLoadedTrace().getTransitionList().size()) {
 							currentTrace.set(currentTrace.get().gotoPosition(index));
 						}
 						traceTableView.refresh();
@@ -230,21 +226,27 @@ public class TraceTestView extends Stage {
 		this.setTitle(String.format(this.getTitle(), replayTrace.getName()));
 		this.postconditions.clear();
 		this.replayTrace = replayTrace;
-		TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
 		traceTableView.getItems().clear();
 		transitionBoxes.clear();
-		if(traceJsonFile != null) {
-			final List<PersistentTransition> transitions = traceJsonFile.getTransitionList();
-			traceTableView.getItems().addAll(transitions);
-			for(int i = 0; i < transitions.size(); i++) {
-				PersistentTransition transition = transitions.get(i);
-				postconditions.add(transition.getPostconditions());
-				descriptions.add(transition.getDescription());
-				VBox box = new VBox();
-				Node btAddTest = buildAddButton(box, i);
-				box.getChildren().add(btAddTest);
-				transitionBoxes.add(box);
-			}
+
+		final TraceJsonFile traceJsonFile;
+		try {
+			traceJsonFile = replayTrace.load();
+		} catch (IOException e) {
+			injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace.getAbsoluteLocation(), e);
+			return;
+		}
+
+		final List<PersistentTransition> transitions = traceJsonFile.getTransitionList();
+		traceTableView.getItems().addAll(transitions);
+		for(int i = 0; i < transitions.size(); i++) {
+			PersistentTransition transition = transitions.get(i);
+			postconditions.add(transition.getPostconditions());
+			descriptions.add(transition.getDescription());
+			VBox box = new VBox();
+			Node btAddTest = buildAddButton(box, i);
+			box.getChildren().add(btAddTest);
+			transitionBoxes.add(box);
 		}
 	}
 
@@ -256,8 +258,7 @@ public class TraceTestView extends Stage {
 	}
 
 	public void saveTrace() {
-		final TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
-		List<PersistentTransition> transitions = traceJsonFile.getTransitionList();
+		List<PersistentTransition> transitions = replayTrace.getLoadedTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
@@ -265,20 +266,12 @@ public class TraceTestView extends Stage {
 			transition.setDescription(descriptions.get(i));
 		}
 
-		final Path tempLocation = Paths.get(replayTrace.getAbsoluteLocation() + ".tmp");
 		try {
-			injector.getInstance(TraceFileHandler.class).save(traceJsonFile.changeTrace(transitions), tempLocation);
-			Files.move(tempLocation, replayTrace.getAbsoluteLocation(), StandardCopyOption.REPLACE_EXISTING);
+			replayTrace.saveModified(replayTrace.getLoadedTrace().changeTrace(transitions));
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
 			stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
-			try {
-				Files.deleteIfExists(tempLocation);
-			} catch (IOException e) {
-				LOGGER.warn("Failed to delete temporary trace file after save error", e);
-			}
 		}
-
 	}
 
 	@FXML

@@ -81,12 +81,6 @@ public class TraceChecker {
 			return;
 		}
 
-		// check if file is a valid Trace JSON file
-		final TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
-		if (traceJsonFile == null) {
-			return;
-		}
-
 		replayTrace.setChecked(Checked.NOT_CHECKED);
 		replayTrace.setReplayedTrace(null);
 		// ReplayTraceFileCommand doesn't support progress updates yet,
@@ -97,6 +91,17 @@ public class TraceChecker {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		Thread replayThread = new Thread(() -> {
 			try {
+				final TraceJsonFile traceJsonFile;
+				try {
+					traceJsonFile = replayTrace.load();
+				} catch (IOException e) {
+					Platform.runLater(() -> {
+						replayTrace.setChecked(Checked.PARSE_ERROR);
+						injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace.getAbsoluteLocation(), e);
+					});
+					return;
+				}
+
 				ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
 				if (replayed.getErrors().isEmpty() && replayed.getReplayStatus() == TraceReplayStatus.PARTIAL) {
 					// FIXME Should this case be reported as an error on the Prolog side?
@@ -221,7 +226,6 @@ public class TraceChecker {
 	}
 
 	private void showTraceReplayCompleteFailed(Trace trace, final ReplayTrace replayTrace) {
-		TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
 		Platform.runLater(() -> {
 			// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
 			final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()
@@ -232,7 +236,7 @@ public class TraceChecker {
 			stageManager.register(alert);
 			alert.setLineNumber(lineNumber(replayTrace, trace.size()));
 			alert.setAttemptedReplayOrLostTrace(trace);
-			alert.setStoredTrace(traceJsonFile);
+			alert.setStoredTrace(replayTrace.getLoadedTrace());
 			alert.setHistory(currentTrace.get());
 			currentTrace.set(trace);
 			alert.setErrorMessage();
@@ -261,7 +265,7 @@ public class TraceChecker {
 				break;
 			}
 		}
-		final List<PersistentTransition> transitionList = replayTrace.getTraceJsonFile().getTransitionList();
+		final List<PersistentTransition> transitionList = replayTrace.getLoadedTrace().getTransitionList();
 		if (firstTransitionWithError >= transitionList.size()) {
 			// Every transition was replayed, and each one was precise, but we still got a replay error...
 			// We have no other way to figure out which transition failed, so just give up.

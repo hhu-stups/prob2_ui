@@ -1,8 +1,15 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
@@ -18,19 +25,24 @@ import de.prob2.ui.sharedviews.RefactorButton;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.ResourceBundle;
-
 
 @FXMLInjected
 @Singleton
@@ -123,7 +135,14 @@ public class TraceReplayView extends ScrollPane {
 			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
 			recheckTraceItem.setOnAction(event -> {
 				Path currentMachinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
-				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(row.getItem(), currentTrace.getStateSpace(), currentMachinePath, injector, currentProject, stageManager);
+				final TraceJsonFile traceFile;
+				try {
+					traceFile = row.getItem().load();
+				} catch (IOException e) {
+					injector.getInstance(TraceFileHandler.class).showLoadError(row.getItem().getAbsoluteLocation(), e);
+					return;
+				}
+				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(traceFile, currentMachinePath, null, row.getItem().getAbsoluteLocation(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
 				traceRefactoredSetup.executeCheck(true);
 				List<Path> persistentTraceList = traceRefactoredSetup.evaluateResults();
 				persistentTraceList.remove(row.getItem().getLocation());

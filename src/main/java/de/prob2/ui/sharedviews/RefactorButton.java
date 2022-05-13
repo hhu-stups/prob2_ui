@@ -1,7 +1,17 @@
 package de.prob2.ui.sharedviews;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
+import javax.imageio.ImageIO;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.ReusableAnimator;
 import de.prob.check.tracereplay.PersistentTransition;
@@ -13,13 +23,14 @@ import de.prob.check.tracereplay.check.refinement.TraceRefinerEventB;
 import de.prob.check.tracereplay.check.refinement.VerticalTraceRefiner;
 import de.prob.check.tracereplay.check.traceConstruction.AdvancedTraceConstructor;
 import de.prob.check.tracereplay.check.traceConstruction.TraceConstructionError;
+import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.model.eventb.EventBModel;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.animation.tracereplay.*;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetup;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
 import de.prob2.ui.animation.tracereplay.refactoring.ReplayOptionsOverview;
@@ -31,28 +42,25 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visualisation.traceDifference.TracePlotter;
+
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 
 @FXMLInjected
 public class RefactorButton extends Button {
@@ -63,11 +71,12 @@ public class RefactorButton extends Button {
 	private final StageManager stageManager;
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
+	private final TraceManager traceManager;
 	private final Injector injector;
 	private final TraceFileHandler traceFileHandler;
 
 	@Inject
-	private RefactorButton(final StageManager stageManager, final CurrentProject currentProject, final MachineLoader machineLoader, final RealTimeSimulator realTimeSimulator, FileChooserManager fileChooserManager, ResourceBundle resourceBundle, TraceFileHandler traceFileHandler, Injector injector) {
+	private RefactorButton(final StageManager stageManager, final CurrentProject currentProject, final MachineLoader machineLoader, final RealTimeSimulator realTimeSimulator, FileChooserManager fileChooserManager, ResourceBundle resourceBundle, TraceFileHandler traceFileHandler, TraceManager traceManager, Injector injector) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -75,6 +84,7 @@ public class RefactorButton extends Button {
 		this.realTimeSimulator = realTimeSimulator;
 		this.bundle = resourceBundle;
 		this.fileChooserManager = fileChooserManager;
+		this.traceManager = traceManager;
 		this.injector = injector;
 		this.traceFileHandler = traceFileHandler;
 
@@ -91,8 +101,11 @@ public class RefactorButton extends Button {
 				return;
 			}
 
-			TraceJsonFile fileObject = traceFileHandler.loadFile(result.getTraceFile());
-			if (fileObject == null) {
+			TraceJsonFile fileObject;
+			try {
+				fileObject = traceManager.load(result.getTraceFile());
+			} catch (IOException e) {
+				traceFileHandler.showLoadError(result.getTraceFile(), e);
 				return;
 			}
 

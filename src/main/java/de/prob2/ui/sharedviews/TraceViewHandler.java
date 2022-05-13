@@ -194,7 +194,7 @@ public class TraceViewHandler {
 				alert.initOwner(scene.getWindow());
 				alert.setErrorMessage();
 			}
-			traceChecker.showTestError(row.getItem().getTraceJsonFile().getTransitionList(), replayTrace.getPostconditionStatus()
+			traceChecker.showTestError(replayTrace.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus()
 					.stream()
 					.map(statuses -> statuses.stream()
 							.map(status -> status == Checked.SUCCESS ? TraceReplay.PostconditionResult.SUCCESS :

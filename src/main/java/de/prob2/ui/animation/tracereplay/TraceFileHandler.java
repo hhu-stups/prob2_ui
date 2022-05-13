@@ -52,15 +52,6 @@ public class TraceFileHandler extends ProBFileHandler {
 		this.traceManager = traceManager;
 	}
 
-	public TraceJsonFile loadFile(Path path) {
-		try {
-			return path != null ? traceManager.load(path) : null;
-		} catch (IOException e) {
-			this.showLoadError(path, e);
-			return null;
-		}
-	}
-
 	public void showLoadError(Path path, Exception e) {
 		LOGGER.warn("Failed to load trace file", e);
 		final String headerBundleKey;
