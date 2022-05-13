@@ -73,9 +73,9 @@ public class Machine implements DescriptionView.Describable, INameable {
 	}
 
 	public static class MachineCheckingStatus {
-		private CheckingStatus status;
-		private int numberSuccess;
-		private int numberTotal;
+		private final CheckingStatus status;
+		private final int numberSuccess;
+		private final int numberTotal;
 
 		public MachineCheckingStatus(CheckingStatus status, int numberSuccess, int numberTotal) {
 			this.status = status;
@@ -99,18 +99,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 
 		public int getNumberTotal() {
 			return numberTotal;
-		}
-
-		public void setStatus(CheckingStatus status) {
-			this.status = status;
-		}
-
-		public void setNumberSuccess(int numberSuccess) {
-			this.numberSuccess = numberSuccess;
-		}
-
-		public void setNumberTotal(int numberTotal) {
-			this.numberTotal = numberTotal;
 		}
 	}
 	
