@@ -59,7 +59,7 @@ public class FileChooserManager {
 		// Remove unsupported file types for creating new machines
 		map.remove(EventBFactory.class);
 		map.remove(EventBPackageFactory.class);
-		map.remove(ZFactory.class);
+		//map.remove(ZFactory.class);
 		map.remove(ZFuzzFactory.class);
 		NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(map);
 	}
