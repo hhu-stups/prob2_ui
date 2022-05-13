@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,8 +117,8 @@ public class VOManager {
 			}
 			case TRACE_REPLAY: {
 				TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
-				traceSaver.saveTrace(currentWindow);
-				item = injector.getInstance(TraceViewHandler.class).getLastTrace();
+				final Path traceLocation = traceSaver.saveTrace(currentWindow);
+				item = injector.getInstance(TraceViewHandler.class).getTrace(machine, traceLocation);
 				break;
 			}
 			case SIMULATION: {

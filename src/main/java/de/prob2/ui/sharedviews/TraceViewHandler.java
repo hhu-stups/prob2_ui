@@ -3,7 +3,9 @@ package de.prob2.ui.sharedviews;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -71,8 +73,6 @@ public class TraceViewHandler {
 
 	private final BooleanProperty noTraces;
 
-	private ReplayTrace lastTrace;
-
 	@Inject
 	public TraceViewHandler(final TraceManager traceManager, final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
 		this.traceManager = traceManager;
@@ -88,11 +88,9 @@ public class TraceViewHandler {
 
 	private void initialize() {
 		final SetChangeListener<Path> listener = c -> {
-			lastTrace = null;
 			if (c.wasAdded()) {
 				final Path trace = c.getElementAdded();
 				ReplayTrace replayTrace = new ReplayTrace(trace, currentProject.getLocation().resolve(trace), traceManager);
-				lastTrace = replayTrace;
 				Machine machine = currentProject.getCurrentMachine();
 				if(!machinesToTraces.containsKey(machine)) {
 					final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
@@ -304,7 +302,15 @@ public class TraceViewHandler {
 		return machinesToTraces;
 	}
 
-	public ReplayTrace getLastTrace() {
-		return lastTrace;
+	public ReplayTrace getTrace(final Machine machine, final Path traceLocation) {
+		final List<ReplayTrace> machineTraces = this.getMachinesToTraces().get(machine);
+		if (machineTraces == null) {
+			throw new NoSuchElementException("Machine " + machine + " doesn't contain any traces");
+		}
+		
+		return machineTraces.stream()
+			.filter(trace -> trace.getLocation().equals(traceLocation))
+			.findFirst()
+			.orElseThrow(() -> new NoSuchElementException("Machine " + machine + " doesn't contain trace file " + traceLocation));
 	}
 }
