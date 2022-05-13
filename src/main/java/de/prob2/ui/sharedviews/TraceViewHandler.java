@@ -13,6 +13,7 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.TraceReplay;
+import de.prob.check.tracereplay.json.TraceManager;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
@@ -54,6 +55,8 @@ public class TraceViewHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceViewHandler.class);
 
+	private final TraceManager traceManager;
+
 	private final TraceChecker traceChecker;
 
 	private final CurrentProject currentProject;
@@ -71,7 +74,8 @@ public class TraceViewHandler {
 	private ReplayTrace lastTrace;
 
 	@Inject
-	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
+	public TraceViewHandler(final TraceManager traceManager, final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
+		this.traceManager = traceManager;
 		this.traceChecker = traceChecker;
 		this.currentProject = currentProject;
 		this.injector = injector;
@@ -87,7 +91,7 @@ public class TraceViewHandler {
 			lastTrace = null;
 			if (c.wasAdded()) {
 				final Path trace = c.getElementAdded();
-				ReplayTrace replayTrace = new ReplayTrace(trace, currentProject.getLocation().resolve(trace), injector);
+				ReplayTrace replayTrace = new ReplayTrace(trace, currentProject.getLocation().resolve(trace), traceManager);
 				lastTrace = replayTrace;
 				Machine machine = currentProject.getCurrentMachine();
 				if(!machinesToTraces.containsKey(machine)) {
@@ -140,7 +144,7 @@ public class TraceViewHandler {
 		project.getMachines().forEach(machine -> {
 			final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
 			machinesToTraces.put(machine, machineTraces);
-			machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, project.getLocation().resolve(tracePath), injector)));
+			machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, project.getLocation().resolve(tracePath), traceManager)));
 			Machine.addCheckingStatusListener(machineTraces, machine.traceReplayStatusProperty());
 		});
 	}

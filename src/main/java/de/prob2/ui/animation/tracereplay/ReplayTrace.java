@@ -9,8 +9,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 
-import com.google.inject.Injector;
-
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
@@ -37,11 +35,10 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	private final ObjectProperty<ReplayedTrace> replayedTrace;
 	private final Path location; // relative to project location
 	private final Path absoluteLocation;
+	private TraceManager traceManager;
 	private BooleanProperty shouldExecute;
 
-	private final Injector injector;
-
-	public ReplayTrace(Path location, Path absoluteLocation, Injector injector) {
+	public ReplayTrace(Path location, Path absoluteLocation, TraceManager traceManager) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
@@ -49,8 +46,8 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
 		this.location = location;
 		this.absoluteLocation = absoluteLocation;
+		this.traceManager = traceManager;
 		this.shouldExecute = new SimpleBooleanProperty(true);
-		this.injector = injector;
 	}
 
 	@Override
@@ -175,7 +172,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	 * @throws IOException if the trace file is missing, invalid, or otherwise couldn't be loaded
 	 */
 	public TraceJsonFile load() throws IOException {
-		this.loadedTrace.set(injector.getInstance(TraceManager.class).load(this.getAbsoluteLocation()));
+		this.loadedTrace.set(this.traceManager.load(this.getAbsoluteLocation()));
 		return this.getLoadedTrace();
 	}
 	
@@ -191,7 +188,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	public void saveModified(final TraceJsonFile newTrace) throws IOException {
 		final Path tempLocation = Paths.get(this.getAbsoluteLocation() + ".tmp");
 		try {
-			injector.getInstance(TraceManager.class).save(tempLocation, newTrace);
+			this.traceManager.save(tempLocation, newTrace);
 			Files.move(tempLocation, this.getAbsoluteLocation(), StandardCopyOption.REPLACE_EXISTING);
 			this.loadedTrace.set(newTrace);
 		} catch (IOException | RuntimeException exc) {
