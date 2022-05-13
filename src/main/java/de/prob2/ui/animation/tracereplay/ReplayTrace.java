@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -140,7 +141,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 			try {
 				injector.getInstance(TraceFileHandler.class).save(file.changeDescription(description), this.getAbsoluteLocation());
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new UncheckedIOException(e);
 			}
 		}
 	}
