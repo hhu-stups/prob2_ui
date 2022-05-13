@@ -331,20 +331,22 @@ public class MachinesTab extends Tab {
 				// Z
 				case "zed":
 				case "tex":
-					 content = Arrays.asList("\\documentclass{article}", 
-					 "\\usepackage{fuzz}", 
-					 "\\begin{document}", 
-					 "This defines a deferred set ID:",
-					 "\\begin{zed}", "  [ID]", "\\end{zed}", 
-					 "This schema represents the state of the model:",
-					 "\\begin{schema}{State}", "x: \\power ID \\\\", "\\end{schema}",
-					 "This schema is the initialisation:",
-					 "\\begin{schema}{Init}", "  State", "   \\where", "   x =\\emptyset", "\\end{schema}",
-					 "This schema is an operation with a parameter:",
-					 "\\begin{schema}{Enter}", "  \\Delta State\\\\", "  new? : ID",
-					  "   \\where", "   new? \\notin x\\\\", "   x' = x \\cup \\{new?\\}",
-					  "\\end{schema}",
-					 "\\end{document}");
+					content = Arrays.asList(
+						"\\documentclass{article}", 
+						"\\usepackage{fuzz}",
+						"\\begin{document}",
+						"This defines a deferred set ID:",
+						"\\begin{zed}", "  [ID]", "\\end{zed}",
+						"This schema represents the state of the model:",
+						"\\begin{schema}{State}", "x: \\power ID \\\\", "\\end{schema}",
+						"This schema is the initialisation:",
+						"\\begin{schema}{Init}", "  State", "   \\where", "   x =\\emptyset", "\\end{schema}",
+						"This schema is an operation with a parameter:",
+						"\\begin{schema}{Enter}", "  \\Delta State\\\\", "  new? : ID",
+						"   \\where", "   new? \\notin x\\\\", "   x' = x \\cup \\{new?\\}",
+						"\\end{schema}",
+						"\\end{document}"
+					);
 					break;
 
 				/*// Fuzz
