@@ -81,10 +81,8 @@ public class TraceChecker {
 			return;
 		}
 
-		TraceFileHandler traceFileHandler = injector.getInstance(TraceFileHandler.class);
-
 		// check if file is a valid Trace JSON file
-		final TraceJsonFile traceJsonFile = traceFileHandler.loadFile(replayTrace.getAbsoluteLocation());
+		final TraceJsonFile traceJsonFile = replayTrace.getTraceJsonFile();
 		if (traceJsonFile == null) {
 			return;
 		}
