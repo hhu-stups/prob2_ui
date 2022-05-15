@@ -150,7 +150,7 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
-		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getType().getName()));
+		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(bundle.getString(features.getValue().getType().getTranslationKey())));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvFormula.setOnMouseClicked(e-> {

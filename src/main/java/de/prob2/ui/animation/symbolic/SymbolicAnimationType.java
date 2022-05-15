@@ -3,18 +3,19 @@ package de.prob2.ui.animation.symbolic;
 import de.prob2.ui.symbolic.SymbolicExecutionType;
 
 public enum SymbolicAnimationType implements SymbolicExecutionType {
-	SEQUENCE("Sequence"),
-	FIND_VALID_STATE("Find valid state"),
+
+	SEQUENCE("animation.type.sequence"),
+	FIND_VALID_STATE("animation.type.findValidState"),
 	;
-	
-	private final String name;
-	
-	SymbolicAnimationType(final String name) {
-		this.name = name;
+
+	private final String translationKey;
+
+	SymbolicAnimationType(final String translationKey) {
+		this.translationKey = translationKey;
 	}
-	
+
 	@Override
-	public String getName() {
-		return this.name;
+	public String getTranslationKey() {
+		return this.translationKey;
 	}
 }

@@ -88,7 +88,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 				if(object == null) {
 					return "";
 				}
-				return object.getName();
+				return bundle.getString(object.getTranslationKey());
 			}
 			
 			@Override
