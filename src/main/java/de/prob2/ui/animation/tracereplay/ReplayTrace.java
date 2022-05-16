@@ -49,7 +49,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	@JsonIgnore
 	private TraceManager traceManager;
 	@JsonIgnore
-	private BooleanProperty shouldExecute;
+	private BooleanProperty selected;
 
 	public ReplayTrace(Path location, Path absoluteLocation, TraceManager traceManager) {
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
@@ -60,7 +60,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.location = location;
 		this.absoluteLocation = absoluteLocation;
 		this.traceManager = traceManager;
-		this.shouldExecute = new SimpleBooleanProperty(true);
+		this.selected = new SimpleBooleanProperty(this, "selected", true);
 	}
 
 	@JsonCreator
@@ -152,17 +152,17 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	
 	@Override
 	public void setSelected(boolean selected) {
-		this.shouldExecute.set(selected);
+		this.selected.set(selected);
 	}
 	
 	@Override
 	public boolean selected() {
-		return shouldExecute.get();
+		return selected.get();
 	}
 	
 	@Override
 	public BooleanProperty selectedProperty() {
-		return shouldExecute;
+		return selected;
 	}
 
 	@JsonIgnore
