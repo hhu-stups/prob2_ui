@@ -61,22 +61,14 @@ public class TraceChecker {
 	}
 
 	public void checkAll(List<ReplayTrace> replayTraces) {
-		replayTraces.forEach(trace -> replayTrace(trace, false));
+		replayTraces.forEach(trace -> check(trace, false));
 	}
 
 	public void check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		replayTrace(replayTrace, setCurrentAnimation);
+		check(replayTrace, setCurrentAnimation, () -> {});
 	}
 
 	public void check(ReplayTrace replayTrace, final boolean setCurrentAnimation, IAfterTraceReplay afterTraceReplay) {
-		replayTrace(replayTrace, setCurrentAnimation, afterTraceReplay);
-	}
-
-	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		replayTrace(replayTrace, setCurrentAnimation, () -> {});
-	}
-
-	private void replayTrace(ReplayTrace replayTrace, final boolean setCurrentAnimation, IAfterTraceReplay afterTraceReplay) {
 		if(!replayTrace.selected()) {
 			return;
 		}
