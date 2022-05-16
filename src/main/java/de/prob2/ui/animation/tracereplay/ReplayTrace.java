@@ -11,7 +11,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.json.TraceManager;
@@ -32,7 +32,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
 public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
-	@JsonIgnore
 	private final ObjectProperty<Checked> status;
 	@JsonIgnore
 	private final DoubleProperty progress;
@@ -42,13 +41,11 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	private final ListProperty<List<Checked>> postconditionStatus;
 	@JsonIgnore
 	private final ObjectProperty<ReplayedTrace> replayedTrace;
-	@JsonValue
 	private final Path location; // relative to project location
 	@JsonIgnore
 	private Path absoluteLocation;
 	@JsonIgnore
 	private TraceManager traceManager;
-	@JsonIgnore
 	private BooleanProperty selected;
 
 	public ReplayTrace(Path location, Path absoluteLocation, TraceManager traceManager) {
@@ -64,7 +61,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	}
 
 	@JsonCreator
-	public ReplayTrace(final Path location) {
+	private ReplayTrace(@JsonProperty("location") final Path location) {
 		// absoluteLocation and traceManager must be initialized later using initAfterLoad,
 		// otherwise many ReplayTrace methods won't work.
 		this(location, null, null);
@@ -80,6 +77,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		return status;
 	}
 
+	@JsonIgnore
 	@Override
 	public Checked getChecked() {
 		return this.status.get();
@@ -155,6 +153,7 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.selected.set(selected);
 	}
 	
+	@JsonProperty("selected")
 	@Override
 	public boolean selected() {
 		return selected.get();

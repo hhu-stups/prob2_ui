@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
-import com.google.gson.JsonObject;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 
@@ -567,6 +566,16 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 	}
 	
+	private static void updateV26Machine(final ObjectNode machine) {
+		final ArrayNode traceObjects = machine.arrayNode();
+		for (final JsonNode traceLocationNode : checkArray(machine.get("traces"))) {
+			final ObjectNode traceObject = traceObjects.addObject();
+			traceObject.set("location", traceLocationNode);
+			traceObject.put("selected", true);
+		}
+		machine.set("traces", traceObjects);
+	}
+	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -663,6 +672,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 25) {
 				updateV25Machine(machine, this.location);
+			}
+			if (oldVersion <= 26) {
+				updateV26Machine(machine);
 			}
 		});
 		
