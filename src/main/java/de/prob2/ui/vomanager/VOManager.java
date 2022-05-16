@@ -70,7 +70,7 @@ public class VOManager {
 			case SYMBOLIC_MODEL_CHECKING:
 				return machine.getSymbolicCheckingFormulas().stream();
 			case TRACE_REPLAY:
-				return injector.getInstance(TraceViewHandler.class).getMachinesToTraces().get(machine).stream();
+				return machine.getTraces().stream();
 			case SIMULATION:
 				return machine.getSimulations().stream().flatMap(model -> model.getSimulationItems().stream());
 			default:
@@ -118,7 +118,11 @@ public class VOManager {
 			case TRACE_REPLAY: {
 				TraceSaver traceSaver = injector.getInstance(TraceSaver.class);
 				final Path traceLocation = traceSaver.saveTrace(currentWindow);
-				item = injector.getInstance(TraceViewHandler.class).getTrace(machine, traceLocation);
+				injector.getInstance(TraceViewHandler.class);
+				item = machine.getTraces().stream()
+					.filter(trace -> trace.getLocation().equals(traceLocation))
+					.findFirst()
+					.orElse(null);
 				break;
 			}
 			case SIMULATION: {

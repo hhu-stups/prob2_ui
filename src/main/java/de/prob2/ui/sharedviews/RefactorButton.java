@@ -40,6 +40,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visualisation.traceDifference.TracePlotter;
 
@@ -117,11 +118,12 @@ public class RefactorButton extends Button {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					traceRefactoredSetup.executeCheck(currentProject.getCurrentMachine().getLocation()==result.getFileAlpha());
+					final Machine currentMachine = currentProject.getCurrentMachine();
+					traceRefactoredSetup.executeCheck(currentMachine.getLocation()==result.getFileAlpha());
 					List<Path> traceFiles = traceRefactoredSetup.evaluateResults();
 
 					if(result.setResult){
-						traceFiles.forEach(entry -> currentProject.getCurrentMachine().addTraceFile(entry));
+						traceFiles.forEach(entry -> traceFileHandler.addTraceFile(currentMachine, entry));
 					}
 					break;
 				case REFINEMENT_REPLAY:
@@ -191,7 +193,7 @@ public class RefactorButton extends Button {
 		traceFileHandler.save(newFileObject, path);
 
 		if(userInput.setResult){
-			currentProject.getCurrentMachine().addTraceFile(path);
+			traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
 		}
 	}
 

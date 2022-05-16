@@ -1,11 +1,6 @@
 package de.prob2.ui.sharedviews;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -15,7 +10,6 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.TraceReplay;
-import de.prob.check.tracereplay.json.TraceManager;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
@@ -25,7 +19,6 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 
@@ -36,7 +29,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.SetChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuItem;
@@ -57,8 +50,6 @@ public class TraceViewHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceViewHandler.class);
 
-	private final TraceManager traceManager;
-
 	private final TraceChecker traceChecker;
 
 	private final CurrentProject currentProject;
@@ -69,41 +60,28 @@ public class TraceViewHandler {
 
 	private final ListProperty<ReplayTrace> traces;
 
-	private final Map<Machine, ListProperty<ReplayTrace>> machinesToTraces;
-
 	private final BooleanProperty noTraces;
 
 	@Inject
-	public TraceViewHandler(final TraceManager traceManager, final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
-		this.traceManager = traceManager;
+	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
 		this.traceChecker = traceChecker;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.bundle = bundle;
 		this.traces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
-		this.machinesToTraces = new HashMap<>();
 		this.noTraces = new SimpleBooleanProperty();
 		initialize();
 	}
 
 	private void initialize() {
-		final SetChangeListener<Path> listener = c -> {
-			if (c.wasAdded()) {
-				final Path trace = c.getElementAdded();
-				ReplayTrace replayTrace = new ReplayTrace(trace, currentProject.getLocation().resolve(trace), traceManager);
-				Machine machine = currentProject.getCurrentMachine();
-				if(!machinesToTraces.containsKey(machine)) {
-					final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
-					machinesToTraces.put(machine, machineTraces);
+		final ListChangeListener<ReplayTrace> listener = c -> {
+			while (c.next()) {
+				if (c.wasAdded()) {
+					for (final ReplayTrace trace : c.getAddedSubList()) {
+						// TODO Remove this and instead call the trace checker manually where needed
+						this.traceChecker.check(trace, true);
+					}
 				}
-				ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
-				if(!machineTraces.contains(replayTrace)) {
-					machineTraces.add(replayTrace);
-				}
-				this.traceChecker.check(machineTraces.get(machineTraces.indexOf(replayTrace)), true);
-			}
-			if (c.wasRemoved()) {
-				removeTraceItems(c.getElementRemoved());
 			}
 		};
 
@@ -114,13 +92,11 @@ public class TraceViewHandler {
 			//It is also possible for the user to switch to the same project (without saving).
 			//In this case, the statuses of all traces are reset by the current machine property (as no machine is chosen after switching the project).
 			if(from == null || to == null || !to.getLocation().equals(from.getLocation())) {
-				this.machinesToTraces.clear();
 				traces.unbind();
 				noTraces.unbind();
 				traces.setValue(FXCollections.observableArrayList());
 				noTraces.set(true);
 				if (to != null) {
-					fillMachineToTraces(to);
 					bindTraces(currentProject.getCurrentMachine(), listener);
 				}
 			}
@@ -128,7 +104,7 @@ public class TraceViewHandler {
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (from != null) {
-				from.getTraceFiles().removeListener(listener);
+				from.getTraces().removeListener(listener);
 			}
 			traces.unbind();
 			noTraces.unbind();
@@ -138,25 +114,11 @@ public class TraceViewHandler {
 		});
 	}
 
-	private void fillMachineToTraces(Project project) {
-		project.getMachines().forEach(machine -> {
-			final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
-			machinesToTraces.put(machine, machineTraces);
-			machine.getTraceFiles().forEach(tracePath -> machineTraces.add(new ReplayTrace(tracePath, project.getLocation().resolve(tracePath), traceManager)));
-			Machine.addCheckingStatusListener(machineTraces, machine.traceReplayStatusProperty());
-		});
-	}
-
-	private void bindTraces(Machine machine, SetChangeListener<Path> listener) {
+	private void bindTraces(Machine machine, ListChangeListener<ReplayTrace> listener) {
 		if (machine != null) {
-			if(!machinesToTraces.containsKey(machine)) {
-				final ListProperty<ReplayTrace> machineTraces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
-				machinesToTraces.put(machine, machineTraces);
-			}
-			ListProperty<ReplayTrace> machineTraces = machinesToTraces.get(machine);
-			traces.bind(machineTraces);
+			traces.bind(machine.tracesProperty());
 			noTraces.bind(machine.tracesProperty().emptyProperty());
-			machine.getTraceFiles().addListener(listener);
+			machine.getTraces().addListener(listener);
 		}
 	}
 
@@ -216,10 +178,6 @@ public class TraceViewHandler {
 				row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 			}
 		});
-	}
-
-	private void removeTraceItems(Path tracePath) {
-		traces.removeIf(trace -> trace.getLocation().equals(tracePath));
 	}
 
 	public void reset() {
@@ -296,21 +254,5 @@ public class TraceViewHandler {
 			default:
 				throw new AssertionError("Unhandled status: " + status);
 		}
-	}
-
-	public Map<Machine, ListProperty<ReplayTrace>> getMachinesToTraces() {
-		return machinesToTraces;
-	}
-
-	public ReplayTrace getTrace(final Machine machine, final Path traceLocation) {
-		final List<ReplayTrace> machineTraces = this.getMachinesToTraces().get(machine);
-		if (machineTraces == null) {
-			throw new NoSuchElementException("Machine " + machine + " doesn't contain any traces");
-		}
-		
-		return machineTraces.stream()
-			.filter(trace -> trace.getLocation().equals(traceLocation))
-			.findFirst()
-			.orElseThrow(() -> new NoSuchElementException("Machine " + machine + " doesn't contain trace file " + traceLocation));
 	}
 }

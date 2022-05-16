@@ -17,8 +17,10 @@ import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -52,6 +54,7 @@ public class ProjectManager {
 	private final JacksonManager<Project> jacksonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final TraceManager traceManager;
 	private final FileChooserManager fileChooserManager;
 	private final ResourceBundle bundle;
 	
@@ -59,12 +62,13 @@ public class ProjectManager {
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
-	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager,
+	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager, final TraceManager traceManager,
 						  ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
 		this.jacksonManager = jacksonManager;
 		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.traceManager = traceManager;
 		this.fileChooserManager = fileChooserManager;
 		this.bundle = bundle;
 		
@@ -228,6 +232,12 @@ public class ProjectManager {
 			// which makes the project savedness tracking behave incorrectly.
 			// To fix this, we forcibly mark the project as unchanged again after it is loaded.
 			project.resetChanged();
+			// Fill in ReplayTrace fields that Jackson cannot set.
+			for (final Machine machine : project.getMachines()) {
+				for (final ReplayTrace trace : machine.getTraces()) {
+					trace.initAfterLoad(path.resolveSibling(trace.getLocation()), traceManager);
+				}
+			}
 			return project;
 		} catch (IOException | JsonConversionException exc) {
 			LOGGER.warn("Failed to open project file", exc);

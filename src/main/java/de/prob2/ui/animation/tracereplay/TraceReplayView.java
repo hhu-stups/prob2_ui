@@ -20,6 +20,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.RefactorButton;
 import de.prob2.ui.sharedviews.TraceViewHandler;
@@ -54,6 +55,7 @@ public class TraceReplayView extends ScrollPane {
 	private final ResourceBundle bundle;
 	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
+	private final TraceFileHandler traceFileHandler;
 	private final TraceViewHandler traceViewHandler;
 	private final CheckBox selectAll;
 
@@ -83,7 +85,7 @@ public class TraceReplayView extends ScrollPane {
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
 							final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
-							final FileChooserManager fileChooserManager, final Injector injector, final TraceViewHandler traceViewHandler) {
+							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler, final TraceViewHandler traceViewHandler) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -91,6 +93,7 @@ public class TraceReplayView extends ScrollPane {
 		this.bundle = bundle;
 		this.fileChooserManager = fileChooserManager;
 		this.injector = injector;
+		this.traceFileHandler = traceFileHandler;
 		this.traceViewHandler = traceViewHandler;
 		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
@@ -132,9 +135,10 @@ public class TraceReplayView extends ScrollPane {
 
 			// Set listeners for menu items
 			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showErrorItem, openInExternalEditorItem);
-			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().removeTraceFile(row.getItem().getLocation()));
+			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().getTraces().remove(row.getItem()));
 			recheckTraceItem.setOnAction(event -> {
-				Path currentMachinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
+				final Machine currentMachine = currentProject.getCurrentMachine();
+				Path currentMachinePath = currentProject.getLocation().resolve(currentMachine.getLocation());
 				final TraceJsonFile traceFile;
 				try {
 					traceFile = row.getItem().load();
@@ -146,7 +150,7 @@ public class TraceReplayView extends ScrollPane {
 				traceRefactoredSetup.executeCheck(true);
 				List<Path> persistentTraceList = traceRefactoredSetup.evaluateResults();
 				persistentTraceList.remove(row.getItem().getLocation());
-				addPathsToProject(persistentTraceList);
+				persistentTraceList.forEach(trace -> traceFileHandler.addTraceFile(currentMachine, trace));
 			});
 			showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 
@@ -190,8 +194,7 @@ public class TraceReplayView extends ScrollPane {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
 		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
-			Path relative = currentProject.getLocation().relativize(traceFile);
-			currentProject.getCurrentMachine().addTraceFile(relative);
+			traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), traceFile);
 		}
 
 	}
@@ -210,13 +213,6 @@ public class TraceReplayView extends ScrollPane {
 		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, injector));
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
-	}
-
-	private void addPathsToProject(List<Path> persistentTraceList) {
-		persistentTraceList.forEach(element -> {
-			Path relative = currentProject.getLocation().relativize(element);
-			currentProject.getCurrentMachine().addTraceFile(relative);
-		});
 	}
 
 	public void refresh() {

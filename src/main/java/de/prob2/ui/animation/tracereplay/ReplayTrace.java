@@ -9,6 +9,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
@@ -28,14 +32,23 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
 public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
+	@JsonIgnore
 	private final ObjectProperty<Checked> status;
+	@JsonIgnore
 	private final DoubleProperty progress;
+	@JsonIgnore
 	private final ObjectProperty<TraceJsonFile> loadedTrace;
+	@JsonIgnore
 	private final ListProperty<List<Checked>> postconditionStatus;
+	@JsonIgnore
 	private final ObjectProperty<ReplayedTrace> replayedTrace;
+	@JsonValue
 	private final Path location; // relative to project location
-	private final Path absoluteLocation;
+	@JsonIgnore
+	private Path absoluteLocation;
+	@JsonIgnore
 	private TraceManager traceManager;
+	@JsonIgnore
 	private BooleanProperty shouldExecute;
 
 	public ReplayTrace(Path location, Path absoluteLocation, TraceManager traceManager) {
@@ -48,6 +61,18 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		this.absoluteLocation = absoluteLocation;
 		this.traceManager = traceManager;
 		this.shouldExecute = new SimpleBooleanProperty(true);
+	}
+
+	@JsonCreator
+	public ReplayTrace(final Path location) {
+		// absoluteLocation and traceManager must be initialized later using initAfterLoad,
+		// otherwise many ReplayTrace methods won't work.
+		this(location, null, null);
+	}
+
+	public void initAfterLoad(final Path absoluteLocation, final TraceManager traceManager) {
+		this.absoluteLocation = absoluteLocation;
+		this.traceManager = traceManager;
 	}
 
 	@Override
@@ -140,11 +165,13 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 		return shouldExecute;
 	}
 
+	@JsonIgnore
 	@Override
 	public String getName() {
 		return location.getFileName().toString();
 	}
 
+	@JsonIgnore
 	@Override
 	public String getDescription() {
 		try {

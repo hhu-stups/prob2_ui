@@ -81,11 +81,14 @@ public class TraceFileHandler extends ProBFileHandler {
 		).showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();
-				if (currentMachine.getTraceFiles().contains(path)) {
-					currentMachine.removeTraceFile(path);
-				}
+				currentMachine.getTraces().removeIf(trace -> trace.getLocation().equals(path));
 			}
 		});
+	}
+
+	public void addTraceFile(final Machine machine, final Path traceFilePath) {
+		final Path relativeLocation = currentProject.getLocation().relativize(traceFilePath);
+		machine.getTraces().add(new ReplayTrace(relativeLocation, traceFilePath, traceManager));
 	}
 
 	public void save(SimulationItem item, Machine machine) {
@@ -103,7 +106,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			for(Trace trace : item.getTraces()){
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + numberGeneratedTraces + ".prob2trace");
 				save(trace, traceFilePath, item.createdByForMetadata());
-				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
+				this.addTraceFile(machine, traceFilePath);
 				numberGeneratedTraces++;
 			}
 		} catch (IOException e) {
@@ -130,7 +133,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			for(int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + (i+1) + ".prob2trace");
 				save(traces.get(i), traceFilePath, item.createdByForMetadata(i));
-				machine.addTraceFile(currentProject.getLocation().relativize(traceFilePath));
+				this.addTraceFile(machine, traceFilePath);
 			}
 
 		} catch (IOException e) {
@@ -161,7 +164,7 @@ public class TraceFileHandler extends ProBFileHandler {
 		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION);
 		if (path != null) {
 			save(trace, path, "traceReplay");
-			machine.addTraceFile(currentProject.getLocation().relativize(path));
+			this.addTraceFile(machine, path);
 		}
 		return path;
 	}
