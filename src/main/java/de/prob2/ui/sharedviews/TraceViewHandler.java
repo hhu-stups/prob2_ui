@@ -60,8 +60,6 @@ public class TraceViewHandler {
 
 	private final ListProperty<ReplayTrace> traces;
 
-	private final BooleanProperty noTraces;
-
 	@Inject
 	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
 		this.traceChecker = traceChecker;
@@ -69,7 +67,6 @@ public class TraceViewHandler {
 		this.injector = injector;
 		this.bundle = bundle;
 		this.traces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
-		this.noTraces = new SimpleBooleanProperty();
 		initialize();
 	}
 
@@ -93,9 +90,7 @@ public class TraceViewHandler {
 			//In this case, the statuses of all traces are reset by the current machine property (as no machine is chosen after switching the project).
 			if(from == null || to == null || !to.getLocation().equals(from.getLocation())) {
 				traces.unbind();
-				noTraces.unbind();
 				traces.setValue(FXCollections.observableArrayList());
-				noTraces.set(true);
 				if (to != null) {
 					bindTraces(currentProject.getCurrentMachine(), listener);
 				}
@@ -107,9 +102,7 @@ public class TraceViewHandler {
 				from.getTraces().removeListener(listener);
 			}
 			traces.unbind();
-			noTraces.unbind();
 			traces.setValue(FXCollections.observableArrayList());
-			noTraces.set(true);
 			bindTraces(to, listener);
 		});
 	}
@@ -117,7 +110,6 @@ public class TraceViewHandler {
 	private void bindTraces(Machine machine, ListChangeListener<ReplayTrace> listener) {
 		if (machine != null) {
 			traces.bind(machine.tracesProperty());
-			noTraces.bind(machine.tracesProperty().emptyProperty());
 			machine.getTraces().addListener(listener);
 		}
 	}
@@ -187,10 +179,6 @@ public class TraceViewHandler {
 			trace.setReplayedTrace(null);
 			trace.setPostconditionStatus(new ArrayList<>());
 		});
-	}
-
-	public BooleanProperty getNoTraces() {
-		return noTraces;
 	}
 
 	public ListProperty<ReplayTrace> getTraces() {
