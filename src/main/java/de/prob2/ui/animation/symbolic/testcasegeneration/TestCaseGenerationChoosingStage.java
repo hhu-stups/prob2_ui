@@ -83,7 +83,7 @@ public class TestCaseGenerationChoosingStage extends Stage {
 				if(object == null) {
 					return "";
 				}
-				return object.getName();
+				return bundle.getString(object.getTranslationKey());
 			}
 			
 			@Override

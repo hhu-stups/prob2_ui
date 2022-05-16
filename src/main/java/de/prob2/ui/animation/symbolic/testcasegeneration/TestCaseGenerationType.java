@@ -1,22 +1,17 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 public enum TestCaseGenerationType {
-	MCDC("MCDC Testing"),
-	COVERED_OPERATIONS("Covered Operations Testing")
-	;
-	
-	private final String name;
-	
-	TestCaseGenerationType(final String name) {
-		this.name = name;
+
+	MCDC("animation.testcase.type.mcdc"),
+	COVERED_OPERATIONS("animation.testcase.type.coveredOperations");
+
+	private final String translationKey;
+
+	TestCaseGenerationType(final String translationKey) {
+		this.translationKey = translationKey;
 	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	@Override
-	public String toString() {
-		return name;
+
+	public String getTranslationKey() {
+		return translationKey;
 	}
 }

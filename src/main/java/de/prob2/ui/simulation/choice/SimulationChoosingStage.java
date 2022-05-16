@@ -18,6 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
@@ -29,25 +30,6 @@ import java.util.ResourceBundle;
 
 
 public class SimulationChoosingStage extends Stage {
-
-	public static class SimulationChoiceItem {
-
-		private final SimulationType simulationType;
-
-		public SimulationChoiceItem(@NamedArg("simulationType") SimulationType simulationType) {
-			this.simulationType = simulationType;
-		}
-
-		@Override
-		public String toString() {
-			return simulationType.getName();
-		}
-
-		public SimulationType getSimulationType() {
-			return simulationType;
-		}
-
-	}
 
 	@FXML
 	private Button btAdd;
@@ -71,7 +53,8 @@ public class SimulationChoosingStage extends Stage {
 	private VBox inputBox;
 
 	@FXML
-	private ChoiceBox<SimulationChoiceItem> simulationChoice;
+	private ChoiceBox<SimulationType> simulationChoice;
+	private final ResourceBundle bundle;
 
 	private final StageManager stageManager;
 
@@ -84,7 +67,8 @@ public class SimulationChoosingStage extends Stage {
 	private SimulationItem lastItem;
 
 	@Inject
-	public SimulationChoosingStage(final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
+	public SimulationChoosingStage(final ResourceBundle bundle, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
+		this.bundle = bundle;
 		this.stageManager = stageManager;
 		this.simulationItemHandler = simulationItemHandler;
 		this.simulationChoiceBindings = simulationChoiceBindings;
@@ -100,8 +84,22 @@ public class SimulationChoosingStage extends Stage {
 			if(to == null) {
 				return;
 			}
-			changeGUIType(to.getSimulationType());
+			changeGUIType(to);
 			this.sizeToScene();
+		});
+		simulationChoice.setConverter(new StringConverter<SimulationType>() {
+			@Override
+			public String toString(final SimulationType object) {
+				if(object == null) {
+					return "";
+				}
+				return bundle.getString(object.getTranslationKey());
+			}
+
+			@Override
+			public SimulationType fromString(final String string) {
+				throw new UnsupportedOperationException("Conversion from String to SimulationType not supported");
+			}
 		});
 		simulationMonteCarloChoice.setSimulationChoosingStage(this);
 		simulationHypothesisChoice.setSimulationChoosingStage(this);
@@ -137,8 +135,7 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	private boolean checkSelection() {
-		SimulationChoiceItem item = simulationChoice.getSelectionModel().getSelectedItem();
-		SimulationType type = item.getSimulationType();
+		SimulationType type = simulationChoice.getSelectionModel().getSelectedItem();
 		switch (type) {
 			case MONTE_CARLO_SIMULATION:
 				return simulationMonteCarloChoice.checkSelection();
@@ -160,19 +157,13 @@ public class SimulationChoosingStage extends Stage {
 
 
 	private SimulationItem extractItem() {
-		SimulationItem simulationItem = new SimulationItem(this.extractType(), this.extractInformation());
+		SimulationItem simulationItem = new SimulationItem(simulationChoice.getSelectionModel().getSelectedItem(), this.extractInformation());
 		simulationItem.setSimulationModel(simulation);
 		return simulationItem;
 	}
 
-	private SimulationType extractType() {
-		SimulationChoiceItem item = simulationChoice.getSelectionModel().getSelectedItem();
-		return item.getSimulationType();
-	}
-
 	private Map<String, Object> extractInformation() {
-		SimulationChoiceItem item = simulationChoice.getSelectionModel().getSelectedItem();
-		SimulationType simulationType = item.getSimulationType();
+		SimulationType simulationType = simulationChoice.getSelectionModel().getSelectedItem();
 		Map<String, Object> information = new HashMap<>();
 		switch (simulationType) {
 			case MONTE_CARLO_SIMULATION:

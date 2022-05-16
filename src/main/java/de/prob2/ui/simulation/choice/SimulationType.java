@@ -2,17 +2,18 @@ package de.prob2.ui.simulation.choice;
 
 public enum SimulationType {
 
-	MONTE_CARLO_SIMULATION("Monte Carlo Simulation"),
-	HYPOTHESIS_TEST("Hypothesis Test"),
-	ESTIMATION("Estimation");
+	MONTE_CARLO_SIMULATION("simulation.type.monteCarloSimulation"),
+	HYPOTHESIS_TEST("simulation.type.hypothesisTest"),
+	ESTIMATION("simulation.type.estimation"),
+	;
 
-	private final String name;
+	private final String translationKey;
 
-	SimulationType(String name) {
-		this.name = name;
+	SimulationType(String translationKey) {
+		this.translationKey = translationKey;
 	}
 
-	public String getName() {
-		return name;
+	public String getTranslationKey() {
+		return translationKey;
 	}
 }

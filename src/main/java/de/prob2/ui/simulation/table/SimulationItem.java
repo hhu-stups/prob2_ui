@@ -204,7 +204,7 @@ public class SimulationItem implements IExecutableItem {
 
 	@JsonIgnore
 	public String getTypeAsName() {
-		return type.getName();
+		return type.toString();
 	}
 
 	public SimulationType getType() {
