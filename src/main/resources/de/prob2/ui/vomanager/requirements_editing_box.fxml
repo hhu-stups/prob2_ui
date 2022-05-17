@@ -33,7 +33,7 @@
 		<TextField fx:id="tfName" maxWidth="200.0" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 	</VBox>
 	<VBox>
-		<Label text="%vomanager.edit.vt.linkMachine"/>
+		<Label text="%vomanager.edit.requirement.linkMachine"/>
 		<ChoiceBox fx:id="cbRequirementLinkMachineChoice"/>
 	</VBox>
 	<VBox>

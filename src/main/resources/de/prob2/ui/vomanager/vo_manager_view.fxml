@@ -7,10 +7,8 @@
 <?import de.prob2.ui.vomanager.VOEditingBox?>
 <?import de.prob2.ui.vomanager.VOManagerSetting?>
 <?import de.prob2.ui.vomanager.VOManagerStage?>
-<?import de.prob2.ui.vomanager.VTEditingBox?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
@@ -73,16 +71,11 @@
 							</TreeTableView>
 						</VBox>
 						<VBox>
-							<HBox styleClass="border">
+							<HBox styleClass="border" alignment="CENTER_LEFT">
 								<padding>
 									<Insets left="5.0"/>
 								</padding>
-								<Spacer/>
-								<Button fx:id="btAddVT" contentDisplay="GRAPHIC_ONLY" onAction="#addVT">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
-									</graphic>
-								</Button>
+								<Label text="%vomanager.table.vt.title"/>
 							</HBox>
 							<TreeTableView fx:id="tvValidationTasks" showRoot="false">
 								<columnResizePolicy>
@@ -104,7 +97,6 @@
 					<StackPane>
 						<RequirementsEditingBox fx:id="requirementEditingBox" VBox.vgrow="NEVER"/>
 						<VOEditingBox fx:id="voEditingBox" VBox.vgrow="NEVER"/>
-						<VTEditingBox fx:id="vtEditingBox" VBox.vgrow="NEVER"/>
 					</StackPane>
 				</SplitPane>
 			</StackPane>

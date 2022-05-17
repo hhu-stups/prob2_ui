@@ -16,7 +16,7 @@ import de.prob.json.JsonMetadataBuilder;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.vomanager.Requirement;
-import de.prob2.ui.vomanager.ValidationTask;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;

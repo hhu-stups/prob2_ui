@@ -649,6 +649,8 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				simulationItem.put("id", idByParams.get(configuration.toString()));
 			}
 		}
+		
+		machine.remove("validationTasks");
 	}
 	
 	@Override

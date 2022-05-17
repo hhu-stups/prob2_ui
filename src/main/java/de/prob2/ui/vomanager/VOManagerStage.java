@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.model.classicalb.ClassicalBModel;
@@ -18,7 +17,6 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
@@ -29,14 +27,14 @@ import de.prob2.ui.verifications.TreeCheckedCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
@@ -44,8 +42,6 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
-
-import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
@@ -56,7 +52,7 @@ public class VOManagerStage extends Stage {
 	}
 
 	public static enum Mode {
-		NONE, REQUIREMENT, VO, VT
+		NONE, REQUIREMENT, VO
 	}
 
 	@FXML
@@ -69,13 +65,13 @@ public class VOManagerStage extends Stage {
 	private TreeTableColumn<INameable, String> requirementNameColumn;
 
 	@FXML
-	private TreeTableView<INameable> tvValidationTasks;
+	private TreeTableView<Object> tvValidationTasks; // contains Machine and ValidationTask objects
 
 	@FXML
-	private TreeTableColumn<INameable, Checked> vtStatusColumn;
+	private TreeTableColumn<Object, Checked> vtStatusColumn;
 
 	@FXML
-	private TreeTableColumn<INameable, String> vtNameColumn;
+	private TreeTableColumn<Object, String> vtNameColumn;
 
 	@FXML
 	private MenuButton btAddRequirementVO;
@@ -84,16 +80,10 @@ public class VOManagerStage extends Stage {
 	private MenuItem btAddVO;
 
 	@FXML
-	private Button btAddVT;
-
-	@FXML
 	private RequirementsEditingBox requirementEditingBox;
 
 	@FXML
 	private VOEditingBox voEditingBox;
-
-	@FXML
-	private VTEditingBox vtEditingBox;
 
 	@FXML
 	private ChoiceBox<VOManagerSetting> cbViewSetting;
@@ -101,8 +91,6 @@ public class VOManagerStage extends Stage {
 	private final CurrentProject currentProject;
 
 	private final CurrentTrace currentTrace;
-
-	private final VOManager voManager;
 
 	private final VOChecker voChecker;
 
@@ -117,12 +105,11 @@ public class VOManagerStage extends Stage {
 	private final Map<String, List<String>> refinementChain;
 
 	@Inject
-	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector,
-						  final VOManager voManager, final VOChecker voChecker, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
+	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
+			final VOChecker voChecker, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
 		super();
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.voManager = voManager;
 		this.voChecker = voChecker;
 		this.requirementHandler = requirementHandler;
 		this.bundle = bundle;
@@ -138,7 +125,18 @@ public class VOManagerStage extends Stage {
 		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		vtStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		vtStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
-		vtNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
+		vtNameColumn.setCellValueFactory(features -> {
+			final Object obj = features.getValue().getValue();
+			final StringProperty value = new SimpleStringProperty();
+			if (obj instanceof INameable) {
+				value.set(((INameable)obj).getName());
+			} else if (obj instanceof IValidationTask) {
+				value.set(((IValidationTask)obj).getId());
+			} else {
+				throw new IllegalArgumentException("Unsupported class in VT table: " + value.getClass());
+			}
+			return value;
+		});
 
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<INameable> row = new TreeTableRow<>();
@@ -199,61 +197,33 @@ public class VOManagerStage extends Stage {
 		});
 
 		tvValidationTasks.setRowFactory(table -> {
-			final TreeTableRow<INameable> row = new TreeTableRow<>();
+			final TreeTableRow<Object> row = new TreeTableRow<>();
 
 			MenuItem checkItem = new MenuItem(bundle.getString("vomanager.menu.items.checkVT"));
 			checkItem.setOnAction(e -> {
-				INameable item = row.getItem();
-				if(item instanceof Machine) {
-					return;
+				Object item = row.getItem();
+				if(item instanceof IValidationTask) {
+					voChecker.checkVT((IValidationTask) item);
 				}
-				voChecker.checkVT((ValidationTask) item);
-			});
-
-			MenuItem removeItem = new MenuItem(bundle.getString("vomanager.menu.items.removeVT"));
-			removeItem.setOnAction(e -> {
-				INameable item = row.getItem();
-				if(item instanceof Machine) {
-					return;
-				}
-				ValidationTask validationTask = (ValidationTask) item;
-				final Machine machine = (Machine)row.getTreeItem().getParent().getValue();
-				machine.getValidationTasks().remove(validationTask);
-				updateValidationTasksTable();
-				// TODO: Implement dependency between VO and VT
 			});
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(checkItem, removeItem)));
+							.otherwise(new ContextMenu(checkItem)));
 			return row;
 		});
 
-		tvValidationTasks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to == null || to.getValue() instanceof Machine) {
-				return;
-			}
-			ValidationTask task = (ValidationTask) to.getValue();
-			if(task != null) {
-				switchMode(EditType.EDIT, Mode.VT);
-				vtEditingBox.showValidationTask(task);
-			} else {
-				switchMode(EditType.NONE, Mode.NONE);
-			}
-		});
-
 		tvValidationTasks.setOnMouseClicked(e-> {
-			TreeItem<INameable> treeItem = tvValidationTasks.getSelectionModel().getSelectedItem();
+			TreeItem<Object> treeItem = tvValidationTasks.getSelectionModel().getSelectedItem();
 			if(treeItem == null) {
 				return;
 			}
-			if(treeItem.getValue() instanceof Machine) {
-				return;
-			}
-			ValidationTask item = (ValidationTask) treeItem.getValue();
-			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
-				voChecker.checkVT(item);
+			if(treeItem.getValue() instanceof IValidationTask) {
+				IValidationTask item = (IValidationTask) treeItem.getValue();
+				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
+					voChecker.checkVT(item);
+				}
 			}
 		});
 
@@ -273,11 +243,9 @@ public class VOManagerStage extends Stage {
 	private void initializeEditingBoxes() {
 		requirementEditingBox.setVoManagerStage(this);
 		voEditingBox.setVoManagerStage(this);
-		vtEditingBox.setVoManagerStage(this);
 
 		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.REQUIREMENT, editTypeProperty, modeProperty));
 		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VO, editTypeProperty, modeProperty));
-		vtEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VT, editTypeProperty, modeProperty));
 	}
 
 	private void initializeChoiceBoxes() {
@@ -291,7 +259,6 @@ public class VOManagerStage extends Stage {
 			final List<Machine> machines = to == null ? Collections.emptyList() : to.getMachines();
 			requirementEditingBox.updateLinkedMachines(machines);
 			voEditingBox.updateLinkedMachines(machines);
-			vtEditingBox.updateLinkedMachines(machines);
 
 			if(from != null) {
 				for (Requirement requirement : from.getRequirements()) {
@@ -300,8 +267,6 @@ public class VOManagerStage extends Stage {
 			}
 
 			if (to != null) {
-				voManager.synchronizeProject(to);
-
 				btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
 
 				for(Requirement requirement : to.getRequirements()) {
@@ -318,22 +283,9 @@ public class VOManagerStage extends Stage {
 
 			switchMode(EditType.NONE, Mode.NONE);
 			btAddRequirementVO.setDisable(to == null);
-			btAddVT.setDisable(to == null);
 		};
 		currentProject.addListener(projectChangeListener);
 		projectChangeListener.changed(null, null, currentProject.get());
-	}
-
-	private void initializeListenerOnMode() {
-		modeProperty.addListener((observable, from, to) -> {
-			if(to == Mode.VT) {
-				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.TIMES_CIRCLE));
-				btAddVT.setTooltip(new Tooltip());
-			} else {
-				btAddVT.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
-				btAddVT.setTooltip(new Tooltip());
-			}
-		});
 	}
 
 	@FXML
@@ -342,7 +294,6 @@ public class VOManagerStage extends Stage {
 		initializeEditingBoxes();
 		initializeChoiceBoxes();
 		initializeListenerOnProjectChange();
-		initializeListenerOnMode();
 	}
 
 	public void switchMode(EditType editType, Mode mode) {
@@ -406,15 +357,15 @@ public class VOManagerStage extends Stage {
 	}
 
 	public void updateValidationTasksTable() {
-		TreeItem<INameable> root = new TreeItem<>();
+		TreeItem<Object> root = new TreeItem<>();
 		for(Machine machine : currentProject.getMachines()) {
 			if (machine.getValidationTasks().isEmpty()) {
 				continue;
 			}
-			TreeItem<INameable> machineItem = new TreeItem<>(machine);
+			TreeItem<Object> machineItem = new TreeItem<>(machine);
 			root.getChildren().add(machineItem);
-			for(ValidationTask validationTask : machine.getValidationTasks()) {
-				TreeItem<INameable> validationTaskItem = new TreeItem<>(validationTask);
+			for(IValidationTask validationTask : machine.getValidationTasks()) {
+				TreeItem<Object> validationTaskItem = new TreeItem<>(validationTask);
 				machineItem.getChildren().add(validationTaskItem);
 			}
 		}
@@ -465,17 +416,6 @@ public class VOManagerStage extends Stage {
 		}
 	}
 
-	@FXML
-	private void addVT() {
-		if(editTypeProperty.get() == EditType.NONE || modeProperty.get() != Mode.VT) {
-			vtEditingBox.resetVTEditing();
-			switchMode(EditType.ADD, Mode.VT);
-		} else {
-			switchMode(EditType.NONE, Mode.NONE);
-		}
-		tvValidationTasks.getSelectionModel().clearSelection();
-	}
-
 	public EditType getEditType() {
 		return editTypeProperty.get();
 	}
@@ -484,16 +424,8 @@ public class VOManagerStage extends Stage {
 		tvRequirements.getSelectionModel().clearSelection();
 	}
 
-	public void clearVTsSelection() {
-		tvValidationTasks.getSelectionModel().clearSelection();
-	}
-
 	public INameable getSelectedRequirement() {
 		return tvRequirements.getSelectionModel().getSelectedItem().getValue();
-	}
-
-	public INameable getSelectedVT() {
-		return tvValidationTasks.getSelectionModel().getSelectedItem().getValue();
 	}
 
 	public void refreshRequirementsTable() {
@@ -502,14 +434,6 @@ public class VOManagerStage extends Stage {
 		this.clearRequirementsSelection();
 		this.updateRequirementsTable();
 		tvRequirements.refresh();
-	}
-
-	public void refreshVTTable() {
-		// TODO: Replace refresh?
-		this.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
-		this.clearVTsSelection();
-		this.updateValidationTasksTable();
-		tvValidationTasks.refresh();
 	}
 
 	private void resolveRefinementHierarchy(AbstractModel model) {

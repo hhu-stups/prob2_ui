@@ -71,7 +71,7 @@ public class VOEditingBox extends VBox {
 				cbVOExpression.getItems().clear();
 			} else {
 				cbVOExpression.getItems().setAll(to.getValidationTasks().stream()
-					.map(ValidationTask::getId)
+					.map(IValidationTask::getId)
 					.collect(Collectors.toList()));
 			}
 		});

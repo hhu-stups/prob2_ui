@@ -79,7 +79,7 @@ public class VOChecker {
 		// Currently assumes that a VO consists of one VT
 		String voExpression = validationObligation.getExpression();
 		validationObligation.checkedProperty().unbind();
-		for(ValidationTask validationTask : currentProject.getCurrentMachine().getValidationTasks()) {
+		for(IValidationTask validationTask : currentProject.getCurrentMachine().getValidationTasks()) {
 			if(validationTask.getId().equals(voExpression)) {
 				validationObligation.checkedProperty().bind(validationTask.checkedProperty());
 				checkVT(validationTask);
@@ -88,27 +88,19 @@ public class VOChecker {
 		}
 	}
 
-	public void checkVT(ValidationTask validationTask) {
-		ValidationTechnique validationTechnique = validationTask.getValidationTechnique();
-		IExecutableItem executable = validationTask.getExecutable();
-		switch (validationTechnique) {
-			case MODEL_CHECKING:
-				modelchecker.checkItem((ModelCheckingItem) executable, false, false);
-				break;
-			case LTL_MODEL_CHECKING:
-				ltlChecker.checkFormula((LTLFormulaItem) executable);
-				break;
-			case SYMBOLIC_MODEL_CHECKING:
-				symbolicChecker.handleItem((SymbolicCheckingFormulaItem) executable, false);
-				break;
-			case TRACE_REPLAY:
-				traceChecker.check((ReplayTrace) executable, true);
-				break;
-			case SIMULATION:
-				simulationItemHandler.checkItem((SimulationItem) executable, false);
-				break;
-			default:
-				throw new RuntimeException("Validation technique is not valid: " + validationTechnique);
+	public void checkVT(IValidationTask validationTask) {
+		if (validationTask instanceof ModelCheckingItem) {
+			modelchecker.checkItem((ModelCheckingItem)validationTask, false, false);
+		} else if (validationTask instanceof LTLFormulaItem) {
+			ltlChecker.checkFormula((LTLFormulaItem)validationTask);
+		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
+			symbolicChecker.handleItem((SymbolicCheckingFormulaItem)validationTask, false);
+		} else if (validationTask instanceof ReplayTrace) {
+			traceChecker.check((ReplayTrace)validationTask, true);
+		} else if (validationTask instanceof SimulationItem) {
+			simulationItemHandler.checkItem((SimulationItem)validationTask, false);
+		} else {
+			throw new AssertionError("Unhandled validation task type: " + validationTask.getClass());
 		}
 	}
 

@@ -4,11 +4,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.common.collect.Streams;
 import com.google.common.io.MoreFiles;
 
 import de.prob.ltl.parser.pattern.PatternManager;
@@ -28,8 +30,8 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.INameable;
+import de.prob2.ui.vomanager.IValidationTask;
 import de.prob2.ui.vomanager.ValidationObligation;
-import de.prob2.ui.vomanager.ValidationTask;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -113,7 +115,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final StringProperty description;
 	private final Path location;
 	private final StringProperty lastUsedPreferenceName;
-	private final ListProperty<ValidationTask> validationTasks;
 	private final ListProperty<ValidationObligation> validationObligations;
 	private final ListProperty<LTLFormulaItem> ltlFormulas;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
@@ -143,7 +144,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = location;
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
-		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
 		this.validationObligations = new SimpleListProperty<>(this, "validationObligations", FXCollections.observableArrayList());
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
@@ -214,7 +214,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.nameProperty().addListener(changedListener);
 		this.descriptionProperty().addListener(changedListener);
 		this.lastUsedPreferenceNameProperty().addListener(changedListener);
-		this.validationTasksProperty().addListener(changedListener);
 		this.validationObligationsProperty().addListener(changedListener);
 		this.ltlFormulasProperty().addListener(changedListener);
 		this.ltlPatternsProperty().addListener(changedListener);
@@ -358,18 +357,20 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.descriptionProperty().set(description);
 	}
 
-	public ListProperty<ValidationTask> validationTasksProperty() {
-		return validationTasks;
-	}
-
-	@JsonProperty("validationTasks")
-	public List<ValidationTask> getValidationTasks() {
-		return validationTasks.get();
-	}
-
-	@JsonProperty("validationTasks")
-	public void setValidationTasks(final List<ValidationTask> validationTasks) {
-		this.validationTasks.setAll(validationTasks);
+	@JsonIgnore
+	public List<IValidationTask> getValidationTasks() {
+		// Collect all checking items that are validation tasks and have a non-null ID
+		return Streams.concat(
+			this.getModelcheckingItems().stream(),
+			this.getLTLFormulas().stream(),
+			this.getSymbolicCheckingFormulas().stream(),
+			this.getTraces().stream(),
+			this.getSimulations().stream()
+				.map(SimulationModel::getSimulationItems)
+				.flatMap(List::stream)
+		)
+			.filter(vt -> vt.getId() != null)
+			.collect(Collectors.toList());
 	}
 
 	public ListProperty<ValidationObligation> validationObligationsProperty() {
