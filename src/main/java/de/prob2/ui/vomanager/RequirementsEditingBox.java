@@ -41,16 +41,13 @@ public class RequirementsEditingBox extends VBox {
 
 	private final CurrentProject currentProject;
 
-	private final VOManager voManager;
-
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOManager voManager) {
+	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
-		this.voManager = voManager;
 		stageManager.loadFXML(this, "requirements_editing_box.fxml");
 	}
 
@@ -61,7 +58,7 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	public void applyRequirement() {
-		if(voManager.requirementIsValid(tfName.getText(), taRequirement.getText())) {
+		if(!tfName.getText().trim().isEmpty() && !taRequirement.getText().trim().isEmpty()) {
 			boolean nameExists = currentProject.getRequirements().stream()
 					.map(Requirement::getName)
 					.collect(Collectors.toList())

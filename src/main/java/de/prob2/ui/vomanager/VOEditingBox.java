@@ -37,15 +37,13 @@ public class VOEditingBox extends VBox {
 
 	private final CurrentProject currentProject;
 
-	private final VOManager voManager;
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOManager voManager) {
+	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
-		this.voManager = voManager;
 		stageManager.loadFXML(this, "vo_editing_box.fxml");
 	}
 
@@ -111,7 +109,7 @@ public class VOEditingBox extends VBox {
 
 	@FXML
 	private void applyVO() {
-		boolean voIsValid = voManager.voIsValid(tfVOName.getText(), cbLinkRequirementChoice.getValue());
+		boolean voIsValid = !tfVOName.getText().trim().isEmpty() && cbLinkRequirementChoice.getValue() != null;
 		VOManagerStage.EditType editType = voManagerStage.getEditType();
 		if(voIsValid) {
 			boolean nameExists = currentProject.getMachines().stream()
