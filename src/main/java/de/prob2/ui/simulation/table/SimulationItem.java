@@ -18,8 +18,8 @@ import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.vomanager.IValidationTask;
 
-import de.prob2.ui.verifications.IExecutableItem;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -27,7 +27,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-public class SimulationItem implements IExecutableItem {
+public class SimulationItem implements IValidationTask {
 
 	public static class SimulationCheckingInformation {
 		private final Map<String, Object> information;
@@ -133,6 +133,8 @@ public class SimulationItem implements IExecutableItem {
 		}
 	}
 
+	private final String id;
+
 	private final SimulationType type;
 
 	private final Map<String, Object> information;
@@ -152,7 +154,8 @@ public class SimulationItem implements IExecutableItem {
 	@JsonIgnore
 	private SimulationModel simulationModel;
 
-	public SimulationItem(SimulationType type, Map<String, Object> information) {
+	public SimulationItem(String id, SimulationType type, Map<String, Object> information) {
+		this.id = id;
 		this.type = type;
 		this.information = information;
 		initListeners();
@@ -160,10 +163,11 @@ public class SimulationItem implements IExecutableItem {
 
 	@JsonCreator
 	private SimulationItem(
+		@JsonProperty("id") final String id,
 		@JsonProperty("type") final SimulationType type,
 		@JsonProperty("information") final SimulationCheckingInformation information
 	) {
-		this(type, information.getInformation());
+		this(id, type, information.getInformation());
 	}
 
 	private void initListeners() {
@@ -171,6 +175,11 @@ public class SimulationItem implements IExecutableItem {
 		this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.simulationStats = null;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	public void setChecked(Checked checked) {

@@ -157,7 +157,7 @@ public class SimulationChoosingStage extends Stage {
 
 
 	private SimulationItem extractItem() {
-		SimulationItem simulationItem = new SimulationItem(simulationChoice.getSelectionModel().getSelectedItem(), this.extractInformation());
+		SimulationItem simulationItem = new SimulationItem(null, simulationChoice.getSelectionModel().getSelectedItem(), this.extractInformation());
 		simulationItem.setSimulationModel(simulation);
 		return simulationItem;
 	}

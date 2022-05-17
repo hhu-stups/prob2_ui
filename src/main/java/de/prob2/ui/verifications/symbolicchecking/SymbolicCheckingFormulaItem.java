@@ -3,16 +3,25 @@ package de.prob2.ui.verifications.symbolicchecking;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicItem;
+import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class SymbolicCheckingFormulaItem extends SymbolicItem<SymbolicCheckingType> {
+@JsonPropertyOrder({
+	"id",
+	"type",
+	"code",
+	"selected",
+})
+public class SymbolicCheckingFormulaItem extends SymbolicItem<SymbolicCheckingType> implements IValidationTask {
+	private final String id;
 	private final SymbolicCheckingType type;
 	
 	@JsonIgnore
@@ -20,11 +29,18 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem<SymbolicCheckingTy
 	
 	@JsonCreator
 	public SymbolicCheckingFormulaItem(
+		@JsonProperty("id") final String id,
 		@JsonProperty("code") final String code,
 		@JsonProperty("type") final SymbolicCheckingType type
 	) {
 		super(code);
+		this.id = id;
 		this.type = type;
+	}
+	
+	@Override
+	public String getId() {
+		return this.id;
 	}
 	
 	@Override

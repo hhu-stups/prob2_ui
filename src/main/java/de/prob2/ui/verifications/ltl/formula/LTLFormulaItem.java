@@ -8,16 +8,19 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.ILTLItem;
+import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 @JsonPropertyOrder({
+	"id",
 	"description",
 	"code",
 	"selected",
 })
-public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
+public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem, IValidationTask {
+	private final String id;
 	private final String code;
 	private final String description;
 	
@@ -26,11 +29,13 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 	
 	@JsonCreator
 	public LTLFormulaItem(
+		@JsonProperty("id") final String id,
 		@JsonProperty("code") final String code,
 		@JsonProperty("description") final String description
 	) {
 		super();
 		
+		this.id = id;
 		this.code = code;
 		this.description = description;
 	}
@@ -39,6 +44,11 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem {
 	public void reset() {
 		super.reset();
 		this.setCounterExample(null);
+	}
+	
+	@Override
+	public String getId() {
+		return this.id;
 	}
 	
 	public String getCode() {

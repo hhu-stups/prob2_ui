@@ -50,9 +50,9 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		lastItem = null;
 		String code = taCode.getText();
 		if(handleItem.getHandleType() == HandleType.ADD) {
-			addItem(currentProject.getCurrentMachine(), new LTLFormulaItem(code, taDescription.getText()));
+			addItem(currentProject.getCurrentMachine(), new LTLFormulaItem(null, code, taDescription.getText()));
 		} else {
-			changeItem(handleItem.getItem(), new LTLFormulaItem(code, taDescription.getText()));
+			changeItem(handleItem.getItem(), new LTLFormulaItem(handleItem.getItem().getId(), code, taDescription.getText()));
 		}
 	}
 	

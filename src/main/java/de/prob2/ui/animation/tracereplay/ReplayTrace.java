@@ -18,7 +18,7 @@ import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -31,7 +31,8 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-public class ReplayTrace implements IExecutableItem, DescriptionView.Describable {
+public class ReplayTrace implements IValidationTask, DescriptionView.Describable {
+	private final String id;
 	private final ObjectProperty<Checked> status;
 	@JsonIgnore
 	private final DoubleProperty progress;
@@ -48,7 +49,8 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	private TraceManager traceManager;
 	private BooleanProperty selected;
 
-	public ReplayTrace(Path location, Path absoluteLocation, TraceManager traceManager) {
+	public ReplayTrace(String id, Path location, Path absoluteLocation, TraceManager traceManager) {
+		this.id = id;
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
@@ -61,15 +63,23 @@ public class ReplayTrace implements IExecutableItem, DescriptionView.Describable
 	}
 
 	@JsonCreator
-	private ReplayTrace(@JsonProperty("location") final Path location) {
+	private ReplayTrace(
+		@JsonProperty("id") final String id,
+		@JsonProperty("location") final Path location
+	) {
 		// absoluteLocation and traceManager must be initialized later using initAfterLoad,
 		// otherwise many ReplayTrace methods won't work.
-		this(location, null, null);
+		this(id, location, null, null);
 	}
 
 	public void initAfterLoad(final Path absoluteLocation, final TraceManager traceManager) {
 		this.absoluteLocation = absoluteLocation;
 		this.traceManager = traceManager;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	@Override

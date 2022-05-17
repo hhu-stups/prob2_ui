@@ -49,6 +49,6 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 	
 	@Override
 	protected SymbolicCheckingFormulaItem extractItem() {
-		return new SymbolicCheckingFormulaItem(this.extractFormula(), this.getExecutionType());
+		return new SymbolicCheckingFormulaItem(null, this.extractFormula(), this.getExecutionType());
 	}
 }

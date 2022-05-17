@@ -2,8 +2,11 @@ package de.prob2.ui.project;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -576,6 +579,78 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		machine.set("traces", traceObjects);
 	}
 	
+	private static void updateV27Machine(final ObjectNode machine) {
+		final ArrayNode validationTasksArray = checkArray(machine.get("validationTasks"));
+		
+		final Map<String, String> idByParams = new HashMap<>();
+		for (final JsonNode taskNode : validationTasksArray) {
+			final ObjectNode task = checkObject(taskNode);
+			final String id = checkText(task.get("id"));
+			final String parameters = checkText(task.get("parameters"));
+			idByParams.put(parameters, id);
+		}
+		
+		final ArrayNode modelcheckingItems = checkArray(machine.get("modelcheckingItems"));
+		for (final JsonNode itemNode : modelcheckingItems) {
+			final ObjectNode item = checkObject(itemNode);
+			final ObjectNode options = checkObject(item.get("options"));
+			final ArrayNode prologOptions = checkArray(options.get("options"));
+			final StringJoiner parameters = new StringJoiner(", ");
+			for (final JsonNode option : prologOptions) {
+				parameters.add(checkText(option));
+			}
+			item.put("id", idByParams.get(parameters.toString()));
+		}
+		
+		final ArrayNode ltlFormulas = checkArray(machine.get("ltlFormulas"));
+		for (final JsonNode formulaNode : ltlFormulas) {
+			final ObjectNode formula = checkObject(formulaNode);
+			final String code = checkText(formula.get("code"));
+			formula.put("id", idByParams.get(code));
+		}
+		
+		final ArrayNode symbolicCheckingFormulas = checkArray(machine.get("symbolicCheckingFormulas"));
+		for (final JsonNode formulaNode : symbolicCheckingFormulas) {
+			final ObjectNode formula = checkObject(formulaNode);
+			final String type = checkText(formula.get("type"));
+			final String code = checkText(formula.get("code"));
+			final String parameters;
+			if ("INVARIANT".equals(type)) {
+				parameters = String.format("%s(%s)", type, code.isEmpty() ? "all" : code);
+			} else if ("DEADLOCK".equals(type)) {
+				parameters = String.format("%s(%s)", type, code);
+			} else if ("SYMBOLIC_MODEL_CHECK".equals(type)) {
+				parameters = code;
+			} else {
+				parameters = type;
+			}
+			formula.put("id", idByParams.get(parameters));
+		}
+		
+		final ArrayNode traces = checkArray(machine.get("traces"));
+		for (final JsonNode traceNode : traces) {
+			final ObjectNode trace = checkObject(traceNode);
+			final String location = checkText(trace.get("location"));
+			final String[] split = location.split("/");
+			final String fileName = split[split.length - 1];
+			trace.put("id", idByParams.get(fileName));
+		}
+		
+		final ArrayNode simulations = checkArray(machine.get("simulations"));
+		for (final JsonNode simulationNode : simulations) {
+			final ObjectNode simulation = checkObject(simulationNode);
+			for (final JsonNode simulationItemNode : checkArray(simulation.get("simulationItems"))) {
+				final ObjectNode simulationItem = checkObject(simulationItemNode);
+				final ObjectNode information = checkObject(simulationItem.get("information"));
+				final StringJoiner configuration = new StringJoiner(",\n");
+				information.fields().forEachRemaining(entry ->
+					configuration.add(String.format("%s : %s", entry.getKey(), entry.getValue().asText()))
+				);
+				simulationItem.put("id", idByParams.get(configuration.toString()));
+			}
+		}
+	}
+	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -675,6 +750,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 26) {
 				updateV26Machine(machine);
+			}
+			if (oldVersion <= 27) {
+				updateV27Machine(machine);
 			}
 		});
 		
