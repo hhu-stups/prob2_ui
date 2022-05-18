@@ -27,8 +27,6 @@ import de.prob2.ui.verifications.TreeCheckedCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
@@ -63,15 +61,6 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private TreeTableColumn<INameable, String> requirementNameColumn;
-
-	@FXML
-	private TreeTableView<Object> tvValidationTasks; // contains Machine and ValidationTask objects
-
-	@FXML
-	private TreeTableColumn<Object, Checked> vtStatusColumn;
-
-	@FXML
-	private TreeTableColumn<Object, String> vtNameColumn;
 
 	@FXML
 	private MenuButton btAddRequirementVO;
@@ -123,20 +112,6 @@ public class VOManagerStage extends Stage {
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
 		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-		vtStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
-		vtStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
-		vtNameColumn.setCellValueFactory(features -> {
-			final Object obj = features.getValue().getValue();
-			final StringProperty value = new SimpleStringProperty();
-			if (obj instanceof INameable) {
-				value.set(((INameable)obj).getName());
-			} else if (obj instanceof IValidationTask) {
-				value.set(((IValidationTask)obj).getId());
-			} else {
-				throw new IllegalArgumentException("Unsupported class in VT table: " + value.getClass());
-			}
-			return value;
-		});
 
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<INameable> row = new TreeTableRow<>();
@@ -196,37 +171,6 @@ public class VOManagerStage extends Stage {
 			}
 		});
 
-		tvValidationTasks.setRowFactory(table -> {
-			final TreeTableRow<Object> row = new TreeTableRow<>();
-
-			MenuItem checkItem = new MenuItem(bundle.getString("vomanager.menu.items.checkVT"));
-			checkItem.setOnAction(e -> {
-				Object item = row.getItem();
-				if(item instanceof IValidationTask) {
-					voChecker.checkVT((IValidationTask) item);
-				}
-			});
-
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(checkItem)));
-			return row;
-		});
-
-		tvValidationTasks.setOnMouseClicked(e-> {
-			TreeItem<Object> treeItem = tvValidationTasks.getSelectionModel().getSelectedItem();
-			if(treeItem == null) {
-				return;
-			}
-			if(treeItem.getValue() instanceof IValidationTask) {
-				IValidationTask item = (IValidationTask) treeItem.getValue();
-				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
-					voChecker.checkVT(item);
-				}
-			}
-		});
-
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> initializeRefinementHierarchy(to));
 		initializeRefinementHierarchy(currentTrace.getStateSpace());
 	}
@@ -275,10 +219,8 @@ public class VOManagerStage extends Stage {
 				}
 
 				updateRequirementsTable();
-				updateValidationTasksTable();
 			} else {
 				tvRequirements.setRoot(null);
-				tvValidationTasks.setRoot(null);
 			}
 
 			switchMode(EditType.NONE, Mode.NONE);
@@ -354,22 +296,6 @@ public class VOManagerStage extends Stage {
 			}
 			root.getChildren().add(requirementItem);
 		}
-	}
-
-	public void updateValidationTasksTable() {
-		TreeItem<Object> root = new TreeItem<>();
-		for(Machine machine : currentProject.getMachines()) {
-			if (machine.getValidationTasks().isEmpty()) {
-				continue;
-			}
-			TreeItem<Object> machineItem = new TreeItem<>(machine);
-			root.getChildren().add(machineItem);
-			for(IValidationTask validationTask : machine.getValidationTasks()) {
-				TreeItem<Object> validationTaskItem = new TreeItem<>(validationTask);
-				machineItem.getChildren().add(validationTaskItem);
-			}
-		}
-		tvValidationTasks.setRoot(root);
 	}
 
 	@FXML

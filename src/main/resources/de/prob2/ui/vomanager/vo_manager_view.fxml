@@ -29,70 +29,45 @@
 			<StackPane>
 				<SplitPane dividerPositions="0.35">
 					<VBox styleClass="border" spacing="20.0" alignment="CENTER_LEFT">
-						<VBox>
-							<HBox styleClass="border" spacing="5.0" alignment="CENTER_LEFT">
-								<padding>
-									<Insets left="5.0"/>
-								</padding>
-								<Label text="%vomanager.table.requirements.groupBy"/>
-								<ChoiceBox fx:id="cbViewSetting">
-									<items>
-										<FXCollections fx:factory="observableArrayList">
-											<VOManagerSetting fx:value="MACHINE"/>
-											<VOManagerSetting fx:value="REQUIREMENT"/>
-										</FXCollections>
-									</items>
-								</ChoiceBox>
-								<Spacer/>
-								<MenuButton fx:id="btAddRequirementVO">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
-									</graphic>
-									<items>
-										<MenuItem fx:id="btAddRequirement" text="%vomanager.menu.requirements.add" onAction="#addRequirement"/>
-										<MenuItem fx:id="btAddVO" text="%vomanager.menu.vo.add" onAction="#addVO"/>
-									</items>
-								</MenuButton>
-							</HBox>
-							<TreeTableView fx:id="tvRequirements" showRoot="false">
-								<columnResizePolicy>
-									<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-								</columnResizePolicy>
-								<columns>
-									<TreeTableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
-												 minWidth="${fontSize.fontSize * 6}"
-												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TreeTableColumn fx:id="requirementNameColumn" minWidth="70.0"
-												 text="%vomanager.table.requirements.column.name"/>
-								</columns>
-								<placeholder>
-									<Label text="%vomanager.table.requirements.placeholder"/>
-								</placeholder>
-							</TreeTableView>
-						</VBox>
-						<VBox>
-							<HBox styleClass="border" alignment="CENTER_LEFT">
-								<padding>
-									<Insets left="5.0"/>
-								</padding>
-								<Label text="%vomanager.table.vt.title"/>
-							</HBox>
-							<TreeTableView fx:id="tvValidationTasks" showRoot="false">
-								<columnResizePolicy>
-									<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-								</columnResizePolicy>
-								<columns>
-									<TreeTableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;"
-												 minWidth="${fontSize.fontSize * 6}"
-												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TreeTableColumn fx:id="vtNameColumn" minWidth="140.0"
-												 text="%vomanager.table.vt.column.name"/>
-								</columns>
-								<placeholder>
-									<Label text="%vomanager.table.vt.placeholder"/>
-								</placeholder>
-							</TreeTableView>
-						</VBox>
+						<HBox styleClass="border" spacing="5.0" alignment="CENTER_LEFT">
+							<padding>
+								<Insets left="5.0"/>
+							</padding>
+							<Label text="%vomanager.table.requirements.groupBy"/>
+							<ChoiceBox fx:id="cbViewSetting">
+								<items>
+									<FXCollections fx:factory="observableArrayList">
+										<VOManagerSetting fx:value="MACHINE"/>
+										<VOManagerSetting fx:value="REQUIREMENT"/>
+									</FXCollections>
+								</items>
+							</ChoiceBox>
+							<Spacer/>
+							<MenuButton fx:id="btAddRequirementVO">
+								<graphic>
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
+								</graphic>
+								<items>
+									<MenuItem fx:id="btAddRequirement" text="%vomanager.menu.requirements.add" onAction="#addRequirement"/>
+									<MenuItem fx:id="btAddVO" text="%vomanager.menu.vo.add" onAction="#addVO"/>
+								</items>
+							</MenuButton>
+						</HBox>
+						<TreeTableView fx:id="tvRequirements" showRoot="false">
+							<columnResizePolicy>
+								<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+							</columnResizePolicy>
+							<columns>
+								<TreeTableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
+											 minWidth="${fontSize.fontSize * 6}"
+											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+								<TreeTableColumn fx:id="requirementNameColumn" minWidth="70.0"
+											 text="%vomanager.table.requirements.column.name"/>
+							</columns>
+							<placeholder>
+								<Label text="%vomanager.table.requirements.placeholder"/>
+							</placeholder>
+						</TreeTableView>
 					</VBox>
 					<StackPane>
 						<RequirementsEditingBox fx:id="requirementEditingBox" VBox.vgrow="NEVER"/>
