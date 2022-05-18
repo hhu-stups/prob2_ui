@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -22,12 +23,11 @@
 						</padding>
 						<HBox alignment="CENTER_LEFT">
 							<Label text="%verifications.ltl.formula.ltlFormulaStage.formula" HBox.hgrow="ALWAYS"/>
-							<HBox alignment="CENTER_RIGHT">
-								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
-							</HBox>
+							<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
+							<Spacer/>
+							<Button styleClass="button-blue" text="%verifications.ltl.formula.ltlFormulaStage.showBuiltins" onAction="#showBuiltins" HBox.hgrow="NEVER"/>
 						</HBox>
 						<CodeArea fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
-						<Button styleClass="button-blue" text="%verifications.ltl.formula.ltlFormulaStage.showBuiltins" onAction="#showBuiltins" VBox.vgrow="NEVER"/>
 						<Label text="%verifications.ltl.formula.ltlFormulaStage.description" VBox.vgrow="NEVER"/>
 						<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
 						<Label text="%verifications.ltl.formula.ltlFormulaStage.errors" VBox.vgrow="NEVER"/>
