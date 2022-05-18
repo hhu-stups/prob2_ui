@@ -28,8 +28,8 @@
 		<Scene stylesheets="@/prob.css">
 			<StackPane>
 				<SplitPane dividerPositions="0.35">
-					<VBox styleClass="border" spacing="20.0" alignment="CENTER_LEFT">
-						<HBox styleClass="border" spacing="5.0" alignment="CENTER_LEFT">
+					<VBox>
+						<HBox styleClass="border" spacing="5.0" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
 							<padding>
 								<Insets left="5.0"/>
 							</padding>
@@ -53,7 +53,7 @@
 								</items>
 							</MenuButton>
 						</HBox>
-						<TreeTableView fx:id="tvRequirements" showRoot="false">
+						<TreeTableView fx:id="tvRequirements" showRoot="false" VBox.vgrow="ALWAYS">
 							<columnResizePolicy>
 								<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 							</columnResizePolicy>
