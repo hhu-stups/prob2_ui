@@ -230,7 +230,7 @@ public class SimulationItem implements IValidationTask {
 			return false;
 		}
 		SimulationItem otherItem = (SimulationItem) obj;
-		return this.type == otherItem.type && this.information.equals(otherItem.information);
+		return Objects.equals(this.id, otherItem.id) && this.type == otherItem.type && this.information.equals(otherItem.information);
 	}
 
 	public void reset() {

@@ -23,9 +23,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -194,6 +192,10 @@ public class TraceViewHandler {
 	public MenuItem createAddTestsItem() {
 		final MenuItem addTestsItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.editTrace"));
 		return addTestsItem;
+	}
+
+	public MenuItem createEditIdItem() {
+		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.editId"));
 	}
 
 	public MenuItem createDeleteTraceItem() {

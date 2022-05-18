@@ -48,6 +48,10 @@
 						</ChoiceBox>
 					</HBox>
 					<VBox spacing="10.0" fx:id="inputBox">
+						<HBox alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+							<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>
+							<TextField fx:id="idTextField" promptText="%common.optionalPlaceholder" HBox.hgrow="NEVER"/>
+						</HBox>
 						<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
 							<Button fx:id="btAdd" text="%common.buttons.add" styleClass="button-blue"/>
 							<Button fx:id="btCheck" text="%simulation.buttons.addAndCheck" styleClass="button-blue"/>

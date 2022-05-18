@@ -82,6 +82,10 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 		return this.id;
 	}
 
+	public ReplayTrace withId(final String id) {
+		return new ReplayTrace(id, this.location, this.absoluteLocation, this.traceManager);
+	}
+
 	@Override
 	public ObjectProperty<Checked> checkedProperty() {
 		return status;

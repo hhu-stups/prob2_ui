@@ -3,6 +3,7 @@ package de.prob2.ui.animation.tracereplay;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
@@ -42,6 +43,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 
@@ -127,6 +129,7 @@ public class TraceReplayView extends ScrollPane {
 
 			final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
 			final MenuItem addTestsItem = traceViewHandler.createAddTestsItem();
+			final MenuItem editIdItem = traceViewHandler.createEditIdItem();
 			final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
 			final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
 			final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
@@ -135,6 +138,20 @@ public class TraceReplayView extends ScrollPane {
 
 			// Set listeners for menu items
 			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showErrorItem, openInExternalEditorItem);
+			editIdItem.setOnAction(event -> {
+				final ReplayTrace trace = row.getItem();
+				final TextInputDialog dialog = new TextInputDialog(trace.getId() == null ? "" : trace.getId());
+				stageManager.register(dialog);
+				dialog.setTitle(bundle.getString("animation.tracereplay.view.contextMenu.editId"));
+				dialog.setHeaderText(bundle.getString("vomanager.validationTaskId"));
+				dialog.getEditor().setPromptText(bundle.getString("common.optionalPlaceholder"));
+				final Optional<String> res = dialog.showAndWait();
+				res.ifPresent(idText -> {
+					final String id = idText.trim().isEmpty() ? null : idText;
+					final List<ReplayTrace> traces = currentProject.getCurrentMachine().getTraces();
+					traces.set(traces.indexOf(trace), trace.withId(id));
+				});
+			});
 			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().getTraces().remove(row.getItem()));
 			recheckTraceItem.setOnAction(event -> {
 				final Machine currentMachine = currentProject.getCurrentMachine();
@@ -157,7 +174,7 @@ public class TraceReplayView extends ScrollPane {
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(replayTraceItem, addTestsItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, recheckTraceItem)));
+							.otherwise(new ContextMenu(replayTraceItem, addTestsItem, editIdItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, recheckTraceItem)));
 
 			row.setOnMouseClicked(event -> {
 				ReplayTrace item = row.getItem();
