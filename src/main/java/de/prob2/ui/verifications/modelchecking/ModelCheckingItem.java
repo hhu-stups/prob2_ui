@@ -152,7 +152,8 @@ public class ModelCheckingItem implements IValidationTask {
 	}
 
 	public boolean settingsEqual(final ModelCheckingItem other) {
-		return this.getNodesLimit().equals(other.getNodesLimit())
+		return Objects.equals(this.getId(), other.getId())
+			&& this.getNodesLimit().equals(other.getNodesLimit())
 			&& this.getTimeLimit().equals(other.getTimeLimit())
 			&& this.getGoal().equals(other.getGoal())
 			&& this.getOptions().equals(other.getOptions());

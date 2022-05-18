@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -72,7 +74,8 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem, I
 	}
 	
 	public boolean settingsEqual(final LTLFormulaItem other) {
-		return this.getCode().equals(other.getCode())
+		return Objects.equals(this.getId(), other.getId())
+			&& this.getCode().equals(other.getCode())
 			&& this.getDescription().equals(other.getDescription());
 	}
 }

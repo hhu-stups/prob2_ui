@@ -63,6 +63,8 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private Spinner<Integer> timeLimit;
 	@FXML
+	private TextField idTextField;
+	@FXML
 	private CheckBox additionalGoal;
 	@FXML
 	private TextField tfAdditionalGoal;
@@ -138,10 +140,11 @@ public class ModelcheckingStage extends Stage {
 	private void startModelCheck() {
 		lastItem = null;
 		if (currentTrace.get() != null) {
+			final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 			String nLimit = chooseNodesLimit.isSelected() ? String.valueOf(nodesLimit.getValue()) : "-";
 			String tLimit = chooseTimeLimit.isSelected() ? String.valueOf(timeLimit.getValue()) : "-";
 			String goal = additionalGoal.isSelected() ? tfAdditionalGoal.getText() : "-";
-			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(null, nLimit, tLimit, goal, getOptions());
+			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, nLimit, tLimit, goal, getOptions());
 			if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);

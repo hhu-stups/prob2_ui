@@ -4,13 +4,20 @@ import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.SymbolicChoosingStage;
 import de.prob2.ui.symbolic.SymbolicGUIType;
 
+import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
+
 public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<SymbolicCheckingFormulaItem, SymbolicCheckingType> {
+	@FXML
+	private TextField idTextField;
+	
 	@Inject
 	private SymbolicCheckingChoosingStage(
 		final StageManager stageManager,
@@ -49,6 +56,13 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 	
 	@Override
 	protected SymbolicCheckingFormulaItem extractItem() {
-		return new SymbolicCheckingFormulaItem(null, this.extractFormula(), this.getExecutionType());
+		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
+		return new SymbolicCheckingFormulaItem(id, this.extractFormula(), this.getExecutionType());
+	}
+	
+	@Override
+	public void changeFormula(final SymbolicCheckingFormulaItem item, final AbstractResultHandler resultHandler) {
+		this.idTextField.setText(item.getId() == null ? "" : item.getId());
+		super.changeFormula(item, resultHandler);
 	}
 }

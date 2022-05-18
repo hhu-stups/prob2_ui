@@ -14,7 +14,6 @@ import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.fxmisc.richtext.CodeArea;
@@ -60,11 +59,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	@FXML
 	protected void showBuiltins() {
 		builtinsStage.show();
-	}
-	
-	public void setData(String description, String code) {
-		taDescription.setText(description);
-		taCode.replaceText(code);
 	}
 	
 	public void clear() {

@@ -16,10 +16,13 @@ import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 import de.prob2.ui.vomanager.Requirement;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 
 import java.util.stream.Collectors;
 
 public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
+	@FXML
+	private TextField idTextField;
 
 	@FXML
 	private Button applyButton;
@@ -45,14 +48,21 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		applyButton.disableProperty().bind(formulaChecker.runningProperty());
 	}
 
+	public void setData(final LTLFormulaItem item) {
+		idTextField.setText(item.getId() == null ? "" : item.getId());
+		taCode.replaceText(item.getCode());
+		taDescription.setText(item.getDescription());
+	}
+
 	@FXML
 	private void applyFormula() {
 		lastItem = null;
+		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		String code = taCode.getText();
 		if(handleItem.getHandleType() == HandleType.ADD) {
-			addItem(currentProject.getCurrentMachine(), new LTLFormulaItem(null, code, taDescription.getText()));
+			addItem(currentProject.getCurrentMachine(), new LTLFormulaItem(id, code, taDescription.getText()));
 		} else {
-			changeItem(handleItem.getItem(), new LTLFormulaItem(handleItem.getItem().getId(), code, taDescription.getText()));
+			changeItem(handleItem.getItem(), new LTLFormulaItem(id, code, taDescription.getText()));
 		}
 	}
 	

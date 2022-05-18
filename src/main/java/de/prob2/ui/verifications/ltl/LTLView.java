@@ -311,7 +311,7 @@ public class LTLView extends AnchorPane {
 	
 	private void showCurrentItemDialog(LTLFormulaItem item) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.setData(item.getDescription(), item.getCode());
+		formulaStage.setData(item);
 		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		formulaStage.showAndWait();
 		formulaStage.clear();
@@ -319,7 +319,7 @@ public class LTLView extends AnchorPane {
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
-		patternStage.setData(item.getDescription(), item.getCode());
+		patternStage.setData(item);
 		patternStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		patternStage.showAndWait();
 		patternStage.clear();

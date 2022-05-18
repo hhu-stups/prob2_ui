@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -54,6 +56,13 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem<SymbolicCheckingTy
 	
 	public ListProperty<Trace> counterExamplesProperty() {
 		return counterExamples;
+	}
+	
+	@Override
+	public boolean settingsEqual(final SymbolicItem<?> other) {
+		return other instanceof SymbolicCheckingFormulaItem
+			&& super.settingsEqual(other)
+			&& Objects.equals(this.getId(), ((SymbolicCheckingFormulaItem)other).getId());
 	}
 	
 	@Override

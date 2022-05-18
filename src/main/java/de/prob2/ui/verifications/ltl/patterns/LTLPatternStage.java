@@ -27,6 +27,11 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}
 	
+	public void setData(final LTLPatternItem item) {
+		taCode.replaceText(item.getCode());
+		taDescription.setText(item.getDescription());
+	}
+	
 	@FXML
 	private void applyPattern() {
 		String code = taCode.getText();

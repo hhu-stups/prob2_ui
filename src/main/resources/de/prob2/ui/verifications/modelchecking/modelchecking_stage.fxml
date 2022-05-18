@@ -62,6 +62,10 @@
 									</Spinner>
 								</HBox>
 							</HBox>
+							<HBox alignment="CENTER_LEFT" spacing="5.0">
+								<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>
+								<TextField fx:id="idTextField" promptText="%common.optionalPlaceholder" HBox.hgrow="ALWAYS"/>
+							</HBox>
 						</VBox>
 					</AnchorPane>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS"
