@@ -113,6 +113,7 @@
 										<TableColumn fx:id="simulationStatusColumn" style="-fx-alignment: CENTER;"
 													 minWidth="${fontSize.fontSize * 6}"
 													 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+										<TableColumn fx:id="simulationIdColumn" style="-fx-alignment: CENTER;" minWidth="40.0" text="%verifications.common.columns.id"/>
 										<TableColumn fx:id="simulationTypeColumn" style="-fx-alignment: CENTER;" minWidth="140.0" maxWidth="140.0"
 													 text="%simulation.tableView.type"/>
 										<TableColumn fx:id="simulationConfigurationColumn" minWidth="80.0"

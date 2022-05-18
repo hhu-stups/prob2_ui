@@ -119,8 +119,14 @@ public class TraceReplayView extends ScrollPane {
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(traceTableView, selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		statusColumn.setCellValueFactory(injector.getInstance(TraceViewHandler.class).getTraceStatusFactory());
-		nameColumn.setCellValueFactory(
-				features -> new SimpleStringProperty(features.getValue().getLocation().getFileName().toString()));
+		nameColumn.setCellValueFactory(features -> {
+			final ReplayTrace trace = features.getValue();
+			String name = trace.getLocation().getFileName().toString();
+			if (trace.getId() != null) {
+				name = "[" + trace.getId() + "] " + name;
+			}
+			return new SimpleStringProperty(name);
+		});
 	}
 
 	private void initTableRows() {

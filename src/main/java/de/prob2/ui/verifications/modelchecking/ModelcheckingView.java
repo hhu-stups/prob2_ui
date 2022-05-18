@@ -68,6 +68,9 @@ public final class ModelcheckingView extends ScrollPane {
 	private TableColumn<ModelCheckingItem, Checked> statusColumn;
 	
 	@FXML
+	private TableColumn<ModelCheckingItem, String> idColumn;
+	
+	@FXML
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
 
 	@FXML
@@ -183,6 +186,7 @@ public final class ModelcheckingView extends ScrollPane {
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		strategyColumn.setCellValueFactory(features -> Bindings.createStringBinding(() ->
 			bundle.getString(SearchStrategy.fromOptions(features.getValue().getOptions()).getName())
 		));

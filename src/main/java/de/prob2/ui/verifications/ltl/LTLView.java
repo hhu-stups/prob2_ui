@@ -91,6 +91,8 @@ public class LTLView extends AnchorPane {
 	@FXML
 	private TableColumn<LTLFormulaItem, Checked> formulaStatusColumn;
 	@FXML
+	private TableColumn<LTLFormulaItem, String> formulaIdColumn;
+	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
@@ -257,6 +259,7 @@ public class LTLView extends AnchorPane {
 		formulaSelectedColumn.setGraphic(formulaSelectAll);
 		formulaStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		formulaStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		formulaIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		patternStatusColumn.setCellFactory(col -> new CheckedCell<>());

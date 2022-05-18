@@ -23,10 +23,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
-
 
 @FXMLInjected
 @Singleton
@@ -88,6 +89,9 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		}
 	}
 
+	@FXML
+	private TableColumn<SymbolicCheckingFormulaItem, String> idColumn;
+
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
 					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler, 
@@ -100,6 +104,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	public void initialize() {
 		super.initialize();
 		tvFormula.setRowFactory(new SymbolicCheckingCellFactory());
+		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		helpButton.setHelpContent("verification", "Symbolic");
 	}
 	
