@@ -115,7 +115,7 @@ public class VOEditingBox extends VBox {
 		if(validationObligation == null) {
 			return;
 		}
-		tfVOName.setText(validationObligation.getId());
+		tfVOName.setText(validationObligation.getId() == null ? "" : validationObligation.getId());
 		cbVOExpression.setValue(validationObligation.getExpression());
 		Requirement requirement = currentProject.getRequirements().stream()
 				.filter(req -> req.getName().equals(validationObligation.getRequirement()))
@@ -132,29 +132,29 @@ public class VOEditingBox extends VBox {
 
 	@FXML
 	private void applyVO() {
-		boolean voIsValid = !tfVOName.getText().trim().isEmpty() && cbLinkRequirementChoice.getValue() != null;
+		boolean voIsValid = cbLinkRequirementChoice.getValue() != null;
 		VOManagerStage.EditType editType = voManagerStage.getEditType();
 		if(voIsValid) {
-			boolean nameExists = currentProject.getMachines().stream()
+			final String id = tfVOName.getText().trim().isEmpty() ? null : tfVOName.getText();
+			boolean nameExists = id != null && currentProject.getMachines().stream()
 					.flatMap(m -> m.getValidationObligations().stream())
 					.map(ValidationObligation::getId)
-					.collect(Collectors.toList())
-					.contains(tfVOName.getText());
+					.anyMatch(id::equals);
 			if(editType == VOManagerStage.EditType.ADD) {
 				if(nameExists) {
 					warnAlreadyExists();
 					return;
 				}
 				Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
-				ValidationObligation validationObligation = new ValidationObligation(tfVOName.getText(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
+				ValidationObligation validationObligation = new ValidationObligation(id, cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
 				machine.getValidationObligations().add(validationObligation);
 			} else if(editType == VOManagerStage.EditType.EDIT) {
 				ValidationObligation validationObligation = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				if(nameExists && !validationObligation.getName().equals(tfVOName.getText())) {
+				if(nameExists && !validationObligation.getName().equals(id)) {
 					warnAlreadyExists();
 					return;
 				}
-				validationObligation.setData(tfVOName.getText(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
+				validationObligation.setData(id, cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
 			}
 			voManagerStage.refreshRequirementsTable();
 		} else {

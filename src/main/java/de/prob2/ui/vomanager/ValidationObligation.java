@@ -80,7 +80,11 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	@Override
 	@JsonIgnore
 	public String getName() {
-		return getId();
+		if (this.getId() == null) {
+			return this.getExpression();
+		} else {
+			return "[" + this.getId() + "] " + this.getExpression();
+		}
 	}
 
 	@JsonIgnore
