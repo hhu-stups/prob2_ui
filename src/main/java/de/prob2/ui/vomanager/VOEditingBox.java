@@ -1,11 +1,23 @@
 package de.prob2.ui.vomanager;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
@@ -14,8 +26,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
@@ -64,15 +75,27 @@ public class VOEditingBox extends VBox {
 			}
 		});
 
+		final ListProperty<String> vtIds = new SimpleListProperty<>(FXCollections.observableArrayList());
+		final Comparator<? super String> idComparator = new AlphanumericComparator(Locale.ROOT);
+		final MapChangeListener<String, IValidationTask> vtListener = change -> {
+			final List<String> ids = new ArrayList<>(change.getMap().keySet());
+			ids.sort(idComparator);
+			vtIds.setAll(ids);
+		};
 		cbVOLinkMachineChoice.valueProperty().addListener((o, from, to) -> {
-			if (to == null) {
-				cbVOExpression.getItems().clear();
-			} else {
-				cbVOExpression.getItems().setAll(to.getValidationTasks().stream()
-					.map(IValidationTask::getId)
-					.collect(Collectors.toList()));
+			if (from != null) {
+				from.validationTasksProperty().removeListener(vtListener);
+				vtIds.clear();
+			}
+
+			if (to != null) {
+				to.validationTasksProperty().addListener(vtListener);
+				final List<String> ids = new ArrayList<>(to.validationTasksProperty().keySet());
+				ids.sort(idComparator);
+				vtIds.setAll(ids);
 			}
 		});
+		cbVOExpression.itemsProperty().bind(vtIds);
 	}
 
 	public void resetVOEditing() {

@@ -79,13 +79,9 @@ public class VOChecker {
 		// Currently assumes that a VO consists of one VT
 		String voExpression = validationObligation.getExpression();
 		validationObligation.checkedProperty().unbind();
-		for(IValidationTask validationTask : currentProject.getCurrentMachine().getValidationTasks()) {
-			if(validationTask.getId().equals(voExpression)) {
-				validationObligation.checkedProperty().bind(validationTask.checkedProperty());
-				checkVT(validationTask);
-				return;
-			}
-		}
+		final IValidationTask validationTask = currentProject.getCurrentMachine().getValidationTasks().get(voExpression);
+		validationObligation.checkedProperty().bind(validationTask.checkedProperty());
+		checkVT(validationTask);
 	}
 
 	public void checkVT(IValidationTask validationTask) {
