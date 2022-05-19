@@ -150,10 +150,7 @@ public class VOEditingBox extends VBox {
 				machine.getValidationObligations().add(validationObligation);
 			} else if(editType == VOManagerStage.EditType.EDIT) {
 				ValidationObligation validationObligation = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				if(nameExists &&
-					validationObligation.getName().equals(tfVOName.getText()) &&
-					validationObligation.getRequirement().equals(cbLinkRequirementChoice.getValue().getName()) &&
-					validationObligation.getExpression().equals(cbVOExpression.getValue())) {
+				if(nameExists && !validationObligation.getName().equals(tfVOName.getText())) {
 					warnAlreadyExists();
 					return;
 				}
