@@ -58,11 +58,11 @@
 								<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 							</columnResizePolicy>
 							<columns>
+								<TreeTableColumn fx:id="requirementNameColumn" minWidth="70.0"
+											 text="%vomanager.table.requirements.column.name"/>
 								<TreeTableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
 											 minWidth="${fontSize.fontSize * 6}"
 											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-								<TreeTableColumn fx:id="requirementNameColumn" minWidth="70.0"
-											 text="%vomanager.table.requirements.column.name"/>
 							</columns>
 							<placeholder>
 								<Label text="%vomanager.table.requirements.placeholder"/>
