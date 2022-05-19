@@ -141,36 +141,28 @@ public class VOEditingBox extends VBox {
 					.collect(Collectors.toList())
 					.contains(tfVOName.getText());
 			if(editType == VOManagerStage.EditType.ADD) {
-				addVO(nameExists);
+				if(nameExists) {
+					warnAlreadyExists();
+					return;
+				}
+				Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
+				ValidationObligation validationObligation = new ValidationObligation(tfVOName.getText(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
+				machine.getValidationObligations().add(validationObligation);
 			} else if(editType == VOManagerStage.EditType.EDIT) {
-				editVO(nameExists);
+				ValidationObligation validationObligation = (ValidationObligation) voManagerStage.getSelectedRequirement();
+				if(nameExists &&
+					validationObligation.getName().equals(tfVOName.getText()) &&
+					validationObligation.getRequirement().equals(cbLinkRequirementChoice.getValue().getName()) &&
+					validationObligation.getExpression().equals(cbVOExpression.getValue())) {
+					warnAlreadyExists();
+					return;
+				}
+				validationObligation.setData(tfVOName.getText(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
 			}
 			voManagerStage.refreshRequirementsTable();
 		} else {
 			warnNotValid();
 		}
-	}
-
-	private void addVO(boolean nameExists) {
-		if(nameExists) {
-			warnAlreadyExists();
-			return;
-		}
-		Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
-		ValidationObligation validationObligation = new ValidationObligation(tfVOName.getText(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
-		machine.getValidationObligations().add(validationObligation);
-	}
-
-	private void editVO(boolean nameExists) {
-		ValidationObligation validationObligation = (ValidationObligation) voManagerStage.getSelectedRequirement();
-		if(nameExists &&
-				validationObligation.getName().equals(tfVOName.getText()) &&
-				validationObligation.getRequirement().equals(cbLinkRequirementChoice.getValue().getName()) &&
-				validationObligation.getExpression().equals(cbVOExpression.getValue())) {
-			warnAlreadyExists();
-			return;
-		}
-		validationObligation.setData(tfVOName.getText(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
 	}
 
 	private void warnNotValid() {
