@@ -1,21 +1,16 @@
 package de.prob2.ui.vomanager;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import de.prob2.ui.verifications.Checked;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.util.Objects;
-
-@JsonPropertyOrder({
-	"name",
-	"introducedAt",
-	"type",
-	"text"
-})
 public class Requirement implements IAbstractRequirement, INameable {
 
 	private final String name;
@@ -54,11 +49,6 @@ public class Requirement implements IAbstractRequirement, INameable {
 		return type;
 	}
 
-	@JsonIgnore
-	public String getConfiguration() {
-		return getText();
-	}
-
 	public String getText() {
 		return text;
 	}
@@ -73,10 +63,6 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 	public void setChecked(Checked checked) {
 		this.checked.set(checked);
-	}
-
-	public void reset() {
-
 	}
 
 	@Override

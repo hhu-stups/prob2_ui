@@ -1,20 +1,16 @@
 package de.prob2.ui.vomanager;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import de.prob2.ui.verifications.Checked;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.util.Objects;
-
-@JsonPropertyOrder({
-	"id",
-	"expression",
-	"requirement"
-})
 public class ValidationObligation implements IAbstractRequirement, INameable {
 
 	private final String id;
@@ -67,15 +63,6 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		} else {
 			return "[" + this.getId() + "] " + this.getExpression();
 		}
-	}
-
-	@JsonIgnore
-	public String getConfiguration() {
-		return getExpression();
-	}
-
-	public void reset() {
-
 	}
 
 	@Override
