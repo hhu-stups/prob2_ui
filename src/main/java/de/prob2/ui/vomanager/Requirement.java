@@ -18,13 +18,13 @@ import java.util.Objects;
 })
 public class Requirement implements IAbstractRequirement, INameable {
 
-	private String name;
+	private final String name;
 
-	private String introducedAt; // machine where the requirement is first introduced
+	private final String introducedAt; // machine where the requirement is first introduced
 
-	private RequirementType type;
+	private final RequirementType type;
 
-	private String text;
+	private final String text;
 
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
@@ -75,31 +75,8 @@ public class Requirement implements IAbstractRequirement, INameable {
 		this.checked.set(checked);
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setIntroducedAt(String introducedAt) {
-		this.introducedAt = introducedAt;
-	}
-
-	public void setType(RequirementType type) {
-		this.type = type;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
-
 	public void reset() {
 
-	}
-
-	public void setData(String name, String introducedAt, RequirementType type, String text) {
-		this.name = name;
-		this.introducedAt = introducedAt;
-		this.type = type;
-		this.text = text;
 	}
 
 	@Override

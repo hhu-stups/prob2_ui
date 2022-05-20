@@ -201,6 +201,12 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), requirementsList, this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
+	public void replaceRequirement(final Requirement oldRequirement, final Requirement newRequirement) {
+		List<Requirement> requirementsList = this.getRequirements();
+		requirementsList.set(requirementsList.indexOf(oldRequirement), newRequirement);
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), requirementsList, this.getPreferences(), this.getMetadata(), this.getLocation()));
+	}
+
 	public void addPreference(Preference preference) {
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.add(preference);

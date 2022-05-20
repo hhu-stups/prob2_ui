@@ -86,19 +86,19 @@ public class RequirementsEditingBox extends VBox {
 	}
 
 	private void editRequirement(boolean nameExists) {
-		Requirement requirement = (Requirement) voManagerStage.getSelectedRequirement();
-		if(nameExists && requirement.getName().equals(tfName.getText()) && requirement.getIntroducedAt().equals(cbRequirementLinkMachineChoice.getValue().getName())) {
+		final Requirement oldRequirement = (Requirement) voManagerStage.getSelectedRequirement();
+		if(nameExists && oldRequirement.getName().equals(tfName.getText()) && oldRequirement.getIntroducedAt().equals(cbRequirementLinkMachineChoice.getValue().getName())) {
 			warnAlreadyExists();
 			return;
 		}
-		String oldName = requirement.getName();
-		requirement.setData(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText());
+		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText());
+		currentProject.replaceRequirement(oldRequirement, newRequirement);
 
 		// Update validation obligations, this means update VO of ids that are affected
 		for (Machine machine : currentProject.getMachines()) {
 			for (ListIterator<ValidationObligation> iterator = machine.getValidationObligations().listIterator(); iterator.hasNext();) {
 				final ValidationObligation oldVo = iterator.next();
-				if (oldVo.getRequirement().equals(oldName)) {
+				if (oldVo.getRequirement().equals(oldRequirement.getName())) {
 					iterator.set(new ValidationObligation(oldVo.getId(), oldVo.getExpression(), tfName.getText()));
 				}
 			}
