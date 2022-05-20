@@ -17,11 +17,11 @@ import java.util.Objects;
 })
 public class ValidationObligation implements IAbstractRequirement, INameable {
 
-	private String id;
+	private final String id;
 
-	private String expression;
+	private final String expression;
 
-	private String requirement;
+	private final String requirement;
 
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
@@ -51,30 +51,12 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	public String getExpression() {
 		return expression;
 	}
 
-	public void setExpression(String expression) {
-		this.expression = expression;
-	}
-
-	public void setRequirement(String requirement) {
-		this.requirement = requirement;
-	}
-
 	public String getRequirement() {
 		return requirement;
-	}
-
-	public void setData(String id, String expression, String requirement) {
-		this.id = id;
-		this.expression = expression;
-		this.requirement = requirement;
 	}
 
 	@Override

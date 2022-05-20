@@ -136,6 +136,7 @@ public class VOEditingBox extends VBox {
 		VOManagerStage.EditType editType = voManagerStage.getEditType();
 		if(voIsValid) {
 			final String id = tfVOName.getText().trim().isEmpty() ? null : tfVOName.getText();
+			final ValidationObligation newVo = new ValidationObligation(id, cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
 			boolean nameExists = id != null && currentProject.getMachines().stream()
 					.flatMap(m -> m.getValidationObligations().stream())
 					.map(ValidationObligation::getId)
@@ -146,15 +147,14 @@ public class VOEditingBox extends VBox {
 					return;
 				}
 				Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
-				ValidationObligation validationObligation = new ValidationObligation(id, cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
-				machine.getValidationObligations().add(validationObligation);
+				machine.getValidationObligations().add(newVo);
 			} else if(editType == VOManagerStage.EditType.EDIT) {
-				ValidationObligation validationObligation = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				if(nameExists && !validationObligation.getName().equals(id)) {
+				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
+				if(nameExists && !oldVo.getName().equals(id)) {
 					warnAlreadyExists();
 					return;
 				}
-				validationObligation.setData(id, cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
+				voManagerStage.replaceCurrentValidationObligation(newVo);
 			}
 			voManagerStage.refreshRequirementsTable();
 		} else {

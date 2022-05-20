@@ -1,11 +1,17 @@
 package de.prob2.ui.vomanager;
 
+import java.util.List;
+import java.util.ListIterator;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -13,10 +19,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -94,9 +96,10 @@ public class RequirementsEditingBox extends VBox {
 
 		// Update validation obligations, this means update VO of ids that are affected
 		for (Machine machine : currentProject.getMachines()) {
-			for(ValidationObligation validationObligation : machine.getValidationObligations()) {
-				if(validationObligation.getRequirement().equals(oldName)) {
-					validationObligation.setRequirement(tfName.getText());
+			for (ListIterator<ValidationObligation> iterator = machine.getValidationObligations().listIterator(); iterator.hasNext();) {
+				final ValidationObligation oldVo = iterator.next();
+				if (oldVo.getRequirement().equals(oldName)) {
+					iterator.set(new ValidationObligation(oldVo.getId(), oldVo.getExpression(), tfName.getText()));
 				}
 			}
 		}

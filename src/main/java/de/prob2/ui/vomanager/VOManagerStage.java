@@ -354,6 +354,19 @@ public class VOManagerStage extends Stage {
 		return tvRequirements.getSelectionModel().getSelectedItem().getValue();
 	}
 
+	public void replaceCurrentValidationObligation(final ValidationObligation newVo) {
+		final TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
+		final ValidationObligation oldVo = (ValidationObligation)treeItem.getValue();
+		final TreeItem<INameable> parentItem = treeItem.getParent();
+		final Machine machine;
+		if (parentItem.getValue() instanceof Machine) {
+			machine = (Machine)parentItem.getValue();
+		} else {
+			machine = (Machine)parentItem.getParent().getValue();
+		}
+		machine.getValidationObligations().set(machine.getValidationObligations().indexOf(oldVo), newVo);
+	}
+
 	public void refreshRequirementsTable() {
 		// TODO: Replace refresh?
 		this.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
