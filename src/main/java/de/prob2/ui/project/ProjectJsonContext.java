@@ -652,6 +652,31 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		
 		machine.remove("validationTasks");
 	}
+
+	private static void updateV28Machine(ObjectNode machine) {
+		checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
+			ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
+			for (String key : new String[] {"nodesLimit", "timeLimit"}) {
+				if (modelCheckingItem.has(key)) {
+					String content = checkText(modelCheckingItem.get(key));
+					if ("-".equals(content)) {
+						modelCheckingItem.remove(key);
+					} else {
+						modelCheckingItem.put(key, Integer.parseInt(content));
+					}
+				}
+			}
+
+			for (String key : new String[] {"goal"}) {
+				if (modelCheckingItem.has(key)) {
+					String content = checkText(modelCheckingItem.get(key));
+					if ("-".equals(content)) {
+						modelCheckingItem.remove(key);
+					}
+				}
+			}
+		});
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -755,6 +780,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 27) {
 				updateV27Machine(machine);
+			}
+			if (oldVersion <= 28) {
+				updateV28Machine(machine);
 			}
 		});
 		

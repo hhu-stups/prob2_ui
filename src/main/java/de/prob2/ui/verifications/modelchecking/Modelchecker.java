@@ -129,7 +129,7 @@ public class Modelchecker {
 	private IEvalElement getGoal(ModelCheckingItem item) {
 		IEvalElement evalElement = null;
 		if(currentTrace.getModel().getFormalismType() == FormalismType.B) {
-			if(!item.getGoal().equals("-")) {
+			if(item.getGoal() != null) {
 				AbstractModel model = currentTrace.getModel();
 				if(model instanceof EventBModel) {
 					evalElement = new EventB(item.getGoal(), FormulaExpand.EXPAND);
@@ -143,11 +143,11 @@ public class Modelchecker {
 
 	private IModelCheckJob buildModelCheckJob(StateSpace stateSpace, ModelCheckingItem item, boolean recheckExisting, IModelCheckListener listener) {
 		ConsistencyChecker checker = new ConsistencyChecker(stateSpace, item.getOptions().recheckExisting(recheckExisting), getGoal(item), listener);
-		if (!"-".equals(item.getNodesLimit())) {
-			checker.getLimitConfiguration().setNodesLimit(Integer.parseInt(item.getNodesLimit()));
+		if (item.getNodesLimit() != null) {
+			checker.getLimitConfiguration().setNodesLimit(item.getNodesLimit());
 		}
-		if (!"-".equals(item.getTimeLimit())) {
-			checker.getLimitConfiguration().setTimeLimit(Integer.parseInt(item.getTimeLimit()));
+		if (item.getTimeLimit() != null) {
+			checker.getLimitConfiguration().setTimeLimit(item.getTimeLimit());
 		}
 		return checker;
 	}

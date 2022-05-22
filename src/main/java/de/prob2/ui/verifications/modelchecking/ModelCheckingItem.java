@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -37,15 +38,18 @@ public class ModelCheckingItem implements IValidationTask {
 
 	private final String id;
 
-	private final String nodesLimit;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private final Integer nodesLimit;
 
-	private final String timeLimit;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private final Integer timeLimit;
 
 	private final ModelCheckingOptions options;
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String goal;
 	
-	private BooleanProperty shouldExecute;
+	private final BooleanProperty shouldExecute;
 	
 	@JsonIgnore
 	private final ListProperty<ModelCheckingJobItem> items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
@@ -53,8 +57,8 @@ public class ModelCheckingItem implements IValidationTask {
 	@JsonCreator
 	public ModelCheckingItem(
 		@JsonProperty("id") final String id,
-		@JsonProperty("nodesLimit") final String nodesLimit,
-		@JsonProperty("timeLimit") final String timeLimit,
+		@JsonProperty("nodesLimit") final Integer nodesLimit,
+		@JsonProperty("timeLimit") final Integer timeLimit,
 		@JsonProperty("goal") final String goal,
 		@JsonProperty("options") final ModelCheckingOptions options
 	) {
@@ -106,11 +110,11 @@ public class ModelCheckingItem implements IValidationTask {
 		return this.id;
 	}
 
-	public String getNodesLimit() {
+	public Integer getNodesLimit() {
 		return nodesLimit;
 	}
 
-	public String getTimeLimit() {
+	public Integer getTimeLimit() {
 		return timeLimit;
 	}
 
@@ -161,6 +165,6 @@ public class ModelCheckingItem implements IValidationTask {
 	
 	@Override
 	public String toString() {
-		return String.format("%s(%s,%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
+		return String.format("%s(%s,%s,%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
 	}
 }
