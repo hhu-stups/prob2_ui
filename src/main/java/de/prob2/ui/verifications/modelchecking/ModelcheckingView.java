@@ -47,7 +47,10 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 @FXMLInjected
 @Singleton
@@ -63,7 +66,10 @@ public final class ModelcheckingView extends ScrollPane {
 	
 	@FXML
 	private TableView<ModelCheckingItem> tvItems;
-	
+
+	@FXML
+	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
+
 	@FXML
 	private TableColumn<ModelCheckingItem, Checked> statusColumn;
 	
@@ -74,34 +80,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
 
 	@FXML
-	private TableColumn<ModelCheckingItem, String> nodesLimitColumn;
-
-	@FXML
-	private TableColumn<ModelCheckingItem, String> timeLimitColumn;
-	
-	@FXML
-	private TableColumn<ModelCheckingItem, Boolean> deadlockColumn;
-	
-	@FXML
-	private TableColumn<ModelCheckingItem, Boolean> invariantsViolationsColumn;
-
-	@FXML
-	private TableColumn<ModelCheckingItem, Boolean> assertionViolationsColumn;
-
-	@FXML
-	private TableColumn<ModelCheckingItem, Boolean> otherErrorsColumn;
-
-	@FXML
-	private TableColumn<ModelCheckingItem, String> addGoalsColumn;
-
-	@FXML
-	private TableColumn<ModelCheckingItem, Boolean> goalsColumn;
-	
-	@FXML
-	private TableColumn<ModelCheckingItem, Boolean> stopAtFullCoverageColumn;
-	
-	@FXML
-	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
+	private TableColumn<ModelCheckingItem, String> descriptionColumn;
 
 	@FXML
 	private TableView<ModelCheckingJobItem> tvChecks;
@@ -184,30 +163,17 @@ public final class ModelcheckingView extends ScrollPane {
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 		checkMachineButton.disableProperty().bind(currentTrace.isNull().or(noModelcheckingItems.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
 		cancelButton.disableProperty().bind(checker.runningProperty().not());
+
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvItems, selectAll));
+		shouldExecuteColumn.setGraphic(selectAll);
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		strategyColumn.setCellValueFactory(features -> Bindings.createStringBinding(() ->
 			bundle.getString(SearchStrategy.fromOptions(features.getValue().getOptions()).getName())
 		));
-		nodesLimitColumn.setCellValueFactory(new PropertyValueFactory<>("nodesLimit"));
-		timeLimitColumn.setCellValueFactory(new PropertyValueFactory<>("timeLimit"));
-		deadlockColumn.setCellFactory(col -> new BooleanCell<>());
-		deadlockColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_DEADLOCKS, false));
-		invariantsViolationsColumn.setCellFactory(col -> new BooleanCell<>());
-		invariantsViolationsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS, false));
-		assertionViolationsColumn.setCellFactory(col -> new BooleanCell<>());
-		assertionViolationsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_ASSERTION_VIOLATIONS, false));
-		otherErrorsColumn.setCellFactory(col -> new BooleanCell<>());
-		otherErrorsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_OTHER_ERRORS, true));
-		addGoalsColumn.setCellValueFactory(new PropertyValueFactory<>("goal"));
-		goalsColumn.setCellFactory(col -> new BooleanCell<>());
-		goalsColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.FIND_GOAL, false));
-		stopAtFullCoverageColumn.setCellFactory(col -> new BooleanCell<>());
-		stopAtFullCoverageColumn.setCellValueFactory(makeOptionValueFactory(ModelCheckingOptions.Options.STOP_AT_FULL_COVERAGE, false));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvItems, selectAll));
-		shouldExecuteColumn.setGraphic(selectAll);
-		
+		descriptionColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> toUIString(features.getValue())));
+
 		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
@@ -243,7 +209,30 @@ public final class ModelcheckingView extends ScrollPane {
 			})
 		);
 	}
-	
+
+	private String toUIString(ModelCheckingItem item) {
+		List<String> s = new ArrayList<>();
+		if (item.getNodesLimit() != null) {
+			s.add("node limit: " + item.getNodesLimit());
+		}
+		if (item.getTimeLimit() != null) {
+			s.add("time limit: " + item.getTimeLimit() + "s");
+		}
+		Set<ModelCheckingOptions.Options> opts = item.getOptions().getPrologOptions();
+		for (ModelCheckingOptions.Options opt : ModelCheckingOptions.Options.values()) {
+			if (opt == ModelCheckingOptions.Options.BREADTH_FIRST_SEARCH || opt == ModelCheckingOptions.Options.DEPTH_FIRST_SEARCH) {
+				continue;
+			}
+			if (opts.contains(opt)) {
+				s.add(opt.getDescription());
+			}
+		}
+		if (item.getGoal() != null) {
+			s.add("additional goal: " + item.getGoal());
+		}
+		return String.join(", ", s);
+	}
+
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
