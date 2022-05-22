@@ -57,10 +57,8 @@
 			</columnResizePolicy>
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
-				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-				<TableColumn fx:id="idColumn" minWidth="30.0" text="%verifications.common.columns.id" />
-				<TableColumn fx:id="strategyColumn" minWidth="60.0" text="%verifications.common.columns.strategy" />
-				<TableColumn fx:id="descriptionColumn" minWidth="120.0" text="%verifications.common.columns.description" />
+				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
+				<TableColumn fx:id="descriptionColumn" text="%verifications.common.columns.description" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />

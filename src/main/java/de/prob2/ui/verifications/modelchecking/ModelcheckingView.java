@@ -74,9 +74,6 @@ public final class ModelcheckingView extends ScrollPane {
 	private TableColumn<ModelCheckingItem, Checked> statusColumn;
 	
 	@FXML
-	private TableColumn<ModelCheckingItem, String> idColumn;
-	
-	@FXML
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
 
 	@FXML
@@ -168,10 +165,6 @@ public final class ModelcheckingView extends ScrollPane {
 		shouldExecuteColumn.setGraphic(selectAll);
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-		strategyColumn.setCellValueFactory(features -> Bindings.createStringBinding(() ->
-			bundle.getString(SearchStrategy.fromOptions(features.getValue().getOptions()).getName())
-		));
 		descriptionColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> toUIString(features.getValue())));
 
 		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -212,6 +205,10 @@ public final class ModelcheckingView extends ScrollPane {
 
 	private String toUIString(ModelCheckingItem item) {
 		List<String> s = new ArrayList<>();
+		if (item.getId() != null) {
+			s.add("id: " + item.getId());
+		}
+		s.add(bundle.getString(SearchStrategy.fromOptions(item.getOptions()).getName()));
 		if (item.getNodesLimit() != null) {
 			s.add("node limit: " + item.getNodesLimit());
 		}

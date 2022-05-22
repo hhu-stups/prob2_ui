@@ -36,6 +36,7 @@ public class ModelCheckingItem implements IValidationTask {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -157,14 +158,14 @@ public class ModelCheckingItem implements IValidationTask {
 
 	public boolean settingsEqual(final ModelCheckingItem other) {
 		return Objects.equals(this.getId(), other.getId())
-			&& this.getNodesLimit().equals(other.getNodesLimit())
-			&& this.getTimeLimit().equals(other.getTimeLimit())
-			&& this.getGoal().equals(other.getGoal())
+			&& Objects.equals(this.getNodesLimit(), other.getNodesLimit())
+			&& Objects.equals(this.getTimeLimit(), other.getTimeLimit())
+			&& Objects.equals(this.getGoal(), other.getGoal())
 			&& this.getOptions().equals(other.getOptions());
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("%s(%s,%s,%s,%s)", this.getClass().getSimpleName(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
+		return String.format("%s(%s,%s,%s,%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
 	}
 }

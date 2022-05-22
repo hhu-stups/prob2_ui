@@ -181,22 +181,6 @@ final class ProB2UIJacksonModule extends Module {
 		}
 	}
 	
-	private static final class SerializedModelCheckingOptions {
-		private final Set<ModelCheckingOptions.Options> options;
-		
-		@JsonCreator
-		private SerializedModelCheckingOptions(
-			@JsonProperty("options") final Set<ModelCheckingOptions.Options> options
-		) {
-			this.options = options;
-		}
-		
-		@JsonProperty
-		private Set<ModelCheckingOptions.Options> getOptions() {
-			return this.options;
-		}
-	}
-	
 	ProB2UIJacksonModule() {
 		super();
 	}
@@ -217,10 +201,10 @@ final class ProB2UIJacksonModule extends Module {
 			new CustomNioPathSerializer(),
 			new BoundingBoxSerializer(),
 			new ColorSerializer(),
-			new StdDelegatingSerializer(ModelCheckingOptions.class, new StdConverter<ModelCheckingOptions, SerializedModelCheckingOptions>() {
+			new StdDelegatingSerializer(ModelCheckingOptions.class, new StdConverter<ModelCheckingOptions, Set<ModelCheckingOptions.Options>>() {
 				@Override
-				public SerializedModelCheckingOptions convert(final ModelCheckingOptions value) {
-					return new SerializedModelCheckingOptions(value.getPrologOptions());
+				public Set<ModelCheckingOptions.Options> convert(final ModelCheckingOptions value) {
+					return value.getPrologOptions();
 				}
 			})
 		)));
@@ -229,10 +213,10 @@ final class ProB2UIJacksonModule extends Module {
 		deserializers.put(Path.class, new CustomNioPathDeserializer());
 		deserializers.put(BoundingBox.class, new BoundingBoxDeserializer());
 		deserializers.put(Color.class, new ColorDeserializer());
-		deserializers.put(ModelCheckingOptions.class, new StdDelegatingDeserializer<>(new StdConverter<SerializedModelCheckingOptions, ModelCheckingOptions>() {
+		deserializers.put(ModelCheckingOptions.class, new StdDelegatingDeserializer<>(new StdConverter<Set<ModelCheckingOptions.Options>, ModelCheckingOptions>() {
 			@Override
-			public ModelCheckingOptions convert(final SerializedModelCheckingOptions value) {
-				return new ModelCheckingOptions(value.getOptions());
+			public ModelCheckingOptions convert(final Set<ModelCheckingOptions.Options> value) {
+				return new ModelCheckingOptions(value);
 			}
 		}));
 		context.addDeserializers(new SimpleDeserializers(deserializers));

@@ -675,6 +675,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 					}
 				}
 			}
+
+			ObjectNode options = checkObject(modelCheckingItem.get("options"));
+			modelCheckingItem.set("options", checkArray(options.get("options")));
 		});
 	}
 	
