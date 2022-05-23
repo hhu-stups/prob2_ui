@@ -134,14 +134,6 @@ public final class ModelcheckingView extends ScrollPane {
 		setContextMenus();
 	}
 	
-	private Callback<TableColumn.CellDataFeatures<ModelCheckingItem, Boolean>, ObservableValue<Boolean>> makeOptionValueFactory(final ModelCheckingOptions.Options option, boolean negated) {
-		return features -> {
-			BooleanBinding binding = Bindings.createBooleanBinding(
-					() -> features.getValue().getOptions().getPrologOptions().contains(option));
-			return negated ? binding.not() : binding;
-		};
-	}
-	
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noModelcheckingItems = new SimpleBooleanProperty();
