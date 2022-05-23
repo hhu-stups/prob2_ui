@@ -677,7 +677,13 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 
 			ObjectNode options = checkObject(modelCheckingItem.get("options"));
-			modelCheckingItem.set("options", checkArray(options.get("options")));
+			ArrayNode prologOptions = checkArray(options.get("options"));
+			for (Iterator<JsonNode> it = prologOptions.iterator(); it.hasNext();) {
+				if ("INSPECT_EXISTING_NODES".equals(it.next().textValue())) {
+					it.remove();
+				}
+			}
+			modelCheckingItem.set("options", prologOptions);
 		});
 	}
 	
