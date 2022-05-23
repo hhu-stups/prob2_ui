@@ -205,9 +205,6 @@ public final class ModelcheckingView extends ScrollPane {
 
 	private String toUIString(ModelCheckingItem item) {
 		final StringJoiner s = new StringJoiner(", ");
-		if (item.getId() != null) {
-			s.add("id: " + item.getId());
-		}
 		s.add(bundle.getString(SearchStrategy.fromOptions(item.getOptions()).getName()));
 		if (item.getNodesLimit() != null) {
 			s.add("node limit: " + item.getNodesLimit());
@@ -227,7 +224,11 @@ public final class ModelcheckingView extends ScrollPane {
 		if (item.getGoal() != null) {
 			s.add("additional goal: " + item.getGoal());
 		}
-		return s.toString();
+		String description = s.toString();
+		if (item.getId() != null) {
+			description = "[" + item.getId() + "] " + description;
+		}
+		return description;
 	}
 
 	private void tvItemsClicked(MouseEvent e) {
