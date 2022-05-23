@@ -1,8 +1,14 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.math.BigInteger;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.StringJoiner;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.GetStatisticsCommand;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
@@ -14,12 +20,12 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.sharedviews.BooleanCell;
 import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -45,12 +51,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
 
 @FXMLInjected
 @Singleton
@@ -204,7 +204,7 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	private String toUIString(ModelCheckingItem item) {
-		List<String> s = new ArrayList<>();
+		final StringJoiner s = new StringJoiner(", ");
 		if (item.getId() != null) {
 			s.add("id: " + item.getId());
 		}
@@ -227,7 +227,7 @@ public final class ModelcheckingView extends ScrollPane {
 		if (item.getGoal() != null) {
 			s.add("additional goal: " + item.getGoal());
 		}
-		return String.join(", ", s);
+		return s.toString();
 	}
 
 	private void tvItemsClicked(MouseEvent e) {
