@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -34,10 +35,7 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollBar;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -138,11 +136,23 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	@Override
 	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
+		// TODO Catch ProB Error and relay useful messages
 		this.dot = item.getState().getStateSpace().getCurrentPreference("DOT");
 		this.dotEngine = item.getPreferredDotLayoutEngine()
 				.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
+		Platform.runLater(() -> {
+			// Make sure dot is available, else react with proper error message
+			if (this.dot.isEmpty()) {
+				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.emptyDotPath.header", "dotty.error.emptyDotPath.message").show();
+				this.close();
+			} else if (!Files.exists(Paths.get(this.dot))) {
+				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.dotNotFound.header", "dotty.error.dotNotFound.message", this.dot).show();
+				this.close();
+			}
+		});
+		boolean noDotAvailable = this.dot.isEmpty() || !Files.exists(Paths.get(this.dot));
 		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
-		if (!Thread.currentThread().isInterrupted()) {
+		if (!Thread.currentThread().isInterrupted() && !noDotAvailable) {
 			final byte[] svgData = new DotCall(this.dot)
 					.layoutEngine(this.dotEngine)
 					.outputFormat(DotOutputFormat.SVG)
