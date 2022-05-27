@@ -18,6 +18,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
+import de.prob2.ui.menu.RevealInExplorer;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
@@ -130,7 +131,7 @@ public class TraceViewHandler {
 		};
 	}
 
-	public void initializeRow(final Scene scene, final TableRow<ReplayTrace> row, final MenuItem addTestsItem, final MenuItem replayTraceItem, final MenuItem showErrorItem, final MenuItem openInExternalEditorItem) {
+	public void initializeRow(final Scene scene, final TableRow<ReplayTrace> row, final MenuItem addTestsItem, final MenuItem replayTraceItem, final MenuItem showErrorItem, final MenuItem openInExternalEditorItem, final MenuItem revealInExplorerItem) {
 		replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
 		addTestsItem.setOnAction(event -> {
 			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
@@ -158,6 +159,9 @@ public class TraceViewHandler {
 		});
 		openInExternalEditorItem.setOnAction(event ->
 			injector.getInstance(ExternalEditor.class).open(row.getItem().getAbsoluteLocation())
+		);
+		revealInExplorerItem.setOnAction(event ->
+			injector.getInstance(RevealInExplorer.class).revealInExplorer(row.getItem().getAbsoluteLocation())
 		);
 		row.itemProperty().addListener((observable, from, to) -> {
 			showErrorItem.disableProperty().unbind();
@@ -215,6 +219,10 @@ public class TraceViewHandler {
 
 	public MenuItem createOpenInExternalEditorItem() {
 		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+	}
+
+	public MenuItem createRevealInExplorerItem() {
+		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.revealInExplorer"));
 	}
 
 	public MenuItem createRecheckTraceForChangesItem(){

@@ -78,15 +78,16 @@ public class TraceSelectionView extends Stage {
 			final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
 			final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
 			final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
+			final MenuItem revealInExplorerItem = traceViewHandler.createRevealInExplorerItem();
 
 			// Set listeners for menu items
-			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showErrorItem, openInExternalEditorItem);
+			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showErrorItem, openInExternalEditorItem, revealInExplorerItem);
 			showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(replayTraceItem, addTestsItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, new SeparatorMenuItem(), openInExternalEditorItem)));
+					.otherwise(new ContextMenu(replayTraceItem, addTestsItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem)));
 
 			row.setOnMouseClicked(event -> {
 				ReplayTrace item = row.getItem();

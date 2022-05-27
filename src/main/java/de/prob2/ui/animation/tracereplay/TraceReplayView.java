@@ -140,10 +140,11 @@ public class TraceReplayView extends ScrollPane {
 			final MenuItem showErrorItem = traceViewHandler.createShowErrorItem();
 			final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
 			final MenuItem deleteTraceItem = traceViewHandler.createDeleteTraceItem();
+			final MenuItem revealInExplorerItem = traceViewHandler.createRevealInExplorerItem();
 			final MenuItem recheckTraceItem = traceViewHandler.createRecheckTraceForChangesItem();
 
 			// Set listeners for menu items
-			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showErrorItem, openInExternalEditorItem);
+			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showErrorItem, openInExternalEditorItem, revealInExplorerItem);
 			editIdItem.setOnAction(event -> {
 				final ReplayTrace trace = row.getItem();
 				final TextInputDialog dialog = new TextInputDialog(trace.getId() == null ? "" : trace.getId());
@@ -180,7 +181,7 @@ public class TraceReplayView extends ScrollPane {
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(replayTraceItem, addTestsItem, editIdItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, recheckTraceItem)));
+							.otherwise(new ContextMenu(replayTraceItem, addTestsItem, editIdItem, showErrorItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem)));
 
 			row.setOnMouseClicked(event -> {
 				ReplayTrace item = row.getItem();

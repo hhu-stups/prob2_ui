@@ -1,29 +1,26 @@
 package de.prob2.ui.internal;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-
+import com.google.inject.*;
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.config.RuntimeOptions;
+import de.prob2.ui.menu.RevealInExplorer;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.BuilderFactory;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 public class ProB2Module extends AbstractModule {
-	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase().contains("mac");
+
+	public static final boolean IS_MAC = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("mac");
+	public static final boolean IS_WINDOWS = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
 
 	private final ProB2 application;
 	private final RuntimeOptions runtimeOptions;
@@ -62,6 +59,18 @@ public class ProB2Module extends AbstractModule {
 			return MenuToolkit.toolkit(locale);
 		} else {
 			return null;
+		}
+	}
+
+	@Provides
+	@Singleton
+	private static RevealInExplorer provideRevealInExplorer(StageManager stageManager, StopActions stopActions) {
+		if (IS_WINDOWS) {
+			return new RevealInExplorer.ExplorerSelect(stageManager, stopActions);
+		} else if (IS_MAC) {
+			return new RevealInExplorer.OpenR(stageManager, stopActions);
+		} else {
+			return new RevealInExplorer.DesktopBrowse(stageManager, stopActions);
 		}
 	}
 
