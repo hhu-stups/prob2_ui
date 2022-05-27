@@ -186,6 +186,10 @@ public final class OperationsView extends VBox {
 	private Button cancelButton;
 	@FXML
 	private Button btComputeUnsatCore;
+	@FXML
+	private ToggleButton searchToggle;
+	@FXML
+	private VBox searchBox;
 
 	private final List<OperationItem> events = new ArrayList<>();
 	private final BooleanProperty showDisabledOps;
@@ -237,6 +241,8 @@ public final class OperationsView extends VBox {
 		});
 		opsListView.disableProperty().bind(disablePropertyController.disableProperty());
 
+		searchBox.visibleProperty().bind(searchToggle.selectedProperty());
+		searchBox.managedProperty().bind(searchToggle.selectedProperty());
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 
 		randomButton.disableProperty().bind(currentTrace.isNull().or(randomExecutionThread.isNotNull()).or(disablePropertyController.disableProperty()));

@@ -25,16 +25,6 @@
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<VBox>
-		<padding>
-			<Insets top="5.0"/>
-		</padding>
-		<HBox alignment="CENTER">
-			<padding>
-				<Insets left="10.0"/>
-			</padding>
-			<TextField fx:id="searchBar" promptText="%operations.operationsView.search.prompt" HBox.hgrow="ALWAYS"/>
-			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
-		</HBox>
 		<HBox alignment="CENTER_LEFT">
 			<padding>
 				<Insets left="5.0"/>
@@ -96,8 +86,28 @@
 					</tooltip>
 				</Button>
 			</StackPane>
+
+			<ToggleButton fx:id="searchToggle">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize + 2}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%operations.operationsView.tooltips.searchbar"/>
+				</tooltip>
+			</ToggleButton>
+
+			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 		</HBox>
 	</VBox>
+
+	<AnchorPane>
+		<VBox fx:id="searchBox" AnchorPane.topAnchor="5.0"
+			  AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
+			  AnchorPane.bottomAnchor="5.0" visible="false" spacing="10.0">
+			<TextField fx:id="searchBar" promptText="%operations.operationsView.search.prompt" HBox.hgrow="ALWAYS"/>
+		</VBox>
+	</AnchorPane>
+
 	<ListView fx:id="opsListView" VBox.vgrow="ALWAYS"/>
 	<VBox>
 		<Label fx:id="warningLabel" styleClass="warning"/>
