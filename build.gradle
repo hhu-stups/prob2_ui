@@ -187,7 +187,7 @@ sourceSets {
 final helpSourceDir = file("src/main/helpsources")
 final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
 final helpOutputDir = new File(generatedResourcesDir, "de/prob2/ui/helpsystem/helppages")
-final helpFilterLuaScript = file("pandoc_links_to_html.lua")
+final helpFilterLuaScript = "pandoc_links_to_html.lua"
 task createHelp {
 	inputs.file(helpFilterLuaScript)
 	inputs.files(helpSourceFiles)
