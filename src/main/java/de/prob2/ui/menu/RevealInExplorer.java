@@ -37,7 +37,6 @@ public abstract class RevealInExplorer {
 					throw new UncheckedIOException(e);
 				}
 
-				System.out.println(fileAsFile);
 				executorService.submit(() -> {
 					try {
 						open(fileAsFile, parentAsFile);
