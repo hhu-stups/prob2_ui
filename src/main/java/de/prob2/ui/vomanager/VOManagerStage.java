@@ -253,6 +253,9 @@ public class VOManagerStage extends Stage {
 		} else if(setting == VOManagerSetting.REQUIREMENT) {
 			updateRequirementsMachineTable(root);
 		}
+		for (final TreeItem<INameable> item : root.getChildren()) {
+			item.setExpanded(true);
+		}
 		tvRequirements.setRoot(root);
 	}
 
