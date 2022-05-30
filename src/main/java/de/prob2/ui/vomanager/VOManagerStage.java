@@ -162,7 +162,7 @@ public class VOManagerStage extends Stage {
 			if(nameable == null) {
 				return;
 			}
-			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && currentTrace.get() != null) {
+			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
 				if (nameable instanceof Requirement) {
 					VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
 					Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) treeItem.getParent().getValue() : null;
