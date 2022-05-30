@@ -743,9 +743,6 @@
 	-fx-border-color: transparent;
 	-fx-padding: 0em 0.25em 0.05em 0.25em;
 }
-.table-row-cell:focused .table-cell {
-	-fx-font-weight: bold;
-}
 .table-row-cell:disabled {
 	-fx-text-fill: -prob-lightgrey;
 }
