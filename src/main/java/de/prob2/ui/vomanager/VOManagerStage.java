@@ -148,6 +148,8 @@ public class VOManagerStage extends Stage {
 				INameable item = to.getValue();
 				if(item instanceof Requirement || item instanceof ValidationObligation) {
 					showRequirement((IAbstractRequirement) item, true);
+				} else {
+					switchMode(EditType.NONE, Mode.NONE);
 				}
 			} else {
 				switchMode(EditType.NONE, Mode.NONE);
