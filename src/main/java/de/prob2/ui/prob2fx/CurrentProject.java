@@ -19,10 +19,9 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-
 import de.prob2.ui.vomanager.Requirement;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -37,7 +36,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
@@ -157,7 +155,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		injector.getInstance(LTLPatternParser.class).parseMachine(m);
-		injector.getInstance(TraceViewHandler.class).reset();
 	}
 
 	public void reloadCurrentMachine() {

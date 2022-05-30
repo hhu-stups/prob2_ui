@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -103,6 +104,12 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 
 	public ReadOnlyObjectProperty<TraceJsonFile> loadedTraceProperty() {
 		return this.loadedTrace;
+	}
+
+	public void reset() {
+		this.setChecked(Checked.NOT_CHECKED);
+		this.setReplayedTrace(null);
+		this.setPostconditionStatus(Collections.emptyList());
 	}
 
 	/**

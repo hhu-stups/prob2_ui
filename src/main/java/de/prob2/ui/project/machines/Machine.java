@@ -332,6 +332,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
 		simulations.forEach(SimulationModel::reset);
 		testCases.forEach(TestCaseGenerationItem::reset);
+		traces.forEach(ReplayTrace::reset);
 		modelcheckingItems.forEach(ModelCheckingItem::reset);
 	}
 

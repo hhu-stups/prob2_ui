@@ -174,15 +174,6 @@ public class TraceViewHandler {
 		});
 	}
 
-	public void reset() {
-		traceChecker.cancelReplay();
-		traces.forEach(trace -> {
-			trace.setChecked(Checked.NOT_CHECKED);
-			trace.setReplayedTrace(null);
-			trace.setPostconditionStatus(new ArrayList<>());
-		});
-	}
-
 	public ListProperty<ReplayTrace> getTraces() {
 		return traces;
 	}
