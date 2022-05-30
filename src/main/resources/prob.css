@@ -1114,14 +1114,6 @@
 	-fx-font-weight: bold;
 }
 
-.tree-table-row-cell.unsatCore {
-	-fx-background-color: orange;
-}
-
-.tree-table-row-cell.unsatCore .tree-table-cell {
-	-fx-font-weight: bold;
-}
-
 .tree-table-cell.false {
 	-fx-background-color: pink;
 }
