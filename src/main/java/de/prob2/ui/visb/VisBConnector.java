@@ -28,6 +28,13 @@ public class VisBConnector {
 		// probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
 		LOGGER.debug("\nSVG Element with ID "+id+" was clicked at page position " + pageX + "," + pageY 
 			+ " with shift "+shiftKey + " cmd/meta " + metaKey); // 1=left, 2=middle, 3=right
-		this.injector.getInstance(VisBController.class).executeEvent(id,pageX,pageY,shiftKey,metaKey);
+		try {
+			this.injector.getInstance(VisBController.class).executeEvent(id,pageX,pageY,shiftKey,metaKey);
+		} catch (Throwable t) {
+			// It seems that JavaScript exceptions are completely ignored if they are thrown back to JavaScript,
+			// so log them manually here.
+			LOGGER.error("Uncaught exception in VisBConnector.click called by JavaScript", t);
+			throw t;
+		}
 	}
 }
