@@ -183,16 +183,13 @@ public class VisBController {
 			StateSpace stateSpace = currentTrace.getStateSpace();
 			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(stateSpace, id, Collections.emptyList(), currentTrace.getCurrentState().getId());
 			stateSpace.execute(performClickCommand);
-			List<String> transIDS = performClickCommand.getTransIDS();
+			List<Transition> transitions = performClickCommand.getTransitions();
 
-			if (transIDS.isEmpty()) {
+			if (transitions.isEmpty()) {
 				updateInfo("visb.infobox.no.events.for.id", id);
 			} else {
 				LOGGER.debug("Executing event for id: "+id + " and preds = " + event.getPredicates());
-				Trace trace = currentTrace.get();
-				for(String transID : transIDS) {
-					trace = trace.add(transID);
-				}
+				Trace trace = currentTrace.get().addTransitions(transitions);
 				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + event.getPredicates());
 				currentTrace.set(trace);
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
