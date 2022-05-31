@@ -197,8 +197,20 @@ public class VisBController {
 				currentTrace.set(trace);
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			}
-		} catch (Exception e) {
-			handleExecuteOperationError(e, event, id);
+		} catch (ExecuteOperationException e) {
+			LOGGER.debug("Cannot execute event for id: {}", id, e);
+			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
+			if (e.getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
+				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
+				alert.initOwner(this.injector.getInstance(VisBStage.class));
+				alert.show();
+			}
+		} catch (EvaluationException e) {
+			LOGGER.debug("Cannot execute event for id: {}", id, e);
+			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
+			Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
+			alert.initOwner(this.injector.getInstance(VisBStage.class));
+			alert.show();
 		}
 	}
 
@@ -223,24 +235,6 @@ public class VisBController {
 					.replace("%metaKey",  (metaKey  ? "TRUE" : "FALSE"))
 					.replace("%pageX", Integer.toString(pageX))
 					.replace("%pageY", Integer.toString(pageY)));
-		}
-	}
-
-	private void handleExecuteOperationError(Exception e, VisBEvent event, String id) {
-		if (e instanceof ExecuteOperationException) {
-			if (((ExecuteOperationException) e).getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
-				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", ((ExecuteOperationException) e).getErrorMessages()));
-				alert.initOwner(this.injector.getInstance(VisBStage.class));
-				alert.show();
-			}
-			LOGGER.debug("Cannot execute event for id: " + e);
-			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
-		} else if(e instanceof EvaluationException) {
-			Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
-			alert.initOwner(this.injector.getInstance(VisBStage.class));
-			alert.show();
-			LOGGER.debug("Cannot execute event for id: "+e);
-			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 		}
 	}
 
