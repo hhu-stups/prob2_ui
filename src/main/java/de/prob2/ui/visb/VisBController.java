@@ -225,19 +225,6 @@ public class VisBController {
 		}
 	}
 
-	// This should be implemented in the provided meta information to Prolog
-	@Deprecated
-	private void executeEvent(VisBEvent event, Trace trace, String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
-		// perform replacements to transmit event information:
-		List<String> preds = event.getPredicates();
-		for(int j = 0; j < preds.size(); j++) {
-			preds.set(j, preds.get(j).replace("%shiftKey", (shiftKey ? "TRUE" : "FALSE"))
-					.replace("%metaKey",  (metaKey  ? "TRUE" : "FALSE"))
-					.replace("%pageX", Integer.toString(pageX))
-					.replace("%pageY", Integer.toString(pageY)));
-		}
-	}
-
 	void reloadVisualisation(){
 		if (this.getVisBPath() == null) {
 			return;
