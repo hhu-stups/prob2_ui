@@ -150,7 +150,7 @@ public class VOEditingBox extends VBox {
 				machine.getValidationObligations().add(newVo);
 			} else if(editType == VOManagerStage.EditType.EDIT) {
 				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				if(nameExists && !oldVo.getName().equals(id)) {
+				if(nameExists && !oldVo.getId().equals(id)) {
 					warnAlreadyExists();
 					return;
 				}
