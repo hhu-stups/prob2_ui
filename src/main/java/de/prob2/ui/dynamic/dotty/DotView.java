@@ -137,24 +137,31 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	@Override
 	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
 		// TODO Catch ProB Error and relay useful messages
-		this.dot = item.getState().getStateSpace().getCurrentPreference("DOT");
-		this.dotEngine = item.getPreferredDotLayoutEngine()
+		// Store dot and dotEngine as local variables in addition to the fields
+		// to avoid a race condition where clearContent sets them to null
+		// while this method is still running in the background thread.
+		final String dotLocal = item.getState().getStateSpace().getCurrentPreference("DOT");
+		final String dotEngineLocal = item.getPreferredDotLayoutEngine()
 				.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
-		Platform.runLater(() -> {
-			// Make sure dot is available, else react with proper error message
-			if (this.dot.isEmpty()) {
+		this.dot = dotLocal;
+		this.dotEngine = dotEngineLocal;
+		// Make sure dot is available, else react with proper error message
+		if (dotLocal.isEmpty()) {
+			Platform.runLater(() -> {
 				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.emptyDotPath.header", "dotty.error.emptyDotPath.message").show();
 				this.close();
-			} else if (!Files.exists(Paths.get(this.dot))) {
-				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.dotNotFound.header", "dotty.error.dotNotFound.message", this.dot).show();
+			});
+		} else if (!Files.exists(Paths.get(dotLocal))) {
+			Platform.runLater(() -> {
+				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.dotNotFound.header", "dotty.error.dotNotFound.message", dotLocal).show();
 				this.close();
-			}
-		});
-		boolean noDotAvailable = this.dot.isEmpty() || !Files.exists(Paths.get(this.dot));
+			});
+		}
+		boolean noDotAvailable = dotLocal.isEmpty() || !Files.exists(Paths.get(dotLocal));
 		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
 		if (!Thread.currentThread().isInterrupted() && !noDotAvailable) {
-			final byte[] svgData = new DotCall(this.dot)
-					.layoutEngine(this.dotEngine)
+			final byte[] svgData = new DotCall(dotLocal)
+					.layoutEngine(dotEngineLocal)
 					.outputFormat(DotOutputFormat.SVG)
 					.input(this.currentDotContent.get())
 					.call();
