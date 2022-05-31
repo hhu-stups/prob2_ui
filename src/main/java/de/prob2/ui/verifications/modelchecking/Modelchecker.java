@@ -127,18 +127,11 @@ public class Modelchecker {
 	}
 
 	private IEvalElement getGoal(ModelCheckingItem item) {
-		IEvalElement evalElement = null;
-		if(currentTrace.getModel().getFormalismType() == FormalismType.B) {
-			if(item.getGoal() != null) {
-				AbstractModel model = currentTrace.getModel();
-				if(model instanceof EventBModel) {
-					evalElement = new EventB(item.getGoal(), FormulaExpand.EXPAND);
-				} else {
-					evalElement = new ClassicalB(item.getGoal(), FormulaExpand.EXPAND);
-				}
-			}
+		if (item.getGoal() != null) {
+			return currentTrace.getModel().parseFormula(item.getGoal(), FormulaExpand.EXPAND);
+		} else {
+			return null;
 		}
-		return evalElement;
 	}
 
 	private IModelCheckJob buildModelCheckJob(StateSpace stateSpace, ModelCheckingItem item, boolean recheckExisting, IModelCheckListener listener) {
