@@ -16,6 +16,7 @@ import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -28,12 +29,10 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -50,7 +49,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
@@ -63,7 +61,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private Button cancelButton;
 	@FXML
 	private HelpButton helpButton;
-	
+
 	@FXML
 	private TableView<ModelCheckingItem> tvItems;
 
@@ -72,7 +70,7 @@ public final class ModelcheckingView extends ScrollPane {
 
 	@FXML
 	private TableColumn<ModelCheckingItem, Checked> statusColumn;
-	
+
 	@FXML
 	private TableColumn<ModelCheckingItem, String> strategyColumn;
 
@@ -108,20 +106,20 @@ public final class ModelcheckingView extends ScrollPane {
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-	
+
 	private final Injector injector;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final Modelchecker checker;
 	private final CheckBox selectAll;
 
 	@Inject
 	private ModelcheckingView(final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final StageManager stageManager, final Injector injector, 
-			final ResourceBundle bundle, final Modelchecker checker) {
+			final CurrentProject currentProject, final StageManager stageManager, final Injector injector,
+			final I18n i18n, final Modelchecker checker) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.checker = checker;
 		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
@@ -133,7 +131,7 @@ public final class ModelcheckingView extends ScrollPane {
 		setBindings();
 		setContextMenus();
 	}
-	
+
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		final BooleanProperty noModelcheckingItems = new SimpleBooleanProperty();
@@ -183,7 +181,7 @@ public final class ModelcheckingView extends ScrollPane {
 				tvChecks.setItems(FXCollections.observableArrayList());
 			}
 		});
-		
+
 		tvChecks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) ->
 			Platform.runLater(() -> {
 				if(to != null && to.getStats() != null) {
@@ -197,12 +195,12 @@ public final class ModelcheckingView extends ScrollPane {
 
 	private String toUIString(ModelCheckingItem item) {
 		final StringJoiner s = new StringJoiner(", ");
-		s.add(bundle.getString(SearchStrategy.fromOptions(item.getOptions()).getName()));
+		s.add(i18n.translate(SearchStrategy.fromOptions(item.getOptions()).getName()));
 		if (item.getNodesLimit() != null) {
-			s.add("node limit: " + item.getNodesLimit());
+			s.add(i18n.format("verifications.modelchecking.description.nodeLimit", item.getNodesLimit()));
 		}
 		if (item.getTimeLimit() != null) {
-			s.add("time limit: " + item.getTimeLimit() + "s");
+			s.add(i18n.format("verifications.modelchecking.description.timeLimit", item.getTimeLimit()));
 		}
 		Set<ModelCheckingOptions.Options> opts = item.getOptions().getPrologOptions();
 		for (ModelCheckingOptions.Options opt : ModelCheckingOptions.Options.values()) {
@@ -210,11 +208,11 @@ public final class ModelcheckingView extends ScrollPane {
 				continue;
 			}
 			if (opts.contains(opt)) {
-				s.add(opt.getDescription());
+				s.add(i18n.translate("verifications.modelchecking.description.option." + opt.getPrologName()));
 			}
 		}
 		if (item.getGoal() != null) {
-			s.add("additional goal: " + item.getGoal());
+			s.add(i18n.format("verifications.modelchecking.description.additionalGoal", item.getGoal()));
 		}
 		String description = s.toString();
 		if (item.getId() != null) {
@@ -234,18 +232,18 @@ public final class ModelcheckingView extends ScrollPane {
 			}
 		}
 	}
-	
+
 	private void setContextMenus() {
 		tvItems.setRowFactory(table -> {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
 			row.setOnMouseClicked(this::tvItemsClicked);
-			
-			MenuItem checkItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.check"));
+
+			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				checker.checkItem(item, true, false);
 			});
-			
+
 			row.itemProperty().addListener((o, from, to) -> {
 				checkItem.disableProperty().unbind();
 				if (to != null) {
@@ -256,13 +254,13 @@ public final class ModelcheckingView extends ScrollPane {
 					checkItem.setDisable(true);
 				}
 			});
-			
-			MenuItem searchForNewErrorsItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
+
+			MenuItem searchForNewErrorsItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
 			searchForNewErrorsItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 				checker.checkItem(item, false, false);
 			});
-			
+
 			row.itemProperty().addListener((o, from, to) -> {
 				searchForNewErrorsItem.disableProperty().unbind();
 				if (to != null) {
@@ -274,18 +272,18 @@ public final class ModelcheckingView extends ScrollPane {
 					searchForNewErrorsItem.setDisable(true);
 				}
 			});
-			
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
+
+			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 			removeItem.setOnAction(e -> removeItem());
 			removeItem.disableProperty().bind(row.emptyProperty());
-			
+
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu)null)
 				.otherwise(new ContextMenu(checkItem, searchForNewErrorsItem, removeItem)));
 			return row;
 		});
-		
+
 		tvChecks.setRowFactory(table -> {
 			final TableRow<ModelCheckingJobItem> row = new TableRow<>();
 
@@ -297,7 +295,7 @@ public final class ModelcheckingView extends ScrollPane {
 			showTraceItem.disableProperty().bind(Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription),
 					row.emptyProperty(), row.itemProperty()));
-			
+
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 					.then((ContextMenu)null)
@@ -313,20 +311,20 @@ public final class ModelcheckingView extends ScrollPane {
 			stageController.showAndWait();
 		}
 	}
-	
+
 	private void removeItem() {
 		Machine machine = currentProject.getCurrentMachine();
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		machine.getModelcheckingItems().remove(item);
 	}
-	
+
 	@FXML
 	public void checkMachine() {
 		currentProject.currentMachineProperty().get().getModelcheckingItems().stream()
 			.filter(item -> item.getItems().isEmpty())
 			.forEach(item -> checker.checkItem(item, true, true));
 	}
-	
+
 	@FXML
 	public void cancelModelcheck() {
 		checker.cancelModelcheck();
@@ -345,19 +343,19 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	private double calculateProgress(StateSpaceStats stats) {
+		double processedStates = stats.getNrProcessedNodes() - 1;
 		int distinctStates = stats.getNrTotalNodes() - 1;
-		int processedStates = stats.getNrProcessedNodes() - 1;
-		return 1.0 * Math.pow(((processedStates + 0.0)/distinctStates), 6);
+		return Math.pow(processedStates / distinctStates, 6);
 	}
 
 	public void hideStats() {
 		statsBox.setVisible(false);
 	}
-	
+
 	public void selectItem(ModelCheckingItem item) {
 		tvItems.getSelectionModel().select(item);
 	}
-	
+
 	public void selectJobItem(ModelCheckingJobItem item) {
 		tvChecks.getSelectionModel().select(item);
 	}
