@@ -296,10 +296,10 @@ public class VisBStage extends Stage {
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
 	 */
-	private void initialiseWebView(String svgContent) {
+	private void initialiseWebView(String svgContent, String baseUrl) {
 		this.placeholder.setVisible(false);
 		this.webView.setVisible(true);
-		String htmlFile = generateHTMLFileWithSVG(svgContent);
+		String htmlFile = generateHTMLFileWithSVG(svgContent, baseUrl);
 		this.webView.getEngine().loadContent(htmlFile);
 	}
 
@@ -326,8 +326,9 @@ public class VisBStage extends Stage {
 	}
 
 	private void loadSvgFile(final VisBVisualisation visBVisualisation) throws IOException {
-		String svgContent = new String(Files.readAllBytes(visBVisualisation.getSvgPath()), StandardCharsets.UTF_8);
-		this.initialiseWebView(svgContent);
+		final Path path = visBVisualisation.getSvgPath();
+		String svgContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+		this.initialiseWebView(svgContent, path.getParent().toUri().toString());
 	}
 
 	private void treatJavascriptError(WebErrorEvent event) {
@@ -501,13 +502,15 @@ public class VisBStage extends Stage {
 		simulatorStage.toFront();
 	}
 
-	private String generateHTMLFileWithSVG(String svgContent) {
+	private String generateHTMLFileWithSVG(String svgContent, String baseUrl) {
 		final InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.html");
 		if (inputStream == null) {
 			throw new AssertionError("VisB HTML template resource not found - this should never happen");
 		}
 		try (final InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-			return CharStreams.toString(reader).replace("@SVG_CONTENT@", svgContent);
+			return CharStreams.toString(reader)
+				.replace("@BASE_URL@", baseUrl)
+				.replace("@SVG_CONTENT@", svgContent);
 		} catch (IOException e) {
 			throw new UncheckedIOException("I/O exception while reading VisB HTML template resource - this should never happen", e);
 		}
