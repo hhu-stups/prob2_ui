@@ -596,4 +596,11 @@ public final class OperationsView extends VBox {
 		expressionTableView.show();
 		expressionTableView.toFront();
 	}
+
+	@FXML
+	private void clearSearchbarWhenHidden(){
+		if (!searchToggle.isSelected()){
+			searchBar.clear();
+		}
+	}
 }

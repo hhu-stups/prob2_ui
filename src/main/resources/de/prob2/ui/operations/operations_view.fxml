@@ -87,7 +87,7 @@
 				</Button>
 			</StackPane>
 
-			<ToggleButton fx:id="searchToggle">
+			<ToggleButton fx:id="searchToggle" onAction="#clearSearchbarWhenHidden">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
