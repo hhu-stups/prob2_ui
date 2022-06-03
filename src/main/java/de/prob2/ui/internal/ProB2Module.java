@@ -14,6 +14,7 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.config.RuntimeOptions;
+import de.prob2.ui.menu.OpenFile;
 import de.prob2.ui.menu.RevealInExplorer;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
@@ -70,8 +71,14 @@ public class ProB2Module extends AbstractModule {
 		} else if (IS_MAC) {
 			return new RevealInExplorer.OpenR(stageManager, stopActions);
 		} else {
-			return new RevealInExplorer.DesktopBrowse(stageManager, stopActions);
+			return new RevealInExplorer.DesktopOpen(stageManager, stopActions);
 		}
+	}
+
+	@Provides
+	@Singleton
+	private static OpenFile provideOpenFile(StageManager stageManager, StopActions stopActions) {
+		return new OpenFile.DesktopOpen(stageManager, stopActions);
 	}
 
 	@Provides

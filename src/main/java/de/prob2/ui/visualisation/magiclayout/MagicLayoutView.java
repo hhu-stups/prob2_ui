@@ -1,6 +1,5 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -9,6 +8,7 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.json.JsonMetadata;
@@ -17,12 +17,12 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.menu.OpenFile;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.editpane.MagicLayoutEditEdges;
 import de.prob2.ui.visualisation.magiclayout.editpane.MagicLayoutEditNodes;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -71,6 +71,7 @@ public class MagicLayoutView extends Stage {
 	@FXML
 	private ChoiceBox<MagicLayout> layoutChoiceBox;
 
+	private final Injector injector;
 	private final StageManager stageManager;
 	private final MagicGraphI magicGraph;
 	private final CurrentTrace currentTrace;
@@ -80,10 +81,11 @@ public class MagicLayoutView extends Stage {
 	private final ResourceBundle bundle;
 
 	@Inject
-	public MagicLayoutView(final StageManager stageManager, final MagicGraphI magicGraph,
-			final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final VersionInfo versionInfo,
-			final MagicLayoutSettingsManager settingsManager, final ResourceBundle bundle) {
+	public MagicLayoutView(final Injector injector, final StageManager stageManager, final MagicGraphI magicGraph,
+	                       final CurrentTrace currentTrace, final CurrentProject currentProject,
+	                       final VersionInfo versionInfo,
+	                       final MagicLayoutSettingsManager settingsManager, final ResourceBundle bundle) {
+		this.injector = injector;
 		this.stageManager = stageManager;
 		this.magicGraph = magicGraph;
 		this.currentTrace = currentTrace;
@@ -219,6 +221,8 @@ public class MagicLayoutView extends Stage {
 		params.setTransform(Transform.scale(4, 4));
 		image = magicGraphPane.snapshot(params, image);
 
+		zoom(zoomFactor);
+
 		String name = currentProject.getCurrentMachine().getName();
 		final Path projectFolder = currentProject.get().getLocation();
 
@@ -243,24 +247,9 @@ public class MagicLayoutView extends Stage {
 					"visualisation.magicLayout.view.alerts.couldNotSaveGraphAsImage.content");
 			alert.initOwner(this);
 			alert.show();
+			return;
 		}
 
-		// try to open image with external viewer
-		// This needs to be done in a background thread to avoid an issue on Linux,
-		// where calling Desktop.open on the JavaFX application thread causes the UI to hang.
-		final File finalFile = file;
-		new Thread(() -> {
-			try {
-				Desktop.getDesktop().open(finalFile);
-			} catch (IOException e) {
-				Platform.runLater(() -> {
-					final Alert alert = stageManager.makeExceptionAlert(e, "visualisation.magicLayout.view.alerts.couldNotOpenImage.content");
-					alert.initOwner(this);
-					alert.show();
-				});
-			}
-		}, "Magic Layout Image Opener").start();
-		
-		zoom(zoomFactor);
+		injector.getInstance(OpenFile.class).open(file.toPath());
 	}
 }
