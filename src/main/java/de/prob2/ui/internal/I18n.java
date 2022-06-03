@@ -25,7 +25,7 @@ public final class I18n {
 		try {
 			return bundle.getString(key);
 		} catch (Exception e) {
-			LOGGER.warn("Error while translating key '{}'", key, e);
+			LOGGER.error("Error while translating key '{}'", key, e);
 			return key;
 		}
 	}
@@ -36,7 +36,7 @@ public final class I18n {
 			MessageFormat messageFormat = new MessageFormat(pattern);
 			return messageFormat.format(arguments);
 		} catch (Exception e) {
-			LOGGER.warn("Error while formatting pattern '{}' for key '{}'", pattern, key, e);
+			LOGGER.error("Error while formatting pattern '{}' for key '{}'", pattern, key, e);
 			return key;
 		}
 	}
