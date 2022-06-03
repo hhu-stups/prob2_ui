@@ -3,7 +3,6 @@ package de.prob2.ui.verifications.symbolicchecking;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -25,6 +24,7 @@ import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
@@ -39,8 +39,8 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 	private final CurrentTrace currentTrace;
 	
 	@Inject
-	public SymbolicCheckingResultHandler(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
-		super(stageManager, bundle);
+	public SymbolicCheckingResultHandler(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
+		super(stageManager, i18n);
 		this.currentTrace = currentTrace;
 		this.type = CheckingType.SYMBOLIC_CHECKING;
 	}
@@ -123,7 +123,7 @@ public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHa
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if (result == null) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message", "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.header", Checked.FAIL);
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.header", "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message", Checked.FAIL);
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
 			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.noViolationFound", "common.literal", Checked.SUCCESS, msg);
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {

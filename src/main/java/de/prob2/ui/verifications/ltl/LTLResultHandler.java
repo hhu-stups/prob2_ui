@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.ltl;
 
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -12,6 +11,7 @@ import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
 import de.prob2.ui.verifications.Checked;
@@ -24,8 +24,8 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 public class LTLResultHandler extends AbstractVerificationsResultHandler {
 	
 	@Inject
-	public LTLResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
-		super(stageManager, bundle);	
+	public LTLResultHandler(final StageManager stageManager, final I18n i18n) {
+		super(stageManager, i18n);
 		this.type = CheckingType.LTL;
 	}
 	
@@ -78,7 +78,7 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 			String msg;
 			List<LTLMarker> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {
-				msg = bundle.getString("verifications.ltl.pattern.empty");
+				msg = i18n.translate("verifications.ltl.pattern.empty");
 			} else {
 				msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
 			}

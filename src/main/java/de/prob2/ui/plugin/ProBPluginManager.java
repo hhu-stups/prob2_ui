@@ -493,7 +493,7 @@ public class ProBPluginManager {
 				int modifiers = pluginClass.getModifiers();
 				if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)
 						|| (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
-					LOGGER.error("The plugin clazz '{}' is not a valid ProBPlugin", pluginClassName);
+					LOGGER.error("The plugin class '{}' is not a valid ProBPlugin", pluginClassName);
 					return new InvalidPlugin(pluginWrapper,
 							"plugin.invalidPlugin.message.notAValidPluginClass", pluginClassName);
 				}

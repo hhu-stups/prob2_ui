@@ -258,7 +258,7 @@ public class VisualisationController {
 				visualisation.get().stop();
 			} catch (Exception e) {
 				LOGGER.debug("Could not stop visualisation!");
-				Alert alert = stageManager.makeExceptionAlert(e, "visualisation.fx.controller.alerts.visualisationCouldNotBeStopped.content", visualisation.get().getName());
+				Alert alert = stageManager.makeExceptionAlert(e, "", "visualisation.fx.controller.alerts.visualisationCouldNotBeStopped.content", visualisation.get().getName());
 				alert.show();
 			}
 			visualisationLoader.closeClassloader();
@@ -275,7 +275,7 @@ public class VisualisationController {
 		try {
 			setVisualisationContent(visualisation.initialize());
 		} catch (Exception e) {
-			Alert alert = stageManager.makeExceptionAlert(e, "visualisation.fx.controller.alerts.visualisationCouldNotBeInitialised.content", visualisation.getName());
+			Alert alert = stageManager.makeExceptionAlert(e, "", "visualisation.fx.controller.alerts.visualisationCouldNotBeInitialised.content", visualisation.getName());
 			alert.show();
 			LOGGER.warn("Exception during the initialisation of the visualisation \"{}\"", visualisation.getName(), e);
 			stopVisualisation();
@@ -322,8 +322,9 @@ public class VisualisationController {
 					listener.variablesChanged(formulaValues);
 				} catch (Exception e) {
 					Alert alert = stageManager.makeExceptionAlert(e,
+							"",
 							"visualisation.fx.controller.alerts.formulaListenerException.content",
-							"common.literal", String.join(" ", formulas));
+							String.join(" ", formulas));
 					alert.show();
 					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +
 							String.join(" ", formulas), e);
@@ -338,8 +339,10 @@ public class VisualisationController {
 				try {
 					eventListenerMap.get(lastEvent).eventExcecuted();
 				} catch (Exception e) {
-					Alert alert = stageManager.makeExceptionAlert(e, 
-							"visualisation.fx.controller.alerts.formulaEventListenerException.content", "common.literal", lastEvent);
+					Alert alert = stageManager.makeExceptionAlert(e,
+							"",
+							"visualisation.fx.controller.alerts.formulaEventListenerException.content",
+							lastEvent);
 					alert.show();
 					LOGGER.warn("Exception while calling the event listener for the event \"{}\".", lastEvent, e);
 				}

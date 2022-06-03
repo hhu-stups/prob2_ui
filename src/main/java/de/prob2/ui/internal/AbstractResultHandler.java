@@ -1,7 +1,5 @@
 package de.prob2.ui.internal;
 
-import java.util.ResourceBundle;
-
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -29,13 +27,13 @@ public abstract class AbstractResultHandler {
 	}
 	
 	protected final StageManager stageManager;
-	protected final ResourceBundle bundle;
+	protected final I18n i18n;
 	
 
 	
-	protected AbstractResultHandler(final StageManager stageManager, final ResourceBundle bundle) {
+	protected AbstractResultHandler(final StageManager stageManager, final I18n i18n) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 	}
 	
 	public void showResult(AbstractCheckableItem item) {
@@ -44,7 +42,7 @@ public abstract class AbstractResultHandler {
 				resultItem.getChecked().equals(Checked.SUCCESS) ? AlertType.INFORMATION : AlertType.ERROR,
 				resultItem.getHeaderBundleKey(),
 				resultItem.getMessageBundleKey(), resultItem.getMessageParams());
-		alert.setTitle(bundle.getString(resultItem.getHeaderBundleKey()));
+		alert.setTitle(i18n.translate(resultItem.getHeaderBundleKey()));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
 	}
@@ -53,7 +51,7 @@ public abstract class AbstractResultHandler {
 	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
 		stageManager.makeAlert(AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content", bundle.getString(itemType.getKey()))
+				"verifications.abstractResultHandler.alerts.alreadyExists.content", i18n.translate(itemType.getKey()))
 				.show();
 	}
 }

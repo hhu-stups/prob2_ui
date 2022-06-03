@@ -51,7 +51,7 @@ public final class I18n {
 		return bundle;
 	}
 
-	public String translate(String key) {
+	private String translate0(String key) {
 		try {
 			return bundle().getString(key);
 		} catch (Exception e) {
@@ -60,14 +60,24 @@ public final class I18n {
 		}
 	}
 
-	public String format(String key, Object... arguments) {
-		String pattern = translate(key);
+	public String translate(String key, Object... arguments) {
+		String pattern = translate0(key);
 		try {
-			MessageFormat messageFormat = new MessageFormat(pattern);
-			return messageFormat.format(arguments);
+			MessageFormat mf = new MessageFormat(pattern, locale());
+			return mf.format(arguments);
 		} catch (Exception e) {
-			LOGGER.error("Error while formatting pattern '{}' for key '{}'", pattern, key, e);
-			return key;
+			LOGGER.error("Error while formatting pattern '{}' for given key '{}'", pattern, key, e);
+			return pattern;
+		}
+	}
+
+	public String format(String pattern, Object... arguments) {
+		try {
+			MessageFormat mf = new MessageFormat(pattern, locale());
+			return mf.format(arguments);
+		} catch (Exception e) {
+			LOGGER.error("Error while formatting given pattern '{}'", pattern, e);
+			return pattern;
 		}
 	}
 }

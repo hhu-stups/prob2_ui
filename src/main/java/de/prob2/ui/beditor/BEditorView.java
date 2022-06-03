@@ -361,9 +361,9 @@ public class BEditorView extends BorderPane {
 		try (final Stream<String> lines = Files.lines(path)) {
 			text = lines.collect(Collectors.joining(System.lineSeparator()));
 		} catch (IOException | UncheckedIOException e) {
-			LOGGER.error(String.format("Could not read file: %s", path), e);
+			LOGGER.error("Could not read file: {}", path, e);
 			if (e.getCause() instanceof MalformedInputException) {
-				final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "beditor.encodingError.header", "beditor.encodingError.content", path, e);
+				final Alert alert = stageManager.makeExceptionAlert(e, "beditor.encodingError.header", "beditor.encodingError.content", path);
 				alert.initOwner(this.getScene().getWindow());
 				alert.show();
 			} else {

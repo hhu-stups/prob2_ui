@@ -80,7 +80,7 @@ public class ProB2Module extends AbstractModule {
 	}
 
 	@Provides
-	private static FXMLLoader provideLoader(final Injector injector, ResourceBundle bundle) {
+	private static FXMLLoader provideLoader(final Injector injector, I18n i18n) {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setBuilderFactory(type -> {
 			if (injector.getExistingBinding(Key.get(type)) != null || type.isAnnotationPresent(FXMLInjected.class)) {
@@ -90,7 +90,7 @@ public class ProB2Module extends AbstractModule {
 			}
 		});
 		fxmlLoader.setControllerFactory(injector::getInstance);
-		fxmlLoader.setResources(bundle);
+		fxmlLoader.setResources(i18n.bundle());
 		return fxmlLoader;
 	}
 

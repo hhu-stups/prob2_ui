@@ -1,7 +1,5 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -19,6 +17,7 @@ import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.AbstractResultHandler;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
@@ -32,8 +31,8 @@ public class SymbolicAnimationResultHandler extends AbstractResultHandler implem
 	private final CurrentTrace currentTrace;
 	
 	@Inject
-	public SymbolicAnimationResultHandler(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
-		super(stageManager, bundle);
+	public SymbolicAnimationResultHandler(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
+		super(stageManager, i18n);
 		this.currentTrace = currentTrace;
 	}
 	

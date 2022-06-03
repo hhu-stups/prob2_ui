@@ -37,13 +37,11 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URL;
-import java.util.ArrayList;
+import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -70,7 +68,7 @@ public final class StageManager {
 	private final Injector injector;
 	private final MenuToolkit menuToolkit;
 	private final UIState uiState;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final ObjectProperty<Stage> current;
 	private final Map<Stage, Void> registered;
@@ -78,11 +76,11 @@ public final class StageManager {
 	private Stage mainStage;
 
 	@Inject
-	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final ResourceBundle bundle) {
+	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final I18n i18n) {
 		this.injector = injector;
 		this.menuToolkit = menuToolkit;
 		this.uiState = uiState;
-		this.bundle = bundle;
+		this.i18n = i18n;
 
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
@@ -279,9 +277,9 @@ public final class StageManager {
 	 * @param alertType the alert type
 	 * @param buttons the custom buttons
 	 * @param headerBundleKey the resource bundle key for the alert header
-	 * text, or {@code ""} for the default header text provided by JavaFX
+	 * text, or either {@code null} or {@code ""} for the default header text provided by JavaFX
 	 * @param contentBundleKey the resource bundle key for the alert content
-	 * text, whose localized value may contain {@link Formatter}-style
+	 * text, whose localized value may contain {@link MessageFormat}-style
 	 * placeholders
 	 * @param contentParams the objects to insert into the placeholders in
 	 * {@code contentBundleKey}'s localized value
@@ -289,12 +287,12 @@ public final class StageManager {
 	 */
 	public Alert makeAlert(final Alert.AlertType alertType, final List<ButtonType> buttons,
 			final String headerBundleKey, final String contentBundleKey, final Object... contentParams) {
-		final Alert alert = new Alert(alertType, String.format(bundle.getString(contentBundleKey), contentParams),
-				buttons.toArray(new ButtonType[buttons.size()]));
+		String content = contentBundleKey != null && !contentBundleKey.isEmpty() ? i18n.translate(contentBundleKey, contentParams) : "";
+		final Alert alert = new Alert(alertType, content, buttons.toArray(new ButtonType[0]));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		this.register(alert);
-		if (!headerBundleKey.isEmpty()) {
-			alert.setHeaderText(bundle.getString(headerBundleKey));
+		if (headerBundleKey != null && !headerBundleKey.isEmpty()) {
+			alert.setHeaderText(i18n.translate(headerBundleKey));
 		}
 		return alert;
 	}
@@ -305,9 +303,9 @@ public final class StageManager {
 	 *
 	 * @param alertType the alert type
 	 * @param headerBundleKey the resource bundle key for the alert header
-	 * text, or {@code ""} for the default header text provided by JavaFX
+	 * text, or either {@code null} or {@code ""} for the default header text provided by JavaFX
 	 * @param contentBundleKey the resource bundle key for the alert content
-	 * text, whose localized value may contain {@link Formatter}-style
+	 * text, whose localized value may contain {@link MessageFormat}-style
 	 * placeholders
 	 * @param contentParams the objects to insert into the placeholders in
 	 * {@code contentBundleKey}'s localized value
@@ -315,7 +313,7 @@ public final class StageManager {
 	 */
 	public Alert makeAlert(final Alert.AlertType alertType, final String headerBundleKey, final String contentBundleKey,
 			final Object... contentParams) {
-		return makeAlert(alertType, new ArrayList<>(), headerBundleKey, contentBundleKey, contentParams);
+		return makeAlert(alertType, Collections.emptyList(), headerBundleKey, contentBundleKey, contentParams);
 	}
 
 	/**
@@ -323,7 +321,7 @@ public final class StageManager {
 	 *
 	 * @param exc the {@link Throwable} for which to make an alert
 	 * @param contentBundleKey the resource bundle key for the alert content
-	 * text, whose localized value may contain {@link Formatter}-style
+	 * text, whose localized value may contain {@link MessageFormat}-style
 	 * placeholders
 	 * @param contentParams the objects to insert into the placeholders in
 	 * {@code contentBundleKey}'s localized value
@@ -331,7 +329,7 @@ public final class StageManager {
 	 */
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {
 		final ExceptionAlert alert = injector.getInstance(ExceptionAlert.class);
-		alert.setText(String.format(bundle.getString(contentBundleKey), contentParams));
+		alert.setText(contentBundleKey != null && !contentBundleKey.isEmpty() ? i18n.translate(contentBundleKey, contentParams) : "");
 		alert.setException(exc);
 		this.register(alert);
 		return alert;
@@ -342,9 +340,9 @@ public final class StageManager {
 	 *
 	 * @param exc the {@link Throwable} for which to make an alert
 	 * @param headerBundleKey the resource bundle key for the alert header
-	 * text, or {@code ""} for the default header text provided by JavaFX
+	 * text, or either {@code null} or {@code ""} for the default header text provided by JavaFX
 	 * @param contentBundleKey the resource bundle key for the alert content
-	 * text, whose localized value may contain {@link Formatter}-style
+	 * text, whose localized value may contain {@link MessageFormat}-style
 	 * placeholders
 	 * @param contentParams the objects to insert into the placeholders in
 	 * {@code contentBundleKey}'s localized value
@@ -353,8 +351,8 @@ public final class StageManager {
 	public Alert makeExceptionAlert(final Throwable exc, final String headerBundleKey, final String contentBundleKey,
 			final Object... contentParams) {
 		Alert alert = makeExceptionAlert(exc, contentBundleKey, contentParams);
-		if (!headerBundleKey.isEmpty()) {
-			alert.setHeaderText(bundle.getString(headerBundleKey));
+		if (headerBundleKey != null && !headerBundleKey.isEmpty()) {
+			alert.setHeaderText(i18n.translate(headerBundleKey));
 		}
 		return alert;
 	}

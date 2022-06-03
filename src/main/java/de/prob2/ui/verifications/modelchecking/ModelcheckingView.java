@@ -197,10 +197,10 @@ public final class ModelcheckingView extends ScrollPane {
 		final StringJoiner s = new StringJoiner(", ");
 		s.add(i18n.translate(SearchStrategy.fromOptions(item.getOptions()).getName()));
 		if (item.getNodesLimit() != null) {
-			s.add(i18n.format("verifications.modelchecking.description.nodeLimit", item.getNodesLimit()));
+			s.add(i18n.translate("verifications.modelchecking.description.nodeLimit", item.getNodesLimit()));
 		}
 		if (item.getTimeLimit() != null) {
-			s.add(i18n.format("verifications.modelchecking.description.timeLimit", item.getTimeLimit()));
+			s.add(i18n.translate("verifications.modelchecking.description.timeLimit", item.getTimeLimit()));
 		}
 		Set<ModelCheckingOptions.Options> opts = item.getOptions().getPrologOptions();
 		for (ModelCheckingOptions.Options opt : ModelCheckingOptions.Options.values()) {
@@ -212,7 +212,7 @@ public final class ModelcheckingView extends ScrollPane {
 			}
 		}
 		if (item.getGoal() != null) {
-			s.add(i18n.format("verifications.modelchecking.description.additionalGoal", item.getGoal()));
+			s.add(i18n.translate("verifications.modelchecking.description.additionalGoal", item.getGoal()));
 		}
 		String description = s.toString();
 		if (item.getId() != null) {

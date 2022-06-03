@@ -57,7 +57,7 @@ public class SimulationHelperFunctions {
 			alert(stageManager, window, e, "simulation.error.header.fileNotFound","simulation.error.body.fileNotFound");
 		} catch (RuntimeException e) {
 			LOGGER.debug("Errors in simulation configuration file detected");
-			alert(stageManager, window, e, "simulation.error.header.configurationError", "simulation.error.body.configurationError", e.getMessage());
+			alert(stageManager, window, e, "simulation.error.header.configurationError", "simulation.error.body.configurationError");
 		}
 	}
 
