@@ -247,6 +247,20 @@ public class Machine implements DescriptionView.Describable, INameable {
 		}
 	}
 	
+	private void updateVoStatusBindings() {
+		for (final ValidationObligation vo : this.getValidationObligations()) {
+			// TODO: Implement for composed Validation Obligation
+			// Currently assumes that a VO consists of one VT
+			final IValidationTask vt = this.getValidationTasks().get(vo.getExpression());
+			vo.checkedProperty().unbind();
+			if (vt != null) {
+				vo.checkedProperty().bind(vt.checkedProperty());
+			} else {
+				vo.checkedProperty().set(Checked.PARSE_ERROR);
+			}
+		}
+	}
+	
 	private void initListeners() {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
 		this.nameProperty().addListener(changedListener);
@@ -284,6 +298,9 @@ public class Machine implements DescriptionView.Describable, INameable {
 				}
 			}
 		});
+
+		this.validationObligationsProperty().addListener((InvalidationListener)o -> this.updateVoStatusBindings());
+		this.validationTasksProperty().addListener((InvalidationListener)o -> this.updateVoStatusBindings());
 	}
 	
 	public BooleanProperty changedProperty() {
