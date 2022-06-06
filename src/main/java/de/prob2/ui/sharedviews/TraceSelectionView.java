@@ -66,7 +66,7 @@ public class TraceSelectionView extends Stage {
 	private void initTableColumns() {
 		statusColumn.setCellValueFactory(injector.getInstance(TraceViewHandler.class).getTraceStatusFactory());
 		nameColumn.setCellValueFactory(
-				features -> new SimpleStringProperty(features.getValue().getLocation().getFileName().toString()));
+				features -> new SimpleStringProperty(features.getValue().getName()));
 	}
 
 	private void initTableRows() {

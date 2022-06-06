@@ -121,7 +121,7 @@ public class TraceReplayView extends ScrollPane {
 		statusColumn.setCellValueFactory(injector.getInstance(TraceViewHandler.class).getTraceStatusFactory());
 		nameColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
-			String name = trace.getLocation().getFileName().toString();
+			String name = trace.getName();
 			if (trace.getId() != null) {
 				name = "[" + trace.getId() + "] " + name;
 			}

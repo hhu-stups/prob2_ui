@@ -13,6 +13,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.io.MoreFiles;
 
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.json.TraceManager;
@@ -189,7 +190,7 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 	@JsonIgnore
 	@Override
 	public String getName() {
-		return location.getFileName().toString();
+		return MoreFiles.getNameWithoutExtension(location.getFileName());
 	}
 
 	@JsonIgnore
