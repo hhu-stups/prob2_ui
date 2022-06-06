@@ -2,8 +2,10 @@ package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -251,14 +253,25 @@ public class Machine implements DescriptionView.Describable, INameable {
 		for (final ValidationObligation vo : this.getValidationObligations()) {
 			// TODO: Implement for composed Validation Obligation
 			// Currently assumes that a VO consists of one VT
-			final IValidationTask vt = this.getValidationTasks().get(vo.getExpression());
-			vo.checkedProperty().unbind();
-			if (vt != null) {
-				vo.checkedProperty().bind(vt.checkedProperty());
-			} else {
-				vo.checkedProperty().set(Checked.PARSE_ERROR);
-			}
+			final List<String> vtIds = splitVoExpression(vo.getExpression());
+			vo.getTasks().setAll(vtIds.stream()
+				.map(this.getValidationTasks()::get)
+				.collect(Collectors.toList()));
 		}
+	}
+	
+	/**
+	 * Ad-hoc parser for VO expressions that consist only of a single top-level conjunction chain.
+	 * Parentheses and other operators are not supported.
+	 *
+	 * @param voExpression the VO expression to parse
+	 * @return list of validation task IDs in the top-level conjunction chain
+	 */
+	private static List<String> splitVoExpression(final String voExpression) {
+		// TODO Implement full validation expression syntax
+		return Arrays.stream(voExpression.split("&"))
+			.map(String::trim)
+			.collect(Collectors.toList());
 	}
 	
 	private void initListeners() {

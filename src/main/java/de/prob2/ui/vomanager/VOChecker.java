@@ -75,12 +75,11 @@ public class VOChecker {
 
 
 	public void checkVO(ValidationObligation validationObligation) {
-		// TODO: Implement for composed Validation Obligation
-		// Currently assumes that a VO consists of one VT
-		String voExpression = validationObligation.getExpression();
-		final IValidationTask validationTask = currentProject.getCurrentMachine().getValidationTasks().get(voExpression);
-		if (validationTask != null) {
-			checkVT(validationTask);
+		// TODO Implement full validation task syntax (not just conjunctions)
+		for (IValidationTask validationTask : validationObligation.getTasks()) {
+			if (validationTask != null) {
+				checkVT(validationTask);
+			}
 		}
 	}
 

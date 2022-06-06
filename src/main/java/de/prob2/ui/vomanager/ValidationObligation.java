@@ -1,5 +1,7 @@
 package de.prob2.ui.vomanager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -8,8 +10,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.verifications.Checked;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 
 public class ValidationObligation implements IAbstractRequirement, INameable {
 
@@ -22,6 +28,9 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
+	@JsonIgnore
+	private final ObservableList<IValidationTask> tasks = FXCollections.observableArrayList();
+
 	@JsonCreator
 	public ValidationObligation(@JsonProperty("id") String id,
 								@JsonProperty("expression") String expression,
@@ -29,6 +38,27 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		this.id = id;
 		this.expression = expression;
 		this.requirement = requirement;
+
+		final InvalidationListener checkedListener = o -> this.checked.set(combineCheckingStatuses(this.getTasks()));
+		this.getTasks().addListener((ListChangeListener<IValidationTask>)o -> {
+			while (o.next()) {
+				if (o.wasRemoved()) {
+					for (final IValidationTask task : o.getRemoved()) {
+						if (task != null) {
+							task.checkedProperty().removeListener(checkedListener);
+						}
+					}
+				}
+				if (o.wasAdded()) {
+					for (final IValidationTask task : o.getAddedSubList()) {
+						if (task != null) {
+							task.checkedProperty().addListener(checkedListener);
+						}
+					}
+				}
+				checkedListener.invalidated(null);
+			}
+		});
 	}
 
 	public ObjectProperty<Checked> checkedProperty() {
@@ -39,8 +69,29 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		return checked.get();
 	}
 
-	public void setChecked(Checked checked) {
-		this.checked.set(checked);
+	private static Checked combineCheckingStatuses(final Collection<IValidationTask> tasks) {
+		final Collection<Checked> statuses = new ArrayList<>();
+		for (final IValidationTask task : tasks) {
+			if (task == null) {
+				// null task -> no task was found for ID
+				return Checked.PARSE_ERROR;
+			}
+			statuses.add(task.getChecked());
+		}
+
+		if (statuses.stream().allMatch(Checked.SUCCESS::equals)) {
+			return Checked.SUCCESS;
+		} else if (statuses.stream().anyMatch(Checked.PARSE_ERROR::equals)) {
+			return Checked.PARSE_ERROR;
+		} else if (statuses.stream().anyMatch(Checked.FAIL::equals)) {
+			return Checked.FAIL;
+		} else {
+			return Checked.NOT_CHECKED;
+		}
+	}
+
+	public ObservableList<IValidationTask> getTasks() {
+		return this.tasks;
 	}
 
 	public String getId() {
