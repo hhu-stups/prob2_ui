@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -209,6 +210,11 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	@Override
+	public String getTaskDescription(final I18n i18n) {
+		return this.getName();
 	}
 
 	/**

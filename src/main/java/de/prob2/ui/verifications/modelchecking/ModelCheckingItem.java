@@ -2,6 +2,8 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.check.ModelCheckingOptions;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
 
@@ -125,6 +128,31 @@ public class ModelCheckingItem implements IValidationTask {
 
 	public ModelCheckingOptions getOptions() {
 		return this.options;
+	}
+	
+	@Override
+	public String getTaskDescription(final I18n i18n) {
+		final StringJoiner s = new StringJoiner(", ");
+		s.add(i18n.translate(SearchStrategy.fromOptions(this.getOptions()).getName()));
+		if (this.getNodesLimit() != null) {
+			s.add(i18n.translate("verifications.modelchecking.description.nodeLimit", this.getNodesLimit()));
+		}
+		if (this.getTimeLimit() != null) {
+			s.add(i18n.translate("verifications.modelchecking.description.timeLimit", this.getTimeLimit()));
+		}
+		Set<ModelCheckingOptions.Options> opts = this.getOptions().getPrologOptions();
+		for (ModelCheckingOptions.Options opt : ModelCheckingOptions.Options.values()) {
+			if (opt == ModelCheckingOptions.Options.BREADTH_FIRST_SEARCH || opt == ModelCheckingOptions.Options.DEPTH_FIRST_SEARCH) {
+				continue;
+			}
+			if (opts.contains(opt)) {
+				s.add(i18n.translate("verifications.modelchecking.description.option." + opt.getPrologName()));
+			}
+		}
+		if (this.getGoal() != null) {
+			s.add(i18n.translate("verifications.modelchecking.description.additionalGoal", this.getGoal()));
+		}
+		return s.toString();
 	}
 	
 	@Override

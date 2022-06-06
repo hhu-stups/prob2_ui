@@ -194,27 +194,7 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	private String toUIString(ModelCheckingItem item) {
-		final StringJoiner s = new StringJoiner(", ");
-		s.add(i18n.translate(SearchStrategy.fromOptions(item.getOptions()).getName()));
-		if (item.getNodesLimit() != null) {
-			s.add(i18n.translate("verifications.modelchecking.description.nodeLimit", item.getNodesLimit()));
-		}
-		if (item.getTimeLimit() != null) {
-			s.add(i18n.translate("verifications.modelchecking.description.timeLimit", item.getTimeLimit()));
-		}
-		Set<ModelCheckingOptions.Options> opts = item.getOptions().getPrologOptions();
-		for (ModelCheckingOptions.Options opt : ModelCheckingOptions.Options.values()) {
-			if (opt == ModelCheckingOptions.Options.BREADTH_FIRST_SEARCH || opt == ModelCheckingOptions.Options.DEPTH_FIRST_SEARCH) {
-				continue;
-			}
-			if (opts.contains(opt)) {
-				s.add(i18n.translate("verifications.modelchecking.description.option." + opt.getPrologName()));
-			}
-		}
-		if (item.getGoal() != null) {
-			s.add(i18n.translate("verifications.modelchecking.description.additionalGoal", item.getGoal()));
-		}
-		String description = s.toString();
+		String description = item.getTaskDescription(i18n);
 		if (item.getId() != null) {
 			description = "[" + item.getId() + "] " + description;
 		}

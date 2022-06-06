@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
@@ -260,6 +261,11 @@ public class SimulationItem implements IValidationTask {
 			configurations.add(String.format("%s : %s", key, obj.toString()));
 		}
 		return String.join(",\n", configurations);
+	}
+
+	@Override
+	public String getTaskDescription(final I18n i18n) {
+		return this.getConfiguration();
 	}
 
 	public void setTraces(List<Trace> traces) {

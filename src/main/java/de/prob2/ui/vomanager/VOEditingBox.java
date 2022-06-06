@@ -10,19 +10,26 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
@@ -44,17 +51,32 @@ public class VOEditingBox extends VBox {
 	@FXML
 	private ChoiceBox<Machine> cbVOLinkMachineChoice;
 
+	@FXML
+	private TableView<IValidationTask> vtTable;
+
+	@FXML
+	private TableColumn<IValidationTask, Checked> statusColumn;
+
+	@FXML
+	private TableColumn<IValidationTask, String> idColumn;
+
+	@FXML
+	private TableColumn<IValidationTask, String> configurationColumn;
+
 	private final StageManager stageManager;
 
 	private final CurrentProject currentProject;
 
+	private I18n i18n;
+
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject) {
+	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final I18n i18n) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.i18n = i18n;
 		stageManager.loadFXML(this, "vo_editing_box.fxml");
 	}
 
@@ -96,6 +118,11 @@ public class VOEditingBox extends VBox {
 			}
 		});
 		cbVOExpression.itemsProperty().bind(vtIds);
+
+		statusColumn.setCellFactory(features -> new CheckedCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+		configurationColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getTaskDescription(this.i18n)));
 	}
 
 	public void resetVOEditing() {
@@ -128,6 +155,7 @@ public class VOEditingBox extends VBox {
 		cbLinkRequirementChoice.getItems().clear();
 		cbLinkRequirementChoice.getItems().addAll(currentProject.getRequirements());
 		cbLinkRequirementChoice.getSelectionModel().select(requirement);
+		vtTable.setItems(validationObligation.getTasks());
 	}
 
 	@FXML

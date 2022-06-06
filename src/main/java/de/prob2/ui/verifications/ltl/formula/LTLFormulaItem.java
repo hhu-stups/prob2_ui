@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ltl.ILTLItem;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -59,6 +60,15 @@ public class LTLFormulaItem extends AbstractCheckableItem implements ILTLItem, I
 	
 	public String getDescription() {
 		return this.description;
+	}
+	
+	@Override
+	public String getTaskDescription(final I18n i18n) {
+		if (this.getDescription().isEmpty()) {
+			return this.getCode();
+		} else {
+			return this.getCode() + " // " + getDescription();
+		}
 	}
 	
 	public void setCounterExample(Trace counterExample) {
