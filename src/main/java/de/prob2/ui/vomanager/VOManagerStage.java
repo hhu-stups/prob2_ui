@@ -135,7 +135,7 @@ public class VOManagerStage extends Stage {
 			});
 
 			MenuItem removeItem = new MenuItem(bundle.getString("common.buttons.remove"));
-			removeItem.setOnAction(e -> removeRequirement((IAbstractRequirement) row.getItem()));
+			removeItem.setOnAction(e -> removeItem(row.getTreeItem()));
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
@@ -328,13 +328,22 @@ public class VOManagerStage extends Stage {
 		switchMode(EditType.ADD, Mode.VO);
 	}
 
-	private void removeRequirement(IAbstractRequirement requirement) {
-		if(requirement instanceof Requirement) {
-			currentProject.removeRequirement((Requirement) requirement);
-		} else if(requirement instanceof ValidationObligation) {
-			Machine machine = currentProject.getCurrentMachine();
-			machine.getValidationObligations().remove((ValidationObligation) requirement);
+	private static Machine getMachineForItem(final TreeItem<INameable> treeItem) {
+		final TreeItem<INameable> parentItem = treeItem.getParent();
+		if (parentItem.getValue() instanceof Machine) {
+			return (Machine)parentItem.getValue();
+		} else {
+			return (Machine)parentItem.getParent().getValue();
 		}
+	}
+
+	private void removeItem(TreeItem<INameable> item) {
+		if (item.getValue() instanceof Requirement) {
+			currentProject.removeRequirement((Requirement)item.getValue());
+		} else if (item.getValue() instanceof ValidationObligation) {
+			getMachineForItem(item).getValidationObligations().remove((ValidationObligation)item.getValue());
+		}
+		// Machine items cannot be manually removed (they disappear when all their children are removed)
 	}
 
 	private void showRequirement(IAbstractRequirement requirement, boolean edit) {
@@ -360,13 +369,7 @@ public class VOManagerStage extends Stage {
 	public void replaceCurrentValidationObligation(final ValidationObligation newVo) {
 		final TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
 		final ValidationObligation oldVo = (ValidationObligation)treeItem.getValue();
-		final TreeItem<INameable> parentItem = treeItem.getParent();
-		final Machine machine;
-		if (parentItem.getValue() instanceof Machine) {
-			machine = (Machine)parentItem.getValue();
-		} else {
-			machine = (Machine)parentItem.getParent().getValue();
-		}
+		final Machine machine = getMachineForItem(treeItem);
 		machine.getValidationObligations().set(machine.getValidationObligations().indexOf(oldVo), newVo);
 	}
 
