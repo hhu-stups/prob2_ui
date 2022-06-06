@@ -156,7 +156,7 @@ public class VOEditingBox extends VBox {
 				}
 				voManagerStage.replaceCurrentValidationObligation(newVo);
 			}
-			voManagerStage.refreshRequirementsTable();
+			voManagerStage.closeEditingBox();
 		} else {
 			warnNotValid();
 		}

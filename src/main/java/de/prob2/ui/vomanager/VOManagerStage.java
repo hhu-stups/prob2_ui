@@ -24,6 +24,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.TreeCheckedCell;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -183,7 +184,6 @@ public class VOManagerStage extends Stage {
 		}
 		this.resolveRefinementHierarchy(stateSpace.getModel());
 		updateRequirementsTable();
-		tvRequirements.refresh();
 	}
 
 	private void initializeEditingBoxes() {
@@ -200,6 +200,7 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void initializeListenerOnProjectChange() {
+		final InvalidationListener updateListener = o -> this.updateRequirementsTable();
 		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
 			btAddVO.disableProperty().unbind();
 			final List<Machine> machines = to == null ? Collections.emptyList() : to.getMachines();
@@ -209,6 +210,10 @@ public class VOManagerStage extends Stage {
 			if(from != null) {
 				for (Requirement requirement : from.getRequirements()) {
 					requirementHandler.resetListeners(from, requirement);
+				}
+				from.requirementsProperty().removeListener(updateListener);
+				for (final Machine machine : from.getMachines()) {
+					machine.validationObligationsProperty().removeListener(updateListener);
 				}
 			}
 
@@ -220,6 +225,10 @@ public class VOManagerStage extends Stage {
 					requirementHandler.initListeners(to, null, requirement, VOManagerSetting.REQUIREMENT);
 				}
 
+				to.requirementsProperty().addListener(updateListener);
+				for (final Machine machine : to.getMachines()) {
+					machine.validationObligationsProperty().addListener(updateListener);
+				}
 				updateRequirementsTable();
 			} else {
 				tvRequirements.setRoot(null);
@@ -243,6 +252,10 @@ public class VOManagerStage extends Stage {
 	public void switchMode(EditType editType, Mode mode) {
 		editTypeProperty.set(editType);
 		modeProperty.set(mode);
+	}
+
+	public void closeEditingBox() {
+		this.switchMode(EditType.NONE, Mode.NONE);
 	}
 
 	public void updateRequirementsTable() {
@@ -325,18 +338,11 @@ public class VOManagerStage extends Stage {
 
 	private void removeRequirement(Requirement requirement) {
 		currentProject.removeRequirement(requirement);
-		updateRequirementsTable();
-		tvRequirements.refresh();
-	}
-
-	private void removeVOFromMachine(ValidationObligation validationObligation) {
-		Machine machine = currentProject.getCurrentMachine();
-		machine.getValidationObligations().remove(validationObligation);
 	}
 
 	private void removeValidationObligation(ValidationObligation validationObligation) {
-		removeVOFromMachine(validationObligation);
-		tvRequirements.refresh();
+		Machine machine = currentProject.getCurrentMachine();
+		machine.getValidationObligations().remove(validationObligation);
 	}
 
 	private void showRequirement(IAbstractRequirement requirement, boolean edit) {
@@ -370,14 +376,6 @@ public class VOManagerStage extends Stage {
 			machine = (Machine)parentItem.getParent().getValue();
 		}
 		machine.getValidationObligations().set(machine.getValidationObligations().indexOf(oldVo), newVo);
-	}
-
-	public void refreshRequirementsTable() {
-		// TODO: Replace refresh?
-		this.switchMode(VOManagerStage.EditType.NONE, VOManagerStage.Mode.NONE);
-		this.clearRequirementsSelection();
-		this.updateRequirementsTable();
-		tvRequirements.refresh();
 	}
 
 	private void resolveRefinementHierarchy(AbstractModel model) {

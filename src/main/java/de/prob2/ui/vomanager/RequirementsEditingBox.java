@@ -71,7 +71,7 @@ public class RequirementsEditingBox extends VBox {
 			} else if(editType == VOManagerStage.EditType.EDIT) {
 				editRequirement(nameExists);
 			}
-			voManagerStage.refreshRequirementsTable();
+			voManagerStage.closeEditingBox();
 		} else {
 			warnNotValid();
 		}
