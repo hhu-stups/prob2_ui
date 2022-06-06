@@ -330,19 +330,11 @@ public class VOManagerStage extends Stage {
 
 	private void removeRequirement(IAbstractRequirement requirement) {
 		if(requirement instanceof Requirement) {
-			removeRequirement((Requirement) requirement);
+			currentProject.removeRequirement((Requirement) requirement);
 		} else if(requirement instanceof ValidationObligation) {
-			removeValidationObligation((ValidationObligation) requirement);
+			Machine machine = currentProject.getCurrentMachine();
+			machine.getValidationObligations().remove((ValidationObligation) requirement);
 		}
-	}
-
-	private void removeRequirement(Requirement requirement) {
-		currentProject.removeRequirement(requirement);
-	}
-
-	private void removeValidationObligation(ValidationObligation validationObligation) {
-		Machine machine = currentProject.getCurrentMachine();
-		machine.getValidationObligations().remove(validationObligation);
 	}
 
 	private void showRequirement(IAbstractRequirement requirement, boolean edit) {
