@@ -2,13 +2,14 @@ package de.prob2.ui.vomanager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -77,7 +78,7 @@ public class VOChecker {
 	public void checkVO(ValidationObligation validationObligation) {
 		// TODO Implement full validation task syntax (not just conjunctions)
 		for (IValidationTask validationTask : validationObligation.getTasks()) {
-			if (validationTask != null) {
+			if (validationTask != null && validationTask.getChecked() != Checked.SUCCESS) {
 				checkVT(validationTask);
 			}
 		}
