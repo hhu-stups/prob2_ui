@@ -32,6 +32,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -190,7 +191,7 @@ public class TestCaseGenerationView extends ScrollPane {
 			if(newValue != null) {
 				tvTestCases.itemsProperty().bind(newValue.testCasesProperty());
 			} else {
-				tvTestCases.getItems().clear();
+				tvTestCases.setItems(FXCollections.emptyObservableList());
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);

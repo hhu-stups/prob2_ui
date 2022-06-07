@@ -40,6 +40,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -173,8 +174,8 @@ public class LTLView extends AnchorPane {
 				tvFormula.itemsProperty().bind(to.ltlFormulasProperty());
 				tvPattern.itemsProperty().bind(to.ltlPatternsProperty());
 			} else {
-				tvFormula.getItems().clear();
-				tvPattern.getItems().clear();
+				tvFormula.setItems(FXCollections.emptyObservableList());
+				tvPattern.setItems(FXCollections.emptyObservableList());
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
