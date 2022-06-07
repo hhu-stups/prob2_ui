@@ -133,6 +133,7 @@ public class VOEditingBox extends VBox {
 		cbLinkRequirementChoice.getItems().addAll(currentProject.getRequirements());
 		cbVOLinkMachineChoice.getSelectionModel().clearSelection();
 		voManagerStage.clearRequirementsSelection();
+		vtTable.setItems(FXCollections.emptyObservableList());
 	}
 
 	public void showValidationObligation(ValidationObligation validationObligation, boolean edit) {
