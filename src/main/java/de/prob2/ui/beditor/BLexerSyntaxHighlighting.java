@@ -15,17 +15,14 @@ import de.be4.classicalb.core.parser.node.EOF;
 import de.be4.classicalb.core.parser.node.TAbstractConstants;
 import de.be4.classicalb.core.parser.node.TAbstractVariables;
 import de.be4.classicalb.core.parser.node.TAny;
-import de.be4.classicalb.core.parser.node.TArity;
 import de.be4.classicalb.core.parser.node.TAssert;
 import de.be4.classicalb.core.parser.node.TAssertions;
 import de.be4.classicalb.core.parser.node.TAssign;
 import de.be4.classicalb.core.parser.node.TBe;
 import de.be4.classicalb.core.parser.node.TBegin;
 import de.be4.classicalb.core.parser.node.TBfalse;
-import de.be4.classicalb.core.parser.node.TBin;
 import de.be4.classicalb.core.parser.node.TBool;
 import de.be4.classicalb.core.parser.node.TBoolCast;
-import de.be4.classicalb.core.parser.node.TBtree;
 import de.be4.classicalb.core.parser.node.TCard;
 import de.be4.classicalb.core.parser.node.TCase;
 import de.be4.classicalb.core.parser.node.TChoice;
@@ -39,7 +36,6 @@ import de.be4.classicalb.core.parser.node.TConcatSequence;
 import de.be4.classicalb.core.parser.node.TConcreteConstants;
 import de.be4.classicalb.core.parser.node.TConcreteVariables;
 import de.be4.classicalb.core.parser.node.TConjunction;
-import de.be4.classicalb.core.parser.node.TConst;
 import de.be4.classicalb.core.parser.node.TConstants;
 import de.be4.classicalb.core.parser.node.TConstraints;
 import de.be4.classicalb.core.parser.node.TConvertIntCeiling;
@@ -66,7 +62,6 @@ import de.be4.classicalb.core.parser.node.TEquivalence;
 import de.be4.classicalb.core.parser.node.TExists;
 import de.be4.classicalb.core.parser.node.TExtends;
 import de.be4.classicalb.core.parser.node.TFalse;
-import de.be4.classicalb.core.parser.node.TFather;
 import de.be4.classicalb.core.parser.node.TFin;
 import de.be4.classicalb.core.parser.node.TFin1;
 import de.be4.classicalb.core.parser.node.TFinite;
@@ -89,7 +84,6 @@ import de.be4.classicalb.core.parser.node.TImports;
 import de.be4.classicalb.core.parser.node.TIn;
 import de.be4.classicalb.core.parser.node.TIncludes;
 import de.be4.classicalb.core.parser.node.TInclusion;
-import de.be4.classicalb.core.parser.node.TInfix;
 import de.be4.classicalb.core.parser.node.TInitialisation;
 import de.be4.classicalb.core.parser.node.TInsertEndSequence;
 import de.be4.classicalb.core.parser.node.TInsertStartSequence;
@@ -104,7 +98,6 @@ import de.be4.classicalb.core.parser.node.TIseq1;
 import de.be4.classicalb.core.parser.node.TIterate;
 import de.be4.classicalb.core.parser.node.TLambda;
 import de.be4.classicalb.core.parser.node.TLast;
-import de.be4.classicalb.core.parser.node.TLeft;
 import de.be4.classicalb.core.parser.node.TLess;
 import de.be4.classicalb.core.parser.node.TLessEqual;
 import de.be4.classicalb.core.parser.node.TLessGreater; // empty sequence
@@ -119,7 +112,6 @@ import de.be4.classicalb.core.parser.node.TMaxInt;
 import de.be4.classicalb.core.parser.node.TMin;
 import de.be4.classicalb.core.parser.node.TMinInt;
 import de.be4.classicalb.core.parser.node.TMinus;
-import de.be4.classicalb.core.parser.node.TMirror;
 import de.be4.classicalb.core.parser.node.TMod;
 import de.be4.classicalb.core.parser.node.TModel;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
@@ -145,7 +137,6 @@ import de.be4.classicalb.core.parser.node.TPartialSurjection;
 import de.be4.classicalb.core.parser.node.TPerm;
 import de.be4.classicalb.core.parser.node.TPi;
 import de.be4.classicalb.core.parser.node.TPlus;
-import de.be4.classicalb.core.parser.node.TPostfix;
 import de.be4.classicalb.core.parser.node.TPow;
 import de.be4.classicalb.core.parser.node.TPow1;
 import de.be4.classicalb.core.parser.node.TPowerOf;
@@ -163,7 +154,6 @@ import de.be4.classicalb.core.parser.node.TPragmaStart;
 import de.be4.classicalb.core.parser.node.TPragmaSymbolic;
 import de.be4.classicalb.core.parser.node.TPre;
 import de.be4.classicalb.core.parser.node.TPred;
-import de.be4.classicalb.core.parser.node.TPrefix;
 import de.be4.classicalb.core.parser.node.TPrj1;
 import de.be4.classicalb.core.parser.node.TPrj2;
 import de.be4.classicalb.core.parser.node.TProduct; // ambiguous
@@ -174,7 +164,6 @@ import de.be4.classicalb.core.parser.node.TQuantifiedUnion;
 import de.be4.classicalb.core.parser.node.TRan;
 import de.be4.classicalb.core.parser.node.TRangeRestriction;
 import de.be4.classicalb.core.parser.node.TRangeSubtraction;
-import de.be4.classicalb.core.parser.node.TRank;
 import de.be4.classicalb.core.parser.node.TReal;
 import de.be4.classicalb.core.parser.node.TRealLiteral;
 import de.be4.classicalb.core.parser.node.TRec;
@@ -184,7 +173,6 @@ import de.be4.classicalb.core.parser.node.TRel;
 import de.be4.classicalb.core.parser.node.TRestrictHeadSequence;
 import de.be4.classicalb.core.parser.node.TRestrictTailSequence;
 import de.be4.classicalb.core.parser.node.TRev;
-import de.be4.classicalb.core.parser.node.TRight;
 import de.be4.classicalb.core.parser.node.TSees;
 import de.be4.classicalb.core.parser.node.TSelect;
 import de.be4.classicalb.core.parser.node.TSemicolon;
@@ -195,31 +183,25 @@ import de.be4.classicalb.core.parser.node.TSetSubtraction;
 import de.be4.classicalb.core.parser.node.TSets;
 import de.be4.classicalb.core.parser.node.TSigma;
 import de.be4.classicalb.core.parser.node.TSize;
-import de.be4.classicalb.core.parser.node.TSizet;
 import de.be4.classicalb.core.parser.node.TSkip;
-import de.be4.classicalb.core.parser.node.TSon;
-import de.be4.classicalb.core.parser.node.TSons;
 // import de.be4.classicalb.core.parser.node.TStar; // * as part of comment
 import de.be4.classicalb.core.parser.node.TStrictInclusion;
 import de.be4.classicalb.core.parser.node.TStrictNonInclusion;
 import de.be4.classicalb.core.parser.node.TString;
 import de.be4.classicalb.core.parser.node.TStringLiteral;
 import de.be4.classicalb.core.parser.node.TStruct;
-import de.be4.classicalb.core.parser.node.TSubtree;
 import de.be4.classicalb.core.parser.node.TSucc;
 import de.be4.classicalb.core.parser.node.TSurjectionRelation;
 import de.be4.classicalb.core.parser.node.TSystem;
 import de.be4.classicalb.core.parser.node.TTail;
 import de.be4.classicalb.core.parser.node.TThen;
 import de.be4.classicalb.core.parser.node.TTilde;
-import de.be4.classicalb.core.parser.node.TTop;
 import de.be4.classicalb.core.parser.node.TTotalBijection;
 import de.be4.classicalb.core.parser.node.TTotalFunction;
 import de.be4.classicalb.core.parser.node.TTotalInjection;
 import de.be4.classicalb.core.parser.node.TTotalRelation;
 import de.be4.classicalb.core.parser.node.TTotalSurjection;
 import de.be4.classicalb.core.parser.node.TTotalSurjectionRelation;
-import de.be4.classicalb.core.parser.node.TTree;
 import de.be4.classicalb.core.parser.node.TTrue;
 import de.be4.classicalb.core.parser.node.TTruthPredicate;
 import de.be4.classicalb.core.parser.node.TUnion;
@@ -308,13 +290,7 @@ final class BLexerSyntaxHighlighting {
 			TInteger.class, TInt.class, TString.class, TReal.class, TFloat.class);
 		addBTokens("editor_string", TStringLiteral.class,
 			TMultilineStringStart.class, TMultilineStringContent.class, TMultilineStringEnd.class);
-		addBTokens("editor_unsupported", TTree.class, TLeft.class, TRight.class,
-			TInfix.class, TArity.class, TSubtree.class, 
-			TSon.class, TFather.class, TRank.class, TMirror.class, TSizet.class,
-			TPostfix.class, TPrefix.class, TSons.class, TTop.class, TConst.class,
-			TBin.class, TBtree.class,
-			TUnrecognisedPragma.class
-			); // actually they are partially supported by ProB
+		addBTokens("editor_unsupported", TUnrecognisedPragma.class);
 		addBTokens("editor_ctrlkeyword", TLet.class, TBe.class,
 			TVar.class, TIn.class, TAny.class, TWhile.class,
 			TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
