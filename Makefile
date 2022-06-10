@@ -1,7 +1,10 @@
 PROB2_HOME=$(HOME)/git_root/prob_prolog/ 
+LOCAL=--include-build ../parsers_prob/
 
 run-with-my-probcli:
-	./gradlew -PprobHome=$(PROB2_HOME) run
+	./gradlew -PprobHome=$(PROB2_HOME) $(LOCAL) run
+offline:
+	./gradlew -PprobHome=$(PROB2_HOME) $(LOCAL) run --offline
 run:
 	./gradlew -PprobHome=$(PROB2_HOME) run --offline
 refresh:
