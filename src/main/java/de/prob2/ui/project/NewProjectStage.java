@@ -12,10 +12,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -35,6 +32,7 @@ public class NewProjectStage extends Stage {
 	private final FileChooserManager fileChooserManager;
 	private final CurrentProject currentProject;
 	private final ResourceBundle bundle;
+	private final StageManager stageManager;
 
 	@Inject
 	private NewProjectStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
@@ -42,6 +40,7 @@ public class NewProjectStage extends Stage {
 		this.currentProject = currentProject;
 		this.bundle = bundle;
 		this.initModality(Modality.APPLICATION_MODAL);
+		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "new_project_stage.fxml");
 	}
 
@@ -70,7 +69,7 @@ public class NewProjectStage extends Stage {
 	void finish() {
 		Path dir = Paths.get(locationField.getText());
 		if (!dir.toFile().isDirectory()) {
-			errorExplanationLabel.setText(bundle.getString("project.newProjectStage.invalidLocationError"));
+			stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.newProjectStage.invalidLocationError").show();
 			return;
 		}
 		Project newProject = new Project(projectNameField.getText(), projectDescriptionTextArea.getText(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), dir);
