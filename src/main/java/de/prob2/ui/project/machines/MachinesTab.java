@@ -25,6 +25,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
+import de.prob2.ui.menu.RevealInExplorer;
 import de.prob2.ui.menu.ViewCodeStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -133,6 +134,11 @@ public class MachinesTab extends Tab {
 		@FXML
 		private void handleEditFileExternal() {
 			injector.getInstance(ExternalEditor.class).open(currentProject.get().getAbsoluteMachinePath(this.machineProperty.get()));
+		}
+
+		@FXML
+		private void handleRevealFileInExplorer() {
+			injector.getInstance(RevealInExplorer.class).revealInExplorer(currentProject.get().getAbsoluteMachinePath(this.machineProperty.get()));
 		}
 		
 		@FXML
