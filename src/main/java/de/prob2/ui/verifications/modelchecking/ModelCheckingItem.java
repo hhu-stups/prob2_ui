@@ -145,7 +145,9 @@ public class ModelCheckingItem implements IValidationTask {
 			if (opt == ModelCheckingOptions.Options.BREADTH_FIRST_SEARCH || opt == ModelCheckingOptions.Options.DEPTH_FIRST_SEARCH) {
 				continue;
 			}
-			if (opts.contains(opt)) {
+
+			boolean expectedContains = opt != ModelCheckingOptions.Options.FIND_OTHER_ERRORS;
+			if (opts.contains(opt) == expectedContains) {
 				s.add(i18n.translate("verifications.modelchecking.description.option." + opt.getPrologName()));
 			}
 		}
