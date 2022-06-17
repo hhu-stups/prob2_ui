@@ -102,9 +102,9 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	private void changeToComboBox(final PrefTreeItem.Preference pti) {
 		final List<String> validValues;
 		if (pti.getPreferenceInfo().type instanceof ListPrologTerm) {
-			validValues = PrologTerm.atomicStrings((ListPrologTerm)pti.getPreferenceInfo().type);
+			validValues = PrologTerm.atomsToStrings((ListPrologTerm)pti.getPreferenceInfo().type);
 		} else {
-			final String typeName = PrologTerm.atomicString(pti.getPreferenceInfo().type);
+			final String typeName = pti.getPreferenceInfo().type.atomToString();
 			validValues = Arrays.asList(PrefConstants.VALID_TYPE_VALUES.get(typeName));
 		}
 		final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(validValues));
@@ -129,7 +129,7 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 				// Lists get a ComboBox.
 				changeToComboBox(pref);
 			} else {
-				final String type = PrologTerm.atomicString(pref.getPreferenceInfo().type);
+				final String type = pref.getPreferenceInfo().type.atomToString();
 				if ("bool".equals(type)) {
 					// Booleans get a CheckBox.
 					changeToCheckBox(pref);
