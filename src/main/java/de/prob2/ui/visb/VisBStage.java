@@ -183,7 +183,7 @@ public class VisBStage extends Stage {
 		// zoom fonts in/out (but only of those that are not given a fixed size):
 		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
 		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
-		this.titleProperty().bind(Bindings.createStringBinding(() -> visBController.getVisBPath() == null ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBController.getVisBPath()).toString()), visBController.visBPathProperty()));
+		this.titleProperty().bind(Bindings.createStringBinding(() -> visBController.getVisBPath() == null ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBController.getVisBPath())), visBController.visBPathProperty()));
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			openTraceSelectionButton.disableProperty().unbind();

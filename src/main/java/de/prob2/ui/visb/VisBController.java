@@ -25,6 +25,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
@@ -77,6 +78,10 @@ public class VisBController {
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.attributeValues = FXCollections.observableHashMap();
+		initialize();
+	}
+
+	private void initialize() {
 		this.visBVisualisation.addListener((o, from, to) -> {
 			if (to == null) {
 				this.attributeValues.clear();
@@ -109,6 +114,11 @@ public class VisBController {
 	}
 
 	public void setVisBPath(final Path visBPath) {
+		// Remark: The VisB path is reset to null, so that the listener for visBPath is triggered when the old visBPath is equal to the new one
+		// Otherwise the listener is not triggered and thus the new visualization is not updated.
+		// We had a similar issue on a ListProperty listener long time ago.
+		// This was caused by JavaFX not triggering the listener when the old object is equal to the new one
+		this.visBPathProperty().set(null);
 		this.visBPathProperty().set(visBPath);
 	}
 
@@ -235,7 +245,7 @@ public class VisBController {
 		LOGGER.debug("Visualisation has been reloaded.");
 	}
 
-	public void setupVisualisation(final Path visBPath){
+	private void setupVisualisation(final Path visBPath){
 		try {
 			this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
 		} catch (UncheckedIOException | ProBError e) {
@@ -262,6 +272,7 @@ public class VisBController {
 			showUpdateVisualisationNotPossible();
 		}
 	}
+
 	private void showUpdateVisualisationNotPossible(){
 		updateInfo("visb.infobox.visualisation.updated");
 		injector.getInstance(VisBStage.class).showModelNotInitialised();
