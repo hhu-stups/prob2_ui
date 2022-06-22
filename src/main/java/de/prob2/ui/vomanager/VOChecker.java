@@ -3,6 +3,18 @@ package de.prob2.ui.vomanager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.voparser.AbstractVOInterpreter;
+import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOParser;
+import de.prob.voparser.node.AAndVo;
+import de.prob.voparser.node.AEquivalentVo;
+import de.prob.voparser.node.AIdentifierVo;
+import de.prob.voparser.node.AImpliesVo;
+import de.prob.voparser.node.ANotVo;
+import de.prob.voparser.node.AOrVo;
+import de.prob.voparser.node.ASequentialVo;
+import de.prob.voparser.node.PVo;
+import de.prob.voparser.node.Start;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -17,8 +29,9 @@ import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
+
 @Singleton
-public class VOChecker {
+public class VOChecker extends AbstractVOInterpreter {
 
 	private final CurrentProject currentProject;
 
@@ -38,6 +51,7 @@ public class VOChecker {
 	public VOChecker(final CurrentProject currentProject, final RequirementHandler requirementHandler, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
 					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
+		super();
 		this.currentProject = currentProject;
 		this.requirementHandler = requirementHandler;
 		this.modelchecker = modelchecker;
@@ -74,8 +88,63 @@ public class VOChecker {
 		}
 	}
 
+	public void interpretVOExpression(String VO) throws VOParseException {
+		super.interpretVOExpression(VO);
+		Start ast = voParser.parseFormula(VO);
+		interpretVOExpression(ast.getPVo());
+	}
+
+	public void interpretVOExpression(PVo VO) {
+		if(VO instanceof AIdentifierVo) {
+			interpretAtomicExpression((AIdentifierVo) VO);
+		} else if(VO instanceof ANotVo) {
+			interpretNotExpression((ANotVo) VO);
+		} else if(VO instanceof AAndVo) {
+			interpretAndExpression((AAndVo) VO);
+		} else if(VO instanceof AOrVo) {
+			interpretOrExpression((AOrVo) VO);
+		} else if(VO instanceof AImpliesVo) {
+			interpretImpliesExpression((AImpliesVo) VO);
+		} else if(VO instanceof AEquivalentVo) {
+			interpretEquivalentExpression((AEquivalentVo) VO);
+		} else if(VO instanceof ASequentialVo) {
+			interpretSequentialExpression((ASequentialVo) VO);
+		} else {
+			throw new RuntimeException("VO expression type is unknown: " + VO.getClass());
+		}
+	}
+
+	public void interpretAtomicExpression(AIdentifierVo VO) {
+
+	}
+
+	public void interpretNotExpression(ANotVo VO) {
+
+	}
+
+	public void interpretAndExpression(AAndVo VO) {
+
+	}
+
+	public void interpretOrExpression(AOrVo VO) {
+
+	}
+
+	public void interpretImpliesExpression(AImpliesVo VO) {
+
+	}
+
+	public void interpretEquivalentExpression(AEquivalentVo VO) {
+
+	}
+
+	public void interpretSequentialExpression(ASequentialVo VO) {
+
+	}
+
 
 	public void checkVO(ValidationObligation validationObligation) {
+		// checkVOExpression(validationObligation.getExpression());
 		// TODO Implement full validation task syntax (not just conjunctions)
 		for (IValidationTask validationTask : validationObligation.getTasks()) {
 			if (validationTask != null && validationTask.getChecked() != Checked.SUCCESS) {
