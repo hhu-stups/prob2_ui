@@ -1,7 +1,9 @@
 package de.prob2.ui.error;
 
 import java.io.CharArrayWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -11,6 +13,7 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.ErrorDisplayFilter;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.binding.Bindings;
@@ -18,8 +21,12 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
@@ -32,23 +39,23 @@ public final class ExceptionAlert extends Alert {
 	
 	private final StageManager stageManager;
 	private final ErrorDisplayFilter errorDisplayFilter;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final StringProperty text;
 	private final ObjectProperty<Throwable> exception;
 	private final StringProperty exceptionMessage;
 	
 	@Inject
-	private ExceptionAlert(final StageManager stageManager, final ErrorDisplayFilter errorDisplayFilter, final ResourceBundle bundle) {
+	private ExceptionAlert(final StageManager stageManager, final ErrorDisplayFilter errorDisplayFilter, final I18n i18n) {
 		super(Alert.AlertType.NONE); // Alert type is set in FXML
-		
+
 		this.stageManager = stageManager;
 		this.errorDisplayFilter = errorDisplayFilter;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		
 		this.text = new SimpleStringProperty(this, "text", null);
 		this.exception = new SimpleObjectProperty<>(this, "exception", null);
 		this.exceptionMessage = new SimpleStringProperty(this, "exceptionMessage", "");
-		
+
 		stageManager.loadFXML(this, "exception_alert.fxml");
 	}
 	
@@ -70,7 +77,7 @@ public final class ExceptionAlert extends Alert {
 			}
 			final String message;
 			if (cliError != null) {
-				message = String.format(bundle.getString("error.exceptionAlert.cliErrorExplanation"), cliError.getMessage());
+				message = this.i18n.translate("error.exceptionAlert.cliErrorExplanation", cliError.getMessage());
 			} else if (proBError != null) {
 				message = proBError.getOriginalMessage();
 			} else if (to != null) {
@@ -88,12 +95,23 @@ public final class ExceptionAlert extends Alert {
 				this.proBErrorTable.getErrorItems().setAll(filteredErrors);
 			}
 		});
+
+		ButtonType copyToClipBoardButtonType = new ButtonType(this.i18n.translate("common.buttons.copyToClipboard"));
+		this.getDialogPane().getButtonTypes().add(copyToClipBoardButtonType);
+		this.getDialogPane().lookupButton(copyToClipBoardButtonType).addEventFilter(ActionEvent.ACTION, ae -> {
+			this.stackTraceTextArea.selectAll();
+			this.stackTraceTextArea.copy();
+			this.stackTraceTextArea.deselect();
+			ae.consume();
+		});
 	}
 	
 	public static String getExceptionStackTrace(final Throwable throwable) {
-		try (final CharArrayWriter caw = new CharArrayWriter(); final PrintWriter pw = new PrintWriter(caw)) {
+		try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
 			throwable.printStackTrace(pw);
-			return caw.toString();
+			return sw.toString();
+		} catch (IOException ignored) {
+			return ""; // can never happen
 		}
 	}
 	

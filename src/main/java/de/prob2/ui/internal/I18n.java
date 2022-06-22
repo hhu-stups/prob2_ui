@@ -60,6 +60,13 @@ public final class I18n {
 		}
 	}
 
+	/**
+	 * First translates the given key to obtain a pattern, then formats the pattern via MessageFormat.
+	 *
+	 * @param key       key to translate
+	 * @param arguments arguments for formatting
+	 * @return formatted and translated string
+	 */
 	public String translate(String key, Object... arguments) {
 		String pattern = translate0(key);
 		try {
@@ -71,6 +78,13 @@ public final class I18n {
 		}
 	}
 
+	/**
+	 * Formats a given pattern via MessageFormat without translating.
+	 *
+	 * @param pattern   pattern
+	 * @param arguments arguments for formatting
+	 * @return formatted string
+	 */
 	public String format(String pattern, Object... arguments) {
 		try {
 			MessageFormat mf = new MessageFormat(pattern, locale());
