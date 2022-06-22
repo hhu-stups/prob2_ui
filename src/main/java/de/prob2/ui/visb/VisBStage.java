@@ -204,10 +204,10 @@ public class VisBStage extends Stage {
 				this.runWhenLoaded(() -> {
 					final JSObject window = this.getJSWindow();
 					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
+					updateDynamicSVGObjects(to);
 					for (final VisBEvent event : to.getVisBEvents()) {
 						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 					}
-					updateDynamicSVGObjects(to);
 				});
 			}
 		};
