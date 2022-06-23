@@ -253,44 +253,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		}
 	}
 	
-	/*private void updateVoStatusBindings() {
-		for (final ValidationObligation vo : this.getValidationObligations()) {
-			VOParser voParser = new VOParser();
-			try {
-				Start ast = voParser.parseFormula(vo.getExpression());
-				vo.setExpressionAst(ast);
-			} catch (VOParseException e) {
-				e.printStackTrace();
-			}
-			// TODO: Implement for composed Validation Obligation
-			// Currently assumes that a VO consists of one VT
-			final List<String> vtIds = splitVoExpression(vo.getExpression());
-			vo.getTasks().setAll(vtIds.stream()
-				.map(id -> {
-					if (this.getValidationTasks().containsKey(id)) {
-						return this.getValidationTasks().get(id);
-					} else {
-						return new ValidationTaskNotFound(id);
-					}
-				})
-				.collect(Collectors.toList()));
-		}
-	}*/
-	
-	/**
-	 * Ad-hoc parser for VO expressions that consist only of a single top-level conjunction chain.
-	 * Parentheses and other operators are not supported.
-	 *
-	 * @param voExpression the VO expression to parse
-	 * @return list of validation task IDs in the top-level conjunction chain
-	 */
-	/*private static List<String> splitVoExpression(final String voExpression) {
-		// TODO Implement full validation expression syntax
-		return Arrays.stream(voExpression.split("&"))
-			.map(String::trim)
-			.collect(Collectors.toList());
-	}*/
-	
 	private void initListeners() {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
 		this.nameProperty().addListener(changedListener);
@@ -328,9 +290,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 				}
 			}
 		});
-
-		//this.validationObligationsProperty().addListener((InvalidationListener)o -> this.updateVoStatusBindings());
-		//this.validationTasksProperty().addListener((InvalidationListener)o -> this.updateVoStatusBindings());
 	}
 	
 	public BooleanProperty changedProperty() {

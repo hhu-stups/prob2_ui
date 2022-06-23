@@ -15,6 +15,8 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.StateSpace;
+import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOParser;
 import de.prob.voparser.VTType;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -112,6 +114,14 @@ public class VOManagerStage extends Stage {
 		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
 	}
 
+	@FXML
+	public void initialize() {
+		initializeTables();
+		initializeEditingBoxes();
+		initializeChoiceBoxes();
+		initializeListenerOnProjectChange();
+	}
+
 	private void initializeTables() {
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
@@ -177,26 +187,38 @@ public class VOManagerStage extends Stage {
 		});
 
 		currentProject.addListener((observable, from, to) -> voChecker.deregisterAllTasks());
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			voChecker.deregisterAllTasks();
-			if(to != null) {
-				for(String key : to.getValidationTasks().keySet()) {
-					IValidationTask validationTask = to.getValidationTasks().get(key);
-					voChecker.registerTask(key, null); // TODO
-				}
-				to.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
-					if(o.wasRemoved()) {
-						voChecker.registerTask(o.getKey(), null); // TODO
-					}
-					if(o.wasAdded()) {
-						voChecker.deregisterTask(o.getKey());
-					}
-				});
-			}
-		});
-
+		ChangeListener<Machine> listener = (observable, from, to) -> updateOnMachine(to);
+		currentProject.currentMachineProperty().addListener(listener);
+		updateOnMachine(currentProject.getCurrentMachine());
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> initializeRefinementHierarchy(to));
 		initializeRefinementHierarchy(currentTrace.getStateSpace());
+	}
+
+	private void updateOnMachine(Machine machine) {
+		voChecker.deregisterAllTasks();
+		if(machine != null) {
+			for(String key : machine.getValidationTasks().keySet()) {
+				IValidationTask validationTask = machine.getValidationTasks().get(key);
+				voChecker.registerTask(key, null); // TODO
+			}
+			machine.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
+				if(o.wasRemoved()) {
+					voChecker.registerTask(o.getKey(), null); // TODO
+				}
+				if(o.wasAdded()) {
+					voChecker.deregisterTask(o.getKey());
+				}
+			});
+			VOParser voParser = new VOParser();
+			for(ValidationObligation VO : machine.getValidationObligations()) {
+				try {
+					voChecker.parseVOExpression(VO, false);
+					VO.setExpressionAst(voParser.parseFormula(VO.getExpression()).getPVo(), voChecker);
+				} catch (VOParseException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	private void initializeRefinementHierarchy(StateSpace stateSpace) {
@@ -260,14 +282,6 @@ public class VOManagerStage extends Stage {
 		};
 		currentProject.addListener(projectChangeListener);
 		projectChangeListener.changed(null, null, currentProject.get());
-	}
-
-	@FXML
-	public void initialize() {
-		initializeTables();
-		initializeEditingBoxes();
-		initializeChoiceBoxes();
-		initializeListenerOnProjectChange();
 	}
 
 	public void switchMode(EditType editType, Mode mode) {
