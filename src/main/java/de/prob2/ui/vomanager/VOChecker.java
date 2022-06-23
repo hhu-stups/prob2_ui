@@ -172,14 +172,16 @@ public class VOChecker {
 		}
 		// TODO Implement full validation task syntax (not just conjunctions)
 		//for (IValidationTask validationTask : validationObligation.getTasks()) {
-		//	if (validationTask != null && validationTask.getChecked() != Checked.SUCCESS) {
+		//	if (validationTask.getChecked() != Checked.SUCCESS) {
 		//		checkVT(validationTask);
 		//	}
 		//}
 	}
 
 	public boolean checkVT(IValidationTask validationTask) {
-		if (validationTask instanceof ModelCheckingItem) {
+		if (validationTask instanceof ValidationTaskNotFound) {
+			// Nothing to be done - it already shows an error status
+		} else if (validationTask instanceof ModelCheckingItem) {
 			modelchecker.checkItem((ModelCheckingItem) validationTask, false, false);
 		} else if (validationTask instanceof LTLFormulaItem) {
 			ltlChecker.checkFormula((LTLFormulaItem) validationTask);

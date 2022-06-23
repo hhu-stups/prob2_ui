@@ -32,6 +32,7 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.INameable;
 import de.prob2.ui.vomanager.IValidationTask;
 import de.prob2.ui.vomanager.ValidationObligation;
+import de.prob2.ui.vomanager.ValidationTaskNotFound;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -255,7 +256,13 @@ public class Machine implements DescriptionView.Describable, INameable {
 			// Currently assumes that a VO consists of one VT
 			final List<String> vtIds = splitVoExpression(vo.getExpression());
 			vo.getTasks().setAll(vtIds.stream()
-				.map(this.getValidationTasks()::get)
+				.map(id -> {
+					if (this.getValidationTasks().containsKey(id)) {
+						return this.getValidationTasks().get(id);
+					} else {
+						return new ValidationTaskNotFound(id);
+					}
+				})
 				.collect(Collectors.toList()));
 		}
 	}

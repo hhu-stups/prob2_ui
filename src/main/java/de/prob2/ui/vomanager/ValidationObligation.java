@@ -1,14 +1,15 @@
 package de.prob2.ui.vomanager;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
@@ -44,16 +45,12 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 			while (o.next()) {
 				if (o.wasRemoved()) {
 					for (final IValidationTask task : o.getRemoved()) {
-						if (task != null) {
-							task.checkedProperty().removeListener(checkedListener);
-						}
+						task.checkedProperty().removeListener(checkedListener);
 					}
 				}
 				if (o.wasAdded()) {
 					for (final IValidationTask task : o.getAddedSubList()) {
-						if (task != null) {
-							task.checkedProperty().addListener(checkedListener);
-						}
+						task.checkedProperty().addListener(checkedListener);
 					}
 				}
 				checkedListener.invalidated(null);
@@ -70,14 +67,9 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	}
 
 	private static Checked combineCheckingStatuses(final Collection<IValidationTask> tasks) {
-		final Collection<Checked> statuses = new ArrayList<>();
-		for (final IValidationTask task : tasks) {
-			if (task == null) {
-				// null task -> no task was found for ID
-				return Checked.PARSE_ERROR;
-			}
-			statuses.add(task.getChecked());
-		}
+		final Collection<Checked> statuses = tasks.stream()
+			.map(IExecutableItem::getChecked)
+			.collect(Collectors.toList());
 
 		if (statuses.stream().allMatch(Checked.SUCCESS::equals)) {
 			return Checked.SUCCESS;
