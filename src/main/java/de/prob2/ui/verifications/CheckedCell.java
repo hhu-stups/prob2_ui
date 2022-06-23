@@ -30,6 +30,7 @@ public final class CheckedCell<T> extends TableCell<T, Checked> {
 			final String styleClass;
 			final FontAwesome.Glyph icon;
 			switch (item) {
+				case UNKNOWN:
 				case NOT_CHECKED:
 					styleClass = "not-checked";
 					icon = FontAwesome.Glyph.QUESTION_CIRCLE;

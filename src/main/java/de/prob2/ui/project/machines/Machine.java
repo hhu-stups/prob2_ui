@@ -16,6 +16,9 @@ import com.google.common.io.MoreFiles;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
+import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOParser;
+import de.prob.voparser.node.Start;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -250,8 +253,15 @@ public class Machine implements DescriptionView.Describable, INameable {
 		}
 	}
 	
-	private void updateVoStatusBindings() {
+	/*private void updateVoStatusBindings() {
 		for (final ValidationObligation vo : this.getValidationObligations()) {
+			VOParser voParser = new VOParser();
+			try {
+				Start ast = voParser.parseFormula(vo.getExpression());
+				vo.setExpressionAst(ast);
+			} catch (VOParseException e) {
+				e.printStackTrace();
+			}
 			// TODO: Implement for composed Validation Obligation
 			// Currently assumes that a VO consists of one VT
 			final List<String> vtIds = splitVoExpression(vo.getExpression());
@@ -265,7 +275,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 				})
 				.collect(Collectors.toList()));
 		}
-	}
+	}*/
 	
 	/**
 	 * Ad-hoc parser for VO expressions that consist only of a single top-level conjunction chain.
@@ -274,12 +284,12 @@ public class Machine implements DescriptionView.Describable, INameable {
 	 * @param voExpression the VO expression to parse
 	 * @return list of validation task IDs in the top-level conjunction chain
 	 */
-	private static List<String> splitVoExpression(final String voExpression) {
+	/*private static List<String> splitVoExpression(final String voExpression) {
 		// TODO Implement full validation expression syntax
 		return Arrays.stream(voExpression.split("&"))
 			.map(String::trim)
 			.collect(Collectors.toList());
-	}
+	}*/
 	
 	private void initListeners() {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
@@ -319,8 +329,8 @@ public class Machine implements DescriptionView.Describable, INameable {
 			}
 		});
 
-		this.validationObligationsProperty().addListener((InvalidationListener)o -> this.updateVoStatusBindings());
-		this.validationTasksProperty().addListener((InvalidationListener)o -> this.updateVoStatusBindings());
+		//this.validationObligationsProperty().addListener((InvalidationListener)o -> this.updateVoStatusBindings());
+		//this.validationTasksProperty().addListener((InvalidationListener)o -> this.updateVoStatusBindings());
 	}
 	
 	public BooleanProperty changedProperty() {

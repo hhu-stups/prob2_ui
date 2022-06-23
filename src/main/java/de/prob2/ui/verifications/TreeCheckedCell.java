@@ -29,6 +29,7 @@ public final class TreeCheckedCell<T> extends TreeTableCell<T, Checked> {
 			final String styleClass;
 			final FontAwesome.Glyph icon;
 			switch (item) {
+				case UNKNOWN:
 				case NOT_CHECKED:
 					styleClass = "not-checked";
 					icon = FontAwesome.Glyph.QUESTION_CIRCLE;

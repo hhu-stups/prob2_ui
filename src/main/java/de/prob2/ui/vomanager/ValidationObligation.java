@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.prob.voparser.node.PVo;
+import de.prob.voparser.node.Start;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 
@@ -27,6 +29,9 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	private final String requirement;
 
 	@JsonIgnore
+	private PVo expressionAst;
+
+	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
 	@JsonIgnore
@@ -39,8 +44,11 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		this.id = id;
 		this.expression = expression;
 		this.requirement = requirement;
+	}
 
-		final InvalidationListener checkedListener = o -> this.checked.set(combineCheckingStatuses(this.getTasks()));
+	public void setExpressionAst(PVo expressionAst, VOChecker voChecker) {
+		this.expressionAst = expressionAst;
+		final InvalidationListener checkedListener = o -> this.checked.set(voChecker.updateVOExpression(expressionAst, this));
 		this.getTasks().addListener((ListChangeListener<IValidationTask>)o -> {
 			while (o.next()) {
 				if (o.wasRemoved()) {
@@ -66,22 +74,6 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		return checked.get();
 	}
 
-	private static Checked combineCheckingStatuses(final Collection<IValidationTask> tasks) {
-		final Collection<Checked> statuses = tasks.stream()
-			.map(IExecutableItem::getChecked)
-			.collect(Collectors.toList());
-
-		if (statuses.stream().allMatch(Checked.SUCCESS::equals)) {
-			return Checked.SUCCESS;
-		} else if (statuses.stream().anyMatch(Checked.PARSE_ERROR::equals)) {
-			return Checked.PARSE_ERROR;
-		} else if (statuses.stream().anyMatch(Checked.FAIL::equals)) {
-			return Checked.FAIL;
-		} else {
-			return Checked.NOT_CHECKED;
-		}
-	}
-
 	public ObservableList<IValidationTask> getTasks() {
 		return this.tasks;
 	}
@@ -92,6 +84,10 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 
 	public String getExpression() {
 		return expression;
+	}
+
+	public PVo getExpressionAst() {
+		return expressionAst;
 	}
 
 	public String getRequirement() {

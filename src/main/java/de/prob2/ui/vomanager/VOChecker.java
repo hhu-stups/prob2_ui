@@ -21,6 +21,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -93,92 +94,175 @@ public class VOChecker {
 		voParser.registerTask(id, type);
 	}
 
+	public void deregisterAllTasks() {
+		voParser.getTasks().clear();
+	}
+
 	public void deregisterTask(String id) {
 		voParser.deregisterTask(id);
 	}
 
-	public void checkVOExpression(ValidationObligation VO) throws VOParseException {
+	public void parseVOExpression(ValidationObligation VO, boolean check) throws VOParseException {
+		VO.getTasks().clear();
 		String expression = VO.getExpression();
 		Start ast = voParser.parseFormula(expression);
-		voParser.semanticCheck(ast);
-		boolean check = checkVOExpression(ast.getPVo(), VO);
+		VO.setExpressionAst(ast.getPVo(), this);
+		//voParser.semanticCheck(ast); // TODO
+		parseVOExpression(ast.getPVo(), VO, check);
 	}
 
-	public boolean checkVOExpression(PVo ast, ValidationObligation VO) {
-		VO.getTasks().clear();
+	private void parseVOExpression(PVo ast, ValidationObligation VO, boolean check) {
 		if(ast instanceof AIdentifierVo) {
-			return checkAtomicExpression((AIdentifierVo) ast, VO);
+			parseAtomicExpression((AIdentifierVo) ast, VO, check);
 		} else if(ast instanceof ANotVo) {
-			return checkNotExpression((ANotVo) ast, VO);
+			parseNotExpression((ANotVo) ast, VO, check);
 		} else if(ast instanceof AAndVo) {
-			return checkAndExpression((AAndVo) ast, VO);
+			parseAndExpression((AAndVo) ast, VO, check);
 		} else if(ast instanceof AOrVo) {
-			return checkOrExpression((AOrVo) ast, VO);
+			parseOrExpression((AOrVo) ast, VO, check);
 		} else if(ast instanceof AImpliesVo) {
-			return checkImpliesExpression((AImpliesVo) ast, VO);
+			parseImpliesExpression((AImpliesVo) ast, VO, check);
 		} else if(ast instanceof AEquivalentVo) {
-			return checkEquivalentExpression((AEquivalentVo) ast, VO);
+			parseEquivalentExpression((AEquivalentVo) ast, VO, check);
 		} else if(ast instanceof ASequentialVo) {
-			return checkSequentialExpression((ASequentialVo) ast, VO);
+			parseSequentialExpression((ASequentialVo) ast, VO, check);
 		} else {
 			throw new RuntimeException("VO expression type is unknown: " + ast.getClass());
 		}
 	}
 
-	public boolean checkAtomicExpression(AIdentifierVo ast, ValidationObligation VO) {
+	public void parseAtomicExpression(AIdentifierVo ast, ValidationObligation VO, boolean check) {
 		Machine machine = currentProject.getCurrentMachine();
-		IValidationTask validationTask = machine.getValidationTasks().get(ast.getIdentifierLiteral().getText());
+		IValidationTask validationTask;
+		if (machine.getValidationTasks().containsKey(ast.getIdentifierLiteral().getText())) {
+			validationTask = machine.getValidationTasks().get(ast.getIdentifierLiteral().getText());
+		} else {
+			validationTask = new ValidationTaskNotFound(ast.getIdentifierLiteral().getText());
+		}
 		VO.getTasks().add(validationTask);
-		return checkVT(validationTask);
+		if(check) {
+			checkVT(validationTask);
+		}
 	}
 
-	public boolean checkNotExpression(ANotVo ast, ValidationObligation VO) {
+	public void parseNotExpression(ANotVo ast, ValidationObligation VO, boolean check) {
+		parseVOExpression(ast.getVo(), VO, check);
+	}
+
+	public void parseAndExpression(AAndVo ast, ValidationObligation VO, boolean check) {
+		parseVOExpression(ast.getLeft(), VO, check);
+		parseVOExpression(ast.getRight(), VO, check);
+		// TODO: Implement short circuiting
+	}
+
+	public void parseOrExpression(AOrVo ast, ValidationObligation VO, boolean check) {
+		parseVOExpression(ast.getLeft(), VO, check);
+		parseVOExpression(ast.getRight(), VO, check);
+		// TODO: Implement short circuiting
+	}
+
+	public void parseImpliesExpression(AImpliesVo ast, ValidationObligation VO, boolean check) {
+		parseOrExpression(new AOrVo(new ANotVo(ast.getLeft().clone()), ast.getRight().clone()), VO, check);
+	}
+
+	public void parseEquivalentExpression(AEquivalentVo ast, ValidationObligation VO, boolean check) {
+		parseAndExpression(new AAndVo(new AImpliesVo(ast.getLeft().clone(), ast.getRight().clone()), new AImpliesVo(ast.getRight().clone(), ast.getLeft().clone())), VO, check);
+	}
+
+	public void parseSequentialExpression(ASequentialVo ast, ValidationObligation VO, boolean check) {
 		// TODO
-		return false;
-	}
-
-	public boolean checkAndExpression(AAndVo ast, ValidationObligation VO) {
-		boolean leftRes = checkVOExpression(ast.getLeft(), VO);
-		boolean rightRes = checkVOExpression(ast.getRight(), VO);
-		return leftRes && rightRes;
-	}
-
-	public boolean checkOrExpression(AOrVo ast, ValidationObligation VO) {
-		// TODO
-		return false;
-	}
-
-	public boolean checkImpliesExpression(AImpliesVo ast, ValidationObligation VO) {
-		// TODO
-		return false;
-	}
-
-	public boolean checkEquivalentExpression(AEquivalentVo ast, ValidationObligation VO) {
-		// TODO
-		return false;
-	}
-
-	public boolean checkSequentialExpression(ASequentialVo ast, ValidationObligation VO) {
-		// TODO
-		return false;
 	}
 
 
 	public void checkVO(ValidationObligation validationObligation) {
 		try {
-			checkVOExpression(validationObligation);
+			parseVOExpression(validationObligation, true);
 		} catch (VOParseException e) {
 			e.printStackTrace();
 		}
-		// TODO Implement full validation task syntax (not just conjunctions)
-		//for (IValidationTask validationTask : validationObligation.getTasks()) {
-		//	if (validationTask.getChecked() != Checked.SUCCESS) {
-		//		checkVT(validationTask);
-		//	}
-		//}
 	}
 
-	public boolean checkVT(IValidationTask validationTask) {
+
+	public Checked updateVOExpression(PVo ast, ValidationObligation VO) {
+		if(ast instanceof AIdentifierVo) {
+			return updateAtomicExpression((AIdentifierVo) ast, VO);
+		} else if(ast instanceof ANotVo) {
+			return updateNotExpression((ANotVo) ast, VO);
+		} else if(ast instanceof AAndVo) {
+			return updateAndExpression((AAndVo) ast, VO);
+		} else if(ast instanceof AOrVo) {
+			return updateOrExpression((AOrVo) ast, VO);
+		} else if(ast instanceof AImpliesVo) {
+			return updateImpliesExpression((AImpliesVo) ast, VO);
+		} else if(ast instanceof AEquivalentVo) {
+			return updateEquivalentExpression((AEquivalentVo) ast, VO);
+		} else if(ast instanceof ASequentialVo) {
+			return updateSequentialExpression((ASequentialVo) ast, VO);
+		} else {
+			throw new RuntimeException("VO expression type is unknown: " + ast.getClass());
+		}
+	}
+
+	public Checked updateAtomicExpression(AIdentifierVo ast, ValidationObligation VO) {
+		Machine machine = currentProject.getCurrentMachine();
+		IValidationTask validationTask = machine.getValidationTasks().get(ast.getIdentifierLiteral().getText());
+		return validationTask.getChecked();
+	}
+
+	public Checked updateNotExpression(ANotVo ast, ValidationObligation VO) {
+		Checked exprRes = updateVOExpression(ast.getVo(), VO);
+		if(exprRes == Checked.SUCCESS) {
+			return Checked.FAIL;
+		} else if(exprRes == Checked.FAIL) {
+			return Checked.SUCCESS;
+		}
+		return Checked.UNKNOWN;
+	}
+
+	public Checked updateAndExpression(AAndVo ast, ValidationObligation VO) {
+		Checked leftRes = updateVOExpression(ast.getLeft(), VO);
+		if(leftRes == Checked.FAIL) {
+			return Checked.FAIL;
+		}
+		Checked rightRes = updateVOExpression(ast.getRight(), VO);
+		if(rightRes == Checked.FAIL) {
+			return Checked.FAIL;
+		}
+		if(leftRes == Checked.SUCCESS && rightRes == Checked.SUCCESS) {
+			return Checked.SUCCESS;
+		}
+		return Checked.UNKNOWN;
+	}
+
+	public Checked updateOrExpression(AOrVo ast, ValidationObligation VO) {
+		Checked leftRes = updateVOExpression(ast.getLeft(), VO);
+		if(leftRes == Checked.SUCCESS) {
+			return Checked.SUCCESS;
+		}
+		Checked rightRes = updateVOExpression(ast.getRight(), VO);
+		if(rightRes == Checked.SUCCESS) {
+			return Checked.SUCCESS;
+		}
+		if(leftRes == Checked.FAIL && rightRes == Checked.FAIL) {
+			return Checked.FAIL;
+		}
+		return Checked.UNKNOWN;
+	}
+
+	public Checked updateImpliesExpression(AImpliesVo ast, ValidationObligation VO) {
+		return updateOrExpression(new AOrVo(new ANotVo(ast.getLeft().clone()), ast.getRight().clone()), VO);
+	}
+
+	public Checked updateEquivalentExpression(AEquivalentVo ast, ValidationObligation VO) {
+		return updateAndExpression(new AAndVo(new AImpliesVo(ast.getLeft().clone(), ast.getRight().clone()), new AImpliesVo(ast.getRight().clone(), ast.getLeft().clone())), VO);
+	}
+
+	public Checked updateSequentialExpression(ASequentialVo ast, ValidationObligation VO) {
+		// TODO
+		return Checked.UNKNOWN;
+	}
+
+	public void checkVT(IValidationTask validationTask) {
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
 		} else if (validationTask instanceof ModelCheckingItem) {
@@ -194,7 +278,6 @@ public class VOChecker {
 		} else {
 			throw new AssertionError("Unhandled validation task type: " + validationTask.getClass());
 		}
-		return false;
 	}
 
 }

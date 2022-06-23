@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOParser;
+import de.prob.voparser.node.PVo;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -67,15 +70,18 @@ public class VOEditingBox extends VBox {
 
 	private final CurrentProject currentProject;
 
+	private final VOChecker voChecker;
+
 	private I18n i18n;
 
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final I18n i18n) {
+	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final I18n i18n, final VOChecker voChecker) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.voChecker = voChecker;
 		this.i18n = i18n;
 		stageManager.loadFXML(this, "vo_editing_box.fxml");
 	}
@@ -165,25 +171,30 @@ public class VOEditingBox extends VBox {
 		VOManagerStage.EditType editType = voManagerStage.getEditType();
 		if(voIsValid) {
 			final String id = tfVOName.getText().trim().isEmpty() ? null : tfVOName.getText();
-			final ValidationObligation newVo = new ValidationObligation(id, cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
-			boolean nameExists = id != null && currentProject.getMachines().stream()
-					.flatMap(m -> m.getValidationObligations().stream())
-					.map(ValidationObligation::getId)
-					.anyMatch(id::equals);
-			if(editType == VOManagerStage.EditType.ADD) {
-				if(nameExists) {
-					warnAlreadyExists();
-					return;
+			try {
+				final ValidationObligation newVo = new ValidationObligation(id, cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
+				voChecker.parseVOExpression(newVo, false);
+				boolean nameExists = id != null && currentProject.getMachines().stream()
+						.flatMap(m -> m.getValidationObligations().stream())
+						.map(ValidationObligation::getId)
+						.anyMatch(id::equals);
+				if (editType == VOManagerStage.EditType.ADD) {
+					if (nameExists) {
+						warnAlreadyExists();
+						return;
+					}
+					Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
+					machine.getValidationObligations().add(newVo);
+				} else if (editType == VOManagerStage.EditType.EDIT) {
+					final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
+					if (nameExists && !oldVo.getId().equals(id)) {
+						warnAlreadyExists();
+						return;
+					}
+					voManagerStage.replaceCurrentValidationObligation(newVo);
 				}
-				Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
-				machine.getValidationObligations().add(newVo);
-			} else if(editType == VOManagerStage.EditType.EDIT) {
-				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				if(nameExists && !oldVo.getId().equals(id)) {
-					warnAlreadyExists();
-					return;
-				}
-				voManagerStage.replaceCurrentValidationObligation(newVo);
+			} catch (VOParseException e) {
+				e.printStackTrace();
 			}
 			voManagerStage.closeEditingBox();
 		} else {

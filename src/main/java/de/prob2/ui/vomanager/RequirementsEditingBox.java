@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -43,13 +44,16 @@ public class RequirementsEditingBox extends VBox {
 
 	private final CurrentProject currentProject;
 
+	private final VOChecker voChecker;
+
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject) {
+	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOChecker voChecker) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.voChecker = voChecker;
 		stageManager.loadFXML(this, "requirements_editing_box.fxml");
 	}
 
@@ -99,7 +103,13 @@ public class RequirementsEditingBox extends VBox {
 			for (ListIterator<ValidationObligation> iterator = machine.getValidationObligations().listIterator(); iterator.hasNext();) {
 				final ValidationObligation oldVo = iterator.next();
 				if (oldVo.getRequirement().equals(oldRequirement.getName())) {
-					iterator.set(new ValidationObligation(oldVo.getId(), oldVo.getExpression(), tfName.getText()));
+					try {
+						ValidationObligation validationObligation = new ValidationObligation(oldVo.getId(), oldVo.getExpression(), tfName.getText());
+						voChecker.parseVOExpression(validationObligation, false);
+						iterator.set(validationObligation);
+					} catch (VOParseException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}

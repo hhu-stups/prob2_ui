@@ -15,6 +15,7 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.StateSpace;
+import de.prob.voparser.VTType;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -29,6 +30,8 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -131,7 +134,6 @@ public class VOManagerStage extends Stage {
 				} else if(item instanceof ValidationObligation) {
 					voChecker.checkVO((ValidationObligation) item);
 				}
-
 			});
 
 			MenuItem removeItem = new MenuItem(bundle.getString("common.buttons.remove"));
@@ -171,6 +173,25 @@ public class VOManagerStage extends Stage {
 				} else if (nameable instanceof ValidationObligation) {
 					voChecker.checkVO((ValidationObligation) nameable);
 				}
+			}
+		});
+
+		currentProject.addListener((observable, from, to) -> voChecker.deregisterAllTasks());
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			voChecker.deregisterAllTasks();
+			if(to != null) {
+				for(String key : to.getValidationTasks().keySet()) {
+					IValidationTask validationTask = to.getValidationTasks().get(key);
+					voChecker.registerTask(key, null); // TODO
+				}
+				to.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
+					if(o.wasRemoved()) {
+						voChecker.registerTask(o.getKey(), null); // TODO
+					}
+					if(o.wasAdded()) {
+						voChecker.deregisterTask(o.getKey());
+					}
+				});
 			}
 		});
 
