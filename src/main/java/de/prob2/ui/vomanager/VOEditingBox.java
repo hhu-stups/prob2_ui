@@ -199,6 +199,7 @@ public class VOEditingBox extends VBox {
 				requirementHandler.initListenerForVO(cbLinkRequirementChoice.getValue(), newVo);
 			} catch (VOParseException e) {
 				e.printStackTrace();
+				// TODO
 			}
 			voManagerStage.closeEditingBox();
 		} else {

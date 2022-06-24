@@ -216,6 +216,7 @@ public class VOManagerStage extends Stage {
 					VO.setExpressionAst(voParser.parseFormula(VO.getExpression()).getPVo(), voChecker);
 				} catch (VOParseException e) {
 					e.printStackTrace();
+					// TODO
 				}
 			}
 		}

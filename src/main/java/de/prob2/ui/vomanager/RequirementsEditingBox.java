@@ -113,6 +113,7 @@ public class RequirementsEditingBox extends VBox {
 						requirementHandler.initListenerForVO(newRequirement, validationObligation);
 					} catch (VOParseException e) {
 						e.printStackTrace();
+						// TODO
 					}
 				}
 			}

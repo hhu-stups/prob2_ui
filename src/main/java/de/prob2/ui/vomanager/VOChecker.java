@@ -179,6 +179,7 @@ public class VOChecker {
 			parseVOExpression(validationObligation, true);
 		} catch (VOParseException e) {
 			e.printStackTrace();
+			// TODO
 		}
 	}
 
