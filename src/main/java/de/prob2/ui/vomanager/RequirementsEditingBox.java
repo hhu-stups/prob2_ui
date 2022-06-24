@@ -46,14 +46,17 @@ public class RequirementsEditingBox extends VBox {
 
 	private final VOChecker voChecker;
 
+	private final RequirementHandler requirementHandler;
+
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOChecker voChecker) {
+	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOChecker voChecker, final RequirementHandler requirementHandler) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.voChecker = voChecker;
+		this.requirementHandler = requirementHandler;
 		stageManager.loadFXML(this, "requirements_editing_box.fxml");
 	}
 
@@ -107,6 +110,7 @@ public class RequirementsEditingBox extends VBox {
 						ValidationObligation validationObligation = new ValidationObligation(oldVo.getId(), oldVo.getExpression(), tfName.getText());
 						voChecker.parseVOExpression(validationObligation, false);
 						iterator.set(validationObligation);
+						requirementHandler.initListenerForVO(newRequirement, validationObligation);
 					} catch (VOParseException e) {
 						e.printStackTrace();
 					}

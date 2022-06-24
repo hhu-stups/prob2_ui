@@ -76,9 +76,16 @@ public class RequirementHandler {
 		listenerMap.put(requirement, (observable, from, to) -> updateChecked(project, machine, requirement, setting));
 		for(Machine mch : project.getMachines()) {
 			for(ValidationObligation validationObligation : mch.getValidationObligations()) {
-				validationObligation.checkedProperty().addListener(listenerMap.get(requirement));
+				initListenerForVO(requirement, validationObligation);
 			}
 		}
+	}
+
+	public void initListenerForVO(Requirement requirement, ValidationObligation validationObligation) {
+		validationObligation.checkedProperty().addListener(listenerMap.get(requirement));
+		Checked checked = validationObligation.getChecked();
+		validationObligation.checkedProperty().set(Checked.UNKNOWN);
+		validationObligation.checkedProperty().set(checked);
 	}
 
 }

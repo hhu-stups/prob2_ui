@@ -72,16 +72,19 @@ public class VOEditingBox extends VBox {
 
 	private final VOChecker voChecker;
 
+	private final RequirementHandler requirementHandler;
+
 	private I18n i18n;
 
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final I18n i18n, final VOChecker voChecker) {
+	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final I18n i18n, final VOChecker voChecker, final RequirementHandler requirementHandler) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.voChecker = voChecker;
+		this.requirementHandler = requirementHandler;
 		this.i18n = i18n;
 		stageManager.loadFXML(this, "vo_editing_box.fxml");
 	}
@@ -193,6 +196,7 @@ public class VOEditingBox extends VBox {
 					}
 					voManagerStage.replaceCurrentValidationObligation(newVo);
 				}
+				requirementHandler.initListenerForVO(cbLinkRequirementChoice.getValue(), newVo);
 			} catch (VOParseException e) {
 				e.printStackTrace();
 			}
