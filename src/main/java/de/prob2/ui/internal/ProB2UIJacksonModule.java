@@ -44,7 +44,7 @@ final class ProB2UIJacksonModule extends Module {
 	// (the serializer always converts them to absolute paths).
 	// So we provide our own Path (de)serializer implementations
 	// that use the same serialization format as we used before
-	// and that support serializting relative paths.
+	// and that support serializing relative paths.
 	
 	// Extend the standard NioPathSerializer to inherit the implementation of serializeWithType.
 	private static final class CustomNioPathSerializer extends NioPathSerializer {
