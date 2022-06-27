@@ -43,6 +43,8 @@
 			<ComboBox fx:id="cbVOExpression" editable="true"/>
 		</HBox>
 		<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVO"/>
+
+		<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceVO"/>
 		<TableView fx:id="vtTable">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
