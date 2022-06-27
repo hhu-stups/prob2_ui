@@ -74,7 +74,7 @@
 						</HBox>
 
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="Search for Goals (Stopping Condtions):" style="-fx-font-weight: bold; -fx-text-fill: red"/>
+							<Label text="Search for Goals (Stopping Conditions):" style="-fx-font-weight: bold; -fx-text-fill: red"/>
 						</HBox>
 
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
@@ -90,14 +90,6 @@
 									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.stopAtFullCoverage" />
 								</tooltip>
 							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="additionalGoal" text="%verifications.modelchecking.modelcheckingStage.options.findAdditionalGoal"/>
-							<TextField fx:id="tfAdditionalGoal">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.additionalGoal" />
-								</tooltip>
-							</TextField>
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<CheckBox fx:id="chooseNodesLimit" text="%verifications.modelchecking.modelcheckingStage.nodesLimit">
@@ -122,6 +114,14 @@
 									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.timeLimit" />
 								</tooltip>
 							</Spinner>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="additionalGoal" text="%verifications.modelchecking.modelcheckingStage.options.findAdditionalGoal"/>
+							<TextField fx:id="tfAdditionalGoal">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.additionalGoal" />
+								</tooltip>
+							</TextField>
 						</HBox>
 					</VBox>
 					<AnchorPane>
