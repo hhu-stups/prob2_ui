@@ -1,40 +1,37 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.animator.domainobjects.EventB;
-import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.check.ConsistencyChecker;
-import de.prob.check.IModelCheckJob;
-import de.prob.check.IModelCheckListener;
-import de.prob.check.IModelCheckingResult;
-import de.prob.check.StateSpaceStats;
-import de.prob.model.eventb.EventBModel;
-import de.prob.model.representation.AbstractModel;
-import de.prob.statespace.FormalismType;
-import de.prob.statespace.ITraceDescription;
-import de.prob.statespace.StateSpace;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.stats.StatsView;
-import javafx.application.Platform;
-import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.SetProperty;
-import javafx.beans.property.SimpleSetProperty;
-import javafx.collections.FXCollections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+
+import de.prob.check.ConsistencyChecker;
+import de.prob.check.IModelCheckJob;
+import de.prob.check.IModelCheckListener;
+import de.prob.check.IModelCheckingResult;
+import de.prob.check.ModelCheckingOptions;
+import de.prob.check.StateSpaceStats;
+import de.prob.statespace.ITraceDescription;
+import de.prob.statespace.StateSpace;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.stats.StatsView;
+
+import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.SetProperty;
+import javafx.beans.property.SimpleSetProperty;
+import javafx.collections.FXCollections;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class Modelchecker {
@@ -116,7 +113,8 @@ public class Modelchecker {
 				Platform.runLater(() -> showResult(item, jobItem));
 			}
 		};
-		IModelCheckJob job = buildModelCheckJob(stateSpace, item, recheckExisting, listener);
+		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel()).recheckExisting(recheckExisting);
+		IModelCheckJob job = new ConsistencyChecker(stateSpace, options, listener);
 
 		try {
 			job.call();
@@ -124,25 +122,6 @@ public class Modelchecker {
 			LOGGER.error("Exception while running model check job", e);
 			Platform.runLater(() -> stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
 		}
-	}
-
-	private IEvalElement getGoal(ModelCheckingItem item) {
-		if (item.getGoal() != null) {
-			return currentTrace.getModel().parseFormula(item.getGoal(), FormulaExpand.EXPAND);
-		} else {
-			return null;
-		}
-	}
-
-	private IModelCheckJob buildModelCheckJob(StateSpace stateSpace, ModelCheckingItem item, boolean recheckExisting, IModelCheckListener listener) {
-		ConsistencyChecker checker = new ConsistencyChecker(stateSpace, item.getOptions().recheckExisting(recheckExisting), getGoal(item), listener);
-		if (item.getNodesLimit() != null) {
-			checker.getLimitConfiguration().setNodesLimit(item.getNodesLimit());
-		}
-		if (item.getTimeLimit() != null) {
-			checker.getLimitConfiguration().setTimeLimit(item.getTimeLimit());
-		}
-		return checker;
 	}
 
 	public void cancelModelcheck() {

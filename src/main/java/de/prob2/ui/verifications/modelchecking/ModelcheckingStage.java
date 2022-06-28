@@ -1,13 +1,18 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
+
 import de.prob.check.ModelCheckingOptions;
+import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.vomanager.Requirement;
-import de.prob2.ui.vomanager.RequirementType;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -19,11 +24,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 public class ModelcheckingStage extends Stage {
@@ -41,7 +44,7 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private Button startButton;
 	@FXML
-	private ChoiceBox<SearchStrategy> selectSearchStrategy;
+	private ChoiceBox<ModelCheckingSearchStrategy> selectSearchStrategy;
 	@FXML
 	private CheckBox findDeadlocks;
 	@FXML
@@ -97,17 +100,26 @@ public class ModelcheckingStage extends Stage {
 		this.setResizable(true);
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.startButton.disableProperty().bind(modelchecker.runningProperty());
-		this.selectSearchStrategy.getItems().setAll(SearchStrategy.values());
-		this.selectSearchStrategy.setValue(SearchStrategy.MIXED_BF_DF);
-		this.selectSearchStrategy.setConverter(new StringConverter<SearchStrategy>() {
+		this.selectSearchStrategy.getItems().setAll(
+			ModelCheckingSearchStrategy.MIXED_BF_DF,
+			ModelCheckingSearchStrategy.BREADTH_FIRST,
+			ModelCheckingSearchStrategy.DEPTH_FIRST
+		);
+		this.selectSearchStrategy.setValue(ModelCheckingSearchStrategy.MIXED_BF_DF);
+		this.selectSearchStrategy.setConverter(new StringConverter<ModelCheckingSearchStrategy>() {
 			@Override
-			public String toString(final SearchStrategy object) {
-				return bundle.getString(object.getName());
+			public String toString(final ModelCheckingSearchStrategy object) {
+				final String key = getSearchStrategyNameKey(object);
+				if (key != null) {
+					return bundle.getString(key);
+				} else {
+					return object.toString();
+				}
 			}
 			
 			@Override
-			public SearchStrategy fromString(final String string) {
-				throw new UnsupportedOperationException("Conversion from String to SearchStrategy not supported");
+			public ModelCheckingSearchStrategy fromString(final String string) {
+				throw new UnsupportedOperationException("Conversion from String to ModelCheckingSearchStrategy not supported");
 			}
 		});
 		this.nodesLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_NODES_LIMIT, INITIAL_NODES_STEP));
@@ -136,15 +148,32 @@ public class ModelcheckingStage extends Stage {
 		this.tfAdditionalGoal.visibleProperty().bind(additionalGoal.selectedProperty());
 	}
 
+	public static String getSearchStrategyNameKey(final ModelCheckingSearchStrategy searchStrategy) {
+		switch (searchStrategy) {
+			case MIXED_BF_DF:
+				return "verifications.modelchecking.modelcheckingStage.strategy.mixedBfDf";
+			
+			case BREADTH_FIRST:
+				return "verifications.modelchecking.modelcheckingStage.strategy.breadthFirst";
+			
+			case DEPTH_FIRST:
+				return "verifications.modelchecking.modelcheckingStage.strategy.depthFirst";
+			
+			default:
+				return null;
+		}
+	}
+
 	@FXML
 	private void startModelCheck() {
 		lastItem = null;
 		if (currentTrace.get() != null) {
 			final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
+			final ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
 			Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
 			Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;
 			String goal = additionalGoal.isSelected() ? tfAdditionalGoal.getText() : null;
-			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, nLimit, tLimit, goal, getOptions());
+			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions());
 			if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);
@@ -165,16 +194,15 @@ public class ModelcheckingStage extends Stage {
 		}
 	}
 	
-	private ModelCheckingOptions getOptions() {
+	private Set<ModelCheckingOptions.Options> getOptions() {
 		ModelCheckingOptions options = new ModelCheckingOptions();
-		options = selectSearchStrategy.getValue().toOptions(options);
 		options = options.checkDeadlocks(findDeadlocks.isSelected());
 		options = options.checkInvariantViolations(findInvViolations.isSelected());
 		options = options.checkAssertions(findBAViolations.isSelected());
 		options = options.checkOtherErrors(findOtherErrors.isSelected());
 		options = options.checkGoal(findGoal.isSelected());
 		options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
-		return options;
+		return options.getPrologOptions();
 	}
 
 	@FXML

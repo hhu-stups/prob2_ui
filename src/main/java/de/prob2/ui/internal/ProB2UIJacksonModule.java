@@ -5,11 +5,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -204,7 +203,12 @@ final class ProB2UIJacksonModule extends Module {
 			new StdDelegatingSerializer(ModelCheckingOptions.class, new StdConverter<ModelCheckingOptions, Set<ModelCheckingOptions.Options>>() {
 				@Override
 				public Set<ModelCheckingOptions.Options> convert(final ModelCheckingOptions value) {
-					return value.getPrologOptions();
+					final Set<ModelCheckingOptions.Options> options = new HashSet<>(value.getPrologOptions());
+					// Search strategy is now stored in a separate field.
+					// Compare enum values by string name to avoid deprecation warnings
+					// (and future compile errors once they are removed from ProB 2).
+					options.removeIf(opt -> Arrays.asList("BREADTH_FIRST_SEARCH", "DEPTH_FIRST_SEARCH").contains(opt.name()));
+					return options;
 				}
 			})
 		)));

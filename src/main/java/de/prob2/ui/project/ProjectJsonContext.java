@@ -687,6 +687,41 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 	
+	private static void updateV29Machine(ObjectNode machine) {
+		checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
+			ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
+			ArrayNode options = checkArray(modelCheckingItem.get("options"));
+			boolean breadthFirst = false;
+			boolean depthFirst = false;
+			boolean ignoreOtherErrors = false;
+			for (Iterator<JsonNode> it = options.iterator(); it.hasNext();) {
+				final String text = it.next().textValue();
+				if ("BREADTH_FIRST_SEARCH".equals(text)) {
+					breadthFirst = true;
+					it.remove();
+				} else if ("DEPTH_FIRST_SEARCH".equals(text)) {
+					depthFirst = true;
+					it.remove();
+				} else if ("FIND_OTHER_ERRORS".equals(text)) {
+					ignoreOtherErrors = true;
+					it.remove();
+				}
+			}
+			if (ignoreOtherErrors) {
+				options.add("IGNORE_OTHER_ERRORS");
+			}
+			final String searchStrategy;
+			if (breadthFirst) {
+				searchStrategy = "BREADTH_FIRST";
+			} else if (depthFirst) {
+				searchStrategy = "DEPTH_FIRST";
+			} else {
+				searchStrategy = "MIXED_BF_DF";
+			}
+			modelCheckingItem.put("searchStrategy", searchStrategy);
+		});
+	}
+	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -792,6 +827,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 28) {
 				updateV28Machine(machine);
+			}
+			if (oldVersion <= 29) {
+				updateV29Machine(machine);
 			}
 		});
 		

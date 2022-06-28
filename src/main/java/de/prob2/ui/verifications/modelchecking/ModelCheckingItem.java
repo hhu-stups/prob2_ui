@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -12,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.check.ModelCheckingOptions;
+import de.prob.check.ModelCheckingSearchStrategy;
+import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -29,6 +32,7 @@ import javafx.collections.FXCollections;
 // (to avoid unnecessary reordering when re-saving existing files).
 @JsonPropertyOrder({
 	"id",
+	"searchStrategy",
 	"nodesLimit",
 	"timeLimit",
 	"options",
@@ -42,13 +46,15 @@ public class ModelCheckingItem implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 
+	private final ModelCheckingSearchStrategy searchStrategy;
+
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final Integer nodesLimit;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final Integer timeLimit;
 
-	private final ModelCheckingOptions options;
+	private final Set<ModelCheckingOptions.Options> options;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String goal;
@@ -61,13 +67,15 @@ public class ModelCheckingItem implements IValidationTask {
 	@JsonCreator
 	public ModelCheckingItem(
 		@JsonProperty("id") final String id,
+		@JsonProperty("searchStrategy") final ModelCheckingSearchStrategy searchStrategy,
 		@JsonProperty("nodesLimit") final Integer nodesLimit,
 		@JsonProperty("timeLimit") final Integer timeLimit,
 		@JsonProperty("goal") final String goal,
-		@JsonProperty("options") final ModelCheckingOptions options
+		@JsonProperty("options") final Set<ModelCheckingOptions.Options> options
 	) {
 		Objects.requireNonNull(options);
 		this.id = id;
+		this.searchStrategy = searchStrategy;
 		this.nodesLimit = nodesLimit;
 		this.timeLimit = timeLimit;
 		this.goal = goal;
@@ -114,6 +122,10 @@ public class ModelCheckingItem implements IValidationTask {
 		return this.id;
 	}
 
+	public ModelCheckingSearchStrategy getSearchStrategy() {
+		return this.searchStrategy;
+	}
+
 	public Integer getNodesLimit() {
 		return nodesLimit;
 	}
@@ -126,27 +138,43 @@ public class ModelCheckingItem implements IValidationTask {
 		return goal;
 	}
 
-	public ModelCheckingOptions getOptions() {
+	public Set<ModelCheckingOptions.Options> getOptions() {
 		return this.options;
+	}
+	
+	public ModelCheckingOptions getFullOptions(final AbstractModel model) {
+		ModelCheckingOptions fullOptions = new ModelCheckingOptions(this.getOptions())
+			.searchStrategy(this.getSearchStrategy());
+		if (this.getGoal() != null) {
+			fullOptions = fullOptions.customGoal(model.parseFormula(this.getGoal()));
+		}
+		if (this.getNodesLimit() != null) {
+			fullOptions = fullOptions.stateLimit(this.getNodesLimit());
+		}
+		if (this.getTimeLimit() != null) {
+			fullOptions = fullOptions.timeLimit(Duration.ofSeconds(this.getTimeLimit()));
+		}
+		return fullOptions;
 	}
 	
 	@Override
 	public String getTaskDescription(final I18n i18n) {
 		final StringJoiner s = new StringJoiner(", ");
-		s.add(i18n.translate(SearchStrategy.fromOptions(this.getOptions()).getName()));
+		final String strategyKey = ModelcheckingStage.getSearchStrategyNameKey(this.getSearchStrategy());
+		if (strategyKey != null) {
+			s.add(i18n.translate(strategyKey));
+		} else {
+			s.add(this.getSearchStrategy().toString());
+		}
 		if (this.getNodesLimit() != null) {
 			s.add(i18n.translate("verifications.modelchecking.description.nodeLimit", this.getNodesLimit()));
 		}
 		if (this.getTimeLimit() != null) {
 			s.add(i18n.translate("verifications.modelchecking.description.timeLimit", this.getTimeLimit()));
 		}
-		Set<ModelCheckingOptions.Options> opts = this.getOptions().getPrologOptions();
+		Set<ModelCheckingOptions.Options> opts = this.getOptions();
 		for (ModelCheckingOptions.Options opt : ModelCheckingOptions.Options.values()) {
-			if (opt == ModelCheckingOptions.Options.BREADTH_FIRST_SEARCH || opt == ModelCheckingOptions.Options.DEPTH_FIRST_SEARCH) {
-				continue;
-			}
-
-			boolean expectedContains = opt != ModelCheckingOptions.Options.FIND_OTHER_ERRORS;
+			boolean expectedContains = opt != ModelCheckingOptions.Options.IGNORE_OTHER_ERRORS;
 			if (opts.contains(opt) == expectedContains) {
 				s.add(i18n.translate("verifications.modelchecking.description.option." + opt.getPrologName()));
 			}
@@ -188,6 +216,7 @@ public class ModelCheckingItem implements IValidationTask {
 
 	public boolean settingsEqual(final ModelCheckingItem other) {
 		return Objects.equals(this.getId(), other.getId())
+			&& Objects.equals(this.getSearchStrategy(), other.getSearchStrategy())
 			&& Objects.equals(this.getNodesLimit(), other.getNodesLimit())
 			&& Objects.equals(this.getTimeLimit(), other.getTimeLimit())
 			&& Objects.equals(this.getGoal(), other.getGoal())
@@ -196,6 +225,6 @@ public class ModelCheckingItem implements IValidationTask {
 	
 	@Override
 	public String toString() {
-		return String.format("%s(%s,%s,%s,%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
+		return String.format("%s(%s,%s,%s,%s,%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getSearchStrategy(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
 	}
 }
