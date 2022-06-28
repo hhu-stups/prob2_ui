@@ -94,7 +94,6 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		this.setResizable(true);
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.startButton.disableProperty().bind(modelchecker.runningProperty());
 		this.selectSearchStrategy.getItems().setAll(SearchStrategy.values());
