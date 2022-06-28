@@ -34,12 +34,13 @@
 							</HBox>
 						</VBox>
 					</AnchorPane>
-					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 
+					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="Search for Errors:" style="-fx-font-weight: bold; -fx-text-fill: red"/>
+							<Label text="Search for Errors:" style="-fx-font-weight: bold;"/>
 						</HBox>
-
+					</VBox>
+					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<CheckBox fx:id="findDeadlocks" selected="true"
 								text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks">
@@ -72,11 +73,13 @@
 								</tooltip>
 							</CheckBox>
 						</HBox>
-
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="Search for Goals (Stopping Conditions):" style="-fx-font-weight: bold; -fx-text-fill: red"/>
-						</HBox>
-
+					</VBox>
+						<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+							<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+								<Label text="Search for Goals (Stopping Conditions):" style="-fx-font-weight: bold;"/>
+							</HBox>
+						</VBox>
+					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<CheckBox fx:id="findGoal" text="%verifications.modelchecking.modelcheckingStage.options.findGoal">
 								<tooltip>
