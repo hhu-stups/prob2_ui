@@ -73,10 +73,10 @@ public class RequirementsEditingBox extends VBox {
 					.collect(Collectors.toList())
 					.contains(tfName.getText());
 			VOManagerStage.EditType editType = voManagerStage.getEditType();
-			if(editType == VOManagerStage.EditType.ADD) {
+			if(editType == VOManagerStage.EditType.MODIFY) {
 				addRequirement(nameExists);
-			} else if(editType == VOManagerStage.EditType.EDIT) {
-				editRequirement(nameExists);
+			} else if(editType == VOManagerStage.EditType.NONE) {
+		//		editRequirement(nameExists);
 			}
 			voManagerStage.closeEditingBox();
 		} else {
@@ -129,7 +129,7 @@ public class RequirementsEditingBox extends VBox {
 
 	public void showRequirement(Requirement requirement, boolean edit) {
 		if(edit) {
-			voManagerStage.switchMode(VOManagerStage.EditType.EDIT, VOManagerStage.Mode.REQUIREMENT);
+			voManagerStage.switchMode(VOManagerStage.EditType.MODIFY, VOManagerStage.Mode.REQUIREMENT);
 		}
 		if(requirement == null) {
 			return;

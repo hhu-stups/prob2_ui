@@ -52,7 +52,7 @@ import javafx.stage.Stage;
 public class VOManagerStage extends Stage {
 
 	public static enum EditType {
-		NONE, ADD, EDIT;
+		NONE, MODIFY;
 	}
 
 	public static enum Mode {
@@ -99,6 +99,8 @@ public class VOManagerStage extends Stage {
 
 	private final Map<String, List<String>> refinementChain;
 
+
+
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 			final VOChecker voChecker, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
@@ -121,6 +123,8 @@ public class VOManagerStage extends Stage {
 		initializeChoiceBoxes();
 		initializeListenerOnProjectChange();
 	}
+
+
 
 	private void initializeTables() {
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
@@ -355,13 +359,13 @@ public class VOManagerStage extends Stage {
 	@FXML
 	public void addRequirement() {
 		requirementEditingBox.resetRequirementEditing();
-		switchMode(EditType.ADD, Mode.REQUIREMENT);
+		switchMode(EditType.MODIFY, Mode.REQUIREMENT);
 	}
 
 	@FXML
 	public void addVO() {
 		voEditingBox.resetVOEditing();
-		switchMode(EditType.ADD, Mode.VO);
+		switchMode(EditType.MODIFY, Mode.VO);
 	}
 
 	private static Machine getMachineForItem(final TreeItem<INameable> treeItem) {
@@ -407,6 +411,11 @@ public class VOManagerStage extends Stage {
 		final ValidationObligation oldVo = (ValidationObligation)treeItem.getValue();
 		final Machine machine = getMachineForItem(treeItem);
 		machine.getValidationObligations().set(machine.getValidationObligations().indexOf(oldVo), newVo);
+	}
+
+	public ValidationObligation getCurrentValidationObligation(){
+		final TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
+		return  (ValidationObligation) treeItem.getValue();
 	}
 
 	private void resolveRefinementHierarchy(AbstractModel model) {

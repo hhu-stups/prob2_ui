@@ -34,6 +34,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import se.sawano.java.text.AlphanumericComparator;
@@ -147,7 +148,7 @@ public class VOEditingBox extends VBox {
 
 	public void showValidationObligation(ValidationObligation validationObligation, boolean edit) {
 		if(edit) {
-			voManagerStage.switchMode(VOManagerStage.EditType.EDIT, VOManagerStage.Mode.VO);
+			voManagerStage.switchMode(VOManagerStage.EditType.MODIFY, VOManagerStage.Mode.VO);
 		}
 		if(validationObligation == null) {
 			return;
@@ -169,36 +170,73 @@ public class VOEditingBox extends VBox {
 	}
 
 
-	private ValidationObligation parseAndCheck(){
-		return null;
+	private boolean nameExists(String id, ValidationObligation oldVo){
+		return id != null && currentProject.getMachines().stream()
+				.flatMap(m -> m.getValidationObligations().stream())
+				.map(ValidationObligation::getId)
+				.anyMatch(id::equals)
+				&& !oldVo.getId().equals(id);
 	}
 
 	@FXML
-	private void applyVO() {
+	private void addVO() {
 		boolean voIsValid = cbLinkRequirementChoice.getValue() != null;
-		VOManagerStage.EditType editType = voManagerStage.getEditType();
+
 		if(voIsValid) {
-			final String id = tfVOName.getText().trim().isEmpty() ? null : tfVOName.getText();
+
 			try {
-				final ValidationObligation newVo = new ValidationObligation(id, cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
+				final ValidationObligation newVo = createNewFromCurrentSelection();
 				voChecker.parseVOExpression(newVo, false);
 
 				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				boolean nameExists = id != null && currentProject.getMachines().stream()
-						.flatMap(m -> m.getValidationObligations().stream())
-						.map(ValidationObligation::getId)
-						.anyMatch(id::equals)
-						&& !oldVo.getId().equals(id);
-				if (nameExists  ) {
+
+				if (nameExists(currentVOName(),oldVo)) {
 					warnAlreadyExists();
 					return;
 				}
-				if (editType == VOManagerStage.EditType.ADD) {
-					Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
-					machine.getValidationObligations().add(newVo);
-				} else if (editType == VOManagerStage.EditType.EDIT) {
-					voManagerStage.replaceCurrentValidationObligation(newVo);
+
+				Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
+				machine.getValidationObligations().add(newVo);
+
+				requirementHandler.initListenerForVO(cbLinkRequirementChoice.getValue(), newVo);
+			} catch (VOParseException e) {
+				e.printStackTrace(); // TODO
+			}
+			voManagerStage.closeEditingBox();
+		} else {
+			warnNotValid();
+		}
+	}
+
+	private String currentVOName(){
+		return tfVOName.getText().trim().isEmpty() ? null : tfVOName.getText();
+	}
+
+	private ValidationObligation createNewFromCurrentSelection(){
+		return new ValidationObligation(currentVOName(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName());
+	}
+
+	private ValidationObligation createNewFromCurrentSelection(List<ValidationObligation> parents){
+		return new ValidationObligation(currentVOName(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName(), parents);
+	}
+
+	@FXML
+	private void replaceVO() {
+		boolean voIsValid = cbLinkRequirementChoice.getValue() != null;
+		if(voIsValid) {
+
+			try {
+				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
+				final ValidationObligation newVo = createNewFromCurrentSelection(oldVo.getPreviousVersion());
+				voChecker.parseVOExpression(newVo, false);
+
+				if (nameExists(currentVOName(),oldVo)) {
+					warnAlreadyExists();
+					return;
 				}
+
+				voManagerStage.replaceCurrentValidationObligation(newVo);
+
 				requirementHandler.initListenerForVO(cbLinkRequirementChoice.getValue(), newVo);
 			} catch (VOParseException e) {
 				e.printStackTrace(); // TODO
@@ -210,9 +248,14 @@ public class VOEditingBox extends VBox {
 	}
 
 	@FXML
-	private void replaceVO() {
-
+	private void historyVO() {
+		Stage table = new HistoryTable<ValidationObligation>((ValidationObligation) voManagerStage.getSelectedRequirement());
+		stageManager.loadFXML(table, "history_box.fxml", this.getClass().getName());
+		table.show();
+		table.toFront();
 	}
+
+
 
 	private void warnNotValid() {
 		stageManager.makeAlert(Alert.AlertType.INFORMATION, "vomanager.warnings.vo.notValid.header", "vomanager.warnings.vo.notValid.content").show();
