@@ -37,7 +37,7 @@
 
 					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="Search for Errors:" style="-fx-font-weight: bold;"/>
+							<Label text="%verifications.modelchecking.modelcheckingStage.errors" style="-fx-font-weight: bold;"/>
 						</HBox>
 					</VBox>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
@@ -76,7 +76,7 @@
 					</VBox>
 						<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 							<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-								<Label text="Search for Goals (Stopping Conditions):" style="-fx-font-weight: bold;"/>
+								<Label text="%verifications.modelchecking.modelcheckingStage.goals" style="-fx-font-weight: bold;"/>
 							</HBox>
 						</VBox>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
