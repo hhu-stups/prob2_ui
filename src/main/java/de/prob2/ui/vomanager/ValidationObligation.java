@@ -1,17 +1,15 @@
 package de.prob2.ui.vomanager;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.voparser.node.PVo;
-import de.prob.voparser.node.Start;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.IExecutableItem;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
@@ -29,6 +27,9 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	private final String requirement;
 
 	@JsonIgnore
+	private final List<ValidationObligation> previousVersion;
+
+	@JsonIgnore
 	private PVo expressionAst;
 
 	@JsonIgnore
@@ -44,6 +45,15 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		this.id = id;
 		this.expression = expression;
 		this.requirement = requirement;
+		this.previousVersion = new ArrayList<>();
+	}
+
+
+	public ValidationObligation(String id, String expression, String requirement, List<ValidationObligation> previousVersion) {
+		this.id = id;
+		this.expression = expression;
+		this.requirement = requirement;
+		this.previousVersion = previousVersion;
 	}
 
 	public void setExpressionAst(PVo expressionAst, VOChecker voChecker) {
@@ -65,6 +75,8 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 			}
 		});
 	}
+
+
 
 	public ObjectProperty<Checked> checkedProperty() {
 		return checked;
@@ -93,6 +105,12 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	public String getRequirement() {
 		return requirement;
 	}
+
+	@JsonIgnore
+	public List<ValidationObligation> getPreviousVersion(){
+		return previousVersion;
+	}
+
 
 	@Override
 	@JsonIgnore
