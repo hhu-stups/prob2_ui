@@ -173,7 +173,7 @@ public final class ModelcheckingView extends ScrollPane {
 				if(to.getItems().isEmpty()) {
 					hideStats();
 				} else {
-					tvChecks.getSelectionModel().selectFirst();
+					tvChecks.getSelectionModel().selectLast();
 				}
 			} else {
 				// Because of the previous binding, the tvChecks items list is the same object as the job items list of one of the ModelcheckingItems.
