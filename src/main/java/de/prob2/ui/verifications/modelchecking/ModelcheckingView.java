@@ -2,15 +2,11 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.StringJoiner;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetStatisticsCommand;
-import de.prob.check.ModelCheckingOptions;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -185,7 +181,7 @@ public final class ModelcheckingView extends ScrollPane {
 		tvChecks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) ->
 			Platform.runLater(() -> {
 				if(to != null && to.getStats() != null) {
-					showStats(to.getTimeElapsed(), to.getStats());
+					showStats(to.getTimeElapsed(), to.getStats(), null);
 				} else {
 					hideStats();
 				}
@@ -310,16 +306,16 @@ public final class ModelcheckingView extends ScrollPane {
 		checker.cancelModelcheck();
 	}
 
-	public void showStats(final long timeElapsed, final StateSpaceStats stats) {
-		GetStatisticsCommand cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
-		currentTrace.getStateSpace().execute(cmd);
+	public void showStats(final long timeElapsed, final StateSpaceStats stats, final BigInteger memory) {
 		elapsedTime.setText(String.format("%.1f", timeElapsed / 1000.0) + " s");
 		if (stats != null) {
 			progressBar.setProgress(calculateProgress(stats));
 			simpleStatsView.setStats(stats);
 		}
+		if (memory != null) {
+			memoryUsage.setText(String.format("%d MB", memory.divide(new BigInteger("1000000")).intValue()));
+		}
 		statsBox.setVisible(true);
-		memoryUsage.setText(String.format("%d MB", cmd.getResult().divide(new BigInteger("1000000")).intValue()));
 	}
 
 	private double calculateProgress(StateSpaceStats stats) {

@@ -11,6 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetStatisticsCommand;
 import de.prob.check.ConsistencyChecker;
 import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
@@ -94,7 +95,10 @@ public class Modelchecker {
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats));
+				// Command must be executed outside of Platform.runLater to avoid blocking the UI thread!
+				GetStatisticsCommand cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
+				stateSpace.execute(cmd);
+				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats, cmd.getResult()));
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
@@ -102,10 +106,14 @@ public class Modelchecker {
 
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats));
+				// Command must be executed outside of Platform.runLater to avoid blocking the UI thread!
+				GetStatisticsCommand cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
+				stateSpace.execute(cmd);
+				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats, cmd.getResult()));
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
+				// TODO Store memory usage in ModelCheckingJobItem
 				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(item.getItems().size() + 1, result, timeElapsed, stats, stateSpace);
 				if (!checkAll && jobItem.getResult() instanceof ITraceDescription) {
 					currentTrace.set(jobItem.getTrace());
