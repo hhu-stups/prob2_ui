@@ -215,7 +215,9 @@ public class VOChecker {
 
 	public Checked updateNotExpression(ANotVo ast, ValidationObligation VO) {
 		Checked exprRes = updateVOExpression(ast.getVo(), VO);
-		if(exprRes == Checked.SUCCESS) {
+		if (exprRes == Checked.PARSE_ERROR) {
+			return Checked.PARSE_ERROR;
+		} else if (exprRes == Checked.SUCCESS) {
 			return Checked.FAIL;
 		} else if(exprRes == Checked.FAIL) {
 			return Checked.SUCCESS;
@@ -225,11 +227,15 @@ public class VOChecker {
 
 	public Checked updateAndExpression(AAndVo ast, ValidationObligation VO) {
 		Checked leftRes = updateVOExpression(ast.getLeft(), VO);
-		if(leftRes == Checked.FAIL) {
+		if (leftRes == Checked.PARSE_ERROR) {
+			return Checked.PARSE_ERROR;
+		} else if (leftRes == Checked.FAIL) {
 			return Checked.FAIL;
 		}
 		Checked rightRes = updateVOExpression(ast.getRight(), VO);
-		if(rightRes == Checked.FAIL) {
+		if (rightRes == Checked.PARSE_ERROR) {
+			return Checked.PARSE_ERROR;
+		} else if (rightRes == Checked.FAIL) {
 			return Checked.FAIL;
 		}
 		if(leftRes == Checked.SUCCESS && rightRes == Checked.SUCCESS) {
@@ -240,11 +246,15 @@ public class VOChecker {
 
 	public Checked updateOrExpression(AOrVo ast, ValidationObligation VO) {
 		Checked leftRes = updateVOExpression(ast.getLeft(), VO);
-		if(leftRes == Checked.SUCCESS) {
+		if (leftRes == Checked.PARSE_ERROR) {
+			return Checked.PARSE_ERROR;
+		} else if (leftRes == Checked.SUCCESS) {
 			return Checked.SUCCESS;
 		}
 		Checked rightRes = updateVOExpression(ast.getRight(), VO);
-		if(rightRes == Checked.SUCCESS) {
+		if (rightRes == Checked.PARSE_ERROR) {
+			return Checked.PARSE_ERROR;
+		} else if (rightRes == Checked.SUCCESS) {
 			return Checked.SUCCESS;
 		}
 		if(leftRes == Checked.FAIL && rightRes == Checked.FAIL) {
