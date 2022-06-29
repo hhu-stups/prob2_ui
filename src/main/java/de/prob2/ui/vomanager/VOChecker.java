@@ -206,8 +206,11 @@ public class VOChecker {
 
 	public Checked updateAtomicExpression(AIdentifierVo ast, ValidationObligation VO) {
 		Machine machine = currentProject.getCurrentMachine();
-		IValidationTask validationTask = machine.getValidationTasks().get(ast.getIdentifierLiteral().getText());
-		return validationTask.getChecked();
+		if (machine.getValidationTasks().containsKey(ast.getIdentifierLiteral().getText())) {
+			return machine.getValidationTasks().get(ast.getIdentifierLiteral().getText()).getChecked();
+		} else {
+			return Checked.PARSE_ERROR;
+		}
 	}
 
 	public Checked updateNotExpression(ANotVo ast, ValidationObligation VO) {
