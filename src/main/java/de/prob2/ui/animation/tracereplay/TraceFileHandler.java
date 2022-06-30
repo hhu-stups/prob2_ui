@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
@@ -20,6 +19,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
@@ -42,13 +42,12 @@ public class TraceFileHandler extends ProBFileHandler {
 	public static final String TRACE_TABLE_EXTENSION = "csv";
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
-
 	private final TraceManager traceManager;
 
 	@Inject
 	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject,
-							StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
-		super(versionInfo, currentProject, stageManager, fileChooserManager, bundle);
+	                        StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n) {
+		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);
 		this.traceManager = traceManager;
 	}
 
@@ -98,12 +97,12 @@ public class TraceFileHandler extends ProBFileHandler {
 		}
 
 		try {
-			if(checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "animation.testcase.save.directoryAlreadyContainsTestCases")){
+			if (checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
-			for(Trace trace : item.getTraces()){
+			for (Trace trace : item.getTraces()) {
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + numberGeneratedTraces + ".prob2trace");
 				save(trace, traceFilePath, item.createdByForMetadata());
 				this.addTraceFile(machine, traceFilePath);
@@ -124,14 +123,14 @@ public class TraceFileHandler extends ProBFileHandler {
 
 		try {
 
-			if(checkIfPathAlreadyContainsFiles(path, TEST_CASE_TRACE_PREFIX, "animation.testcase.save.directoryAlreadyContainsTestCases")){
+			if (checkIfPathAlreadyContainsFiles(path, TEST_CASE_TRACE_PREFIX, "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
 			int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 			//Starts counting with 1 in the file name
-			for(int i = 0; i < numberGeneratedTraces; i++) {
-				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + (i+1) + ".prob2trace");
+			for (int i = 0; i < numberGeneratedTraces; i++) {
+				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + (i + 1) + ".prob2trace");
 				save(traces.get(i), traceFilePath, item.createdByForMetadata(i));
 				this.addTraceFile(machine, traceFilePath);
 			}
@@ -140,7 +139,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
 			return;
 		}
-		if(traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
+		if (traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION,
 					"animation.testcase.notAllTestCasesGenerated.header",
 					"animation.testcase.notAllTestCasesGenerated.content",
@@ -150,11 +149,10 @@ public class TraceFileHandler extends ProBFileHandler {
 
 	public void save(Trace trace, Path location, String createdBy) throws IOException {
 		JsonMetadata jsonMetadata = updateMetadataBuilder(TraceJsonFile.metadataBuilder())
-				.withCreator(createdBy)
-				.build();
+				                            .withCreator(createdBy)
+				                            .build();
 		traceManager.save(location, new TraceJsonFile(trace, jsonMetadata));
 	}
-
 
 	public void save(TraceJsonFile traceFile, Path location) throws IOException {
 		traceManager.save(location, traceFile);
@@ -175,7 +173,7 @@ public class TraceFileHandler extends ProBFileHandler {
 		if (path != null) {
 			List<String> rows = new ArrayList<>();
 			rows.add("Position,Transition");
-			for(Transition transition : trace.getTransitionList()) {
+			for (Transition transition : trace.getTransitionList()) {
 				String name = OperationItem.forTransitionFast(trace.getStateSpace(), transition).toPrettyString(true);
 				String row = String.format("%s,%s", i, name);
 				rows.add(row);
@@ -185,5 +183,4 @@ public class TraceFileHandler extends ProBFileHandler {
 		}
 		return path;
 	}
-
 }

@@ -3,7 +3,6 @@ package de.prob2.ui.simulation.simulators;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -13,6 +12,7 @@ import de.prob.json.JacksonManager;
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
@@ -31,8 +31,8 @@ public class SimulationSaver extends ProBFileHandler {
 
 	@Inject
 	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final ObjectMapper objectMapper, final JacksonManager<SimulationConfiguration> jsonManager, final SimulationCreator simulationCreator,
-						   final CurrentProject currentProject, final ResourceBundle bundle) {
-		super(versionInfo, currentProject, stageManager, fileChooserManager, bundle);
+	                       final CurrentProject currentProject, final I18n i18n) {
+		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);
 		this.jsonManager = jsonManager;
 		this.simulationCreator = simulationCreator;
 
@@ -43,12 +43,11 @@ public class SimulationSaver extends ProBFileHandler {
 		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveTimedTrace.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, SIMULATION_EXTENSION);
 		if (path != null) {
 			JsonMetadata jsonMetadata = updateMetadataBuilder(SimulationConfiguration.metadataBuilder())
-				.withCreator(createdBy)
-				.build();
+					                            .withCreator(createdBy)
+					                            .build();
 			saveConfiguration(trace, timestamps, path, jsonMetadata);
 		}
 	}
-
 
 	public void saveConfiguration(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
 		SimulationConfiguration configuration = simulationCreator.createConfiguration(trace, timestamps, true, jsonMetadata);
@@ -65,18 +64,18 @@ public class SimulationSaver extends ProBFileHandler {
 		}
 
 		try {
-			if(checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "simulation.save.directoryAlreadyContainsSimulations")){
+			if (checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "simulation.save.directoryAlreadyContainsSimulations")) {
 				return;
 			}
 
 			int numberGeneratedTraces = traces.size();
 			//Starts counting with 1 in the file name
-			for(int i = 1; i <= numberGeneratedTraces; i++) {
+			for (int i = 1; i <= numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
 				JsonMetadata jsonMetadata = updateMetadataBuilder(SimulationConfiguration.metadataBuilder())
-					.withCreator(item.createdByForMetadata())
-					.build();
-				this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath, jsonMetadata);
+						                            .withCreator(item.createdByForMetadata())
+						                            .build();
+				this.saveConfiguration(traces.get(i - 1), timestamps.get(i - 1), traceFilePath, jsonMetadata);
 			}
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();
