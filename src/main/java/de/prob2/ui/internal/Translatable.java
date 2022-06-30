@@ -4,7 +4,7 @@ public interface Translatable {
 
 	String getTranslationKey();
 
-	default Object[] getFormattingArguments() {
+	default Object[] getTranslationArguments() {
 		return new Object[0];
 	}
 }

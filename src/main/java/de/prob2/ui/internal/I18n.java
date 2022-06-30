@@ -165,15 +165,32 @@ public final class I18n {
 	/**
 	 * String converter that translates, according to the rules of {@link I18n#translate(String, Object...)}.
 	 *
-	 * @param <T> translatable type
 	 * @return string converter
 	 */
 	public <T extends Translatable> StringConverter<T> translateConverter() {
+		return translateConverter(null);
+	}
+
+	/**
+	 * String converter that translates, according to the rules of {@link I18n#translate(String, Object...)}.
+	 *
+	 * @param nullTranslationKey optional translation key used for null objects
+	 * @return string converter
+	 */
+	public <T extends Translatable> StringConverter<T> translateConverter(String nullTranslationKey) {
 		return new StringConverter<T>() {
 
 			@Override
 			public String toString(T object) {
-				return object != null ? translate(object.getTranslationKey(), object.getFormattingArguments()) : "";
+				if (object != null) {
+					return translate(object.getTranslationKey(), object.getTranslationArguments());
+				}
+
+				if (nullTranslationKey != null) {
+					return translate(nullTranslationKey);
+				}
+
+				return "";
 			}
 
 			@Override
@@ -186,15 +203,32 @@ public final class I18n {
 	/**
 	 * String converter that formats, according to the rules of {@link I18n#format(String, Object...)}.
 	 *
-	 * @param <T> formattable type
 	 * @return string converter
 	 */
 	public <T extends Formattable> StringConverter<T> formatConverter() {
+		return formatConverter(null);
+	}
+
+	/**
+	 * String converter that formats, according to the rules of {@link I18n#format(String, Object...)}.
+	 *
+	 * @param nullTranslationKey optional translation key used for null objects
+	 * @return string converter
+	 */
+	public <T extends Formattable> StringConverter<T> formatConverter(String nullTranslationKey) {
 		return new StringConverter<T>() {
 
 			@Override
 			public String toString(T object) {
-				return object != null ? format(object.getFormattingPattern(), object.getFormattingArguments()) : "";
+				if (object != null) {
+					return format(object.getFormattingPattern(), object.getFormattingArguments());
+				}
+
+				if (nullTranslationKey != null) {
+					return translate(nullTranslationKey);
+				}
+
+				return "";
 			}
 
 			@Override
