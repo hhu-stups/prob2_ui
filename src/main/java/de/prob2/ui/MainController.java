@@ -5,7 +5,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -17,6 +16,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MenuController;
@@ -25,7 +25,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -43,9 +42,9 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class MainController extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
-	
+
 	public static final String DEFAULT_PERSPECTIVE = "main.fxml";
-	
+
 	@FXML private TitledPane historyTP;
 	@FXML private HistoryView historyView;
 	@FXML private TitledPane statsTP;
@@ -59,15 +58,15 @@ public class MainController extends BorderPane {
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final UIState uiState;
-	private final ResourceBundle resourceBundle;
+	private final I18n i18n;
 	private final Config config;
 
 	@Inject
-	public MainController(Injector injector, StageManager stageManager, UIState uiState, ResourceBundle resourceBundle, Config config) {
+	public MainController(Injector injector, StageManager stageManager, UIState uiState, I18n i18n, Config config) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.uiState = uiState;
-		this.resourceBundle = resourceBundle;
+		this.i18n = i18n;
 		this.config = config;
 		this.reloadMainView();
 	}
@@ -75,21 +74,19 @@ public class MainController extends BorderPane {
 	@FXML
 	private void initialize() {
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
-		final ObservableValue<Number> currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
+		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
-				.bind(Bindings.format(this.resourceBundle.getString("common.views.historyWithState"), currentHistoryValue, historySize));
+				.bind(i18n.formatBinding("common.views.historyWithState", currentHistoryValue, historySize));
 
 		statsView.lastResultProperty().addListener((o, from, to) -> {
 			if (to == null) {
-				this.statsTP.setText(this.resourceBundle.getString("common.views.stats"));
+				this.statsTP.setText(i18n.translate("common.views.stats"));
 			} else {
-				this.statsTP.setText(String.format(
-					this.resourceBundle.getString("common.views.statsWithState"),
-					to.getNrProcessedNodes(), to.getNrTotalNodes()
-				));
+				this.statsTP.setText(i18n.translate("common.views.statsWithState",
+						to.getNrProcessedNodes(), to.getNrTotalNodes()));
 			}
 		});
-		
+
 		injector.getInstance(CurrentProject.class).addListener((observable, from, to) -> {
 			// When a project is opened, show the project view's machines tab for convenience.
 			if (to != null && (from == null || !from.getLocation().equals(to.getLocation()))) {
@@ -108,16 +105,16 @@ public class MainController extends BorderPane {
 							.forEach(acc::setExpandedPane)
 					);
 				}
-				
+
 				if (configData.horizontalDividerPositions != null && horizontalSP != null) {
 					horizontalSP.setDividerPositions(configData.horizontalDividerPositions);
 				}
-				
+
 				if (configData.verticalDividerPositions != null && verticalSP != null) {
 					verticalSP.setDividerPositions(configData.verticalDividerPositions);
 				}
 			}
-			
+
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.expandedTitledPanes = getAccordions().stream()
@@ -147,7 +144,7 @@ public class MainController extends BorderPane {
 					url = null;
 				}
 				break;
-			
+
 			case CUSTOM:
 				try {
 					url = new URL(perspective);
@@ -156,7 +153,7 @@ public class MainController extends BorderPane {
 					url = null;
 				}
 				break;
-			
+
 			default:
 				throw new AssertionError("Unhandled perspective kind: " + kind);
 		}
@@ -170,7 +167,7 @@ public class MainController extends BorderPane {
 		stageManager.loadFXML(this, url);
 		injector.getInstance(MenuController.class).setMacMenu();
 	}
-	
+
 	public List<Accordion> getAccordions() {
 		return Collections.unmodifiableList(accordions);
 	}

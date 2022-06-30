@@ -18,7 +18,6 @@ import de.prob2.ui.sharedviews.TraceSelectionView;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -132,7 +131,7 @@ public final class HistoryView extends VBox {
 				.bind(partOfDisableBinding.or(currentProject.isNotNull().and(currentTrace.isNotNull()).not()));
 	}
 
-	public NumberBinding getCurrentHistoryPositionProperty() {
+	public ObservableIntegerValue getCurrentHistoryPositionProperty() {
 		return Bindings.createIntegerBinding(
 				() -> currentTrace.get() == null ? 0 : currentTrace.get().getCurrent().getIndex() + 1, currentTrace);
 	}
