@@ -13,9 +13,13 @@ import com.google.inject.Singleton;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ObservableValue;
+import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Internationalization class.
+ */
 @Singleton
 public final class I18n {
 
@@ -115,14 +119,15 @@ public final class I18n {
 	public StringBinding translateBinding(String key, Object... arguments) {
 		Objects.requireNonNull(key, "key");
 		Objects.requireNonNull(arguments, "arguments");
-		ObservableValue<?>[] dependencies = Arrays.stream(arguments)
+		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
+		ObservableValue<?>[] dependencies = Arrays.stream(copiedArguments)
 				                                    .filter(arg -> arg instanceof ObservableValue)
 				                                    .map(arg -> (ObservableValue<?>) arg)
 				                                    .toArray(ObservableValue[]::new);
 		return Bindings.createStringBinding(
 				() -> translate(
 						key,
-						Arrays.stream(arguments)
+						Arrays.stream(copiedArguments)
 								.map(arg -> arg instanceof ObservableValue ? ((ObservableValue<?>) arg).getValue() : arg)
 								.toArray()
 				),
@@ -141,18 +146,61 @@ public final class I18n {
 	public StringBinding formatBinding(String pattern, Object... arguments) {
 		Objects.requireNonNull(pattern, "pattern");
 		Objects.requireNonNull(arguments, "arguments");
-		ObservableValue<?>[] dependencies = Arrays.stream(arguments)
+		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
+		ObservableValue<?>[] dependencies = Arrays.stream(copiedArguments)
 				                                    .filter(arg -> arg instanceof ObservableValue)
 				                                    .map(arg -> (ObservableValue<?>) arg)
 				                                    .toArray(ObservableValue[]::new);
 		return Bindings.createStringBinding(
 				() -> format(
 						pattern,
-						Arrays.stream(arguments)
+						Arrays.stream(copiedArguments)
 								.map(arg -> arg instanceof ObservableValue ? ((ObservableValue<?>) arg).getValue() : arg)
 								.toArray()
 				),
 				dependencies
 		);
+	}
+
+	/**
+	 * String converter that translates, according to the rules of {@link I18n#translate(String, Object...)}.
+	 *
+	 * @param <T> translatable type
+	 * @return string converter
+	 */
+	public <T extends Translatable> StringConverter<T> translateConverter() {
+		return new StringConverter<T>() {
+
+			@Override
+			public String toString(T object) {
+				return object != null ? translate(object.getTranslationKey(), object.getFormattingArguments()) : "";
+			}
+
+			@Override
+			public T fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String not supported");
+			}
+		};
+	}
+
+	/**
+	 * String converter that formats, according to the rules of {@link I18n#format(String, Object...)}.
+	 *
+	 * @param <T> formattable type
+	 * @return string converter
+	 */
+	public <T extends Formattable> StringConverter<T> formatConverter() {
+		return new StringConverter<T>() {
+
+			@Override
+			public String toString(T object) {
+				return object != null ? format(object.getFormattingPattern(), object.getFormattingArguments()) : "";
+			}
+
+			@Override
+			public T fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String not supported");
+			}
+		};
 	}
 }

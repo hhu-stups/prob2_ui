@@ -1,6 +1,8 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-public enum TestCaseGenerationType {
+import de.prob2.ui.internal.Translatable;
+
+public enum TestCaseGenerationType implements Translatable {
 
 	MCDC("animation.testcase.type.mcdc"),
 	COVERED_OPERATIONS("animation.testcase.type.coveredOperations");
@@ -11,6 +13,7 @@ public enum TestCaseGenerationType {
 		this.translationKey = translationKey;
 	}
 
+	@Override
 	public String getTranslationKey() {
 		return translationKey;
 	}
