@@ -76,7 +76,7 @@ public class MainController extends BorderPane {
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
 		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
-				.bind(i18n.formatBinding("common.views.historyWithState", currentHistoryValue, historySize));
+				.bind(i18n.translateBinding("common.views.historyWithState", currentHistoryValue, historySize));
 
 		statsView.lastResultProperty().addListener((o, from, to) -> {
 			if (to == null) {

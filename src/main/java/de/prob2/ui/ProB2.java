@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +26,7 @@ import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.internal.BasicConfigModule;
 import de.prob2.ui.internal.ConfigDirectory;
 import de.prob2.ui.internal.ConfigFile;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -70,7 +70,7 @@ public class ProB2 extends Application {
 
 	private RuntimeOptions runtimeOptions;
 	private Injector injector;
-	private ResourceBundle bundle;
+	private I18n i18n;
 	private StopActions stopActions;
 
 	private boolean isJavaVersionOk(final String javaVersion) {
@@ -228,7 +228,7 @@ public class ProB2 extends Application {
 	}
 
 	private Scene startInBackground(final Stage primaryStage) {
-		bundle = injector.getInstance(ResourceBundle.class);
+		i18n = injector.getInstance(I18n.class);
 		this.stopActions = injector.getInstance(StopActions.class);
 		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
 		StageManager stageManager = injector.getInstance(StageManager.class);
@@ -403,8 +403,8 @@ public class ProB2 extends Application {
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
 		if (!currentProject.isSaved()) {
-			ButtonType save = new ButtonType(bundle.getString("common.buttons.save"), ButtonBar.ButtonData.YES);
-			ButtonType doNotSave = new ButtonType(bundle.getString("common.buttons.doNotSave"), ButtonBar.ButtonData.NO);
+			ButtonType save = new ButtonType(i18n.translate("common.buttons.save"), ButtonBar.ButtonData.YES);
+			ButtonType doNotSave = new ButtonType(i18n.translate("common.buttons.doNotSave"), ButtonBar.ButtonData.NO);
 			List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(save);
 			buttons.add(ButtonType.CANCEL);
