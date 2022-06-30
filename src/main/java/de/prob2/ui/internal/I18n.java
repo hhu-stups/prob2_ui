@@ -71,6 +71,17 @@ public final class I18n {
 	}
 
 	/**
+	 * Translates the given {@link Translatable} object.
+	 *
+	 * @param object translatable object
+	 * @return formatted and translated string representation
+	 */
+	public String translate(Translatable object) {
+		Objects.requireNonNull(object, "object");
+		return translate(object.getTranslationKey(), object.getTranslationArguments());
+	}
+
+	/**
 	 * First translates the given key to obtain a pattern, then formats the pattern via MessageFormat.
 	 *
 	 * @param key       key to translate
@@ -90,6 +101,17 @@ public final class I18n {
 	}
 
 	/**
+	 * Formats the given {@link Formattable} object.
+	 *
+	 * @param object formattable object
+	 * @return formatted string representation
+	 */
+	public String format(Formattable object) {
+		Objects.requireNonNull(object, "object");
+		return translate(object.getFormattingPattern(), object.getFormattingArguments());
+	}
+
+	/**
 	 * Formats a given pattern via MessageFormat without translating.
 	 *
 	 * @param pattern   pattern
@@ -106,6 +128,17 @@ public final class I18n {
 			LOGGER.error("Error while formatting given pattern '{}'", pattern, e);
 			return pattern;
 		}
+	}
+
+	/**
+	 * Generates a string binding for the given {@link Translatable} object, according to the rules of {@link I18n#translateBinding(String, Object...)}.
+	 *
+	 * @param object translatable object
+	 * @return binding for the formatted and translated string representation
+	 */
+	public StringBinding translateBinding(Translatable object) {
+		Objects.requireNonNull(object, "object");
+		return translateBinding(object.getTranslationKey(), object.getTranslationArguments());
 	}
 
 	/**
@@ -133,6 +166,17 @@ public final class I18n {
 				),
 				dependencies
 		);
+	}
+
+	/**
+	 * Generates a string binding for the given {@link Formattable} object, according to the rules of {@link I18n#formatBinding(String, Object...)}.
+	 *
+	 * @param object formattable object
+	 * @return binding for the formatted string representation
+	 */
+	public StringBinding formatBinding(Formattable object) {
+		Objects.requireNonNull(object, "object");
+		return translateBinding(object.getFormattingPattern(), object.getFormattingArguments());
 	}
 
 	/**
@@ -183,7 +227,7 @@ public final class I18n {
 			@Override
 			public String toString(T object) {
 				if (object != null) {
-					return translate(object.getTranslationKey(), object.getTranslationArguments());
+					return translate(object);
 				}
 
 				if (nullTranslationKey != null) {
@@ -221,7 +265,7 @@ public final class I18n {
 			@Override
 			public String toString(T object) {
 				if (object != null) {
-					return format(object.getFormattingPattern(), object.getFormattingArguments());
+					return format(object);
 				}
 
 				if (nullTranslationKey != null) {

@@ -2,7 +2,6 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
@@ -16,6 +15,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -45,68 +45,68 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
- 
+
 @FXMLInjected
 @Singleton
 public class TestCaseGenerationView extends ScrollPane {
-	
+
 	@FXML
 	private HelpButton helpButton;
-		
+
 	@FXML
 	private TableView<TestCaseGenerationItem> tvTestCases;
-	
+
 	@FXML
 	private TableColumn<TestCaseGenerationItem, Checked> statusColumn;
-	
+
 	@FXML
 	private TableColumn<TestCaseGenerationItem, String> configurationColumn;
-	
+
 	@FXML
 	private TableColumn<TestCaseGenerationItem, String> typeColumn;
-	
+
 	@FXML
 	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
-	
+
 	@FXML
 	private Button addTestCaseButton;
-	
+
 	@FXML
 	private Button generateButton;
-	
+
 	@FXML
 	private Button cancelButton;
-	
-	private final ResourceBundle bundle;
-	
+
+	private final I18n i18n;
+
 	private final CurrentTrace currentTrace;
-	
+
 	private final CurrentProject currentProject;
 
 	private final Injector injector;
-	
+
 	private final TestCaseGenerator testCaseGenerator;
-	
+
 	private final TestCaseGenerationItemHandler itemHandler;
 
 	private final CheckBox selectAll;
-	
-	private class TestCaseGenerationCellFactory implements Callback<TableView<TestCaseGenerationItem>, TableRow<TestCaseGenerationItem>>{
+
+	private class TestCaseGenerationCellFactory implements Callback<TableView<TestCaseGenerationItem>, TableRow<TestCaseGenerationItem>> {
 		@Override
 		public TableRow<TestCaseGenerationItem> call(TableView<TestCaseGenerationItem> param) {
 			TableRow<TestCaseGenerationItem> row = new TableRow<>();
-			
-			MenuItem checkItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.generate"));
-			checkItem.setDisable(true);
-			checkItem.setOnAction(e-> itemHandler.handleItem(row.getItem()));
 
-			MenuItem removeItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.removeConfiguration"));
+			MenuItem checkItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.generate"));
+			checkItem.setDisable(true);
+			checkItem.setOnAction(e -> itemHandler.handleItem(row.getItem()));
+
+			MenuItem removeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> removeFormula());
-			
-			MenuItem changeItem = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.changeConfiguration"));
+
+			MenuItem changeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> changeItem(row.getItem()));
-			
-			MenuItem showDetails = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.showDetails"));
+
+			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
 			showDetails.setOnAction(e -> {
 				TestCaseGenerationItem item = row.getItem();
@@ -117,13 +117,13 @@ public class TestCaseGenerationView extends ScrollPane {
 				stage.toFront();
 			});
 
-			Menu showStateItem = new Menu(bundle.getString("animation.testcase.view.contextMenu.showFoundPaths"));
+			Menu showStateItem = new Menu(i18n.translate("animation.testcase.view.contextMenu.showFoundPaths"));
 			showStateItem.setDisable(true);
-			
-			MenuItem showMessage = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.showGenerationMessage"));
+
+			MenuItem showMessage = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showGenerationMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(TestCaseGenerationResultHandler.class).showResult(row.getItem()));
 
-			MenuItem saveTraces = new MenuItem(bundle.getString("animation.testcase.view.contextMenu.savePaths"));
+			MenuItem saveTraces = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.savePaths"));
 			saveTraces.setOnAction(e -> {
 				TestCaseGenerationItem item = row.getItem();
 				injector.getInstance(TestCaseGenerationResultHandler.class).saveTraces(item);
@@ -136,7 +136,7 @@ public class TestCaseGenerationView extends ScrollPane {
 					from.examplesProperty().removeListener(updateExamplesListener);
 				}
 
-				if(to != null) {
+				if (to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					to.examplesProperty().addListener(updateExamplesListener);
@@ -149,8 +149,8 @@ public class TestCaseGenerationView extends ScrollPane {
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
-					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(checkItem, changeItem, removeItem, showDetails, showMessage, showStateItem, saveTraces)));		
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(checkItem, changeItem, removeItem, showDetails, showMessage, showStateItem, saveTraces)));
 
 			return row;
 		}
@@ -158,20 +158,20 @@ public class TestCaseGenerationView extends ScrollPane {
 		private void showExamples(TestCaseGenerationItem item, Menu exampleItem) {
 			exampleItem.getItems().clear();
 			List<Trace> examples = item.getExamples();
-			for(int i = 0; i < examples.size(); i++) {
-				MenuItem traceItem = new MenuItem(String.format(bundle.getString("animation.testcase.view.contextMenu.showExample"), i + 1));
+			for (int i = 0; i < examples.size(); i++) {
+				MenuItem traceItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showExample", i + 1));
 				final int index = i;
-				traceItem.setOnAction(e-> currentTrace.set((examples.get(index))));
+				traceItem.setOnAction(e -> currentTrace.set((examples.get(index))));
 				exampleItem.getItems().add(traceItem);
 			}
 		}
 	}
-	
+
 	@Inject
-	public TestCaseGenerationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final TestCaseGenerationItemHandler itemHandler, 
-					final TestCaseGenerator testCaseGenerator, final Injector injector) {
-		this.bundle = bundle;
+	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
+	                              final CurrentProject currentProject, final TestCaseGenerationItemHandler itemHandler,
+	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
+		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
@@ -180,7 +180,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "test_case_generation_view.fxml");
 	}
-	
+
 	@FXML
 	public void initialize() {
 		helpButton.setHelpContent("animation", "Symbolic");
@@ -188,7 +188,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		tvTestCases.setRowFactory(new TestCaseGenerationCellFactory());
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
 			tvTestCases.itemsProperty().unbind();
-			if(newValue != null) {
+			if (newValue != null) {
 				tvTestCases.itemsProperty().bind(newValue.testCasesProperty());
 			} else {
 				tvTestCases.setItems(FXCollections.emptyObservableList());
@@ -197,7 +197,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
-	
+
 	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
@@ -215,18 +215,18 @@ public class TestCaseGenerationView extends ScrollPane {
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("configurationDescription"));
-		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(bundle.getString(features.getValue().getType().getTranslationKey())));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvTestCases,  selectAll));
+		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvTestCases, selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
-		tvTestCases.setOnMouseClicked(e-> {
+		tvTestCases.setOnMouseClicked(e -> {
 			TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
+			if (e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
 				itemHandler.handleItem(item);
 			}
 		});
 		tvTestCases.disableProperty().bind(partOfDisableBinding.or(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty())));
 	}
-	
+
 	@FXML
 	public void addTestCase() {
 		final TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
@@ -240,7 +240,7 @@ public class TestCaseGenerationView extends ScrollPane {
 			itemHandler.generateTestCases(existingItem.orElse(newItem));
 		}
 	}
-	
+
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
 		TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
@@ -256,7 +256,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		if (newItem == null) {
 			return;
 		}
-		if(!itemHandler.replaceItem(item, newItem).isPresent()) {
+		if (!itemHandler.replaceItem(item, newItem).isPresent()) {
 			if (choosingStage.isCheckRequested()) {
 				itemHandler.generateTestCases(newItem);
 			}
@@ -264,13 +264,13 @@ public class TestCaseGenerationView extends ScrollPane {
 			injector.getInstance(TestCaseGenerationResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
 		}
 	}
-	
+
 	@FXML
 	public void generate() {
 		Machine machine = currentProject.getCurrentMachine();
 		itemHandler.handleMachine(machine);
 	}
-	
+
 	@FXML
 	public void cancel() {
 		testCaseGenerator.interrupt();
