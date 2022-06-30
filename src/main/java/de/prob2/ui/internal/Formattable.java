@@ -1,5 +1,6 @@
 package de.prob2.ui.internal;
 
+@FunctionalInterface
 public interface Formattable {
 
 	String getFormattingPattern();
