@@ -33,4 +33,8 @@ public interface TranslatableAdapter<T> {
 	static <T> TranslatableAdapter<T> mappingAdapter(Function<? super T, ? extends Translatable> translatable) {
 		return translatable::apply;
 	}
+
+	static <T extends Enum<T>> TranslatableAdapter<T> enumNameAdapter(String prefix) {
+		return adapter(object -> prefix + '.' + StringUtil.snakeCaseToCamelCase(object.name()));
+	}
 }

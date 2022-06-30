@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 import com.google.inject.Inject;
@@ -24,16 +23,16 @@ public abstract class ProBFileHandler {
 	protected final CurrentProject currentProject;
 	protected final StageManager stageManager;
 	protected final FileChooserManager fileChooserManager;
-	protected final ResourceBundle bundle;
+	protected final I18n i18n;
 	protected final VersionInfo versionInfo;
 
 	@Inject
-	public ProBFileHandler(VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, ResourceBundle bundle) {
+	public ProBFileHandler(VersionInfo versionInfo, CurrentProject currentProject, StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n) {
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 	}
 
 	public boolean checkIfPathAlreadyContainsFiles(Path path, String prefix, String contentBundleKey) throws IOException {
@@ -49,15 +48,15 @@ public abstract class ProBFileHandler {
 		return false;
 	}
 
-	protected Path chooseDirectory(FileChooserManager.Kind kind, String titleKey){
+	protected Path chooseDirectory(FileChooserManager.Kind kind, String titleKey) {
 		final DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(bundle.getString(titleKey));
+		directoryChooser.setTitle(i18n.translate(titleKey));
 		return this.fileChooserManager.showDirectoryChooser(directoryChooser, kind, stageManager.getCurrent());
 	}
 
 	protected Path openSaveFileChooser(String titleKey, String extensionKey, FileChooserManager.Kind kind, String extension) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString(titleKey));
+		fileChooser.setTitle(i18n.translate(titleKey));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + extension);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter(extensionKey, extension));
 		return this.fileChooserManager.showSaveFileChooser(fileChooser, kind, stageManager.getCurrent());
@@ -65,7 +64,7 @@ public abstract class ProBFileHandler {
 
 	protected JsonMetadataBuilder updateMetadataBuilder(final JsonMetadataBuilder builder) {
 		return builder
-			.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-			.withModelName(currentProject.getCurrentMachine().getName());
+				       .withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+				       .withModelName(currentProject.getCurrentMachine().getName());
 	}
 }

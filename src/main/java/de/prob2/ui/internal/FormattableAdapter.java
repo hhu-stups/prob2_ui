@@ -33,4 +33,8 @@ public interface FormattableAdapter<T> {
 	static <T> FormattableAdapter<T> mappingAdapter(Function<? super T, ? extends Formattable> formattable) {
 		return formattable::apply;
 	}
+
+	static <T extends Enum<T>> FormattableAdapter<T> enumNameAdapter(String prefix) {
+		return adapter(object -> prefix + '.' + StringUtil.snakeCaseToCamelCase(object.name()));
+	}
 }
