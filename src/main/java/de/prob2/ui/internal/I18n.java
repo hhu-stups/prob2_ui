@@ -1,13 +1,18 @@
 package de.prob2.ui.internal;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ObservableValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +57,7 @@ public final class I18n {
 	}
 
 	private String translate0(String key) {
+		Objects.requireNonNull(key, "key");
 		try {
 			return bundle().getString(key);
 		} catch (Exception e) {
@@ -68,6 +74,7 @@ public final class I18n {
 	 * @return formatted and translated string
 	 */
 	public String translate(String key, Object... arguments) {
+		Objects.requireNonNull(arguments, "arguments");
 		String pattern = translate0(key);
 		try {
 			MessageFormat mf = new MessageFormat(pattern, locale());
@@ -86,6 +93,8 @@ public final class I18n {
 	 * @return formatted string
 	 */
 	public String format(String pattern, Object... arguments) {
+		Objects.requireNonNull(pattern, "pattern");
+		Objects.requireNonNull(arguments, "arguments");
 		try {
 			MessageFormat mf = new MessageFormat(pattern, locale());
 			return mf.format(arguments);
@@ -93,5 +102,57 @@ public final class I18n {
 			LOGGER.error("Error while formatting given pattern '{}'", pattern, e);
 			return pattern;
 		}
+	}
+
+	/**
+	 * Generates a string binding for the given translation, according to the rules of {@link I18n#translate(String, Object...)}.
+	 * Observable value in the arguments will be evaluated and the translation will be redone when one of them changes.
+	 *
+	 * @param key       key to translate
+	 * @param arguments arguments for formatting (may be observable)
+	 * @return binding for the formatted and translated string
+	 */
+	public StringBinding translateBinding(String key, Object... arguments) {
+		Objects.requireNonNull(key, "key");
+		Objects.requireNonNull(arguments, "arguments");
+		ObservableValue<?>[] dependencies = Arrays.stream(arguments)
+				                                    .filter(arg -> arg instanceof ObservableValue)
+				                                    .map(arg -> (ObservableValue<?>) arg)
+				                                    .toArray(ObservableValue[]::new);
+		return Bindings.createStringBinding(
+				() -> translate(
+						key,
+						Arrays.stream(arguments)
+								.map(arg -> arg instanceof ObservableValue ? ((ObservableValue<?>) arg).getValue() : arg)
+								.toArray()
+				),
+				dependencies
+		);
+	}
+
+	/**
+	 * Generates a string binding for the given formatting, according to the rules of {@link I18n#format(String, Object...)}.
+	 * Observable value in the arguments will be evaluated and the formatting will be redone when one of them changes.
+	 *
+	 * @param pattern   pattern
+	 * @param arguments arguments for formatting (may be observable)
+	 * @return binding for the formatted string
+	 */
+	public StringBinding formatBinding(String pattern, Object... arguments) {
+		Objects.requireNonNull(pattern, "pattern");
+		Objects.requireNonNull(arguments, "arguments");
+		ObservableValue<?>[] dependencies = Arrays.stream(arguments)
+				                                    .filter(arg -> arg instanceof ObservableValue)
+				                                    .map(arg -> (ObservableValue<?>) arg)
+				                                    .toArray(ObservableValue[]::new);
+		return Bindings.createStringBinding(
+				() -> format(
+						pattern,
+						Arrays.stream(arguments)
+								.map(arg -> arg instanceof ObservableValue ? ((ObservableValue<?>) arg).getValue() : arg)
+								.toArray()
+				),
+				dependencies
+		);
 	}
 }
