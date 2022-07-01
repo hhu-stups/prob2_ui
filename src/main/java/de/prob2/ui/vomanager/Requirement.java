@@ -1,5 +1,7 @@
 package de.prob2.ui.vomanager;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,6 +23,8 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 	private final String text;
 
+	private final List<Requirement> previousVersions;
+
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
@@ -33,9 +37,22 @@ public class Requirement implements IAbstractRequirement, INameable {
 		this.introducedAt = introducedAt;
 		this.type = type;
 		this.text = text;
+		this.previousVersions = Collections.emptyList();
+	}
+
+	public Requirement(String name, String introducedAt, RequirementType type, String text, List<Requirement> previousVersions) {
+		this.name = name;
+		this.introducedAt = introducedAt;
+		this.type = type;
+		this.text = text;
+		this.previousVersions = previousVersions;
 	}
 
 
+	@JsonIgnore
+	public List<Requirement> getPreviousVersions(){
+		return previousVersions;
+	}
 	@Override
 	public String getName() {
 		return name;
