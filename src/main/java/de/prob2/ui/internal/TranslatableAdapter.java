@@ -35,6 +35,6 @@ public interface TranslatableAdapter<T> {
 	}
 
 	static <T extends Enum<T>> TranslatableAdapter<T> enumNameAdapter(String prefix) {
-		return adapter(object -> prefix + '.' + StringUtil.snakeCaseToCamelCase(object.name()));
+		return adapter(object -> prefix + '.' + object.name());
 	}
 }
