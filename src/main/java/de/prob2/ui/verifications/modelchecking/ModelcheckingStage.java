@@ -54,8 +54,6 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private CheckBox findOtherErrors;
 	@FXML
-	private CheckBox findGoal;
-	@FXML
 	private CheckBox stopAtFullCoverage;
 	@FXML
 	private CheckBox chooseNodesLimit;
@@ -68,9 +66,9 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private TextField idTextField;
 	@FXML
-	private CheckBox additionalGoal;
+	private CheckBox findGoal;
 	@FXML
-	private TextField tfAdditionalGoal;
+	private TextField tfFindGoal;
 	
 	private final ResourceBundle bundle;
 	
@@ -97,7 +95,6 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		this.setResizable(true);
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.startButton.disableProperty().bind(modelchecker.runningProperty());
 		this.selectSearchStrategy.getItems().setAll(
@@ -145,7 +142,7 @@ public class ModelcheckingStage extends Stage {
 				alert.showAndWait();;
 			}
 		});
-		this.tfAdditionalGoal.visibleProperty().bind(additionalGoal.selectedProperty());
+		this.tfFindGoal.visibleProperty().bind(findGoal.selectedProperty());
 	}
 
 	public static String getSearchStrategyNameKey(final ModelCheckingSearchStrategy searchStrategy) {
@@ -172,8 +169,8 @@ public class ModelcheckingStage extends Stage {
 			final ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
 			Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
 			Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;
-			String goal = additionalGoal.isSelected() ? tfAdditionalGoal.getText() : null;
-			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions());
+			String goal = findGoal.isSelected() ? tfFindGoal.getText() : null;
+			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions("GOAL".equals(goal)));
 			if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
 				this.hide();
 				modelchecker.checkItem(modelcheckingItem, true, false);
@@ -194,13 +191,13 @@ public class ModelcheckingStage extends Stage {
 		}
 	}
 	
-	private Set<ModelCheckingOptions.Options> getOptions() {
+	private Set<ModelCheckingOptions.Options> getOptions(boolean goal) {
 		ModelCheckingOptions options = new ModelCheckingOptions();
 		options = options.checkDeadlocks(findDeadlocks.isSelected());
 		options = options.checkInvariantViolations(findInvViolations.isSelected());
 		options = options.checkAssertions(findBAViolations.isSelected());
 		options = options.checkOtherErrors(findOtherErrors.isSelected());
-		options = options.checkGoal(findGoal.isSelected());
+		options = options.checkGoal(goal);
 		options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
 		return options.getPrologOptions();
 	}
