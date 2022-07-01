@@ -315,7 +315,7 @@ public final class ModelcheckingView extends ScrollPane {
 			simpleStatsView.setStats(stats);
 		}
 		if (memory != null) {
-			memoryUsage.setText(String.format("%d MiB", memory.divide(MIB_FACTOR).intValue()));
+			memoryUsage.setText(memory.divide(MIB_FACTOR) + " MiB");
 		}
 		statsBox.setVisible(true);
 	}
