@@ -189,6 +189,15 @@ public final class ModelcheckingView extends ScrollPane {
 				}
 			})
 		);
+
+		tvChecks.itemsProperty().addListener(o -> {
+			if (tvChecks.getSelectionModel().getSelectedIndex() == -1) {
+				// Auto-select current/last model checking job if selection gets cleared.
+				// This usually happens when a running job updates its progress/stats
+				// (replacing an item in a list view will deselect it).
+				tvChecks.getSelectionModel().selectLast();
+			}
+		});
 	}
 
 	private String toUIString(ModelCheckingItem item) {
@@ -308,7 +317,7 @@ public final class ModelcheckingView extends ScrollPane {
 		checker.cancelModelcheck();
 	}
 
-	public void showStats(final long timeElapsed, final StateSpaceStats stats, final BigInteger memory) {
+	private void showStats(final long timeElapsed, final StateSpaceStats stats, final BigInteger memory) {
 		elapsedTime.setText(String.format("%.1f", timeElapsed / 1000.0) + " s");
 		if (stats != null) {
 			progressBar.setProgress(calculateProgress(stats));

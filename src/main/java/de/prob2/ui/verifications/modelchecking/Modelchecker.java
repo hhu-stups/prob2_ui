@@ -93,7 +93,6 @@ public class Modelchecker {
 
 	private void startModelchecking(ModelCheckingItem item, boolean recheckExisting, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		final ModelcheckingView modelcheckingView = injector.getInstance(ModelcheckingView.class);
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;
 		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(jobItemDisplayIndex, new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
@@ -105,7 +104,6 @@ public class Modelchecker {
 				// Command must be executed outside of Platform.runLater to avoid blocking the UI thread!
 				GetStatisticsCommand cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
 				stateSpace.execute(cmd);
-				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats, cmd.getResult()));
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
@@ -118,7 +116,6 @@ public class Modelchecker {
 				// Command must be executed outside of Platform.runLater to avoid blocking the UI thread!
 				GetStatisticsCommand cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
 				stateSpace.execute(cmd);
-				Platform.runLater(() -> modelcheckingView.showStats(timeElapsed, stats, cmd.getResult()));
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
