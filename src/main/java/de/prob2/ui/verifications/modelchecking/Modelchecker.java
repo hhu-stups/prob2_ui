@@ -6,6 +6,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -15,7 +17,6 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetStatisticsCommand;
 import de.prob.check.ConsistencyChecker;
-import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckingOptions;
@@ -74,9 +75,24 @@ public class Modelchecker {
 			return;
 		}
 
-		final ListenableFuture<?> future = this.executor.submit(() -> startModelchecking(item, recheckExisting, checkAll));
+		final ListenableFuture<ModelCheckingJobItem> future = this.executor.submit(() -> startModelchecking(item, recheckExisting));
 		this.currentTasks.add(future);
 		future.addListener(() -> this.currentTasks.remove(future), MoreExecutors.directExecutor());
+
+		Futures.addCallback(future, new FutureCallback<ModelCheckingJobItem>() {
+			@Override
+			public void onSuccess(final ModelCheckingJobItem result) {
+				if (!checkAll && result.getResult() instanceof ITraceDescription) {
+					currentTrace.set(result.getTrace());
+				}
+			}
+
+			@Override
+			public void onFailure(final Throwable t) {
+				LOGGER.error("Exception while running model check job", t);
+				Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
+			}
+		}, MoreExecutors.directExecutor());
 	}
 
 	public BooleanExpression runningProperty() {
@@ -87,7 +103,7 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
-	private void startModelchecking(ModelCheckingItem item, boolean recheckExisting, boolean checkAll) {
+	private ModelCheckingJobItem startModelchecking(ModelCheckingItem item, boolean recheckExisting) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;
@@ -115,18 +131,8 @@ public class Modelchecker {
 			}
 		};
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel()).recheckExisting(recheckExisting);
-		IModelCheckJob job = new ConsistencyChecker(stateSpace, options, listener);
-
-		try {
-			job.call();
-		} catch (Exception e) {
-			LOGGER.error("Exception while running model check job", e);
-			Platform.runLater(() -> stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
-		}
-
-		if (!checkAll && lastJobItem.get().getResult() instanceof ITraceDescription) {
-			currentTrace.set(lastJobItem.get().getTrace());
-		}
+		new ConsistencyChecker(stateSpace, options, listener).call();
+		return lastJobItem.get();
 	}
 
 	public void cancelModelcheck() {
