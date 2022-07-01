@@ -29,7 +29,9 @@ import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SetProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 
@@ -96,6 +98,7 @@ public class Modelchecker {
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;
 		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(jobItemDisplayIndex, new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
+		final ObjectProperty<ModelCheckingJobItem> lastJobItem = new SimpleObjectProperty<>(initialJobItem);
 		Platform.runLater(() -> showResult(item, initialJobItem));
 		
 		final IModelCheckListener listener = new IModelCheckListener() {
@@ -108,22 +111,13 @@ public class Modelchecker {
 					statsView.updateSimpleStats(stats);
 				}
 				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItemDisplayIndex, result, timeElapsed, stats, cmd.getResult(), stateSpace);
+				lastJobItem.set(jobItem);
 				Platform.runLater(() -> item.getItems().set(jobItemListIndex, jobItem));
 			}
 
 			@Override
 			public void isFinished(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
-				// Command must be executed outside of Platform.runLater to avoid blocking the UI thread!
-				GetStatisticsCommand cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
-				stateSpace.execute(cmd);
-				if (stats != null) {
-					statsView.updateSimpleStats(stats);
-				}
-				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItemDisplayIndex, result, timeElapsed, stats, cmd.getResult(), stateSpace);
-				Platform.runLater(() -> item.getItems().set(jobItemListIndex, jobItem));
-				if (!checkAll && jobItem.getResult() instanceof ITraceDescription) {
-					currentTrace.set(jobItem.getTrace());
-				}
+				this.updateStats(jobId, timeElapsed, result, stats);
 			}
 		};
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel()).recheckExisting(recheckExisting);
@@ -134,6 +128,10 @@ public class Modelchecker {
 		} catch (Exception e) {
 			LOGGER.error("Exception while running model check job", e);
 			Platform.runLater(() -> stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
+		}
+
+		if (!checkAll && lastJobItem.get().getResult() instanceof ITraceDescription) {
+			currentTrace.set(lastJobItem.get().getTrace());
 		}
 	}
 
