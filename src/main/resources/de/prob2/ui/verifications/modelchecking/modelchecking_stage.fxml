@@ -81,13 +81,6 @@
 						</VBox>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="findGoal" text="%verifications.modelchecking.modelcheckingStage.options.findGoal">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findGoal" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<CheckBox fx:id="stopAtFullCoverage" text="%verifications.modelchecking.modelcheckingStage.options.stopAtFullCoverage">
 								<tooltip>
 									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.stopAtFullCoverage" />
@@ -119,10 +112,10 @@
 							</Spinner>
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="additionalGoal" text="%verifications.modelchecking.modelcheckingStage.options.findAdditionalGoal"/>
-							<TextField fx:id="tfAdditionalGoal">
+							<CheckBox fx:id="findGoal" text="%verifications.modelchecking.modelcheckingStage.options.findGoal"/>
+							<TextField fx:id="tfFindGoal" text="GOAL">
 								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.additionalGoal" />
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.findGoal" />
 								</tooltip>
 							</TextField>
 						</HBox>
