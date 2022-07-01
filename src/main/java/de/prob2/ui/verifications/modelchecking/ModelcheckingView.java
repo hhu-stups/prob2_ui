@@ -183,7 +183,7 @@ public final class ModelcheckingView extends ScrollPane {
 		tvChecks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) ->
 			Platform.runLater(() -> {
 				if(to != null && to.getStats() != null) {
-					showStats(to.getTimeElapsed(), to.getStats(), null);
+					showStats(to.getTimeElapsed(), to.getStats(), to.getMemoryUsed());
 				} else {
 					hideStats();
 				}

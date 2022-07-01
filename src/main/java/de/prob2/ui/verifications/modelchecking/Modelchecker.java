@@ -113,8 +113,7 @@ public class Modelchecker {
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
-				// TODO Store memory usage in ModelCheckingJobItem
-				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(item.getItems().size() + 1, result, timeElapsed, stats, stateSpace);
+				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(item.getItems().size() + 1, result, timeElapsed, stats, cmd.getResult(), stateSpace);
 				if (!checkAll && jobItem.getResult() instanceof ITraceDescription) {
 					currentTrace.set(jobItem.getTrace());
 				}

@@ -1,5 +1,8 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.math.BigInteger;
+import java.util.Objects;
+
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckGoalFound;
 import de.prob.check.ModelCheckOk;
@@ -15,10 +18,11 @@ public class ModelCheckingJobItem {
 	private final Checked checked;
 	private final long timeElapsed;
 	private final StateSpaceStats stats;
+	private final BigInteger memoryUsed;
 	private final StateSpace stateSpace;
 	private Trace trace;
 	
-	public ModelCheckingJobItem(final int index, final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final StateSpace stateSpace) {
+	public ModelCheckingJobItem(final int index, final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final BigInteger memoryUsed, final StateSpace stateSpace) {
 		this.index = index;
 		this.result = result;
 		if (result instanceof ModelCheckOk || result instanceof ModelCheckGoalFound) {
@@ -31,6 +35,7 @@ public class ModelCheckingJobItem {
 		
 		this.timeElapsed = timeElapsed;
 		this.stats = stats;
+		this.memoryUsed = Objects.requireNonNull(memoryUsed, "memoryUsed");
 		this.stateSpace = stateSpace;
 		this.trace = null;
 	}
@@ -57,6 +62,10 @@ public class ModelCheckingJobItem {
 	
 	public StateSpaceStats getStats() {
 		return stats;
+	}
+	
+	public BigInteger getMemoryUsed() {
+		return this.memoryUsed;
 	}
 	
 	public StateSpace getStateSpace() {
