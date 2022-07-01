@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
@@ -17,6 +18,7 @@ import de.prob.check.IModelCheckJob;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckingOptions;
+import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
@@ -92,6 +94,11 @@ public class Modelchecker {
 	private void startModelchecking(ModelCheckingItem item, boolean recheckExisting, boolean checkAll) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final ModelcheckingView modelcheckingView = injector.getInstance(ModelcheckingView.class);
+		final int jobItemListIndex = item.getItems().size();
+		final int jobItemDisplayIndex = jobItemListIndex + 1;
+		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(jobItemDisplayIndex, new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
+		Platform.runLater(() -> showResult(item, initialJobItem));
+		
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(final String jobId, final long timeElapsed, final IModelCheckingResult result, final StateSpaceStats stats) {
@@ -102,6 +109,8 @@ public class Modelchecker {
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
+				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItemDisplayIndex, result, timeElapsed, stats, cmd.getResult(), stateSpace);
+				Platform.runLater(() -> item.getItems().set(jobItemListIndex, jobItem));
 			}
 
 			@Override
@@ -113,11 +122,11 @@ public class Modelchecker {
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
-				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(item.getItems().size() + 1, result, timeElapsed, stats, cmd.getResult(), stateSpace);
+				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItemDisplayIndex, result, timeElapsed, stats, cmd.getResult(), stateSpace);
+				Platform.runLater(() -> item.getItems().set(jobItemListIndex, jobItem));
 				if (!checkAll && jobItem.getResult() instanceof ITraceDescription) {
 					currentTrace.set(jobItem.getTrace());
 				}
-				Platform.runLater(() -> showResult(item, jobItem));
 			}
 		};
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel()).recheckExisting(recheckExisting);
