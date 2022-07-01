@@ -75,9 +75,7 @@ public class Modelchecker {
 			return;
 		}
 
-		final ListenableFuture<ModelCheckingJobItem> future = this.executor.submit(() -> startModelchecking(item, recheckExisting));
-		this.currentTasks.add(future);
-		future.addListener(() -> this.currentTasks.remove(future), MoreExecutors.directExecutor());
+		final ListenableFuture<ModelCheckingJobItem> future = startModelchecking(item, recheckExisting);
 
 		Futures.addCallback(future, new FutureCallback<ModelCheckingJobItem>() {
 			@Override
@@ -103,13 +101,13 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
-	private ModelCheckingJobItem startModelchecking(ModelCheckingItem item, boolean recheckExisting) {
+	private ListenableFuture<ModelCheckingJobItem> startModelchecking(ModelCheckingItem item, boolean recheckExisting) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;
 		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(jobItemDisplayIndex, new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
 		final ObjectProperty<ModelCheckingJobItem> lastJobItem = new SimpleObjectProperty<>(initialJobItem);
-		Platform.runLater(() -> showResult(item, initialJobItem));
+		showResult(item, initialJobItem);
 		
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
@@ -131,8 +129,15 @@ public class Modelchecker {
 			}
 		};
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel()).recheckExisting(recheckExisting);
-		new ConsistencyChecker(stateSpace, options, listener).call();
-		return lastJobItem.get();
+		final ConsistencyChecker checker = new ConsistencyChecker(stateSpace, options, listener);
+
+		final ListenableFuture<ModelCheckingJobItem> future = this.executor.submit(() -> {
+			checker.call();
+			return lastJobItem.get();
+		});
+		this.currentTasks.add(future);
+		future.addListener(() -> this.currentTasks.remove(future), MoreExecutors.directExecutor());
+		return future;
 	}
 
 	public void cancelModelcheck() {
