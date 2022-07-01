@@ -3,11 +3,12 @@ package de.prob2.ui.verifications.modelchecking;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -43,8 +44,8 @@ public class Modelchecker {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Modelchecker.class);
 
-	private final SetProperty<Future<Void>> currentTasks;
-	private final ExecutorService executor;
+	private final SetProperty<Future<?>> currentTasks;
+	private final ListeningExecutorService executor;
 
 	private final StageManager stageManager;
 
@@ -62,7 +63,9 @@ public class Modelchecker {
 		this.statsView = statsView;
 		this.injector = injector;
 		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new CopyOnWriteArraySet<>()));
-		this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"));
+		this.executor = MoreExecutors.listeningDecorator(
+			Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"))
+		);
 		stopActions.add(this.executor::shutdownNow);
 	}
 
@@ -71,18 +74,9 @@ public class Modelchecker {
 			return;
 		}
 
-		final FutureTask<Void> task = new FutureTask<Void>(() -> {
-			startModelchecking(item, recheckExisting, checkAll);
-			return null;
-		}) {
-			@Override
-			protected void done() {
-				super.done();
-				currentTasks.remove(this);
-			}
-		};
-		this.currentTasks.add(task);
-		this.executor.submit(task);
+		final ListenableFuture<?> future = this.executor.submit(() -> startModelchecking(item, recheckExisting, checkAll));
+		this.currentTasks.add(future);
+		future.addListener(() -> this.currentTasks.remove(future), MoreExecutors.directExecutor());
 	}
 
 	public BooleanExpression runningProperty() {
