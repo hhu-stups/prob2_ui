@@ -1,7 +1,10 @@
 package de.prob2.ui.internal;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public final class StringUtil {
 
@@ -20,19 +23,19 @@ public final class StringUtil {
 			return "";
 		}
 
-		String[] parts = snakeCase.split("_");
-		if (parts.length == 1) { // parts.length cannot be 0
-			return parts[0].toLowerCase(Locale.ROOT);
+		List<String> parts = Arrays.stream(snakeCase.split("_"))
+				                     .filter(part -> !part.isEmpty())
+				                     .collect(Collectors.toList());
+		if (parts.isEmpty()) {
+			return "";
+		} else if (parts.size() == 1) {
+			return parts.get(0).toLowerCase(Locale.ROOT);
 		}
 
 		StringBuilder b = new StringBuilder();
-		b.append(parts[0].toLowerCase(Locale.ROOT));
-		for (int i = 1; i < parts.length; i++) {
-			String part = parts[i];
-			if (part.isEmpty()) {
-				continue;
-			}
-
+		b.append(parts.get(0).toLowerCase(Locale.ROOT));
+		for (int i = 1; i < parts.size(); i++) {
+			String part = parts.get(i);
 			b.append(part.substring(0, 1).toUpperCase(Locale.ROOT));
 			b.append(part.substring(1).toLowerCase(Locale.ROOT));
 		}

@@ -124,8 +124,9 @@ dependencies {
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 
-	testImplementation(platform('org.junit:junit-bom:5.7.2'))
-	testImplementation('org.junit.jupiter:junit-jupiter')
+	testImplementation  platform('org.junit:junit-bom:5.8.2')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.assertj:assertj-core:3.23.1'
 }
 
 if (!project.hasProperty("javafxVersion")) {
