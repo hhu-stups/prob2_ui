@@ -45,6 +45,11 @@
 			<Label text="%vomanager.edit.requirement.content"/>
 			<TextArea fx:id="taRequirement" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 		</VBox>
-		<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
+		<HBox>
+			<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#addRequirement"/>
+			<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceRequirement"/>
+			<Button fx:id="historyVOButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyRequirement"/>
+		</HBox>
+
 	</VBox>
 </fx:root>

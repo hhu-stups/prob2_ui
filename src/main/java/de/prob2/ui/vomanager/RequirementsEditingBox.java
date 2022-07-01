@@ -65,8 +65,18 @@ public class RequirementsEditingBox extends VBox {
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 	}
 
+
 	@FXML
-	public void applyRequirement() {
+	public void replaceRequirement(){
+
+	}
+
+	@FXML void historyRequirement(){
+
+	}
+
+	@FXML
+	public void addRequirement() {
 		if(!tfName.getText().trim().isEmpty() && !taRequirement.getText().trim().isEmpty()) {
 			boolean nameExists = currentProject.getRequirements().stream()
 					.map(Requirement::getName)
