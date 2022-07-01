@@ -49,6 +49,8 @@ import javafx.scene.layout.VBox;
 @FXMLInjected
 @Singleton
 public final class ModelcheckingView extends ScrollPane {
+	private static final BigInteger MIB_FACTOR = new BigInteger("1024").pow(2);
+
 	@FXML
 	private Button addModelCheckButton;
 	@FXML
@@ -313,7 +315,7 @@ public final class ModelcheckingView extends ScrollPane {
 			simpleStatsView.setStats(stats);
 		}
 		if (memory != null) {
-			memoryUsage.setText(String.format("%d MB", memory.divide(new BigInteger("1000000")).intValue()));
+			memoryUsage.setText(String.format("%d MiB", memory.divide(MIB_FACTOR).intValue()));
 		}
 		statsBox.setVisible(true);
 	}
