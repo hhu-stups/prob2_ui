@@ -68,7 +68,28 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	public void replaceRequirement(){
+		boolean nameExists = nameExists();
+		final Requirement oldRequirement = (Requirement) voManagerStage.getSelectedRequirement();
 
+		if(nameExists && oldRequirement.getName().equals(tfName.getText()) && oldRequirement.getIntroducedAt().equals(cbRequirementLinkMachineChoice.getValue().getName())) {
+			warnAlreadyExists();
+			return;
+		}
+
+		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText());
+		currentProject.replaceRequirement(oldRequirement, newRequirement);
+
+		// Update validation obligations, this means update VO of ids that are affected
+		for (Machine machine : currentProject.getMachines()) {
+			for (ListIterator<ValidationObligation> iterator = machine.getValidationObligations().listIterator(); iterator.hasNext();) {
+				final ValidationObligation oldVo = iterator.next();
+				if (oldVo.getRequirement().equals(oldRequirement.getName())) {
+					ValidationObligation validationObligation = oldVo.changeRequirement(tfName.getText());
+					iterator.set(validationObligation);
+					requirementHandler.initListenerForVO(newRequirement, validationObligation);
+				}
+			}
+		}
 	}
 
 	@FXML void historyRequirement(){
@@ -78,20 +99,19 @@ public class RequirementsEditingBox extends VBox {
 	@FXML
 	public void addRequirement() {
 		if(!tfName.getText().trim().isEmpty() && !taRequirement.getText().trim().isEmpty()) {
-			boolean nameExists = currentProject.getRequirements().stream()
-					.map(Requirement::getName)
-					.collect(Collectors.toList())
-					.contains(tfName.getText());
-			VOManagerStage.EditType editType = voManagerStage.getEditType();
-			if(editType == VOManagerStage.EditType.MODIFY) {
-				addRequirement(nameExists);
-			} else if(editType == VOManagerStage.EditType.NONE) {
-		//		editRequirement(nameExists);
-			}
-			voManagerStage.closeEditingBox();
+			boolean nameExists = nameExists();
+			addRequirement(nameExists);
+		    voManagerStage.closeEditingBox();
 		} else {
 			warnNotValid();
 		}
+	}
+
+	private boolean nameExists(){
+		return currentProject.getRequirements().stream()
+				.map(Requirement::getName)
+				.collect(Collectors.toList())
+				.contains(tfName.getText());
 	}
 
 	private void addRequirement(boolean nameExists) {
@@ -102,33 +122,6 @@ public class RequirementsEditingBox extends VBox {
 		currentProject.addRequirement(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText()));
 	}
 
-	private void editRequirement(boolean nameExists) {
-		final Requirement oldRequirement = (Requirement) voManagerStage.getSelectedRequirement();
-		if(nameExists && oldRequirement.getName().equals(tfName.getText()) && oldRequirement.getIntroducedAt().equals(cbRequirementLinkMachineChoice.getValue().getName())) {
-			warnAlreadyExists();
-			return;
-		}
-		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText());
-		currentProject.replaceRequirement(oldRequirement, newRequirement);
-
-		// Update validation obligations, this means update VO of ids that are affected
-		for (Machine machine : currentProject.getMachines()) {
-			for (ListIterator<ValidationObligation> iterator = machine.getValidationObligations().listIterator(); iterator.hasNext();) {
-				final ValidationObligation oldVo = iterator.next();
-				if (oldVo.getRequirement().equals(oldRequirement.getName())) {
-					try {
-						ValidationObligation validationObligation = new ValidationObligation(oldVo.getId(), oldVo.getExpression(), tfName.getText());
-						voChecker.parseVOExpression(validationObligation, false);
-						iterator.set(validationObligation);
-						requirementHandler.initListenerForVO(newRequirement, validationObligation);
-					} catch (VOParseException e) {
-						e.printStackTrace();
-						// TODO
-					}
-				}
-			}
-		}
-	}
 
 	public void resetRequirementEditing() {
 		cbRequirementChoice.getSelectionModel().clearSelection();
