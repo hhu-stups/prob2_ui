@@ -42,11 +42,12 @@
 			<Label text="%vomanager.edit.vo.expression"/>
 			<ComboBox fx:id="cbVOExpression" editable="true"/>
 		</HBox>
-		<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.add" onAction="#addVO"/>
+		<HBox>
+			<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.add" onAction="#addVO"/>
+			<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceVO"/>
+			<Button fx:id="historyVOButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyVO"/>
+		</HBox>
 
-		<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceVO"/>
-
-		<Button fx:id="historyVOButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyVO"/>
 		<TableView fx:id="vtTable">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
