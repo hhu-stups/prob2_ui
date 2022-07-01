@@ -27,9 +27,10 @@ public class HistoryTable<T> extends Stage {
 	@FXML
 	private  TableColumn<ValidationObligation,String>  expression;
 
+	private final ValidationObligation vo;
 
 	public HistoryTable(ValidationObligation vo) {
-		System.out.println("bla");
+		this.vo = vo;
 	}
 
 	@FXML
@@ -38,7 +39,7 @@ public class HistoryTable<T> extends Stage {
 	}
 
 	private void initTable(){
-
+		table.getItems().addAll(vo.getPreviousVersion());
 	}
 
 }

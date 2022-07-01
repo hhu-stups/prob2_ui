@@ -27,7 +27,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	private final String requirement;
 
 	@JsonIgnore
-	private final List<ValidationObligation> previousVersion;
+	private final List<ValidationObligation> previousVersions;
 
 	@JsonIgnore
 	private PVo expressionAst;
@@ -45,15 +45,15 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		this.id = id;
 		this.expression = expression;
 		this.requirement = requirement;
-		this.previousVersion = new ArrayList<>();
+		this.previousVersions = new ArrayList<>();
 	}
 
 
-	public ValidationObligation(String id, String expression, String requirement, List<ValidationObligation> previousVersion) {
+	public ValidationObligation(String id, String expression, String requirement, List<ValidationObligation> previousVersions) {
 		this.id = id;
 		this.expression = expression;
 		this.requirement = requirement;
-		this.previousVersion = previousVersion;
+		this.previousVersions = previousVersions;
 	}
 
 	public void setExpressionAst(PVo expressionAst, VOChecker voChecker) {
@@ -108,7 +108,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 
 	@JsonIgnore
 	public List<ValidationObligation> getPreviousVersion(){
-		return previousVersion;
+		return previousVersions;
 	}
 
 

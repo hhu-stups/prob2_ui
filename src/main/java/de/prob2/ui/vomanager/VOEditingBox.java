@@ -227,7 +227,9 @@ public class VOEditingBox extends VBox {
 
 			try {
 				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				final ValidationObligation newVo = createNewFromCurrentSelection(oldVo.getPreviousVersion());
+				List<ValidationObligation> validationObligationList = new ArrayList<>(oldVo.getPreviousVersion());
+				validationObligationList.add(oldVo);
+				final ValidationObligation newVo = createNewFromCurrentSelection(validationObligationList);
 				voChecker.parseVOExpression(newVo, false);
 
 				if (nameExists(currentVOName(),oldVo)) {

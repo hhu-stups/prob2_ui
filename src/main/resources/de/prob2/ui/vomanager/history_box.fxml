@@ -30,19 +30,19 @@
 							<columns>
 
 								<TableColumn fx:id="name" minWidth="70.0"
-											 text="%vomanager.table.requirements.column.name" >
+											 text="%vomanager.table.history.column.name" >
 									<cellValueFactory><PropertyValueFactory property="id" />
 									</cellValueFactory>
 								</TableColumn>
 
 								<TableColumn fx:id="expression" minWidth="70.0"
-											 text="%vomanager.table.requirements.column.name">
+											 text="%vomanager.table.history.column.expression">
 									<cellValueFactory><PropertyValueFactory property="expression" />
 									</cellValueFactory>
 								</TableColumn>
 
 								<TableColumn fx:id="requirement" minWidth="70.0"
-											 text="%vomanager.table.requirements.column.name">
+											 text="%vomanager.table.history.column.requirement">
 									<cellValueFactory><PropertyValueFactory property="requirement" />
 									</cellValueFactory>
 								</TableColumn>
