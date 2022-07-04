@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
@@ -7,7 +8,6 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -20,6 +20,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 @FXMLInjected
 @Singleton
@@ -76,7 +77,9 @@ public class RequirementsEditingBox extends VBox {
 			return;
 		}
 
-		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText());
+		ArrayList<Requirement> parents = new ArrayList<>(oldRequirement.getPreviousVersions());
+		parents.add(oldRequirement);
+		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText(), parents);
 		currentProject.replaceRequirement(oldRequirement, newRequirement);
 
 		// Update validation obligations, this means update VO of ids that are affected
@@ -93,7 +96,10 @@ public class RequirementsEditingBox extends VBox {
 	}
 
 	@FXML void historyRequirement(){
-
+		Stage table = new HistoryTable<ValidationObligation>((ValidationObligation) voManagerStage.getSelectedRequirement());
+		stageManager.loadFXML(table, "history_box.fxml", this.getClass().getName());
+		table.show();
+		table.toFront();
 	}
 
 	@FXML
