@@ -1,6 +1,7 @@
 package de.prob2.ui.vomanager;
 
-import java.util.ArrayList;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,7 +46,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		this.id = id;
 		this.expression = expression;
 		this.requirement = requirement;
-		this.previousVersions = new ArrayList<>();
+		this.previousVersions = Collections.emptyList();
 	}
 
 
@@ -76,6 +77,10 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		});
 	}
 
+
+	public ValidationObligation changeRequirement(String requirement){
+		return new ValidationObligation(this.id, this.expression, requirement, this.previousVersions);
+	}
 
 
 	public ObjectProperty<Checked> checkedProperty() {
