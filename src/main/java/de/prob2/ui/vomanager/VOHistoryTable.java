@@ -2,18 +2,14 @@ package de.prob2.ui.vomanager;
 
 import com.google.inject.Singleton;
 import de.prob2.ui.internal.FXMLInjected;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TreeTableView;
 import javafx.stage.Stage;
-
-import javax.swing.text.Element;
 
 @FXMLInjected
 @Singleton
-public class HistoryTable<T> extends Stage {
+public class VOHistoryTable<T> extends Stage {
 
 	@FXML
 	private  TableView<ValidationObligation> table;
@@ -29,7 +25,7 @@ public class HistoryTable<T> extends Stage {
 
 	private final ValidationObligation vo;
 
-	public HistoryTable(ValidationObligation vo) {
+	public VOHistoryTable(ValidationObligation vo) {
 		this.vo = vo;
 	}
 
@@ -39,7 +35,7 @@ public class HistoryTable<T> extends Stage {
 	}
 
 	private void initTable(){
-		table.getItems().addAll(vo.getPreviousVersion());
+		table.getItems().addAll(vo.getPreviousVersions());
 	}
 
 }

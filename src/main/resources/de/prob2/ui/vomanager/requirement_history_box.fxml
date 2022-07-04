@@ -16,12 +16,8 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<VBox>
-
-
-
 				<TableView fx:id="table" >
 					<columns>
-
 						<TableColumn fx:id="name" minWidth="70.0"
 									 text="%vomanager.table.history.column.name" >
 							<cellValueFactory><PropertyValueFactory property="name" />

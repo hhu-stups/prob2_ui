@@ -10,8 +10,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.voparser.VOParseException;
-import de.prob.voparser.VOParser;
-import de.prob.voparser.node.PVo;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -227,7 +225,7 @@ public class VOEditingBox extends VBox {
 
 			try {
 				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
-				List<ValidationObligation> validationObligationList = new ArrayList<>(oldVo.getPreviousVersion());
+				List<ValidationObligation> validationObligationList = new ArrayList<>(oldVo.getPreviousVersions());
 				validationObligationList.add(oldVo);
 				final ValidationObligation newVo = createNewFromCurrentSelection(validationObligationList);
 				voChecker.parseVOExpression(newVo, false);
@@ -251,8 +249,8 @@ public class VOEditingBox extends VBox {
 
 	@FXML
 	private void historyVO() {
-		Stage table = new HistoryTable<ValidationObligation>((ValidationObligation) voManagerStage.getSelectedRequirement());
-		stageManager.loadFXML(table, "history_box.fxml", this.getClass().getName());
+		Stage table = new VOHistoryTable<ValidationObligation>((ValidationObligation) voManagerStage.getSelectedRequirement());
+		stageManager.loadFXML(table, "vo_history_box.fxml", this.getClass().getName());
 		table.show();
 		table.toFront();
 	}

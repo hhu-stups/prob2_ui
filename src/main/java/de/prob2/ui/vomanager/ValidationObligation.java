@@ -112,7 +112,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	}
 
 	@JsonIgnore
-	public List<ValidationObligation> getPreviousVersion(){
+	public List<ValidationObligation> getPreviousVersions(){
 		return previousVersions;
 	}
 
