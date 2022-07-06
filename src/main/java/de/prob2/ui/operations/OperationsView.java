@@ -1,8 +1,19 @@
 package de.prob2.ui.operations;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.statespace.LoadedMachine;
@@ -17,12 +28,14 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -47,21 +60,12 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.sawano.java.text.AlphanumericComparator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
@@ -82,14 +86,14 @@ public final class OperationsView extends VBox {
 				}
 			});
 
-			final MenuItem showDetailsItem = new MenuItem(bundle.getString("operations.operationsView.contextMenu.items.showDetails"));
+			final MenuItem showDetailsItem = new MenuItem(i18n.translate("operations.operationsView.contextMenu.items.showDetails"));
 			showDetailsItem.setOnAction(event -> {
 				final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
 				stage.setItem(this.getItem());
 				stage.show();
 			});
 
-			final MenuItem executeByPredicateItem = new MenuItem(bundle.getString("operations.operationsView.contextMenu.items.executeByPredicate"));
+			final MenuItem executeByPredicateItem = new MenuItem(i18n.translate("operations.operationsView.contextMenu.items.executeByPredicate"));
 			executeByPredicateItem.setOnAction(event -> {
 				final ExecuteByPredicateStage stage = injector.getInstance(ExecuteByPredicateStage.class);
 				stage.setItem(this.getItem());
@@ -110,7 +114,7 @@ public final class OperationsView extends VBox {
 				case TIMEOUT:
 					icon = FontAwesome.Glyph.CLOCK_ALT;
 					getStyleClass().add("timeout");
-					setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.timeout")));
+					setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.timeout")));
 					break;
 
 				case ENABLED:
@@ -118,13 +122,13 @@ public final class OperationsView extends VBox {
 					getStyleClass().add("enabled");
 					if (!item.isExplored()) {
 						getStyleClass().add("unexplored");
-						setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.reachesUnexplored")));
+						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesUnexplored")));
 					} else if (item.isErrored()) {
 						getStyleClass().add("errored");
-						setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.reachesErrored")));
+						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesErrored")));
 					} else if (item.isSkip()) {
 						getStyleClass().add("skip");
-						setTooltip(new Tooltip(bundle.getString("operations.operationsView.tooltips.reachesSame")));
+						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesSame")));
 					} else {
 						getStyleClass().add("normal");
 						setTooltip(null);
@@ -197,7 +201,7 @@ public final class OperationsView extends VBox {
 	private final ObjectProperty<OperationsView.SortMode> sortMode;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final DisablePropertyController disablePropertyController;
 	private final StageManager stageManager;
 	private final Config config;
@@ -208,15 +212,16 @@ public final class OperationsView extends VBox {
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-						   final Injector injector, final ResourceBundle bundle, final StatusBar statusBar, final DisablePropertyController disablePropertyController,
-						   final StopActions stopActions, final Config config) {
+						   final Injector injector, final I18n i18n, final StatusBar statusBar,
+						   final DisablePropertyController disablePropertyController, final StopActions stopActions,
+						   final Config config) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
 		this.injector = injector;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.disablePropertyController = disablePropertyController;
 		this.stageManager = stageManager;
 		this.config = config;
@@ -388,9 +393,9 @@ public final class OperationsView extends VBox {
 
 		final String text;
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			text = bundle.getString("operations.operationsView.warningLabel.maxReached");
+			text = i18n.translate("operations.operationsView.warningLabel.maxReached");
 		} else if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
-			text = bundle.getString("operations.operationsView.warningLabel.noSetupConstantsOrInit");
+			text = i18n.translate("operations.operationsView.warningLabel.noSetupConstantsOrInit");
 		} else {
 			text = "";
 		}

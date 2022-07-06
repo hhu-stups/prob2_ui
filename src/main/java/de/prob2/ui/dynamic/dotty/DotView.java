@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -22,6 +21,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.MultiKeyCombination;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -35,7 +35,11 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -43,6 +47,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,8 +104,8 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	@Inject
 	public DotView(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
-				   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
-		super(preferencesStageProvider, currentTrace, currentProject, bundle, stopActions, "Graph Visualizer");
+	               final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+		super(preferencesStageProvider, currentTrace, currentProject, i18n, stopActions, "Graph Visualizer");
 
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
@@ -190,7 +195,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		FileChooser.ExtensionFilter dotFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.dot", "dot");
 		FileChooser.ExtensionFilter pdfFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.pdf", "pdf");
 		fileChooser.getExtensionFilters().setAll(svgFilter, pngFilter, dotFilter, pdfFilter);
-		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
+		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this.getScene().getWindow());
 		if (path == null) {
 			return;

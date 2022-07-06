@@ -1,10 +1,9 @@
 package de.prob2.ui.menu;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.MultiKeyCombination;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -20,7 +19,7 @@ import javafx.scene.input.KeyCombination;
 @FXMLInjected
 public class ViewMenu extends Menu {
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final FontSize fontSize;
 
 	@FXML
@@ -43,9 +42,9 @@ public class ViewMenu extends Menu {
 	private final KeyCombination zoomOutKeypad = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.SHORTCUT_DOWN);
 
 	@Inject
-	private ViewMenu(final StageManager stageManager, final ResourceBundle bundle, final FontSize fontSize) {
+	private ViewMenu(final StageManager stageManager, final I18n i18n, final FontSize fontSize) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.fontSize = fontSize;
 		stageManager.loadFXML(this, "viewMenu.fxml");
 	}
@@ -55,8 +54,8 @@ public class ViewMenu extends Menu {
 		stageManager.currentProperty().addListener((observable, from, to) -> {
 			if (to != null) {
 				to.fullScreenProperty().addListener((observable1, from1, to1) ->
-						fullScreenMenuItem.setText(to1 ? bundle.getString("menu.view.items.exitFullScreen")
-								: bundle.getString("menu.view.items.enterFullScreen"))
+						fullScreenMenuItem.setText(to1 ? i18n.translate("menu.view.items.exitFullScreen")
+								: i18n.translate("menu.view.items.enterFullScreen"))
 				);
 			}
 		});

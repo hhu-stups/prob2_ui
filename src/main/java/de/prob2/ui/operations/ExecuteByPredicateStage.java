@@ -1,7 +1,13 @@
 package de.prob2.ui.operations;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -15,10 +21,12 @@ import de.prob.model.representation.ModelElementList;
 import de.prob.statespace.Transition;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -29,14 +37,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 public final class ExecuteByPredicateStage extends Stage {
@@ -65,19 +68,19 @@ public final class ExecuteByPredicateStage extends Stage {
 
 	private final Injector injector;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private final ObjectProperty<OperationItem> item;
 
 	private String lastFailedPredicate;
 	
 	@Inject
-	private ExecuteByPredicateStage(final Injector injector, final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
+	private ExecuteByPredicateStage(final Injector injector, final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
 		super();
 
 		this.injector = injector;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.item = new SimpleObjectProperty<>(this, "item", null);
 		
@@ -87,13 +90,13 @@ public final class ExecuteByPredicateStage extends Stage {
 	
 	@FXML
 	private void initialize() {
-		this.predicateBuilderView.setPlaceholder(new Label(bundle.getString("operations.executeByPredicate.noParameters")));
+		this.predicateBuilderView.setPlaceholder(new Label(i18n.translate("operations.executeByPredicate.noParameters")));
 		this.itemProperty().addListener((o, from, to) -> {
 			if (to == null) {
 				this.operationLabel.setText(null);
 				this.predicateBuilderView.setItems(new ArrayList<>());
 			} else {
-				this.operationLabel.setText(String.format(bundle.getString("operations.executeByPredicate.operation"), this.getItem().getPrettyName()));
+				this.operationLabel.setText(i18n.translate("operations.executeByPredicate.operation", this.getItem().getPrettyName()));
 				
 				final List<PredicateBuilderTableItem> items = new ArrayList<>();
 				buildParameters(to.getParameterValues(), to.getParameterNames(), items, PredicateBuilderTableItem.VariableType.INPUT);

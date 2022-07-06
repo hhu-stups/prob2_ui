@@ -2,10 +2,10 @@ package de.prob2.ui.operations;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.property.ObjectProperty;
@@ -52,15 +52,15 @@ class OperationDetailsStage extends Stage {
 	@FXML private TreeItem<ValueItem> variablesItem;
 	@FXML private TextArea textArea;
 	
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
 	private final ObjectProperty<OperationItem> item;
 	
 	@Inject
-	OperationDetailsStage(final StageManager stageManager, final ResourceBundle bundle) {
+	OperationDetailsStage(final StageManager stageManager, final I18n i18n) {
 		super();
 		
-		this.bundle = bundle;
+		this.i18n = i18n;
 		
 		this.item = new SimpleObjectProperty<>(this, "item", null);
 		
@@ -75,10 +75,10 @@ class OperationDetailsStage extends Stage {
 		this.valueColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue().getValue()));
 		
 		this.rootItem.setValue(new ValueItem("Values (this root item should be invisible)", ""));
-		this.parametersItem.setValue(new ValueItem(bundle.getString("operations.operationDetails.groups.parameters"), ""));
-		this.returnValuesItem.setValue(new ValueItem(bundle.getString("operations.operationDetails.groups.returnValues"), ""));
-		this.constantsItem.setValue(new ValueItem(bundle.getString("operations.operationDetails.groups.constants"), ""));
-		this.variablesItem.setValue(new ValueItem(bundle.getString("operations.operationDetails.groups.variables"), ""));
+		this.parametersItem.setValue(new ValueItem(i18n.translate("operations.operationDetails.groups.parameters"), ""));
+		this.returnValuesItem.setValue(new ValueItem(i18n.translate("operations.operationDetails.groups.returnValues"), ""));
+		this.constantsItem.setValue(new ValueItem(i18n.translate("operations.operationDetails.groups.constants"), ""));
+		this.variablesItem.setValue(new ValueItem(i18n.translate("operations.operationDetails.groups.variables"), ""));
 		
 		this.item.addListener((observable, from, to) -> {
 			this.rootItem.getChildren().clear();
@@ -88,9 +88,9 @@ class OperationDetailsStage extends Stage {
 			this.rootItem.getChildren().add(this.variablesItem);
 			this.rootItem.getChildren().forEach(ti -> ti.getChildren().clear());
 			if (to == null) {
-				this.setTitle(bundle.getString("operations.operationDetails.title"));
+				this.setTitle(i18n.translate("operations.operationDetails.title"));
 			} else {
-				this.setTitle(String.format(bundle.getString("operations.operationDetails.titleWithName"), to.getPrettyName()));
+				this.setTitle(i18n.translate("operations.operationDetails.titleWithName", to.getPrettyName()));
 				
 				final List<String> paramNames = to.getParameterNames();
 				final List<String> paramValues = to.getParameterValues();

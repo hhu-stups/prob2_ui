@@ -1,38 +1,41 @@
 package de.prob2.ui.menu;
 
+import java.util.StringJoiner;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ResourceBundle;
-import java.util.StringJoiner;
 
 @Singleton
 public final class AboutBox extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AboutBox.class);
 
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final VersionInfo versionInfo;
 
 	@FXML
 	private TextArea versionInfoTextArea;
 
 	@Inject
-	private AboutBox(final StageManager stageManager, final ResourceBundle bundle, final VersionInfo versionInfo) {
+	private AboutBox(final StageManager stageManager, final I18n i18n, final VersionInfo versionInfo) {
 		super();
 
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.versionInfo = versionInfo;
 
 		stageManager.loadFXML(this, "about_box.fxml");
@@ -42,14 +45,12 @@ public final class AboutBox extends Stage {
 	private void initialize() {
 		final StringJoiner versionInfoBuilder = new StringJoiner("\n\n");
 		
-		versionInfoBuilder.add(String.format(
-			this.bundle.getString("menu.aboutBox.uiInfo"),
+		versionInfoBuilder.add(i18n.translate("menu.aboutBox.uiInfo",
 			this.versionInfo.getUIVersion(),
 			this.versionInfo.getUICommit()
 		));
 		
-		versionInfoBuilder.add(String.format(
-			this.bundle.getString("menu.aboutBox.kernelInfo"),
+		versionInfoBuilder.add(i18n.translate("menu.aboutBox.kernelInfo",
 			this.versionInfo.getKernelVersion(),
 			this.versionInfo.getKernelCommit()
 		));
@@ -68,27 +69,21 @@ public final class AboutBox extends Stage {
 			final Alert alert = stageManager.makeExceptionAlert(e, "menu.aboutBox.cliStartFailed.message");
 			alert.initOwner(this);
 			alert.show();
-			cliVersion = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
-			cliRevision = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
-			cliLastChangedDate = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
-			cliPrologInfo = bundle.getString("menu.aboutBox.cliStartFailed.placeholder");
+			cliVersion = cliRevision = cliLastChangedDate = cliPrologInfo = i18n.translate("menu.aboutBox.cliStartFailed.placeholder");
 		}
-		versionInfoBuilder.add(String.format(
-			this.bundle.getString("menu.aboutBox.cliInfo"),
+		versionInfoBuilder.add(i18n.translate("menu.aboutBox.cliInfo",
 			cliVersion,
 			cliRevision,
 			cliLastChangedDate,
 			cliPrologInfo
 		));
 		
-		versionInfoBuilder.add(String.format(
-			this.bundle.getString("menu.aboutBox.parserInfo"),
+		versionInfoBuilder.add(i18n.translate("menu.aboutBox.parserInfo",
 			this.versionInfo.getParserVersion(),
 			this.versionInfo.getParserCommit()
 		));
 		
-		versionInfoBuilder.add(String.format(
-			this.bundle.getString("menu.aboutBox.javaInfo"),
+		versionInfoBuilder.add(i18n.translate("menu.aboutBox.javaInfo",
 			System.getProperty("java.version"),
 			System.getProperty("java.vendor"),
 			System.getProperty("java.vm.name"),
@@ -96,8 +91,7 @@ public final class AboutBox extends Stage {
 			System.getProperty("java.vm.vendor")
 		));
 		
-		versionInfoBuilder.add(String.format(
-			this.bundle.getString("menu.aboutBox.javaFxInfo"),
+		versionInfoBuilder.add(i18n.translate("menu.aboutBox.javaFxInfo",
 			System.getProperty("javafx.version"),
 			System.getProperty("javafx.runtime.version")
 		));

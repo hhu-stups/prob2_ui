@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -33,6 +32,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.internal.DefaultPluginDirectory;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.VersionInfo;
@@ -72,7 +72,7 @@ public class ProBPluginManager {
 
 	private final ProBPluginHelper proBPluginHelper;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final Path defaultPluginDirectory;
 	private final VersionInfo versionInfo;
@@ -87,13 +87,13 @@ public class ProBPluginManager {
 	 *
 	 * @param proBPluginHelper singleton instance of {@link ProBPluginHelper} used in the prob2-ui application
 	 * @param stageManager singleton instance of {@link StageManager} used in the prob2-ui application
-	 * @param bundle {@link ResourceBundle} used in the prob2-ui application
+	 * @param i18n {@link I18n} used in the prob2-ui application
 	 */
 	@Inject
-	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, ResourceBundle bundle, final FileChooserManager fileChooserManager, @DefaultPluginDirectory final Path defaultPluginDirectory, final VersionInfo versionInfo, final StopActions stopActions, final Config config) {
+	public ProBPluginManager(ProBPluginHelper proBPluginHelper, StageManager stageManager, I18n i18n, final FileChooserManager fileChooserManager, @DefaultPluginDirectory final Path defaultPluginDirectory, final VersionInfo versionInfo, final StopActions stopActions, final Config config) {
 		this.proBPluginHelper = proBPluginHelper;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.defaultPluginDirectory = defaultPluginDirectory;
 		this.versionInfo = versionInfo;
@@ -203,7 +203,7 @@ public class ProBPluginManager {
 	 */
 	List<PluginWrapper> changePluginDirectory() {
 		DirectoryChooser chooser = new DirectoryChooser();
-		chooser.setTitle(bundle.getString("plugin.pluginMenu.directoryChooser.changePath.title"));
+		chooser.setTitle(i18n.translate("plugin.pluginMenu.directoryChooser.changePath.title"));
 		chooser.setInitialDirectory(getPluginDirectory().toFile());
 		final Path newPath = fileChooserManager.showDirectoryChooser(chooser, null, stageManager.getCurrent());
 		if (newPath != null) {
@@ -328,7 +328,7 @@ public class ProBPluginManager {
 
 	private Path showFileChooser(@Nonnull final Stage stage) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("plugin.fileChooser.addPlugin.title"));
+		fileChooser.setTitle(i18n.translate("plugin.fileChooser.addPlugin.title"));
 		fileChooser.getExtensionFilters()
 				.addAll(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Plugin", "jar"));
 		return fileChooserManager.showOpenFileChooser(fileChooser, Kind.PLUGINS, stage);

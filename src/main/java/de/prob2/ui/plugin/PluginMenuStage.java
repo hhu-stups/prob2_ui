@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.property.SimpleBooleanProperty;
@@ -42,7 +42,7 @@ public class PluginMenuStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginMenuStage.class);
 
 	private final ProBPluginManager proBPluginManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final StageManager stageManager;
 
 	private ObservableList<PluginWrapper> pluginList;
@@ -65,9 +65,9 @@ public class PluginMenuStage extends Stage {
 	@Inject
 	public PluginMenuStage(final StageManager stageManager,
 						   final ProBPluginManager proBPluginManager,
-						   final ResourceBundle bundle) {
+						   final I18n i18n) {
 		this.proBPluginManager = proBPluginManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "plugin_menu_stage.fxml", this.getClass().getName());
 	}
@@ -195,16 +195,14 @@ public class PluginMenuStage extends Stage {
 		final String pluginId = pluginWrapper.getPluginId();
 		final String pluginName = plugin.getName();
 
-		final MenuItem restartItem = new MenuItem(
-				getFormattedString("plugin.pluginMenu.table.contextmenu.restart", pluginName));
+		final MenuItem restartItem = new MenuItem(i18n.translate("plugin.pluginMenu.table.contextmenu.restart", pluginName));
 		restartItem.setOnAction(event -> {
 			if (PluginState.STOPPED == getProBJarPluginManager().stopPlugin(pluginId)) {
 				getProBJarPluginManager().startPlugin(pluginId);
 			}
 		});
 
-		final MenuItem removeMenuItem = new MenuItem(
-				getFormattedString("plugin.pluginMenu.table.contextmenu.remove", pluginName));
+		final MenuItem removeMenuItem = new MenuItem(i18n.translate("plugin.pluginMenu.table.contextmenu.remove", pluginName));
 		removeMenuItem.setOnAction(event -> {
 			final List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(ButtonType.YES);
@@ -224,14 +222,5 @@ public class PluginMenuStage extends Stage {
 
 	private ProBPluginManager.ProBJarPluginManager getProBJarPluginManager() {
 		return proBPluginManager.getPluginManager();
-	}
-
-	private String getFormattedString(final String key, final Object... args) {
-		final String bundleString = bundle.getString(key);
-		if (args.length == 0) {
-			return bundleString;
-		} else {
-			return String.format(bundleString, args);
-		}
 	}
 }

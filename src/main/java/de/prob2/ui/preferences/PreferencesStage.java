@@ -8,7 +8,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,7 +20,9 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.ErrorDisplayFilter;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -82,7 +83,7 @@ public final class PreferencesStage extends Stage {
 
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final ErrorDisplayFilter errorDisplayFilter;
 	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;
@@ -96,7 +97,7 @@ public final class PreferencesStage extends Stage {
 	private PreferencesStage(
 		final StageManager stageManager,
 		final FileChooserManager fileChooserManager,
-		final ResourceBundle bundle,
+		final I18n i18n,
 		final ErrorDisplayFilter errorDisplayFilter,
 		final ProjectManager projectManager,
 		final CurrentProject currentProject,
@@ -107,7 +108,7 @@ public final class PreferencesStage extends Stage {
 	) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.errorDisplayFilter = errorDisplayFilter;
 		this.projectManager = projectManager;
 		this.currentProject = currentProject;
@@ -132,17 +133,7 @@ public final class PreferencesStage extends Stage {
 		// Require at least ErrorItem.Type.ERROR to be always visible.
 		this.errorLevelChoiceBox.getItems().remove(ErrorItem.Type.INTERNAL_ERROR);
 		this.errorLevelChoiceBox.valueProperty().bindBidirectional(this.errorDisplayFilter.errorLevelProperty());
-		this.errorLevelChoiceBox.setConverter(new StringConverter<ErrorItem.Type>() {
-			@Override
-			public String toString(final ErrorItem.Type object) {
-				return bundle.getString(ERROR_LEVEL_DESCRIPTION_KEYS.get(object));
-			}
-			
-			@Override
-			public ErrorItem.Type fromString(final String string) {
-				throw new UnsupportedOperationException("Conversion from String to ErrorItem.Type not supported");
-			}
-		});
+		this.errorLevelChoiceBox.setConverter(i18n.translateConverter(TranslatableAdapter.adapter(ERROR_LEVEL_DESCRIPTION_KEYS::get)));
 		
 		final SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 50);
 		
@@ -172,10 +163,11 @@ public final class PreferencesStage extends Stage {
 
 		// TODO: persist tracediffchoice
 		// TODO: change of choice not accepted yet
+		// TODO: change this to enums as well
 		traceDiffChoiceBox.getItems().setAll(FXCollections.observableArrayList(
-				bundle.getString("preferences.stage.tage.general.traceDiffType.singleLines"),
-				bundle.getString("preferences.stage.tage.general.traceDiffType.multipleLines")
-				//,bundle.getString("preferences.stage.tage.general.traceDiffType.treeView")
+				i18n.translate("preferences.stage.tage.general.traceDiffType.singleLines"),
+				i18n.translate("preferences.stage.tage.general.traceDiffType.multipleLines")
+				//,i18n.translate("preferences.stage.tage.general.traceDiffType.treeView")
 		));
 		traceDiffChoiceBox.getSelectionModel().select(0);
 
@@ -206,10 +198,11 @@ public final class PreferencesStage extends Stage {
 	}
 
 	public String getTraceDiffType() {
+		// TODO: change this to enum
 		String s = traceDiffChoiceBox.getSelectionModel().getSelectedItem();
 		String prefix = "preferences.stage.tage.general.traceDiffType.";
 		for (String t : new String[]{"singleLines", "multipleLines", "treeView"}) {
-			if (bundle.getString(prefix + t).equals(s)) {
+			if (i18n.translate(prefix + t).equals(s)) {
 				return t;
 			}
 		}
@@ -219,7 +212,7 @@ public final class PreferencesStage extends Stage {
 	@FXML
 	private void selectDefaultLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle(bundle.getString("preferences.stage.tabs.general.directoryChooser.selectLocation.title"));
+		dirChooser.setTitle(i18n.translate("preferences.stage.tabs.general.directoryChooser.selectLocation.title"));
 		dirChooser.setInitialDirectory(new File(defaultLocationField.getText()));
 		final Path path = fileChooserManager.showDirectoryChooser(dirChooser, null, this.getOwner());
 		

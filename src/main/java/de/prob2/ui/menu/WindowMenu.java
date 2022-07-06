@@ -2,7 +2,6 @@ package de.prob2.ui.menu;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.ResourceBundle;
 
 import javax.annotation.Nullable;
 
@@ -13,8 +12,8 @@ import de.codecentric.centerdevice.MenuToolkit;
 import de.codecentric.centerdevice.util.StageUtils;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
@@ -35,7 +34,7 @@ public class WindowMenu extends Menu {
 
 	private final Injector injector;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final UIState uiState;
 
@@ -43,14 +42,14 @@ public class WindowMenu extends Menu {
 	private WindowMenu(
 		final Injector injector,
 		final StageManager stageManager,
-		final ResourceBundle bundle,
+		final I18n i18n,
 		final FileChooserManager fileChooserManager,
 		final UIState uiState,
 		@Nullable MenuToolkit menuToolkit
 	) {
 		this.injector = injector;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.uiState = uiState;
 		stageManager.loadFXML(this, "windowMenu.fxml");
@@ -99,7 +98,7 @@ public class WindowMenu extends Menu {
 	@FXML
 	private void handleLoadPerspective() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
+		fileChooser.setTitle(i18n.translate("common.fileChooser.open.title"));
 		fileChooser.getExtensionFilters().addAll(
 				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.fxml", "fxml"));
 		Path selectedFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PERSPECTIVES,

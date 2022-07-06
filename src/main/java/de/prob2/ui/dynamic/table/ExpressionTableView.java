@@ -1,9 +1,20 @@
 package de.prob2.ui.dynamic.table;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.GetShortestTraceCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
@@ -14,10 +25,12 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -32,19 +45,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
@@ -125,8 +128,8 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	
 	@Inject
 	public ExpressionTableView(final Injector injector, final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
-							   final CurrentProject currentProject, final ResourceBundle bundle, final FileChooserManager fileChooserManager, final StopActions stopActions) {
-		super(preferencesStageProvider, currentTrace, currentProject, bundle, stopActions, "Expression Table Visualizer");
+	                           final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+		super(preferencesStageProvider, currentTrace, currentProject, i18n, stopActions, "Expression Table Visualizer");
 		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
@@ -198,7 +201,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 
 	private void handleSource(List<String> header, List<String> item, List<MenuItem> contextMenuItems) {
-		MenuItem showSourceItem = new MenuItem(bundle.getString("dynamic.tableview.showSource"));
+		MenuItem showSourceItem = new MenuItem(i18n.translate("dynamic.tableview.showSource"));
 		int indexOfSource = header.indexOf(SOURCE_COLUMN_NAME);
 		if(item != null) {
 			String source = item.get(indexOfSource);
@@ -249,7 +252,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 
 	private void handleStateID(List<String> header, List<String> item, List<MenuItem> contextMenuItems) {
-		MenuItem jumpToStateItem = new MenuItem(bundle.getString("dynamic.tableview.jumpToState"));
+		MenuItem jumpToStateItem = new MenuItem(i18n.translate("dynamic.tableview.jumpToState"));
 		int indexOfStateID = header.indexOf(STATE_ID_COLUMN_NAME);
 		if(item != null) {
 			String stateID = item.get(indexOfStateID);
@@ -277,7 +280,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private void save() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv"));
-		fileChooser.setTitle(bundle.getString("common.fileChooser.saveAsCSV.title"));
+		fileChooser.setTitle(i18n.translate("common.fileChooser.saveAsCSV.title"));
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this);
 		if(path == null || currentTable == null) {
 			return;

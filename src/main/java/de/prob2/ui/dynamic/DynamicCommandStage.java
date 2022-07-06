@@ -2,7 +2,6 @@ package de.prob2.ui.dynamic;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.google.inject.Provider;
 
@@ -15,6 +14,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.BackgroundUpdater;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -95,16 +95,16 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	
 	protected final CurrentProject currentProject;
 	
-	protected final ResourceBundle bundle;
+	protected final I18n i18n;
 	
 	protected final BackgroundUpdater updater;
 	
 	protected DynamicCommandStage(final Provider<DynamicPreferencesStage> preferencesStageProvider,
-			final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final StopActions stopActions, final String threadName) {
+			final CurrentTrace currentTrace, final CurrentProject currentProject, final I18n i18n, final StopActions stopActions, final String threadName) {
 		this.preferencesStageProvider = preferencesStageProvider;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.updater = new BackgroundUpdater(threadName);
 		stopActions.add(this.updater::shutdownNow);
 	}
@@ -189,7 +189,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		preferences.setToRefresh(this);
 		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
 		preferences.setIncludedPreferenceNames(currentItem.getRelevantPreferences());
-		preferences.setTitle(String.format(bundle.getString("dynamic.preferences.stage.title"), currentItem.getName()));
+		preferences.setTitle(i18n.translate("dynamic.preferences.stage.title", currentItem.getName()));
 		preferences.show();
 	}
 	
@@ -202,15 +202,15 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	private void updatePlaceholderLabel() {
 		final String text;
 		if (this.updater.isRunning()) {
-			text = bundle.getString("dynamic.placeholder.inProgress");
+			text = i18n.translate("dynamic.placeholder.inProgress");
 		} else if (currentTrace.get() == null) {
-			text = bundle.getString("common.noModelLoaded");
+			text = i18n.translate("common.noModelLoaded");
 		} else {
 			final T selectedItem = lvChoice.getSelectionModel().getSelectedItem();
 			if (selectedItem == null) {
-				text = bundle.getString("dynamic.placeholder.selectVisualization");
+				text = i18n.translate("dynamic.placeholder.selectVisualization");
 			} else if (selectedItem.getArity() > 0) {
-				text = bundle.getString("dynamic.enterFormula.placeholder");
+				text = i18n.translate("dynamic.enterFormula.placeholder");
 			} else {
 				// The placeholder label shouldn't be seen by the user in this case,
 				// because the visualization content should be visible,
