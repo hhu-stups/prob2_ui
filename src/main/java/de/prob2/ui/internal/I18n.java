@@ -14,6 +14,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,18 +96,19 @@ public final class I18n {
 	}
 
 	/**
-	 * First translates the given key to obtain a pattern, then formats the pattern via MessageFormat.
+	 * First translates the given key to obtain a pattern, then formats the pattern via MessageFormat with the given arguments.
+	 * The arguments will be evaluated before use: {@link ObservableValue}s will be queried and {@link Translatable}/{@link Formattable} objects will be resolved.
 	 *
 	 * @param key       key to translate
 	 * @param arguments arguments for formatting
 	 * @return formatted and translated string
 	 */
 	public String translate(String key, Object... arguments) {
-		Objects.requireNonNull(arguments, "arguments");
 		String pattern = translate0(key);
+		Object[] evaluatedArguments = evaluateArguments(arguments);
 		try {
 			MessageFormat mf = new MessageFormat(pattern, locale());
-			return mf.format(arguments);
+			return mf.format(evaluatedArguments);
 		} catch (Exception e) {
 			LOGGER.error("Error while formatting pattern '{}' for given key '{}'", pattern, key, e);
 			return pattern;
@@ -138,7 +140,8 @@ public final class I18n {
 	}
 
 	/**
-	 * Formats a given pattern via MessageFormat without translating.
+	 * Formats a given pattern via MessageFormat with the given arguments without translating.
+	 * The arguments will be evaluated before use: {@link ObservableValue}s will be queried and {@link Translatable}/{@link Formattable} objects will be resolved.
 	 *
 	 * @param pattern   pattern
 	 * @param arguments arguments for formatting
@@ -146,10 +149,10 @@ public final class I18n {
 	 */
 	public String format(String pattern, Object... arguments) {
 		Objects.requireNonNull(pattern, "pattern");
-		Objects.requireNonNull(arguments, "arguments");
+		Object[] evaluatedArguments = evaluateArguments(arguments);
 		try {
 			MessageFormat mf = new MessageFormat(pattern, locale());
-			return mf.format(arguments);
+			return mf.format(evaluatedArguments);
 		} catch (Exception e) {
 			LOGGER.error("Error while formatting given pattern '{}'", pattern, e);
 			return pattern;
@@ -192,17 +195,9 @@ public final class I18n {
 		Objects.requireNonNull(key, "key");
 		Objects.requireNonNull(arguments, "arguments");
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
-		ObservableValue<?>[] dependencies = Arrays.stream(copiedArguments)
-				                                    .filter(arg -> arg instanceof ObservableValue)
-				                                    .map(arg -> (ObservableValue<?>) arg)
-				                                    .toArray(ObservableValue[]::new);
+		ObservableValue<?>[] dependencies = collectDependencies(copiedArguments);
 		return Bindings.createStringBinding(
-				() -> translate(
-						key,
-						Arrays.stream(copiedArguments)
-								.map(arg -> arg instanceof ObservableValue ? ((ObservableValue<?>) arg).getValue() : arg)
-								.toArray()
-				),
+				() -> translate(key, evaluateArguments(copiedArguments)),
 				dependencies
 		);
 	}
@@ -243,17 +238,9 @@ public final class I18n {
 		Objects.requireNonNull(pattern, "pattern");
 		Objects.requireNonNull(arguments, "arguments");
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
-		ObservableValue<?>[] dependencies = Arrays.stream(copiedArguments)
-				                                    .filter(arg -> arg instanceof ObservableValue)
-				                                    .map(arg -> (ObservableValue<?>) arg)
-				                                    .toArray(ObservableValue[]::new);
+		ObservableValue<?>[] dependencies = collectDependencies(copiedArguments);
 		return Bindings.createStringBinding(
-				() -> format(
-						pattern,
-						Arrays.stream(copiedArguments)
-								.map(arg -> arg instanceof ObservableValue ? ((ObservableValue<?>) arg).getValue() : arg)
-								.toArray()
-				),
+				() -> format(pattern, evaluateArguments(copiedArguments)),
 				dependencies
 		);
 	}
@@ -420,5 +407,34 @@ public final class I18n {
 				throw new UnsupportedOperationException("Conversion from String not supported");
 			}
 		};
+	}
+
+	private Object evaluateArgument(Object arg) {
+		if (arg == null) {
+			return "null";
+		} else if (arg instanceof Translatable) {
+			return translate((Translatable) arg);
+		} else if (arg instanceof Formattable) {
+			return format((Formattable) arg);
+		} else if (arg instanceof ObservableValue) {
+			return evaluateArgument(((ObservableValue<?>) arg).getValue());
+		}
+
+		return arg;
+	}
+
+	private Object[] evaluateArguments(Object... arguments) {
+		Objects.requireNonNull(arguments, "arguments");
+		return Arrays.stream(arguments)
+				       .map(this::evaluateArgument)
+				       .toArray();
+	}
+
+	private static ObservableValue<?>[] collectDependencies(Object... arguments) {
+		Objects.requireNonNull(arguments, "arguments");
+		return Arrays.stream(arguments)
+				       .filter(arg -> arg instanceof ObservableValue)
+				       .map(arg -> (ObservableValue<?>) arg)
+				       .toArray(ObservableValue[]::new);
 	}
 }
