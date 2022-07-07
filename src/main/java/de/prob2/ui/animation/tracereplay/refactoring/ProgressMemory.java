@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.tracereplay.refactoring;
 
 import de.prob.check.tracereplay.check.ui.ProgressMemoryInterface;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -104,13 +105,13 @@ public class ProgressMemory extends AnchorPane implements ProgressMemoryInterfac
 	}
 
 
-	public static ProgressMemory setupForTraceChecker(ResourceBundle resourceBundle, StageManager stageManager, Stage progressStage){
+	public static ProgressMemory setupForTraceChecker(I18n i18n, StageManager stageManager, Stage progressStage){
 		List<String> labels = Arrays.asList(
-				resourceBundle.getString("traceModification.progressBar.label.types"),
-				resourceBundle.getString("traceModification.progressBar.label.delta"),
-				resourceBundle.getString("traceModification.progressBar.label.prepare"),
-				resourceBundle.getString("traceModification.progressBar.label.replay"),
-				resourceBundle.getString("traceModification.progressBar.label.after")
+				i18n.translate("traceModification.progressBar.label.types"),
+				i18n.translate("traceModification.progressBar.label.delta"),
+				i18n.translate("traceModification.progressBar.label.prepare"),
+				i18n.translate("traceModification.progressBar.label.replay"),
+				i18n.translate("traceModification.progressBar.label.after")
 		);
 
 		return new ProgressMemory(5, labels, stageManager, progressStage);

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 
@@ -37,6 +36,7 @@ import de.prob2.ui.animation.tracereplay.refactoring.ReplayOptionsOverview;
 import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
@@ -70,20 +70,20 @@ public class RefactorButton extends Button {
 	private final MachineLoader machineLoader;
 	private final RealTimeSimulator realTimeSimulator;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final TraceManager traceManager;
 	private final Injector injector;
 	private final TraceFileHandler traceFileHandler;
 
 	@Inject
-	private RefactorButton(final StageManager stageManager, final CurrentProject currentProject, final MachineLoader machineLoader, final RealTimeSimulator realTimeSimulator, FileChooserManager fileChooserManager, ResourceBundle resourceBundle, TraceFileHandler traceFileHandler, TraceManager traceManager, Injector injector) {
+	private RefactorButton(final StageManager stageManager, final CurrentProject currentProject, final MachineLoader machineLoader, final RealTimeSimulator realTimeSimulator, FileChooserManager fileChooserManager, I18n i18n, TraceFileHandler traceFileHandler, TraceManager traceManager, Injector injector) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.machineLoader = machineLoader;
 		this.realTimeSimulator = realTimeSimulator;
-		this.bundle = resourceBundle;
+		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.traceManager = traceManager;
 		this.injector = injector;
@@ -97,7 +97,7 @@ public class RefactorButton extends Button {
 		this.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()).or(realTimeSimulator.runningProperty()));
 
 		this.setOnAction(event -> {
-			RefactorSetup result = new RefactorSetupView(stageManager, currentProject, bundle, fileChooserManager).showAndWait().get();
+			RefactorSetup result = new RefactorSetupView(stageManager, currentProject, i18n, fileChooserManager).showAndWait().get();
 			if (result.whatToDo == RefactorSetup.WhatToDo.NOTHING) {
 				return;
 			}

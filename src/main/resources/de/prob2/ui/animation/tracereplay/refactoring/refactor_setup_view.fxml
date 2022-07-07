@@ -1,52 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.DialogPane?>
-<?import javafx.scene.control.Dialog?>
-
-<?import javafx.scene.Scene?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Dialog?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.layout.VBox?>
 <fx:root type="Dialog" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane prefHeight="284.0" prefWidth="414.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
 			<content>
 				<VBox>
 					<children>
-						<ChoiceBox fx:id="options" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="320.0">
+						<ComboBox fx:id="options" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="320.0">
 							<VBox.margin>
 								<Insets top="10.0" />
 							</VBox.margin>
-						</ChoiceBox>
-						<Button fx:id="firstMachine" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="First Machine">
-							<VBox.margin>
-								<Insets top="10.0" />
-							</VBox.margin>
-						</Button>
-						<Button fx:id="secondMachine" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="Second Machine">
+						</ComboBox>
+						<Button fx:id="firstMachine" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="%traceModification.traceRefactorSetup.button.firstMachine">
 							<VBox.margin>
 								<Insets top="10.0" />
 							</VBox.margin>
 						</Button>
-						<Button fx:id="traceFile" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="Trace File">
+						<Button fx:id="secondMachine" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="%traceModification.traceRefactorSetup.button.secondMachine">
 							<VBox.margin>
 								<Insets top="10.0" />
 							</VBox.margin>
 						</Button>
-						<CheckBox fx:id="checkBox" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="set result as trace in current machine" />
+						<Button fx:id="traceFile" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="%traceModification.traceRefactorSetup.button.trace">
+							<VBox.margin>
+								<Insets top="10.0" />
+							</VBox.margin>
+						</Button>
+						<CheckBox fx:id="checkBox" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="%traceModification.traceRefactorSetup.checkBox.setResult" />
 					</children>
 				</VBox>
 			</content>
 		</DialogPane>
 	</dialogPane>
 </fx:root>
-
-
-

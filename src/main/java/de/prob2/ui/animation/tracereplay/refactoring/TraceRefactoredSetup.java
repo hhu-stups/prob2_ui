@@ -26,6 +26,7 @@ import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
@@ -49,14 +50,15 @@ public class TraceRefactoredSetup {
 	private final Injector injector;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final ResourceBundle resourceBundle;
+	private final I18n i18n;
 	private final StateSpace stateSpace;
 	private final Map<String, OperationInfo> currentMachineOperations;
 	private Stage progressStage;
 	private Thread traceCheckerProcess;
 
-	public TraceRefactoredSetup(TraceJsonFile traceJsonFile, Path machineA, Path machineB, Path tracePath, StateSpace stateSpace,
-									Injector injector, CurrentProject currentProject, StageManager stageManager)  {
+	public TraceRefactoredSetup(TraceJsonFile traceJsonFile, Path machineA, Path machineB, Path tracePath,
+	                            StateSpace stateSpace, Injector injector, CurrentProject currentProject,
+	                            StageManager stageManager) {
 		this.traceJsonFile = traceJsonFile;
 		this.machineA = machineA;
 		this.machineB = machineB;
@@ -65,13 +67,14 @@ public class TraceRefactoredSetup {
 		this.injector = injector;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.resourceBundle = injector.getInstance(ResourceBundle.class);
+		this.i18n = injector.getInstance(I18n.class);
 		this.currentMachineOperations = stateSpace.getLoadedMachine().getOperations();
 		this.stateSpace = stateSpace;
 	}
 
 	public TraceRefactoredSetup(TraceJsonFile traceJsonFile, Path machineA, Path machineB, Path tracePath,
-								Injector injector, CurrentProject currentProject, StageManager stageManager) throws IOException {
+	                            Injector injector, CurrentProject currentProject, StageManager stageManager)
+			throws IOException {
 		this.traceJsonFile = traceJsonFile;
 		this.machineA = machineA;
 		this.machineB = machineB;
@@ -80,27 +83,25 @@ public class TraceRefactoredSetup {
 		this.injector = injector;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.resourceBundle = injector.getInstance(ResourceBundle.class);
+		this.i18n = injector.getInstance(I18n.class);
 		this.currentMachineOperations = TraceCheckerUtils.createStateSpace(machineA.toString(), injector).getLoadedMachine().getOperations();
 		this.stateSpace = null;
 	}
 
-
-
 	private TraceChecker create(boolean useStateSpaceFromCurrentlyLoaded, boolean useDynamicChecks, ReplayOptions replayOptions, ProgressMemory progressMemory) throws IOException, DeltaCalculationException {
 		StateSpace localStateSpace;
 
-		if(useStateSpaceFromCurrentlyLoaded){
+		if (useStateSpaceFromCurrentlyLoaded) {
 			localStateSpace = stateSpace;
-		}else{
+		} else {
 			localStateSpace = TraceCheckerUtils.createStateSpace(machineA.toString(), injector);
 		}
 
 		String localMachineB;
 
-		if(useDynamicChecks){
+		if (useDynamicChecks) {
 			localMachineB = this.machineB.toString();
-		}else{
+		} else {
 			localMachineB = null;
 		}
 
@@ -118,16 +119,14 @@ public class TraceRefactoredSetup {
 
 	}
 
-
-
-	public void executeCheck(boolean withLocalStateSpace){
+	public void executeCheck(boolean withLocalStateSpace) {
 
 		ReplayOptionsOverview traceOptionChoice = new ReplayOptionsOverview(traceJsonFile.getVariableNames(), traceJsonFile.getMachineOperationInfos(), stageManager);
 		Optional<ReplayOptions> optionResult = traceOptionChoice.showAndWait();
 		ReplayOptions replayOptions = optionResult.get();
 
 		progressStage = new Stage();
-		ProgressMemory progressMemory = ProgressMemory.setupForTraceChecker(resourceBundle, stageManager, progressStage);
+		ProgressMemory progressMemory = ProgressMemory.setupForTraceChecker(i18n, stageManager, progressStage);
 		stageManager.register(progressStage, null);
 		progressStage.initOwner(stageManager.getMainStage().getOwner());
 		progressStage.initModality(Modality.WINDOW_MODAL);
@@ -149,40 +148,39 @@ public class TraceRefactoredSetup {
 		progressStage.showAndWait();
 	}
 
-
 	/**
 	 * Presents the user with the evaluation results and demands some input of him
+	 *
 	 * @return the selected traces to be stored
 	 */
-	public List<Path> evaluateResults(){
+	public List<Path> evaluateResults() {
 
 		try {
 			traceCheckerProcess.join();
 			progressStage.close();
 
-			if(traceChecker == null){
+			if (traceChecker == null) {
 				throw new NullPointerException();
 			}
 
 			final List<Path> result = new ArrayList<>();
 
 			TraceModifier traceModifier = traceChecker.getTraceModifier();
-			if(traceModifier.tracingFoundResult() && traceModifier.isDirty()){
+			if (traceModifier.tracingFoundResult() && traceModifier.isDirty()) {
 				TraceRefactorResults dialog = new TraceRefactorResults(injector, stageManager, this, persistentTrace);
 				stageManager.register(dialog);
 				List<PersistentTrace> dialogResult = new ArrayList<>(dialog.showAndWait().get());//The dialog can only return 0,1 or 2 results
-				if(dialogResult.remove(persistentTrace)){
+				if (dialogResult.remove(persistentTrace)) {
 					result.add(traceJsonFilePath);
 				}
-				if(!dialogResult.isEmpty()){
+				if (!dialogResult.isEmpty()) {
 					result.add(saveNewTrace(dialogResult.get(0)));
 				}
-			}else if(traceModifier.tracingFoundResult() && !traceModifier.isDirty()){
+			} else if (traceModifier.tracingFoundResult() && !traceModifier.isDirty()) {
 				result.add(traceJsonFilePath);
-			}
-			else if(!traceModifier.tracingFoundResult() && traceModifier.thereAreIncompleteTraces() && traceModifier.ungracefulTraceWithMinLength(3).isEmpty()) {
+			} else if (!traceModifier.tracingFoundResult() && traceModifier.thereAreIncompleteTraces() && traceModifier.ungracefulTraceWithMinLength(3).isEmpty()) {
 				result.addAll(traceReplayedUngracefully(traceModifier.ungracefulTraceWithMinLength(3)));
-			} else{
+			} else {
 				result.addAll(traceNotReplayable());
 			}
 
@@ -193,12 +191,11 @@ public class TraceRefactoredSetup {
 		}
 	}
 
-
 	private List<Path> saveTraces(List<PersistentTrace> persistentTraces) throws IOException {
 
 		List<Path> results = new ArrayList<>();
 
-		for(PersistentTrace persistentTrace : persistentTraces) {
+		for (PersistentTrace persistentTrace : persistentTraces) {
 			String newMachineName = currentProject.getCurrentMachine().getName();
 			results.add(save("_not_fully_replayable_for_", persistentTrace));
 
@@ -207,7 +204,7 @@ public class TraceRefactoredSetup {
 	}
 
 	private Path saveNewTrace(PersistentTrace persistentTrace) throws IOException {
-		return save( "_edited_for_", persistentTrace);
+		return save("_edited_for_", persistentTrace);
 	}
 
 	private Path save(String filenameModification, PersistentTrace persistentTrace) throws IOException {
@@ -215,7 +212,7 @@ public class TraceRefactoredSetup {
 
 		String filename = MoreFiles.getNameWithoutExtension(traceJsonFilePath);
 
-		String modified = filename +  filenameModification + newMachineName+"." + MoreFiles.getFileExtension(traceJsonFilePath);
+		String modified = filename + filenameModification + newMachineName + "." + MoreFiles.getFileExtension(traceJsonFilePath);
 
 		Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
 
@@ -226,44 +223,41 @@ public class TraceRefactoredSetup {
 		return saveAt;
 	}
 
-
-
 	private List<Path> traceReplayedUngracefully(List<List<PersistentTransition>> persistentTraces) throws IOException {
-		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, resourceBundle.getString("traceModification.alert.traceReplayedUngracefully") , ButtonType.YES, ButtonType.NO);
+		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, i18n.translate("traceModification.alert.traceReplayedUngracefully"), ButtonType.YES, ButtonType.NO);
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.setTitle("Trace refactoring could not complete");
 
 		Optional<ButtonType> dialogResult = alert.showAndWait();
-		if (dialogResult.get() == ButtonType.YES) {
+		if (dialogResult.isPresent() && dialogResult.get() == ButtonType.YES) {
 			List<PersistentTrace> toSave = persistentTraces.stream().map(persistentTrace::setTrace).collect(Collectors.toList());
 			return saveTraces(toSave);
-		}else{
+		} else {
 			return emptyList();
 		}
 	}
 
-	private List<Path> traceNotReplayable(){
-		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, resourceBundle.getString("traceModification.alert.traceNotReplayable") , ButtonType.YES, ButtonType.NO);
+	private List<Path> traceNotReplayable() {
+		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, i18n.translate("traceModification.alert.traceNotReplayable"), ButtonType.YES, ButtonType.NO);
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.setTitle("No suitable configuration found.");
 
 		Optional<ButtonType> dialogResult = alert.showAndWait();
-		if (dialogResult.get() == ButtonType.YES) {
+		if (dialogResult.isPresent() && dialogResult.get() == ButtonType.YES) {
 			return singletonList(traceJsonFilePath);
-		}else{
+		} else {
 			return emptyList();
 		}
 	}
 
-	public static void traceNotReplayableConfirmation(ResourceBundle bundle){
+	public static void traceNotReplayableConfirmation(ResourceBundle bundle) {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION, bundle.getString("traceModification.alert.traceNotReplayable"));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.setTitle("No suitable configuration found.");
 		alert.showAndWait();
 	}
 
-
-	class TraceModificationError extends RuntimeException{
+	static class TraceModificationError extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 
 		/**
