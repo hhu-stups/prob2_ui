@@ -306,8 +306,11 @@ public class SimulatorStage extends Stage {
 		this.titleProperty().bind(
 				Bindings.when(configurationPath.isNull())
 						.then(i18n.translateBinding("simulation.stage.title"))
-						.otherwise(i18n.translate("simulation.currentSimulation",
-								Bindings.createStringBinding(() -> currentProject.getLocation().relativize(configurationPath.get()).toString(), configurationPath)))
+						.otherwise(i18n.translateBinding("simulation.currentSimulation",
+								Bindings.createStringBinding(() -> currentProject.getLocation() != null ?
+										                                   currentProject.getLocation().relativize(configurationPath.get()).toString() :
+										                                   "",
+										configurationPath)))
 		);
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
