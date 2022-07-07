@@ -1,12 +1,10 @@
 package de.prob2.ui.animation.tracereplay;
 
-import java.util.Optional;
-import java.util.ResourceBundle;
-
 import com.google.inject.Injector;
 
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.tracediff.TraceDiffStage;
@@ -30,7 +28,7 @@ public final class TraceReplayErrorAlert extends Alert {
 
 	private final Injector injector;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final String text;
 	private final Trigger trigger;
 	private int attemptedReplayTraceSize = -1;
@@ -45,8 +43,8 @@ public final class TraceReplayErrorAlert extends Alert {
 		super(AlertType.ERROR);
 		this.injector = injector;
 		this.stageManager = injector.getInstance(StageManager.class);
-		this.bundle = injector.getInstance(ResourceBundle.class);
-		this.text = String.format(bundle.getString(contentBundleKey), contentParams);
+		this.i18n = injector.getInstance(I18n.class);
+		this.text = i18n.translate(contentBundleKey, contentParams);
 		this.trigger = trigger;
 
 		stageManager.loadFXML(this, "trace_replay_error_alert.fxml");
@@ -71,7 +69,7 @@ public final class TraceReplayErrorAlert extends Alert {
 	@FXML
 	private void initialize() {
 		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-		this.setHeaderText(bundle.getString("animation.tracereplay.alerts.traceReplayError.header"));
+		this.setHeaderText(i18n.translate("animation.tracereplay.alerts.traceReplayError.header"));
 		stageManager.register(this);
 		taError.setText(text);
 		double padding = this.getDialogPane().getPadding().getRight() + this.getDialogPane().getPadding().getLeft();
@@ -85,13 +83,13 @@ public final class TraceReplayErrorAlert extends Alert {
 				this.getButtonTypes().add(ButtonType.CLOSE);
 				break;
 			case TRIGGER_SAVE_TRACE:
-				/*this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
+				/*this.showTraceDiff = new ButtonType(i18n.translate("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
 				this.getButtonTypes().addAll(ButtonType.YES, this.showTraceDiff, ButtonType.NO);*/
 				// TODO Find a way to distinguish between current trace and history (might be not the same if storing failed)
 				this.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
 				break;
 			case TRIGGER_TRACE_CHECKER:
-				this.showTraceDiff = new ButtonType(injector.getInstance(ResourceBundle.class).getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
+				this.showTraceDiff = new ButtonType(i18n.translate("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
 				this.getButtonTypes().addAll(this.showTraceDiff, ButtonType.CLOSE);
 				break;
 			default:
@@ -102,13 +100,13 @@ public final class TraceReplayErrorAlert extends Alert {
 	public void setErrorMessage() {
 		switch (trigger) {
 			case TRIGGER_SAVE_TRACE:
-				this.setHeaderText(bundle.getString("traceSave.buttons.saveTrace.error"));
-				error.setText(bundle.getString("traceSave.buttons.saveTrace.error.msg"));
+				this.setHeaderText(i18n.translate("traceSave.buttons.saveTrace.error"));
+				error.setText(i18n.translate("traceSave.buttons.saveTrace.error.msg"));
 				this.getDialogPane().setExpandableContent(null);
 				handleAlert();
 				break;
 			case TRIGGER_TRACE_CHECKER:
-				error.setText(String.format(bundle.getString("animation.tracereplay.alerts.traceReplayError.error"), attemptedReplayTraceSize, storedTraceSize, lineNumber));
+				error.setText(i18n.translate("animation.tracereplay.alerts.traceReplayError.error", attemptedReplayTraceSize, storedTraceSize, lineNumber));
 				handleAlert();
 				break;
 			case TRIGGER_TRACE_REPLAY_VIEW:
@@ -132,10 +130,10 @@ public final class TraceReplayErrorAlert extends Alert {
 	private void handleAlert() {
 		injector.getInstance(TraceDiffStage.class).close();
 		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
-		Optional<ButtonType> type = this.showAndWait();
-		if (type.get() == ButtonType.NO) {
+		ButtonType type = this.showAndWait().orElse(null);
+		if (type == ButtonType.NO) {
 			currentTrace.set(history == null ? new Trace(currentTrace.getStateSpace()) : history);
-		} else if (type.get() == showTraceDiff) {
+		} else if (type == showTraceDiff) {
 			TraceDiffStage traceDiffStage = injector.getInstance(TraceDiffStage.class);
 			traceDiffStage.setAlert(this);
 			if (trigger == Trigger.TRIGGER_SAVE_TRACE) {

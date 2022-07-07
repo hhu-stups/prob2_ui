@@ -40,7 +40,7 @@ public class TraceSaver {
 				return traceSaver.save(possiblyLostTrace, currentProject.getCurrentMachine());
 			} catch (Exception e) {
 				LOGGER.error("", e);
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_SAVE_TRACE, Collections.EMPTY_LIST);
+				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_SAVE_TRACE);
 				alert.initOwner(window);
 				alert.setAttemptedReplayOrLostTrace(possiblyLostTrace);
 				// TODO set history

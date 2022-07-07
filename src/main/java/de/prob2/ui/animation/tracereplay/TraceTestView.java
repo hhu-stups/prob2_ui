@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -18,6 +17,7 @@ import de.prob.check.tracereplay.Postcondition;
 import de.prob.check.tracereplay.PostconditionPredicate;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
@@ -48,6 +48,8 @@ import javafx.stage.Stage;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 
 @FXMLInjected
 public class TraceTestView extends Stage {
@@ -160,7 +162,7 @@ public class TraceTestView extends Stage {
 
 	private final FontSize fontSize;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final Injector injector;
 
@@ -174,10 +176,10 @@ public class TraceTestView extends Stage {
 
 	@Inject
 	public TraceTestView(final StageManager stageManager, final FontSize fontSize,
-						 final ResourceBundle bundle, final Injector injector) {
+						 final I18n i18n, final Injector injector) {
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.injector = injector;
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}
@@ -367,9 +369,9 @@ public class TraceTestView extends Stage {
 	private MenuButton buildAddButton(VBox box, int index) {
 		final MenuButton btAddTest = new MenuButton("", new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
 		btAddTest.getStyleClass().add("icon-dark");
-		MenuItem addPredicate = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.predicate"));
-		MenuItem addOperationEnabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.enabled"));
-		MenuItem addOperationDisabled = new MenuItem(bundle.getString("animation.trace.replay.test.postcondition.addItem.disabled"));
+		MenuItem addPredicate = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.predicate"));
+		MenuItem addOperationEnabled = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.enabled"));
+		MenuItem addOperationDisabled = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.disabled"));
 
 		addPredicate.setOnAction(e1 -> {
 			PostconditionPredicate postcondition = new PostconditionPredicate();
@@ -401,21 +403,10 @@ public class TraceTestView extends Stage {
 		final HBox innerBox = new HBox();
 		innerBox.setSpacing(2);
 
-		String typeString;
-		switch (postcondition.getKind()) {
-			case PREDICATE:
-				typeString = bundle.getString("animation.trace.replay.test.postcondition.predicate");
-				break;
-			case ENABLEDNESS:
-				typeString = bundle.getString("animation.trace.replay.test.postcondition.enabled");
-				break;
-			case DISABLEDNESS:
-				typeString = bundle.getString("animation.trace.replay.test.postcondition.disabled");
-				break;
-			default:
-				throw new RuntimeException("Given postcondition kind does not exist: " + postcondition.getKind());
-		}
-		final Label typeLabel = new Label(typeString);
+		final Label typeLabel = new Label(i18n.translate(
+				enumNameAdapter("animation.trace.replay.test.postcondition"),
+				postcondition.getKind()
+		));
 		final TextField postconditionTextField = buildPostconditionTextField(postcondition);
 		final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
 		final BindableGlyph statusIcon = buildStatusIcon();
@@ -432,7 +423,7 @@ public class TraceTestView extends Stage {
 		innerBox.getChildren().add(postconditionTextField);
 
 		if(postcondition instanceof OperationExecutability) {
-			final Label withLabel = new Label(bundle.getString("animation.trace.replay.test.postcondition.with"));
+			final Label withLabel = new Label(i18n.translate("animation.trace.replay.test.postcondition.with"));
 			final TextField predicateTextField = buildOperationPredicateTextField(postcondition);
 			innerBox.getChildren().add(withLabel);
 			innerBox.getChildren().add(predicateTextField);

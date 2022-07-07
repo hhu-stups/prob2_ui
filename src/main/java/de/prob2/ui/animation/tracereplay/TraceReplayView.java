@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -18,6 +17,7 @@ import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -54,7 +54,7 @@ public class TraceReplayView extends ScrollPane {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final TraceChecker traceChecker;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
 	private final TraceFileHandler traceFileHandler;
@@ -86,13 +86,13 @@ public class TraceReplayView extends ScrollPane {
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
-							final CurrentTrace currentTrace, final TraceChecker traceChecker, final ResourceBundle bundle,
+							final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
 							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler, final TraceViewHandler traceViewHandler) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.injector = injector;
 		this.traceFileHandler = traceFileHandler;
@@ -149,9 +149,9 @@ public class TraceReplayView extends ScrollPane {
 				final ReplayTrace trace = row.getItem();
 				final TextInputDialog dialog = new TextInputDialog(trace.getId() == null ? "" : trace.getId());
 				stageManager.register(dialog);
-				dialog.setTitle(bundle.getString("animation.tracereplay.view.contextMenu.editId"));
-				dialog.setHeaderText(bundle.getString("vomanager.validationTaskId"));
-				dialog.getEditor().setPromptText(bundle.getString("common.optionalPlaceholder"));
+				dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+				dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
+				dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
 				final Optional<String> res = dialog.showAndWait();
 				res.ifPresent(idText -> {
 					final String id = idText.trim().isEmpty() ? null : idText;
@@ -213,7 +213,7 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void loadTraceFromFile() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("animation.tracereplay.fileChooser.loadTrace.title"));
+		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.loadTrace.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
 		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());

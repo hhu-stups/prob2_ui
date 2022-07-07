@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -28,6 +27,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
@@ -46,17 +46,17 @@ public class TraceChecker {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
 			FXCollections.observableArrayList());
 
 	@Inject
 	private TraceChecker(final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager,
-						 final DisablePropertyController disablePropertyController, final ResourceBundle bundle) {
+						 final DisablePropertyController disablePropertyController, final I18n i18n) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
@@ -140,21 +140,21 @@ public class TraceChecker {
 					Postcondition postcondition = transition.getPostconditions().get(j);
 					switch (postcondition.getKind()) {
 						case PREDICATE:
-							sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.predicate"), transition.getOperationName(), ((PostconditionPredicate) postcondition).getPredicate()));
+							sb.append(i18n.translate("animation.trace.replay.test.alert.content.predicate", transition.getOperationName(), ((PostconditionPredicate) postcondition).getPredicate()));
 							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
-								sb.append(bundle.getString("animation.trace.replay.test.alert.content.parseError"));
+								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
 							}
 							sb.append("\n");
 							break;
 						case ENABLEDNESS: {
 							String predicate = ((OperationEnabledness) postcondition).getPredicate();
 							if (predicate.isEmpty()) {
-								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabled"), transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation()));
+								sb.append(i18n.translate("animation.trace.replay.test.alert.content.enabled", transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation()));
 							} else {
-								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.enabledWithPredicate"), transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation(), predicate));
+								sb.append(i18n.translate("animation.trace.replay.test.alert.content.enabledWithPredicate", transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation(), predicate));
 							}
 							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
-								sb.append(bundle.getString("animation.trace.replay.test.alert.content.parseError"));
+								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
 							}
 							sb.append("\n");
 							break;
@@ -162,12 +162,12 @@ public class TraceChecker {
 						case DISABLEDNESS: {
 							String predicate = ((OperationDisabledness) postcondition).getPredicate();
 							if (predicate.isEmpty()) {
-								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.disabled"), transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation()));
+								sb.append(i18n.translate("animation.trace.replay.test.alert.content.disabled", transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation()));
 							} else {
-								sb.append(String.format(bundle.getString("animation.trace.replay.test.alert.content.disabledWithPredicate"), transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation(), predicate));
+								sb.append(i18n.translate("animation.trace.replay.test.alert.content.disabledWithPredicate", transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation(), predicate));
 							}
 							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
-								sb.append(bundle.getString("animation.trace.replay.test.alert.content.parseError"));
+								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
 							}
 							sb.append("\n");
 							break;
@@ -183,7 +183,7 @@ public class TraceChecker {
 		if(failed) {
 			Platform.runLater(() -> {
 				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setHeaderText(bundle.getString("animation.trace.replay.test.alert.header"));
+				alert.setHeaderText(i18n.translate("animation.trace.replay.test.alert.header"));
 				alert.setContentText(sb.toString());
 				stageManager.register(alert);
 				alert.showAndWait();
