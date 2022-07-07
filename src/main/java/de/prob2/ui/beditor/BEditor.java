@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -23,6 +22,7 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -62,7 +62,7 @@ public class BEditor extends CodeArea {
 
 	private final FontSize fontSize;
 	private final CurrentProject currentProject;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final Injector injector;
 
 	private final ExecutorService executor;
@@ -71,10 +71,10 @@ public class BEditor extends CodeArea {
 	private final Label errorPopupLabel;
 
 	@Inject
-	private BEditor(final FontSize fontSize, final ResourceBundle bundle, final Injector injector, final CurrentProject currentProject, final StopActions stopActions) {
+	private BEditor(final FontSize fontSize, final I18n i18n, final Injector injector, final CurrentProject currentProject, final StopActions stopActions) {
 		this.fontSize = fontSize;
 		this.currentProject = currentProject;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.injector = injector;
 		this.executor = Executors.newSingleThreadExecutor();
 		stopActions.add(this.executor::shutdownNow);
@@ -89,31 +89,31 @@ public class BEditor extends CodeArea {
 	private void initializeContextMenu() {
 		final ContextMenu contextMenu = new ContextMenu();
 
-		final MenuItem undoItem = new MenuItem(bundle.getString("common.contextMenu.undo"));
+		final MenuItem undoItem = new MenuItem(i18n.translate("common.contextMenu.undo"));
 		undoItem.setOnAction(e -> this.getUndoManager().undo());
 		contextMenu.getItems().add(undoItem);
 
-		final MenuItem redoItem = new MenuItem(bundle.getString("common.contextMenu.redo"));
+		final MenuItem redoItem = new MenuItem(i18n.translate("common.contextMenu.redo"));
 		redoItem.setOnAction(e -> this.getUndoManager().redo());
 		contextMenu.getItems().add(redoItem);
 
-		final MenuItem cutItem = new MenuItem(bundle.getString("common.contextMenu.cut"));
+		final MenuItem cutItem = new MenuItem(i18n.translate("common.contextMenu.cut"));
 		cutItem.setOnAction(e -> this.cut());
 		contextMenu.getItems().add(cutItem);
 
-		final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
+		final MenuItem copyItem = new MenuItem(i18n.translate("common.contextMenu.copy"));
 		copyItem.setOnAction(e -> this.copy());
 		contextMenu.getItems().add(copyItem);
 
-		final MenuItem pasteItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
+		final MenuItem pasteItem = new MenuItem(i18n.translate("common.contextMenu.paste"));
 		pasteItem.setOnAction(e -> this.paste());
 		contextMenu.getItems().add(pasteItem);
 
-		final MenuItem deleteItem = new MenuItem(bundle.getString("common.contextMenu.delete"));
+		final MenuItem deleteItem = new MenuItem(i18n.translate("common.contextMenu.delete"));
 		deleteItem.setOnAction(e -> this.deleteText(this.getSelection()));
 		contextMenu.getItems().add(deleteItem);
 
-		final MenuItem selectAllItem = new MenuItem(bundle.getString("common.contextMenu.selectAll"));
+		final MenuItem selectAllItem = new MenuItem(i18n.translate("common.contextMenu.selectAll"));
 		selectAllItem.setOnAction(e -> this.selectAll());
 		contextMenu.getItems().add(selectAllItem);
 

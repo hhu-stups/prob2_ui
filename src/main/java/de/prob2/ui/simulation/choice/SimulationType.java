@@ -1,6 +1,8 @@
 package de.prob2.ui.simulation.choice;
 
-public enum SimulationType {
+import de.prob2.ui.internal.Translatable;
+
+public enum SimulationType implements Translatable {
 
 	MONTE_CARLO_SIMULATION("simulation.type.monteCarloSimulation"),
 	HYPOTHESIS_TEST("simulation.type.hypothesisTest"),
@@ -13,6 +15,7 @@ public enum SimulationType {
 		this.translationKey = translationKey;
 	}
 
+	@Override
 	public String getTranslationKey() {
 		return translationKey;
 	}

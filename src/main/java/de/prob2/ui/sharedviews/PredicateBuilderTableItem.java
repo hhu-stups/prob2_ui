@@ -2,9 +2,11 @@ package de.prob2.ui.sharedviews;
 
 import java.util.Objects;
 
+import de.prob2.ui.internal.Translatable;
+
 public class PredicateBuilderTableItem {
 
-	public enum VariableType {
+	public enum VariableType implements Translatable {
 		INPUT("internal.predicateBuilderView.variableType.input"),
 		OUTPUT("internal.predicateBuilderView.variableType.return"),
 		VARIABLE("internal.predicateBuilderView.variableType.variable"),
@@ -16,7 +18,8 @@ public class PredicateBuilderTableItem {
 			this.bundleKey = bundleKey;
 		}
 
-		public String getBundleKey() {
+		@Override
+		public String getTranslationKey() {
 			return bundleKey;
 		}
 	}

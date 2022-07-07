@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -20,6 +19,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
 
@@ -54,7 +54,7 @@ public class TraceDiff extends VBox {
 	@FXML private HBox buttonBox;
 
 	private final Injector injector;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private TraceReplayErrorAlert alert;
 	private ArrayList<ListView<TraceDiffItem>> listViews = new ArrayList<>();
 	private List<ScrollBar> scrollBarList = new ArrayList<>();
@@ -166,7 +166,7 @@ public class TraceDiff extends VBox {
 	@Inject
 	private TraceDiff(StageManager stageManager, Injector injector) {
 		this.injector = injector;
-		this.bundle = injector.getInstance(ResourceBundle.class);
+		this.i18n = injector.getInstance(I18n.class);
 		stageManager.loadFXML(this,"trace_diff.fxml");
 	}
 
@@ -312,12 +312,10 @@ public class TraceDiff extends VBox {
 	void setAlert(TraceReplayErrorAlert alert) {
 		this.alert = alert;
 		if (alert.getTrigger().equals(TraceReplayErrorAlert.Trigger.TRIGGER_SAVE_TRACE)) {
-			replayed.setText(bundle.getString("history.buttons.saveTrace.error.lost"));
-			if (listBox.getChildren().contains(persistentBox)) {
-				listBox.getChildren().remove(persistentBox);
-			}
+			replayed.setText(i18n.translate("history.buttons.saveTrace.error.lost"));
+			listBox.getChildren().remove(persistentBox);
 		} else {
-			replayed.setText(bundle.getString("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
+			replayed.setText(i18n.translate("animation.tracereplay.alerts.traceReplayError.error.traceDiff.replayed"));
 			if (!listBox.getChildren().contains(persistentBox)) {
 				listBox.getChildren().add(persistentBox);
 			}

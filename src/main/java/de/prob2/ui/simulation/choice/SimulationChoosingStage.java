@@ -4,10 +4,10 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.SimulationModel;
@@ -22,7 +22,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 
 public class SimulationChoosingStage extends Stage {
 
@@ -53,7 +52,7 @@ public class SimulationChoosingStage extends Stage {
 	@FXML
 	private TextField idTextField;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final StageManager stageManager;
 
@@ -66,8 +65,8 @@ public class SimulationChoosingStage extends Stage {
 	private SimulationItem lastItem;
 
 	@Inject
-	public SimulationChoosingStage(final ResourceBundle bundle, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
-		this.bundle = bundle;
+	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
+		this.i18n = i18n;
 		this.stageManager = stageManager;
 		this.simulationItemHandler = simulationItemHandler;
 		this.simulationChoiceBindings = simulationChoiceBindings;
@@ -86,20 +85,7 @@ public class SimulationChoosingStage extends Stage {
 			changeGUIType(to);
 			this.sizeToScene();
 		});
-		simulationChoice.setConverter(new StringConverter<SimulationType>() {
-			@Override
-			public String toString(final SimulationType object) {
-				if(object == null) {
-					return "";
-				}
-				return bundle.getString(object.getTranslationKey());
-			}
-
-			@Override
-			public SimulationType fromString(final String string) {
-				throw new UnsupportedOperationException("Conversion from String to SimulationType not supported");
-			}
-		});
+		simulationChoice.setConverter(i18n.translateConverter());
 		simulationMonteCarloChoice.setSimulationChoosingStage(this);
 		simulationHypothesisChoice.setSimulationChoosingStage(this);
 		simulationEstimationChoice.setSimulationChoosingStage(this);

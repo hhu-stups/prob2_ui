@@ -1,8 +1,27 @@
 package de.prob2.ui.beditor;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
 import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
 import de.prob.animator.domainobjects.ErrorItem;
@@ -13,12 +32,14 @@ import de.prob.scripting.EventBPackageFactory;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -39,29 +60,10 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
-import org.fxmisc.flowless.VirtualizedScrollPane;
+
 import org.fxmisc.richtext.model.StyleSpans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
-import java.nio.charset.MalformedInputException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @FXMLInjected
 @Singleton
@@ -94,7 +96,7 @@ public class BEditorView extends BorderPane {
 	private VirtualizedScrollPane<BEditor> virtualizedScrollPane;*/
 
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
@@ -111,13 +113,13 @@ public class BEditorView extends BorderPane {
 	//private boolean switched = false;
 
 	@Inject
-	private BEditorView(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
+	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
 		/*
 		*	TODO: remember scroll position.
 		*   Getting scrollbar values does not work. Getting estimated y values of Virtualized Scroll Pane does produce weird values (Code area refreshing too often?)
 		*/
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
@@ -152,7 +154,7 @@ public class BEditorView extends BorderPane {
 		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(Bindings.when(saved)
 			.then("")
-			.otherwise(bundle.getString("beditor.unsavedWarning"))
+			.otherwise(i18n.translate("beditor.unsavedWarning"))
 		);
 		setHint();
 		
@@ -342,7 +344,7 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void setHint() {
-		this.setEditorText(bundle.getString("beditor.hint"), null);
+		this.setEditorText(i18n.translate("beditor.hint"), null);
 		beditor.setEditable(false);
 	}
 

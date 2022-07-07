@@ -1,5 +1,15 @@
 package de.prob2.ui.consoles;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import de.prob2.ui.internal.I18n;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.ContextMenu;
@@ -11,19 +21,11 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
+
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 public abstract class Console extends StyleClassedTextArea {
@@ -31,7 +33,7 @@ public abstract class Console extends StyleClassedTextArea {
 	
 	private static final String EMPTY_PROMPT = ">";
 	
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final List<ConsoleInstruction> instructions;
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
@@ -42,10 +44,10 @@ public abstract class Console extends StyleClassedTextArea {
 	private final String header;
 	private final StringProperty prompt;
 	
-	protected Console(ResourceBundle bundle, String header, String prompt, Executable interpreter) {
-		this.bundle = bundle;
+	protected Console(I18n i18n, String header, String prompt, Executable interpreter) {
+		this.i18n = i18n;
 		this.instructions = new ArrayList<>();
-		this.searchHandler = new ConsoleSearchHandler(this, bundle);
+		this.searchHandler = new ConsoleSearchHandler(this, i18n);
 		this.interpreter = interpreter;
 		this.header = header;
 		this.prompt = new SimpleStringProperty(this, "prompt", prompt);
@@ -76,15 +78,15 @@ public abstract class Console extends StyleClassedTextArea {
 	private void initializeContextMenu() {
 		final ContextMenu contextMenu = new ContextMenu();
 		
-		final MenuItem copyItem = new MenuItem(bundle.getString("common.contextMenu.copy"));
+		final MenuItem copyItem = new MenuItem(i18n.translate("common.contextMenu.copy"));
 		copyItem.setOnAction(e -> this.copy());
 		contextMenu.getItems().add(copyItem);
 		
-		final MenuItem pasteItem = new MenuItem(bundle.getString("common.contextMenu.paste"));
+		final MenuItem pasteItem = new MenuItem(i18n.translate("common.contextMenu.paste"));
 		pasteItem.setOnAction(e -> this.paste());
 		contextMenu.getItems().add(pasteItem);
 		
-		final MenuItem clearItem = new MenuItem(bundle.getString("common.contextMenu.clear"));
+		final MenuItem clearItem = new MenuItem(i18n.translate("common.contextMenu.clear"));
 		clearItem.setOnAction(e -> this.reset());
 		contextMenu.getItems().add(clearItem);
 		
@@ -229,7 +231,7 @@ public abstract class Console extends StyleClassedTextArea {
 	protected void activateSearch() {
 		final String input = this.getInput();
 		this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
-		this.appendText(String.format(bundle.getString("consoles.prompt.backwardSearch"), "", input));
+		this.appendText(i18n.translate("consoles.prompt.backwardSearch", "", input));
 		this.moveTo(getLineNumber(), this.getLine().lastIndexOf('\''));
 		currentPosInLine = 0;
 		charCounterInLine = 0;

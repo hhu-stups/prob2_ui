@@ -1,7 +1,20 @@
 package de.prob2.ui.config;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.model.brules.RulesModelFactory;
 import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
@@ -14,25 +27,14 @@ import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob.scripting.ZFuzzFactory;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
+
 import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @Singleton
 public class FileChooserManager {
@@ -64,7 +66,7 @@ public class FileChooserManager {
 		NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(map);
 	}
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final StageManager stageManager;
 
 	private final List<String> machineExtensionPatterns;
@@ -73,8 +75,8 @@ public class FileChooserManager {
 	private final Map<Kind, Path> initialDirectories = new EnumMap<>(Kind.class);
 
 	@Inject
-	private FileChooserManager(final Config config, final ResourceBundle bundle, final StageManager stageManager) {
-		this.bundle = bundle;
+	private FileChooserManager(final Config config, final I18n i18n, final StageManager stageManager) {
+		this.i18n = i18n;
 		this.stageManager = stageManager;
 
 		this.machineExtensionPatterns = FactoryProvider.EXTENSION_TO_FACTORY_MAP.keySet()
@@ -85,7 +87,7 @@ public class FileChooserManager {
 		FactoryProvider.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
 			final String name;
 			if (FACTORY_TO_TYPE_KEY_MAP.containsKey(factory)) {
-				name = bundle.getString(FACTORY_TO_TYPE_KEY_MAP.get(factory));
+				name = i18n.translate(FACTORY_TO_TYPE_KEY_MAP.get(factory));
 			} else {
 				name = factory.getSimpleName();
 			}
@@ -145,7 +147,7 @@ public class FileChooserManager {
 	 * @return an extension filter with the given settings
 	 */
 	public FileChooser.ExtensionFilter getExtensionFilter(final String descriptionBundleKey, final List<String> extensions) {
-		return getExtensionFilterUnlocalized(bundle.getString(descriptionBundleKey), extensions);
+		return getExtensionFilterUnlocalized(i18n.translate(descriptionBundleKey), extensions);
 	}
 	
 	/**
@@ -165,7 +167,7 @@ public class FileChooserManager {
 	 * @return an extension filter that matches all file types
 	 */
 	public FileChooser.ExtensionFilter getAllExtensionsFilter() {
-		return new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.all"), "*.*");
+		return new FileChooser.ExtensionFilter(i18n.translate("common.fileChooser.fileTypes.all"), "*.*");
 	}
 
 	public Path showOpenFileChooser(final FileChooser fileChooser, final Kind kind, final Window window) {
@@ -190,8 +192,13 @@ public class FileChooserManager {
 			String fileExtension = i == -1 ? null : "*" + file.toString().substring(i);
 			if (fileExtension == null || fileChooser.getExtensionFilters().stream().noneMatch(extensionFilter -> extensionFilter.getExtensions().contains(fileExtension))) {
 				// Either there is no file extension or an invalid one
-				stageManager.makeAlert(Alert.AlertType.WARNING, "common.fileChooser.invalidExtension.warning.header", "common.fileChooser.invalidExtension.warning.content", fileExtension == null ? bundle.getString("common.fileChooser.invalidExtension.warning.content.empty") : fileExtension).showAndWait();
-				fileChooser.setTitle(bundle.getString("common.fileChooser.invalidExtension.fileChooser.header"));
+				stageManager.makeAlert(
+						Alert.AlertType.WARNING,
+						"common.fileChooser.invalidExtension.warning.header",
+						"common.fileChooser.invalidExtension.warning.content",
+						fileExtension == null ? i18n.translate("common.fileChooser.invalidExtension.warning.content.empty") : fileExtension
+				).showAndWait();
+				fileChooser.setTitle(i18n.translate("common.fileChooser.invalidExtension.fileChooser.header"));
 				return showSaveFileChooser(fileChooser, kind, window);
 			}
 		}
@@ -224,7 +231,7 @@ public class FileChooserManager {
 	 */
 	private Path showOpenProjectOrMachineChooser(final Window window, final boolean projects, final boolean machines) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("common.fileChooser.open.title"));
+		fileChooser.setTitle(i18n.translate("common.fileChooser.open.title"));
 		
 		final List<String> allExtensionPatterns = new ArrayList<>();
 		if (projects) {
@@ -239,7 +246,7 @@ public class FileChooserManager {
 
 		// This extension filter is created manually instead of with getExtensionFilter,
 		// so that the list of extensions doesn't get appended (it would be very long).
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allProB"), allExtensionPatterns));
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(i18n.translate("common.fileChooser.fileTypes.allProB"), allExtensionPatterns));
 		return this.showOpenFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, window);
 	}
 	
@@ -286,7 +293,7 @@ public class FileChooserManager {
 		// Z: all (zed, tex);
 		// Fuzz: all (fuzz).
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
+		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 
 		List<String> supportedNewMachineExtensionPatterns = new ArrayList<>(this.machineExtensionPatterns);
 		String[] notSupported = {"*.ref", "*.imp", "*.sys", "*.def", "*.bum", "*.buc", "*.eventb", "*.zed", "*.tex", "*.fuzz"};
@@ -296,7 +303,7 @@ public class FileChooserManager {
 		FactoryProvider.FACTORY_TO_EXTENSIONS_MAP.forEach((factory, extensions) -> {
 			final String name;
 			if (NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.containsKey(factory)) {
-				name = bundle.getString(NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.get(factory));
+				name = i18n.translate(NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP.get(factory));
 			} else {
 				return;
 			}
@@ -310,7 +317,7 @@ public class FileChooserManager {
 		fileChooser.getExtensionFilters().addAll(supportedNewMachineExtenionFilters);
 		// This extension filter is created manually instead of with getExtensionFilter,
 		// so that the list of extensions doesn't get appended (it would be very long).
-		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(bundle.getString("common.fileChooser.fileTypes.allSupportedProB"), supportedNewMachineExtensionPatterns));
+		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(i18n.translate("common.fileChooser.fileTypes.allSupportedProB"), supportedNewMachineExtensionPatterns));
 		return this.showSaveFileChooser(fileChooser, FileChooserManager.Kind.NEW_MACHINE, window);
 	}
 

@@ -1,9 +1,8 @@
 package de.prob2.ui.sharedviews;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Injector;
 
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
@@ -30,24 +29,24 @@ public class DescriptionView extends AnchorPane {
 
 	private final Describable describable;
 	private final Runnable closeMethod;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
 	public DescriptionView(final Describable describable, final Runnable closeMethod, final StageManager stageManager, final Injector injector) {
 		this.describable = describable;
 		this.closeMethod = closeMethod;
-		this.bundle = injector.getInstance(ResourceBundle.class);
+		this.i18n = injector.getInstance(I18n.class);
 		stageManager.loadFXML(this, "description_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
-		titelLabel.setText(String.format(bundle.getString("project.machines.machineDescriptionView.title"), describable.getName()));
+		titelLabel.setText(i18n.translate("project.machines.machineDescriptionView.title", describable.getName()));
 		String description = describable.getDescription();
 		if(description == null) {
 			Platform.runLater(this::closeDescriptionView);
 			return;
 		}
-		descriptionText.setText(description.isEmpty()? bundle.getString("project.machines.machineDescriptionView.placeholder") : describable.getDescription());
+		descriptionText.setText(description.isEmpty() ? i18n.translate("project.machines.machineDescriptionView.placeholder") : describable.getDescription());
 		saveButton.visibleProperty().bind(descriptionText.editableProperty());
 	}
 
@@ -59,7 +58,7 @@ public class DescriptionView extends AnchorPane {
 	@FXML
 	public void editDescription() {
 		descriptionText.setEditable(true);
-		if(descriptionText.getText().equals(bundle.getString("project.machines.machineDescriptionView.placeholder"))) {
+		if(descriptionText.getText().equals(i18n.translate("project.machines.machineDescriptionView.placeholder"))) {
 			descriptionText.clear();
 		}
 		descriptionText.requestFocus();
@@ -71,7 +70,7 @@ public class DescriptionView extends AnchorPane {
 		descriptionText.setEditable(false);
 		describable.setDescription(descriptionText.getText());
 		if(descriptionText.getText().isEmpty()) {
-			descriptionText.setText(bundle.getString("project.machines.machineDescriptionView.placeholder"));
+			descriptionText.setText(i18n.translate("project.machines.machineDescriptionView.placeholder"));
 		}
 	}
 

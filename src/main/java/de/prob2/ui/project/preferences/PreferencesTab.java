@@ -1,13 +1,12 @@
 package de.prob2.ui.project.preferences;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -33,15 +32,15 @@ public class PreferencesTab extends Tab {
 	@FXML
 	private HelpButton helpButton;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final Injector injector;
 	private final StageManager stageManager;
 
 	@Inject
-	private PreferencesTab(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final Injector injector) {
+	private PreferencesTab(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final Injector injector) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		stageManager.loadFXML(this, "preferences_tab.fxml");
@@ -76,11 +75,11 @@ public class PreferencesTab extends Tab {
 			}
 		};
 
-		final MenuItem removePreferenceMenuItem = new MenuItem(bundle.getString("project.preferences.preferencesTab.contextMenu.items.remove"));
+		final MenuItem removePreferenceMenuItem = new MenuItem(i18n.translate("project.preferences.preferencesTab.contextMenu.items.remove"));
 		removePreferenceMenuItem.setOnAction(event -> currentProject.removePreference(cell.getItem()));
 		removePreferenceMenuItem.disableProperty().bind(cell.emptyProperty());
 
-		final MenuItem editMenuItem = new MenuItem(bundle.getString("project.preferences.preferencesTab.contextMenu.items.edit"));
+		final MenuItem editMenuItem = new MenuItem(i18n.translate("project.preferences.preferencesTab.contextMenu.items.edit"));
 		editMenuItem.setOnAction(event -> {
 			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
 			prefDialog.initOwner(this.getTabPane().getScene().getWindow());

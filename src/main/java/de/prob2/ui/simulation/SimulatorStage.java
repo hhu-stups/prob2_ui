@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -21,6 +20,7 @@ import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
@@ -76,7 +76,6 @@ import javafx.stage.WindowEvent;
 
 import org.controlsfx.glyphfont.FontAwesome;
 
-
 @FXMLInjected
 @Singleton
 public class SimulatorStage extends Stage {
@@ -100,17 +99,17 @@ public class SimulatorStage extends Stage {
 
 				List<MenuItem> menuItems = FXCollections.observableArrayList();
 
-				MenuItem checkItem = new MenuItem(bundle.getString("simulation.contextMenu.check"));
+				MenuItem checkItem = new MenuItem(i18n.translate("simulation.contextMenu.check"));
 				checkItem.disableProperty().bind(configurationPath.isNull().or(simulationItemHandler.runningProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
 				checkItem.setOnAction(e-> simulationItemHandler.checkItem(this.getItem(), false));
 
-				MenuItem removeItem = new MenuItem(bundle.getString("simulation.contextMenu.remove"));
+				MenuItem removeItem = new MenuItem(i18n.translate("simulation.contextMenu.remove"));
 				removeItem.setOnAction(e -> simulationItemHandler.removeItem(cbSimulation.getSelectionModel().getSelectedItem(), this.getItem()));
 
 				menuItems.add(checkItem);
 				menuItems.add(removeItem);
 
-				Menu copyMenu = new Menu(bundle.getString("simulation.contextMenu.copy"));
+				Menu copyMenu = new Menu(i18n.translate("simulation.contextMenu.copy"));
 				copyMenu.getItems().clear();
 				for(SimulationModel model : currentProject.getCurrentMachine().getSimulations()) {
 					SimulationModel simulationModel = cbSimulation.getSelectionModel().getSelectedItem();
@@ -128,7 +127,7 @@ public class SimulatorStage extends Stage {
 				menuItems.add(copyMenu);
 				copyMenu.setDisable(copyMenu.getItems().isEmpty());
 
-				MenuItem showTraces = new MenuItem(bundle.getString("simulation.contextMenu.showTraces"));
+				MenuItem showTraces = new MenuItem(i18n.translate("simulation.contextMenu.showTraces"));
 				showTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
 				showTraces.setOnAction(e -> {
 					if(item.getTraces().size() == 1) {
@@ -142,7 +141,7 @@ public class SimulatorStage extends Stage {
 				});
 				menuItems.add(showTraces);
 
-				MenuItem showStatistics = new MenuItem(bundle.getString("simulation.contextMenu.showStatistics"));
+				MenuItem showStatistics = new MenuItem(i18n.translate("simulation.contextMenu.showStatistics"));
 				showStatistics.disableProperty().bind(item.tracesProperty().emptyProperty());
 				showStatistics.setOnAction(e -> {
 					SimulationStatsView statsView = injector.getInstance(SimulationStatsView.class);
@@ -151,7 +150,7 @@ public class SimulatorStage extends Stage {
 				});
 				menuItems.add(showStatistics);
 
-				MenuItem saveTraces = new MenuItem(bundle.getString("simulation.contextMenu.saveGeneratedTraces"));
+				MenuItem saveTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTraces"));
 				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
 						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
 				saveTraces.setOnAction(e -> {
@@ -162,7 +161,7 @@ public class SimulatorStage extends Stage {
 				});
 				menuItems.add(saveTraces);
 
-				MenuItem saveTimedTraces = new MenuItem(bundle.getString("simulation.contextMenu.saveGeneratedTimedTraces"));
+				MenuItem saveTimedTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTimedTraces"));
 				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
 						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null,this.itemProperty())));
 				saveTimedTraces.setOnAction(e -> {
@@ -244,7 +243,7 @@ public class SimulatorStage extends Stage {
 
 	private final MachineLoader machineLoader;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final FileChooserManager fileChooserManager;
 
@@ -263,7 +262,7 @@ public class SimulatorStage extends Stage {
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
-						  final SimulationItemHandler simulationItemHandler, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
+						  final SimulationItemHandler simulationItemHandler, final I18n i18n, final FileChooserManager fileChooserManager,
 						  final StopActions stopActions) {
 		super();
 		this.stageManager = stageManager;
@@ -274,7 +273,7 @@ public class SimulatorStage extends Stage {
 		this.machineLoader = machineLoader;
 		this.simulationItemHandler = simulationItemHandler;
 		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
 		this.time = 0;
@@ -289,12 +288,12 @@ public class SimulatorStage extends Stage {
 			if(to) {
 				Platform.runLater(() -> {
 					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PAUSE));
-					btSimulate.setTooltip(new Tooltip(bundle.getString("simulation.button.stop")));
+					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.stop")));
 				});
 			} else {
 				Platform.runLater(() -> {
 					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLAY));
-					btSimulate.setTooltip(new Tooltip(bundle.getString("simulation.button.start")));
+					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.start")));
 				});
 			}
 		});
@@ -304,7 +303,12 @@ public class SimulatorStage extends Stage {
 
 		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(simulationItemHandler.runningProperty().or(noSimulations.or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
 		btCancel.disableProperty().bind(simulationItemHandler.runningProperty().not());
-		this.titleProperty().bind(Bindings.createStringBinding(() -> configurationPath.isNull().get() ? bundle.getString("simulation.stage.title") : String.format(bundle.getString("simulation.currentSimulation"), currentProject.getLocation().relativize(configurationPath.get()).toString()), configurationPath));
+		this.titleProperty().bind(
+				Bindings.when(configurationPath.isNull())
+						.then(i18n.translateBinding("simulation.stage.title"))
+						.otherwise(i18n.translate("simulation.currentSimulation",
+								Bindings.createStringBinding(() -> currentProject.getLocation().relativize(configurationPath.get()).toString(), configurationPath)))
+		);
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow()));
@@ -316,10 +320,10 @@ public class SimulatorStage extends Stage {
 				//TODO: Handle error
 			}
 		});
-		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, bundle));
+		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, i18n));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
-			if(to) {
+			if (to) {
 				stopSimulator(lastSimulator.get());
 			}
 			resetSimulator();
@@ -421,7 +425,7 @@ public class SimulatorStage extends Stage {
 	@FXML
 	public void loadConfiguration() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("simulation.stage.filechooser.title"));
+		fileChooser.setTitle(i18n.translate("simulation.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().addAll(
 				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json")
 		);
@@ -494,7 +498,7 @@ public class SimulatorStage extends Stage {
 					Platform.runLater(() -> lbTime.setText(""));
 				} else {
 					BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
-					Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+					Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.time.second", seconds.doubleValue())));
 				}
 			}
 		};
@@ -510,7 +514,7 @@ public class SimulatorStage extends Stage {
 					if(time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
 						time += 100;
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
-						Platform.runLater(() -> lbTime.setText(String.format(bundle.getString("simulation.time.second"), seconds.doubleValue())));
+						Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.time.second", seconds.doubleValue())));
 					}
 				} else {
 					Platform.runLater(() -> {
@@ -576,6 +580,4 @@ public class SimulatorStage extends Stage {
 		}
 		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
 	}
-
-
 }

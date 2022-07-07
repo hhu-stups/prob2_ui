@@ -2,6 +2,7 @@ package de.prob2.ui.consoles.groovy;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -9,15 +10,16 @@ import de.prob2.ui.consoles.Console;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
+
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
-
-import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -25,8 +27,8 @@ public class GroovyConsole extends Console {
 	private final GroovyInterpreter groovyInterpreter;
 	
 	@Inject
-	private GroovyConsole(GroovyInterpreter groovyInterpreter, ResourceBundle bundle, Config config) {
-		super(bundle, bundle.getString("consoles.groovy.header"), bundle.getString("consoles.groovy.prompt"), groovyInterpreter);
+	private GroovyConsole(GroovyInterpreter groovyInterpreter, I18n i18n, Config config) {
+		super(i18n, i18n.translate("consoles.groovy.header"), i18n.translate("consoles.groovy.prompt"), groovyInterpreter);
 		this.groovyInterpreter = groovyInterpreter;
 		this.groovyInterpreter.setCodeCompletion(this);
 		setCodeCompletionEvent();

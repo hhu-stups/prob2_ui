@@ -1,14 +1,13 @@
 package de.prob2.ui.project.machines;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
@@ -31,14 +30,14 @@ public class EditMachinesDialog extends Dialog<Machine> {
 	@FXML
 	private ButtonType okButtonType;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private Machine machine;
 
 	@Inject
-	public EditMachinesDialog(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject) {
+	public EditMachinesDialog(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject) {
 		super();
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.currentProject = currentProject;
 
 		this.setResultConverter(type -> {
@@ -54,18 +53,18 @@ public class EditMachinesDialog extends Dialog<Machine> {
 	}
 
 	public Optional<Machine> editAndShow(Machine machine) {
-		this.setTitle(String.format(bundle.getString("project.machines.editMachinesDialog.title"), machine.getName()));
+		this.setTitle(i18n.translate("project.machines.editMachinesDialog.title", machine.getName()));
 		this.machine = machine;
 
 		List<Machine> machinesList = currentProject.getMachines();
-		Set<String> machineNamesSet = new HashSet<>(machinesList.stream().map(Machine::getName).collect(Collectors.toList()));
+		Set<String> machineNamesSet = machinesList.stream().map(Machine::getName).collect(Collectors.toSet());
 		machineNamesSet.remove(machine.getName());
 
 		nameField.textProperty().addListener((observable, from, to) -> {
 			Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
 			if (machineNamesSet.contains(to)) {
 				okButton.setDisable(true);
-				errorExplanationLabel.setText(String.format(bundle.getString("project.machines.editMachinesDialog.machineAlreadyExistsError"), to));
+				errorExplanationLabel.setText(i18n.translate("project.machines.editMachinesDialog.machineAlreadyExistsError", to));
 			} else if (to.isEmpty()) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText("");

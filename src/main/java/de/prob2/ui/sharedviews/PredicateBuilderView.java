@@ -1,9 +1,20 @@
 package de.prob2.ui.sharedviews;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
+
 import de.prob.formula.PredicateBuilder;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,15 +26,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 public final class PredicateBuilderView extends VBox {
@@ -59,15 +61,15 @@ public final class PredicateBuilderView extends VBox {
 	@FXML private TableColumn<PredicateBuilderTableItem, String> typeColumn;
 	@FXML private TextField predicateField;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final ObjectProperty<Node> placeholder;
 	private final List<PredicateBuilderTableItem> items;
 	
 	@Inject
-	private PredicateBuilderView(final StageManager stageManager, final ResourceBundle bundle) {
+	private PredicateBuilderView(final StageManager stageManager, final I18n i18n) {
 		super();
 
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.placeholder = new SimpleObjectProperty<>(this, "placeholder", null);
 		this.items = new ArrayList<>();
 		
@@ -80,7 +82,7 @@ public final class PredicateBuilderView extends VBox {
 		this.nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getName()));
 		this.valueColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue()));
 		this.valueColumn.setCellFactory(param -> this.new ValueCell());
-		this.typeColumn.setCellValueFactory(features -> new SimpleStringProperty(bundle.getString(features.getValue().getType().getBundleKey())));
+		this.typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 	}
 	
 	public ObjectProperty<Node> placeholderProperty() {

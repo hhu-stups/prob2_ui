@@ -1,10 +1,9 @@
 package de.prob2.ui.output;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
@@ -17,7 +16,7 @@ import javafx.stage.Stage;
 
 @Singleton
 public class PrologOutputStage extends Stage {
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;
 	
@@ -33,8 +32,8 @@ public class PrologOutputStage extends Stage {
 	private Button clearButton;
 
 	@Inject
-	private PrologOutputStage(final StageManager stageManager, final ResourceBundle bundle, final MachineLoader machineLoader, final CurrentTrace currentTrace) {
-		this.bundle = bundle;
+	private PrologOutputStage(final StageManager stageManager, final I18n i18n, final MachineLoader machineLoader, final CurrentTrace currentTrace) {
+		this.i18n = i18n;
 		this.machineLoader = machineLoader;
 		this.currentTrace = currentTrace;
 
@@ -53,27 +52,27 @@ public class PrologOutputStage extends Stage {
 		final String status;
 		if (machineLoader.currentAnimatorProperty().get() != null) {
 			if (currentTrace.isAnimatorBusy()) {
-				status = bundle.getString("proBCoreConsole.status.inTransaction");
+				status = i18n.translate("proBCoreConsole.status.inTransaction");
 			} else {
-				status = bundle.getString("proBCoreConsole.status.running");
+				status = i18n.translate("proBCoreConsole.status.running");
 			}
 			interruptButton.setDisable(false);
 			startStopButton.setDisable(false);
-			startStopButton.setText(bundle.getString("proBCoreConsole.control.stop"));
+			startStopButton.setText(i18n.translate("proBCoreConsole.control.stop"));
 			startStopButton.setOnAction(e -> machineLoader.shutdownSharedAnimator());
 		} else {
 			if (machineLoader.currentAnimatorStartingProperty().get()) {
-				status = bundle.getString("proBCoreConsole.status.starting");
+				status = i18n.translate("proBCoreConsole.status.starting");
 				startStopButton.setDisable(true);
 			} else {
-				status = bundle.getString("proBCoreConsole.status.notRunning");
+				status = i18n.translate("proBCoreConsole.status.notRunning");
 				startStopButton.setDisable(false);
 			}
 			interruptButton.setDisable(true);
-			startStopButton.setText(bundle.getString("proBCoreConsole.control.start"));
+			startStopButton.setText(i18n.translate("proBCoreConsole.control.start"));
 			startStopButton.setOnAction(e -> new Thread(machineLoader::startSharedAnimator, "Shared Animator Starter").start());
 		}
-		statusLabel.setText(String.format(bundle.getString("proBCoreConsole.status"), status));
+		statusLabel.setText(i18n.translate("proBCoreConsole.status", status));
 	}
 
 	@FXML

@@ -1,10 +1,10 @@
 package de.prob2.ui.sharedviews;
 
 import java.nio.file.Path;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.scene.control.ButtonType;
@@ -17,7 +17,7 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 		UNSET_DEFAULT,
 	}
 	
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
 	private String statusWithDefault;
 	private String statusWithoutDefault;
@@ -28,10 +28,10 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 	private Path defaultPath;
 	
 	@Inject
-	public DefaultPathDialog(final StageManager stageManager, final ResourceBundle bundle) {
+	public DefaultPathDialog(final StageManager stageManager, final I18n i18n) {
 		super();
 		
-		this.bundle = bundle;
+		this.i18n = i18n;
 		
 		this.setResultConverter(buttonType -> {
 			if (buttonType == null || buttonType == ButtonType.CANCEL) {
@@ -72,12 +72,12 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 		final String setButtonKey,
 		final String unsetButtonKey
 	) {
-		this.setTitle(bundle.getString(titleKey));
-		this.statusWithDefault = bundle.getString(statusWithDefaultKey);
-		this.statusWithoutDefault = bundle.getString(statusWithoutDefaultKey);
-		this.loadButtonType = new ButtonType(bundle.getString(loadButtonKey));
-		this.setButtonType = new ButtonType(bundle.getString(setButtonKey));
-		this.unsetButtonType = new ButtonType(bundle.getString(unsetButtonKey));
+		this.setTitle(i18n.translate(titleKey));
+		this.statusWithDefault = i18n.translate(statusWithDefaultKey);
+		this.statusWithoutDefault = i18n.translate(statusWithoutDefaultKey);
+		this.loadButtonType = new ButtonType(i18n.translate(loadButtonKey));
+		this.setButtonType = new ButtonType(i18n.translate(setButtonKey));
+		this.unsetButtonType = new ButtonType(i18n.translate(unsetButtonKey));
 		this.update();
 	}
 	

@@ -2,7 +2,8 @@ package de.prob2.ui.consoles;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
+
+import de.prob2.ui.internal.I18n;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -13,12 +14,12 @@ public final class ConsoleSearchHandler {
 	private final List<SearchResult> searchResults;
 	private int currentSearchIndex = 0;
 	private final Console parent;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
-	public ConsoleSearchHandler(Console parent, ResourceBundle bundle) {
+	public ConsoleSearchHandler(Console parent, I18n i18n) {
 		this.searchResults = new ArrayList<>();
 		this.parent = parent;
-		this.bundle = bundle;
+		this.i18n = i18n;
 	}
 	
 	public boolean isActive() {
@@ -94,8 +95,10 @@ public final class ConsoleSearchHandler {
 	}
 	
 	private void refreshSearch() {
-		final String format = bundle.getString(searchResults.get(0).getFound() ? "consoles.prompt.backwardSearch" : "consoles.prompt.backwardSearchFailed");
-		final String addition = String.format(format, getSearchCurrent(), searchResults.get(currentSearchIndex).getResult());
+		final String addition = i18n.translate(
+				searchResults.get(0).getFound() ? "consoles.prompt.backwardSearch" : "consoles.prompt.backwardSearchFailed",
+				getSearchCurrent(), searchResults.get(currentSearchIndex).getResult()
+		);
 		parent.deleteText(parent.getLineStart(), parent.getLength());
 		parent.appendText(addition);
 		parent.moveTo(parent.getAbsolutePosition(parent.getLineNumber(), parent.getLine().indexOf(':')) - 1);

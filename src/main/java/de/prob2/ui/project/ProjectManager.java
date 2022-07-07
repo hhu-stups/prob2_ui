@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.MoreFiles;
@@ -25,6 +24,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -56,21 +56,21 @@ public class ProjectManager {
 	private final StageManager stageManager;
 	private final TraceManager traceManager;
 	private final FileChooserManager fileChooserManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
 	private final ObservableList<Path> recentProjects;
 	private final IntegerProperty maximumRecentProjects;
 
 	@Inject
 	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager, final TraceManager traceManager,
-						  ResourceBundle bundle, Config config, final FileChooserManager fileChooserManager) {
+						  I18n i18n, Config config, final FileChooserManager fileChooserManager) {
 		this.jacksonManager = jacksonManager;
 		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.traceManager = traceManager;
 		this.fileChooserManager = fileChooserManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		
 		this.recentProjects = FXCollections.observableArrayList();
 		this.maximumRecentProjects = new SimpleIntegerProperty(this, "maximumRecentProjects");
@@ -124,7 +124,7 @@ public class ProjectManager {
 		final List<MenuItem> newItems = new ArrayList<>();
 		
 		if (this.getRecentProjects().isEmpty()) {
-			final MenuItem placeholderItem = new MenuItem(bundle.getString("menu.file.items.placeholder"));
+			final MenuItem placeholderItem = new MenuItem(i18n.translate("menu.file.items.placeholder"));
 			placeholderItem.setDisable(true);
 			newItems.add(placeholderItem);
 		} else {
@@ -144,7 +144,7 @@ public class ProjectManager {
 		
 		newItems.add(new SeparatorMenuItem());
 		
-		final MenuItem clearRecentItem = new MenuItem(bundle.getString("menu.file.items.openRecentProject.items.clear"));
+		final MenuItem clearRecentItem = new MenuItem(i18n.translate("menu.file.items.openRecentProject.items.clear"));
 		clearRecentItem.setDisable(newItems.isEmpty());
 		clearRecentItem.setOnAction(event -> this.getRecentProjects().clear());
 		newItems.add(clearRecentItem);
@@ -158,8 +158,8 @@ public class ProjectManager {
 		Path location = project.getLocation().resolve(project.getName() + "." + PROJECT_FILE_EXTENSION);
 
 		if (currentProject.isNewProject() && Files.exists(location)) {
-			ButtonType renameBT = new ButtonType((bundle.getString("common.buttons.rename")));
-			ButtonType replaceBT = new ButtonType((bundle.getString("common.buttons.replace")));
+			ButtonType renameBT = new ButtonType(i18n.translate("common.buttons.rename"));
+			ButtonType replaceBT = new ButtonType(i18n.translate("common.buttons.replace"));
 			List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(replaceBT);
 			buttons.add(renameBT);
@@ -288,7 +288,7 @@ public class ProjectManager {
 		final Path projectLocation = path.getParent();
 		final Path relative = projectLocation.relativize(path);
 		final String shortName = MoreFiles.getNameWithoutExtension(path);
-		final String description = String.format(bundle.getString("menu.file.automaticProjectDescription"), path);
+		final String description = i18n.translate("menu.file.automaticProjectDescription", path);
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if(replacingProject) {

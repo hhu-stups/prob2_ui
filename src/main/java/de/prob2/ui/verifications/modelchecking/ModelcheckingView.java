@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -265,7 +264,7 @@ public final class ModelcheckingView extends ScrollPane {
 		tvChecks.setRowFactory(table -> {
 			final TableRow<ModelCheckingJobItem> row = new TableRow<>();
 
-			MenuItem showTraceItem = new MenuItem(injector.getInstance(ResourceBundle.class).getString("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
+			MenuItem showTraceItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
 			showTraceItem.setOnAction(e-> {
 				ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
 				injector.getInstance(CurrentTrace.class).set(item.getTrace());

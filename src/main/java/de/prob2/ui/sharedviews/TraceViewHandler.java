@@ -1,7 +1,5 @@
 package de.prob2.ui.sharedviews;
 
-import java.util.ArrayList;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -15,6 +13,7 @@ import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.internal.DisablePropertyController;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
@@ -55,16 +54,16 @@ public class TraceViewHandler {
 
 	private final Injector injector;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final ListProperty<ReplayTrace> traces;
 
 	@Inject
-	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final ResourceBundle bundle) {
+	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final I18n i18n) {
 		this.traceChecker = traceChecker;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.traces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
 		initialize();
 	}
@@ -179,45 +178,44 @@ public class TraceViewHandler {
 	}
 
 	public MenuItem createReplayTraceItem() {
-		final MenuItem replayTraceItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.replayTrace"));
+		final MenuItem replayTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
 		replayTraceItem.setDisable(true);
 		return replayTraceItem;
 	}
 
 	public MenuItem createAddTestsItem() {
-		final MenuItem addTestsItem = new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.editTrace"));
+		final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
 		return addTestsItem;
 	}
 
 	public MenuItem createEditIdItem() {
-		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.editId"));
+		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
 	}
 
 	public MenuItem createDeleteTraceItem() {
-		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.removeTrace"));
+		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.removeTrace"));
 	}
 
 	public MenuItem createShowDescriptionItem() {
-		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.showDescription"));
+		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
 	}
 
 	public MenuItem createShowErrorItem() {
-		final MenuItem showErrorItem = new MenuItem(
-				bundle.getString("animation.tracereplay.view.contextMenu.showError"));
+		final MenuItem showErrorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showError"));
 		showErrorItem.setDisable(true);
 		return showErrorItem;
 	}
 
 	public MenuItem createOpenInExternalEditorItem() {
-		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
 	}
 
 	public MenuItem createRevealInExplorerItem() {
-		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.revealInExplorer"));
+		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
 	}
 
 	public MenuItem createRecheckTraceForChangesItem(){
-		return new MenuItem(bundle.getString("animation.tracereplay.view.contextMenu.refactorTrace"));
+		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.refactorTrace"));
 	}
 
 	public static void updateStatusIcon(final BindableGlyph iconView, final Checked status) {

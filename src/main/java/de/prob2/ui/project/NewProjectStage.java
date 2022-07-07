@@ -3,16 +3,20 @@ package de.prob2.ui.project;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -31,14 +35,14 @@ public class NewProjectStage extends Stage {
 
 	private final FileChooserManager fileChooserManager;
 	private final CurrentProject currentProject;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final StageManager stageManager;
 
 	@Inject
-	private NewProjectStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, StageManager stageManager, ResourceBundle bundle) {
+	private NewProjectStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, StageManager stageManager, I18n i18n) {
 		this.fileChooserManager = fileChooserManager;
 		this.currentProject = currentProject;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "new_project_stage.fxml");
@@ -53,7 +57,7 @@ public class NewProjectStage extends Stage {
 	@FXML
 	void selectLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle(bundle.getString("project.newProjectStage.directoryChooser.selectLocation.title"));
+		dirChooser.setTitle(i18n.translate("project.newProjectStage.directoryChooser.selectLocation.title"));
 		final Path path = fileChooserManager.showDirectoryChooser(dirChooser, null, this.getOwner());
 		if (path != null) {
 			locationField.setText(path.toString());

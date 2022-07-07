@@ -1,27 +1,28 @@
 package de.prob2.ui.error;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 import com.google.inject.Inject;
-
 import com.google.inject.Injector;
-import de.prob.animator.domainobjects.ErrorItem;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.beditor.BEditorView;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
+
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.layout.VBox;
+
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.ResourceBundle;
 
 final class LocationsCell extends TreeTableCell<Object, Object> {
 	final private Injector injector;
@@ -41,26 +42,25 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 			final VBox vbox = new VBox();
 			for (final ErrorItem.Location location : ((ErrorItem)item).getLocations()) {
 				final StringBuilder sb = new StringBuilder();
-				ResourceBundle rb = injector.getInstance(ResourceBundle.class);
-				sb.append(rb.getString("error.errorTable.columns.locations.line"));
+				I18n i18n = injector.getInstance(I18n.class);
+				sb.append(i18n.translate("error.errorTable.columns.locations.line"));
 				sb.append(location.getStartLine());
 				sb.append(", ");
-				sb.append(rb.getString("error.errorTable.columns.locations.column"));
+				sb.append(i18n.translate("error.errorTable.columns.locations.column"));
 				sb.append(location.getStartColumn());
 				
 				if (location.getStartLine() != location.getEndLine() || location.getStartColumn() != location.getEndColumn()) {
-					sb.append(rb.getString("error.errorTable.columns.locations.to"));
-					sb.append(rb.getString("error.errorTable.columns.locations.line"));
+					sb.append(i18n.translate("error.errorTable.columns.locations.to"));
+					sb.append(i18n.translate("error.errorTable.columns.locations.line"));
 					sb.append(location.getEndLine());
 					sb.append(", ");
-					sb.append(rb.getString("error.errorTable.columns.locations.column"));
+					sb.append(i18n.translate("error.errorTable.columns.locations.column"));
 					sb.append(location.getEndColumn());
 				}
 				// Add ContextMenu for every location to be able to jump to each of them
 				ContextMenu contextMenu = new ContextMenu();
-				MenuItem menuItem = new MenuItem(String.format(rb.getString("error.errorTable.location.jumpTo"),
-						rb.getString("error.errorTable.columns.locations.line") + location.getStartLine() + ", " +
-						rb.getString("error.errorTable.columns.locations.column") + location.getStartColumn()));
+				MenuItem menuItem = new MenuItem(i18n.translate("error.errorTable.location.jumpTo",
+						i18n.translate("error.errorTable.columns.locations.line") + location.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + location.getStartColumn()));
 				menuItem.setOnAction(e -> jumpToResource(location));
 				contextMenu.getItems().add(menuItem);
 

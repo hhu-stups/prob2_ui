@@ -1,12 +1,12 @@
 package de.prob2.ui.chart;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
+
+import javax.imageio.ImageIO;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -22,11 +22,12 @@ import de.prob.statespace.TraceElement;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryItem;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -35,7 +36,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -62,8 +62,6 @@ import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
 
 @Singleton
 public final class HistoryChartStage extends Stage {
@@ -136,7 +134,7 @@ public final class HistoryChartStage extends Stage {
 	private class HistoryItemStringConverter extends StringConverter<HistoryItem> {
 		@Override
 		public String toString(final HistoryItem object) {
-			return object == null ? bundle.getString("common.noModelLoaded") : object.toPrettyString();
+			return object == null ? i18n.translate("common.noModelLoaded") : object.toPrettyString();
 		}
 
 		@Override
@@ -172,20 +170,20 @@ public final class HistoryChartStage extends Stage {
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final FileChooserManager fileChooserManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final ObservableList<LineChart<Number, Number>> separateCharts;
 
 	@Inject
 	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-							  final FileChooserManager fileChooserManager, final ResourceBundle bundle) {
+							  final FileChooserManager fileChooserManager, final I18n i18n) {
 		super();
 
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.fileChooserManager = fileChooserManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 
 		this.separateCharts = FXCollections.observableArrayList();
 
@@ -260,10 +258,10 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void addChartMenu(LineChart<Number, Number> chart) {
-		final MenuItem saveImageItem = new MenuItem(bundle.getString("chart.historyChart.menus.item.saveAsImage"));
+		final MenuItem saveImageItem = new MenuItem(i18n.translate("chart.historyChart.menus.item.saveAsImage"));
 		saveImageItem.setOnAction(e -> {
 			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle(bundle.getString("chart.historyChart.fileChooser.saveAsImage"));
+			fileChooser.setTitle(i18n.translate("chart.historyChart.fileChooser.saveAsImage"));
 			fileChooser.getExtensionFilters().addAll(
 					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
 			);
@@ -280,7 +278,7 @@ public final class HistoryChartStage extends Stage {
 			}
 		});
 
-		final MenuItem saveCSVItem = new MenuItem(bundle.getString("chart.historyChart.menus.item.saveAsCSV"));
+		final MenuItem saveCSVItem = new MenuItem(i18n.translate("chart.historyChart.menus.item.saveAsCSV"));
 		saveCSVItem.setOnAction(e -> {
 			List<String> rows = new ArrayList<>();
 			for(XYChart.Series<Number, Number> series : chart.getData()) {
@@ -289,7 +287,7 @@ public final class HistoryChartStage extends Stage {
 				}
 			}
 			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle(bundle.getString("chart.historyChart.fileChooser.saveAsCSV"));
+			fileChooser.setTitle(i18n.translate("chart.historyChart.fileChooser.saveAsCSV"));
 			fileChooser.getExtensionFilters().addAll(
 					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv")
 			);
