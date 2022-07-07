@@ -1,13 +1,12 @@
 package de.prob2.ui.statusbar;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.StateError;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -57,14 +56,14 @@ public final class ErrorStatusStage extends Stage {
 	@FXML
 	private TextArea descriptionTextArea;
 	
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	
 	@Inject
-	private ErrorStatusStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace) {
+	private ErrorStatusStage(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
 		super();
 		
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		
 		stageManager.loadFXML(this, "error_status_stage.fxml", this.getClass().getName());
@@ -97,33 +96,33 @@ public final class ErrorStatusStage extends Stage {
 			this.errorsBox.setVisible(false);
 		} else {
 			if (!to.getCurrentState().isInitialised()) {
-				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotInitialised"));
+				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantNotInitialised"));
 			} else if (to.getCurrentState().isInvariantOk()) {
 				// TO DO: isInvariantOk is incorrect for ignored states (SCOPE predicate false)
 				this.invariantOkLabel.getStyleClass().add("no-error");
-				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantOk"));
+				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantOk"));
 			} else {
 				this.invariantOkLabel.getStyleClass().add("error");
-				this.invariantOkLabel.setText(this.bundle.getString("statusbar.errorStatusStage.invariantNotOk"));
+				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantNotOk"));
 			}
 			
 			if (to.getCurrentState().getOutTransitions().isEmpty()) {
 				// TO DO: this test is incorrect for ignored states (SCOPE predicate false) or if MAX_OPERATIONS==0
 				this.deadlockLabel.getStyleClass().add("warning");
-				this.deadlockLabel.setText(this.bundle.getString("statusbar.errorStatusStage.deadlocked"));
+				this.deadlockLabel.setText(i18n.translate("statusbar.errorStatusStage.deadlocked"));
 			} else {
 				this.deadlockLabel.getStyleClass().add("no-error");
-				this.deadlockLabel.setText(this.bundle.getString("statusbar.errorStatusStage.notDeadlocked"));
+				this.deadlockLabel.setText(i18n.translate("statusbar.errorStatusStage.notDeadlocked"));
 			}
 			
 			if (to.getCurrentState().getStateErrors().isEmpty()) {
 				this.otherStateErrorsLabel.getStyleClass().add("no-error");
-				this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.noOtherStateErrors"));
+				this.otherStateErrorsLabel.setText(i18n.translate("statusbar.errorStatusStage.noOtherStateErrors"));
 				this.otherStateErrorsPane.setVisible(false);
 				this.otherStateErrorsPane.setManaged(false);
 			} else {
 				this.otherStateErrorsLabel.getStyleClass().add("error");
-				this.otherStateErrorsLabel.setText(this.bundle.getString("statusbar.errorStatusStage.otherStateErrors"));
+				this.otherStateErrorsLabel.setText(i18n.translate("statusbar.errorStatusStage.otherStateErrors"));
 				this.otherStateErrorsPane.setVisible(true);
 				this.otherStateErrorsPane.setManaged(true);
 			}
