@@ -73,7 +73,7 @@ public class VOEditingBox extends VBox {
 
 	private final RequirementHandler requirementHandler;
 
-	private I18n i18n;
+	private final I18n i18n;
 
 	private VOManagerStage voManagerStage;
 
