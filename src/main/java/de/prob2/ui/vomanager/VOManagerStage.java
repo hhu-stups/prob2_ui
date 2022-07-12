@@ -17,7 +17,6 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.StateSpace;
 import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
-import de.prob.voparser.VTType;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -32,7 +31,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
@@ -89,6 +87,8 @@ public class VOManagerStage extends Stage {
 
 	private final VOChecker voChecker;
 
+	private final VOErrorHandler voErrorHandler;
+
 	private final RequirementHandler requirementHandler;
 
 	private final ResourceBundle bundle;
@@ -103,11 +103,12 @@ public class VOManagerStage extends Stage {
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-			final VOChecker voChecker, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
+			final VOChecker voChecker, final VOErrorHandler voErrorHandler, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
 		super();
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voChecker = voChecker;
+		this.voErrorHandler = voErrorHandler;
 		this.requirementHandler = requirementHandler;
 		this.bundle = bundle;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
@@ -150,7 +151,7 @@ public class VOManagerStage extends Stage {
 						voChecker.checkVO((ValidationObligation) item);
 					}
 				} catch (VOParseException exception) {
-					voChecker.handleError(this.getScene().getWindow(), exception);
+					voErrorHandler.handleError(this.getScene().getWindow(), exception);
 				}
 			});
 
@@ -193,7 +194,7 @@ public class VOManagerStage extends Stage {
 						voChecker.checkVO((ValidationObligation) nameable);
 					}
 				} catch (VOParseException exc) {
-					voChecker.handleError(this.getScene().getWindow(), exc);
+					voErrorHandler.handleError(this.getScene().getWindow(), exc);
 				}
 			}
 		});
@@ -224,10 +225,10 @@ public class VOManagerStage extends Stage {
 			VOParser voParser = new VOParser();
 			for(ValidationObligation VO : machine.getValidationObligations()) {
 				try {
-					voChecker.parseVOExpression(VO, false);
+					voChecker.parseAndCheckVOExpression(VO, false);
 					VO.setExpressionAst(voParser.parseFormula(VO.getExpression()).getPVo(), voChecker);
 				} catch (VOParseException e) {
-					voChecker.handleError(this, e);
+					voErrorHandler.handleError(this, e);
 				}
 			}
 		}

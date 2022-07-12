@@ -70,6 +70,8 @@ public class VOEditingBox extends VBox {
 
 	private final VOChecker voChecker;
 
+	private final VOErrorHandler voErrorHandler;
+
 	private final RequirementHandler requirementHandler;
 
 	private final I18n i18n;
@@ -77,11 +79,13 @@ public class VOEditingBox extends VBox {
 	private VOManagerStage voManagerStage;
 
 	@Inject
-	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final I18n i18n, final VOChecker voChecker, final RequirementHandler requirementHandler) {
+	public VOEditingBox(final StageManager stageManager, final CurrentProject currentProject, final I18n i18n, final VOChecker voChecker,
+						final VOErrorHandler voErrorHandler, final RequirementHandler requirementHandler) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.voChecker = voChecker;
+		this.voErrorHandler = voErrorHandler;
 		this.requirementHandler = requirementHandler;
 		this.i18n = i18n;
 		stageManager.loadFXML(this, "vo_editing_box.fxml");
@@ -182,7 +186,7 @@ public class VOEditingBox extends VBox {
 		if(voIsValid) {
 			try {
 				final ValidationObligation newVo = createNewFromCurrentSelection();
-				voChecker.parseVOExpression(newVo, false);
+				voChecker.parseAndCheckVOExpression(newVo, false);
 				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
 
 				if (nameExists(currentVOName(), oldVo)) {
@@ -194,7 +198,7 @@ public class VOEditingBox extends VBox {
 				machine.getValidationObligations().add(newVo);
 				requirementHandler.initListenerForVO(cbLinkRequirementChoice.getValue(), newVo);
 			} catch (VOParseException e) {
-				voChecker.handleError(this.getScene().getWindow(), e);
+				voErrorHandler.handleError(this.getScene().getWindow(), e);
 			}
 			voManagerStage.closeEditingBox();
 		} else {
@@ -212,7 +216,7 @@ public class VOEditingBox extends VBox {
 				List<ValidationObligation> validationObligationList = new ArrayList<>(oldVo.getPreviousVersions());
 				validationObligationList.add(oldVo);
 				final ValidationObligation newVo = createNewFromCurrentSelection(validationObligationList);
-				voChecker.parseVOExpression(newVo, false);
+				voChecker.parseAndCheckVOExpression(newVo, false);
 
 				if (nameExists(currentVOName(), oldVo)) {
 					warnAlreadyExists();
@@ -222,7 +226,7 @@ public class VOEditingBox extends VBox {
 				voManagerStage.replaceCurrentValidationObligation(newVo);
 				requirementHandler.initListenerForVO(cbLinkRequirementChoice.getValue(), newVo);
 			} catch (VOParseException e) {
-				voChecker.handleError(this.getScene().getWindow(), e);
+				voErrorHandler.handleError(this.getScene().getWindow(), e);
 			}
 			voManagerStage.closeEditingBox();
 		} else {
