@@ -140,13 +140,17 @@ public class VOManagerStage extends Stage {
 
 			MenuItem checkItem = new MenuItem(bundle.getString("common.buttons.check"));
 			checkItem.setOnAction(e -> {
-				IAbstractRequirement item = (IAbstractRequirement) row.getItem();
-				if(item instanceof Requirement) {
-					VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
-					Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) row.getTreeItem().getParent().getValue() : null;
-					voChecker.checkRequirement((Requirement) item, machine, setting);
-				} else if(item instanceof ValidationObligation) {
-					voChecker.checkVO((ValidationObligation) item);
+				try {
+					IAbstractRequirement item = (IAbstractRequirement) row.getItem();
+					if (item instanceof Requirement) {
+						VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
+						Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) row.getTreeItem().getParent().getValue() : null;
+						voChecker.checkRequirement((Requirement) item, machine, setting);
+					} else if (item instanceof ValidationObligation) {
+						voChecker.checkVO((ValidationObligation) item);
+					}
+				} catch (VOParseException exception) {
+					voChecker.handleError(this.getScene().getWindow(), exception);
 				}
 			});
 
@@ -180,12 +184,16 @@ public class VOManagerStage extends Stage {
 				return;
 			}
 			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
-				if (nameable instanceof Requirement) {
-					VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
-					Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) treeItem.getParent().getValue() : null;
-					voChecker.checkRequirement((Requirement) nameable, machine, setting);
-				} else if (nameable instanceof ValidationObligation) {
-					voChecker.checkVO((ValidationObligation) nameable);
+				try {
+					if (nameable instanceof Requirement) {
+						VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
+						Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) treeItem.getParent().getValue() : null;
+						voChecker.checkRequirement((Requirement) nameable, machine, setting);
+					} else if (nameable instanceof ValidationObligation) {
+						voChecker.checkVO((ValidationObligation) nameable);
+					}
+				} catch (VOParseException exc) {
+					voChecker.handleError(this.getScene().getWindow(), exc);
 				}
 			}
 		});
@@ -219,8 +227,7 @@ public class VOManagerStage extends Stage {
 					voChecker.parseVOExpression(VO, false);
 					VO.setExpressionAst(voParser.parseFormula(VO.getExpression()).getPVo(), voChecker);
 				} catch (VOParseException e) {
-					e.printStackTrace();
-					// TODO
+					voChecker.handleError(this, e);
 				}
 			}
 		}

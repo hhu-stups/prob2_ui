@@ -17,6 +17,7 @@ import de.prob.voparser.node.PVo;
 import de.prob.voparser.node.Start;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
@@ -28,10 +29,14 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import javafx.scene.control.Alert;
+import javafx.stage.Window;
 
 
 @Singleton
 public class VOChecker {
+
+	private final StageManager stageManager;
 
 	private final CurrentProject currentProject;
 
@@ -50,9 +55,10 @@ public class VOChecker {
 	private final VOParser voParser;
 
 	@Inject
-	public VOChecker(final CurrentProject currentProject, final RequirementHandler requirementHandler, final Modelchecker modelchecker,
+	public VOChecker(final StageManager stageManager, final CurrentProject currentProject, final RequirementHandler requirementHandler, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
 					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
+		this.stageManager = stageManager;
 		this.voParser = new VOParser();
 		this.currentProject = currentProject;
 		this.requirementHandler = requirementHandler;
@@ -63,7 +69,7 @@ public class VOChecker {
 		this.simulationItemHandler = simulationItemHandler;
 	}
 
-	public void checkRequirement(Requirement requirement, Machine machine, VOManagerSetting setting) {
+	public void checkRequirement(Requirement requirement, Machine machine, VOManagerSetting setting) throws VOParseException{
 		if(setting == VOManagerSetting.REQUIREMENT) {
 			checkRequirementOnRequirementView(requirement);
 		} else if(setting == VOManagerSetting.MACHINE) {
@@ -72,7 +78,7 @@ public class VOChecker {
 		requirementHandler.updateChecked(currentProject.get(), machine, requirement, setting);
 	}
 
-	private void checkRequirementOnRequirementView(Requirement requirement) {
+	private void checkRequirementOnRequirementView(Requirement requirement) throws VOParseException {
 		for(Machine machine : currentProject.getMachines()) {
 			for (ValidationObligation validationObligation : machine.getValidationObligations()) {
 				if(validationObligation.getRequirement().equals(requirement.getName())) {
@@ -82,7 +88,7 @@ public class VOChecker {
 		}
 	}
 
-	private void checkRequirementOnMachineView(Requirement requirement, Machine machine) {
+	private void checkRequirementOnMachineView(Requirement requirement, Machine machine) throws VOParseException {
 		for (ValidationObligation validationObligation : machine.getValidationObligations()) {
 			if(validationObligation.getRequirement().equals(requirement.getName())) {
 				this.checkVO(validationObligation);
@@ -174,13 +180,8 @@ public class VOChecker {
 	}
 
 
-	public void checkVO(ValidationObligation validationObligation) {
-		try {
-			parseVOExpression(validationObligation, true);
-		} catch (VOParseException e) {
-			e.printStackTrace();
-			// TODO
-		}
+	public void checkVO(ValidationObligation validationObligation) throws VOParseException {
+		parseVOExpression(validationObligation, true);
 	}
 
 
@@ -292,6 +293,28 @@ public class VOChecker {
 		} else {
 			throw new AssertionError("Unhandled validation task type: " + validationTask.getClass());
 		}
+	}
+
+	public void handleError(Window window, VOParseException exception) {
+		VOParseException.ErrorType errorType = exception.getErrorType();
+		String headerKey = "vomanager.error.parsing.header";
+		String contentKey;
+		switch (errorType) {
+			case PARSING:
+				contentKey = "vomanager.error.parsing.content";
+				break;
+			case SCOPING:
+				contentKey = "vomanager.error.scoping";
+				break;
+			case TYPECHECKING:
+				contentKey = "vomanager.error.typechecking";
+				break;
+			default:
+				throw new RuntimeException("VO parsing error type unknown: " + errorType);
+		}
+		final Alert alert = stageManager.makeExceptionAlert(exception, headerKey, contentKey);
+		alert.initOwner(window);
+		alert.show();
 	}
 
 }

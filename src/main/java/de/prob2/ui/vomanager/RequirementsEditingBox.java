@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -89,15 +90,21 @@ public class RequirementsEditingBox extends VBox {
 			for (ListIterator<ValidationObligation> iterator = machine.getValidationObligations().listIterator(); iterator.hasNext();) {
 				final ValidationObligation oldVo = iterator.next();
 				if (oldVo.getRequirement().equals(oldRequirement.getName())) {
-					ValidationObligation validationObligation = oldVo.changeRequirement(tfName.getText());
-					iterator.set(validationObligation);
-					requirementHandler.initListenerForVO(newRequirement, validationObligation);
+					try {
+						ValidationObligation validationObligation = new ValidationObligation(oldVo.getId(), oldVo.getExpression(), tfName.getText());
+						voChecker.parseVOExpression(validationObligation, false);
+						iterator.set(validationObligation);
+						requirementHandler.initListenerForVO(newRequirement, validationObligation);
+					} catch (VOParseException e) {
+						voChecker.handleError(this.getScene().getWindow(), e);
+					}
 				}
 			}
 		}
 	}
 
-	@FXML void historyRequirement(){
+	@FXML
+	void historyRequirement(){
 		Stage table = new RequirementHistoryTable((Requirement) voManagerStage.getSelectedRequirement());
 		stageManager.loadFXML(table, "requirement_history_box.fxml", this.getClass().getName());
 		table.show();
