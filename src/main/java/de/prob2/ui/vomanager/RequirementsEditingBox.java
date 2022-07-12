@@ -73,18 +73,20 @@ public class RequirementsEditingBox extends VBox {
 		boolean nameExists = nameExists();
 		final Requirement oldRequirement = (Requirement) voManagerStage.getSelectedRequirement();
 
-
 		//If another requirement has the name we have chosen we should not allow the change
 		if(nameExists && !oldRequirement.getName().equals(tfName.getText())) {
 			warnAlreadyExists();
 			return;
 		}
-
 		ArrayList<Requirement> parents = new ArrayList<>(oldRequirement.getPreviousVersions());
 		parents.add(oldRequirement);
 		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText(), parents);
 		currentProject.replaceRequirement(oldRequirement, newRequirement);
 
+		updateVOs(oldRequirement, newRequirement);
+	}
+
+	private void updateVOs(Requirement oldRequirement, Requirement newRequirement) {
 		// Update validation obligations, this means update VO of ids that are affected
 		for (Machine machine : currentProject.getMachines()) {
 			for (ListIterator<ValidationObligation> iterator = machine.getValidationObligations().listIterator(); iterator.hasNext();) {
@@ -104,7 +106,7 @@ public class RequirementsEditingBox extends VBox {
 	}
 
 	@FXML
-	void historyRequirement(){
+	public void historyRequirement(){
 		Stage table = new RequirementHistoryTable((Requirement) voManagerStage.getSelectedRequirement());
 		stageManager.loadFXML(table, "requirement_history_box.fxml", this.getClass().getName());
 		table.show();
