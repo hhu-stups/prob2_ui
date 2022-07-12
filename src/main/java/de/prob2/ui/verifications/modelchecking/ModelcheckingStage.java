@@ -13,6 +13,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingHandleItem.HandleType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -81,6 +83,8 @@ public class ModelcheckingStage extends Stage {
 	private final Modelchecker modelchecker;
 
 	private ModelCheckingItem lastItem;
+
+	private ModelCheckingHandleItem handleItem;
 
 	@Inject
 	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, 
@@ -171,16 +175,11 @@ public class ModelcheckingStage extends Stage {
 			Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;
 			String goal = findGoal.isSelected() ? tfFindGoal.getText() : null;
 			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions("GOAL".equals(goal)));
-			if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
-				this.hide();
-				modelchecker.checkItem(modelcheckingItem, true, false);
-				currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
-				lastItem = modelcheckingItem;
-			} else {
-				ModelCheckingItem checkedItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(modelcheckingItem::settingsEqual).collect(Collectors.toList()).get(0);
-				modelchecker.checkItem(checkedItem, true, false);
-				lastItem = checkedItem;
-				this.hide();
+			if(handleItem.getHandleType() == HandleType.ADD) {
+				addItem(modelcheckingItem);
+			}
+			else {
+				changeItem(handleItem.getItem(), modelcheckingItem);
 			}
 		} else {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "",
@@ -190,7 +189,35 @@ public class ModelcheckingStage extends Stage {
 			this.hide();
 		}
 	}
-	
+
+	private void addItem(ModelCheckingItem modelcheckingItem) {
+		if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
+			currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
+			this.hide();
+			modelchecker.checkItem(modelcheckingItem, true, false);
+			setHandleItem(new ModelCheckingHandleItem(HandleType.CHANGE, modelcheckingItem));
+			lastItem = modelcheckingItem;
+		} else {
+			ModelCheckingItem checkedItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(modelcheckingItem::settingsEqual).collect(Collectors.toList()).get(0);
+			modelchecker.checkItem(checkedItem, true, false);
+			lastItem = checkedItem;
+			this.hide();
+		}
+	}
+
+	private void changeItem(ModelCheckingItem oldItem, ModelCheckingItem changedItem) {
+		Machine machine = currentProject.getCurrentMachine();
+		if(machine.getModelcheckingItems().stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
+			machine.getModelcheckingItems().set(machine.getModelcheckingItems().indexOf(oldItem), changedItem);
+			this.hide();
+			modelchecker.checkItem(changedItem, true, false);
+			setHandleItem(new ModelCheckingHandleItem(HandleType.CHANGE, changedItem));
+			lastItem = changedItem;
+		} else {
+			this.hide();
+		}
+	}
+
 	private Set<ModelCheckingOptions.Options> getOptions(boolean goal) {
 		ModelCheckingOptions options = new ModelCheckingOptions();
 		options = options.checkDeadlocks(findDeadlocks.isSelected());
@@ -210,5 +237,43 @@ public class ModelcheckingStage extends Stage {
 	public ModelCheckingItem getLastItem() {
 		return lastItem;
 	}
-	
+
+	public void setData(final ModelCheckingItem item) {
+		idTextField.setText(item.getId() == null ? "" : item.getId());
+
+		selectSearchStrategy.setValue(item.getSearchStrategy());
+
+		findDeadlocks.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.FIND_DEADLOCKS));
+		findInvViolations.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS));
+		findBAViolations.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.FIND_ASSERTION_VIOLATIONS));
+		stopAtFullCoverage.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.STOP_AT_FULL_COVERAGE));
+
+		findOtherErrors.setSelected(!item.getOptions().contains(ModelCheckingOptions.Options.IGNORE_OTHER_ERRORS));
+
+		if (item.getNodesLimit() != null){
+			chooseNodesLimit.setSelected(true);
+			nodesLimit.getValueFactory().setValue(item.getNodesLimit());
+		} else {
+			chooseNodesLimit.setSelected(false);
+		}
+
+		if (item.getTimeLimit() != null){
+			chooseTimeLimit.setSelected(true);
+			timeLimit.getValueFactory().setValue(item.getTimeLimit());
+		} else {
+			chooseTimeLimit.setSelected(false);
+		}
+
+		if (item.getGoal() != null){
+			findGoal.setSelected(true);
+			tfFindGoal.setText(item.getGoal());
+		} else {
+			findGoal.setSelected(false);
+		}
+	}
+
+	public void setHandleItem(ModelCheckingHandleItem handleItem) {
+		this.handleItem = handleItem;
+	}
+
 }

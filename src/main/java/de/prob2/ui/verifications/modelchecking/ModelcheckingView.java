@@ -22,6 +22,9 @@ import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
+import de.prob2.ui.verifications.ltl.LTLHandleItem;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
@@ -230,6 +233,9 @@ public final class ModelcheckingView extends ScrollPane {
 				checker.checkItem(item, true, false);
 			});
 
+			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
+			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
+
 			row.itemProperty().addListener((o, from, to) -> {
 				checkItem.disableProperty().unbind();
 				if (to != null) {
@@ -266,7 +272,7 @@ public final class ModelcheckingView extends ScrollPane {
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(checkItem, searchForNewErrorsItem, removeItem)));
+				.otherwise(new ContextMenu(checkItem, searchForNewErrorsItem, removeItem, openEditor)));
 			return row;
 		});
 
@@ -294,6 +300,7 @@ public final class ModelcheckingView extends ScrollPane {
 	public void addModelCheck() {
 		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
 		if (!stageController.isShowing()) {
+			stageController.setHandleItem(new ModelCheckingHandleItem(ModelCheckingHandleItem.HandleType.ADD, null));
 			stageController.showAndWait();
 		}
 	}
@@ -345,4 +352,12 @@ public final class ModelcheckingView extends ScrollPane {
 	public void selectJobItem(ModelCheckingJobItem item) {
 		tvChecks.getSelectionModel().select(item);
 	}
+
+	private void showCurrentItemDialog(ModelCheckingItem item) {
+		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
+		modelcheckingStage.setData(item);
+		modelcheckingStage.setHandleItem(new ModelCheckingHandleItem(ModelCheckingHandleItem.HandleType.CHANGE, item));
+		modelcheckingStage.showAndWait();
+	}
+
 }
