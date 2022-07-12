@@ -42,7 +42,7 @@
 			<Label text="%vomanager.edit.vo.expression"/>
 			<ComboBox fx:id="cbVOExpression" editable="true"/>
 		</HBox>
-		<HBox>
+		<HBox spacing="5.0">
 			<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.add" onAction="#addVO"/>
 			<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceVO"/>
 			<Button fx:id="historyVOButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyVO"/>
