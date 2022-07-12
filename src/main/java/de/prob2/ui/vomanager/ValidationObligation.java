@@ -59,6 +59,10 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 
 	public void setExpressionAst(PVo expressionAst, VOChecker voChecker) {
 		this.expressionAst = expressionAst;
+		addCheckedListener(voChecker);
+	}
+
+	private void addCheckedListener(VOChecker voChecker) {
 		final InvalidationListener checkedListener = o -> this.checked.set(voChecker.updateVOExpression(expressionAst, this));
 		this.getTasks().addListener((ListChangeListener<IValidationTask>)o -> {
 			while (o.next()) {

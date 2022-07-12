@@ -93,7 +93,7 @@ public class RequirementsEditingBox extends VBox {
 				final ValidationObligation oldVo = iterator.next();
 				if (oldVo.getRequirement().equals(oldRequirement.getName())) {
 					try {
-						ValidationObligation validationObligation = new ValidationObligation(oldVo.getId(), oldVo.getExpression(), tfName.getText());
+						ValidationObligation validationObligation = oldVo.changeRequirement(tfName.getText());
 						voChecker.parseVOExpression(validationObligation, false);
 						iterator.set(validationObligation);
 						requirementHandler.initListenerForVO(newRequirement, validationObligation);
