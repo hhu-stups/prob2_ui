@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -22,9 +23,6 @@ import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
-import de.prob2.ui.verifications.ltl.LTLHandleItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
@@ -299,10 +297,22 @@ public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	public void addModelCheck() {
 		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
-		if (!stageController.isShowing()) {
-			stageController.setHandleItem(new ModelCheckingHandleItem(ModelCheckingHandleItem.HandleType.ADD, null));
-			stageController.showAndWait();
+		stageController.showAndWait();
+		final ModelCheckingItem newItem = stageController.getResult();
+		if (newItem == null) {
+			// User cancelled/closed the window
+			return;
 		}
+		final Optional<ModelCheckingItem> existingItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(newItem::settingsEqual).findAny();
+		final ModelCheckingItem toCheck;
+		if (existingItem.isPresent()) {
+			// Identical existing configuration found - reuse it instead of creating another one
+			toCheck = existingItem.get();
+		} else {
+			currentProject.getCurrentMachine().getModelcheckingItems().add(newItem);
+			toCheck = newItem;
+		}
+		checker.checkItem(toCheck, true, false);
 	}
 
 	private void removeItem() {
@@ -353,11 +363,16 @@ public final class ModelcheckingView extends ScrollPane {
 		tvChecks.getSelectionModel().select(item);
 	}
 
-	private void showCurrentItemDialog(ModelCheckingItem item) {
+	private void showCurrentItemDialog(ModelCheckingItem oldItem) {
 		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-		modelcheckingStage.setData(item);
-		modelcheckingStage.setHandleItem(new ModelCheckingHandleItem(ModelCheckingHandleItem.HandleType.CHANGE, item));
+		modelcheckingStage.setData(oldItem);
 		modelcheckingStage.showAndWait();
+		final ModelCheckingItem changedItem = modelcheckingStage.getResult();
+		Machine machine = currentProject.getCurrentMachine();
+		if(machine.getModelcheckingItems().stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
+			machine.getModelcheckingItems().set(machine.getModelcheckingItems().indexOf(oldItem), changedItem);
+			checker.checkItem(changedItem, true, false);
+		}
 	}
 
 }

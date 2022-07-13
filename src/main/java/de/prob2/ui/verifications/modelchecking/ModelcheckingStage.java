@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
@@ -10,11 +9,7 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.modelchecking.ModelCheckingHandleItem.HandleType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -27,14 +22,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @FXMLInjected
 public class ModelcheckingStage extends Stage {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingStage.class);
-
 	private static final int INITIAL_NODES_LIMIT = 500000;
 
 	private static final int INITIAL_NODES_STEP = 1000;
@@ -76,20 +65,16 @@ public class ModelcheckingStage extends Stage {
 	
 	private final StageManager stageManager;
 	
-	private final CurrentProject currentProject;
-	
 	private final Modelchecker modelchecker;
 
-	private ModelCheckingItem lastItem;
-
-	private ModelCheckingHandleItem handleItem;
+	private ModelCheckingItem result;
 
 	@Inject
-	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final Modelchecker modelchecker) {
+	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, final Modelchecker modelchecker) {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
-		this.currentProject = currentProject;
 		this.modelchecker = modelchecker;
+		this.result = null;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
 	}
 
@@ -163,47 +148,13 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void startModelCheck() {
-		lastItem = null;
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		final ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
 		Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
 		Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;
 		String goal = findGoal.isSelected() ? tfFindGoal.getText() : null;
-		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions("GOAL".equals(goal)));
-		if(handleItem.getHandleType() == HandleType.ADD) {
-			addItem(modelcheckingItem);
-		}
-		else {
-			changeItem(handleItem.getItem(), modelcheckingItem);
-		}
-	}
-
-	private void addItem(ModelCheckingItem modelcheckingItem) {
-		if(currentProject.getCurrentMachine().getModelcheckingItems().stream().noneMatch(modelcheckingItem::settingsEqual)) {
-			currentProject.getCurrentMachine().getModelcheckingItems().add(modelcheckingItem);
-			this.hide();
-			modelchecker.checkItem(modelcheckingItem, true, false);
-			setHandleItem(new ModelCheckingHandleItem(HandleType.CHANGE, modelcheckingItem));
-			lastItem = modelcheckingItem;
-		} else {
-			ModelCheckingItem checkedItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(modelcheckingItem::settingsEqual).collect(Collectors.toList()).get(0);
-			modelchecker.checkItem(checkedItem, true, false);
-			lastItem = checkedItem;
-			this.hide();
-		}
-	}
-
-	private void changeItem(ModelCheckingItem oldItem, ModelCheckingItem changedItem) {
-		Machine machine = currentProject.getCurrentMachine();
-		if(machine.getModelcheckingItems().stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
-			machine.getModelcheckingItems().set(machine.getModelcheckingItems().indexOf(oldItem), changedItem);
-			this.hide();
-			modelchecker.checkItem(changedItem, true, false);
-			setHandleItem(new ModelCheckingHandleItem(HandleType.CHANGE, changedItem));
-			lastItem = changedItem;
-		} else {
-			this.hide();
-		}
+		this.result = new ModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions("GOAL".equals(goal)));
+		this.hide();
 	}
 
 	private Set<ModelCheckingOptions.Options> getOptions(boolean goal) {
@@ -219,11 +170,12 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void cancel() {
+		this.result = null;
 		this.hide();
 	}
 
-	public ModelCheckingItem getLastItem() {
-		return lastItem;
+	public ModelCheckingItem getResult() {
+		return result;
 	}
 
 	public void setData(final ModelCheckingItem item) {
@@ -259,9 +211,4 @@ public class ModelcheckingStage extends Stage {
 			findGoal.setSelected(false);
 		}
 	}
-
-	public void setHandleItem(ModelCheckingHandleItem handleItem) {
-		this.handleItem = handleItem;
-	}
-
 }
