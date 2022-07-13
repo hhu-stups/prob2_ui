@@ -208,14 +208,15 @@ public final class ModelcheckingView extends ScrollPane {
 		return description;
 	}
 
+	private void checkSingleItem(final ModelCheckingItem item) {
+		checker.checkItem(item, item.getItems().isEmpty(), false);
+	}
+
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-			if(item.getItems().isEmpty()) {
-				checker.checkItem(item, true, false);
-			} else if (item.getItems()
-					.stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-				checker.checkItem(item, false, false);
+			if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
+				this.checkSingleItem(item);
 			}
 		}
 	}
@@ -226,10 +227,7 @@ public final class ModelcheckingView extends ScrollPane {
 			row.setOnMouseClicked(this::tvItemsClicked);
 
 			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-			checkItem.setOnAction(e-> {
-				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				checker.checkItem(item, item.getItems().isEmpty(), false);
-			});
+			checkItem.setOnAction(e -> this.checkSingleItem(tvItems.getSelectionModel().getSelectedItem()));
 
 			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
