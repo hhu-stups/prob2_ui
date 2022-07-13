@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -65,7 +66,23 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
-	public ListenableFuture<ModelCheckingJobItem> startModelchecking(ModelCheckingItem item) {
+	/**
+	 * Start model checking using the given configuration.
+	 * If a result (success or error) has already been found using the configuration,
+	 * return that result directly instead of restarting the check.
+	 * 
+	 * @param item the model checking configuration to run
+	 * @return result of the model check
+	 */
+	public ListenableFuture<ModelCheckingJobItem> startCheckIfNeeded(final ModelCheckingItem item) {
+		if (item.getItems().isEmpty()) {
+			return this.startNextCheckStep(item);
+		} else {
+			return Futures.immediateFuture(item.getItems().get(0));
+		}
+	}
+
+	public ListenableFuture<ModelCheckingJobItem> startNextCheckStep(ModelCheckingItem item) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;

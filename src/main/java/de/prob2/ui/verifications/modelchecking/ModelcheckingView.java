@@ -222,7 +222,7 @@ public final class ModelcheckingView extends ScrollPane {
 			return;
 		}
 
-		final ListenableFuture<ModelCheckingJobItem> future = checker.startModelchecking(item);
+		final ListenableFuture<ModelCheckingJobItem> future = checker.startNextCheckStep(item);
 
 		Futures.addCallback(future, new FutureCallback<ModelCheckingJobItem>() {
 			@Override
@@ -353,11 +353,11 @@ public final class ModelcheckingView extends ScrollPane {
 		};
 
 		for (ModelCheckingItem item : currentProject.currentMachineProperty().get().getModelcheckingItems()) {
-			if (!item.selected() || !item.getItems().isEmpty()) {
+			if (!item.selected()) {
 				continue;
 			}
 
-			final ListenableFuture<ModelCheckingJobItem> future = checker.startModelchecking(item);
+			final ListenableFuture<ModelCheckingJobItem> future = checker.startCheckIfNeeded(item);
 			Futures.addCallback(future, errorCallback, MoreExecutors.directExecutor());
 		}
 	}
