@@ -70,12 +70,12 @@ public class Modelchecker {
 		stopActions.add(this.executor::shutdownNow);
 	}
 
-	public void checkItem(ModelCheckingItem item, boolean recheckExisting, boolean checkAll) {
+	public void checkItem(ModelCheckingItem item, boolean checkAll) {
 		if(!item.selected()) {
 			return;
 		}
 
-		final ListenableFuture<ModelCheckingJobItem> future = startModelchecking(item, recheckExisting);
+		final ListenableFuture<ModelCheckingJobItem> future = startModelchecking(item);
 
 		Futures.addCallback(future, new FutureCallback<ModelCheckingJobItem>() {
 			@Override
@@ -101,7 +101,7 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
-	private ListenableFuture<ModelCheckingJobItem> startModelchecking(ModelCheckingItem item, boolean recheckExisting) {
+	private ListenableFuture<ModelCheckingJobItem> startModelchecking(ModelCheckingItem item) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;
@@ -128,7 +128,7 @@ public class Modelchecker {
 				this.updateStats(jobId, timeElapsed, result, stats);
 			}
 		};
-		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel()).recheckExisting(recheckExisting);
+		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel());
 		final ConsistencyChecker checker = new ConsistencyChecker(stateSpace, options, listener);
 
 		final ListenableFuture<ModelCheckingJobItem> future = this.executor.submit(() -> {

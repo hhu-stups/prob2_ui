@@ -209,7 +209,7 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	private void checkSingleItem(final ModelCheckingItem item) {
-		checker.checkItem(item, item.getItems().isEmpty(), false);
+		checker.checkItem(item, false);
 	}
 
 	private void tvItemsClicked(MouseEvent e) {
@@ -315,7 +315,7 @@ public final class ModelcheckingView extends ScrollPane {
 	public void checkMachine() {
 		currentProject.currentMachineProperty().get().getModelcheckingItems().stream()
 			.filter(item -> item.getItems().isEmpty())
-			.forEach(item -> checker.checkItem(item, true, true));
+			.forEach(item -> checker.checkItem(item, true));
 	}
 
 	@FXML

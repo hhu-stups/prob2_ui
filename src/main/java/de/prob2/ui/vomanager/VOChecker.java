@@ -275,7 +275,7 @@ public class VOChecker {
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
 		} else if (validationTask instanceof ModelCheckingItem) {
-			modelchecker.checkItem((ModelCheckingItem) validationTask, false, false);
+			modelchecker.checkItem((ModelCheckingItem) validationTask, false);
 		} else if (validationTask instanceof LTLFormulaItem) {
 			ltlChecker.checkFormula((LTLFormulaItem) validationTask);
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
