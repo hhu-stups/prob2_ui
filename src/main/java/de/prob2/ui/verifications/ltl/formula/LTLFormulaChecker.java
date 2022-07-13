@@ -81,7 +81,6 @@ public class LTLFormulaChecker {
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
 		final LTLParseListener parseListener = parseFormula(parser);
-		final List<LTLMarker> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
 		try {
 			final LTL formula;
 			BParser bParser = new BParser();
@@ -94,21 +93,20 @@ public class LTLFormulaChecker {
 			} else {
 				formula = new LTL(item.getCode(), new ClassicalBParser(bParser), parser);
 				if(!parseListener.getErrorMarkers().isEmpty()) {
-					errorMarkers.addAll(parseListener.getErrorMarkers());
-					resultHandler.handleFormulaParseErrors(item, errorMarkers);
+					resultHandler.handleFormulaParseErrors(item, parseListener.getErrorMarkers());
 					return;
 				}
 			}
 			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {
-				errorMarkers.addAll(ltlMarkersFromErrorItems(((LTLError)result).getErrors()));
-				resultHandler.handleFormulaParseErrors(item, errorMarkers);
+				resultHandler.handleFormulaParseErrors(item, ltlMarkersFromErrorItems(((LTLError)result).getErrors()));
 			} else {
 				resultHandler.handleFormulaResult(item, result);
 			}
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
+			final List<LTLMarker> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
 			if(error.getErrors() == null) {
 				errorMarkers.add(new LTLMarker("error", 1, 0, 1, error.getMessage()));
 			} else {
@@ -117,6 +115,7 @@ public class LTLFormulaChecker {
 			resultHandler.handleFormulaParseErrors(item, errorMarkers);
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
+			final List<LTLMarker> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
 			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getTokenString().length(), error.toString()));
 			resultHandler.handleFormulaParseErrors(item, errorMarkers);
 		}
