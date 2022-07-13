@@ -196,26 +196,34 @@ public class VOManagerStage extends Stage {
 	private void updateOnMachine(Machine machine) {
 		voChecker.deregisterAllTasks();
 		if(machine != null) {
-			for(String key : machine.getValidationTasks().keySet()) {
-				IValidationTask validationTask = machine.getValidationTasks().get(key);
-				voChecker.registerTask(key, null); // TODO
+			updateVTsFromMachine(machine);
+			updateVOsFromMachine(machine);
+		}
+	}
+
+	private void updateVTsFromMachine(Machine machine) {
+		for(String key : machine.getValidationTasks().keySet()) {
+			IValidationTask validationTask = machine.getValidationTasks().get(key);
+			voChecker.registerTask(key, null); // TODO
+		}
+		machine.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
+			if(o.wasRemoved()) {
+				voChecker.registerTask(o.getKey(), null); // TODO
 			}
-			machine.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
-				if(o.wasRemoved()) {
-					voChecker.registerTask(o.getKey(), null); // TODO
-				}
-				if(o.wasAdded()) {
-					voChecker.deregisterTask(o.getKey());
-				}
-			});
-			VOParser voParser = new VOParser();
-			for(ValidationObligation VO : machine.getValidationObligations()) {
-				try {
-					voChecker.parseAndCheckVOExpression(VO, false);
-					VO.setExpressionAst(voParser.parseFormula(VO.getExpression()).getPVo(), voChecker);
-				} catch (VOParseException e) {
-					voErrorHandler.handleError(this, e);
-				}
+			if(o.wasAdded()) {
+				voChecker.deregisterTask(o.getKey());
+			}
+		});
+	}
+
+	private void updateVOsFromMachine(Machine machine) {
+		VOParser voParser = new VOParser();
+		for(ValidationObligation VO : machine.getValidationObligations()) {
+			try {
+				voChecker.parseAndCheckVOExpression(VO, false);
+				VO.setExpressionAst(voParser.parseFormula(VO.getExpression()).getPVo(), voChecker);
+			} catch (VOParseException e) {
+				voErrorHandler.handleError(this, e);
 			}
 		}
 	}
