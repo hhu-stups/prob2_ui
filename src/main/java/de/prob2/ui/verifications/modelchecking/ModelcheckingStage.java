@@ -76,8 +76,6 @@ public class ModelcheckingStage extends Stage {
 	
 	private final StageManager stageManager;
 	
-	private final CurrentTrace currentTrace;
-	
 	private final CurrentProject currentProject;
 	
 	private final Modelchecker modelchecker;
@@ -87,11 +85,9 @@ public class ModelcheckingStage extends Stage {
 	private ModelCheckingHandleItem handleItem;
 
 	@Inject
-	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, 
-							final CurrentTrace currentTrace, final CurrentProject currentProject, final Modelchecker modelchecker) {
+	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, final CurrentProject currentProject, final Modelchecker modelchecker) {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
-		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.modelchecker = modelchecker;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
@@ -168,25 +164,17 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private void startModelCheck() {
 		lastItem = null;
-		if (currentTrace.get() != null) {
-			final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
-			final ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
-			Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
-			Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;
-			String goal = findGoal.isSelected() ? tfFindGoal.getText() : null;
-			ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions("GOAL".equals(goal)));
-			if(handleItem.getHandleType() == HandleType.ADD) {
-				addItem(modelcheckingItem);
-			}
-			else {
-				changeItem(handleItem.getItem(), modelcheckingItem);
-			}
-		} else {
-			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "",
-					"verifications.modelchecking.modelcheckingStage.alerts.noMachineLoaded.content");
-			alert.initOwner(this);
-			alert.showAndWait();
-			this.hide();
+		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
+		final ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
+		Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
+		Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;
+		String goal = findGoal.isSelected() ? tfFindGoal.getText() : null;
+		ModelCheckingItem modelcheckingItem = new ModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions("GOAL".equals(goal)));
+		if(handleItem.getHandleType() == HandleType.ADD) {
+			addItem(modelcheckingItem);
+		}
+		else {
+			changeItem(handleItem.getItem(), modelcheckingItem);
 		}
 	}
 
