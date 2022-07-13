@@ -80,9 +80,46 @@ public class LTLFormulaChecker {
 		}
 		LtlParser parser = new LtlParser(item.getCode());
 		parser.setPatternManager(machine.getPatternManager());
-		List<LTLMarker> errorMarkers = new ArrayList<>();
-		Object result = getResult(parser, errorMarkers, item);
-		resultHandler.handleFormulaResult(item, errorMarkers, result);
+		final LTLParseListener parseListener = parseFormula(parser);
+		final List<LTLMarker> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
+		try {
+			final LTL formula;
+			BParser bParser = new BParser();
+			if (currentTrace.get().getModel() instanceof ClassicalBModel) {
+				IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
+				bParser.setDefinitions(definitions);
+			}
+			if(!parseListener.getErrorMarkers().isEmpty()) {
+				formula = new LTL(item.getCode(), new ClassicalBParser(bParser));
+			} else {
+				formula = new LTL(item.getCode(), new ClassicalBParser(bParser), parser);
+				if(!parseListener.getErrorMarkers().isEmpty()) {
+					errorMarkers.addAll(parseListener.getErrorMarkers());
+					resultHandler.handleFormulaParseErrors(item, errorMarkers);
+					return;
+				}
+			}
+			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
+			final IModelCheckingResult result = checker.call();
+			if (result instanceof LTLError) {
+				errorMarkers.addAll(ltlMarkersFromErrorItems(((LTLError)result).getErrors()));
+				resultHandler.handleFormulaParseErrors(item, errorMarkers);
+			} else {
+				resultHandler.handleFormulaResult(item, result);
+			}
+		} catch (ProBError error) {
+			logger.error("Could not parse LTL formula: ", error);
+			if(error.getErrors() == null) {
+				errorMarkers.add(new LTLMarker("error", 1, 0, 1, error.getMessage()));
+			} else {
+				errorMarkers.addAll(ltlMarkersFromErrorItems(error.getErrors()));
+			}
+			resultHandler.handleFormulaParseErrors(item, errorMarkers);
+		} catch (LtlParseException error) {
+			logger.error("Could not parse LTL formula: ", error);
+			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getTokenString().length(), error.toString()));
+			resultHandler.handleFormulaParseErrors(item, errorMarkers);
+		}
 	}
 	
 	public void checkFormula(LTLFormulaItem item) {
@@ -165,46 +202,6 @@ public class LTLFormulaChecker {
 		return markers.stream()
 			.map(marker -> new ErrorItem(marker.getMsg(), proBErrorTypeFromLtl(marker.getType()), Collections.emptyList()))
 			.collect(Collectors.toList());
-	}
-	
-	private Object getResult(LtlParser parser, List<LTLMarker> errorMarkers, LTLFormulaItem item) {
-		LTLParseListener parseListener = parseFormula(parser);
-		errorMarkers.addAll(parseListener.getErrorMarkers());
-		try {
-			final LTL formula;
-			BParser bParser = new BParser();
-			if (currentTrace.get().getModel() instanceof ClassicalBModel) {
-				IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
-				bParser.setDefinitions(definitions);
-			}
-			if(!parseListener.getErrorMarkers().isEmpty()) {
-				formula = new LTL(item.getCode(), new ClassicalBParser(bParser));
-			} else {
-				formula = new LTL(item.getCode(), new ClassicalBParser(bParser), parser);
-				if(!parseListener.getErrorMarkers().isEmpty()) {
-					errorMarkers.addAll(parseListener.getErrorMarkers());
-					return new LTLError(formula, errorItemsFromLtlMarkers(parseListener.getErrorMarkers()));
-				}
-			}
-			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
-			final IModelCheckingResult res = checker.call();
-			if(res instanceof LTLError) {
-				errorMarkers.addAll(ltlMarkersFromErrorItems(((LTLError)res).getErrors()));
-			}
-			return res;
-		} catch (ProBError error) {
-			logger.error("Could not parse LTL formula: ", error);
-			if(error.getErrors() == null) {
-				errorMarkers.add(new LTLMarker("error", 1, 0, 1, error.getMessage()));
-			} else {
-				errorMarkers.addAll(ltlMarkersFromErrorItems(error.getErrors()));
-			}
-			return error;
-		} catch (LtlParseException error) {
-			logger.error("Could not parse LTL formula: ", error);
-			errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getTokenString().length(), error.toString()));
-			return error;
-		}
 	}
 	
 	private LTLParseListener parseFormula(LtlParser parser) {

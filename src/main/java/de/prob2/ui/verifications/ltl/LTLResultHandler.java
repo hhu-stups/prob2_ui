@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.check.CheckInterrupted;
+import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
@@ -49,24 +50,23 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		return result instanceof Throwable || result instanceof LTLError;
 	}
 	
-	public void handleFormulaResult(LTLFormulaItem item, List<LTLMarker> errorMarkers, Object result) {
-		CheckingResultItem resultItem = handleFormulaResult(result);
-
+	public void handleFormulaResult(LTLFormulaItem item, IModelCheckingResult result) {
+		assert !isParseError(result);
 		if (result instanceof LTLCounterExample) {
 			item.setCounterExample(((LTLCounterExample)result).getTraceToLoopEntry());
 		} else {
 			item.setCounterExample(null);
 		}
-		if(isParseError(result)) {
-			//errorMarkers contains errors, resultItem only contains errors from the exception
-			String errorMessage = errorMarkers.stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
-			if(errorMessage.isEmpty()) {
-				errorMessage = "Parse Error in typed formula";
-			}
-			item.setResultItem(new LTLCheckingResultItem(resultItem.getChecked(), errorMarkers, resultItem.getHeaderBundleKey(), resultItem.getMessageBundleKey(), errorMessage));
-		} else {
-			item.setResultItem(resultItem);
+		item.setResultItem(handleFormulaResult(result));
+	}
+	
+	public void handleFormulaParseErrors(LTLFormulaItem item, List<LTLMarker> errorMarkers) {
+		item.setCounterExample(null);
+		String errorMessage = errorMarkers.stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
+		if(errorMessage.isEmpty()) {
+			errorMessage = "Parse Error in typed formula";
 		}
+		item.setResultItem(new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.couldNotParseFormula.header", "common.result.message", errorMessage));
 	}
 	
 	public void handlePatternResult(LTLParseListener parseListener, LTLPatternItem item) {
