@@ -33,6 +33,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -500,6 +501,21 @@ public class VisBStage extends Stage {
 		SimulatorStage simulatorStage = injector.getInstance(SimulatorStage.class);
 		simulatorStage.show();
 		simulatorStage.toFront();
+	}
+
+	@FXML
+	private void showProjection() {
+		VisBVisualisation visBVisualisation = this.visBController.getVisBVisualisation();
+		if(visBVisualisation == null) {
+			return;
+		}
+		List<VisBItem> visBItems = visBVisualisation.getVisBItems();
+		String projectionString = visBItems.stream()
+				.map(item -> String.format("\"%s_%s\" |-> %s", item.getId(), item.getAttribute(), item.getExpression()))
+				.collect(Collectors.joining(" |-> \n"));
+		DotView formulaStage = injector.getInstance(DotView.class);
+		formulaStage.show();
+		formulaStage.visualizeProjection(projectionString);
 	}
 
 	private String generateHTMLFileWithSVG(String svgContent, String baseUrl) {

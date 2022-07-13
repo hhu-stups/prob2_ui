@@ -294,4 +294,8 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		this.selectCommand(DotVisualizationCommand.FORMULA_TREE_NAME, formula);
 	}
 
+	public void visualizeProjection(final String formula) {
+		this.selectCommand(DotVisualizationCommand.STATE_SPACE_PROJECTION_NAME, formula);
+	}
+
 }
