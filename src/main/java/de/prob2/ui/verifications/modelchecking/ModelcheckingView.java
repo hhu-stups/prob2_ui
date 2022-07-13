@@ -298,7 +298,11 @@ public final class ModelcheckingView extends ScrollPane {
 			currentProject.getCurrentMachine().getModelcheckingItems().add(newItem);
 			toCheck = newItem;
 		}
-		checker.checkItem(toCheck, true, false);
+		if (toCheck.getItems().isEmpty()) {
+			// Start checking with this configuration
+			// (unless it's an existing configuration that has already been run)
+			this.checkSingleItem(toCheck);
+		}
 	}
 
 	private void removeItem() {
@@ -357,7 +361,9 @@ public final class ModelcheckingView extends ScrollPane {
 		Machine machine = currentProject.getCurrentMachine();
 		if(machine.getModelcheckingItems().stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
 			machine.getModelcheckingItems().set(machine.getModelcheckingItems().indexOf(oldItem), changedItem);
-			checker.checkItem(changedItem, true, false);
+			// This is a new configuration and so should have no history of previous checks
+			assert changedItem.getItems().isEmpty();
+			this.checkSingleItem(changedItem);
 		}
 	}
 
