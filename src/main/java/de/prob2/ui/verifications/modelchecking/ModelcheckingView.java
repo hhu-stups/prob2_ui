@@ -1,7 +1,12 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -22,9 +27,6 @@ import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
-import de.prob2.ui.verifications.ltl.LTLHandleItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
@@ -48,9 +50,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
 @Singleton
 public final class ModelcheckingView extends ScrollPane {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingView.class);
 	private static final BigInteger MIB_FACTOR = new BigInteger("1024").pow(2);
 
 	@FXML
@@ -106,7 +112,7 @@ public final class ModelcheckingView extends ScrollPane {
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-
+	private final StageManager stageManager;
 	private final Injector injector;
 	private final I18n i18n;
 	private final Modelchecker checker;
@@ -118,6 +124,7 @@ public final class ModelcheckingView extends ScrollPane {
 			final I18n i18n, final Modelchecker checker) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.stageManager = stageManager;
 		this.injector = injector;
 		this.i18n = i18n;
 		this.checker = checker;
@@ -210,14 +217,34 @@ public final class ModelcheckingView extends ScrollPane {
 		return description;
 	}
 
+	private void checkSingleItem(final ModelCheckingItem item) {
+		if(!item.selected()) {
+			return;
+		}
+
+		final ListenableFuture<ModelCheckingJobItem> future = checker.startNextCheckStep(item);
+
+		Futures.addCallback(future, new FutureCallback<ModelCheckingJobItem>() {
+			@Override
+			public void onSuccess(final ModelCheckingJobItem result) {
+				if (result.getResult() instanceof ITraceDescription) {
+					currentTrace.set(result.getTrace());
+				}
+			}
+
+			@Override
+			public void onFailure(final Throwable t) {
+				LOGGER.error("Exception while running model check job", t);
+				Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
+			}
+		}, MoreExecutors.directExecutor());
+	}
+
 	private void tvItemsClicked(MouseEvent e) {
 		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
 		if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-			if(item.getItems().isEmpty()) {
-				checker.checkItem(item, true, false);
-			} else if (item.getItems()
-					.stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-				checker.checkItem(item, false, false);
+			if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
+				this.checkSingleItem(item);
 			}
 		}
 	}
@@ -228,40 +255,25 @@ public final class ModelcheckingView extends ScrollPane {
 			row.setOnMouseClicked(this::tvItemsClicked);
 
 			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-			checkItem.setOnAction(e-> {
-				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				checker.checkItem(item, true, false);
-			});
+			checkItem.setOnAction(e -> this.checkSingleItem(tvItems.getSelectionModel().getSelectedItem()));
 
 			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 
 			row.itemProperty().addListener((o, from, to) -> {
+				checkItem.textProperty().unbind();
 				checkItem.disableProperty().unbind();
 				if (to != null) {
-					checkItem.disableProperty().bind(to.itemsProperty().emptyProperty().not()
+					checkItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
+						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
+						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
+					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
+					checkItem.disableProperty().bind(anySucceeded
 						.or(checker.runningProperty())
 						.or(to.selectedProperty().not()));
 				} else {
+					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 					checkItem.setDisable(true);
-				}
-			});
-
-			MenuItem searchForNewErrorsItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
-			searchForNewErrorsItem.setOnAction(e-> {
-				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				checker.checkItem(item, false, false);
-			});
-
-			row.itemProperty().addListener((o, from, to) -> {
-				searchForNewErrorsItem.disableProperty().unbind();
-				if (to != null) {
-					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().isEmpty() || to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
-					searchForNewErrorsItem.disableProperty().bind(anySucceeded
-						.or(checker.runningProperty())
-						.or(to.selectedProperty().not()));
-				} else {
-					searchForNewErrorsItem.setDisable(true);
 				}
 			});
 
@@ -272,7 +284,7 @@ public final class ModelcheckingView extends ScrollPane {
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(checkItem, searchForNewErrorsItem, removeItem, openEditor)));
+				.otherwise(new ContextMenu(checkItem, removeItem, openEditor)));
 			return row;
 		});
 
@@ -299,9 +311,25 @@ public final class ModelcheckingView extends ScrollPane {
 	@FXML
 	public void addModelCheck() {
 		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
-		if (!stageController.isShowing()) {
-			stageController.setHandleItem(new ModelCheckingHandleItem(ModelCheckingHandleItem.HandleType.ADD, null));
-			stageController.showAndWait();
+		stageController.showAndWait();
+		final ModelCheckingItem newItem = stageController.getResult();
+		if (newItem == null) {
+			// User cancelled/closed the window
+			return;
+		}
+		final Optional<ModelCheckingItem> existingItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(newItem::settingsEqual).findAny();
+		final ModelCheckingItem toCheck;
+		if (existingItem.isPresent()) {
+			// Identical existing configuration found - reuse it instead of creating another one
+			toCheck = existingItem.get();
+		} else {
+			currentProject.getCurrentMachine().getModelcheckingItems().add(newItem);
+			toCheck = newItem;
+		}
+		if (toCheck.getItems().isEmpty()) {
+			// Start checking with this configuration
+			// (unless it's an existing configuration that has already been run)
+			this.checkSingleItem(toCheck);
 		}
 	}
 
@@ -313,9 +341,25 @@ public final class ModelcheckingView extends ScrollPane {
 
 	@FXML
 	public void checkMachine() {
-		currentProject.currentMachineProperty().get().getModelcheckingItems().stream()
-			.filter(item -> item.getItems().isEmpty())
-			.forEach(item -> checker.checkItem(item, true, true));
+		final FutureCallback<ModelCheckingJobItem> errorCallback = new FutureCallback<ModelCheckingJobItem>() {
+			@Override
+			public void onSuccess(final ModelCheckingJobItem result) {}
+
+			@Override
+			public void onFailure(final Throwable t) {
+				LOGGER.error("Exception while running model check job", t);
+				Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
+			}
+		};
+
+		for (ModelCheckingItem item : currentProject.currentMachineProperty().get().getModelcheckingItems()) {
+			if (!item.selected()) {
+				continue;
+			}
+
+			final ListenableFuture<ModelCheckingJobItem> future = checker.startCheckIfNeeded(item);
+			Futures.addCallback(future, errorCallback, MoreExecutors.directExecutor());
+		}
 	}
 
 	@FXML
@@ -353,11 +397,18 @@ public final class ModelcheckingView extends ScrollPane {
 		tvChecks.getSelectionModel().select(item);
 	}
 
-	private void showCurrentItemDialog(ModelCheckingItem item) {
+	private void showCurrentItemDialog(ModelCheckingItem oldItem) {
 		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-		modelcheckingStage.setData(item);
-		modelcheckingStage.setHandleItem(new ModelCheckingHandleItem(ModelCheckingHandleItem.HandleType.CHANGE, item));
+		modelcheckingStage.setData(oldItem);
 		modelcheckingStage.showAndWait();
+		final ModelCheckingItem changedItem = modelcheckingStage.getResult();
+		Machine machine = currentProject.getCurrentMachine();
+		if(machine.getModelcheckingItems().stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
+			machine.getModelcheckingItems().set(machine.getModelcheckingItems().indexOf(oldItem), changedItem);
+			// This is a new configuration and so should have no history of previous checks
+			assert changedItem.getItems().isEmpty();
+			this.checkSingleItem(changedItem);
+		}
 	}
 
 }

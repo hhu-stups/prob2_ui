@@ -144,7 +144,10 @@ public class ModelCheckingItem implements IValidationTask {
 	
 	public ModelCheckingOptions getFullOptions(final AbstractModel model) {
 		ModelCheckingOptions fullOptions = new ModelCheckingOptions(this.getOptions())
-			.searchStrategy(this.getSearchStrategy());
+			.searchStrategy(this.getSearchStrategy())
+			// Start checking from the beginning if this item hasn't been checked yet,
+			// otherwise continue checking from the last error.
+			.recheckExisting(this.getItems().isEmpty());
 		if (this.getGoal() != null) {
 			fullOptions = fullOptions.customGoal(model.parseFormula(this.getGoal()));
 		}
