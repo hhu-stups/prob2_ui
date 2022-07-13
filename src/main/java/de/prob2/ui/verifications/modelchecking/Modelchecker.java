@@ -6,8 +6,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -22,9 +20,7 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
-import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
@@ -37,18 +33,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Singleton
 public class Modelchecker {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(Modelchecker.class);
-
 	private final SetProperty<Future<?>> currentTasks;
 	private final ListeningExecutorService executor;
-
-	private final StageManager stageManager;
 
 	private final CurrentTrace currentTrace;
 
@@ -57,9 +45,8 @@ public class Modelchecker {
 	private final Injector injector;
 
 	@Inject
-	private Modelchecker(final StageManager stageManager, final CurrentTrace currentTrace,
+	private Modelchecker(final CurrentTrace currentTrace,
 						 final StopActions stopActions, final StatsView statsView, final Injector injector) {
-		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.statsView = statsView;
 		this.injector = injector;
@@ -70,29 +57,6 @@ public class Modelchecker {
 		stopActions.add(this.executor::shutdownNow);
 	}
 
-	public void checkItem(ModelCheckingItem item, boolean checkAll) {
-		if(!item.selected()) {
-			return;
-		}
-
-		final ListenableFuture<ModelCheckingJobItem> future = startModelchecking(item);
-
-		Futures.addCallback(future, new FutureCallback<ModelCheckingJobItem>() {
-			@Override
-			public void onSuccess(final ModelCheckingJobItem result) {
-				if (!checkAll && result.getResult() instanceof ITraceDescription) {
-					currentTrace.set(result.getTrace());
-				}
-			}
-
-			@Override
-			public void onFailure(final Throwable t) {
-				LOGGER.error("Exception while running model check job", t);
-				Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
-			}
-		}, MoreExecutors.directExecutor());
-	}
-
 	public BooleanExpression runningProperty() {
 		return this.currentTasks.emptyProperty().not();
 	}
@@ -101,7 +65,7 @@ public class Modelchecker {
 		return this.runningProperty().get();
 	}
 
-	private ListenableFuture<ModelCheckingJobItem> startModelchecking(ModelCheckingItem item) {
+	public ListenableFuture<ModelCheckingJobItem> startModelchecking(ModelCheckingItem item) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;

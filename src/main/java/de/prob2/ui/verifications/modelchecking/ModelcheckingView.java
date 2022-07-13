@@ -3,6 +3,10 @@ package de.prob2.ui.verifications.modelchecking;
 import java.math.BigInteger;
 import java.util.Optional;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -46,9 +50,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
 @Singleton
 public final class ModelcheckingView extends ScrollPane {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingView.class);
 	private static final BigInteger MIB_FACTOR = new BigInteger("1024").pow(2);
 
 	@FXML
@@ -104,7 +112,7 @@ public final class ModelcheckingView extends ScrollPane {
 
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-
+	private final StageManager stageManager;
 	private final Injector injector;
 	private final I18n i18n;
 	private final Modelchecker checker;
@@ -116,6 +124,7 @@ public final class ModelcheckingView extends ScrollPane {
 			final I18n i18n, final Modelchecker checker) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.stageManager = stageManager;
 		this.injector = injector;
 		this.i18n = i18n;
 		this.checker = checker;
@@ -209,7 +218,26 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	private void checkSingleItem(final ModelCheckingItem item) {
-		checker.checkItem(item, false);
+		if(!item.selected()) {
+			return;
+		}
+
+		final ListenableFuture<ModelCheckingJobItem> future = checker.startModelchecking(item);
+
+		Futures.addCallback(future, new FutureCallback<ModelCheckingJobItem>() {
+			@Override
+			public void onSuccess(final ModelCheckingJobItem result) {
+				if (result.getResult() instanceof ITraceDescription) {
+					currentTrace.set(result.getTrace());
+				}
+			}
+
+			@Override
+			public void onFailure(final Throwable t) {
+				LOGGER.error("Exception while running model check job", t);
+				Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
+			}
+		}, MoreExecutors.directExecutor());
 	}
 
 	private void tvItemsClicked(MouseEvent e) {
@@ -313,9 +341,25 @@ public final class ModelcheckingView extends ScrollPane {
 
 	@FXML
 	public void checkMachine() {
-		currentProject.currentMachineProperty().get().getModelcheckingItems().stream()
-			.filter(item -> item.getItems().isEmpty())
-			.forEach(item -> checker.checkItem(item, true));
+		final FutureCallback<ModelCheckingJobItem> errorCallback = new FutureCallback<ModelCheckingJobItem>() {
+			@Override
+			public void onSuccess(final ModelCheckingJobItem result) {}
+
+			@Override
+			public void onFailure(final Throwable t) {
+				LOGGER.error("Exception while running model check job", t);
+				Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
+			}
+		};
+
+		for (ModelCheckingItem item : currentProject.currentMachineProperty().get().getModelcheckingItems()) {
+			if (!item.selected() || !item.getItems().isEmpty()) {
+				continue;
+			}
+
+			final ListenableFuture<ModelCheckingJobItem> future = checker.startModelchecking(item);
+			Futures.addCallback(future, errorCallback, MoreExecutors.directExecutor());
+		}
 	}
 
 	@FXML

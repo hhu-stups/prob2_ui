@@ -275,7 +275,9 @@ public class VOChecker {
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
 		} else if (validationTask instanceof ModelCheckingItem) {
-			modelchecker.checkItem((ModelCheckingItem) validationTask, false);
+			// FIXME Currently ignores exceptions from the model checking future!
+			// (Those normally should never happen, but still...)
+			modelchecker.startModelchecking((ModelCheckingItem) validationTask);
 		} else if (validationTask instanceof LTLFormulaItem) {
 			ltlChecker.checkFormula((LTLFormulaItem) validationTask);
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
