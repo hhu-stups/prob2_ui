@@ -228,38 +228,26 @@ public final class ModelcheckingView extends ScrollPane {
 			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setOnAction(e-> {
 				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				checker.checkItem(item, true, false);
+				checker.checkItem(item, item.getItems().isEmpty(), false);
 			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 
 			row.itemProperty().addListener((o, from, to) -> {
+				checkItem.textProperty().unbind();
 				checkItem.disableProperty().unbind();
 				if (to != null) {
-					checkItem.disableProperty().bind(to.itemsProperty().emptyProperty().not()
+					checkItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
+						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
+						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
+					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
+					checkItem.disableProperty().bind(anySucceeded
 						.or(checker.runningProperty())
 						.or(to.selectedProperty().not()));
 				} else {
+					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 					checkItem.setDisable(true);
-				}
-			});
-
-			MenuItem searchForNewErrorsItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
-			searchForNewErrorsItem.setOnAction(e-> {
-				ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
-				checker.checkItem(item, false, false);
-			});
-
-			row.itemProperty().addListener((o, from, to) -> {
-				searchForNewErrorsItem.disableProperty().unbind();
-				if (to != null) {
-					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().isEmpty() || to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
-					searchForNewErrorsItem.disableProperty().bind(anySucceeded
-						.or(checker.runningProperty())
-						.or(to.selectedProperty().not()));
-				} else {
-					searchForNewErrorsItem.setDisable(true);
 				}
 			});
 
@@ -270,7 +258,7 @@ public final class ModelcheckingView extends ScrollPane {
 			row.contextMenuProperty().bind(
 				Bindings.when(row.emptyProperty())
 				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(checkItem, searchForNewErrorsItem, removeItem, openEditor)));
+				.otherwise(new ContextMenu(checkItem, removeItem, openEditor)));
 			return row;
 		});
 
