@@ -49,11 +49,11 @@ import javafx.stage.Stage;
 @Singleton
 public class VOManagerStage extends Stage {
 
-	public static enum EditType {
+	public enum EditType {
 		NONE, MODIFY;
 	}
 
-	public static enum Mode {
+	public enum Mode {
 		NONE, REQUIREMENT, VO
 	}
 
@@ -99,8 +99,6 @@ public class VOManagerStage extends Stage {
 
 	private final Map<String, List<String>> refinementChain;
 
-
-
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 			final VOChecker voChecker, final VOErrorHandler voErrorHandler, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
@@ -125,8 +123,6 @@ public class VOManagerStage extends Stage {
 		initializeListenerOnProjectChange();
 	}
 
-
-
 	private void initializeTables() {
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
@@ -134,26 +130,12 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<INameable> row = new TreeTableRow<>();
-
 			if(row.getItem() instanceof Machine) {
 				return row;
 			}
 
 			MenuItem checkItem = new MenuItem(bundle.getString("common.buttons.check"));
-			checkItem.setOnAction(e -> {
-				try {
-					IAbstractRequirement item = (IAbstractRequirement) row.getItem();
-					if (item instanceof Requirement) {
-						VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
-						Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) row.getTreeItem().getParent().getValue() : null;
-						voChecker.checkRequirement((Requirement) item, machine, setting);
-					} else if (item instanceof ValidationObligation) {
-						voChecker.checkVO((ValidationObligation) item);
-					}
-				} catch (VOParseException exception) {
-					voErrorHandler.handleError(this.getScene().getWindow(), exception);
-				}
-			});
+			checkItem.setOnAction(e -> checkItem(row.getTreeItem()));
 
 			MenuItem removeItem = new MenuItem(bundle.getString("common.buttons.remove"));
 			removeItem.setOnAction(e -> removeItem(row.getTreeItem()));
@@ -165,37 +147,23 @@ public class VOManagerStage extends Stage {
 			return row;
 		});
 
+		tvRequirements.setOnMouseClicked(e-> {
+			TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
+			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
+				checkItem(treeItem);
+			}
+		});
+
 		tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null && to.getValue() != null) {
 				INameable item = to.getValue();
 				if(item instanceof Requirement || item instanceof ValidationObligation) {
-					showRequirement((IAbstractRequirement) item, true);
+					showRequirement((IAbstractRequirement) item);
 				} else {
 					switchMode(EditType.NONE, Mode.NONE);
 				}
 			} else {
 				switchMode(EditType.NONE, Mode.NONE);
-			}
-		});
-
-		tvRequirements.setOnMouseClicked(e-> {
-			TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-			INameable nameable = treeItem == null ? null : treeItem.getValue();
-			if(nameable == null) {
-				return;
-			}
-			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
-				try {
-					if (nameable instanceof Requirement) {
-						VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
-						Machine machine = setting == VOManagerSetting.MACHINE ? (Machine) treeItem.getParent().getValue() : null;
-						voChecker.checkRequirement((Requirement) nameable, machine, setting);
-					} else if (nameable instanceof ValidationObligation) {
-						voChecker.checkVO((ValidationObligation) nameable);
-					}
-				} catch (VOParseException exc) {
-					voErrorHandler.handleError(this.getScene().getWindow(), exc);
-				}
 			}
 		});
 
@@ -205,6 +173,24 @@ public class VOManagerStage extends Stage {
 		updateOnMachine(currentProject.getCurrentMachine());
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> initializeRefinementHierarchy(to));
 		initializeRefinementHierarchy(currentTrace.getStateSpace());
+	}
+
+	private void checkItem(TreeItem<INameable> treeItem) {
+		INameable item = treeItem == null ? null : treeItem.getValue();
+		if(item == null) {
+			return;
+		}
+		try {
+			if (item instanceof Requirement) {
+				VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
+				Machine selectedMachine = setting == VOManagerSetting.MACHINE ? (Machine) treeItem.getParent().getValue() : null;
+				voChecker.checkRequirement((Requirement) item, selectedMachine, setting);
+			} else if (item instanceof ValidationObligation) {
+				voChecker.checkVO((ValidationObligation) item);
+			}
+		} catch (VOParseException exc) {
+			voErrorHandler.handleError(this.getScene().getWindow(), exc);
+		}
 	}
 
 	private void updateOnMachine(Machine machine) {
@@ -379,9 +365,9 @@ public class VOManagerStage extends Stage {
 	private static Machine getMachineForItem(final TreeItem<INameable> treeItem) {
 		final TreeItem<INameable> parentItem = treeItem.getParent();
 		if (parentItem.getValue() instanceof Machine) {
-			return (Machine)parentItem.getValue();
+			return (Machine) parentItem.getValue();
 		} else {
-			return (Machine)parentItem.getParent().getValue();
+			return (Machine) parentItem.getParent().getValue();
 		}
 	}
 
@@ -394,11 +380,11 @@ public class VOManagerStage extends Stage {
 		// Machine items cannot be manually removed (they disappear when all their children are removed)
 	}
 
-	private void showRequirement(IAbstractRequirement requirement, boolean edit) {
+	private void showRequirement(IAbstractRequirement requirement) {
 		if(requirement instanceof Requirement) {
-			requirementEditingBox.showRequirement((Requirement) requirement, edit);
+			requirementEditingBox.showRequirement((Requirement) requirement, true);
 		} else if(requirement instanceof ValidationObligation) {
-			voEditingBox.showValidationObligation((ValidationObligation) requirement, edit);
+			voEditingBox.showValidationObligation((ValidationObligation) requirement, true);
 		}
 	}
 
@@ -421,9 +407,9 @@ public class VOManagerStage extends Stage {
 		machine.getValidationObligations().set(machine.getValidationObligations().indexOf(oldVo), newVo);
 	}
 
-	public ValidationObligation getCurrentValidationObligation(){
+	public ValidationObligation getCurrentValidationObligation() {
 		final TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-		return  (ValidationObligation) treeItem.getValue();
+		return (ValidationObligation) treeItem.getValue();
 	}
 
 	private void resolveRefinementHierarchy(AbstractModel model) {
