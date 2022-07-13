@@ -117,9 +117,9 @@ public class LTLFormulaChecker {
 			logger.error("Could not parse LTL formula: ", error);
 			final List<LTLMarker> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
 			if (error.getTokenString() == null) {
-				errorMarkers.add(new LTLMarker("error", 1, 0, 1, error.toString()));
+				errorMarkers.add(new LTLMarker("error", 1, 0, 1, error.getMessage()));
 			} else {
-				errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getTokenString().length(), error.toString()));
+				errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getTokenString().length(), error.getMessage()));
 			}
 			resultHandler.handleFormulaParseErrors(item, errorMarkers);
 		}
