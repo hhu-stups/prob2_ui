@@ -503,21 +503,6 @@ public class VisBStage extends Stage {
 		simulatorStage.toFront();
 	}
 
-	@FXML
-	private void showProjection() {
-		VisBVisualisation visBVisualisation = this.visBController.getVisBVisualisation();
-		if(visBVisualisation == null) {
-			return;
-		}
-		List<VisBItem> visBItems = visBVisualisation.getVisBItems();
-		String projectionString = visBItems.stream()
-				.map(item -> String.format("\"%s_%s\" |-> %s", item.getId(), item.getAttribute(), item.getExpression()))
-				.collect(Collectors.joining(" |-> \n"));
-		DotView formulaStage = injector.getInstance(DotView.class);
-		formulaStage.show();
-		formulaStage.visualizeProjection(projectionString);
-	}
-
 	private String generateHTMLFileWithSVG(String svgContent, String baseUrl) {
 		final InputStream inputStream = this.getClass().getResourceAsStream("visb_html_view.html");
 		if (inputStream == null) {

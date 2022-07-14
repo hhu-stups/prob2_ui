@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListCell?>
+<?import javafx.scene.control.TableCell?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="ListCell" stylesheets="@/prob.css" styleClass="visb-item" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="TableCell" stylesheets="@/prob.css" styleClass="visb-item" xmlns:fx="http://javafx.com/fxml/1">
 	<VBox fx:id="itemBox">
 		<Label fx:id="lbID" styleClass="name"/>
 		<Label fx:id="lbAttribute" styleClass="information" />

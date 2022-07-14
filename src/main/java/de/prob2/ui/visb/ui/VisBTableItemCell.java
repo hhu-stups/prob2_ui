@@ -11,15 +11,16 @@ import de.prob.animator.domainobjects.VisBItem;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visb.VisBStage;
 
+import de.prob2.ui.visb.VisBTableItem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
+import javafx.scene.control.TableCell;
 import javafx.scene.layout.VBox;
 
-public class ListViewItem extends ListCell<VisBItem> {
+public class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 	@FXML
 	private VBox itemBox;
 	@FXML
@@ -41,7 +42,7 @@ public class ListViewItem extends ListCell<VisBItem> {
 
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
 
-	public ListViewItem(final StageManager stageManager, final ResourceBundle bundle, final Injector injector, final Map<String, VisBEvent> eventsById, final ObservableMap<VisBItem.VisBItemKey, String> attributeValues) {
+	public VisBTableItemCell(final StageManager stageManager, final ResourceBundle bundle, final Injector injector, final Map<String, VisBEvent> eventsById, final ObservableMap<VisBItem.VisBItemKey, String> attributeValues) {
 		stageManager.loadFXML(this,"list_view_item.fxml");
 		this.visBItem = null;
 		this.bundle = bundle;
@@ -67,14 +68,17 @@ public class ListViewItem extends ListCell<VisBItem> {
 	}
 
 	@Override
-	protected void updateItem(final VisBItem visBItem, final boolean empty){
+	protected void updateItem(final String visBItem, final boolean empty){
 		super.updateItem(visBItem, empty);
-		this.visBItem = visBItem;
-		if(visBItem != null) {
-			this.lbID.setText(visBItem.getId());
-			this.lbAttribute.setText(String.format(bundle.getString("visb.item.attribute"), visBItem.getAttribute()));
-			this.lbExpression.setText(String.format(bundle.getString("visb.item.expression"), visBItem.getExpression()));
-			final StringExpression valueBinding = Bindings.stringValueAt(this.attributeValues, visBItem.getKey());
+		if(this.getTableRow().getItem() == null) {
+			return;
+		}
+		this.visBItem = this.getTableRow().getItem().getVisBItem();
+		if(this.visBItem != null) {
+			this.lbID.setText(this.visBItem.getId());
+			this.lbAttribute.setText(String.format(bundle.getString("visb.item.attribute"), this.visBItem.getAttribute()));
+			this.lbExpression.setText(String.format(bundle.getString("visb.item.expression"), this.visBItem.getExpression()));
+			final StringExpression valueBinding = Bindings.stringValueAt(this.attributeValues, this.visBItem.getKey());
 			this.lbValue.textProperty().bind(Bindings.format(
 				bundle.getString("visb.item.value"),
 				Bindings.when(valueBinding.isNull())
@@ -98,4 +102,7 @@ public class ListViewItem extends ListCell<VisBItem> {
 		this.setText("");
 	}
 
+	public void setVisBItem(VisBItem visBItem) {
+		this.visBItem = visBItem;
+	}
 }
