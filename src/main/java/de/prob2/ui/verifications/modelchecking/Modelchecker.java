@@ -2,14 +2,10 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -22,6 +18,8 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.internal.CompletableExecutorService;
+import de.prob2.ui.internal.CompletableThreadPoolExecutor;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
@@ -37,7 +35,7 @@ import javafx.collections.FXCollections;
 @Singleton
 public class Modelchecker {
 	private final SetProperty<Future<?>> currentTasks;
-	private final ListeningExecutorService executor;
+	private final CompletableExecutorService executor;
 
 	private final CurrentTrace currentTrace;
 
@@ -52,9 +50,7 @@ public class Modelchecker {
 		this.statsView = statsView;
 		this.injector = injector;
 		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new CopyOnWriteArraySet<>()));
-		this.executor = MoreExecutors.listeningDecorator(
-			Executors.newSingleThreadExecutor(r -> new Thread(r, "Model Checker"))
-		);
+		this.executor = CompletableThreadPoolExecutor.newSingleThreadedExecutor(r -> new Thread(r, "Model Checker"));
 		stopActions.add(this.executor::shutdownNow);
 	}
 
@@ -74,15 +70,15 @@ public class Modelchecker {
 	 * @param item the model checking configuration to run
 	 * @return result of the model check
 	 */
-	public ListenableFuture<ModelCheckingJobItem> startCheckIfNeeded(final ModelCheckingItem item) {
+	public CompletableFuture<ModelCheckingJobItem> startCheckIfNeeded(final ModelCheckingItem item) {
 		if (item.getItems().isEmpty()) {
 			return this.startNextCheckStep(item);
 		} else {
-			return Futures.immediateFuture(item.getItems().get(0));
+			return CompletableFuture.completedFuture(item.getItems().get(0));
 		}
 	}
 
-	public ListenableFuture<ModelCheckingJobItem> startNextCheckStep(ModelCheckingItem item) {
+	public CompletableFuture<ModelCheckingJobItem> startNextCheckStep(ModelCheckingItem item) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;
@@ -112,12 +108,12 @@ public class Modelchecker {
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel());
 		final ConsistencyChecker checker = new ConsistencyChecker(stateSpace, options, listener);
 
-		final ListenableFuture<ModelCheckingJobItem> future = this.executor.submit(() -> {
+		final CompletableFuture<ModelCheckingJobItem> future = this.executor.submit(() -> {
 			checker.call();
 			return lastJobItem.get();
 		});
 		this.currentTasks.add(future);
-		future.addListener(() -> this.currentTasks.remove(future), MoreExecutors.directExecutor());
+		future.whenComplete((r, t) -> this.currentTasks.remove(future));
 		return future;
 	}
 
