@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
+import de.prob2.ui.internal.CliTaskExecutor;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
@@ -65,15 +66,15 @@ public class ModelcheckingStage extends Stage {
 	
 	private final StageManager stageManager;
 	
-	private final Modelchecker modelchecker;
+	private final CliTaskExecutor cliExecutor;
 
 	private ModelCheckingItem result;
 
 	@Inject
-	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, final Modelchecker modelchecker) {
+	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, final CliTaskExecutor cliExecutor) {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
-		this.modelchecker = modelchecker;
+		this.cliExecutor = cliExecutor;
 		this.result = null;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
 	}
@@ -81,7 +82,7 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private void initialize() {
 		this.initModality(Modality.APPLICATION_MODAL);
-		this.startButton.disableProperty().bind(modelchecker.runningProperty());
+		this.startButton.disableProperty().bind(cliExecutor.runningProperty());
 		this.selectSearchStrategy.getItems().setAll(
 			ModelCheckingSearchStrategy.MIXED_BF_DF,
 			ModelCheckingSearchStrategy.BREADTH_FIRST,

@@ -12,6 +12,7 @@ import com.google.inject.Singleton;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.CliTaskExecutor;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -114,18 +115,20 @@ public final class ModelcheckingView extends ScrollPane {
 	private final Injector injector;
 	private final I18n i18n;
 	private final Modelchecker checker;
+	private CliTaskExecutor cliExecutor;
 	private final CheckBox selectAll;
 
 	@Inject
 	private ModelcheckingView(final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final StageManager stageManager, final Injector injector,
-			final I18n i18n, final Modelchecker checker) {
+			final I18n i18n, final Modelchecker checker, final CliTaskExecutor cliExecutor) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.i18n = i18n;
 		this.checker = checker;
+		this.cliExecutor = cliExecutor;
 		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 	}
@@ -154,7 +157,7 @@ public final class ModelcheckingView extends ScrollPane {
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 		checkMachineButton.disableProperty().bind(currentTrace.isNull().or(noModelcheckingItems.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
-		cancelButton.disableProperty().bind(checker.runningProperty().not());
+		cancelButton.disableProperty().bind(cliExecutor.runningProperty().not());
 
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvItems, selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
@@ -270,7 +273,7 @@ public final class ModelcheckingView extends ScrollPane {
 						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
 					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
 					checkItem.disableProperty().bind(anySucceeded
-						.or(checker.runningProperty())
+						.or(cliExecutor.runningProperty())
 						.or(to.selectedProperty().not()));
 				} else {
 					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));

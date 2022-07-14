@@ -15,7 +15,7 @@ import com.google.common.util.concurrent.Futures;
  * 
  * @param <T> Result type of the computation.
  */
-class CompletableFutureTask<T> extends CompletableFuture<T> implements RunnableFuture<T> {
+public class CompletableFutureTask<T> extends CompletableFuture<T> implements RunnableFuture<T> {
 	private final FutureTask<T> task;
 	
 	CompletableFutureTask(final Callable<T> callable) {

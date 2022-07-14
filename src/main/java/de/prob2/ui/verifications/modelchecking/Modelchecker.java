@@ -3,8 +3,6 @@ package de.prob2.ui.verifications.modelchecking;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Future;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -18,24 +16,17 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.internal.CompletableExecutorService;
-import de.prob2.ui.internal.CompletableThreadPoolExecutor;
-import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SetProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleSetProperty;
-import javafx.collections.FXCollections;
 
 @Singleton
 public class Modelchecker {
-	private final SetProperty<Future<?>> currentTasks;
-	private final CompletableExecutorService executor;
+	private final CliTaskExecutor executor;
 
 	private final CurrentTrace currentTrace;
 
@@ -44,22 +35,11 @@ public class Modelchecker {
 	private final Injector injector;
 
 	@Inject
-	private Modelchecker(final CurrentTrace currentTrace,
-						 final StopActions stopActions, final StatsView statsView, final Injector injector) {
+	private Modelchecker(final CliTaskExecutor executor, final CurrentTrace currentTrace, final StatsView statsView, final Injector injector) {
+		this.executor = executor;
 		this.currentTrace = currentTrace;
 		this.statsView = statsView;
 		this.injector = injector;
-		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new CopyOnWriteArraySet<>()));
-		this.executor = CompletableThreadPoolExecutor.newSingleThreadedExecutor(r -> new Thread(r, "Model Checker"));
-		stopActions.add(this.executor::shutdownNow);
-	}
-
-	public BooleanExpression runningProperty() {
-		return this.currentTasks.emptyProperty().not();
-	}
-
-	public boolean isRunning() {
-		return this.runningProperty().get();
 	}
 
 	/**
@@ -108,17 +88,14 @@ public class Modelchecker {
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel());
 		final ConsistencyChecker checker = new ConsistencyChecker(stateSpace, options, listener);
 
-		final CompletableFuture<ModelCheckingJobItem> future = this.executor.submit(() -> {
+		return this.executor.submit(() -> {
 			checker.call();
 			return lastJobItem.get();
 		});
-		this.currentTasks.add(future);
-		future.whenComplete((r, t) -> this.currentTasks.remove(future));
-		return future;
 	}
 
 	public void cancelModelcheck() {
-		this.currentTasks.forEach(task -> task.cancel(true));
+		this.executor.interruptAll();
 		currentTrace.getStateSpace().sendInterrupt();
 	}
 

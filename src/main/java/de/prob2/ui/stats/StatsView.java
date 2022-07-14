@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.ComputeCoverageCommand;
@@ -18,7 +17,6 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.SimpleStatsView;
-import de.prob2.ui.verifications.modelchecking.Modelchecker;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -65,15 +63,12 @@ public class StatsView extends ScrollPane {
 	private final ResourceBundle bundle;
 	private final CurrentTrace currentTrace;
 	private final FontSize fontSize;
-	private final Injector injector;
 
 	@Inject
-	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace,
-			final FontSize fontSize, final Injector injector) {
+	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace, final FontSize fontSize) {
 		this.bundle = bundle;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
-		this.injector = injector;
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
@@ -124,21 +119,22 @@ public class StatsView extends ScrollPane {
 
 	private void update(final StateSpace stateSpace) {
 		if (stateSpace != null) {
-			// During model checking, simple stats are automatically calculated and returned by probcli on every model checking step.
-			// Modelchecker reports these automatically calculated stats to StatsView, so there is no need to calculate them again here.
-			// The same does *not* apply to extended stats though, which always need to be calculated explicitly.
-			if (!injector.getInstance(Modelchecker.class).isRunning()) {
+			// Don't attempt to update any stats while probcli is busy (i. e. can't execute commands for a while).
+			// During model checking, simple stats are still updated,
+			// because probcli automatically returns them after every model checking step
+			// and Modelchecker reports these stats to StatsView.
+			if (!stateSpace.isBusy()) {
 				final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
 				stateSpace.execute(stateSpaceStatsCmd);
 				updateSimpleStats(stateSpaceStatsCmd.getResult());
-			}
 
-			if (extendedStatsToggle.isSelected()) {
-				final ComputeCoverageCommand coverageCmd = new ComputeCoverageCommand();
-				stateSpace.execute(coverageCmd);
-				final ComputeCoverageCommand.ComputeCoverageResult result = coverageCmd.getResult();
-				showStats(result.getNodes(), stateStats);
-				showStats(result.getOps(), transStats);
+				if (extendedStatsToggle.isSelected()) {
+					final ComputeCoverageCommand coverageCmd = new ComputeCoverageCommand();
+					stateSpace.execute(coverageCmd);
+					final ComputeCoverageCommand.ComputeCoverageResult result = coverageCmd.getResult();
+					showStats(result.getNodes(), stateStats);
+					showStats(result.getOps(), transStats);
+				}
 			}
 		} else {
 			updateSimpleStats(null);

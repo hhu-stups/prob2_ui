@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * The {@link CompletableFuture}s returned by this executor support cancellation properly,
  * unlike the standard {@link CompletableFuture} class.
  */
-public final class CompletableThreadPoolExecutor extends ThreadPoolExecutor implements CompletableExecutorService {
+public class CompletableThreadPoolExecutor extends ThreadPoolExecutor implements CompletableExecutorService {
 	public CompletableThreadPoolExecutor(
 		final int corePoolSize,
 		final int maximumPoolSize,
@@ -71,12 +71,12 @@ public final class CompletableThreadPoolExecutor extends ThreadPoolExecutor impl
 	}
 	
 	@Override
-	protected <T> RunnableFuture<T> newTaskFor(final Runnable runnable, final T value) {
+	protected <T> CompletableFutureTask<T> newTaskFor(final Runnable runnable, final T value) {
 		return this.newTaskFor(Executors.callable(runnable, value));
 	}
 	
 	@Override
-	protected <T> RunnableFuture<T> newTaskFor(final Callable<T> callable) {
+	protected <T> CompletableFutureTask<T> newTaskFor(final Callable<T> callable) {
 		return new CompletableFutureTask<>(callable);
 	}
 	
