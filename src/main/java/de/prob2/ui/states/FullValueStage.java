@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,9 +15,8 @@ import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-
-import difflib.DiffUtils;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -35,6 +33,8 @@ import javafx.stage.Stage;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import difflib.DiffUtils;
 
 public class FullValueStage extends Stage {
 	private static final Pattern PRETTIFY_DELIMITERS = Pattern.compile("[\\{\\}\\,]");
@@ -56,15 +56,15 @@ public class FullValueStage extends Stage {
 	
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
 	private final ObjectProperty<StateItem> value;
 	
 	@Inject
-	public FullValueStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final ResourceBundle bundle) {
+	public FullValueStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final I18n i18n) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		
 		this.value = new SimpleObjectProperty<>(this, "value", null);
 		
@@ -136,8 +136,8 @@ public class FullValueStage extends Stage {
 	}
 	
 	private void updateDiff(final String cv, final String pv) {
-		final String prevName = bundle.getString("states.fullValueStage.diff.previousValueName");
-		final String curName = bundle.getString("states.fullValueStage.diff.currentValueName");
+		final String prevName = i18n.translate("states.fullValueStage.diff.previousValueName");
+		final String curName = i18n.translate("states.fullValueStage.diff.currentValueName");
 		final List<String> prevLines = Arrays.asList(pv.split("\n"));
 		final List<String> curLines = Arrays.asList(cv.split("\n"));
 		final List<String> uniDiffLines = DiffUtils.generateUnifiedDiff(prevName, curName, prevLines, DiffUtils.diff(prevLines, curLines), 3);
@@ -145,7 +145,7 @@ public class FullValueStage extends Stage {
 		this.diffTextarea.clear();
 		
 		if (uniDiffLines.isEmpty()) {
-			this.diffTextarea.appendText(bundle.getString("states.fullValueStage.diff.noDifferencePlaceholder"));
+			this.diffTextarea.appendText(i18n.translate("states.fullValueStage.diff.noDifferencePlaceholder"));
 		} else {
 			for (final String line : uniDiffLines) {
 				final List<String> styleClasses = new ArrayList<>();
@@ -179,12 +179,9 @@ public class FullValueStage extends Stage {
 		} else if (value instanceof BVisual2Value.ExpressionValue) {
 			return ((BVisual2Value.ExpressionValue)value).getValue();
 		} else if (value instanceof BVisual2Value.Inactive) {
-			return bundle.getString("states.fullValueStage.value.inactive");
+			return i18n.translate("states.fullValueStage.value.inactive");
 		} else if (value instanceof BVisual2Value.Error) {
-			return String.format(
-				bundle.getString("states.fullValueStage.value.error"),
-				((BVisual2Value.Error)value).getMessage()
-			);
+			return i18n.translate("states.fullValueStage.value.error", ((BVisual2Value.Error)value).getMessage());
 		} else {
 			throw new IllegalArgumentException("Cannot display a BVisual2Value of type " + value.getClass());
 		}
@@ -236,7 +233,7 @@ public class FullValueStage extends Stage {
 		} else if (this.getValue().getLabel().matches("[\\w\\s]+")) {
 			defaultFileName = this.getValue().getLabel();
 		} else {
-			defaultFileName = bundle.getString("states.fullValueStage.saveAs.defaultFileName");
+			defaultFileName = i18n.translate("states.fullValueStage.saveAs.defaultFileName");
 		}
 		chooser.setInitialFileName(defaultFileName + defaultExtension);
 		final Path selected = fileChooserManager.showSaveFileChooser(chooser, null, this);

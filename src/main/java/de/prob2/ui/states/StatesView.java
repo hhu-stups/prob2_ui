@@ -1,8 +1,20 @@
 package de.prob2.ui.states;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.animator.domainobjects.BVisual2Formula;
 import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
@@ -19,11 +31,13 @@ import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -46,22 +60,11 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
+
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -92,7 +95,7 @@ public final class StatesView extends StackPane {
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final Config config;
 
 	private final BackgroundUpdater updater;
@@ -107,11 +110,11 @@ public final class StatesView extends StackPane {
 
 	@Inject
 	private StatesView(final Injector injector, final CurrentTrace currentTrace, final StatusBar statusBar,
-					   final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final Config config) {
+					   final StageManager stageManager, final I18n i18n, final StopActions stopActions, final Config config) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.config = config;
 
 		this.updater = new BackgroundUpdater("StatesView Updater");
@@ -161,8 +164,8 @@ public final class StatesView extends StackPane {
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell(this.showExpandedFormulasButton.selectedProperty()));
-		this.tvValue.setCellFactory(col -> new ValueCell(bundle));
-		this.tvPreviousValue.setCellFactory(col -> new ValueCell(bundle));
+		this.tvValue.setCellFactory(col -> new ValueCell(i18n));
+		this.tvPreviousValue.setCellFactory(col -> new ValueCell(i18n));
 
 		this.tvName.setCellValueFactory(data -> data.getValue().valueProperty());
 		this.tvValue.setCellValueFactory(data -> Bindings.select(data.getValue().valueProperty(), "currentValue"));
@@ -221,9 +224,9 @@ public final class StatesView extends StackPane {
 		final int childrenCount = item.getSubformulas().size();
 		if (childrenCount > 0) {
 			if (item.getFunctorSymbol() != null) {
-				sb.append(String.format(bundle.getString("states.statesView.tooltip.formulaChildren"), item.getFunctorSymbol(), childrenCount));
+				sb.append(i18n.translate("states.statesView.tooltip.formulaChildren", item.getFunctorSymbol(), childrenCount));
 			} else {
-				sb.append(String.format(bundle.getString("states.statesView.tooltip.elementChildren"), childrenCount));
+				sb.append(i18n.translate("states.statesView.tooltip.elementChildren", childrenCount));
 			}
 		}
 		if (sb.length() > 0) {
@@ -232,7 +235,7 @@ public final class StatesView extends StackPane {
 
 		final ExpandedFormula.ProofInfo proofInfo = item.getProofInfo();
 		if (proofInfo != null) {
-			sb.append(String.format(bundle.getString("states.statesView.tooltip.proofInfo"), proofInfo.getProvenCount(), proofInfo.getUnprovenCount(), proofInfo.getUnchangedCount()));
+			sb.append(i18n.translate("states.statesView.tooltip.proofInfo", proofInfo.getProvenCount(), proofInfo.getUnprovenCount(), proofInfo.getUnchangedCount()));
 		}
 
 		if (sb.length() > 0) {
@@ -295,7 +298,7 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-		final MenuItem copyItem = new MenuItem(bundle.getString("states.statesView.contextMenu.items.copyName"));
+		final MenuItem copyItem = new MenuItem(i18n.translate("states.statesView.contextMenu.items.copyName"));
 
 		copyItem.setOnAction(e -> handleCopyName(row.getTreeItem()));
 		copyItem.disableProperty().bind(row.itemProperty().isNull());
@@ -308,7 +311,7 @@ public final class StatesView extends StackPane {
 		});
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
-				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionGraph"));
+				i18n.translate("states.statesView.contextMenu.items.visualizeExpressionGraph"));
 		visualizeExpressionAsGraphItem.disableProperty().bind(Bindings.createBooleanBinding(() -> row.getItem() == null || row.getItem().getType() == ExpandedFormula.FormulaType.OTHER ||
 				row.getItem().getCurrentValue() instanceof BVisual2Value.Inactive, row.itemProperty()));
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
@@ -327,7 +330,7 @@ public final class StatesView extends StackPane {
 		});
 
 		final MenuItem visualizeExpressionAsTableItem = new MenuItem(
-				bundle.getString("states.statesView.contextMenu.items.visualizeExpressionTable"));
+				i18n.translate("states.statesView.contextMenu.items.visualizeExpressionTable"));
 		visualizeExpressionAsTableItem.disableProperty().bind(Bindings.createBooleanBinding(() -> row.getItem() == null || row.getItem().getType() == ExpandedFormula.FormulaType.OTHER ||
 				row.getItem().getCurrentValue() instanceof BVisual2Value.Inactive, row.itemProperty()));
 		visualizeExpressionAsTableItem.setOnAction(event -> {
@@ -348,7 +351,7 @@ public final class StatesView extends StackPane {
 			}
 		});
 
-		final MenuItem showDetailsItem = new MenuItem(bundle.getString("states.statesView.contextMenu.items.showDetails"));
+		final MenuItem showDetailsItem = new MenuItem(i18n.translate("states.statesView.contextMenu.items.showDetails"));
 		showDetailsItem.disableProperty().bind(row.itemProperty().isNull());
 		showDetailsItem.setOnAction(event -> this.showDetails(row.getItem()));
 

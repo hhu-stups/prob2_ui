@@ -1,19 +1,18 @@
 package de.prob2.ui.states;
 
-import java.util.ResourceBundle;
-
 import de.prob.animator.domainobjects.BVisual2Value;
+import de.prob2.ui.internal.I18n;
 
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
 
 final class ValueCell extends TreeTableCell<StateItem, BVisual2Value> {
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
-	ValueCell(final ResourceBundle bundle) {
+	ValueCell(final I18n i18n) {
 		super();
 		
-		this.bundle = bundle;
+		this.i18n = i18n;
 		
 		this.setTextOverrun(OverrunStyle.CENTER_WORD_ELLIPSIS);
 	}
@@ -56,7 +55,7 @@ final class ValueCell extends TreeTableCell<StateItem, BVisual2Value> {
 			this.getStyleClass().add("not-initialized");
 		} else if (result instanceof BVisual2Value.Error) {
 			final String firstErrorMessageLine = ((BVisual2Value.Error)result).getMessage().split("\\n", 2)[0];
-			this.setText(String.format(bundle.getString("states.valueCell.error"), firstErrorMessageLine));
+			this.setText(i18n.translate("states.valueCell.error", firstErrorMessageLine));
 			this.getStyleClass().add("error");
 		} else {
 			throw new IllegalArgumentException("Don't know how to show the value of a " + result.getClass() + " instance");
