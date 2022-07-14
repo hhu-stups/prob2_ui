@@ -7,13 +7,11 @@ import com.google.inject.Inject;
 
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
-import de.prob2.ui.internal.CliTaskExecutor;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Spinner;
@@ -33,8 +31,6 @@ public class ModelcheckingStage extends Stage {
 
 	private static final int INITIAL_TIME_STEP = 1;
 
-	@FXML
-	private Button startButton;
 	@FXML
 	private ChoiceBox<ModelCheckingSearchStrategy> selectSearchStrategy;
 	@FXML
@@ -66,15 +62,12 @@ public class ModelcheckingStage extends Stage {
 	
 	private final StageManager stageManager;
 	
-	private final CliTaskExecutor cliExecutor;
-
 	private ModelCheckingItem result;
 
 	@Inject
-	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle, final CliTaskExecutor cliExecutor) {
+	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle) {
 		this.bundle = bundle;
 		this.stageManager = stageManager;
-		this.cliExecutor = cliExecutor;
 		this.result = null;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
 	}
@@ -82,7 +75,6 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private void initialize() {
 		this.initModality(Modality.APPLICATION_MODAL);
-		this.startButton.disableProperty().bind(cliExecutor.runningProperty());
 		this.selectSearchStrategy.getItems().setAll(
 			ModelCheckingSearchStrategy.MIXED_BF_DF,
 			ModelCheckingSearchStrategy.BREADTH_FIRST,

@@ -132,7 +132,7 @@
 						<HBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0"
 							AnchorPane.bottomAnchor="20.0" spacing="5.0">
 							<AnchorPane HBox.hgrow="ALWAYS">
-								<Button fx:id="startButton" onAction="#startModelCheck"
+								<Button onAction="#startModelCheck"
 									text="%verifications.modelchecking.modelcheckingStage.buttons.start"
 									AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
 							</AnchorPane>
