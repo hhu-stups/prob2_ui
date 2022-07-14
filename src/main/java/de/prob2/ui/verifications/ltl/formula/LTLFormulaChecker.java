@@ -21,6 +21,7 @@ import de.prob.check.LTLError;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
 import de.prob.model.classicalb.ClassicalBModel;
+import de.prob2.ui.internal.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -30,9 +31,6 @@ import de.prob2.ui.verifications.ltl.LTLResultHandler;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,37 +39,34 @@ import org.slf4j.LoggerFactory;
 public class LTLFormulaChecker {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LTLFormulaChecker.class);
-				
+	
+	private final CliTaskExecutor cliExecutor;
+	
 	private final CurrentTrace currentTrace;
 	
 	private final CurrentProject currentProject;
 	
-	private final ListProperty<Thread> currentJobThreads;
-	
 	private final LTLResultHandler resultHandler;
 	
 	@Inject
-	private LTLFormulaChecker(final CurrentTrace currentTrace, final CurrentProject currentProject,
+	private LTLFormulaChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace, final CurrentProject currentProject,
 			final LTLResultHandler resultHandler) {
+		this.cliExecutor = cliExecutor;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.resultHandler = resultHandler;
-		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 	}
 	
 	public void checkMachine() {
 		Machine machine = currentProject.getCurrentMachine();
-		Thread checkingThread = new Thread(() -> {
+		this.cliExecutor.submit(() -> {
 			for (LTLFormulaItem item : machine.getLTLFormulas()) {
 				this.checkFormula(item, machine);
 				if(Thread.currentThread().isInterrupted()) {
 					break;
 				}
 			}
-			currentJobThreads.remove(Thread.currentThread());
-		}, "LTL Checking Thread");
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		});
 	}
 	
 	public void checkFormula(LTLFormulaItem item, Machine machine) {
@@ -127,29 +122,23 @@ public class LTLFormulaChecker {
 	
 	public void checkFormula(LTLFormulaItem item) {
 		Machine machine = currentProject.getCurrentMachine();
-		Thread checkingThread = new Thread(() -> {
+		this.cliExecutor.submit(() -> {
 			checkFormula(item, machine);
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}
-			currentJobThreads.remove(Thread.currentThread());
-		}, "LTL Checking Thread");
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		});
 	}
 
 	public void checkFormula(LTLFormulaItem item, LTLFormulaStage formulaStage) {
 		Machine machine = currentProject.getCurrentMachine();
-		Thread checkingThread = new Thread(() -> {
+		this.cliExecutor.submit(() -> {
 			checkFormula(item, machine);
 			Platform.runLater(() -> formulaStage.showErrors(item.getResultItem()));
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}
-			currentJobThreads.remove(Thread.currentThread());
-		}, "LTL Checking Thread");
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		});
 	}
 	
 	private static String ltlErrorTypeFromProB(final ErrorItem.Type type) {
@@ -217,12 +206,12 @@ public class LTLFormulaChecker {
 	}
 	
 	public void cancel() {
-		currentJobThreads.forEach(Thread::interrupt);
+		cliExecutor.interruptAll();
 		currentTrace.getStateSpace().sendInterrupt();
 	}
 	
 	public BooleanExpression runningProperty() {
-		return currentJobThreads.emptyProperty().not();
+		return cliExecutor.runningProperty();
 	}
 	
 	public boolean isRunning() {
