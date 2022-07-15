@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.ltl.formula;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -29,7 +30,6 @@ import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 
-import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 
 import org.slf4j.Logger;
@@ -120,27 +120,17 @@ public class LTLFormulaChecker {
 		}
 	}
 	
-	public void checkFormula(LTLFormulaItem item) {
+	public CompletableFuture<LTLFormulaItem> checkFormula(LTLFormulaItem item) {
 		Machine machine = currentProject.getCurrentMachine();
-		this.cliExecutor.submit(() -> {
+		return this.cliExecutor.submit(() -> {
 			checkFormula(item, machine);
 			if(item.getCounterExample() != null) {
 				currentTrace.set(item.getCounterExample());
 			}
+			return item;
 		});
 	}
 
-	public void checkFormula(LTLFormulaItem item, LTLFormulaStage formulaStage) {
-		Machine machine = currentProject.getCurrentMachine();
-		this.cliExecutor.submit(() -> {
-			checkFormula(item, machine);
-			Platform.runLater(() -> formulaStage.showErrors(item.getResultItem()));
-			if(item.getCounterExample() != null) {
-				currentTrace.set(item.getCounterExample());
-			}
-		});
-	}
-	
 	private static String ltlErrorTypeFromProB(final ErrorItem.Type type) {
 		switch (type) {
 			case MESSAGE:

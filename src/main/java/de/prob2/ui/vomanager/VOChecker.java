@@ -272,11 +272,11 @@ public class VOChecker {
 	}
 
 	public void checkVT(IValidationTask validationTask) {
+		// FIXME Currently ignores exceptions from CompletableFutures!
+		// (Those normally should never happen, but still...)
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
 		} else if (validationTask instanceof ModelCheckingItem) {
-			// FIXME Currently ignores exceptions from the model checking future!
-			// (Those normally should never happen, but still...)
 			modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask);
 		} else if (validationTask instanceof LTLFormulaItem) {
 			ltlChecker.checkFormula((LTLFormulaItem) validationTask);
