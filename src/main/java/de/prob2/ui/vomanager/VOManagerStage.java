@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,6 +17,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -91,7 +91,7 @@ public class VOManagerStage extends Stage {
 
 	private final RequirementHandler requirementHandler;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final ObjectProperty<EditType> editTypeProperty;
 
@@ -101,14 +101,14 @@ public class VOManagerStage extends Stage {
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-			final VOChecker voChecker, final VOErrorHandler voErrorHandler, final RequirementHandler requirementHandler, final ResourceBundle bundle) {
+			final VOChecker voChecker, final VOErrorHandler voErrorHandler, final RequirementHandler requirementHandler, final I18n i18n) {
 		super();
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voChecker = voChecker;
 		this.voErrorHandler = voErrorHandler;
 		this.requirementHandler = requirementHandler;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.refinementChain = new HashMap<>();
@@ -134,10 +134,10 @@ public class VOManagerStage extends Stage {
 				return row;
 			}
 
-			MenuItem checkItem = new MenuItem(bundle.getString("common.buttons.check"));
+			MenuItem checkItem = new MenuItem(i18n.translate("common.buttons.check"));
 			checkItem.setOnAction(e -> checkItem(row.getTreeItem()));
 
-			MenuItem removeItem = new MenuItem(bundle.getString("common.buttons.remove"));
+			MenuItem removeItem = new MenuItem(i18n.translate("common.buttons.remove"));
 			removeItem.setOnAction(e -> removeItem(row.getTreeItem()));
 
 			row.contextMenuProperty().bind(

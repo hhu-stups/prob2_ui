@@ -1,11 +1,10 @@
 package de.prob2.ui.visb.ui;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Injector;
 
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visb.VisBStage;
 
@@ -26,14 +25,14 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 
 	private VisBEvent visBEvent;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final Injector injector;
 
-	public ListViewEvent(final StageManager stageManager, final ResourceBundle bundle, final Injector injector) {
+	public ListViewEvent(final StageManager stageManager, final I18n i18n, final Injector injector) {
 		stageManager.loadFXML(this,"list_view_event.fxml");
 		this.visBEvent = null;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.injector = injector;
 	}
 
@@ -57,8 +56,8 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 		this.visBEvent = visBEvent;
 		if(visBEvent != null){
 			lbID.setText(visBEvent.getId());
-			lbEvent.setText(String.format(bundle.getString("visb.event.event"), visBEvent.getEvent()));
-			lbPredicates.setText(String.format(bundle.getString("visb.event.predicates"), visBEvent.getPredicates().toString()));
+			lbEvent.setText(i18n.translate("visb.event.event", visBEvent.getEvent()));
+			lbPredicates.setText(i18n.translate("visb.event.predicates", visBEvent.getPredicates().toString()));
 			this.setGraphic(this.eventBox);
 			this.setText("");
 		} else {

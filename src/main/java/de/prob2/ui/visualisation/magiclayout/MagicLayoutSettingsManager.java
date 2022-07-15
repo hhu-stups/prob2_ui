@@ -3,7 +3,6 @@ package de.prob2.ui.visualisation.magiclayout;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -12,6 +11,7 @@ import com.google.inject.Inject;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
@@ -28,11 +28,11 @@ public class MagicLayoutSettingsManager {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	@Inject
 	public MagicLayoutSettingsManager(ObjectMapper objectMapper, JacksonManager<MagicLayoutSettings> jsonManager, CurrentProject currentProject, StageManager stageManager,
-									  FileChooserManager fileChooserManager, ResourceBundle bundle) {
+									  FileChooserManager fileChooserManager, I18n i18n) {
 		this.jsonManager = jsonManager;
 		this.jsonManager.initContext(new JacksonManager.Context<MagicLayoutSettings>(objectMapper, MagicLayoutSettings.class, MagicLayoutSettings.FILE_TYPE, MagicLayoutSettings.CURRENT_FORMAT_VERSION) {
 			@Override
@@ -55,13 +55,13 @@ public class MagicLayoutSettingsManager {
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 	}
 
 	public void save(MagicLayoutSettings layoutSettings) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(
-				bundle.getString("visualisation.magicLayout.settingsManager.fileChooser.saveLayoutSettings.title"));
+				i18n.translate("visualisation.magicLayout.settingsManager.fileChooser.saveLayoutSettings.title"));
 
 		final Path magicSettingsFolder = currentProject.getLocation().resolve("magic_graph").resolve("settings");
 		if (!magicSettingsFolder.toFile().exists()) {
@@ -93,7 +93,7 @@ public class MagicLayoutSettingsManager {
 	public MagicLayoutSettings load() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(
-				bundle.getString("visualisation.magicLayout.settingsManager.fileChooser.loadLayoutSettings.title"));
+				i18n.translate("visualisation.magicLayout.settingsManager.fileChooser.loadLayoutSettings.title"));
 
 		final Path magicSettingsFolder = currentProject.getLocation().resolve("magic_graph").resolve("settings");
 		if (!magicSettingsFolder.toFile().exists()) {

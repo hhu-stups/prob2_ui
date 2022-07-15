@@ -1,17 +1,17 @@
 package de.prob2.ui.visb.ui;
 
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
 
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visb.VisBStage;
-
 import de.prob2.ui.visb.VisBTableItem;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.collections.ObservableMap;
@@ -34,7 +34,7 @@ public class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 
 	private VisBItem visBItem;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final Injector injector;
 
@@ -42,10 +42,10 @@ public class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
 
-	public VisBTableItemCell(final StageManager stageManager, final ResourceBundle bundle, final Injector injector, final Map<String, VisBEvent> eventsById, final ObservableMap<VisBItem.VisBItemKey, String> attributeValues) {
+	public VisBTableItemCell(final StageManager stageManager, final I18n i18n, final Injector injector, final Map<String, VisBEvent> eventsById, final ObservableMap<VisBItem.VisBItemKey, String> attributeValues) {
 		stageManager.loadFXML(this,"list_view_item.fxml");
 		this.visBItem = null;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.injector = injector;
 		this.eventsById = eventsById;
 		this.attributeValues = attributeValues;
@@ -80,14 +80,13 @@ public class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 		this.visBItem = item.getVisBItem();
 		if(this.visBItem != null) {
 			this.lbID.setText(this.visBItem.getId());
-			this.lbAttribute.setText(String.format(bundle.getString("visb.item.attribute"), this.visBItem.getAttribute()));
-			this.lbExpression.setText(String.format(bundle.getString("visb.item.expression"), this.visBItem.getExpression()));
+			this.lbAttribute.setText(i18n.translate("visb.item.attribute", this.visBItem.getAttribute()));
+			this.lbExpression.setText(i18n.translate("visb.item.expression", this.visBItem.getExpression()));
 			final StringExpression valueBinding = Bindings.stringValueAt(this.attributeValues, this.visBItem.getKey());
-			this.lbValue.textProperty().bind(Bindings.format(
-				bundle.getString("visb.item.value"),
-				Bindings.when(valueBinding.isNull())
-					.then("not initialised")
-					.otherwise(Bindings.format("\"%s\"", valueBinding))
+			this.lbValue.textProperty().bind(i18n.translateBinding("visb.item.value",
+					Bindings.when(valueBinding.isNull())
+							.then(i18n.translateBinding("visb.item.value.notInitialized"))
+							.otherwise(i18n.translateBinding("common.quoted", valueBinding))
 			));
 			this.setGraphic(this.itemBox);
 			this.setText("");

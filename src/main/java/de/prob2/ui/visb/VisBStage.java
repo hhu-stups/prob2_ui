@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -33,7 +32,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.dynamic.dotty.DotView;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -67,11 +66,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import netscape.javascript.JSException;
-import netscape.javascript.JSObject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import netscape.javascript.JSException;
+import netscape.javascript.JSObject;
 
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
@@ -85,7 +84,7 @@ public class VisBStage extends Stage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBStage.class);
 	private final Injector injector;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
@@ -152,11 +151,11 @@ public class VisBStage extends Stage {
 	 */
 	@Inject
 	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
-					 final CurrentTrace currentTrace, final ResourceBundle bundle, final FileChooserManager fileChooserManager,
+					 final CurrentTrace currentTrace, final I18n i18n, final FileChooserManager fileChooserManager,
 					 final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController) {
 		super();
 		this.injector = injector;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -184,7 +183,17 @@ public class VisBStage extends Stage {
 		// zoom fonts in/out (but only of those that are not given a fixed size):
 		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
 		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
-		this.titleProperty().bind(Bindings.createStringBinding(() -> visBController.getVisBPath() == null ? bundle.getString("visb.title") : String.format(bundle.getString("visb.currentVisualisation"), currentProject.getLocation().relativize(visBController.getVisBPath())), visBController.visBPathProperty()));
+		this.titleProperty().bind(
+				Bindings.when(visBController.visBPathProperty().isNull())
+						.then(i18n.translateBinding("visb.title"))
+						.otherwise(i18n.translateBinding(
+								"visb.currentVisualisation",
+								Bindings.createStringBinding(() -> currentProject.getLocation() != null && visBController.getVisBPath() != null ?
+										                                   currentProject.getLocation().relativize(visBController.getVisBPath()).toString() :
+										                                   "",
+										currentProject, visBController.visBPathProperty())
+						))
+		);
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			openTraceSelectionButton.disableProperty().unbind();
@@ -201,7 +210,7 @@ public class VisBStage extends Stage {
 				} catch (final IOException e) {
 					throw new UncheckedIOException(e);
 				}
-				updateInfo(bundle.getString("visb.infobox.visualisation.svg.loaded"));
+				updateInfo(i18n.translate("visb.infobox.visualisation.svg.loaded"));
 				this.runWhenLoaded(() -> {
 					final JSObject window = this.getJSWindow();
 					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
@@ -247,11 +256,11 @@ public class VisBStage extends Stage {
 			if (change.wasAdded()) {
 				try {
 					this.changeAttribute(change.getKey().getId(), change.getKey().getAttribute(), change.getValueAdded());
-					updateInfo(bundle.getString("visb.infobox.visualisation.updated"));
+					updateInfo(i18n.translate("visb.infobox.visualisation.updated"));
 				} catch (final JSException e) {
 					LOGGER.error("JavaScript error while updating VisB attributes", e);
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
-					updateInfo(bundle.getString("visb.infobox.visualisation.error"));
+					updateInfo(i18n.translate("visb.infobox.visualisation.error"));
 				}
 			}
 		});
@@ -427,7 +436,7 @@ public class VisBStage extends Stage {
 			return;
 		}
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("visb.stage.filechooser.title"));
+		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().addAll(
 				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
 		);
@@ -452,7 +461,7 @@ public class VisBStage extends Stage {
 
 	private void exportImage() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("visb.stage.filechooser.export.title"));
+		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));
 		fileChooser.getExtensionFilters().addAll(
 				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
 		);
@@ -562,7 +571,7 @@ public class VisBStage extends Stage {
 			final FileChooser fileChooser = new FileChooser();
 			FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
 			fileChooser.getExtensionFilters().setAll(htmlFilter);
-			fileChooser.setTitle(bundle.getString("common.fileChooser.save.title"));
+			fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this);
 			if(path != null) {

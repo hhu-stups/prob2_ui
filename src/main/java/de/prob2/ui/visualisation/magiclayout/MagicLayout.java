@@ -1,6 +1,8 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-public enum MagicLayout {
+import de.prob2.ui.internal.Translatable;
+
+public enum MagicLayout implements Translatable {
 	
 	LAYERED("visualisation.magicLayout.layout.layered"),
 	RANDOM("visualisation.magicLayout.layout.random"),
@@ -11,8 +13,9 @@ public enum MagicLayout {
 	MagicLayout(final String bundleKey) {
 		this.bundleKey = bundleKey;
 	}
-	
-	public String getBundleKey() {
+
+	@Override
+	public String getTranslationKey() {
 		return bundleKey;
 	}
 }

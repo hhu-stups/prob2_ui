@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -18,6 +17,7 @@ import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -58,7 +58,7 @@ public class VisualisationController {
 	private final ChangeListener<Trace> currentTraceChangeListener;
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final TabPane tabPane;
 	private final ReadOnlyObjectProperty<Machine> currentMachine;
 	private final FileChooserManager fileChooserManager;
@@ -77,12 +77,12 @@ public class VisualisationController {
 
 	@Inject
 	public VisualisationController(StageManager stageManager, CurrentTrace currentTrace, CurrentProject currentProject,
-								   MainView mainView, ResourceBundle bundle, FileChooserManager fileChooserManager) {
+								   MainView mainView, I18n i18n, FileChooserManager fileChooserManager) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentMachine = currentProject.currentMachineProperty();
 		this.tabPane = mainView.getTabPane();
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.visualisationModel = new VisualisationModel(currentTrace, stageManager);
 		this.fileChooserManager = fileChooserManager;
 
@@ -96,8 +96,7 @@ public class VisualisationController {
 					}
 					updateVisualization();
 				} else {
-					setVisualisationContent(getPlaceHolderContent(
-							format("common.notInitialised", currentMachine.get().getName())));
+					setVisualisationContent(getPlaceHolderContent(i18n.translate("common.notInitialised.name", currentMachine.get().getName())));
 				}
 			}
 		};
@@ -162,7 +161,7 @@ public class VisualisationController {
 		}
 		LOGGER.debug("Show filechooser to select a visualisation.");
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("visualisation.fx.controller.fileChooser.selectVisualisation"));
+		fileChooser.setTitle(i18n.translate("visualisation.fx.controller.fileChooser.selectVisualisation"));
 		fileChooser.getExtensionFilters().addAll(
 			fileChooserManager.getExtensionFilter("visualisation.fx.controller.fileChooser.fileTypes.visualisationJar", "jar"),
 			fileChooserManager.getExtensionFilter("visualisation.fx.controller.fileChooser.fileTypes.visualisationClass", "java")
@@ -351,8 +350,7 @@ public class VisualisationController {
 	}
 
 	private void createVisualisationTab() {
-		visualisationTab = new Tab(visualisation.get().getName(), getPlaceHolderContent(
-				format("common.notInitialised", currentMachine.get().getName())));
+		visualisationTab = new Tab(visualisation.get().getName(), getPlaceHolderContent(i18n.translate("common.notInitialised.name", currentMachine.get().getName())));
 		visualisationTab.setClosable(false);
 		tabPane.getTabs().add(visualisationTab);
 		tabPane.getSelectionModel().select(visualisationTab);
@@ -385,7 +383,7 @@ public class VisualisationController {
 			visualizationStage = null;
 		});
 		visualizationStage.show();
-		visualisationTab.setContent(getPlaceHolderContent(bundle.getString("visualisation.fx.controller.visualisationDetached")));
+		visualisationTab.setContent(getPlaceHolderContent(i18n.translate("visualisation.fx.controller.visualisationDetached")));
 		detached.set(true);
 	}
 
@@ -409,10 +407,6 @@ public class VisualisationController {
 			start = Arrays.asList(machines).contains(machineName);
 		}
 		return start;
-	}
-
-	private String format(String key, Object... args) {
-		return String.format(bundle.getString(key), args);
 	}
 
 	private void setZeroAnchor(Node node) {

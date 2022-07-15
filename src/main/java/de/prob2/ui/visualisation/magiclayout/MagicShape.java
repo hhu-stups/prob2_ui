@@ -1,7 +1,9 @@
 package de.prob2.ui.visualisation.magiclayout;
 
-public enum MagicShape {
-	
+import de.prob2.ui.internal.Translatable;
+
+public enum MagicShape implements Translatable {
+
 	RECTANGLE("visualisation.magicLayout.shapes.rectangle"),
 	CIRCLE("visualisation.magicLayout.shapes.circle"),
 	ELLIPSE("visualisation.magicLayout.shapes.ellipse"),
@@ -9,12 +11,13 @@ public enum MagicShape {
 	;
 
 	private final String bundleKey;
-	
+
 	MagicShape(final String bundleKey) {
 		this.bundleKey = bundleKey;
 	}
-	
-	public String getBundleKey() {
+
+	@Override
+	public String getTranslationKey() {
 		return bundleKey;
 	}
 }

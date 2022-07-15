@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
@@ -38,10 +37,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.scene.control.Alert;
 
-import netscape.javascript.JSException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import netscape.javascript.JSException;
 
 /**
  * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler}.
@@ -55,7 +54,7 @@ public class VisBController {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final ObjectProperty<Path> visBPath;
 	private final ObjectProperty<VisBVisualisation> visBVisualisation;
@@ -66,15 +65,15 @@ public class VisBController {
 	 * @param injector used for interaction with ProB2-UI
 	 * @param stageManager currently not used
 	 * @param currentTrace used to add {@link ChangeListener} for interacting with trace
-	 * @param bundle used to access string resources
+	 * @param i18n used to access string resources
 	 */
 	@Inject
-	public VisBController(final VisBFileHandler visBFileHandler, final Injector injector, final StageManager stageManager, final CurrentTrace currentTrace, final ResourceBundle bundle) {
+	public VisBController(final VisBFileHandler visBFileHandler, final Injector injector, final StageManager stageManager, final CurrentTrace currentTrace, final I18n i18n) {
 		this.visBFileHandler = visBFileHandler;
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.attributeValues = FXCollections.observableHashMap();
@@ -170,11 +169,11 @@ public class VisBController {
 	 * @param key bundlekey for string
 	 */
 	private void updateInfo(String key){
-		injector.getInstance(VisBStage.class).updateInfo(bundle.getString(key));
+		injector.getInstance(VisBStage.class).updateInfo(i18n.translate(key));
 	}
 
 	private void updateInfo(String key, Object... params){
-		injector.getInstance(VisBStage.class).updateInfo(String.format(bundle.getString(key), params));
+		injector.getInstance(VisBStage.class).updateInfo(i18n.translate(key, params));
 	}
 
 	/**

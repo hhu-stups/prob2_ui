@@ -3,11 +3,11 @@ package de.prob2.ui.visualisation.magiclayout.editpane;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
@@ -32,7 +32,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 		@Override
 		protected void updateItem(MagicShape shape, boolean empty) {
 			super.updateItem(shape, empty);
-			setText((shape == null || empty) ? "" : bundle.getString(shape.getBundleKey()));
+			setText((shape == null || empty) ? "" : i18n.translate(shape));
 		}
 	}
 
@@ -41,9 +41,9 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 	private ColorPicker nodeColorPicker;
 
 	@Inject
-	public MagicLayoutEditNodes(final StageManager stageManager, final ResourceBundle bundle,
+	public MagicLayoutEditNodes(final StageManager stageManager, final I18n i18n,
 			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
-		super(stageManager, bundle, currentTrace, magicGraph);
+		super(stageManager, i18n, currentTrace, magicGraph);
 	}
 
 	@FXML
@@ -54,7 +54,7 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 		expressionTextArea.setPromptText("{x|...}");
 
 		// add Node specific controls
-		clusterCheckBox = new CheckBox(bundle.getString("visualisation.magicLayout.editPane.labels.cluster"));
+		clusterCheckBox = new CheckBox(i18n.translate("visualisation.magicLayout.editPane.labels.cluster"));
 		setMargin(clusterCheckBox, new Insets(0, 5, 0, 10));
 		if (magicGraph.supportsClustering()) {
 			this.getChildren().add(2, clusterCheckBox);
@@ -69,8 +69,8 @@ public class MagicLayoutEditNodes extends MagicLayoutEditPane<MagicNodegroup> {
 		nodeColorPicker = new ColorPicker(Color.WHITE);
 
 		flowPane.getChildren().addAll(
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.shape"), shapeComboBox),
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.color"), nodeColorPicker));
+				wrapInVBox(i18n.translate("visualisation.magicLayout.editPane.labels.shape"), shapeComboBox),
+				wrapInVBox(i18n.translate("visualisation.magicLayout.editPane.labels.color"), nodeColorPicker));
 
 		disableControls(true);
 		addMachineElements();

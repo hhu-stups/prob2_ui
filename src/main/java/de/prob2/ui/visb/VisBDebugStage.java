@@ -3,7 +3,6 @@ package de.prob2.ui.visb;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +14,7 @@ import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob2.ui.dynamic.dotty.DotView;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -79,7 +79,7 @@ public class VisBDebugStage extends Stage {
 
 	private final CurrentProject currentProject;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final VisBController visBController;
 
@@ -102,12 +102,12 @@ public class VisBDebugStage extends Stage {
 	private final CheckBox selectAll;
 
 	@Inject
-	public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final ResourceBundle bundle, final VisBController visBController, final Injector injector) {
+	public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final I18n i18n, final VisBController visBController, final Injector injector) {
 		super();
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.visBController = visBController;
 		this.injector = injector;
 		this.eventsById = new HashMap<>();
@@ -131,10 +131,10 @@ public class VisBDebugStage extends Stage {
 		this.selectedColumn.setCellValueFactory(new VisBSelectionCell(visBItems, selectAll));
 		this.selectedColumn.setGraphic(selectAll);
 
-		this.itemColumn.setCellFactory(param -> new VisBTableItemCell(stageManager, bundle, injector, eventsById, visBController.getAttributeValues()));
+		this.itemColumn.setCellFactory(param -> new VisBTableItemCell(stageManager, i18n, injector, eventsById, visBController.getAttributeValues()));
 		this.itemColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
 
-		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, bundle, injector));
+		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, i18n, injector));
 		this.currentTrace.addListener((observable, from, to) -> refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> refresh());
 		this.visBItems.getSelectionModel().selectedItemProperty().addListener(listener);
@@ -203,8 +203,4 @@ public class VisBDebugStage extends Stage {
 		formulaStage.toFront();
 		formulaStage.visualizeProjection(projectionString);
 	}
-
-
 }
-
-

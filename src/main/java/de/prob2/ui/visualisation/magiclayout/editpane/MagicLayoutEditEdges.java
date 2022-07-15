@@ -3,12 +3,12 @@ package de.prob2.ui.visualisation.magiclayout.editpane;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
@@ -26,9 +26,9 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 	private Spinner<Integer> textSizeSpinner;
 
 	@Inject
-	public MagicLayoutEditEdges(final StageManager stageManager, final ResourceBundle bundle,
+	public MagicLayoutEditEdges(final StageManager stageManager, final I18n i18n,
 			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
-		super(stageManager, bundle, currentTrace, magicGraph);
+		super(stageManager, i18n, currentTrace, magicGraph);
 	}
 
 	@FXML
@@ -43,7 +43,7 @@ public class MagicLayoutEditEdges extends MagicLayoutEditPane<MagicEdgegroup> {
 		textSizeSpinner.setEditable(true);
 
 		flowPane.getChildren().add(
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
+				wrapInVBox(i18n.translate("visualisation.magicLayout.editPane.labels.textsize"), textSizeSpinner));
 
 		disableControls(true);
 		addMachineElements();

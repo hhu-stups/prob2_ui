@@ -3,10 +3,10 @@ package de.prob2.ui.visualisation.magiclayout.editpane;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visualisation.magiclayout.MagicComponent;
@@ -14,6 +14,7 @@ import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutSettings;
 import de.prob2.ui.visualisation.magiclayout.MagicLineType;
 import de.prob2.ui.visualisation.magiclayout.MagicLineWidth;
+
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -79,15 +80,15 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 	private ColorPicker textColorPicker;
 
 	final StageManager stageManager;
-	final ResourceBundle bundle;
+	final I18n i18n;
 	final CurrentTrace currentTrace;
 	final MagicGraphI magicGraph;
 
 	@Inject
-	public MagicLayoutEditPane(final StageManager stageManager, final ResourceBundle bundle,
+	public MagicLayoutEditPane(final StageManager stageManager, final I18n i18n,
 			final CurrentTrace currentTrace, final MagicGraphI magicGraph) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.magicGraph = magicGraph;
 		stageManager.loadFXML(this, "magic_layout_edit_pane.fxml");
@@ -111,10 +112,10 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 		textColorPicker = new ColorPicker(Color.BLACK);
 
 		flowPane.getChildren().addAll(
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linetype"), lineTypeComboBox),
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linecolor"), lineColorPicker),
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox),
-				wrapInVBox(bundle.getString("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker));
+				wrapInVBox(i18n.translate("visualisation.magicLayout.editPane.labels.linetype"), lineTypeComboBox),
+				wrapInVBox(i18n.translate("visualisation.magicLayout.editPane.labels.linecolor"), lineColorPicker),
+				wrapInVBox(i18n.translate("visualisation.magicLayout.editPane.labels.linewidth"), lineWidthComboBox),
+				wrapInVBox(i18n.translate("visualisation.magicLayout.editPane.labels.textcolor"), textColorPicker));
 
 		// clear listview when the model changes and add machine elements
 		currentTrace.modelProperty().addListener((observable, from, to) -> {
@@ -206,11 +207,11 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 
 			// define ContextMenu for ListCell
 			final MenuItem editItem = new MenuItem(
-					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.rename"));
+					i18n.translate("visualisation.magicLayout.editPane.listView.contextMenu.rename"));
 			editItem.setOnAction(event -> cell.startEdit());
 
 			final MenuItem deleteItem = new MenuItem(
-					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.delete"));
+					i18n.translate("visualisation.magicLayout.editPane.listView.contextMenu.delete"));
 			deleteItem.setOnAction(event -> {
 				List<ButtonType> buttons = new ArrayList<>();
 				buttons.add(ButtonType.YES);
@@ -226,11 +227,11 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 			});
 
 			final MenuItem newNodesItem = new MenuItem(
-					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
+					i18n.translate("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
 			newNodesItem.setOnAction(event -> ((MagicLayoutEditNodes) this).addNewNodegroup());
 
 			final MenuItem newEdgesItem = new MenuItem(
-					bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
+					i18n.translate("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
 			newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addNewEdgegroup());
 
 			cell.emptyProperty().addListener((observable, from, to) -> {
@@ -331,10 +332,10 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 
 		// add ContextMenu to empty ListView
 		final MenuItem newNodesItem = new MenuItem(
-				bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
+				i18n.translate("visualisation.magicLayout.editPane.listView.contextMenu.newNodes"));
 		newNodesItem.setOnAction(event -> ((MagicLayoutEditNodes) this).addNewNodegroup());
 		final MenuItem newEdgesItem = new MenuItem(
-				bundle.getString("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
+				i18n.translate("visualisation.magicLayout.editPane.listView.contextMenu.newEdges"));
 		newEdgesItem.setOnAction(event -> ((MagicLayoutEditEdges) this).addNewEdgegroup());
 		listView.setContextMenu(
 				(this instanceof MagicLayoutEditNodes) ? new ContextMenu(newNodesItem) : new ContextMenu(newEdgesItem));

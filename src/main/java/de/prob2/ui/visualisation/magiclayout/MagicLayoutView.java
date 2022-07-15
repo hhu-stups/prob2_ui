@@ -3,7 +3,6 @@ package de.prob2.ui.visualisation.magiclayout;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 
@@ -15,6 +14,7 @@ import de.prob.json.JsonMetadata;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.menu.OpenFile;
@@ -37,7 +37,6 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 
 @Singleton
 public class MagicLayoutView extends Stage {
@@ -78,13 +77,13 @@ public class MagicLayoutView extends Stage {
 	private final CurrentProject currentProject;
 	private final VersionInfo versionInfo;
 	private final MagicLayoutSettingsManager settingsManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	@Inject
 	public MagicLayoutView(final Injector injector, final StageManager stageManager, final MagicGraphI magicGraph,
 	                       final CurrentTrace currentTrace, final CurrentProject currentProject,
 	                       final VersionInfo versionInfo,
-	                       final MagicLayoutSettingsManager settingsManager, final ResourceBundle bundle) {
+	                       final MagicLayoutSettingsManager settingsManager, final I18n i18n) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.magicGraph = magicGraph;
@@ -92,7 +91,7 @@ public class MagicLayoutView extends Stage {
 		this.currentProject = currentProject;
 		this.versionInfo = versionInfo;
 		this.settingsManager = settingsManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		stageManager.loadFXML(this, "magic_layout_view.fxml");
 	}
 
@@ -133,21 +132,7 @@ public class MagicLayoutView extends Stage {
 		
 		layoutChoiceBox.getItems().setAll(magicGraph.getSupportedLayouts());
 		layoutChoiceBox.getSelectionModel().selectFirst();
-		layoutChoiceBox.setConverter(new StringConverter<MagicLayout>() {
-				@Override
-				public String toString(MagicLayout layout) {
-					return bundle.getString(layout.getBundleKey());
-				}
-
-				@Override
-				public MagicLayout fromString(String string) {
-					if (string.equals(bundle.getString(MagicLayout.RANDOM.getBundleKey()))) {
-						return MagicLayout.RANDOM;
-					} else {
-						return MagicLayout.LAYERED;
-					}
-				}
-			});
+		layoutChoiceBox.setConverter(i18n.translateConverter());
 	}
 
 	private void disableButtons(boolean disable) {

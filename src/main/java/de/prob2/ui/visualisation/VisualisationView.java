@@ -1,7 +1,17 @@
 package de.prob2.ui.visualisation;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob.Main;
 import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
@@ -9,11 +19,13 @@ import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -23,16 +35,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 
 @FXMLInjected
 @Singleton
@@ -53,16 +55,16 @@ public class VisualisationView extends AnchorPane {
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 
 	private final BackgroundUpdater updater;
 
 	@Inject
-	public VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final ResourceBundle bundle, final StopActions stopActions, final StatusBar statusBar) {
+	public VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final I18n i18n, final StopActions stopActions, final StatusBar statusBar) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.updater = new BackgroundUpdater("VisualisationView Updater");
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
@@ -85,11 +87,11 @@ public class VisualisationView extends AnchorPane {
 
 		currentTrace.addListener((o, from, to) -> {
 			if (to == null) {
-				placeholderLabel.setText(bundle.getString("common.noModelLoaded"));
+				placeholderLabel.setText(i18n.translate("common.noModelLoaded"));
 			} else if (!currentTrace.getCurrentState().isInitialised()) {
-				placeholderLabel.setText(bundle.getString("common.notInitialised"));
+				placeholderLabel.setText(i18n.translate("common.notInitialised"));
 			} else {
-				placeholderLabel.setText(bundle.getString("visualisation.view.placeholder.noAnimationFunction"));
+				placeholderLabel.setText(i18n.translate("visualisation.view.placeholder.noAnimationFunction"));
 			}
 			
 			updater.execute(() -> {
