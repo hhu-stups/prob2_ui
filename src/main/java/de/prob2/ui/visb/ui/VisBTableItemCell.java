@@ -70,10 +70,14 @@ public class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 	@Override
 	protected void updateItem(final String visBItem, final boolean empty){
 		super.updateItem(visBItem, empty);
-		if(this.getTableRow().getItem() == null) {
+		// This cast is needed with JavaFX 8,
+		// where TableCell.getTableRow doesn't have a generic return type.
+		@SuppressWarnings({"cast", "RedundantCast"})
+		final VisBTableItem item = (VisBTableItem)this.getTableRow().getItem();
+		if (item == null) {
 			return;
 		}
-		this.visBItem = this.getTableRow().getItem().getVisBItem();
+		this.visBItem = item.getVisBItem();
 		if(this.visBItem != null) {
 			this.lbID.setText(this.visBItem.getId());
 			this.lbAttribute.setText(String.format(bundle.getString("visb.item.attribute"), this.visBItem.getAttribute()));
