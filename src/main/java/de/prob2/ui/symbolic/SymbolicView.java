@@ -1,13 +1,12 @@
 package de.prob2.ui.symbolic;
 
-import java.util.ResourceBundle;
-
 import com.google.inject.Injector;
 
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -20,7 +19,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -41,7 +39,7 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 		public TableRow<T> createRow() {
 			TableRow<T> row = new TableRow<>();
 			
-			MenuItem checkItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.check"));
+			MenuItem checkItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.check"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e -> formulaHandler.handleItem(row.getItem(), false));
 			
@@ -84,7 +82,7 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	@FXML
 	protected Button cancelButton;
 					
-	protected final ResourceBundle bundle;
+	protected final I18n i18n;
 	
 	protected final CurrentTrace currentTrace;
 	
@@ -100,10 +98,10 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 
 	protected final CheckBox selectAll;
 	
-	public SymbolicView(final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final Injector injector, final SymbolicExecutor<T> executor,
-					final SymbolicFormulaHandler<T> formulaHandler, final Class<T> clazz) {
-		this.bundle = bundle;
+	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace,
+	                    final CurrentProject currentProject, final Injector injector, final SymbolicExecutor<T> executor,
+	                    final SymbolicFormulaHandler<T> formulaHandler, final Class<T> clazz) {
+		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
@@ -150,7 +148,7 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
-		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(bundle.getString(features.getValue().getType().getTranslationKey())));
+		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		tvFormula.setOnMouseClicked(e-> {

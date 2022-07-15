@@ -1,7 +1,5 @@
 package de.prob2.ui.menu;
 
-import java.util.ResourceBundle;
-
 import javax.annotation.Nullable;
 
 import com.google.inject.Inject;
@@ -9,6 +7,7 @@ import com.google.inject.Singleton;
 
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
@@ -35,7 +34,7 @@ public final class MenuController extends MenuBar {
 
 	@Inject
 	private MenuController(final StageManager stageManager, @Nullable final MenuToolkit menuToolkit,
-						   final ResourceBundle bundle) {
+						   final I18n i18n) {
 		this.menuToolkit = menuToolkit;
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "menu.fxml");
@@ -53,15 +52,15 @@ public final class MenuController extends MenuBar {
 			fileMenu.getItems().remove(preferencesItem);
 
 			// Create Mac-style application menu
-			MenuItem quit = menuToolkit.createQuitMenuItem(bundle.getString("common.prob2"));
+			MenuItem quit = menuToolkit.createQuitMenuItem(i18n.translate("common.prob2"));
 			quit.setOnAction(event -> {
 				for (Stage stage : stageManager.getRegistered()) {
 					stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
 				}
 			});
-			final Menu applicationMenu = new Menu(bundle.getString("common.prob2"), null,
+			final Menu applicationMenu = new Menu(i18n.translate("common.prob2"), null,
 					aboutItem, new SeparatorMenuItem(), preferencesItem,
-					new SeparatorMenuItem(), menuToolkit.createHideMenuItem(bundle.getString("common.prob2")),
+					new SeparatorMenuItem(), menuToolkit.createHideMenuItem(i18n.translate("common.prob2")),
 					menuToolkit.createHideOthersMenuItem(), menuToolkit.createUnhideAllMenuItem(),
 					new SeparatorMenuItem(), quit);
 			this.getMenus().add(0, applicationMenu);

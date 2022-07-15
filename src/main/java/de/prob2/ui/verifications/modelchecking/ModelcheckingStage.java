@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -8,7 +7,9 @@ import com.google.inject.Inject;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.TranslatableAdapter;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -19,7 +20,6 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 
 @FXMLInjected
 public class ModelcheckingStage extends Stage {
@@ -58,15 +58,15 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private TextField tfFindGoal;
 	
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
 	private final StageManager stageManager;
 	
 	private ModelCheckingItem result;
 
 	@Inject
-	private ModelcheckingStage(final StageManager stageManager, final ResourceBundle bundle) {
-		this.bundle = bundle;
+	private ModelcheckingStage(final StageManager stageManager, final I18n i18n) {
+		this.i18n = i18n;
 		this.stageManager = stageManager;
 		this.result = null;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
@@ -81,22 +81,7 @@ public class ModelcheckingStage extends Stage {
 			ModelCheckingSearchStrategy.DEPTH_FIRST
 		);
 		this.selectSearchStrategy.setValue(ModelCheckingSearchStrategy.MIXED_BF_DF);
-		this.selectSearchStrategy.setConverter(new StringConverter<ModelCheckingSearchStrategy>() {
-			@Override
-			public String toString(final ModelCheckingSearchStrategy object) {
-				final String key = getSearchStrategyNameKey(object);
-				if (key != null) {
-					return bundle.getString(key);
-				} else {
-					return object.toString();
-				}
-			}
-			
-			@Override
-			public ModelCheckingSearchStrategy fromString(final String string) {
-				throw new UnsupportedOperationException("Conversion from String to ModelCheckingSearchStrategy not supported");
-			}
-		});
+		this.selectSearchStrategy.setConverter(i18n.translateConverter(TranslatableAdapter.adapter(ModelcheckingStage::getSearchStrategyNameKey)));
 		this.nodesLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_NODES_LIMIT, INITIAL_NODES_STEP));
 		this.nodesLimit.visibleProperty().bind(chooseNodesLimit.selectedProperty());
 		this.timeLimit.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1 , Integer.MAX_VALUE, INITIAL_TIME_LIMIT, INITIAL_TIME_STEP));

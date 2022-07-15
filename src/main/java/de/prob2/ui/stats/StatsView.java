@@ -1,7 +1,6 @@
 package de.prob2.ui.stats;
 
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -12,6 +11,7 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
@@ -60,13 +60,13 @@ public class StatsView extends ScrollPane {
 	@FXML
 	private HelpButton helpButton;
 
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private final FontSize fontSize;
 
 	@Inject
-	public StatsView(final ResourceBundle bundle, final StageManager stageManager, final CurrentTrace currentTrace, final FontSize fontSize) {
-		this.bundle = bundle;
+	public StatsView(final I18n i18n, final StageManager stageManager, final CurrentTrace currentTrace, final FontSize fontSize) {
+		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
 		stageManager.loadFXML(this, "stats_view.fxml");
@@ -107,10 +107,10 @@ public class StatsView extends ScrollPane {
 			this.update(currentTrace.getStateSpace());
 
 			icon = FontAwesome.Glyph.CLOSE;
-			text = bundle.getString("stats.statsView.hideExtendedStats");
+			text = i18n.translate("stats.statsView.hideExtendedStats");
 		} else {
 			icon = FontAwesome.Glyph.PLUS_CIRCLE;
-			text = bundle.getString("stats.statsView.showExtendedStats");
+			text = i18n.translate("stats.statsView.showExtendedStats");
 		}
 		((BindableGlyph)extendedStatsToggle.getGraphic()).setIcon(icon);
 		extendedStatsToggle.setText(text);

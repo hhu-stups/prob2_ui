@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.common.io.MoreFiles;
@@ -250,8 +249,8 @@ public class TraceRefactoredSetup {
 		}
 	}
 
-	public static void traceNotReplayableConfirmation(ResourceBundle bundle) {
-		Alert alert = new Alert(Alert.AlertType.INFORMATION, bundle.getString("traceModification.alert.traceNotReplayable"));
+	public static void traceNotReplayableConfirmation(I18n i18n) {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION, i18n.translate("traceModification.alert.traceNotReplayable"));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.setTitle("No suitable configuration found.");
 		alert.showAndWait();

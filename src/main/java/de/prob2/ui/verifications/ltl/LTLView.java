@@ -3,7 +3,6 @@ package de.prob2.ui.verifications.ltl;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +18,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -105,7 +105,7 @@ public class LTLView extends AnchorPane {
 	private TableColumn<LTLPatternItem, String> patternDescriptionColumn;
 
 	private final StageManager stageManager;
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
 	private final VersionInfo versionInfo;
@@ -118,7 +118,7 @@ public class LTLView extends AnchorPane {
 	private final JacksonManager<LTLData> jacksonManager;
 				
 	@Inject
-	private LTLView(final StageManager stageManager, final ResourceBundle bundle, final Injector injector,
+	private LTLView(final StageManager stageManager, final I18n i18n, final Injector injector,
 					final CurrentTrace currentTrace, final VersionInfo versionInfo, final CurrentProject currentProject,
 					final LTLFormulaChecker checker, final LTLPatternParser patternParser,
 					final LTLResultHandler resultHandler,
@@ -126,7 +126,7 @@ public class LTLView extends AnchorPane {
 					final ObjectMapper objectMapper,
 					final JacksonManager<LTLData> jacksonManager) {
 		this.stageManager = stageManager;
-		this.bundle = bundle;
+		this.i18n = i18n;
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.versionInfo = versionInfo;
@@ -197,20 +197,20 @@ public class LTLView extends AnchorPane {
 	private void setContextMenus() {
 		tvFormula.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.removeFormula"));
+			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
 			removeItem.setOnAction(e -> removeFormula());
 						
-			MenuItem showCounterExampleItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCounterExample"));
+			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e-> currentTrace.set(tvFormula.getSelectionModel().getSelectedItem().getCounterExample()));
 			showCounterExampleItem.setDisable(true);
 
-			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.openInEditor"));
+			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 
-			MenuItem checkItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.check"));
+			MenuItem checkItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e-> {
 				checker.checkFormula(row.getItem());
@@ -233,13 +233,13 @@ public class LTLView extends AnchorPane {
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.removePattern"));
+			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removePattern"));
 			removeItem.setOnAction(e -> removePattern());
 
-			MenuItem openEditor = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.openInEditor"));
+			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("verifications.ltl.ltlView.contextMenu.showParsingMessage"));
+			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showParsingMessage"));
 			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -343,7 +343,7 @@ public class LTLView extends AnchorPane {
 	private void saveLTL() {
 		Machine machine = currentProject.getCurrentMachine();
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.saveLTL.title"));
+		fileChooser.setTitle(i18n.translate("verifications.ltl.ltlView.fileChooser.saveLTL.title"));
 		fileChooser.setInitialFileName(machine.getName() + "." + LTL_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
@@ -372,7 +372,7 @@ public class LTLView extends AnchorPane {
 	private void loadLTL() {
 		Machine machine = currentProject.getCurrentMachine();
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(bundle.getString("verifications.ltl.ltlView.fileChooser.loadLTL.title"));
+		fileChooser.setTitle(i18n.translate("verifications.ltl.ltlView.fileChooser.loadLTL.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION, OLD_LTL_FILE_EXTENSION));
 		Path ltlFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());

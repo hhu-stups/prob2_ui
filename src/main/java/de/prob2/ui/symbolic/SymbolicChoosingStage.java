@@ -3,11 +3,11 @@ package de.prob2.ui.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.AbstractResultHandler;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
@@ -20,7 +20,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 
 public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET extends SymbolicExecutionType> extends Stage {
 	@FXML
@@ -47,7 +46,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	@FXML
 	private ChoiceBox<ET> cbChoice;
 	
-	private final ResourceBundle bundle;
+	private final I18n i18n;
 	
 	protected final CurrentProject currentProject;
 	
@@ -59,12 +58,12 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 
 	private T lastItem;
 	
-	public SymbolicChoosingStage(final ResourceBundle bundle, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
-		this.bundle = bundle;
+	public SymbolicChoosingStage(final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
+		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.formulaHandler = formulaHandler;
-		this.checkAllOperations = bundle.getString("verifications.symbolicchecking.choice.checkAllOperations");
+		this.checkAllOperations = i18n.translate("verifications.symbolicchecking.choice.checkAllOperations");
 		
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
@@ -82,20 +81,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 			changeGUIType(getGUIType(to));
 			this.sizeToScene();
 		});
-		cbChoice.setConverter(new StringConverter<ET>() {
-			@Override
-			public String toString(final ET object) {
-				if(object == null) {
-					return "";
-				}
-				return bundle.getString(object.getTranslationKey());
-			}
-			
-			@Override
-			public ET fromString(final String string) {
-				throw new UnsupportedOperationException("Conversion from String to SymbolicExecutionType not supported");
-			}
-		});
+		cbChoice.setConverter(i18n.translateConverter());
 		symbolicModelCheckAlgorithmChoiceBox.getItems().setAll(SymbolicModelcheckCommand.Algorithm.values());
 		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
 		this.setResizable(true);
@@ -187,8 +173,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	protected abstract T extractItem();
 
 	public void changeFormula(T item, AbstractResultHandler resultHandler) {
-		btAdd.setText(bundle.getString("symbolic.formulaInput.buttons.change"));
-		btCheck.setText(bundle.getString("symbolic.formulaInput.buttons.changeAndCheck"));
+		btAdd.setText(i18n.translate("symbolic.formulaInput.buttons.change"));
+		btCheck.setText(i18n.translate("symbolic.formulaInput.buttons.changeAndCheck"));
 		setChangeListeners(item, resultHandler);
 		cbChoice.getSelectionModel().select(item.getType());
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {

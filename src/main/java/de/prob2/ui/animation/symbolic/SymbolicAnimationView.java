@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.symbolic;
 
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
@@ -10,6 +9,7 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -37,17 +37,17 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		public TableRow<SymbolicAnimationItem> call(TableView<SymbolicAnimationItem> param) {
 			TableRow<SymbolicAnimationItem> row = createRow();
 
-			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.removeConfiguration"));
+			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> removeFormula());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.changeConfiguration"));
+			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
 
-			Menu showStateItem = new Menu(bundle.getString("animation.symbolic.view.contextMenu.showFoundPaths"));
+			Menu showStateItem = new Menu(i18n.translate("animation.symbolic.view.contextMenu.showFoundPaths"));
 			showStateItem.setDisable(true);
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("symbolic.view.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicAnimationResultHandler.class).showResult(row.getItem()));
 
 
@@ -81,7 +81,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			exampleItem.getItems().clear();
 			List<Trace> examples = item.getExamples();
 			for(int i = 0; i < examples.size(); i++) {
-				MenuItem traceItem = new MenuItem(String.format(bundle.getString("animation.symbolic.view.contextMenu.showExample"), i + 1));
+				MenuItem traceItem = new MenuItem(i18n.translate("animation.symbolic.view.contextMenu.showExample", i + 1));
 				final int index = i;
 				traceItem.setOnAction(e-> currentTrace.set((examples.get(index))));
 				exampleItem.getItems().add(traceItem);
@@ -90,10 +90,10 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	}
 	
 	@Inject
-	public SymbolicAnimationView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler, 
-					final SymbolicAnimationChecker symbolicChecker, final Injector injector) {
-		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicAnimationItem.class);
+	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
+	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
+	                             final SymbolicAnimationChecker symbolicChecker, final Injector injector) {
+		super(i18n, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicAnimationItem.class);
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 	

@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.inject.Inject;
 
@@ -10,6 +9,7 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -39,16 +39,16 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		public TableRow<SymbolicCheckingFormulaItem> call(TableView<SymbolicCheckingFormulaItem> param) {
 			TableRow<SymbolicCheckingFormulaItem> row = createRow();
 			
-			MenuItem removeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.removeConfiguration"));
+			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> removeFormula());
 			
-			MenuItem changeItem = new MenuItem(bundle.getString("symbolic.view.contextMenu.changeConfiguration"));
+			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e->openItem(row.getItem()));
 			
-			Menu showCounterExampleItem = new Menu(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
+			Menu showCounterExampleItem = new Menu(i18n.translate("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
 			
-			MenuItem showMessage = new MenuItem(bundle.getString("symbolic.view.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -81,7 +81,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			counterExampleItem.getItems().clear();
 			List<Trace> counterExamples = item.getCounterExamples();
 			for(int i = 0; i < counterExamples.size(); i++) {
-				MenuItem traceItem = new MenuItem(String.format(bundle.getString("verifications.symbolicchecking.view.contextMenu.showCounterExample.counterExample"), i + 1));
+				MenuItem traceItem = new MenuItem(i18n.translate("verifications.symbolicchecking.view.contextMenu.showCounterExample.counterExample", i + 1));
 				final int index = i;
 				traceItem.setOnAction(e-> currentTrace.set((counterExamples.get(index))));
 				counterExampleItem.getItems().add(traceItem);
@@ -93,10 +93,10 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	private TableColumn<SymbolicCheckingFormulaItem, String> idColumn;
 
 	@Inject
-	public SymbolicCheckingView(final StageManager stageManager, final ResourceBundle bundle, final CurrentTrace currentTrace, 
-					final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler, 
-					final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
-		super(bundle, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicCheckingFormulaItem.class);
+	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
+	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
+	                            final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
+		super(i18n, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicCheckingFormulaItem.class);
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
 	

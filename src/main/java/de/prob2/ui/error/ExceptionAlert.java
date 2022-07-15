@@ -1,11 +1,9 @@
 package de.prob2.ui.error;
 
-import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import com.google.inject.Inject;
 
@@ -24,8 +22,6 @@ import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;

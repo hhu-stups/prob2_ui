@@ -1,10 +1,9 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import java.util.ResourceBundle;
-
 import javax.inject.Inject;
 
 import de.prob2.ui.internal.AbstractResultHandler;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -22,11 +21,11 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 	private SymbolicCheckingChoosingStage(
 		final StageManager stageManager,
 		final SymbolicCheckingFormulaHandler symbolicCheckingFormulaHandler,
-		final ResourceBundle bundle,
+		final I18n i18n,
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace
 	) {
-		super(bundle, currentProject, currentTrace, symbolicCheckingFormulaHandler);
+		super(i18n, currentProject, currentTrace, symbolicCheckingFormulaHandler);
 		stageManager.loadFXML(this, "symbolic_checking_choice.fxml");
 	}
 	
