@@ -80,7 +80,7 @@ public class MachineTableView extends TableView<Machine> {
 				}
 				graphic.getStyleClass().add(styleClass);
 				graphic.setIcon(icon);
-				this.setText(status == Machine.CheckingStatus.NONE ? "" : i18n.format("(%d/%d)", item.getNumberSuccess(), item.getNumberTotal()));
+				this.setText(status == Machine.CheckingStatus.NONE ? "" : i18n.format("({0,number,integer}/{1,number,integer})", item.getNumberSuccess(), item.getNumberTotal()));
 			}
 		}
 	}

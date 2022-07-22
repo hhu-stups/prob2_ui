@@ -41,7 +41,7 @@ public final class SimpleStatsView extends VBox {
 				processedStates.setText(null);
 				totalTransitions.setText(null);
 			} else {
-				String processedStatesDescription = i18n.format("%d/%d", to.getNrProcessedNodes(), to.getNrTotalNodes());
+				String processedStatesDescription = i18n.format("{0,number,integer}/{1,number,integer}", to.getNrProcessedNodes(), to.getNrTotalNodes());
 				if (to.getNrTotalNodes() != 0) {
 					final int percentProcessedNodes = 100 * to.getNrProcessedNodes() / to.getNrTotalNodes();
 					processedStatesDescription += " (" + percentProcessedNodes + "%)";
