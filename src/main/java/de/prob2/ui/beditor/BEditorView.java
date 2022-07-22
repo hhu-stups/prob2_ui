@@ -303,7 +303,7 @@ public class BEditorView extends BorderPane {
 			watcher = directory.getFileSystem().newWatchService();
 			directory.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
 		} catch (IOException e) {
-			LOGGER.error(String.format("Could not register file: %s", path), e);
+			LOGGER.error("Could not register file: {}", path, e);
 			return;
 		}
 		watchThread = new Thread(() -> {
@@ -390,7 +390,7 @@ public class BEditorView extends BorderPane {
 			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
 			alert.initOwner(this.getScene().getWindow());
 			alert.showAndWait();
-			LOGGER.error(String.format("Could not save file: %s", path), e);
+			LOGGER.error("Could not save file: {}", path, e);
 			return;
 		}
 		currentProject.reloadCurrentMachine();

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -126,13 +127,12 @@ public class FileChooserManager {
 		final List<String> extensionPatterns = extensions.stream()
 			.map(ext -> {
 				if (ext.startsWith(EXTENSION_PATTERN_PREFIX)) {
-					throw new IllegalArgumentException(String.format("Extensions passed to getExtensionFilter must not include a pattern (%s) prefix: %s", EXTENSION_PATTERN_PREFIX, ext));
+					throw new IllegalArgumentException(String.format(Locale.ROOT, "Extensions passed to getExtensionFilter must not include a pattern (%s) prefix: %s", EXTENSION_PATTERN_PREFIX, ext));
 				}
 				return EXTENSION_PATTERN_PREFIX + ext;
 			})
 			.collect(Collectors.toList());
-		final String descriptionWithPatterns = String.format(
-			"%s (%s)",
+		final String descriptionWithPatterns = String.format("%s (%s)",
 			description,
 			String.join(", ", extensionPatterns)
 		);

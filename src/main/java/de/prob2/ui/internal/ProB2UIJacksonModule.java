@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -151,7 +152,7 @@ final class ProB2UIJacksonModule extends Module {
 			final int green = (int)Math.round(value.getGreen() * 255.0);
 			final int blue = (int)Math.round(value.getBlue() * 255.0);
 			final int opacity = (int)Math.round(value.getOpacity() * 255.0);
-			gen.writeString(String.format("#%02x%02x%02x%02x", red, green, blue, opacity));
+			gen.writeString(String.format(Locale.ROOT, "#%02x%02x%02x%02x", red, green, blue, opacity));
 		}
 	}
 	

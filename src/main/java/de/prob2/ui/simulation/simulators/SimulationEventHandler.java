@@ -14,6 +14,7 @@ import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -108,10 +109,10 @@ public class SimulationEventHandler {
 		} else {
 			switch (mode) {
 				case CLASSICAL_B:
-					newExpression = String.format("LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+					newExpression = String.format(Locale.ROOT, "LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
 					break;
 				case EVENT_B:
-					newExpression = String.format("{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
+					newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
 					break;
 				default:
 					throw new RuntimeException("Evaluation mode is not supported.");

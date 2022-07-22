@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.simulators;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -87,6 +88,6 @@ public class Activation {
 
 	@Override
 	public String toString() {
-		return String.format("Activation{operation = %s, time = %s, probability = %s, additionalGuards = %s, activationKind = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s}", operation, time, probabilisticVariables, additionalGuards, activationKind, firingTransitionParameters, firingTransitionParametersPredicate);
+		return String.format(Locale.ROOT, "Activation{operation = %s, time = %s, probability = %s, additionalGuards = %s, activationKind = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s}", operation, time, probabilisticVariables, additionalGuards, activationKind, firingTransitionParameters, firingTransitionParametersPredicate);
 	}
 }

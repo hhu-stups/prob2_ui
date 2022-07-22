@@ -3,6 +3,7 @@ package de.prob2.ui.animation.tracereplay;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.Checked;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -166,7 +168,7 @@ public class TraceTestView extends Stage {
 
 	private final Injector injector;
 
-	private ReplayTrace replayTrace;
+	private SimpleObjectProperty<ReplayTrace> replayTrace;
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
 
@@ -181,20 +183,23 @@ public class TraceTestView extends Stage {
 		this.fontSize = fontSize;
 		this.i18n = i18n;
 		this.injector = injector;
+		this.replayTrace = new SimpleObjectProperty<>();
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}
 
 	@FXML
 	private void initialize() {
+		this.titleProperty().bind(i18n.translateBinding("animation.tracereplay.test.stage.title", this.replayTrace));
+
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<PersistentTransition> row = new TableRow<>();
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					this.saveTrace();
-					injector.getInstance(TraceChecker.class).check(replayTrace, true, () -> {
+					injector.getInstance(TraceChecker.class).check(replayTrace.get(), true, () -> {
 						CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
 						int index = row.getIndex();
-						if(index < replayTrace.getLoadedTrace().getTransitionList().size()) {
+						if(index < replayTrace.get().getLoadedTrace().getTransitionList().size()) {
 							currentTrace.set(currentTrace.get().gotoPosition(index));
 						}
 						traceTableView.refresh();
@@ -218,16 +223,16 @@ public class TraceTestView extends Stage {
 		if(persistentTransition.getParameters().isEmpty()) {
 			return opName;
 		} else {
-			return String.format("%s(%s)", opName, persistentTransition.getParameters().entrySet()
+			return String.format(Locale.ROOT, "%s(%s)", opName, persistentTransition.getParameters().entrySet()
 					.stream()
 					.map(entry -> entry.getKey() + "=" + entry.getValue()).collect(Collectors.joining(", ")));
 		}
 	}
 
 	public void loadReplayTrace(ReplayTrace replayTrace) {
-		this.setTitle(String.format(this.getTitle(), replayTrace.getName()));
+		this.setTitle(i18n.translate("animation.tracereplay.test.stage.title", replayTrace.getName()));
 		this.postconditions.clear();
-		this.replayTrace = replayTrace;
+		this.replayTrace.set(replayTrace);
 		traceTableView.getItems().clear();
 		transitionBoxes.clear();
 
@@ -255,12 +260,12 @@ public class TraceTestView extends Stage {
 	@FXML
 	private void applyTest() {
 		this.saveTrace();
-		injector.getInstance(TraceChecker.class).check(replayTrace, true);
+		injector.getInstance(TraceChecker.class).check(replayTrace.get(), true);
 		this.close();
 	}
 
 	public void saveTrace() {
-		List<PersistentTransition> transitions = replayTrace.getLoadedTrace().getTransitionList();
+		List<PersistentTransition> transitions = replayTrace.get().getLoadedTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
@@ -269,7 +274,7 @@ public class TraceTestView extends Stage {
 		}
 
 		try {
-			replayTrace.saveModified(replayTrace.getLoadedTrace().changeTrace(transitions));
+			replayTrace.get().saveModified(replayTrace.get().getLoadedTrace().changeTrace(transitions));
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
 			stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
@@ -285,7 +290,7 @@ public class TraceTestView extends Stage {
 				List<Postcondition> postconditionsForTransition = postconditions.get(i);
 				String key = entry.getKey();
 				String value = entry.getValue();
-				PostconditionPredicate postcondition = new PostconditionPredicate(String.format("%s = %s", key, value));
+				PostconditionPredicate postcondition = new PostconditionPredicate(String.format(Locale.ROOT, "%s = %s", key, value));
 				if(!postconditionsForTransition.contains(postcondition)) {
 					postconditionsForTransition.add(postcondition);
 					VBox box = transitionBoxes.get(i);
@@ -411,11 +416,11 @@ public class TraceTestView extends Stage {
 		final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
 		final BindableGlyph statusIcon = buildStatusIcon();
 
-		if(replayTrace.getPostconditionStatus().isEmpty() || replayTrace.getPostconditionStatus().get(index).isEmpty() || isNewBox) {
+		if(replayTrace.get().getPostconditionStatus().isEmpty() || replayTrace.get().getPostconditionStatus().get(index).isEmpty() || isNewBox) {
 			TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
 		} else {
-			Checked status = replayTrace.getPostconditionStatus().get(index).get(postconditionIndex);
-			replayTrace.checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
+			Checked status = replayTrace.get().getPostconditionStatus().get(index).get(postconditionIndex);
+			replayTrace.get().checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
 			TraceViewHandler.updateStatusIcon(statusIcon, status);
 		}
 

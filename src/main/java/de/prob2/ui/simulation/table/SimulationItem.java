@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.table;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -258,7 +259,7 @@ public class SimulationItem implements IValidationTask {
 		List<String> configurations = new ArrayList<>();
 		for(String key : information.keySet()) {
 			Object obj = information.get(key);
-			configurations.add(String.format("%s : %s", key, obj.toString()));
+			configurations.add(String.format(Locale.ROOT, "%s : %s", key, obj.toString()));
 		}
 		return String.join(",\n", configurations);
 	}

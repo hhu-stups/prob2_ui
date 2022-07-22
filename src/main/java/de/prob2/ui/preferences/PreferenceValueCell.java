@@ -2,6 +2,7 @@ package de.prob2.ui.preferences;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
@@ -88,8 +89,8 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 		final ColorPicker colorPicker = new ColorPicker(color);
 		colorPicker.setOnAction(event -> {
 			final Color selected = colorPicker.getValue();
-			this.setPreferenceValue(pti.getPreferenceInfo().name, String.format(
-				"#%02x%02x%02x",
+			this.setPreferenceValue(pti.getPreferenceInfo().name, String.format(Locale.ROOT,
+					"#%02x%02x%02x",
 				(int)(selected.getRed()*255),
 				(int)(selected.getGreen()*255),
 				(int)(selected.getBlue()*255)

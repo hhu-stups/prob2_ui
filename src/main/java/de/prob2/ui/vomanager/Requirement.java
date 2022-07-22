@@ -2,6 +2,7 @@ package de.prob2.ui.vomanager;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -97,6 +98,6 @@ public class Requirement implements IAbstractRequirement, INameable {
 
 	@Override
 	public String toString() {
-		return String.format("Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s}", checked, name, introducedAt, type, text);
+		return String.format(Locale.ROOT, "Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s}", checked, name, introducedAt, type, text);
 	}
 }

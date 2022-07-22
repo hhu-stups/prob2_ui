@@ -1,6 +1,7 @@
 package de.prob2.ui.sharedviews;
 
 import java.nio.file.Path;
+import java.util.Locale;
 
 import com.google.inject.Inject;
 
@@ -55,6 +56,7 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 			this.getDialogPane().setContentText(this.statusWithoutDefault);
 			this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
 		} else {
+			// TODO: convert this whole class to I18n
 			this.getDialogPane().setContentText(String.format(this.statusWithDefault, this.defaultPath));
 			this.getDialogPane().getButtonTypes().clear();
 			if (!this.defaultPath.equals(this.loadedPath)) {

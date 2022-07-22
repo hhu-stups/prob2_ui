@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -323,12 +324,12 @@ public class VisBStage extends Stage {
 				String id = visBSVGObject.getId();
 				String object = visBSVGObject.getObject();
 				Map<String, String> attributes = visBSVGObject.getAttributes();
-				scriptString.append(String.format("var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
-				scriptString.append(String.format("new__%s.setAttribute(\"id\",\"%s\");\n", id, id));
+				scriptString.append(String.format(Locale.ROOT, "var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
+				scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"id\",\"%s\");\n", id, id));
 				for(Map.Entry<String, String> entry : attributes.entrySet()) {
-					scriptString.append(String.format("new__%s.setAttribute(\"%s\",\"%s\");\n", id, entry.getKey(), entry.getValue()));
+					scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"%s\",\"%s\");\n", id, entry.getKey(), entry.getValue()));
 				}
-				scriptString.append(String.format("document.querySelector(\"svg\").appendChild(new__%s);\n", id));
+				scriptString.append(String.format(Locale.ROOT, "document.querySelector(\"svg\").appendChild(new__%s);\n", id));
 			}
 			scriptString.append("}");
 			webView.getEngine().executeScript(scriptString.toString());

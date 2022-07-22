@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 
 import de.prob.check.StateSpaceStats;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.property.ObjectProperty;
@@ -14,6 +15,7 @@ import javafx.scene.layout.VBox;
 
 @FXMLInjected
 public final class SimpleStatsView extends VBox {
+	private final I18n i18n;
 	@FXML
 	private Label processedStates;
 	@FXML
@@ -22,9 +24,11 @@ public final class SimpleStatsView extends VBox {
 	private final ObjectProperty<StateSpaceStats> stats;
 	
 	@Inject
-	private SimpleStatsView(final StageManager stageManager) {
+	private SimpleStatsView(final StageManager stageManager, I18n i18n) {
 		super();
-		
+
+		this.i18n = i18n;
+
 		this.stats = new SimpleObjectProperty<>(this, "stats", null);
 		
 		stageManager.loadFXML(this, "simple_stats_view.fxml");
@@ -37,7 +41,7 @@ public final class SimpleStatsView extends VBox {
 				processedStates.setText(null);
 				totalTransitions.setText(null);
 			} else {
-				String processedStatesDescription = String.format("%d/%d", to.getNrProcessedNodes(), to.getNrTotalNodes());
+				String processedStatesDescription = i18n.format("%d/%d", to.getNrProcessedNodes(), to.getNrTotalNodes());
 				if (to.getNrTotalNodes() != 0) {
 					final int percentProcessedNodes = 100 * to.getNrProcessedNodes() / to.getNrTotalNodes();
 					processedStatesDescription += " (" + percentProcessedNodes + "%)";

@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -337,7 +338,7 @@ public final class StatesView extends StackPane {
 			try {
 				String visualizedFormula = getFormulaForVisualization(row.getItem());
 				if(FormulaType.PREDICATE == row.getItem().getFormula().expandStructureNonrecursive().getType()) {
-					visualizedFormula = String.format("bool(%s)", visualizedFormula);
+					visualizedFormula = String.format(Locale.ROOT, "bool(%s)", visualizedFormula);
 				}
 				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
 				expressionTableView.show();

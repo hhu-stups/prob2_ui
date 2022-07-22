@@ -2,6 +2,7 @@ package de.prob2.ui.visb;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -196,7 +197,7 @@ public class VisBDebugStage extends Stage {
 		String projectionString = visBItems.stream()
 				.filter(VisBTableItem::isSelected)
 				.map(VisBTableItem::getVisBItem)
-				.map(item -> String.format("\"%s_%s\" |-> %s", item.getId(), item.getAttribute(), item.getExpression()))
+				.map(item -> String.format(Locale.ROOT, "\"%s_%s\" |-> %s", item.getId(), item.getAttribute(), item.getExpression()))
 				.collect(Collectors.joining(" |-> \n"));
 		DotView formulaStage = injector.getInstance(DotView.class);
 		formulaStage.show();

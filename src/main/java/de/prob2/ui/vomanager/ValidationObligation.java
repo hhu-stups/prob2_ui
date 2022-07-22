@@ -3,6 +3,7 @@ package de.prob2.ui.vomanager;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -146,7 +147,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 
 	@Override
 	public String toString() {
-		return String.format("ValidationObligation{checked = %s, id = %s, expression = %s, requirement = %s}", checked.get(), id, expression, requirement);
+		return String.format(Locale.ROOT, "ValidationObligation{checked = %s, id = %s, expression = %s, requirement = %s}", checked.get(), id, expression, requirement);
 	}
 
 }

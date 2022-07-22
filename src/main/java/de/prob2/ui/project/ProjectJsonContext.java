@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -616,9 +617,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			final String code = checkText(formula.get("code"));
 			final String parameters;
 			if ("INVARIANT".equals(type)) {
-				parameters = String.format("%s(%s)", type, code.isEmpty() ? "all" : code);
+				parameters = String.format(Locale.ROOT, "%s(%s)", type, code.isEmpty() ? "all" : code);
 			} else if ("DEADLOCK".equals(type)) {
-				parameters = String.format("%s(%s)", type, code);
+				parameters = String.format(Locale.ROOT, "%s(%s)", type, code);
 			} else if ("SYMBOLIC_MODEL_CHECK".equals(type)) {
 				parameters = code;
 			} else {
@@ -644,7 +645,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				final ObjectNode information = checkObject(simulationItem.get("information"));
 				final StringJoiner configuration = new StringJoiner(",\n");
 				information.fields().forEachRemaining(entry ->
-					configuration.add(String.format("%s : %s", entry.getKey(), entry.getValue().asText()))
+					configuration.add(String.format(Locale.ROOT, "%s : %s", entry.getKey(), entry.getValue().asText()))
 				);
 				simulationItem.put("id", idByParams.get(configuration.toString()));
 			}

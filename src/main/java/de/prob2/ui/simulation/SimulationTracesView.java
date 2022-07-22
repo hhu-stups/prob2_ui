@@ -13,6 +13,7 @@ import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.Translatable;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
@@ -23,7 +24,6 @@ import de.prob2.ui.simulation.table.SimulationItem;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -40,7 +40,7 @@ import javafx.stage.Stage;
 @Singleton
 public class SimulationTracesView extends Stage {
 
-	private static class SimulationTraceItem {
+	private static class SimulationTraceItem implements Translatable {
 
 		private final SimulationItem parent;
 
@@ -73,8 +73,14 @@ public class SimulationTracesView extends Stage {
 			return index;
 		}
 
-		public String getName() {
-			return String.format("Trace %s", index);
+		@Override
+		public String getTranslationKey() {
+			return "simulation.traces.view.name";
+		}
+
+		@Override
+		public Object[] getTranslationArguments() {
+			return new Object[]{index};
 		}
 	}
 
@@ -94,7 +100,7 @@ public class SimulationTracesView extends Stage {
 
 	@Inject
 	public SimulationTracesView(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-								final I18n i18n, final Injector injector) {
+	                            final I18n i18n, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.i18n = i18n;
@@ -112,14 +118,14 @@ public class SimulationTracesView extends Stage {
 
 	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps) {
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
-		for(int i = 1; i <= traces.size(); i++) {
-			items.add(new SimulationTraceItem(item, traces.get(i - 1), timestamps.get(i-1), i));
+		for (int i = 1; i <= traces.size(); i++) {
+			items.add(new SimulationTraceItem(item, traces.get(i - 1), timestamps.get(i - 1), i));
 		}
 		traceTableView.setItems(items);
 	}
 
 	private void initTableColumns() {
-		traceColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getName()));
+		traceColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue()));
 	}
 
 	private void initTableRows() {
@@ -130,7 +136,7 @@ public class SimulationTracesView extends Stage {
 
 			loadTraceItem.setOnAction(e -> {
 				SimulationTraceItem item = row.getItem();
-				if(item == null) {
+				if (item == null) {
 					return;
 				}
 				this.currentTrace.set(item.getTrace());
@@ -162,7 +168,7 @@ public class SimulationTracesView extends Stage {
 
 			saveTraceItem.setOnAction(e -> {
 				SimulationTraceItem item = row.getItem();
-				if(item == null) {
+				if (item == null) {
 					return;
 				}
 				TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
@@ -181,7 +187,7 @@ public class SimulationTracesView extends Stage {
 
 			saveTimedTraceItem.setOnAction(e -> {
 				SimulationTraceItem item = row.getItem();
-				if(item == null) {
+				if (item == null) {
 					return;
 				}
 				SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
@@ -196,12 +202,12 @@ public class SimulationTracesView extends Stage {
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
-					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(loadTraceItem, playTraceItem, saveTraceItem, saveTimedTraceItem)));
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(loadTraceItem, playTraceItem, saveTraceItem, saveTimedTraceItem)));
 
 			row.setOnMouseClicked(event -> {
 				SimulationTraceItem item = row.getItem();
-				if(item == null) {
+				if (item == null) {
 					return;
 				}
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {

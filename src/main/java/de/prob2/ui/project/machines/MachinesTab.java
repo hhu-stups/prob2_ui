@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -261,7 +262,7 @@ public class MachinesTab extends Tab {
 		int i = 1;
 		String nameInProject = machineName;
 		while (machineNamesSet.contains(nameInProject)) {
-			nameInProject = String.format("%s (%d)", machineName, i);
+			nameInProject = String.format(Locale.ROOT, "%s (%d)", machineName, i);
 			i++;
 		}
 		final Path relative = currentProject.getLocation().relativize(selected);
@@ -404,7 +405,7 @@ public class MachinesTab extends Tab {
 		String name = n[0];
 		int i = 1;
 		while (machineNamesSet.contains(name)) {
-			name = String.format("%s (%d)", n[0], i);
+			name = String.format(Locale.ROOT, "%s (%d)", n[0], i);
 			i++;
 		}
 		final Machine machine = new Machine(name, "", relative);

@@ -1,5 +1,7 @@
 package de.prob2.ui.consoles.b;
 
+import java.util.Locale;
+
 import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;

@@ -1,6 +1,7 @@
 package de.prob2.ui.stats;
 
 import java.util.List;
+import java.util.Locale;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -159,7 +160,7 @@ public class StatsView extends ScrollPane {
 			} else if (split.length == 1) {
 				stat = new Stat(split[0]);
 			} else {
-				throw new IllegalArgumentException(String.format(
+				throw new IllegalArgumentException(String.format(Locale.ROOT,
 						"Invalid number of splits (%d, should be 1 or 2) for packed stat: %s", split.length, pStat));
 			}
 			stats[i] = stat.toFX();
