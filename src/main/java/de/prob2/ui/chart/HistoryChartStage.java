@@ -24,6 +24,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.history.HistoryItem;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -176,7 +177,7 @@ public final class HistoryChartStage extends Stage {
 
 	@Inject
 	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-							  final FileChooserManager fileChooserManager, final I18n i18n) {
+	                          final FileChooserManager fileChooserManager, final I18n i18n) {
 		super();
 
 		this.stageManager = stageManager;
@@ -238,7 +239,7 @@ public final class HistoryChartStage extends Stage {
 			}
 		});
 		this.currentTrace.addListener((observable, from, to) -> {
-			if(to == null) {
+			if (to == null) {
 				return;
 			}
 			SpinnerValueFactory<Integer> currentSpinnerFactory = startSpinner.getValueFactory();
@@ -247,7 +248,7 @@ public final class HistoryChartStage extends Stage {
 		});
 		startSpinner.valueProperty().addListener((observable, from, to) -> {
 			// Workaround for a NPE in JavaFX
-			if(to == null) {
+			if (to == null) {
 				startSpinner.getValueFactory().setValue(0);
 				return;
 			}
@@ -266,40 +267,43 @@ public final class HistoryChartStage extends Stage {
 					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
 			);
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
-			if(path == null) {
+			if (path == null) {
 				return;
 			}
 			WritableImage image = chart.snapshot(new SnapshotParameters(), null);
 			try {
 				ImageIO.write(SwingFXUtils.fromFXImage(image, null), "PNG", path.toFile());
 			} catch (IOException ex) {
-				// TODO: Show error message
-				ex.printStackTrace();
+				LOGGER.error("Saving as PNG failed", ex);
+				final Alert alert = stageManager.makeExceptionAlert(ex, "common.alerts.couldNotWriteFile.content", path);
+				alert.initOwner(this);
+				alert.showAndWait();
 			}
 		});
 
 		final MenuItem saveCSVItem = new MenuItem(i18n.translate("chart.historyChart.menus.item.saveAsCSV"));
 		saveCSVItem.setOnAction(e -> {
-			List<String> rows = new ArrayList<>();
-			for(XYChart.Series<Number, Number> series : chart.getData()) {
-				for (XYChart.Data<Number, Number> entry : series.getData()) {
-					rows.add(String.format("%s,%s", entry.getXValue(), entry.getYValue()));
-				}
-			}
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle(i18n.translate("chart.historyChart.fileChooser.saveAsCSV"));
 			fileChooser.getExtensionFilters().addAll(
 					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv")
 			);
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
-			if(path == null) {
+			if (path == null) {
 				return;
 			}
-			try {
-				Files.write(path, rows);
+
+			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
+				for (XYChart.Series<Number, Number> series : chart.getData()) {
+					for (XYChart.Data<Number, Number> entry : series.getData()) {
+						csvWriter.record(entry.getXValue(), entry.getYValue());
+					}
+				}
 			} catch (IOException ex) {
-				// TODO: Handle exception
-				ex.printStackTrace();
+				LOGGER.error("Saving as CSV failed", ex);
+				final Alert alert = stageManager.makeExceptionAlert(ex, "common.alerts.couldNotWriteFile.content", path);
+				alert.initOwner(this);
+				alert.showAndWait();
 			}
 		});
 
@@ -329,7 +333,7 @@ public final class HistoryChartStage extends Stage {
 		ArrayList<String> formulaCodeList = new ArrayList<>();
 		this.formulaList.getItems().forEach(b -> formulaCodeList.add(b.getCode()));
 		Machine machine = this.currentProject.currentMachineProperty().get();
-		if(machine == null) {
+		if (machine == null) {
 			return;
 		}
 		machine.setHistoryChartItems(formulaCodeList);
@@ -377,7 +381,7 @@ public final class HistoryChartStage extends Stage {
 
 				// Update the upper bound of the X axis of the separate chart
 				separateXAxis.setUpperBound(change.getList().isEmpty() ? 1.0
-						: change.getList().get(change.getList().size() - 1).getXValue().doubleValue());
+						                            : change.getList().get(change.getList().size() - 1).getXValue().doubleValue());
 			});
 
 			separateChart.setMinWidth(160);
@@ -409,7 +413,7 @@ public final class HistoryChartStage extends Stage {
 
 	private void loadFormulas(Machine machine) {
 		this.formulaList.getItems().clear();
-		if(machine == null) {
+		if (machine == null) {
 			return;
 		}
 		if (!machine.getHistoryChartItems().isEmpty()) {
@@ -421,7 +425,7 @@ public final class HistoryChartStage extends Stage {
 		if (!this.isShowing()) {
 			return;
 		}
-		
+
 		final List<List<XYChart.Data<Number, Number>>> newDatas = new ArrayList<>();
 		for (int i = 0; i < this.singleChart.getData().size(); i++) {
 			newDatas.add(new ArrayList<>());
@@ -515,7 +519,7 @@ public final class HistoryChartStage extends Stage {
 			}
 		} else {
 			if (showErrors) {
-				final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, 
+				final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR,
 						"chart.historyChart.alerts.formulaEvalError.header",
 						"chart.historyChart.alerts.formulaEvalError.notAnEvalResult.content", aer);
 				alert.initOwner(this);

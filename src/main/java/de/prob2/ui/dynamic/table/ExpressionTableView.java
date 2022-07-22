@@ -7,8 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -28,6 +26,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -38,6 +37,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -94,38 +94,36 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			}
 		}
 	}
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionTableView.class);
 
 	private static final double MINIMUM_TABLE_COLUMN_WIDTH = 160.0;
-	
-	private static final Pattern NEEDS_CSV_QUOTE_PATTERN = Pattern.compile("[,\"\n\r]");
 
 	private static final String SOURCE_COLUMN_NAME = "Source";
 
 	private static final String STATE_ID_COLUMN_NAME = "State ID";
 
 	private static final String VALUE_COLUMN_NAME = "VALUE";
-	
+
 	@FXML
 	private TableView<ObservableList<String>> tableView;
-	
+
 	@FXML
 	private Button saveButton;
-	
+
 	@FXML
 	private HelpButton helpButton;
 
 	private final Injector injector;
-	
+
 	private final FileChooserManager fileChooserManager;
-	
+
 	private ObjectProperty<TableData> currentTable;
 
 	// Store header globally so that ValueItemRow always use the current header
 	private List<String> header;
-	
-	
+
+
 	@Inject
 	public ExpressionTableView(final Injector injector, final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
 	                           final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions) {
@@ -135,7 +133,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
 		stageManager.loadFXML(this, "table_view.fxml");
 	}
-	
+
 	@Override
 	protected void initialize() {
 		super.initialize();
@@ -147,16 +145,16 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		});
 		saveButton.disableProperty().bind(currentTable.isNull());
 	}
-	
+
 	@Override
 	protected List<TableVisualizationCommand> getCommandsInState(final State state) {
 		return TableVisualizationCommand.getAll(state);
 	}
-	
+
 	public void visualizeExpression(String expression) {
 		this.selectCommand(TableVisualizationCommand.EXPRESSION_AS_TABLE_NAME, expression);
 	}
-	
+
 	@Override
 	protected void visualizeInternal(final TableVisualizationCommand item, final List<IEvalElement> formulas) {
 		final TableData table = item.visualize(formulas);
@@ -168,7 +166,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			tableView.setVisible(true);
 		});
 	}
-	
+
 	private void fillTable(TableData data) {
 		// Update header when table is updated
 		this.header = data.getHeader();
@@ -267,7 +265,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		}
 		contextMenuItems.add(jumpToStateItem);
 	}
-	
+
 	private ObservableList<ObservableList<String>> buildData(List<List<String>> list) {
 		ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
 		for (List<String> row : list) {
@@ -275,44 +273,38 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		}
 		return data;
 	}
-	
+
 	@FXML
 	private void save() {
+		if (currentTable == null || currentTable.get() == null) {
+			return;
+		}
+
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv"));
 		fileChooser.setTitle(i18n.translate("common.fileChooser.saveAsCSV.title"));
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this);
-		if(path == null || currentTable == null) {
+		if (path == null) {
 			return;
 		}
-		if(!path.endsWith(".csv")) {
+
+		if (!path.endsWith(".csv")) {
 			path = path.resolveSibling(path.getFileName() + ".csv");
 		}
-		try {
-			Files.write(path, toCSV(currentTable.get()));
+
+		try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
+			csvWriter.header(currentTable.get().getHeader());
+			for (List<String> row : currentTable.get().getRows()) {
+				csvWriter.record(row);
+			}
 		} catch (IOException e) {
 			LOGGER.error("Saving as CSV failed", e);
+			final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "common.alerts.couldNotWriteFile.content", path);
+			alert.initOwner(this);
+			alert.showAndWait();
 		}
 	}
-	
-	private static String escapeCSV(final String toEscape) {
-		if (NEEDS_CSV_QUOTE_PATTERN.matcher(toEscape).find()) {
-			return '"' + toEscape.replace("\"", "\"\"") + '"';
-		} else {
-			return toEscape;
-		}
-	}
-	
-	private static List<String> toCSV(TableData data) {
-		final List<String> csv = new ArrayList<>();
-		csv.add(String.join(",", data.getHeader()));
-		data.getRows()
-			.stream()
-			.map(column -> column.stream().map(ExpressionTableView::escapeCSV).collect(Collectors.joining(",")))
-			.collect(Collectors.toCollection(() -> csv));
-		return csv;
-	}
-	
+
 	@Override
 	protected void clearContent() {
 		currentTable.set(null);

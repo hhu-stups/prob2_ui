@@ -23,6 +23,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -168,19 +169,19 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public Path saveAsTable(Trace trace) throws IOException {
-		int i = 1;
 		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_TABLE_EXTENSION);
 		if (path != null) {
-			List<String> rows = new ArrayList<>();
-			rows.add("Position,Transition");
-			for (Transition transition : trace.getTransitionList()) {
-				String name = OperationItem.forTransitionFast(trace.getStateSpace(), transition).toPrettyString(true);
-				String row = String.format("%s,%s", i, name);
-				rows.add(row);
-				i++;
+			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
+				csvWriter.header("Position", "Transition");
+
+				int i = 1;
+				for (Transition transition : trace.getTransitionList()) {
+					String name = OperationItem.forTransitionFast(trace.getStateSpace(), transition).toPrettyString(true);
+					csvWriter.record(i++, name);
+				}
 			}
-			Files.write(path, String.join("\n", rows).getBytes());
 		}
+
 		return path;
 	}
 }
