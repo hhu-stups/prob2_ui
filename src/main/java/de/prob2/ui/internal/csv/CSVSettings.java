@@ -61,11 +61,11 @@ public final class CSVSettings {
 			throw new IllegalArgumentException("illegal new line in field");
 		}
 
-		boolean hasQuote = field.indexOf(quote) >= 0;
-		boolean needsQuote = hasQuote || field.indexOf(delimiter) >= 0 || field.indexOf('\n') >= 0 || field.indexOf('\r') >= 0;
-		if (!hasQuote && !needsQuote) {
+		boolean needsEscape = field.indexOf(quote) >= 0;
+		boolean needsQuote = alwaysQuote || needsEscape || field.indexOf(delimiter) >= 0 || field.indexOf('\n') >= 0 || field.indexOf('\r') >= 0;
+		if (!needsEscape && !needsQuote) {
 			return field;
-		} else if (!hasQuote) {
+		} else if (!needsEscape) {
 			return quote + field + quote;
 		} else {
 			return quote + field.replace(String.valueOf(quote), String.valueOf(quote) + quote) + quote;
