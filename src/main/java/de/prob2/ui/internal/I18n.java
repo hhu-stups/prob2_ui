@@ -198,7 +198,13 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(key, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> translate(key, evaluateArguments(copiedArguments)),
+				() -> {
+					try {
+						return translate(key, evaluateArguments(copiedArguments));
+					} catch (NullPointerException ignored) {
+						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
+					}
+				},
 				dependencies
 		);
 	}
@@ -217,7 +223,13 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(key, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> translate(key.getValue(), evaluateArguments(copiedArguments)),
+				() -> {
+					try {
+						return translate(key.getValue(), evaluateArguments(copiedArguments));
+					} catch (NullPointerException ignored) {
+						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
+					}
+				},
 				dependencies
 		);
 	}
@@ -260,7 +272,13 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(pattern, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> format(pattern, evaluateArguments(copiedArguments)),
+				() -> {
+					try {
+						return format(pattern, evaluateArguments(copiedArguments));
+					} catch (NullPointerException ignored) {
+						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
+					}
+				},
 				dependencies
 		);
 	}
@@ -279,7 +297,13 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(pattern, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> format(pattern.getValue(), evaluateArguments(copiedArguments)),
+				() -> {
+					try {
+						return format(pattern.getValue(), evaluateArguments(copiedArguments));
+					} catch (NullPointerException ignored) {
+						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
+					}
+				},
 				dependencies
 		);
 	}

@@ -90,6 +90,8 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 		this.loadButtonType = new ButtonType(i18n.translate(loadButtonKey));
 		this.setButtonType = new ButtonType(i18n.translate(setButtonKey));
 		this.unsetButtonType = new ButtonType(i18n.translate(unsetButtonKey));
+
+		this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
 	}
 
 	public void initPaths(final Path loadedPath, final Path defaultPath) {
