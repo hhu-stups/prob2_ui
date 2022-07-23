@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -195,9 +196,28 @@ public final class I18n {
 		Objects.requireNonNull(key, "key");
 		Objects.requireNonNull(arguments, "arguments");
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
-		ObservableValue<?>[] dependencies = collectDependencies(copiedArguments);
+		ObservableValue<?>[] dependencies = collectDependencies(key, copiedArguments);
 		return Bindings.createStringBinding(
 				() -> translate(key, evaluateArguments(copiedArguments)),
+				dependencies
+		);
+	}
+
+	/**
+	 * Generates a string binding for the given translation, according to the rules of {@link I18n#translate(String, Object...)}.
+	 * Observable value in the key and arguments will be evaluated and the translation will be redone when one of them changes.
+	 *
+	 * @param key       key to translate
+	 * @param arguments arguments for formatting (may be observable)
+	 * @return binding for the formatted and translated string
+	 */
+	public StringBinding translateBinding(ObservableValue<String> key, Object... arguments) {
+		Objects.requireNonNull(key, "key");
+		Objects.requireNonNull(arguments, "arguments");
+		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
+		ObservableValue<?>[] dependencies = collectDependencies(key, copiedArguments);
+		return Bindings.createStringBinding(
+				() -> translate(key.getValue(), evaluateArguments(copiedArguments)),
 				dependencies
 		);
 	}
@@ -238,9 +258,28 @@ public final class I18n {
 		Objects.requireNonNull(pattern, "pattern");
 		Objects.requireNonNull(arguments, "arguments");
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
-		ObservableValue<?>[] dependencies = collectDependencies(copiedArguments);
+		ObservableValue<?>[] dependencies = collectDependencies(pattern, copiedArguments);
 		return Bindings.createStringBinding(
 				() -> format(pattern, evaluateArguments(copiedArguments)),
+				dependencies
+		);
+	}
+
+	/**
+	 * Generates a string binding for the given formatting, according to the rules of {@link I18n#format(String, Object...)}.
+	 * Observable value in the pattern or arguments will be evaluated and the formatting will be redone when one of them changes.
+	 *
+	 * @param pattern   pattern
+	 * @param arguments arguments for formatting (may be observable)
+	 * @return binding for the formatted string
+	 */
+	public StringBinding formatBinding(ObservableValue<String> pattern, Object... arguments) {
+		Objects.requireNonNull(pattern, "pattern");
+		Objects.requireNonNull(arguments, "arguments");
+		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
+		ObservableValue<?>[] dependencies = collectDependencies(pattern, copiedArguments);
+		return Bindings.createStringBinding(
+				() -> format(pattern.getValue(), evaluateArguments(copiedArguments)),
 				dependencies
 		);
 	}
@@ -430,9 +469,8 @@ public final class I18n {
 				       .toArray();
 	}
 
-	private static ObservableValue<?>[] collectDependencies(Object... arguments) {
-		Objects.requireNonNull(arguments, "arguments");
-		return Arrays.stream(arguments)
+	private static ObservableValue<?>[] collectDependencies(Object keyOrPattern, Object... arguments) {
+		return Stream.concat(Stream.of(keyOrPattern), Arrays.stream(arguments))
 				       .filter(arg -> arg instanceof ObservableValue)
 				       .map(arg -> (ObservableValue<?>) arg)
 				       .toArray(ObservableValue[]::new);

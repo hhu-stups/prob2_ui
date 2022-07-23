@@ -1,13 +1,15 @@
 package de.prob2.ui.sharedviews;
 
 import java.nio.file.Path;
-import java.util.Locale;
 
 import com.google.inject.Inject;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 
@@ -17,23 +19,30 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 		SET_CURRENT_AS_DEFAULT,
 		UNSET_DEFAULT,
 	}
-	
+
 	private final I18n i18n;
-	
-	private String statusWithDefault;
-	private String statusWithoutDefault;
+	private final SimpleStringProperty titleKey;
+	private final SimpleStringProperty statusWithDefaultKey;
+	private final SimpleStringProperty statusWithoutDefaultKey;
+	private final SimpleObjectProperty<Path> loadedPath;
+	private final SimpleObjectProperty<Path> defaultPath;
+
 	private ButtonType loadButtonType;
 	private ButtonType setButtonType;
 	private ButtonType unsetButtonType;
-	private Path loadedPath;
-	private Path defaultPath;
-	
+
 	@Inject
 	public DefaultPathDialog(final StageManager stageManager, final I18n i18n) {
 		super();
-		
+
 		this.i18n = i18n;
-		
+		this.titleKey = new SimpleStringProperty();
+		this.statusWithDefaultKey = new SimpleStringProperty();
+		this.statusWithoutDefaultKey = new SimpleStringProperty();
+		this.loadedPath = new SimpleObjectProperty<>();
+		this.defaultPath = new SimpleObjectProperty<>();
+
+		this.titleProperty().bind(i18n.translateBinding(this.titleKey));
 		this.setResultConverter(buttonType -> {
 			if (buttonType == null || buttonType == ButtonType.CANCEL) {
 				return null;
@@ -47,45 +56,44 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 				throw new AssertionError("Unhandled button type: " + buttonType);
 			}
 		});
-		
+		this.contentTextProperty().bind(
+				Bindings.when(defaultPath.isNull())
+						.then(i18n.translateBinding(this.statusWithoutDefaultKey))
+						.otherwise(i18n.translateBinding(this.statusWithDefaultKey, this.defaultPath))
+		);
+		this.defaultPath.addListener((observable, oldValue, newValue) -> {
+			if (newValue == null) {
+				this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
+			} else {
+				this.getDialogPane().getButtonTypes().clear();
+				if (!newValue.equals(this.loadedPath.get())) {
+					this.getDialogPane().getButtonTypes().addAll(this.loadButtonType, this.setButtonType);
+				}
+				this.getDialogPane().getButtonTypes().addAll(this.unsetButtonType, ButtonType.CANCEL);
+			}
+		});
+
 		stageManager.register(this);
 	}
-	
-	private void update() {
-		if (this.defaultPath == null) {
-			this.getDialogPane().setContentText(this.statusWithoutDefault);
-			this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
-		} else {
-			// TODO: convert this whole class to I18n
-			this.getDialogPane().setContentText(String.format(this.statusWithDefault, this.defaultPath));
-			this.getDialogPane().getButtonTypes().clear();
-			if (!this.defaultPath.equals(this.loadedPath)) {
-				this.getDialogPane().getButtonTypes().addAll(this.loadButtonType, this.setButtonType);
-			}
-			this.getDialogPane().getButtonTypes().addAll(this.unsetButtonType, ButtonType.CANCEL);
-		}
-	}
-	
+
 	public void initStrings(
-		final String titleKey,
-		final String statusWithDefaultKey,
-		final String statusWithoutDefaultKey,
-		final String loadButtonKey,
-		final String setButtonKey,
-		final String unsetButtonKey
+			final String titleKey,
+			final String statusWithDefaultKey,
+			final String statusWithoutDefaultKey,
+			final String loadButtonKey,
+			final String setButtonKey,
+			final String unsetButtonKey
 	) {
-		this.setTitle(i18n.translate(titleKey));
-		this.statusWithDefault = i18n.translate(statusWithDefaultKey);
-		this.statusWithoutDefault = i18n.translate(statusWithoutDefaultKey);
+		this.titleKey.set(titleKey);
+		this.statusWithDefaultKey.set(statusWithDefaultKey);
+		this.statusWithoutDefaultKey.set(statusWithoutDefaultKey);
 		this.loadButtonType = new ButtonType(i18n.translate(loadButtonKey));
 		this.setButtonType = new ButtonType(i18n.translate(setButtonKey));
 		this.unsetButtonType = new ButtonType(i18n.translate(unsetButtonKey));
-		this.update();
 	}
-	
+
 	public void initPaths(final Path loadedPath, final Path defaultPath) {
-		this.loadedPath = loadedPath;
-		this.defaultPath = defaultPath;
-		this.update();
+		this.loadedPath.set(loadedPath);
+		this.defaultPath.set(defaultPath);
 	}
 }
