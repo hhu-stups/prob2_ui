@@ -5,8 +5,6 @@ public class LTLMarker {
 	private String type;
 	private LTLMark mark;
 	private String msg;
-	private String name;
-	private LTLMark stop;
 
 	public LTLMarker(String type, int line, int pos, int length, String msg) {
 		this.type = type;
@@ -37,21 +35,4 @@ public class LTLMarker {
 	public void setMsg(String msg) {
 		this.msg = msg;
 	}
-
-	public LTLMark getStop() {
-		return stop;
-	}
-
-	public void setStop(LTLMark stop) {
-		this.stop = stop;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 }
