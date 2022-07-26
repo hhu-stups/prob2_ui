@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
@@ -83,12 +84,12 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	private void markText(CheckingResultItem resultItem) {
 		if(resultItem instanceof LTLCheckingResultItem) {
-			final List<LTLMarker> errorMarkers = ((LTLCheckingResultItem)resultItem).getErrorMarkers();
-			if (!errorMarkers.isEmpty()) {
+			final List<ErrorItem> errorMarkers = ((LTLCheckingResultItem)resultItem).getErrorMarkers();
+			if (!errorMarkers.isEmpty() && !errorMarkers.get(0).getLocations().isEmpty()) {
 				// TODO Implement proper error highlighting like in BEditor
-				final LTLMarker mark = errorMarkers.get(0);
-				final int line = mark.getLine() - 1;
-				taCode.selectRange(line, mark.getPos(), line, mark.getPos() + mark.getLength());
+				final ErrorItem.Location location = errorMarkers.get(0).getLocations().get(0);
+				final int line = location.getStartLine() - 1;
+				taCode.selectRange(line, location.getStartColumn(), line, location.getEndColumn());
 			}
 		}
 	}

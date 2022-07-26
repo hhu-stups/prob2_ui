@@ -1,8 +1,10 @@
 package de.prob2.ui.verifications.ltl;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.ltl.parser.WarningListener;
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
@@ -20,13 +22,17 @@ public class LTLParseListener extends BaseErrorListener implements WarningListen
 
 	private final Logger logger = LoggerFactory.getLogger(LTLParseListener.class);
 
-	private List<LTLMarker> warningMarkers = new LinkedList<>();
-	private List<LTLMarker> errorMarkers = new LinkedList<>();
+	private List<ErrorItem> warningMarkers = new LinkedList<>();
+	private List<ErrorItem> errorMarkers = new LinkedList<>();
+
+	private static ErrorItem.Location locationFromTokenPos(final int line, final int charPositionInLine, final int length) {
+		return new ErrorItem.Location("", line, charPositionInLine, line, charPositionInLine + length);
+	}
 
 	@Override
 	public void warning(Token token, String msg) {
 		int length = token.getStopIndex() - token.getStartIndex() + 1;
-		warningMarkers.add(new LTLMarker("warning", token.getLine(), token.getCharPositionInLine(), length, msg));
+		warningMarkers.add(new ErrorItem(msg, ErrorItem.Type.WARNING, Collections.singletonList(locationFromTokenPos(token.getLine(), token.getCharPositionInLine(), length))));
 	}
 
 	@Override
@@ -37,15 +43,15 @@ public class LTLParseListener extends BaseErrorListener implements WarningListen
 			Token token = (Token) offendingSymbol;
 			length = token.getStopIndex() - token.getStartIndex() + 1;
 		}
-		errorMarkers.add(new LTLMarker("error", line, charPositionInLine, length, msg));
+		errorMarkers.add(new ErrorItem(msg, ErrorItem.Type.ERROR, Collections.singletonList(locationFromTokenPos(line, charPositionInLine, length))));
 		logger.trace("Parse error {}", offendingSymbol);
 	}
 
-	public List<LTLMarker> getWarningMarkers() {
+	public List<ErrorItem> getWarningMarkers() {
 		return warningMarkers;
 	}
 
-	public List<LTLMarker> getErrorMarkers() {
+	public List<ErrorItem> getErrorMarkers() {
 		return errorMarkers;
 	}
 

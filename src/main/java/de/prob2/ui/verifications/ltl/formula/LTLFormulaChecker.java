@@ -1,10 +1,8 @@
 package de.prob2.ui.verifications.ltl.formula;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -26,7 +24,6 @@ import de.prob2.ui.internal.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.ltl.LTLMarker;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 
@@ -95,27 +92,27 @@ public class LTLFormulaChecker {
 			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {
-				resultHandler.handleFormulaParseErrors(item, ltlMarkersFromErrorItems(((LTLError)result).getErrors()));
+				resultHandler.handleFormulaParseErrors(item, ((LTLError)result).getErrors());
 			} else {
 				resultHandler.handleFormulaResult(item, result);
 			}
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
-			final List<LTLMarker> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
+			final List<ErrorItem> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
 			if(error.getErrors() == null) {
-				errorMarkers.add(new LTLMarker("error", 1, 0, 1, error.getMessage()));
+				errorMarkers.add(ErrorItem.fromErrorMessage(error.getMessage()));
 			} else {
-				errorMarkers.addAll(ltlMarkersFromErrorItems(error.getErrors()));
+				errorMarkers.addAll(error.getErrors());
 			}
 			resultHandler.handleFormulaParseErrors(item, errorMarkers);
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
-			final List<LTLMarker> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
-			if (error.getTokenString() == null) {
-				errorMarkers.add(new LTLMarker("error", 1, 0, 1, error.getMessage()));
-			} else {
-				errorMarkers.add(new LTLMarker("error", error.getTokenLine(), error.getTokenColumn(), error.getTokenString().length(), error.getMessage()));
+			final List<ErrorItem> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
+			final List<ErrorItem.Location> locations = new ArrayList<>();
+			if (error.getTokenString() != null) {
+				locations.add(new ErrorItem.Location("", error.getTokenLine(), error.getTokenColumn(), error.getTokenLine(), error.getTokenColumn() + error.getTokenString().length()));
 			}
+			errorMarkers.add(new ErrorItem(error.getMessage(), ErrorItem.Type.ERROR, locations));
 			resultHandler.handleFormulaParseErrors(item, errorMarkers);
 		}
 	}
@@ -129,61 +126,6 @@ public class LTLFormulaChecker {
 			}
 			return item;
 		});
-	}
-
-	private static String ltlErrorTypeFromProB(final ErrorItem.Type type) {
-		switch (type) {
-			case MESSAGE:
-			case WARNING:
-				return "warning";
-			
-			case ERROR:
-			case INTERNAL_ERROR:
-			default:
-				return "error";
-		}
-	}
-	
-	private static ErrorItem.Type proBErrorTypeFromLtl(final String type) {
-		switch (type) {
-			case "warning":
-				return ErrorItem.Type.WARNING;
-			
-			case "error":
-				return ErrorItem.Type.ERROR;
-			
-			default:
-				logger.warn("Unhandled LTL error type: {}", type);
-				return ErrorItem.Type.INTERNAL_ERROR;
-		}
-	}
-	
-	private static List<LTLMarker> ltlMarkersFromErrorItems(final List<ErrorItem> errors) {
-		final List<LTLMarker> markers = new ArrayList<>();
-		for (final ErrorItem error : errors) {
-			final String type = ltlErrorTypeFromProB(error.getType());
-			if (error.getLocations().isEmpty()) {
-				markers.add(new LTLMarker(type, 1, 0, 1, error.getMessage()));
-			} else {
-				for (final ErrorItem.Location location : error.getLocations()) {
-					final int length;
-					if (location.getStartLine() == location.getEndLine()) {
-						length = location.getEndColumn() - location.getStartColumn();
-					} else {
-						// Don't have the original LTL formula here to calculate the length of multi-line spans...
-						length = 1;
-					}
-					markers.add(new LTLMarker(type, location.getStartLine(), location.getStartColumn(), length, error.getMessage()));
-				}
-			}
-		}
-		return markers;
-	}
-	
-	private static List<ErrorItem> errorItemsFromLtlMarkers(final List<LTLMarker> markers) {
-		return markers.stream()
-			.map(marker -> new ErrorItem(marker.getMsg(), proBErrorTypeFromLtl(marker.getType()), Collections.emptyList()))
-			.collect(Collectors.toList());
 	}
 	
 	private LTLParseListener parseFormula(LtlParser parser) {

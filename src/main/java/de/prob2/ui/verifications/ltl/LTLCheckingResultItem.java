@@ -2,20 +2,21 @@ package de.prob2.ui.verifications.ltl;
 
 import java.util.List;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 public class LTLCheckingResultItem extends CheckingResultItem {
 
-	private List<LTLMarker> errorMarkers;
+	private List<ErrorItem> errorMarkers;
 	
-	public LTLCheckingResultItem(Checked checked, List<LTLMarker> errorMarkers, String headerBundleKey, String messageBundleKey,
+	public LTLCheckingResultItem(Checked checked, List<ErrorItem> errorMarkers, String headerBundleKey, String messageBundleKey,
 			Object... messageParams) {
 		super(checked, headerBundleKey, messageBundleKey, messageParams);
 		this.errorMarkers = errorMarkers;
 	}
 	
-	public List<LTLMarker> getErrorMarkers() {
+	public List<ErrorItem> getErrorMarkers() {
 		return errorMarkers;
 	}
 

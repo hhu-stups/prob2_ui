@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLCounterExample;
@@ -60,9 +61,9 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 		item.setResultItem(handleFormulaResult(result));
 	}
 	
-	public void handleFormulaParseErrors(LTLFormulaItem item, List<LTLMarker> errorMarkers) {
+	public void handleFormulaParseErrors(LTLFormulaItem item, List<ErrorItem> errorMarkers) {
 		item.setCounterExample(null);
-		String errorMessage = errorMarkers.stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
+		String errorMessage = errorMarkers.stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
 		if(errorMessage.isEmpty()) {
 			errorMessage = "Parse Error in typed formula";
 		}
@@ -76,11 +77,11 @@ public class LTLResultHandler extends AbstractVerificationsResultHandler {
 			resultItem = new LTLCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully", "verifications.result.patternParsedSuccessfully");
 		} else {
 			String msg;
-			List<LTLMarker> errorMarkers = parseListener.getErrorMarkers();
+			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {
 				msg = i18n.translate("verifications.ltl.pattern.empty");
 			} else {
-				msg = parseListener.getErrorMarkers().stream().map(LTLMarker::getMsg).collect(Collectors.joining("\n"));
+				msg = parseListener.getErrorMarkers().stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
 			}
 			resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header",
 					"common.result.message", msg);
