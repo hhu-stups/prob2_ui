@@ -86,7 +86,7 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 			final List<LTLMarker> errorMarkers = ((LTLCheckingResultItem)resultItem).getErrorMarkers();
 			if (!errorMarkers.isEmpty()) {
 				// TODO Implement proper error highlighting like in BEditor
-				final LTLMark mark = errorMarkers.get(0).getMark();
+				final LTLMarker mark = errorMarkers.get(0);
 				final int line = mark.getLine() - 1;
 				taCode.selectRange(line, mark.getPos(), line, mark.getPos() + mark.getLength());
 			}
