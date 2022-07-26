@@ -1,7 +1,5 @@
 package de.prob2.ui.verifications.ltl;
 
-import org.antlr.v4.runtime.Token;
-
 public class LTLMarker {
 
 	private String type;
@@ -14,20 +12,6 @@ public class LTLMarker {
 		this.type = type;
 		this.mark = new LTLMark(line, pos, length);
 		this.msg = msg;
-	}
-
-	public LTLMarker(String type, Token token, int length, String msg) {
-		this.type = type;
-		this.mark = new LTLMark(token, length);
-		this.msg = msg;
-	}
-
-	public LTLMarker(String type, Token start, Token stop, String name, String msg) {
-		this.type = type;
-		this.mark = new LTLMark(start, 1);
-		this.msg = msg;
-		this.stop = new LTLMark(stop, stop.getStopIndex() - stop.getStartIndex() + 1);
-		this.name = name;
 	}
 
 	public String getType() {

@@ -1,7 +1,5 @@
 package de.prob2.ui.verifications.ltl;
 
-import org.antlr.v4.runtime.Token;
-
 public class LTLMark {
 
 	private int line;
@@ -12,10 +10,6 @@ public class LTLMark {
 		this.line = line;
 		this.pos = pos;
 		this.length = length;
-	}
-
-	public LTLMark(Token token, int length) {
-		this(token.getLine(), token.getCharPositionInLine(), length);
 	}
 
 	public int getLine() {
