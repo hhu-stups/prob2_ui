@@ -85,7 +85,7 @@ public final class ExceptionAlert extends Alert {
 			this.stackTraceTextArea.setText(to == null ? null : getExceptionStackTrace(to));
 			
 			this.contentVBox.getChildren().remove(this.proBErrorTable);
-			if (proBError != null && proBError.getErrors() != null) {
+			if (proBError != null) {
 				this.contentVBox.getChildren().add(this.proBErrorTable);
 				final List<ErrorItem> filteredErrors = this.errorDisplayFilter.filterErrors(proBError.getErrors());
 				this.proBErrorTable.getErrorItems().setAll(filteredErrors);

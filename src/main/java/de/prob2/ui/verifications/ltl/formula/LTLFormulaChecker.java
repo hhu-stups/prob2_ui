@@ -99,11 +99,7 @@ public class LTLFormulaChecker {
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
 			final List<ErrorItem> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
-			if(error.getErrors() == null) {
-				errorMarkers.add(ErrorItem.fromErrorMessage(error.getMessage()));
-			} else {
-				errorMarkers.addAll(error.getErrors());
-			}
+			errorMarkers.addAll(error.getErrors());
 			resultHandler.handleFormulaParseErrors(item, errorMarkers);
 		} catch (LtlParseException error) {
 			logger.error("Could not parse LTL formula: ", error);
