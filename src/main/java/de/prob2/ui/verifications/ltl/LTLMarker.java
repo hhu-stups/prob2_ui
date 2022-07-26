@@ -1,10 +1,9 @@
 package de.prob2.ui.verifications.ltl;
 
 public class LTLMarker {
-
-	private String type;
-	private LTLMark mark;
-	private String msg;
+	private final String type;
+	private final LTLMark mark;
+	private final String msg;
 
 	public LTLMarker(String type, int line, int pos, int length, String msg) {
 		this.type = type;
@@ -16,23 +15,11 @@ public class LTLMarker {
 		return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
 	public LTLMark getMark() {
 		return mark;
 	}
 
-	public void setMark(LTLMark mark) {
-		this.mark = mark;
-	}
-
 	public String getMsg() {
 		return msg;
-	}
-
-	public void setMsg(String msg) {
-		this.msg = msg;
 	}
 }
