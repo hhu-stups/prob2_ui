@@ -229,7 +229,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				column = Integer.parseInt(source.substring(0, nextWhiteSpaceIndex));
 				int fileIndex = source.indexOf("file: ");
 				String pathAsString = source.substring(fileIndex + 6);
-				path = Paths.get(new File(pathAsString).toURI());
+				path = Paths.get(pathAsString);
 			} else {
 				showSourceItem.setDisable(true);
 				line = -1;
