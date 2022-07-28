@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.ltl.formula;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,9 +15,13 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;
+import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.LTLChecker;
+import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
+import de.prob.check.LTLNotYetFinished;
+import de.prob.check.LTLOk;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
 import de.prob.ltl.parser.pattern.PatternManager;
@@ -26,8 +31,10 @@ import de.prob2.ui.internal.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
-import de.prob2.ui.verifications.ltl.LTLResultHandler;
 
 import javafx.beans.binding.BooleanExpression;
 
@@ -45,15 +52,11 @@ public class LTLFormulaChecker {
 	
 	private final CurrentProject currentProject;
 	
-	private final LTLResultHandler resultHandler;
-	
 	@Inject
-	private LTLFormulaChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace, final CurrentProject currentProject,
-			final LTLResultHandler resultHandler) {
+	private LTLFormulaChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		this.cliExecutor = cliExecutor;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.resultHandler = resultHandler;
 	}
 	
 	public void checkMachine() {
@@ -107,6 +110,35 @@ public class LTLFormulaChecker {
 		return LTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser), machine.getPatternManager());
 	}
 	
+	private static void handleFormulaResult(LTLFormulaItem item, IModelCheckingResult result) {
+		assert !(result instanceof LTLError);
+		
+		if (result instanceof LTLCounterExample) {
+			item.setCounterExample(((LTLCounterExample)result).getTraceToLoopEntry());
+		} else {
+			item.setCounterExample(null);
+		}
+		
+		if (result instanceof LTLOk) {
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.ltl.result.succeeded.message"));
+		} else if (result instanceof LTLCounterExample) {
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.ltl.result.counterExampleFound.message"));
+		} else if (result instanceof LTLNotYetFinished || result instanceof CheckInterrupted) {
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage()));
+		} else {
+			throw new AssertionError("Unhandled LTL checking result type: " + result.getClass());
+		}
+	}
+	
+	private static void handleFormulaParseErrors(LTLFormulaItem item, List<ErrorItem> errorMarkers) {
+		item.setCounterExample(null);
+		String errorMessage = errorMarkers.stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
+		if(errorMessage.isEmpty()) {
+			errorMessage = "Parse Error in typed formula";
+		}
+		item.setResultItem(new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.couldNotParseFormula.header", "common.result.message", errorMessage));
+	}
+	
 	public void checkFormula(LTLFormulaItem item, Machine machine) {
 		if(!item.selected()) {
 			return;
@@ -121,13 +153,13 @@ public class LTLFormulaChecker {
 			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {
-				resultHandler.handleFormulaParseErrors(item, ((LTLError)result).getErrors());
+				handleFormulaParseErrors(item, ((LTLError)result).getErrors());
 			} else {
-				resultHandler.handleFormulaResult(item, result);
+				handleFormulaResult(item, result);
 			}
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
-			resultHandler.handleFormulaParseErrors(item, error.getErrors());
+			handleFormulaParseErrors(item, error.getErrors());
 		}
 	}
 	

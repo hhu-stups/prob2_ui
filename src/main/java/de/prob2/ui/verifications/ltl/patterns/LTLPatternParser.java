@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.ltl.parser.LtlParser.NumVarParamContext;
 import de.prob.ltl.parser.LtlParser.Pattern_defContext;
 import de.prob.ltl.parser.LtlParser.Pattern_def_paramContext;
@@ -16,31 +17,46 @@ import de.prob.ltl.parser.LtlParser.VarParamContext;
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
-import de.prob2.ui.verifications.ltl.LTLResultHandler;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 
 @Singleton
 public class LTLPatternParser {
-	private final LTLResultHandler resultHandler;
-		
 	@Inject
-	private LTLPatternParser(final LTLResultHandler resultHandler) {
-		this.resultHandler = resultHandler;
+	private LTLPatternParser() {}
+	
+	private static void handlePatternResult(LTLParseListener parseListener, LTLPatternItem item) {
+		CheckingResultItem resultItem;
+		// Empty Patterns do not have parse errors which is a little bit confusing
+		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
+			resultItem = new LTLCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully", "verifications.result.patternParsedSuccessfully");
+		} else {
+			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
+			if(item.getCode().isEmpty()) {
+				resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header", "verifications.ltl.pattern.empty");
+			} else {
+				final String msg = parseListener.getErrorMarkers().stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
+				resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header", "common.result.message", msg);
+			}
+		}
+		item.setResultItem(resultItem);
 	}
 	
 	public LTLPatternItem parsePattern(final String description, final String code, final Machine machine) {
 		final Pattern pattern = makePattern(description, code);
 		final LTLParseListener parseListener = checkDefinition(pattern, machine);
 		final LTLPatternItem item = new LTLPatternItem(pattern.getName(), pattern.getDescription(), pattern.getCode());
-		resultHandler.handlePatternResult(parseListener, item);
+		handlePatternResult(parseListener, item);
 		return item;
 	}
 	
 	public void addPattern(LTLPatternItem item, Machine machine) {
 		Pattern pattern = itemToPattern(item);
-		resultHandler.handlePatternResult(checkDefinition(pattern, machine), item);
+		handlePatternResult(checkDefinition(pattern, machine), item);
 		machine.getPatternManager().getPatterns().add(pattern);
 	}
 	
