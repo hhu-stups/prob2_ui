@@ -202,7 +202,7 @@ public final class I18n {
 				() -> {
 					try {
 						return translate(key, evaluateArguments(copiedArguments));
-					} catch (NullPointerException ignored) {
+					} catch (NullPointerException | IllegalArgumentException | ClassCastException ignored) {
 						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
 					}
 				},
@@ -227,7 +227,7 @@ public final class I18n {
 				() -> {
 					try {
 						return translate(key.getValue(), evaluateArguments(copiedArguments));
-					} catch (NullPointerException ignored) {
+					} catch (NullPointerException | IllegalArgumentException | ClassCastException ignored) {
 						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
 					}
 				},
@@ -276,7 +276,7 @@ public final class I18n {
 				() -> {
 					try {
 						return format(pattern, evaluateArguments(copiedArguments));
-					} catch (NullPointerException ignored) {
+					} catch (NullPointerException | IllegalArgumentException | ClassCastException ignored) {
 						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
 					}
 				},
@@ -301,7 +301,7 @@ public final class I18n {
 				() -> {
 					try {
 						return format(pattern.getValue(), evaluateArguments(copiedArguments));
-					} catch (NullPointerException ignored) {
+					} catch (NullPointerException | IllegalArgumentException | ClassCastException ignored) {
 						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
 					}
 				},
