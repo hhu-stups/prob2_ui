@@ -53,9 +53,9 @@ public final class SafeBindings {
 			public ObservableList<?> getDependencies() {
 				return copiedDependencies.length == 0 ?
 						       FXCollections.emptyObservableList()
-						       : dependencies.length == 1 ?
-								         FXCollections.singletonObservableList(dependencies[0])
-								         : FXCollections.unmodifiableObservableList(FXCollections.observableArrayList(dependencies));
+						       : copiedDependencies.length == 1 ?
+								         FXCollections.singletonObservableList(copiedDependencies[0])
+								         : FXCollections.unmodifiableObservableList(FXCollections.observableArrayList(copiedDependencies));
 			}
 		};
 	}
