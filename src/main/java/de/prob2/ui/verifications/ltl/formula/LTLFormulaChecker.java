@@ -19,7 +19,9 @@ import de.prob.check.LTLChecker;
 import de.prob.check.LTLError;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
+import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.parserbase.ProBParserBase;
 import de.prob2.ui.internal.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -66,29 +68,48 @@ public class LTLFormulaChecker {
 		});
 	}
 	
+	public static LTL parseFormula(final String code, final ProBParserBase languageSpecificParser, final PatternManager patternManager) {
+		LtlParser parser = new LtlParser(code);
+		parser.setPatternManager(patternManager);
+		parser.removeErrorListeners();
+		LTLParseListener parseListener = new LTLParseListener();
+		parser.addErrorListener(parseListener);
+		parser.addWarningListener(parseListener);
+		parser.parse();
+		
+		if (parseListener.getErrorMarkers().isEmpty()) {
+			final LTL formula = new LTL(code, languageSpecificParser, parser);
+			if (!parseListener.getErrorMarkers().isEmpty()) {
+				throw new ProBError(parseListener.getErrorMarkers());
+			}
+			return formula;
+		} else {
+			logger.warn("Failed to parse LTL formula using ANTLR-based parser! Retrying using SableCC-based parser without pattern support. Formula: {}", code);
+			try {
+				return new LTL(code, languageSpecificParser);
+			} catch (LtlParseException error) {
+				final List<ErrorItem> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
+				final List<ErrorItem.Location> locations = new ArrayList<>();
+				if (error.getTokenString() != null) {
+					locations.add(new ErrorItem.Location("", error.getTokenLine(), error.getTokenColumn(), error.getTokenLine(), error.getTokenColumn() + error.getTokenString().length()));
+				}
+				errorMarkers.add(new ErrorItem(error.getMessage(), ErrorItem.Type.ERROR, locations));
+				throw new ProBError(error.getMessage(), errorMarkers, error);
+			}
+		}
+	}
+	
 	public void checkFormula(LTLFormulaItem item, Machine machine) {
 		if(!item.selected()) {
 			return;
 		}
-		LtlParser parser = new LtlParser(item.getCode());
-		parser.setPatternManager(machine.getPatternManager());
-		final LTLParseListener parseListener = parseFormula(parser);
+		BParser bParser = new BParser();
+		if (currentTrace.get().getModel() instanceof ClassicalBModel) {
+			IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
+			bParser.setDefinitions(definitions);
+		}
 		try {
-			final LTL formula;
-			BParser bParser = new BParser();
-			if (currentTrace.get().getModel() instanceof ClassicalBModel) {
-				IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
-				bParser.setDefinitions(definitions);
-			}
-			if(!parseListener.getErrorMarkers().isEmpty()) {
-				formula = new LTL(item.getCode(), new ClassicalBParser(bParser));
-			} else {
-				formula = new LTL(item.getCode(), new ClassicalBParser(bParser), parser);
-				if(!parseListener.getErrorMarkers().isEmpty()) {
-					resultHandler.handleFormulaParseErrors(item, parseListener.getErrorMarkers());
-					return;
-				}
-			}
+			final LTL formula = LTLFormulaChecker.parseFormula(item.getCode(), new ClassicalBParser(bParser), machine.getPatternManager());
 			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {
@@ -98,18 +119,7 @@ public class LTLFormulaChecker {
 			}
 		} catch (ProBError error) {
 			logger.error("Could not parse LTL formula: ", error);
-			final List<ErrorItem> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
-			errorMarkers.addAll(error.getErrors());
-			resultHandler.handleFormulaParseErrors(item, errorMarkers);
-		} catch (LtlParseException error) {
-			logger.error("Could not parse LTL formula: ", error);
-			final List<ErrorItem> errorMarkers = new ArrayList<>(parseListener.getErrorMarkers());
-			final List<ErrorItem.Location> locations = new ArrayList<>();
-			if (error.getTokenString() != null) {
-				locations.add(new ErrorItem.Location("", error.getTokenLine(), error.getTokenColumn(), error.getTokenLine(), error.getTokenColumn() + error.getTokenString().length()));
-			}
-			errorMarkers.add(new ErrorItem(error.getMessage(), ErrorItem.Type.ERROR, locations));
-			resultHandler.handleFormulaParseErrors(item, errorMarkers);
+			resultHandler.handleFormulaParseErrors(item, error.getErrors());
 		}
 	}
 	
@@ -122,15 +132,6 @@ public class LTLFormulaChecker {
 			}
 			return item;
 		});
-	}
-	
-	private LTLParseListener parseFormula(LtlParser parser) {
-		LTLParseListener parseListener = new LTLParseListener();
-		parser.removeErrorListeners();
-		parser.addErrorListener(parseListener);
-		parser.addWarningListener(parseListener);
-		parser.parse();
-		return parseListener;
 	}
 	
 	public void cancel() {
