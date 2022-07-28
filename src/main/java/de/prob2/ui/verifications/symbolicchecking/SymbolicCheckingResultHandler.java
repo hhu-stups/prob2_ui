@@ -18,56 +18,51 @@ import de.prob.check.CBCDeadlockFound;
 import de.prob.check.CBCInvariantViolationFound;
 import de.prob.check.CheckError;
 import de.prob.check.CheckInterrupted;
+import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
-import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
 
 @Singleton
-public class SymbolicCheckingResultHandler extends AbstractVerificationsResultHandler implements ISymbolicResultHandler<SymbolicCheckingFormulaItem> {
-	
+public class SymbolicCheckingResultHandler extends AbstractResultHandler implements ISymbolicResultHandler<SymbolicCheckingFormulaItem> {
 	private final CurrentTrace currentTrace;
 	
 	@Inject
 	public SymbolicCheckingResultHandler(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
 		super(stageManager, i18n);
 		this.currentTrace = currentTrace;
-		this.type = CheckingType.SYMBOLIC_CHECKING;
-	}
-	
-	@Override
-	protected boolean isSuccess(final Object result) {
-		return result instanceof ModelCheckOk;
-	}
-	
-	@Override
-	protected boolean isCounterExample(final Object result) {
-		return result instanceof CBCInvariantViolationFound || result instanceof CBCDeadlockFound || result instanceof RefinementCheckCounterExample;
-	}
-	
-	@Override
-	protected boolean isInterrupted(final Object result) {
-		return result instanceof NotYetFinished || result instanceof CheckInterrupted || result instanceof CommandInterruptedException;
-	}
-	
-	@Override
-	protected boolean isParseError(final Object result) {
-		return !this.isInterrupted(result) && (result instanceof Throwable || result instanceof CheckError);
 	}
 	
 	@Override
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, Object result) {
-		item.setResultItem(handleFormulaResult(result));
+		CheckingResultItem res;
+		if (result instanceof ModelCheckOk) {
+			res = new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.result.succeeded.message", i18n.translate(CheckingType.SYMBOLIC_CHECKING.getKey()));
+		} else if (result instanceof CBCInvariantViolationFound || result instanceof CBCDeadlockFound || result instanceof RefinementCheckCounterExample) {
+			res = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.result.counterExampleFound.message", i18n.translate(CheckingType.SYMBOLIC_CHECKING.getKey()));
+		} else if (result instanceof CommandInterruptedException) {
+			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", ((CommandInterruptedException)result).getMessage());
+		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
+			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", ((IModelCheckingResult)result).getMessage());
+		} else if (result instanceof Throwable) {
+			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", ((Throwable)result).getMessage());
+		} else if (result instanceof CheckError) {
+			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", ((IModelCheckingResult)result).getMessage());
+		} else {
+			throw new AssertionError("Unhandled symbolic checking result type: " + result.getClass());
+		}
+		item.setResultItem(res);
 		
 		final List<Trace> counterExamples;
 		if (result instanceof CBCInvariantViolationFound) {

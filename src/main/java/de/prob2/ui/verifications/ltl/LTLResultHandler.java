@@ -13,9 +13,9 @@ import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.verifications.AbstractVerificationsResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.CheckingType;
@@ -23,42 +23,30 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
 @Singleton
-public class LTLResultHandler extends AbstractVerificationsResultHandler {
-	
+public class LTLResultHandler extends AbstractResultHandler {
 	@Inject
 	public LTLResultHandler(final StageManager stageManager, final I18n i18n) {
 		super(stageManager, i18n);
-		this.type = CheckingType.LTL;
-	}
-	
-	@Override
-	protected boolean isSuccess(final Object result) {
-		return result instanceof LTLOk;
-	}
-	
-	@Override
-	protected boolean isCounterExample(final Object result) {
-		return result instanceof LTLCounterExample;
-	}
-	
-	@Override
-	protected boolean isInterrupted(final Object result) {
-		return result instanceof LTLNotYetFinished || result instanceof CheckInterrupted;
-	}
-	
-	@Override
-	protected boolean isParseError(final Object result) {
-		return result instanceof Throwable || result instanceof LTLError;
 	}
 	
 	public void handleFormulaResult(LTLFormulaItem item, IModelCheckingResult result) {
-		assert !isParseError(result);
+		assert !(result instanceof LTLError);
+		
 		if (result instanceof LTLCounterExample) {
 			item.setCounterExample(((LTLCounterExample)result).getTraceToLoopEntry());
 		} else {
 			item.setCounterExample(null);
 		}
-		item.setResultItem(handleFormulaResult(result));
+		
+		if (result instanceof LTLOk) {
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.result.succeeded.message", i18n.translate(CheckingType.LTL.getKey())));
+		} else if (result instanceof LTLCounterExample) {
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.result.counterExampleFound.message", i18n.translate(CheckingType.LTL.getKey())));
+		} else if (result instanceof LTLNotYetFinished || result instanceof CheckInterrupted) {
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage()));
+		} else {
+			throw new AssertionError("Unhandled LTL checking result type: " + result.getClass());
+		}
 	}
 	
 	public void handleFormulaParseErrors(LTLFormulaItem item, List<ErrorItem> errorMarkers) {
