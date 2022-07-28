@@ -48,7 +48,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			showStateItem.setDisable(true);
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> injector.getInstance(SymbolicAnimationResultHandler.class).showResult(row.getItem()));
+			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
 
 
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -89,11 +89,14 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		}
 	}
 	
+	private final StageManager stageManager;
+	
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
 	                             final SymbolicAnimationChecker symbolicChecker, final Injector injector) {
 		super(i18n, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicAnimationItem.class);
+		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 	

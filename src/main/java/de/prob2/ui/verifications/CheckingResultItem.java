@@ -1,5 +1,11 @@
 package de.prob2.ui.verifications;
 
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
+
+import javafx.scene.control.Alert;
+import javafx.scene.layout.Region;
+
 public class CheckingResultItem {
 	
 	private Checked checked;
@@ -28,5 +34,15 @@ public class CheckingResultItem {
 	
 	public Object[] getMessageParams() {
 		return messageParams;
+	}
+	
+	public void showAlert(final StageManager stageManager, final I18n i18n) {
+		Alert alert = stageManager.makeAlert(
+			this.getChecked().equals(Checked.SUCCESS) ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR,
+			this.getHeaderBundleKey(),
+			this.getMessageBundleKey(), this.getMessageParams());
+		alert.setTitle(i18n.translate(this.getHeaderBundleKey()));
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+		alert.showAndWait();
 	}
 }

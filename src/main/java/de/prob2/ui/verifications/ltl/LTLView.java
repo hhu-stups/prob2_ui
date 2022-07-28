@@ -209,7 +209,7 @@ public class LTLView extends AnchorPane {
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
+			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
 
 			MenuItem checkItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
 			checkItem.setDisable(true);
@@ -241,7 +241,7 @@ public class LTLView extends AnchorPane {
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showParsingMessage"));
-			showMessage.setOnAction(e -> resultHandler.showResult(row.getItem()));
+			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {

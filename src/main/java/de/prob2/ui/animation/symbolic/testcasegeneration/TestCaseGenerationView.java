@@ -123,7 +123,7 @@ public class TestCaseGenerationView extends ScrollPane {
 			showStateItem.setDisable(true);
 
 			MenuItem showMessage = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showGenerationMessage"));
-			showMessage.setOnAction(e -> injector.getInstance(TestCaseGenerationResultHandler.class).showResult(row.getItem()));
+			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
 
 			MenuItem saveTraces = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.savePaths"));
 			saveTraces.setOnAction(e -> {

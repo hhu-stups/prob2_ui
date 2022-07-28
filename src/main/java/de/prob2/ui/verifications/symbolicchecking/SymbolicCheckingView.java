@@ -49,7 +49,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			showCounterExampleItem.setDisable(true);
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> injector.getInstance(SymbolicCheckingResultHandler.class).showResult(row.getItem()));
+			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				final InvalidationListener updateCounterExamplesListener = o -> showCounterExamples(to, showCounterExampleItem);
@@ -89,6 +89,8 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		}
 	}
 
+	private final StageManager stageManager;
+
 	@FXML
 	private TableColumn<SymbolicCheckingFormulaItem, String> idColumn;
 
@@ -97,6 +99,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
 	                            final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
 		super(i18n, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicCheckingFormulaItem.class);
+		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
 	
