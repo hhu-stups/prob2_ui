@@ -98,6 +98,15 @@ public class LTLFormulaChecker {
 		}
 	}
 	
+	public LTL parseFormula(final String code, final Machine machine) {
+		BParser bParser = new BParser();
+		if (currentTrace.get().getModel() instanceof ClassicalBModel) {
+			IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
+			bParser.setDefinitions(definitions);
+		}
+		return LTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser), machine.getPatternManager());
+	}
+	
 	public void checkFormula(LTLFormulaItem item, Machine machine) {
 		if(!item.selected()) {
 			return;
@@ -108,7 +117,7 @@ public class LTLFormulaChecker {
 			bParser.setDefinitions(definitions);
 		}
 		try {
-			final LTL formula = LTLFormulaChecker.parseFormula(item.getCode(), new ClassicalBParser(bParser), machine.getPatternManager());
+			final LTL formula = this.parseFormula(item.getCode(), machine);
 			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {

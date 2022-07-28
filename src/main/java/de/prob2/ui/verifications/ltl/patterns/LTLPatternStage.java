@@ -7,6 +7,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem;
 import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
@@ -40,6 +41,14 @@ public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
 			addItem(currentProject.getCurrentMachine(), item);
 		} else {
 			changeItem(handleItem.getItem(), item);
+		}
+	}
+	
+	private void showErrors(final LTLCheckingResultItem result) {
+		if (result.getChecked() == Checked.PARSE_ERROR) {
+			showErrors(result.getErrorMarkers());
+		} else {
+			this.close();
 		}
 	}
 	

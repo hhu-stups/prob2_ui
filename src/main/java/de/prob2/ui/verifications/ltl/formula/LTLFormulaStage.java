@@ -1,10 +1,10 @@
 package de.prob2.ui.verifications.ltl.formula;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
+import de.prob.exception.ProBError;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -17,7 +17,6 @@ import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 import de.prob2.ui.vomanager.Requirement;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -43,13 +42,6 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		stageManager.loadFXML(this, "ltlformula_stage.fxml");
 	}
 
-	@Override
-	@FXML
-	public void initialize() {
-		super.initialize();
-		applyButton.disableProperty().bind(formulaChecker.runningProperty());
-	}
-
 	public void setData(final LTLFormulaItem item) {
 		idTextField.setText(item.getId() == null ? "" : item.getId());
 		taCode.replaceText(item.getCode());
@@ -68,6 +60,18 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		}
 	}
 	
+	private void tryParseAndCheckFormula(final Machine machine, final LTLFormulaItem item) {
+		lastItem = item;
+		try {
+			formulaChecker.parseFormula(item.getCode(), machine);
+		} catch (ProBError e) {
+			this.showErrors(e.getErrors());
+			return;
+		}
+		this.close();
+		formulaChecker.checkFormula(item);
+	}
+	
 	private void addItem(Machine machine, LTLFormulaItem item) {
 		final LTLFormulaItem toCheck;
 		if(machine.getLTLFormulas().stream().noneMatch(item::settingsEqual)) {
@@ -77,11 +81,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 		} else {
 			toCheck = machine.getLTLFormulas().stream().filter(item::settingsEqual).collect(Collectors.toList()).get(0);
 		}
-		final CompletableFuture<LTLFormulaItem> future = formulaChecker.checkFormula(toCheck);
-		future.thenAccept(it ->
-			Platform.runLater(() -> this.showErrors(it.getResultItem()))
-		);
-		lastItem = toCheck;
+		this.tryParseAndCheckFormula(machine, toCheck);
 	}
 	
 	private void changeItem(LTLFormulaItem item, LTLFormulaItem result) {
@@ -90,11 +90,7 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 			machine.getLTLFormulas().set(machine.getLTLFormulas().indexOf(item), result);
 			currentProject.setSaved(false);
 			setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, result));
-			final CompletableFuture<LTLFormulaItem> future = formulaChecker.checkFormula(result);
-			future.thenAccept(it ->
-				Platform.runLater(() -> this.showErrors(it.getResultItem()))
-			);
-			lastItem = result;
+			this.tryParseAndCheckFormula(machine, result);
 		} else {
 			this.close();
 			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
@@ -103,9 +99,6 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	@FXML
 	private void cancel() {
-		if(formulaChecker.isRunning()) {
-			formulaChecker.cancel();
-		}
 		this.close();
 	}
 

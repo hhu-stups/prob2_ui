@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,8 +8,6 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
 import javafx.fxml.FXML;
@@ -70,27 +67,19 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 		this.handleItem = handleItem;
 	}
 	
-	public void showErrors(CheckingResultItem resultItem) {
-		//resultItem can be null when LTL model checking is interrupted
-		if(resultItem == null || resultItem.getChecked() != Checked.PARSE_ERROR) {
-			this.close();
-			return;
-		}
-		taErrors.setText(Arrays.stream(resultItem.getMessageParams())
-			.map(Object::toString)
+	public void showErrors(final List<ErrorItem> errors) {
+		taErrors.setText(errors.stream()
+			.map(ErrorItem::getMessage)
 			.collect(Collectors.joining("\n")));
-		markText(resultItem);
+		markText(errors);
 	}
 	
-	private void markText(CheckingResultItem resultItem) {
-		if(resultItem instanceof LTLCheckingResultItem) {
-			final List<ErrorItem> errorMarkers = ((LTLCheckingResultItem)resultItem).getErrorMarkers();
-			if (!errorMarkers.isEmpty() && !errorMarkers.get(0).getLocations().isEmpty()) {
-				// TODO Implement proper error highlighting like in BEditor
-				final ErrorItem.Location location = errorMarkers.get(0).getLocations().get(0);
-				final int line = location.getStartLine() - 1;
-				taCode.selectRange(line, location.getStartColumn(), line, location.getEndColumn());
-			}
+	private void markText(final List<ErrorItem> errorMarkers) {
+		if (!errorMarkers.isEmpty() && !errorMarkers.get(0).getLocations().isEmpty()) {
+			// TODO Implement proper error highlighting like in BEditor
+			final ErrorItem.Location location = errorMarkers.get(0).getLocations().get(0);
+			final int line = location.getStartLine() - 1;
+			taCode.selectRange(line, location.getStartColumn(), line, location.getEndColumn());
 		}
 	}
 
