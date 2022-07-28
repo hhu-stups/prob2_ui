@@ -13,19 +13,19 @@ import de.prob.check.LTLCounterExample;
 import de.prob.check.LTLError;
 import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
-import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
 @Singleton
-public class LTLResultHandler extends AbstractResultHandler {
+public class LTLResultHandler {
+	private final I18n i18n;
+	
 	@Inject
-	public LTLResultHandler(final StageManager stageManager, final I18n i18n) {
-		super(stageManager, i18n);
+	public LTLResultHandler(final I18n i18n) {
+		this.i18n = i18n;
 	}
 	
 	public void handleFormulaResult(LTLFormulaItem item, IModelCheckingResult result) {

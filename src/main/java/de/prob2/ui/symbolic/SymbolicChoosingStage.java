@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.statespace.LoadedMachine;
-import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;

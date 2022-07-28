@@ -13,25 +13,20 @@ import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import de.prob2.ui.internal.AbstractResultHandler;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 @Singleton
-public class TestCaseGenerationResultHandler extends AbstractResultHandler {
-	
+public class TestCaseGenerationResultHandler {
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final Injector injector;
 
 	
 	@Inject
-	public TestCaseGenerationResultHandler(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
-		super(stageManager, i18n);
+	public TestCaseGenerationResultHandler(final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;

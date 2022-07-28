@@ -12,7 +12,6 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;

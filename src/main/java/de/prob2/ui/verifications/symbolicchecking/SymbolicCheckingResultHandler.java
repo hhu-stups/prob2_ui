@@ -25,21 +25,17 @@ import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.AbstractResultHandler;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 @Singleton
-public class SymbolicCheckingResultHandler extends AbstractResultHandler implements ISymbolicResultHandler<SymbolicCheckingFormulaItem> {
+public class SymbolicCheckingResultHandler implements ISymbolicResultHandler<SymbolicCheckingFormulaItem> {
 	private final CurrentTrace currentTrace;
 	
 	@Inject
-	public SymbolicCheckingResultHandler(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
-		super(stageManager, i18n);
+	public SymbolicCheckingResultHandler(final CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
 	}
 	

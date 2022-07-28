@@ -17,7 +17,6 @@ import de.prob.json.JsonConversionException;
 import de.prob.json.JsonMetadata;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
