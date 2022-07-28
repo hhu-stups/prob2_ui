@@ -78,8 +78,4 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 			taCode.selectRange(line, location.getStartColumn(), line, location.getEndColumn());
 		}
 	}
-
-	public void setErrors(String text) {
-		taErrors.setText(text);
-	}
 }
