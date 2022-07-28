@@ -5,9 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.ltl.parser.pattern.Pattern;
-import de.prob.ltl.parser.pattern.PatternManager;
-import de.prob.ltl.parser.pattern.PatternUpdateListener;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
@@ -16,7 +13,7 @@ import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LTLParseListener extends BaseErrorListener implements PatternUpdateListener {
+public class LTLParseListener extends BaseErrorListener {
 
 	private final Logger logger = LoggerFactory.getLogger(LTLParseListener.class);
 
@@ -41,10 +38,4 @@ public class LTLParseListener extends BaseErrorListener implements PatternUpdate
 	public List<ErrorItem> getErrorMarkers() {
 		return errorMarkers;
 	}
-
-	@Override
-	public void patternUpdated(Pattern pattern, PatternManager patternManager) {
-		logger.trace("Pattern updated {}", pattern.getName());
-	}
-	
 }
