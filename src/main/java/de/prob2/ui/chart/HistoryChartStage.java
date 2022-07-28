@@ -21,7 +21,6 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.history.HistoryItem;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.csv.CSVWriter;
@@ -59,7 +58,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,18 +127,6 @@ public final class HistoryChartStage extends Stage {
 			super.cancelEdit();
 			this.textProperty().bind(this.code);
 			this.setGraphic(null);
-		}
-	}
-
-	private class HistoryItemStringConverter extends StringConverter<HistoryItem> {
-		@Override
-		public String toString(final HistoryItem object) {
-			return object == null ? i18n.translate("common.noModelLoaded") : object.toPrettyString();
-		}
-
-		@Override
-		public HistoryItem fromString(final String string) {
-			throw new UnsupportedOperationException("Cannot convert from string to HistoryItem");
 		}
 	}
 
