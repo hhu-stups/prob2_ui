@@ -333,7 +333,6 @@ public class LTLView extends AnchorPane {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
 		formulaStage.setData(oldItem);
 		formulaStage.showAndWait();
-		formulaStage.clear();
 		final LTLFormulaItem changedItem = formulaStage.getResult();
 		if (changedItem == null) {
 			// User cancelled/closed the window
@@ -354,7 +353,6 @@ public class LTLView extends AnchorPane {
 		patternStage.setData(item);
 		patternStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
 		patternStage.showAndWait();
-		patternStage.clear();
 	}
 	
 	@FXML

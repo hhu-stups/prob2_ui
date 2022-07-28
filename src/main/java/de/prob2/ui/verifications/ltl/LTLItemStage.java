@@ -59,10 +59,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 		builtinsStage.show();
 	}
 	
-	public void clear() {
-		this.taDescription.clear();
-	}
-	
 	public void setHandleItem(LTLHandleItem<T> handleItem) {
 		this.handleItem = handleItem;
 	}
