@@ -32,7 +32,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
-import de.prob2.ui.verifications.CheckingType;
 
 @Singleton
 public class SymbolicCheckingResultHandler extends AbstractResultHandler implements ISymbolicResultHandler<SymbolicCheckingFormulaItem> {
@@ -48,9 +47,9 @@ public class SymbolicCheckingResultHandler extends AbstractResultHandler impleme
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, Object result) {
 		CheckingResultItem res;
 		if (result instanceof ModelCheckOk) {
-			res = new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.result.succeeded.message", i18n.translate(CheckingType.SYMBOLIC_CHECKING.getKey()));
+			res = new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success");
 		} else if (result instanceof CBCInvariantViolationFound || result instanceof CBCDeadlockFound || result instanceof RefinementCheckCounterExample) {
-			res = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.result.counterExampleFound.message", i18n.translate(CheckingType.SYMBOLIC_CHECKING.getKey()));
+			res = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample");
 		} else if (result instanceof CommandInterruptedException) {
 			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", ((CommandInterruptedException)result).getMessage());
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {

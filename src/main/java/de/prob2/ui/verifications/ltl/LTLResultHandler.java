@@ -18,7 +18,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
-import de.prob2.ui.verifications.CheckingType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 
@@ -39,9 +38,9 @@ public class LTLResultHandler extends AbstractResultHandler {
 		}
 		
 		if (result instanceof LTLOk) {
-			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.result.succeeded.message", i18n.translate(CheckingType.LTL.getKey())));
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.ltl.result.succeeded.message"));
 		} else if (result instanceof LTLCounterExample) {
-			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.result.counterExampleFound.message", i18n.translate(CheckingType.LTL.getKey())));
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.ltl.result.counterExampleFound.message"));
 		} else if (result instanceof LTLNotYetFinished || result instanceof CheckInterrupted) {
 			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage()));
 		} else {
