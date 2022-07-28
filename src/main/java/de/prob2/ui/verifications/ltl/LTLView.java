@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.ltl;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +17,7 @@ import de.prob.json.JsonConversionException;
 import de.prob.json.JsonMetadata;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -289,8 +291,22 @@ public class LTLView extends AnchorPane {
 	@FXML
 	public void addFormula() {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.ADD, null));
 		formulaStage.showAndWait();
+		final LTLFormulaItem newItem = formulaStage.getResult();
+		if (newItem == null) {
+			// User cancelled/closed the window
+			return;
+		}
+		final Optional<LTLFormulaItem> existingItem = currentProject.getCurrentMachine().getLTLFormulas().stream().filter(newItem::settingsEqual).findAny();
+		final LTLFormulaItem toCheck;
+		if (existingItem.isPresent()) {
+			// Identical existing formula found - reuse it instead of creating another one
+			toCheck = existingItem.get();
+		} else {
+			currentProject.getCurrentMachine().getLTLFormulas().add(newItem);
+			toCheck = newItem;
+		}
+		checker.checkFormula(toCheck);
 	}
 	
 	private void removeFormula() {
@@ -313,12 +329,24 @@ public class LTLView extends AnchorPane {
 		patternParser.removePattern(item, machine);
 	}
 	
-	private void showCurrentItemDialog(LTLFormulaItem item) {
+	private void showCurrentItemDialog(LTLFormulaItem oldItem) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.setData(item);
-		formulaStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
+		formulaStage.setData(oldItem);
 		formulaStage.showAndWait();
 		formulaStage.clear();
+		final LTLFormulaItem changedItem = formulaStage.getResult();
+		if (changedItem == null) {
+			// User cancelled/closed the window
+			return;
+		}
+		final Machine machine = currentProject.getCurrentMachine();
+		if (machine.getLTLFormulas().stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
+			machine.getLTLFormulas().set(machine.getLTLFormulas().indexOf(oldItem), changedItem);
+			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
+			checker.checkFormula(changedItem);
+		} else {
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+		}
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem item) {
