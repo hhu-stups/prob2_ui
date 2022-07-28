@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 
 import org.fxmisc.richtext.CodeArea;
 
-public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
+public abstract class LTLItemStage extends Stage {
 	
 	@FXML
 	protected CodeArea taCode;
@@ -38,8 +38,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	
 	protected final LTLBuiltinsStage builtinsStage;
 	
-	protected LTLHandleItem<T> handleItem;
-	
 	public LTLItemStage(final CurrentProject currentProject, final FontSize fontSize, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
 		super();
 		this.currentProject = currentProject;
@@ -57,10 +55,6 @@ public abstract class LTLItemStage<T extends ILTLItem> extends Stage {
 	@FXML
 	protected void showBuiltins() {
 		builtinsStage.show();
-	}
-	
-	public void setHandleItem(LTLHandleItem<T> handleItem) {
-		this.handleItem = handleItem;
 	}
 	
 	public void showErrors(final List<ErrorItem> errors) {

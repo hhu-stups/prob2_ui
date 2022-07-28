@@ -13,7 +13,7 @@ import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
 import javafx.fxml.FXML;
 
-public class LTLPatternStage extends LTLItemStage<LTLPatternItem> {
+public class LTLPatternStage extends LTLItemStage {
 	private final LTLPatternParser patternParser;
 	
 	private LTLPatternItem result;

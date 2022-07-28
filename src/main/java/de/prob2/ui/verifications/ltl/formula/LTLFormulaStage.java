@@ -14,7 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
-public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
+public class LTLFormulaStage extends LTLItemStage {
 	@FXML
 	private TextField idTextField;
 

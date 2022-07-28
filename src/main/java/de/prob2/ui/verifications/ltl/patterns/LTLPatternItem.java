@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.ltl.ILTLItem;
 
 @JsonPropertyOrder({
 	"name",
@@ -13,7 +12,7 @@ import de.prob2.ui.verifications.ltl.ILTLItem;
 	"code",
 	"selected",
 })
-public class LTLPatternItem extends AbstractCheckableItem implements ILTLItem {
+public class LTLPatternItem extends AbstractCheckableItem {
 	// The pattern name is automatically parsed from the code.
 	// We store the parsed name in the project file
 	// so that we don't need to re-parse the pattern just to get its name
