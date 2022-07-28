@@ -30,7 +30,6 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
@@ -318,8 +317,19 @@ public class LTLView extends AnchorPane {
 	@FXML
 	public void addPattern() {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
-		patternStage.setHandleItem(new LTLHandleItem<>(LTLHandleItem.HandleType.ADD, null));
 		patternStage.showAndWait();
+		final LTLPatternItem newItem = patternStage.getResult();
+		if (newItem == null) {
+			// User cancelled/closed the window
+			return;
+		}
+		final Machine machine = currentProject.getCurrentMachine();
+		if (machine.getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
+			patternParser.addPattern(newItem, machine);
+			machine.getLTLPatterns().add(newItem);
+		} else {
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
+		}
 	}
 	
 	private void removePattern() {
@@ -348,11 +358,24 @@ public class LTLView extends AnchorPane {
 		}
 	}
 	
-	private void showCurrentItemDialog(LTLPatternItem item) {
+	private void showCurrentItemDialog(LTLPatternItem oldItem) {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
-		patternStage.setData(item);
-		patternStage.setHandleItem(new LTLHandleItem<>(HandleType.CHANGE, item));
+		patternStage.setData(oldItem);
 		patternStage.showAndWait();
+		final LTLPatternItem changedItem = patternStage.getResult();
+		if (changedItem == null) {
+			// User cancelled/closed the window
+			return;
+		}
+		final Machine machine = currentProject.getCurrentMachine();
+		patternParser.removePattern(oldItem, machine);
+		if(machine.getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(oldItem) && existing.settingsEqual(changedItem))) {
+			machine.getLTLPatterns().set(machine.getLTLPatterns().indexOf(oldItem), changedItem);
+			patternParser.addPattern(changedItem, machine);
+			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
+		} else {
+			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
+		}
 	}
 	
 	@FXML
