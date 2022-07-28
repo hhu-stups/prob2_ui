@@ -112,7 +112,6 @@ public class LTLView extends AnchorPane {
 	private final CurrentProject currentProject;
 	private final LTLFormulaChecker checker;
 	private final LTLPatternParser patternParser;
-	private final LTLResultHandler resultHandler;
 	private final FileChooserManager fileChooserManager;
 	private final CheckBox formulaSelectAll;
 	private final JacksonManager<LTLData> jacksonManager;
@@ -121,7 +120,6 @@ public class LTLView extends AnchorPane {
 	private LTLView(final StageManager stageManager, final I18n i18n, final Injector injector,
 					final CurrentTrace currentTrace, final VersionInfo versionInfo, final CurrentProject currentProject,
 					final LTLFormulaChecker checker, final LTLPatternParser patternParser,
-					final LTLResultHandler resultHandler,
 					final FileChooserManager fileChooserManager,
 					final ObjectMapper objectMapper,
 					final JacksonManager<LTLData> jacksonManager) {
@@ -133,7 +131,6 @@ public class LTLView extends AnchorPane {
 		this.currentProject = currentProject;
 		this.checker = checker;
 		this.patternParser = patternParser;
-		this.resultHandler = resultHandler;
 		this.fileChooserManager = fileChooserManager;
 		this.jacksonManager = jacksonManager;
 		jacksonManager.initContext(new JacksonManager.Context<LTLData>(objectMapper, LTLData.class, LTLData.FILE_TYPE, LTLData.CURRENT_FORMAT_VERSION) {
