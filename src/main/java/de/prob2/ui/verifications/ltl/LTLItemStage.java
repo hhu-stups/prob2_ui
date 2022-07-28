@@ -34,15 +34,12 @@ public abstract class LTLItemStage extends Stage {
 
 	protected final FontSize fontSize;
 	
-	protected final LTLResultHandler resultHandler;
-	
 	protected final LTLBuiltinsStage builtinsStage;
 	
-	public LTLItemStage(final CurrentProject currentProject, final FontSize fontSize, final LTLResultHandler resultHandler, final LTLBuiltinsStage builtinsStage) {
+	public LTLItemStage(final CurrentProject currentProject, final FontSize fontSize, final LTLBuiltinsStage builtinsStage) {
 		super();
 		this.currentProject = currentProject;
 		this.fontSize = fontSize;
-		this.resultHandler = resultHandler;
 		this.builtinsStage = builtinsStage;
 	}
 	
