@@ -74,7 +74,6 @@ public class LTLFormulaChecker {
 		parser.removeErrorListeners();
 		LTLParseListener parseListener = new LTLParseListener();
 		parser.addErrorListener(parseListener);
-		parser.addWarningListener(parseListener);
 		parser.parse();
 		
 		if (parseListener.getErrorMarkers().isEmpty()) {

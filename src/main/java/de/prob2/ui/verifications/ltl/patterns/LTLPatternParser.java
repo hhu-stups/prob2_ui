@@ -88,7 +88,6 @@ public class LTLPatternParser {
 		pattern.removeWarningListeners();
 		pattern.removeUpdateListeners();
 		pattern.addErrorListener(parseListener);
-		pattern.addWarningListener(parseListener);
 		pattern.addUpdateListener(parseListener);
 		return parseListener;
 	}
