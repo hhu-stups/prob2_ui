@@ -21,6 +21,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
@@ -307,10 +308,11 @@ public class SimulatorStage extends Stage {
 				Bindings.when(configurationPath.isNull())
 						.then(i18n.translateBinding("simulation.stage.title"))
 						.otherwise(i18n.translateBinding("simulation.currentSimulation",
-								Bindings.createStringBinding(() -> currentProject.getLocation() != null && configurationPath.get() != null ?
-										                                   currentProject.getLocation().relativize(configurationPath.get()).toString() :
-										                                   "",
-										currentProject, configurationPath)))
+								SafeBindings.createSafeStringBinding(
+										() -> currentProject.getLocation().relativize(configurationPath.get()).toString(),
+										currentProject, configurationPath
+								)
+						))
 		);
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));

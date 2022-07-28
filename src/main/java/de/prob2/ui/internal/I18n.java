@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -463,6 +464,8 @@ public final class I18n {
 				return evaluateArgument(((ObservableValue<?>) arg).getValue());
 			} else if (arg instanceof Supplier) {
 				return evaluateArgument(((Supplier<?>) arg).get());
+			} else if (arg instanceof Callable) {
+				return evaluateArgument(((Callable<?>) arg).call());
 			}
 		} catch (Exception e) {
 			LOGGER.trace("Could not evaluate format arg {}", arg, e);

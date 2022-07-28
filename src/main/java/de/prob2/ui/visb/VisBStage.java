@@ -34,6 +34,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -189,10 +190,10 @@ public class VisBStage extends Stage {
 						.then(i18n.translateBinding("visb.title"))
 						.otherwise(i18n.translateBinding(
 								"visb.currentVisualisation",
-								Bindings.createStringBinding(() -> currentProject.getLocation() != null && visBController.getVisBPath() != null ?
-										                                   currentProject.getLocation().relativize(visBController.getVisBPath()).toString() :
-										                                   "",
-										currentProject, visBController.visBPathProperty())
+								SafeBindings.createSafeStringBinding(
+										() -> currentProject.getLocation().relativize(visBController.getVisBPath()).toString(),
+										currentProject, visBController.visBPathProperty()
+								)
 						))
 		);
 
