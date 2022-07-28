@@ -30,10 +30,10 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
@@ -76,6 +76,8 @@ public class TestCaseGenerationView extends ScrollPane {
 
 	@FXML
 	private Button cancelButton;
+
+	private final StageManager stageManager;
 
 	private final I18n i18n;
 
@@ -171,6 +173,7 @@ public class TestCaseGenerationView extends ScrollPane {
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                              final CurrentProject currentProject, final TestCaseGenerationItemHandler itemHandler,
 	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
+		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
@@ -261,7 +264,10 @@ public class TestCaseGenerationView extends ScrollPane {
 				itemHandler.generateTestCases(newItem);
 			}
 		} else {
-			injector.getInstance(TestCaseGenerationResultHandler.class).showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
+			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
+				"verifications.abstractResultHandler.alerts.alreadyExists.header",
+				"verifications.abstractResultHandler.alerts.alreadyExists.content",
+				i18n.translate(AbstractResultHandler.ItemType.CONFIGURATION.getKey())).show();
 		}
 	}
 

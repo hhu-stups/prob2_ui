@@ -122,7 +122,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@Override
 	protected void openItem(SymbolicAnimationItem item) {
 		final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
-		choosingStage.changeFormula(item, injector.getInstance(SymbolicAnimationResultHandler.class));
+		choosingStage.changeFormula(item);
 	}
 		
 }

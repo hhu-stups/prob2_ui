@@ -126,7 +126,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	@Override
 	protected void openItem(SymbolicCheckingFormulaItem item) {
 		final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
-		choosingStage.changeFormula(item, injector.getInstance(SymbolicCheckingResultHandler.class));
+		choosingStage.changeFormula(item);
 	}
 		
 }

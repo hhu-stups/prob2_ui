@@ -8,12 +8,14 @@ import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
@@ -46,6 +48,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	@FXML
 	private ChoiceBox<ET> cbChoice;
 	
+	private final StageManager stageManager;
+	
 	private final I18n i18n;
 	
 	protected final CurrentProject currentProject;
@@ -58,7 +62,8 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 
 	private T lastItem;
 	
-	public SymbolicChoosingStage(final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
+	public SymbolicChoosingStage(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
+		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -172,10 +177,10 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 
 	protected abstract T extractItem();
 
-	public void changeFormula(T item, AbstractResultHandler resultHandler) {
+	public void changeFormula(T item) {
 		btAdd.setText(i18n.translate("symbolic.formulaInput.buttons.change"));
 		btCheck.setText(i18n.translate("symbolic.formulaInput.buttons.changeAndCheck"));
-		setChangeListeners(item, resultHandler);
+		setChangeListeners(item);
 		cbChoice.getSelectionModel().select(item.getType());
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
@@ -193,13 +198,16 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 		this.show();
 	}
 	
-	protected void setChangeListeners(T item, AbstractResultHandler resultHandler) {
+	protected void setChangeListeners(T item) {
 		btAdd.setOnAction(e -> {
 			final T newItem = this.extractItem();
 			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
 			if (existingItem.isPresent()) {
 				lastItem = null;
-				resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.CONFIGURATION);
+				stageManager.makeAlert(Alert.AlertType.INFORMATION, 
+					"verifications.abstractResultHandler.alerts.alreadyExists.header",
+					"verifications.abstractResultHandler.alerts.alreadyExists.content",
+					i18n.translate(AbstractResultHandler.ItemType.CONFIGURATION.getKey())).show();
 			} else {
 				lastItem = newItem;
 				this.close();

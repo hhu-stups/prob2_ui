@@ -328,7 +328,10 @@ public class LTLView extends AnchorPane {
 			patternParser.addPattern(newItem, machine);
 			machine.getLTLPatterns().add(newItem);
 		} else {
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
+			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
+				"verifications.abstractResultHandler.alerts.alreadyExists.header",
+				"verifications.abstractResultHandler.alerts.alreadyExists.content",
+				i18n.translate(AbstractResultHandler.ItemType.PATTERN.getKey())).show();
 		}
 	}
 	
@@ -354,7 +357,10 @@ public class LTLView extends AnchorPane {
 			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
 			checker.checkFormula(changedItem);
 		} else {
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.FORMULA);
+			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
+				"verifications.abstractResultHandler.alerts.alreadyExists.header",
+				"verifications.abstractResultHandler.alerts.alreadyExists.content",
+				i18n.translate(AbstractResultHandler.ItemType.FORMULA.getKey())).show();
 		}
 	}
 	
@@ -374,7 +380,10 @@ public class LTLView extends AnchorPane {
 			patternParser.addPattern(changedItem, machine);
 			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
 		} else {
-			resultHandler.showAlreadyExists(AbstractResultHandler.ItemType.PATTERN);
+			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
+				"verifications.abstractResultHandler.alerts.alreadyExists.header",
+				"verifications.abstractResultHandler.alerts.alreadyExists.content",
+				i18n.translate(AbstractResultHandler.ItemType.PATTERN.getKey())).show();
 		}
 	}
 	

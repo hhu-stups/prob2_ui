@@ -46,12 +46,4 @@ public abstract class AbstractResultHandler {
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
 	}
-	
-	
-	public void showAlreadyExists(AbstractResultHandler.ItemType itemType) {
-		stageManager.makeAlert(AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content", i18n.translate(itemType.getKey()))
-				.show();
-	}
 }

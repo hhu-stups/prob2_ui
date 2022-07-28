@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 import javax.inject.Inject;
 
-import de.prob2.ui.internal.AbstractResultHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -25,7 +24,7 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace
 	) {
-		super(i18n, currentProject, currentTrace, symbolicCheckingFormulaHandler);
+		super(stageManager, i18n, currentProject, currentTrace, symbolicCheckingFormulaHandler);
 		stageManager.loadFXML(this, "symbolic_checking_choice.fxml");
 	}
 	
@@ -60,8 +59,8 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 	}
 	
 	@Override
-	public void changeFormula(final SymbolicCheckingFormulaItem item, final AbstractResultHandler resultHandler) {
+	public void changeFormula(final SymbolicCheckingFormulaItem item) {
 		this.idTextField.setText(item.getId() == null ? "" : item.getId());
-		super.changeFormula(item, resultHandler);
+		super.changeFormula(item);
 	}
 }
