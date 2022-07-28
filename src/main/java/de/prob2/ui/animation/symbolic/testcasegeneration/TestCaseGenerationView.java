@@ -266,8 +266,7 @@ public class TestCaseGenerationView extends ScrollPane {
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content",
-				i18n.translate(AbstractResultHandler.ItemType.CONFIGURATION.getKey())).show();
+				"verifications.abstractResultHandler.alerts.alreadyExists.content.configuration").show();
 		}
 	}
 

@@ -8,24 +8,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
 
 public abstract class AbstractResultHandler {
-	
-	public enum ItemType {
-		CONFIGURATION("verifications.abstractResultHandler.itemType.configuration"),
-		FORMULA("verifications.abstractResultHandler.itemType.formula"),
-		PATTERN("verifications.abstractResultHandler.itemType.pattern"),
-		;
-		
-		private final String key;
-		
-		ItemType(final String key) {
-			this.key = key;
-		}
-		
-		public String getKey() {
-			return this.key;
-		}
-	}
-	
 	protected final StageManager stageManager;
 	protected final I18n i18n;
 	

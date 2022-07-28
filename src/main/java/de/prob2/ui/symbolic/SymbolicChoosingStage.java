@@ -206,8 +206,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 				lastItem = null;
 				stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 					"verifications.abstractResultHandler.alerts.alreadyExists.header",
-					"verifications.abstractResultHandler.alerts.alreadyExists.content",
-					i18n.translate(AbstractResultHandler.ItemType.CONFIGURATION.getKey())).show();
+					"verifications.abstractResultHandler.alerts.alreadyExists.content.configuration").show();
 			} else {
 				lastItem = newItem;
 				this.close();

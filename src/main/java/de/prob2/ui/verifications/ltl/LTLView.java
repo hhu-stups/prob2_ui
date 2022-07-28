@@ -330,8 +330,7 @@ public class LTLView extends AnchorPane {
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content",
-				i18n.translate(AbstractResultHandler.ItemType.PATTERN.getKey())).show();
+				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
 		}
 	}
 	
@@ -359,8 +358,7 @@ public class LTLView extends AnchorPane {
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content",
-				i18n.translate(AbstractResultHandler.ItemType.FORMULA.getKey())).show();
+				"verifications.abstractResultHandler.alerts.alreadyExists.content.formula").show();
 		}
 	}
 	
@@ -382,8 +380,7 @@ public class LTLView extends AnchorPane {
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content",
-				i18n.translate(AbstractResultHandler.ItemType.PATTERN.getKey())).show();
+				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
 		}
 	}
 	
