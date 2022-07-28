@@ -199,13 +199,7 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(key, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> {
-					try {
-						return translate(key, evaluateArguments(copiedArguments));
-					} catch (NullPointerException | IllegalArgumentException | ClassCastException ignored) {
-						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
-					}
-				},
+				() -> translate(key, copiedArguments),
 				dependencies
 		);
 	}
@@ -224,13 +218,7 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(key, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> {
-					try {
-						return translate(key.getValue(), evaluateArguments(copiedArguments));
-					} catch (NullPointerException | IllegalArgumentException | ClassCastException ignored) {
-						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
-					}
-				},
+				() -> translate((String) evaluateArgument(key), copiedArguments),
 				dependencies
 		);
 	}
@@ -273,13 +261,7 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(pattern, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> {
-					try {
-						return format(pattern, evaluateArguments(copiedArguments));
-					} catch (NullPointerException | IllegalArgumentException | ClassCastException ignored) {
-						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
-					}
-				},
+				() -> format(pattern, copiedArguments),
 				dependencies
 		);
 	}
@@ -298,13 +280,7 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(pattern, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> {
-					try {
-						return format(pattern.getValue(), evaluateArguments(copiedArguments));
-					} catch (NullPointerException | IllegalArgumentException | ClassCastException ignored) {
-						return ""; // return a dummy value, because Bindings.when always evaluates both expressions
-					}
-				},
+				() -> format((String) evaluateArgument(pattern), copiedArguments),
 				dependencies
 		);
 	}
