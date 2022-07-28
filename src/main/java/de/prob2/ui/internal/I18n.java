@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.google.inject.Inject;
@@ -475,12 +476,21 @@ public final class I18n {
 	private Object evaluateArgument(Object arg) {
 		if (arg == null) {
 			return "null";
-		} else if (arg instanceof Translatable) {
-			return translate((Translatable) arg);
-		} else if (arg instanceof Formattable) {
-			return format((Formattable) arg);
-		} else if (arg instanceof ObservableValue) {
-			return evaluateArgument(((ObservableValue<?>) arg).getValue());
+		}
+
+		try {
+			if (arg instanceof Translatable) {
+				return translate((Translatable) arg);
+			} else if (arg instanceof Formattable) {
+				return format((Formattable) arg);
+			} else if (arg instanceof ObservableValue) {
+				return evaluateArgument(((ObservableValue<?>) arg).getValue());
+			} else if (arg instanceof Supplier) {
+				return evaluateArgument(((Supplier<?>) arg).get());
+			}
+		} catch (Exception e) {
+			LOGGER.trace("Could not evaluate format arg {}", arg, e);
+			return "<error>";
 		}
 
 		return arg;
