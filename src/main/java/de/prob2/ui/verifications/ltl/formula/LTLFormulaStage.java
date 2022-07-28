@@ -15,7 +15,6 @@ import de.prob2.ui.verifications.ltl.LTLHandleItem.HandleType;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.LTLResultHandler;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
-import de.prob2.ui.vomanager.Requirement;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -104,10 +103,5 @@ public class LTLFormulaStage extends LTLItemStage<LTLFormulaItem> {
 
 	public LTLFormulaItem getLastItem() {
 		return lastItem;
-	}
-
-	public void linkRequirement(Requirement requirement) {
-		taDescription.setText(requirement.getText());
-		taDescription.setDisable(true);
 	}
 }
