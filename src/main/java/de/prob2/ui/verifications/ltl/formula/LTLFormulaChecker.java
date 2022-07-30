@@ -27,7 +27,7 @@ import de.prob.ltl.parser.LtlParser;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.parserbase.ProBParserBase;
-import de.prob2.ui.internal.CliTaskExecutor;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;

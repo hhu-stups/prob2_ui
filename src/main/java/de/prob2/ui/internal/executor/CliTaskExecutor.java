@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.internal.executor;
 
 import java.util.HashSet;
 import java.util.concurrent.Callable;
@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import de.prob2.ui.internal.StopActions;
 
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.SetProperty;
@@ -34,22 +36,22 @@ import javafx.collections.FXCollections;
 @Singleton
 public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 	private final SetProperty<Future<?>> currentTasks;
-	
+
 	@Inject
 	private CliTaskExecutor(final StopActions stopActions) {
 		super(
-			1, 1, 0, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<>(),
-			r -> new Thread(r, "probcli command executor")
+				1, 1, 0, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(),
+				r -> new Thread(r, "probcli command executor")
 		);
-		
+
 		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks",
-			FXCollections.synchronizedObservableSet(FXCollections.observableSet(new HashSet<>()))
+				FXCollections.synchronizedObservableSet(FXCollections.observableSet(new HashSet<>()))
 		);
-		
+
 		stopActions.add(this::shutdownNow);
 	}
-	
+
 	@Override
 	protected <T> CompletableFutureTask<T> newTaskFor(final Callable<T> callable) {
 		final CompletableFutureTask<T> task = super.newTaskFor(callable);
@@ -57,17 +59,17 @@ public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 		this.currentTasks.add(task);
 		return task;
 	}
-	
+
 	/**
 	 * Return whether any tasks are currently running on this executor,
 	 * as an observable/bindable boolean expression.
-	 * 
+	 *
 	 * @return expression indicating whether any tasks are currently running
 	 */
 	public BooleanExpression runningProperty() {
 		return this.currentTasks.emptyProperty().not();
 	}
-	
+
 	/**
 	 * Return whether any tasks are currently running on this executor.
 	 *
@@ -76,7 +78,7 @@ public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 	public boolean isRunning() {
 		return this.runningProperty().get();
 	}
-	
+
 	/**
 	 * Cancel and interrupt all tasks currently running (or queued to run) on this executor.
 	 */

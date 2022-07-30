@@ -13,7 +13,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.BackgroundUpdater;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;

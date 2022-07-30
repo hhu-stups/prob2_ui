@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.internal.executor;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -11,10 +11,10 @@ import java.util.concurrent.Future;
 public interface CompletableExecutorService extends ExecutorService {
 	@Override
 	<T> CompletableFuture<T> submit(Callable<T> task);
-	
+
 	@Override
 	<T> CompletableFuture<T> submit(Runnable task, T result);
-	
+
 	@Override
 	CompletableFuture<?> submit(Runnable task);
 }

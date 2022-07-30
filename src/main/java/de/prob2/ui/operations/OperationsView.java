@@ -25,7 +25,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.BackgroundUpdater;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;

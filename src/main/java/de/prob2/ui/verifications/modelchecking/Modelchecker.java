@@ -16,7 +16,7 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.internal.CliTaskExecutor;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 

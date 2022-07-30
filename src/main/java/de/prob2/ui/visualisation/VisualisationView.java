@@ -17,7 +17,7 @@ import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.statespace.State;
-import de.prob2.ui.internal.BackgroundUpdater;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;

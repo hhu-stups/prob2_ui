@@ -12,7 +12,7 @@ import com.google.inject.Singleton;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.CliTaskExecutor;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
