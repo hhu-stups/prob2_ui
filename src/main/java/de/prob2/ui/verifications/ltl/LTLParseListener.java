@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class LTLParseListener extends BaseErrorListener {
 
-	private final Logger logger = LoggerFactory.getLogger(LTLParseListener.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(LTLParseListener.class);
 
 	private List<ErrorItem> errorMarkers = new LinkedList<>();
 
@@ -32,7 +32,7 @@ public class LTLParseListener extends BaseErrorListener {
 			length = token.getStopIndex() - token.getStartIndex() + 1;
 		}
 		errorMarkers.add(new ErrorItem(msg, ErrorItem.Type.ERROR, Collections.singletonList(locationFromTokenPos(line, charPositionInLine, length))));
-		logger.trace("Parse error {}", offendingSymbol);
+		LOGGER.trace("Parse error {}", offendingSymbol);
 	}
 
 	public List<ErrorItem> getErrorMarkers() {

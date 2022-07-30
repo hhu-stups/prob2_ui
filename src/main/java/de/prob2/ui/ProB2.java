@@ -11,8 +11,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.qos.logback.classic.util.ContextInitializer;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -63,17 +61,20 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.util.ContextInitializer;
+
 public class ProB2 extends Application {
+
 	public static final String BUG_REPORT_URL = "https://github.com/hhu-stups/prob-issues/issues/new/choose";
 
-	private Logger logger;
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
 
 	private RuntimeOptions runtimeOptions;
 	private Injector injector;
 	private I18n i18n;
 	private StopActions stopActions;
 
-	private boolean isJavaVersionOk(final String javaVersion) {
+	private static boolean isJavaVersionOk(final String javaVersion) {
 		final Matcher javaVersionMatcher = Pattern.compile("(?:1\\.)?(\\d+).*_(\\d+).*").matcher(javaVersion);
 		if (javaVersionMatcher.matches()) {
 			final int majorVersion;
@@ -82,15 +83,25 @@ public class ProB2 extends Application {
 				majorVersion = Integer.parseInt(javaVersionMatcher.group(1));
 				updateNumber = Integer.parseInt(javaVersionMatcher.group(2));
 			} catch (NumberFormatException e) {
-				logger.warn("Failed to parse Java version; skipping version check", e);
+				LOGGER.warn("Failed to parse Java version; skipping version check", e);
 				return true;
 			}
-			
+
 			return majorVersion > 8 || (majorVersion == 8 && updateNumber >= 60);
 		} else {
-			logger.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
+			LOGGER.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
 			return true;
 		}
+	}
+
+	private static IllegalStateException die(final String message, final int exitCode) {
+		if (message != null) {
+			System.err.println(message);
+		}
+
+		Platform.exit();
+		System.exit(exitCode);
+		return new IllegalStateException(message);
 	}
 
 	private void migrateOldConfigFileIfNeeded(final Injector basicConfigInjector) throws IOException {
@@ -117,7 +128,7 @@ public class ProB2 extends Application {
 				}
 			}
 			if (foundPreviousConfigFilePath != null) {
-				logger.info("Found old config file at {} - migrating to {}", foundPreviousConfigFilePath, currentConfigFilePath);
+				LOGGER.info("Found old config file at {} - migrating to {}", foundPreviousConfigFilePath, currentConfigFilePath);
 				Files.copy(foundPreviousConfigFilePath, currentConfigFilePath);
 			}
 		}
@@ -128,15 +139,14 @@ public class ProB2 extends Application {
 		if (!System.getProperties().containsKey(ContextInitializer.CONFIG_FILE_PROPERTY)) {
 			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "de/prob2/ui/logback_config.xml");
 		}
-		logger = LoggerFactory.getLogger(ProB2.class);
-		
+
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
 		if (runtimeOptions.isLoadConfig()) {
 			final Injector basicConfigInjector = Guice.createInjector(new BasicConfigModule());
 			try {
 				this.migrateOldConfigFileIfNeeded(basicConfigInjector);
 			} catch (IOException e) {
-				logger.error("Failed to migrate old config - ignoring", e);
+				LOGGER.error("Failed to migrate old config - ignoring", e);
 			}
 			final BasicConfig basicConfig = basicConfigInjector.getInstance(BasicConfig.class);
 			final Locale localeOverride = basicConfig.getLocaleOverride();
@@ -150,11 +160,11 @@ public class ProB2 extends Application {
 		if (runtimeOptions.getMachineFile() != null) {
 			injector.getInstance(ProjectManager.class).openAutomaticProjectFromMachine(Paths.get(runtimeOptions.getMachineFile()));
 		}
-		
+
 		if (runtimeOptions.getProject() != null) {
 			injector.getInstance(ProjectManager.class).openProject(Paths.get(runtimeOptions.getProject()));
 		}
-		
+
 		if (runtimeOptions.getMachine() != null) {
 			final Machine foundMachine = currentProject.get().getMachine(runtimeOptions.getMachine());
 
@@ -167,11 +177,11 @@ public class ProB2 extends Application {
 
 			if (foundMachine == null) {
 				stageManager.makeAlert(Alert.AlertType.ERROR, "common.alerts.noMachine.header",
-						"common.alerts.noMachine.content", runtimeOptions.getMachine(), currentProject.getName())
+								"common.alerts.noMachine.content", runtimeOptions.getMachine(), currentProject.getName())
 						.show();
 			} else if (foundPreference == null) {
 				stageManager.makeAlert(Alert.AlertType.ERROR, "common.alerts.noPreference.header",
-						"common.alerts.noPreference.content", runtimeOptions.getPreference(), currentProject.getName())
+								"common.alerts.noPreference.content", runtimeOptions.getPreference(), currentProject.getName())
 						.show();
 			} else {
 				currentProject.startAnimation(foundMachine, foundPreference);
@@ -181,7 +191,7 @@ public class ProB2 extends Application {
 
 	private void showStartupError(final Throwable t, final Stage primaryStage) {
 		primaryStage.setTitle("Error during ProB 2.0 startup");
-		
+
 		final String errorText = "An error occurred while starting ProB 2.0. Please copy the error information below and create a bug report at: " + BUG_REPORT_URL + "\n\n" + ExceptionAlert.getExceptionStackTrace(t);
 		final TextArea errorTextArea = new TextArea(errorText);
 		errorTextArea.setEditable(false);
@@ -219,7 +229,7 @@ public class ProB2 extends Application {
 			try {
 				mainScene = this.startInBackground(primaryStage);
 			} catch (RuntimeException | Error t) {
-				logger.error("Uncaught exception during UI startup", t);
+				LOGGER.error("Uncaught exception during UI startup", t);
 				Platform.runLater(() -> this.showStartupError(t, primaryStage));
 				return;
 			}
@@ -233,13 +243,13 @@ public class ProB2 extends Application {
 		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
 		StageManager stageManager = injector.getInstance(StageManager.class);
 		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
-			logger.error("Uncaught exception on thread {}", thread, exc);
+			LOGGER.error("Uncaught exception on thread {}", thread, exc);
 			Platform.runLater(() -> {
 				try {
 					injector.getInstance(RealTimeSimulator.class).stop();
 					stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
 				} catch (Throwable t) {
-					logger.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
+					LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
 				}
 			});
 		});
@@ -248,10 +258,10 @@ public class ProB2 extends Application {
 		if (!isJavaVersionOk(javaVersion)) {
 			Platform.runLater(() -> {
 				stageManager.makeAlert(
-					Alert.AlertType.ERROR,
-					"internal.javaVersionTooOld.header",
-					"internal.javaVersionTooOld.content",
-					javaVersion
+						Alert.AlertType.ERROR,
+						"internal.javaVersionTooOld.header",
+						"internal.javaVersionTooOld.content",
+						javaVersion
 				).showAndWait();
 				throw die("Java version too old: " + javaVersion, 1);
 			});
@@ -324,17 +334,8 @@ public class ProB2 extends Application {
 		stage.setTitle(title.toString());
 	}
 
-	private static IllegalStateException die(final String message, final int exitCode) {
-		if (message != null) {
-			System.err.println(message);
-		}
-		Platform.exit();
-		System.exit(exitCode);
-		return new IllegalStateException(message);
-	}
-
 	private RuntimeOptions parseRuntimeOptions(final String[] args) {
-		logger.info("Parsing arguments: {}", (Object) args);
+		LOGGER.info("Parsing arguments: {}", (Object) args);
 
 		final Options options = new Options();
 
@@ -351,10 +352,10 @@ public class ProB2 extends Application {
 		try {
 			cl = clParser.parse(options, args);
 		} catch (ParseException e) {
-			logger.error("Failed to parse command line", e);
+			LOGGER.error("Failed to parse command line", e);
 			throw die(e.getLocalizedMessage(), 2);
 		}
-		logger.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
+		LOGGER.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
 
 		if (cl.hasOption("help")) {
 			final HelpFormatter hf = new HelpFormatter();
@@ -379,14 +380,14 @@ public class ProB2 extends Application {
 		}
 
 		final RuntimeOptions runtimeOpts = new RuntimeOptions(
-			cl.getOptionValue("machine-file"),
-			cl.getOptionValue("project"),
-			cl.getOptionValue("machine"),
-			cl.getOptionValue("preference"),
-			!cl.hasOption("no-load-config"), 
-			!cl.hasOption("no-save-config")
+				cl.getOptionValue("machine-file"),
+				cl.getOptionValue("project"),
+				cl.getOptionValue("machine"),
+				cl.getOptionValue("preference"),
+				!cl.hasOption("no-load-config"),
+				!cl.hasOption("no-save-config")
 		);
-		logger.info("Created runtime options: {}", runtimeOpts);
+		LOGGER.info("Created runtime options: {}", runtimeOpts);
 
 		return runtimeOpts;
 	}

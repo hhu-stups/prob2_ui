@@ -1,7 +1,5 @@
 package de.prob2.ui.consoles.b;
 
-import java.util.Locale;
-
 import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -24,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BInterpreter implements Executable {
-	private static final Logger logger = LoggerFactory.getLogger(BInterpreter.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BInterpreter.class);
 	
 	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;
@@ -83,14 +81,14 @@ public class BInterpreter implements Executable {
 		try {
 			formula = trace.getModel().parseFormula(source, FormulaExpand.EXPAND);
 		} catch (EvaluationException e) {
-			logger.info("Failed to parse B console user input", e);
+			LOGGER.info("Failed to parse B console user input", e);
 			return new ConsoleExecResult("", formatParseException(source, e), ConsoleExecResultType.ERROR);
 		}
 		final AbstractEvalResult res;
 		try {
 			res = trace.evalCurrent(formula);
 		} catch (EvaluationException | ProBError e) {
-			logger.info("B evaluation failed", e);
+			LOGGER.info("B evaluation failed", e);
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}
 		return new ConsoleExecResult("", res.toString(), res instanceof EvalResult ? ConsoleExecResultType.PASSED : ConsoleExecResultType.ERROR);

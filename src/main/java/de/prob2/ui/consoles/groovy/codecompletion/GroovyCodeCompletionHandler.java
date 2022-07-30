@@ -17,16 +17,14 @@ import de.prob2.ui.consoles.groovy.objects.GroovyClassHandler;
 import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 
-
 import javafx.collections.ObservableList;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GroovyCodeCompletionHandler {
 	
-	private static final Logger logger = LoggerFactory.getLogger(GroovyCodeCompletionHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GroovyCodeCompletionHandler.class);
 	
 	private final List<GroovyAbstractItem> currentSuggestions;
 	
@@ -80,7 +78,7 @@ public class GroovyCodeCompletionHandler {
 				showSuggestions(clazz, GroovyMethodOption.STATIC);
 				break;
 			} catch (ClassNotFoundException e) {
-				logger.trace("{} is not a class name (this is not an error)", e.getMessage());
+				LOGGER.trace("{} is not a class name (this is not an error)", e.getMessage());
 			}
 			// Special case for the last iteration
 			if (i < methods.length) {

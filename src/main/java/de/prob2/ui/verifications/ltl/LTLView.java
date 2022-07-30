@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 @Singleton
 public class LTLView extends AnchorPane {
-	private static final Logger logger = LoggerFactory.getLogger(LTLView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LTLView.class);
 	
 	private static final String LTL_FILE_EXTENSION = "prob2ltl";
 	private static final String OLD_LTL_FILE_EXTENSION = "ltl";
@@ -434,7 +434,7 @@ public class LTLView extends AnchorPane {
 		try {
 			data = this.jacksonManager.readFromFile(ltlFile);
 		} catch (IOException e) {
-			logger.error("Could not load LTL file: ", e);
+			LOGGER.error("Could not load LTL file: ", e);
 			return;
 		}
 		data.getFormulas().stream()

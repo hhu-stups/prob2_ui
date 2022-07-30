@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class Config {
-	private static final Logger logger = LoggerFactory.getLogger(Config.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
 	private final Path configFilePath;
 	private final JacksonManager<ConfigData> jacksonManager;
@@ -56,7 +56,7 @@ public final class Config {
 		try {
 			Files.createDirectories(this.configFilePath.getParent());
 		} catch (IOException e) {
-			logger.warn("Failed to create the parent directory for the config file {}", this.configFilePath, e);
+			LOGGER.warn("Failed to create the parent directory for the config file {}", this.configFilePath, e);
 		}
 
 		this.load();
@@ -74,20 +74,20 @@ public final class Config {
 		if (this.runtimeOptions.isLoadConfig()) {
 			try {
 				configData = this.jacksonManager.readFromFile(this.configFilePath);
-				logger.info("Config successfully loaded from {}", this.configFilePath);
+				LOGGER.info("Config successfully loaded from {}", this.configFilePath);
 				if (configData == null) {
 					// Config file is empty, use default config.
 					configData = new ConfigData();
 				}
 			} catch (FileNotFoundException | NoSuchFileException exc) {
-				logger.info("Config file not found, loading default settings");
+				LOGGER.info("Config file not found, loading default settings");
 				configData = new ConfigData();
 			} catch (IOException exc) {
-				logger.warn("Failed to load config file", exc);
+				LOGGER.warn("Failed to load config file", exc);
 				throw new UncheckedIOException("Failed to load config file: " + exc, exc);
 			}
 		} else {
-			logger.info("Config loading disabled via runtime options, loading default config");
+			LOGGER.info("Config loading disabled via runtime options, loading default config");
 			configData = new ConfigData();
 		}
 		
@@ -100,7 +100,7 @@ public final class Config {
 
 	public void save() {
 		if (!this.runtimeOptions.isSaveConfig()) {
-			logger.info("Config saving disabled via runtime options, ignoring config save request");
+			LOGGER.info("Config saving disabled via runtime options, ignoring config save request");
 			return;
 		}
 		
@@ -116,10 +116,10 @@ public final class Config {
 		try {
 			this.jacksonManager.writeToFile(this.configFilePath, configData);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
-			logger.warn("Failed to create config file", exc);
+			LOGGER.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
-			logger.warn("Failed to save config file", exc);
+			LOGGER.warn("Failed to save config file", exc);
 		}
-		logger.info("Config successfully saved to {}", this.configFilePath);
+		LOGGER.info("Config successfully saved to {}", this.configFilePath);
 	}
 }

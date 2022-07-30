@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class LTLFormulaChecker {
 	
-	private static final Logger logger = LoggerFactory.getLogger(LTLFormulaChecker.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LTLFormulaChecker.class);
 	
 	private final CliTaskExecutor cliExecutor;
 	
@@ -86,7 +86,7 @@ public class LTLFormulaChecker {
 			}
 			return formula;
 		} else {
-			logger.warn("Failed to parse LTL formula using ANTLR-based parser! Retrying using SableCC-based parser without pattern support. Formula: {}", code);
+			LOGGER.warn("Failed to parse LTL formula using ANTLR-based parser! Retrying using SableCC-based parser without pattern support. Formula: {}", code);
 			try {
 				return new LTL(code, languageSpecificParser);
 			} catch (LtlParseException error) {
@@ -158,7 +158,7 @@ public class LTLFormulaChecker {
 				handleFormulaResult(item, result);
 			}
 		} catch (ProBError error) {
-			logger.error("Could not parse LTL formula: ", error);
+			LOGGER.error("Could not parse LTL formula: ", error);
 			handleFormulaParseErrors(item, error.getErrors());
 		}
 	}
