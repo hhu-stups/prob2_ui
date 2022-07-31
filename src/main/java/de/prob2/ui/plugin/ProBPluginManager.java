@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -44,14 +43,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import org.pf4j.DefaultPluginManager;
-import org.pf4j.PluginDependency;
-import org.pf4j.PluginDescriptor;
-import org.pf4j.PluginException;
-import org.pf4j.PluginFactory;
-import org.pf4j.PluginState;
-import org.pf4j.PluginWrapper;
-import org.pf4j.RuntimeMode;
+import org.pf4j.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +143,7 @@ public class ProBPluginManager {
 						pluginManager.startPlugin(pluginId);
 					}
 				}
-			} catch (IOException | PluginException | RuntimeException e) {
+			} catch (IOException | RuntimeException e) {
 				LOGGER.warn("Tried to copy and load/start the plugin {}.", pluginFileName, e);
 				showWarningAlert("plugin.alerts.couldNotLoadPlugin.content", pluginFileName);
 				//if an error occurred, delete the plugin file
@@ -257,9 +249,6 @@ public class ProBPluginManager {
 			PluginWrapper wrapper = pluginManager.getPlugin(destination);
 			if (wrapper != null) {
 				//if there is a corresponding plugin, ask the user if he wants to overwrite it
-				List<ButtonType> buttons = new ArrayList<>();
-				buttons.add(ButtonType.YES);
-				buttons.add(ButtonType.NO);
 				Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, Arrays.asList(ButtonType.YES, ButtonType.NO), "",
 						"plugin.alerts.confirmOverwriteExistingFile.content", destination.getFileName(),
 						((ProBPlugin) wrapper.getPlugin()).getName(), wrapper.getDescriptor().getVersion());
@@ -293,10 +282,10 @@ public class ProBPluginManager {
 		return false;
 	}
 
-	private boolean checkLoadedPlugin(String loadedPluginId, Path pluginFileName) throws PluginException {
+	private boolean checkLoadedPlugin(String loadedPluginId, Path pluginFileName) {
 		if (loadedPluginId == null) {
 			// error while loading the plugin
-			throw new PluginException("Could not load the plugin '{}'.", pluginFileName);
+			throw new PluginRuntimeException("Could not load the plugin '{}'.", pluginFileName);
 		} else {
 			PluginWrapper pluginWrapper = pluginManager.getPlugin(loadedPluginId);
 			if (pluginWrapper.getPlugin() instanceof InvalidPlugin) {
@@ -463,13 +452,13 @@ public class ProBPluginManager {
 		}
 
 		@Override
-		protected Path createPluginsRoot() {
+		protected List<Path> createPluginsRoot() {
 			try {
 				createPluginDirectory();
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
-			return getPluginDirectory();
+			return Collections.singletonList(getPluginDirectory());
 		}
 
 		@Override
@@ -519,11 +508,11 @@ public class ProBPluginManager {
 
 		@Override
 		//also checked required version
-		protected void validatePluginDescriptor(PluginDescriptor descriptor) throws PluginException {
+		protected void validatePluginDescriptor(PluginDescriptor descriptor) {
 			//TODO: show what is wrong in an alert
 			super.validatePluginDescriptor(descriptor);
 			if (descriptor.getRequires() == null || descriptor.getRequires().isEmpty() || descriptor.getRequires().equals("*")) {
-				throw new PluginException("Plugin-Requires has to be specified!");
+				throw new PluginRuntimeException("Plugin-Requires has to be specified!");
 			}
 			if (!descriptor.getDependencies().isEmpty()) {
 				StringBuilder builder = new StringBuilder("Plugin-Dependencies are not supported but the plugin has the following dependencies:");
@@ -531,7 +520,7 @@ public class ProBPluginManager {
 					builder.append(System.getProperty("line.separator"));
 					builder.append(dependency.getPluginId());
 				}
-				throw new PluginException(builder.toString());
+				throw new PluginRuntimeException(builder.toString());
 			}
 		}
 

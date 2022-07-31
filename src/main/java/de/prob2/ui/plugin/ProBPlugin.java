@@ -3,7 +3,6 @@ package de.prob2.ui.plugin;
 import com.google.inject.Injector;
 
 import org.pf4j.Plugin;
-import org.pf4j.PluginException;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
@@ -60,7 +59,7 @@ public abstract class ProBPlugin extends Plugin {
 	public abstract void stopPlugin() throws Exception;
 
 	@Override
-	public final void start() throws PluginException {
+	public final void start() {
 		if (!started) {
 			try {
 				startPlugin();
@@ -74,7 +73,7 @@ public abstract class ProBPlugin extends Plugin {
 	}
 
 	@Override
-	public final void stop() throws PluginException {
+	public final void stop() {
 		if (started) {
 			try {
 				stopPlugin();
