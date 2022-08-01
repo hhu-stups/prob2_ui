@@ -26,6 +26,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.Checked;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -189,7 +190,7 @@ public class TraceTestView extends Stage {
 
 	@FXML
 	private void initialize() {
-		this.titleProperty().bind(i18n.translateBinding("animation.tracereplay.test.stage.title", this.replayTrace));
+		this.titleProperty().bind(i18n.translateBinding("animation.tracereplay.test.stage.title", Bindings.select(this.replayTrace, "name")));
 
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<PersistentTransition> row = new TableRow<>();
@@ -230,7 +231,6 @@ public class TraceTestView extends Stage {
 	}
 
 	public void loadReplayTrace(ReplayTrace replayTrace) {
-		this.setTitle(i18n.translate("animation.tracereplay.test.stage.title", replayTrace.getName()));
 		this.postconditions.clear();
 		this.replayTrace.set(replayTrace);
 		traceTableView.getItems().clear();
