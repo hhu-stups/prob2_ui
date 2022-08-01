@@ -1,5 +1,6 @@
 # Declare files that will always have LF line endings on checkout.
 *.sh text eol=lf
+gradlew text eol=lf
 
 # Declare files that will always have CRLF line endings on checkout.
 *.{bat,[bB][aA][tT]} text eol=crlf
