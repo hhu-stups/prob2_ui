@@ -62,13 +62,9 @@ public class TraceChecker {
 		replayTraces.forEach(trace -> check(trace, false));
 	}
 
-	public void check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		check(replayTrace, setCurrentAnimation, () -> {});
-	}
-
-	public void check(ReplayTrace replayTrace, final boolean setCurrentAnimation, IAfterTraceReplay afterTraceReplay) {
+	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
 		if(!replayTrace.selected()) {
-			return;
+			return CompletableFuture.completedFuture(replayTrace);
 		}
 
 		replayTrace.reset();
@@ -97,7 +93,7 @@ public class TraceChecker {
 			storePostconditionResults(replayTrace, postconditionResults);
 			return replayTrace;
 		});
-		future.whenComplete((r, e) -> {
+		return future.whenComplete((r, e) -> {
 			Platform.runLater(() -> replayTrace.setProgress(-1));
 			showTestError(r.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
 			if (e == null) {
@@ -108,7 +104,6 @@ public class TraceChecker {
 					} else {
 						currentTrace.set(r.getAnimatedReplayedTrace());
 					}
-					afterTraceReplay.apply();
 				}
 			} else {
 				Platform.runLater(() -> replayTrace.setChecked(Checked.PARSE_ERROR));

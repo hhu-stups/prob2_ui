@@ -197,11 +197,10 @@ public class TraceTestView extends Stage {
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					this.saveTrace();
-					injector.getInstance(TraceChecker.class).check(replayTrace.get(), true, () -> {
-						CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
+					injector.getInstance(TraceChecker.class).check(replayTrace.get(), true).thenAccept(r -> {
 						int index = row.getIndex();
-						if(index < replayTrace.get().getLoadedTrace().getTransitionList().size()) {
-							currentTrace.set(currentTrace.get().gotoPosition(index));
+						if(index < r.getLoadedTrace().getTransitionList().size()) {
+							injector.getInstance(CurrentTrace.class).set(r.getAnimatedReplayedTrace().gotoPosition(index));
 						}
 						traceTableView.refresh();
 					});
