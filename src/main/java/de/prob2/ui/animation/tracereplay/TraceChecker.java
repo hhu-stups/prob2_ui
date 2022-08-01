@@ -29,30 +29,27 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 
 @FXMLInjected
 @Singleton
 public class TraceChecker {
-
+	private final CliTaskExecutor cliExecutor;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final I18n i18n;
-	private final ListProperty<Thread> currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads",
-			FXCollections.observableArrayList());
 
 	@Inject
-	private TraceChecker(final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager,
+	private TraceChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager,
 						 final DisablePropertyController disablePropertyController, final I18n i18n) {
+		this.cliExecutor = cliExecutor;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
@@ -81,7 +78,7 @@ public class TraceChecker {
 		// (this is special-cased in TraceViewHandler).
 		replayTrace.setProgress(-2);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		Thread replayThread = new Thread(() -> {
+		cliExecutor.submit(() -> {
 			try {
 				final TraceJsonFile traceJsonFile;
 				try {
@@ -120,11 +117,8 @@ public class TraceChecker {
 				}
 			} finally {
 				Platform.runLater(() -> replayTrace.setProgress(-1));
-				currentJobThreads.remove(Thread.currentThread());
 			}
-		}, "Trace Replay Thread");
-		currentJobThreads.add(replayThread);
-		replayThread.start();
+		});
 	}
 
 	public void showTestError(List<PersistentTransition> transitions, List<List<TraceReplay.PostconditionResult>> postconditionResults) {
@@ -236,12 +230,11 @@ public class TraceChecker {
 	}
 
 	public void cancelReplay() {
-		currentJobThreads.forEach(Thread::interrupt);
-		currentJobThreads.clear();
+		cliExecutor.interruptAll();
 	}
 
 	public BooleanExpression runningProperty() {
-		return currentJobThreads.emptyProperty().not();
+		return cliExecutor.runningProperty();
 	}
 
 	public boolean isRunning() {
