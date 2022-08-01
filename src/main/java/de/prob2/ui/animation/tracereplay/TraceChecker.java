@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -77,46 +78,41 @@ public class TraceChecker {
 		// (this is special-cased in TraceViewHandler).
 		replayTrace.setProgress(-2);
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		cliExecutor.submit(() -> {
-			try {
-				final TraceJsonFile traceJsonFile;
-				try {
-					traceJsonFile = replayTrace.load();
-				} catch (IOException e) {
-					Platform.runLater(() -> {
-						replayTrace.setChecked(Checked.PARSE_ERROR);
-						injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace.getAbsoluteLocation(), e);
-					});
-					return;
-				}
-
-				ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
-				if (replayed.getErrors().isEmpty() && replayed.getReplayStatus() == TraceReplayStatus.PARTIAL) {
-					// FIXME Should this case be reported as an error on the Prolog side?
-					final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
-					replayed = replayed.withErrors(Collections.singletonList(error));
-				}
-				final ReplayedTrace replayedFinal = replayed;
-				replayTrace.setReplayedTrace(replayed);
-				// TODO Display replay information for each transition if the replay was not perfect/complete
-				Platform.runLater(() -> replayTrace.setChecked(replayedFinal.getErrors().isEmpty() ? Checked.SUCCESS : Checked.FAIL));
-				Trace trace = replayed.getTrace(stateSpace);
-				replayTrace.setAnimatedReplayedTrace(trace);
-				final PersistentTrace persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
-				final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
-				storePostconditionResults(replayTrace, postconditionResults);
-				showTestError(traceJsonFile.getTransitionList(), postconditionResults);
+		final CompletableFuture<ReplayTrace> future = cliExecutor.submit(() -> {
+			final TraceJsonFile traceJsonFile = replayTrace.load();
+			ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
+			if (replayed.getErrors().isEmpty() && replayed.getReplayStatus() == TraceReplayStatus.PARTIAL) {
+				// FIXME Should this case be reported as an error on the Prolog side?
+				final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
+				replayed = replayed.withErrors(Collections.singletonList(error));
+			}
+			final ReplayedTrace replayedFinal = replayed;
+			replayTrace.setReplayedTrace(replayed);
+			// TODO Display replay information for each transition if the replay was not perfect/complete
+			Platform.runLater(() -> replayTrace.setChecked(replayedFinal.getErrors().isEmpty() ? Checked.SUCCESS : Checked.FAIL));
+			Trace trace = replayed.getTrace(stateSpace);
+			replayTrace.setAnimatedReplayedTrace(trace);
+			final PersistentTrace persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
+			final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
+			storePostconditionResults(replayTrace, postconditionResults);
+			showTestError(traceJsonFile.getTransitionList(), postconditionResults);
+			return replayTrace;
+		});
+		future.whenComplete((r, e) -> {
+			Platform.runLater(() -> replayTrace.setProgress(-1));
+			if (e == null) {
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
-					if (!replayed.getErrors().isEmpty()) {
+					if (!r.getReplayedTrace().getErrors().isEmpty()) {
 						showTraceReplayCompleteFailed(replayTrace);
 					} else {
-						currentTrace.set(trace);
+						currentTrace.set(r.getAnimatedReplayedTrace());
 					}
 					afterTraceReplay.apply();
 				}
-			} finally {
-				Platform.runLater(() -> replayTrace.setProgress(-1));
+			} else {
+				Platform.runLater(() -> replayTrace.setChecked(Checked.PARSE_ERROR));
+				injector.getInstance(TraceFileHandler.class).showLoadError(r.getAbsoluteLocation(), e);
 			}
 		});
 	}
