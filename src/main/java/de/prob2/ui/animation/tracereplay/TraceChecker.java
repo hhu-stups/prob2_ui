@@ -95,11 +95,11 @@ public class TraceChecker {
 			final PersistentTrace persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
 			final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
 			storePostconditionResults(replayTrace, postconditionResults);
-			showTestError(traceJsonFile.getTransitionList(), replayTrace.getPostconditionStatus());
 			return replayTrace;
 		});
 		future.whenComplete((r, e) -> {
 			Platform.runLater(() -> replayTrace.setProgress(-1));
+			showTestError(r.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
 			if (e == null) {
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
