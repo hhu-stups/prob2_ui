@@ -247,7 +247,7 @@ public class TraceTestView extends Stage {
 		traceTableView.getItems().addAll(transitions);
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
-			postconditions.add(transition.getPostconditions());
+			postconditions.add(new ArrayList<>(transition.getPostconditions()));
 			descriptions.add(transition.getDescription());
 			VBox box = new VBox();
 			Node btAddTest = buildAddButton(box, i);
