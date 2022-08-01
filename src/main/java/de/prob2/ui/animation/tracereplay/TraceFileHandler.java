@@ -52,7 +52,7 @@ public class TraceFileHandler extends ProBFileHandler {
 		this.traceManager = traceManager;
 	}
 
-	public void showLoadError(Path path, Exception e) {
+	public void showLoadError(Path path, Throwable e) {
 		LOGGER.warn("Failed to load trace file", e);
 		final String headerBundleKey;
 		final String contentBundleKey;
