@@ -95,7 +95,7 @@ public class TraceChecker {
 			final PersistentTrace persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
 			final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
 			storePostconditionResults(replayTrace, postconditionResults);
-			showTestError(traceJsonFile.getTransitionList(), postconditionResults);
+			showTestError(traceJsonFile.getTransitionList(), replayTrace.getPostconditionStatus());
 			return replayTrace;
 		});
 		future.whenComplete((r, e) -> {
@@ -117,21 +117,22 @@ public class TraceChecker {
 		});
 	}
 
-	public void showTestError(List<PersistentTransition> transitions, List<List<TraceReplay.PostconditionResult>> postconditionResults) {
+	public void showTestError(List<PersistentTransition> transitions, List<List<Checked>> postconditionResults) {
 		assert transitions.size() >= postconditionResults.size();
 		StringBuilder sb = new StringBuilder();
 		boolean failed = false;
 		for(int i = 0; i < postconditionResults.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
-			List<TraceReplay.PostconditionResult> postconditionTransitionResults = postconditionResults.get(i);
+			List<Checked> postconditionTransitionResults = postconditionResults.get(i);
 			for(int j = 0; j < postconditionTransitionResults.size(); j++) {
-				TraceReplay.PostconditionResult result = postconditionTransitionResults.get(j);
-				if(result != TraceReplay.PostconditionResult.SUCCESS) {
+				Checked result = postconditionTransitionResults.get(j);
+				if(result != Checked.SUCCESS) {
+					assert result == Checked.FAIL || result == Checked.PARSE_ERROR;
 					Postcondition postcondition = transition.getPostconditions().get(j);
 					switch (postcondition.getKind()) {
 						case PREDICATE:
 							sb.append(i18n.translate("animation.trace.replay.test.alert.content.predicate", transition.getOperationName(), ((PostconditionPredicate) postcondition).getPredicate()));
-							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
+							if(result == Checked.PARSE_ERROR) {
 								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
 							}
 							sb.append("\n");
@@ -143,7 +144,7 @@ public class TraceChecker {
 							} else {
 								sb.append(i18n.translate("animation.trace.replay.test.alert.content.enabledWithPredicate", transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation(), predicate));
 							}
-							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
+							if(result == Checked.PARSE_ERROR) {
 								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
 							}
 							sb.append("\n");
@@ -156,7 +157,7 @@ public class TraceChecker {
 							} else {
 								sb.append(i18n.translate("animation.trace.replay.test.alert.content.disabledWithPredicate", transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation(), predicate));
 							}
-							if(result == TraceReplay.PostconditionResult.PARSE_ERROR) {
+							if(result == Checked.PARSE_ERROR) {
 								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
 							}
 							sb.append("\n");

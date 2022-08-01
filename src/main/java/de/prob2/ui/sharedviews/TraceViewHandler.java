@@ -7,7 +7,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.check.tracereplay.TraceReplay;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
@@ -148,13 +147,7 @@ public class TraceViewHandler {
 				alert.initOwner(scene.getWindow());
 				alert.setErrorMessage();
 			}
-			traceChecker.showTestError(replayTrace.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus()
-					.stream()
-					.map(statuses -> statuses.stream()
-							.map(status -> status == Checked.SUCCESS ? TraceReplay.PostconditionResult.SUCCESS :
-									       status == Checked.FAIL ? TraceReplay.PostconditionResult.FAIL : TraceReplay.PostconditionResult.PARSE_ERROR)
-							.collect(Collectors.toList()))
-					.collect(Collectors.toList()));
+			traceChecker.showTestError(replayTrace.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
 		});
 		openInExternalEditorItem.setOnAction(event ->
 			injector.getInstance(ExternalEditor.class).open(row.getItem().getAbsoluteLocation())
