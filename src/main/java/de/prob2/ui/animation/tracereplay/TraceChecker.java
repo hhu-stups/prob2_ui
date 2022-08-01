@@ -70,8 +70,7 @@ public class TraceChecker {
 			return;
 		}
 
-		replayTrace.setChecked(Checked.NOT_CHECKED);
-		replayTrace.setReplayedTrace(null);
+		replayTrace.reset();
 		// ReplayTraceFileCommand doesn't support progress updates yet,
 		// so set an indeterminate status for now.
 		// We cannot use -1, because it is already used to say that no replay is currently running
@@ -102,6 +101,7 @@ public class TraceChecker {
 				// TODO Display replay information for each transition if the replay was not perfect/complete
 				Platform.runLater(() -> replayTrace.setChecked(replayedFinal.getErrors().isEmpty() ? Checked.SUCCESS : Checked.FAIL));
 				Trace trace = replayed.getTrace(stateSpace);
+				replayTrace.setAnimatedReplayedTrace(trace);
 				final PersistentTrace persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
 				final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
 				storePostconditionResults(replayTrace, postconditionResults);
@@ -109,7 +109,7 @@ public class TraceChecker {
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
 					if (!replayed.getErrors().isEmpty()) {
-						showTraceReplayCompleteFailed(trace, replayTrace);
+						showTraceReplayCompleteFailed(replayTrace);
 					} else {
 						currentTrace.set(trace);
 					}
@@ -211,7 +211,8 @@ public class TraceChecker {
 		}
 	}
 
-	private void showTraceReplayCompleteFailed(Trace trace, final ReplayTrace replayTrace) {
+	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
+		final Trace trace = replayTrace.getAnimatedReplayedTrace();
 		Platform.runLater(() -> {
 			// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
 			final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()

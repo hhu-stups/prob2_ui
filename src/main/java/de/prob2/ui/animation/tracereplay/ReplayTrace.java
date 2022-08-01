@@ -18,6 +18,7 @@ import com.google.common.io.MoreFiles;
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
@@ -45,6 +46,8 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 	private final ListProperty<List<Checked>> postconditionStatus;
 	@JsonIgnore
 	private final ObjectProperty<ReplayedTrace> replayedTrace;
+	@JsonIgnore
+	private final ObjectProperty<Trace> animatedReplayedTrace;
 	private final Path location; // relative to project location
 	@JsonIgnore
 	private Path absoluteLocation;
@@ -59,6 +62,7 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
 		this.postconditionStatus = new SimpleListProperty<>(this, "postcondition", FXCollections.observableArrayList());
 		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
+		this.animatedReplayedTrace = new SimpleObjectProperty<>(this, "animatedReplayedTrace", null);
 		this.location = location;
 		this.absoluteLocation = absoluteLocation;
 		this.traceManager = traceManager;
@@ -111,6 +115,7 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 	public void reset() {
 		this.setChecked(Checked.NOT_CHECKED);
 		this.setReplayedTrace(null);
+		this.setAnimatedReplayedTrace(null);
 		this.setPostconditionStatus(Collections.emptyList());
 	}
 
@@ -161,6 +166,18 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 	
 	public void setReplayedTrace(final ReplayedTrace replayedTrace) {
 		this.replayedTraceProperty().set(replayedTrace);
+	}
+	
+	public ObjectProperty<Trace> animatedReplayedTraceProperty() {
+		return this.animatedReplayedTrace;
+	}
+	
+	public Trace getAnimatedReplayedTrace() {
+		return this.animatedReplayedTraceProperty().get();
+	}
+	
+	public void setAnimatedReplayedTrace(final Trace animatedReplayedTrace) {
+		this.animatedReplayedTraceProperty().set(animatedReplayedTrace);
 	}
 	
 	public Path getLocation() {
