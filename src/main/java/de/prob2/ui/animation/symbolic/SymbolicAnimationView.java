@@ -46,10 +46,17 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			});
 
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> removeFormula());
+			removeItem.setOnAction(e -> {
+				Machine machine = currentProject.getCurrentMachine();
+				SymbolicAnimationItem item = tvFormula.getSelectionModel().getSelectedItem();
+				machine.getSymbolicAnimationFormulas().remove(item);
+			});
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e->openItem(row.getItem()));
+			changeItem.setOnAction(e -> {
+				final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
+				choosingStage.changeFormula(row.getItem());
+			});
 			
 
 			Menu showStateItem = new Menu(i18n.translate("animation.symbolic.view.contextMenu.showFoundPaths"));
@@ -119,20 +126,8 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		return machine.symbolicAnimationFormulasProperty();
 	}
 	
-	@Override
-	protected void removeFormula(Machine machine, SymbolicAnimationItem item) {
-		machine.getSymbolicAnimationFormulas().remove(item);
-	}
-	
 	@FXML
 	public void addFormula() {
 		injector.getInstance(SymbolicAnimationChoosingStage.class).showAndWait();
 	}
-
-	@Override
-	protected void openItem(SymbolicAnimationItem item) {
-		final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
-		choosingStage.changeFormula(item);
-	}
-		
 }

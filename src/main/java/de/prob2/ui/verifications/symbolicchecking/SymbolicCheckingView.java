@@ -48,10 +48,17 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			});
 			
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> removeFormula());
+			removeItem.setOnAction(e -> {
+				Machine machine = currentProject.getCurrentMachine();
+				SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+				machine.getSymbolicCheckingFormulas().remove(item);
+			});
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e->openItem(row.getItem()));
+			changeItem.setOnAction(e -> {
+				final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
+				choosingStage.changeFormula(row.getItem());
+			});
 			
 			Menu showCounterExampleItem = new Menu(i18n.translate("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
@@ -123,20 +130,8 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		return machine.symbolicCheckingFormulasProperty();
 	}
 	
-	@Override
-	protected void removeFormula(Machine machine, SymbolicCheckingFormulaItem item) {
-		machine.getSymbolicCheckingFormulas().remove(item);
-	}
-	
 	@FXML
 	public void addFormula() {
 		injector.getInstance(SymbolicCheckingChoosingStage.class).showAndWait();
 	}
-	
-	@Override
-	protected void openItem(SymbolicCheckingFormulaItem item) {
-		final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
-		choosingStage.changeFormula(item);
-	}
-		
 }

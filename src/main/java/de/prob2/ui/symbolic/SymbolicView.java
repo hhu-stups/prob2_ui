@@ -100,8 +100,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	
 	protected abstract ListProperty<T> formulasProperty(Machine machine);
 	
-	protected abstract void removeFormula(Machine machine, T item);
-	
 	protected void setBindings() {
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
@@ -138,17 +136,8 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 		formulaHandler.handleMachine(machine);
 	}
 	
-	protected void removeFormula() {
-		Machine machine = currentProject.getCurrentMachine();
-		T item = tvFormula.getSelectionModel().getSelectedItem();
-		removeFormula(machine, item);
-	}
-	
-	
 	@FXML
 	public void cancel() {
 		executor.interrupt();
 	}
-
-	protected abstract void openItem(T item);
 }
