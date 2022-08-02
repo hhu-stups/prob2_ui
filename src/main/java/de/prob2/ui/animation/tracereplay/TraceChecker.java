@@ -67,6 +67,24 @@ public class TraceChecker {
 			return CompletableFuture.completedFuture(replayTrace);
 		}
 
+		return checkNoninteractive(replayTrace).whenComplete((r, e) -> {
+			showTestError(r.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
+			if (e == null) {
+				if (setCurrentAnimation) {
+					// set the current trace if no error has occurred. Otherwise leave the decision to the user
+					if (!r.getReplayedTrace().getErrors().isEmpty()) {
+						showTraceReplayCompleteFailed(replayTrace);
+					} else {
+						currentTrace.set(r.getAnimatedReplayedTrace());
+					}
+				}
+			} else {
+				injector.getInstance(TraceFileHandler.class).showLoadError(r.getAbsoluteLocation(), e);
+			}
+		});
+	}
+
+	public CompletableFuture<ReplayTrace> checkNoninteractive(ReplayTrace replayTrace) {
 		replayTrace.reset();
 		// ReplayTraceFileCommand doesn't support progress updates yet,
 		// so set an indeterminate status for now.
@@ -93,23 +111,12 @@ public class TraceChecker {
 			storePostconditionResults(replayTrace, postconditionResults);
 			return replayTrace;
 		});
-		return future.whenComplete((r, e) -> {
-			Platform.runLater(() -> replayTrace.setProgress(-1));
-			showTestError(r.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
-			if (e == null) {
-				if (setCurrentAnimation) {
-					// set the current trace if no error has occurred. Otherwise leave the decision to the user
-					if (!r.getReplayedTrace().getErrors().isEmpty()) {
-						showTraceReplayCompleteFailed(replayTrace);
-					} else {
-						currentTrace.set(r.getAnimatedReplayedTrace());
-					}
-				}
-			} else {
-				Platform.runLater(() -> replayTrace.setChecked(Checked.PARSE_ERROR));
-				injector.getInstance(TraceFileHandler.class).showLoadError(r.getAbsoluteLocation(), e);
+		return future.whenComplete((r, e) -> Platform.runLater(() -> {
+			replayTrace.setProgress(-1);
+			if (e != null) {
+				replayTrace.setChecked(Checked.PARSE_ERROR);
 			}
-		});
+		}));
 	}
 
 	public void showTestError(List<PersistentTransition> transitions, List<List<Checked>> postconditionResults) {

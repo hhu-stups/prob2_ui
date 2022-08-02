@@ -283,7 +283,7 @@ public class VOChecker {
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
 			symbolicChecker.handleItem((SymbolicCheckingFormulaItem) validationTask, false);
 		} else if (validationTask instanceof ReplayTrace) {
-			traceChecker.check((ReplayTrace) validationTask, true);
+			traceChecker.checkNoninteractive((ReplayTrace) validationTask);
 		} else if (validationTask instanceof SimulationItem) {
 			simulationItemHandler.checkItem((SimulationItem) validationTask, false);
 		} else {
