@@ -7,14 +7,12 @@ import java.util.Optional;
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
@@ -47,8 +45,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	@FXML
 	private ChoiceBox<ET> cbChoice;
 	
-	private final StageManager stageManager;
-	
 	private final I18n i18n;
 	
 	protected final CurrentProject currentProject;
@@ -61,8 +57,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 
 	private T lastItem;
 	
-	public SymbolicChoosingStage(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
-		this.stageManager = stageManager;
+	public SymbolicChoosingStage(final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -117,11 +112,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	}
 	
 	protected void setCheckListeners() {
-		btAdd.setOnAction(e -> {
-			lastItem = this.extractItem();
-			this.formulaHandler.addItem(currentProject.getCurrentMachine(), lastItem);
-			this.close();
-		});
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
 			final Optional<T> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
@@ -177,8 +167,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	protected abstract T extractItem();
 
 	public void changeFormula(T item) {
-		btAdd.setText(i18n.translate("symbolic.formulaInput.buttons.change"));
-		btCheck.setText(i18n.translate("symbolic.formulaInput.buttons.changeAndCheck"));
+		btCheck.setText(i18n.translate("symbolic.formulaInput.buttons.change"));
 		setChangeListeners(item);
 		cbChoice.getSelectionModel().select(item.getType());
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
@@ -198,20 +187,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	}
 	
 	protected void setChangeListeners(T item) {
-		btAdd.setOnAction(e -> {
-			final T newItem = this.extractItem();
-			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
-			if (existingItem.isPresent()) {
-				lastItem = null;
-				stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-					"verifications.abstractResultHandler.alerts.alreadyExists.header",
-					"verifications.abstractResultHandler.alerts.alreadyExists.content.configuration").show();
-			} else {
-				lastItem = newItem;
-				this.close();
-			}
-		});
-		
 		btCheck.setOnAction(e -> {
 			final T newItem = this.extractItem();
 			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);

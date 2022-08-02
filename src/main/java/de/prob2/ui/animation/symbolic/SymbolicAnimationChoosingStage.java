@@ -18,7 +18,7 @@ public class SymbolicAnimationChoosingStage extends SymbolicChoosingStage<Symbol
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace
 	) {
-		super(stageManager, i18n, currentProject, currentTrace, symbolicAnimationItemHandler);
+		super(i18n, currentProject, currentTrace, symbolicAnimationItemHandler);
 		stageManager.loadFXML(this, "symbolic_animation_choice.fxml");
 	}
 

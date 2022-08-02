@@ -24,7 +24,7 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 		final CurrentProject currentProject,
 		final CurrentTrace currentTrace
 	) {
-		super(stageManager, i18n, currentProject, currentTrace, symbolicCheckingFormulaHandler);
+		super(i18n, currentProject, currentTrace, symbolicCheckingFormulaHandler);
 		stageManager.loadFXML(this, "symbolic_checking_choice.fxml");
 	}
 	

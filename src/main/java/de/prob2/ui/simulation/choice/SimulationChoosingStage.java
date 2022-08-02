@@ -24,10 +24,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class SimulationChoosingStage extends Stage {
-
-	@FXML
-	private Button btAdd;
-
 	@FXML
 	private Button btCheck;
 
@@ -93,17 +89,6 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	private void setCheckListeners() {
-		btAdd.setOnAction(e -> {
-			lastItem = null;
-			boolean validChoice = checkSelection();
-			if(!validChoice) {
-				showInvalidSelection();
-				return;
-			}
-			lastItem = this.extractItem();
-			this.simulationItemHandler.addItem(simulation, lastItem);
-			this.close();
-		});
 		btCheck.setOnAction(e -> {
 			lastItem = null;
 			boolean validChoice = checkSelection();

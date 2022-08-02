@@ -238,9 +238,7 @@ public class TestCaseGenerationView extends ScrollPane {
 			return;
 		}
 		final Optional<TestCaseGenerationItem> existingItem = itemHandler.addItem(newItem);
-		if (choosingStage.isCheckRequested()) {
-			itemHandler.generateTestCases(existingItem.orElse(newItem));
-		}
+		itemHandler.generateTestCases(existingItem.orElse(newItem));
 	}
 
 	private void removeFormula() {
@@ -259,9 +257,7 @@ public class TestCaseGenerationView extends ScrollPane {
 			return;
 		}
 		if (!itemHandler.replaceItem(item, newItem).isPresent()) {
-			if (choosingStage.isCheckRequested()) {
-				itemHandler.generateTestCases(newItem);
-			}
+			itemHandler.generateTestCases(newItem);
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",

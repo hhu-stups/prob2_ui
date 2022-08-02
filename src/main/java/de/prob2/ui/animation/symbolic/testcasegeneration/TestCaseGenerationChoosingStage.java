@@ -5,10 +5,7 @@ import javax.inject.Inject;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -32,9 +29,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	private OperationCoverageInputView operationCoverageInputView;
 
 	@FXML
-	private Button btAdd;
-
-	@FXML
 	private Button btCheck;
 
 	private final StageManager stageManager;
@@ -42,8 +36,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	private final I18n i18n;
 
 	private final ObjectProperty<TestCaseGenerationItem> item;
-
-	private final BooleanProperty checkRequested;
 
 	@Inject
 	private TestCaseGenerationChoosingStage(final StageManager stageManager, final I18n i18n) {
@@ -53,7 +45,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		this.i18n = i18n;
 
 		this.item = new SimpleObjectProperty<>(this, "item", null);
-		this.checkRequested = new SimpleBooleanProperty(this, "checkRequested", false);
 
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "test_case_generation_choice.fxml");
@@ -98,14 +89,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		this.itemProperty().set(item);
 	}
 
-	public ReadOnlyBooleanProperty checkRequestedProperty() {
-		return this.checkRequested;
-	}
-
-	public boolean isCheckRequested() {
-		return this.checkRequestedProperty().get();
-	}
-
 	private boolean checkValid() {
 		if (this.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS && this.operationCoverageInputView.getOperations().isEmpty()) {
 			final Alert alert = stageManager.makeAlert(
@@ -135,21 +118,12 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	}
 
 	private void setCheckListeners() {
-		btAdd.setOnAction(e -> {
-			if (!checkValid()) {
-				return;
-			}
-			this.close();
-			this.setItem(extractItem());
-			this.checkRequested.set(false);
-		});
 		btCheck.setOnAction(e -> {
 			if (!checkValid()) {
 				return;
 			}
 			this.close();
 			this.setItem(extractItem());
-			this.checkRequested.set(true);
 		});
 	}
 
@@ -176,14 +150,12 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	}
 
 	public void useChangeButtons() {
-		btAdd.setText(i18n.translate("testcase.input.buttons.change"));
-		btCheck.setText(i18n.translate("testcase.input.buttons.changeAndGenerate"));
+		btCheck.setText(i18n.translate("testcase.input.buttons.change"));
 	}
 
 	@FXML
 	public void cancel() {
 		this.close();
 		this.setItem(null);
-		this.checkRequested.set(false);
 	}
 }
