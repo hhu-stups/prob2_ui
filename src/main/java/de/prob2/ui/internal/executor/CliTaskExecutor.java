@@ -1,7 +1,7 @@
 package de.prob2.ui.internal.executor;
 
-import java.util.HashSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -45,9 +45,7 @@ public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 				r -> new Thread(r, "probcli command executor")
 		);
 
-		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks",
-				FXCollections.synchronizedObservableSet(FXCollections.observableSet(new HashSet<>()))
-		);
+		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new CopyOnWriteArraySet<>()));
 
 		stopActions.add(this::shutdownNow);
 	}
