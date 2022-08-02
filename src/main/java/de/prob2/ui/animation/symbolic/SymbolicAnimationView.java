@@ -30,12 +30,20 @@ import javafx.util.Callback;
 @FXMLInjected
 @Singleton
 public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
-	
-	private class SymbolicAnimationCellFactory extends SymbolicCellFactory implements Callback<TableView<SymbolicAnimationItem>, TableRow<SymbolicAnimationItem>>{
-	
+	private class SymbolicAnimationCellFactory implements Callback<TableView<SymbolicAnimationItem>, TableRow<SymbolicAnimationItem>> {
 		@Override
 		public TableRow<SymbolicAnimationItem> call(TableView<SymbolicAnimationItem> param) {
-			TableRow<SymbolicAnimationItem> row = createRow();
+			TableRow<SymbolicAnimationItem> row = new TableRow<>();
+			
+			MenuItem checkItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.check"));
+			checkItem.setDisable(true);
+			checkItem.setOnAction(e -> formulaHandler.handleItem(row.getItem(), false));
+			
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					checkItem.disableProperty().bind(executor.runningProperty().or(to.selectedProperty().not()));
+				}
+			});
 
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> removeFormula());
@@ -66,8 +74,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 				}
 			});
 			
-			ContextMenu contextMenu = row.getContextMenu();
-			contextMenu.getItems().addAll(changeItem, removeItem, showMessage, showStateItem);
+			ContextMenu contextMenu = new ContextMenu(checkItem, changeItem, removeItem, showMessage, showStateItem);
 			
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())

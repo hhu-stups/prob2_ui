@@ -23,38 +23,13 @@ import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
 public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane {
-	
-	public abstract class SymbolicCellFactory {
-
-		public TableRow<T> createRow() {
-			TableRow<T> row = new TableRow<>();
-			
-			MenuItem checkItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.check"));
-			checkItem.setDisable(true);
-			checkItem.setOnAction(e -> formulaHandler.handleItem(row.getItem(), false));
-			
-			row.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					checkItem.disableProperty().bind(executor.runningProperty().or(to.selectedProperty().not()));
-				}
-			});
-			
-			row.setContextMenu(new ContextMenu(checkItem));
-			return row;
-		}
-		
-	}
-
 	@FXML
 	protected HelpButton helpButton;
 		
