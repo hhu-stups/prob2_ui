@@ -63,6 +63,9 @@ public class LTLFormulaChecker {
 		Machine machine = currentProject.getCurrentMachine();
 		this.cliExecutor.submit(() -> {
 			for (LTLFormulaItem item : machine.getLTLFormulas()) {
+				if (!item.selected()) {
+					continue;
+				}
 				this.checkFormula(item, machine);
 				if(Thread.currentThread().isInterrupted()) {
 					break;
@@ -140,9 +143,6 @@ public class LTLFormulaChecker {
 	}
 	
 	public void checkFormula(LTLFormulaItem item, Machine machine) {
-		if(!item.selected()) {
-			return;
-		}
 		BParser bParser = new BParser();
 		if (currentTrace.get().getModel() instanceof ClassicalBModel) {
 			IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
@@ -164,12 +164,22 @@ public class LTLFormulaChecker {
 	}
 	
 	public CompletableFuture<LTLFormulaItem> checkFormula(LTLFormulaItem item) {
+		if (!item.selected()) {
+			return CompletableFuture.completedFuture(item);
+		}
+
+		return this.checkFormulaNoninteractive(item).thenApply(it -> {
+			if (it.getCounterExample() != null) {
+				currentTrace.set(it.getCounterExample());
+			}
+			return it;
+		});
+	}
+	
+	public CompletableFuture<LTLFormulaItem> checkFormulaNoninteractive(LTLFormulaItem item) {
 		Machine machine = currentProject.getCurrentMachine();
 		return this.cliExecutor.submit(() -> {
 			checkFormula(item, machine);
-			if(item.getCounterExample() != null) {
-				currentTrace.set(item.getCounterExample());
-			}
 			return item;
 		});
 	}

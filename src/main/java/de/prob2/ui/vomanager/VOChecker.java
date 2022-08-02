@@ -279,7 +279,7 @@ public class VOChecker {
 		} else if (validationTask instanceof ModelCheckingItem) {
 			modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask);
 		} else if (validationTask instanceof LTLFormulaItem) {
-			ltlChecker.checkFormula((LTLFormulaItem) validationTask);
+			ltlChecker.checkFormulaNoninteractive((LTLFormulaItem) validationTask);
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
 			symbolicChecker.handleItem((SymbolicCheckingFormulaItem) validationTask, false);
 		} else if (validationTask instanceof ReplayTrace) {
