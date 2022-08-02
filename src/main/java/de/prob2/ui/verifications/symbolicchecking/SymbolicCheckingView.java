@@ -105,7 +105,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
 	                            final SymbolicFormulaChecker symbolicChecker, final Injector injector) {
-		super(i18n, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler, SymbolicCheckingFormulaItem.class);
+		super(i18n, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
