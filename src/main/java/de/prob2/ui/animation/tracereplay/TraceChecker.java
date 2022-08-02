@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
@@ -101,10 +102,8 @@ public class TraceChecker {
 				final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
 				replayed = replayed.withErrors(Collections.singletonList(error));
 			}
-			final ReplayedTrace replayedFinal = replayed;
 			replayTrace.setReplayedTrace(replayed);
 			// TODO Display replay information for each transition if the replay was not perfect/complete
-			Platform.runLater(() -> replayTrace.setChecked(replayedFinal.getErrors().isEmpty() ? Checked.SUCCESS : Checked.FAIL));
 			Trace trace = replayed.getTrace(stateSpace);
 			replayTrace.setAnimatedReplayedTrace(trace);
 			final PersistentTrace persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
@@ -112,12 +111,31 @@ public class TraceChecker {
 			storePostconditionResults(replayTrace, postconditionResults);
 			return replayTrace;
 		});
-		return future.whenComplete((r, e) -> Platform.runLater(() -> {
-			replayTrace.setProgress(-1);
-			if (e != null && !(e instanceof CancellationException)) {
-				replayTrace.setChecked(Checked.PARSE_ERROR);
+		return future.whenComplete((r, e) -> {
+			final Checked res;
+			if (e == null) {
+				if (
+					replayTrace.getReplayedTrace().getErrors().isEmpty()
+					// Check that all postconditions are ok
+					&& replayTrace.getPostconditionStatus().stream()
+						.flatMap(Collection::stream)
+						.allMatch(x -> x == Checked.SUCCESS)
+				) {
+					res = Checked.SUCCESS;
+				} else {
+					res = Checked.FAIL;
+				}
+			} else if (e instanceof CancellationException) {
+				// Trace check was interrupted by user
+				res = Checked.NOT_CHECKED;
+			} else {
+				res = Checked.PARSE_ERROR;
 			}
-		}));
+			Platform.runLater(() -> {
+				replayTrace.setProgress(-1);
+				replayTrace.setChecked(res);
+			});
+		});
 	}
 
 	public void showTestError(List<PersistentTransition> transitions, List<List<Checked>> postconditionResults) {
@@ -187,7 +205,6 @@ public class TraceChecker {
 
 	private static void storePostconditionResults(final ReplayTrace replayTrace, final List<List<TraceReplay.PostconditionResult>> postconditionResults) {
 		final List<List<Checked>> convertedResults = new ArrayList<>();
-		boolean successful = true;
 		for (List<TraceReplay.PostconditionResult> transitionResults : postconditionResults) {
 			final List<Checked> convertedTransitionResults = new ArrayList<>();
 			for (TraceReplay.PostconditionResult result : transitionResults) {
@@ -196,19 +213,14 @@ public class TraceChecker {
 					convertedResult = Checked.SUCCESS;
 				} else if (result == TraceReplay.PostconditionResult.FAIL) {
 					convertedResult = Checked.FAIL;
-					successful = false;
 				} else {
 					convertedResult = Checked.PARSE_ERROR;
-					successful = false;
 				}
 				convertedTransitionResults.add(convertedResult);
 			}
 			convertedResults.add(convertedTransitionResults);
 		}
 		replayTrace.setPostconditionStatus(convertedResults);
-		if (!successful) {
-			Platform.runLater(() -> replayTrace.setChecked(Checked.FAIL));
-		}
 	}
 
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
