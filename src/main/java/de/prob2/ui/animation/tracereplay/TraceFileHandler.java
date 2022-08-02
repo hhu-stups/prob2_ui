@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
@@ -53,6 +54,12 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public void showLoadError(Path path, Throwable e) {
+		if (e instanceof CancellationException) {
+			// Trace check was interrupted by user, this isn't really an error.
+			LOGGER.trace("Trace check interrupted", e);
+			return;
+		}
+
 		LOGGER.warn("Failed to load trace file", e);
 		final String headerBundleKey;
 		final String contentBundleKey;

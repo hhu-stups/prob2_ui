@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -113,7 +114,7 @@ public class TraceChecker {
 		});
 		return future.whenComplete((r, e) -> Platform.runLater(() -> {
 			replayTrace.setProgress(-1);
-			if (e != null) {
+			if (e != null && !(e instanceof CancellationException)) {
 				replayTrace.setChecked(Checked.PARSE_ERROR);
 			}
 		}));
