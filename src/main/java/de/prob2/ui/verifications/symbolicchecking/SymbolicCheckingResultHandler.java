@@ -21,7 +21,6 @@ import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
-import de.prob.check.RefinementCheckCounterExample;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -42,7 +41,7 @@ public class SymbolicCheckingResultHandler {
 		CheckingResultItem res;
 		if (result instanceof ModelCheckOk) {
 			res = new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success");
-		} else if (result instanceof CBCInvariantViolationFound || result instanceof CBCDeadlockFound || result instanceof RefinementCheckCounterExample) {
+		} else if (result instanceof CBCInvariantViolationFound || result instanceof CBCDeadlockFound) {
 			res = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample");
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
 			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage());
