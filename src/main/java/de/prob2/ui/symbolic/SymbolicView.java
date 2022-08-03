@@ -65,14 +65,14 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 
 	protected final Injector injector;
 	
-	protected final SymbolicExecutor<T> executor;
+	protected final SymbolicExecutor executor;
 	
 	protected final SymbolicFormulaHandler<T> formulaHandler;
 
 	protected final CheckBox selectAll;
 	
 	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace,
-	                    final CurrentProject currentProject, final Injector injector, final SymbolicExecutor<T> executor,
+	                    final CurrentProject currentProject, final Injector injector, final SymbolicExecutor executor,
 	                    final SymbolicFormulaHandler<T> formulaHandler) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
