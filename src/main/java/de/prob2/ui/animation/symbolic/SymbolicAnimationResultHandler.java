@@ -70,20 +70,11 @@ public class SymbolicAnimationResultHandler {
 		}
 	}
 	
-	private void showCheckingResult(SymbolicAnimationItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
-		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams));
-	}
-	
 	private void showCheckingResult(SymbolicAnimationItem item, Checked checked, String msgKey) {
-		showCheckingResult(item, checked, msgKey, msgKey);
+		item.setResultItem(new CheckingResultItem(checked, msgKey, msgKey));
 	}
 	
 	public void handleFormulaResult(SymbolicAnimationItem item, Object result) {
-		CheckingResultItem resultItem = handleFormulaResult(result);
-		item.setResultItem(resultItem);
-	}
-	
-	public CheckingResultItem handleFormulaResult(Object result) {
 		CheckingResultItem resultItem = null;
 		if(result instanceof ModelCheckOk) {
 			resultItem = new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.result.succeeded.header",
@@ -95,7 +86,7 @@ public class SymbolicAnimationResultHandler {
 			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
 					"common.result.message", ((IModelCheckingResult) result).getMessage());
 		}
-		return resultItem;
+		item.setResultItem(resultItem);
 	}
 
 	public void handleFormulaResult(SymbolicAnimationItem item, AbstractCommand cmd) {
