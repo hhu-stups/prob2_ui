@@ -74,28 +74,30 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 	}
 
 	@Override
-	public void handleItem(SymbolicAnimationItem item, boolean checkAll) {
-		if(!item.selected()) {
-			return;
-		}
-		final CompletableFuture<SymbolicAnimationItem> future;
+	public CompletableFuture<SymbolicAnimationItem> handleItemNoninteractive(final SymbolicAnimationItem item) {
 		switch(item.getType()) {
 			case SEQUENCE:
-				future = handleSequence(item);
-				break;
+				return handleSequence(item);
 			case FIND_VALID_STATE:
-				future = findValidState(item);
-				break;
+				return findValidState(item);
 			default:
 				throw new AssertionError("Unhandled symbolic animation type: " + item.getType());
 		}
-		future.thenAccept(r -> {
+	}
+
+	@Override
+	public CompletableFuture<SymbolicAnimationItem> handleItem(SymbolicAnimationItem item, boolean checkAll) {
+		if(!item.selected()) {
+			return CompletableFuture.completedFuture(item);
+		}
+		return handleItemNoninteractive(item).thenApply(r -> {
 			if(!checkAll) {
 				List<Trace> examples = item.getExamples();
 				if(!examples.isEmpty()) {
 					currentTrace.set(examples.get(0));
 				}
 			}
+			return r;
 		});
 	}
 	

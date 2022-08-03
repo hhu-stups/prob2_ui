@@ -159,43 +159,39 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	}
 	
 	@Override
-	public void handleItem(SymbolicCheckingFormulaItem item, boolean checkAll) {
-		if(!item.selected()) {
-			return;
-		}
-		final CompletableFuture<SymbolicCheckingFormulaItem> future;
+	public CompletableFuture<SymbolicCheckingFormulaItem> handleItemNoninteractive(final SymbolicCheckingFormulaItem item) {
 		switch(item.getType()) {
 			case INVARIANT:
-				future = handleInvariant(item);
-				break;
+				return handleInvariant(item);
 			case CHECK_REFINEMENT:
-				future = handleRefinement(item);
-				break;
+				return handleRefinement(item);
 			case CHECK_STATIC_ASSERTIONS:
-				future = handleStaticAssertions(item);
-				break;
+				return handleStaticAssertions(item);
 			case CHECK_DYNAMIC_ASSERTIONS:
-				future = handleDynamicAssertions(item);
-				break;
+				return handleDynamicAssertions(item);
 			case CHECK_WELL_DEFINEDNESS:
-				future = handleWellDefinedness(item);
-				break;
+				return handleWellDefinedness(item);
 			case DEADLOCK:
-				future = handleDeadlock(item);
-				break;
+				return handleDeadlock(item);
 			case FIND_REDUNDANT_INVARIANTS:
-				future = findRedundantInvariants(item);
-				break;	
+				return findRedundantInvariants(item);
 			case SYMBOLIC_MODEL_CHECK:
-				future = handleSymbolic(item);
-				break;
+				return handleSymbolic(item);
 			default:
 				throw new AssertionError("Unhandled symbolic checking type: " + item.getType());
 		}
-		future.thenAccept(r -> {
+	}
+	
+	@Override
+	public CompletableFuture<SymbolicCheckingFormulaItem> handleItem(SymbolicCheckingFormulaItem item, boolean checkAll) {
+		if(!item.selected()) {
+			return CompletableFuture.completedFuture(item);
+		}
+		return handleItemNoninteractive(item).thenApply(r -> {
 			if(!checkAll) {
 				updateTrace(item);
 			}
+			return r;
 		});
 	}
 	

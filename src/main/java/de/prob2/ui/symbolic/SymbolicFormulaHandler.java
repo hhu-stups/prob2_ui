@@ -2,6 +2,7 @@ package de.prob2.ui.symbolic;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import de.prob2.ui.project.machines.Machine;
 
@@ -26,6 +27,7 @@ public interface SymbolicFormulaHandler<T extends SymbolicItem<?>> {
 		return existingItem;
 	}
 	
-	public void handleItem(T item, boolean checkAll);
+	public CompletableFuture<T> handleItemNoninteractive(T item);
+	public CompletableFuture<T> handleItem(T item, boolean checkAll);
 	public void handleMachine(Machine machine);
 }
