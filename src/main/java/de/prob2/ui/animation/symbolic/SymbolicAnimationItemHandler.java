@@ -43,41 +43,31 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		return machine.getSymbolicAnimationFormulas();
 	}
 
-	private void updateTrace(SymbolicAnimationItem item) {
-		List<Trace> examples = item.getExamples();
-		if(!examples.isEmpty()) {
-			currentTrace.set(examples.get(0));
-		}
-	}
-
-	private void checkItem(SymbolicAnimationItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
-		final CompletableFuture<AbstractCommand> future = cliExecutor.submit(() -> {
+	private <T extends AbstractCommand> CompletableFuture<T> checkItem(SymbolicAnimationItem item, T cmd, final StateSpace stateSpace) {
+		final CompletableFuture<T> future = cliExecutor.submit(() -> {
 			stateSpace.execute(cmd);
 			return cmd;
 		});
-		future.whenComplete((r, e) -> {
+		return future.whenComplete((r, e) -> {
 			if (e == null) {
 				resultHandler.handleFormulaResult(item, r);
 			} else {
 				LOGGER.error("Exception during symbolic animation", e);
 				resultHandler.handleFormulaResult(item, e);
 			}
-			if(!checkAll) {
-				updateTrace(item);
-			}
 		});
 	}
 
-	public void handleSequence(SymbolicAnimationItem item, boolean checkAll) {
+	public CompletableFuture<ConstraintBasedSequenceCheckCommand> handleSequence(SymbolicAnimationItem item) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new ClassicalB("1=1", FormulaExpand.EXPAND));
-		checkItem(item, cmd, currentTrace.getStateSpace(), checkAll);
+		return checkItem(item, cmd, currentTrace.getStateSpace());
 	}
 
-	public void findValidState(SymbolicAnimationItem item, boolean checkAll) {
+	public CompletableFuture<FindStateCommand> findValidState(SymbolicAnimationItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode(), FormulaExpand.EXPAND), true);
-		checkItem(item, cmd, stateSpace, checkAll);
+		return checkItem(item, cmd, stateSpace);
 	}
 
 	@Override
@@ -85,16 +75,25 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		if(!item.selected()) {
 			return;
 		}
+		final CompletableFuture<?> future;
 		switch(item.getType()) {
 			case SEQUENCE:
-				handleSequence(item, checkAll);
+				future = handleSequence(item);
 				break;
 			case FIND_VALID_STATE:
-				findValidState(item, checkAll);
+				future = findValidState(item);
 				break;
 			default:
-				break;
+				throw new AssertionError("Unhandled symbolic animation type: " + item.getType());
 		}
+		future.thenAccept(r -> {
+			if(!checkAll) {
+				List<Trace> examples = item.getExamples();
+				if(!examples.isEmpty()) {
+					currentTrace.set(examples.get(0));
+				}
+			}
+		});
 	}
 	
 	@Override

@@ -58,40 +58,34 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		}
 	}
 	
-	private void checkItem(SymbolicCheckingFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
-		final CompletableFuture<AbstractCommand> future = cliExecutor.submit(() -> {
+	private <T extends AbstractCommand> CompletableFuture<T> checkItem(SymbolicCheckingFormulaItem item, T cmd, final StateSpace stateSpace) {
+		final CompletableFuture<T> future = cliExecutor.submit(() -> {
 			stateSpace.execute(cmd);
 			return cmd;
 		});
-		future.whenComplete((r, e) -> {
+		return future.whenComplete((r, e) -> {
 			if (e == null) {
 				resultHandler.handleFormulaResult(item, r);
 			} else {
 				LOGGER.error("Exception during symbolic checking", e);
 				resultHandler.handleFormulaResult(item, e);
 			}
-			if(!checkAll) {
-				updateTrace(item);
-			}
 		});
 	}
 	
-	private void checkItem(IModelCheckJob checker, SymbolicCheckingFormulaItem item, boolean checkAll) {
+	private CompletableFuture<IModelCheckingResult> checkItem(IModelCheckJob checker, SymbolicCheckingFormulaItem item) {
 		final CompletableFuture<IModelCheckingResult> future = cliExecutor.submit(checker);
-		future.whenComplete((r, e) -> {
+		return future.whenComplete((r, e) -> {
 			if (e == null) {
 				resultHandler.handleFormulaResult(item, r);
 			} else {
 				LOGGER.error("Exception during symbolic checking", e);
 				resultHandler.handleFormulaResult(item, e);
 			}
-			if(!checkAll) {
-				updateTrace(item);
-			}
 		});
 	}
 	
-	public void handleInvariant(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public CompletableFuture<IModelCheckingResult> handleInvariant(SymbolicCheckingFormulaItem item) {
 		final ArrayList<String> eventNames;
 		if (item.getCode().isEmpty()) {
 			// Check all operations/events
@@ -102,51 +96,50 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 			eventNames.add(item.getCode());
 		}
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), eventNames);
-		checkItem(checker, item, checkAll);
+		return checkItem(checker, item);
 	}
 		
-	public void handleRefinement(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public CompletableFuture<ConstraintBasedRefinementCheckCommand> handleRefinement(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedRefinementCheckCommand cmd = new ConstraintBasedRefinementCheckCommand();
-		checkItem(item, cmd, stateSpace, checkAll);
+		return checkItem(item, cmd, stateSpace);
 	}
 	
-	public void handleStaticAssertions(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public CompletableFuture<ConstraintBasedAssertionCheckCommand> handleStaticAssertions(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
-		checkItem(item, cmd, stateSpace, checkAll);
+		return checkItem(item, cmd, stateSpace);
 	}
 
-	public void handleDynamicAssertions(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public CompletableFuture<ConstraintBasedAssertionCheckCommand> handleDynamicAssertions(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
-		checkItem(item, cmd, stateSpace, checkAll);
+		return checkItem(item, cmd, stateSpace);
 	}
 
-	public void handleWellDefinedness(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public CompletableFuture<CheckWellDefinednessCommand> handleWellDefinedness(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		CheckWellDefinednessCommand cmd = new CheckWellDefinednessCommand();
-		checkItem(item, cmd, stateSpace, checkAll);
+		return checkItem(item, cmd, stateSpace);
 	}
 	
-	public void handleSymbolic(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public CompletableFuture<SymbolicModelcheckCommand> handleSymbolic(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		final SymbolicModelcheckCommand.Algorithm algorithm = SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode());
 		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(algorithm);
-		checkItem(item, cmd, stateSpace, checkAll);
-		
+		return checkItem(item, cmd, stateSpace);
 	}
 	
-	public void handleDeadlock(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public CompletableFuture<IModelCheckingResult> handleDeadlock(SymbolicCheckingFormulaItem item) {
 		IEvalElement constraint = new ClassicalB(item.getCode(), FormulaExpand.EXPAND);
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		checkItem(checker, item, checkAll);
+		return checkItem(checker, item);
 	}
 	
-	public void findRedundantInvariants(SymbolicCheckingFormulaItem item, boolean checkAll) {
+	public CompletableFuture<GetRedundantInvariantsCommand> findRedundantInvariants(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		checkItem(item, cmd, stateSpace, checkAll);
+		return checkItem(item, cmd, stateSpace);
 	}
 	
 	@Override
@@ -154,34 +147,40 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		if(!item.selected()) {
 			return;
 		}
+		final CompletableFuture<?> future;
 		switch(item.getType()) {
 			case INVARIANT:
-				handleInvariant(item, checkAll);
+				future = handleInvariant(item);
 				break;
 			case CHECK_REFINEMENT:
-				handleRefinement(item, checkAll);
+				future = handleRefinement(item);
 				break;
 			case CHECK_STATIC_ASSERTIONS:
-				handleStaticAssertions(item, checkAll);
+				future = handleStaticAssertions(item);
 				break;
 			case CHECK_DYNAMIC_ASSERTIONS:
-				handleDynamicAssertions(item, checkAll);
+				future = handleDynamicAssertions(item);
 				break;
 			case CHECK_WELL_DEFINEDNESS:
-				handleWellDefinedness(item, checkAll);
+				future = handleWellDefinedness(item);
 				break;
 			case DEADLOCK:
-				handleDeadlock(item, checkAll);
+				future = handleDeadlock(item);
 				break;
 			case FIND_REDUNDANT_INVARIANTS:
-				findRedundantInvariants(item, checkAll);
+				future = findRedundantInvariants(item);
 				break;	
 			case SYMBOLIC_MODEL_CHECK:
-				handleSymbolic(item, checkAll);
+				future = handleSymbolic(item);
 				break;
 			default:
 				throw new AssertionError("Unhandled symbolic checking type: " + item.getType());
 		}
+		future.thenAccept(r -> {
+			if(!checkAll) {
+				updateTrace(item);
+			}
+		});
 	}
 	
 	@Override
