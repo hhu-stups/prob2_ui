@@ -14,7 +14,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.symbolic.ISymbolicResultHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ public class SymbolicFormulaChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicFormulaChecker.class);
 	
 	protected final CurrentTrace currentTrace;
-	protected final ISymbolicResultHandler<SymbolicCheckingFormulaItem> resultHandler;
+	protected final SymbolicCheckingResultHandler resultHandler;
 	private final CliTaskExecutor cliExecutor;
 	
 	@Inject

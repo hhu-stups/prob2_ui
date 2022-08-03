@@ -26,12 +26,11 @@ import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 @Singleton
-public class SymbolicCheckingResultHandler implements ISymbolicResultHandler<SymbolicCheckingFormulaItem> {
+public class SymbolicCheckingResultHandler {
 	private final CurrentTrace currentTrace;
 	
 	@Inject
@@ -39,7 +38,6 @@ public class SymbolicCheckingResultHandler implements ISymbolicResultHandler<Sym
 		this.currentTrace = currentTrace;
 	}
 	
-	@Override
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, Object result) {
 		CheckingResultItem res;
 		if (result instanceof ModelCheckOk) {
@@ -75,7 +73,6 @@ public class SymbolicCheckingResultHandler implements ISymbolicResultHandler<Sym
 		item.getCounterExamples().setAll(counterExamples);
 	}
 	
-	@Override
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if(item.getType() == SymbolicCheckingType.SYMBOLIC_MODEL_CHECK) {

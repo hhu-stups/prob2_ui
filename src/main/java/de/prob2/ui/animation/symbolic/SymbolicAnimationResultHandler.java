@@ -17,12 +17,11 @@ import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.symbolic.ISymbolicResultHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 @Singleton
-public class SymbolicAnimationResultHandler implements ISymbolicResultHandler<SymbolicAnimationItem> {
+public class SymbolicAnimationResultHandler {
 	private final CurrentTrace currentTrace;
 	
 	@Inject
@@ -79,7 +78,6 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler<Sy
 		showCheckingResult(item, checked, msgKey, msgKey);
 	}
 	
-	@Override
 	public void handleFormulaResult(SymbolicAnimationItem item, Object result) {
 		CheckingResultItem resultItem = handleFormulaResult(result);
 		item.setResultItem(resultItem);
@@ -100,7 +98,6 @@ public class SymbolicAnimationResultHandler implements ISymbolicResultHandler<Sy
 		return resultItem;
 	}
 
-	@Override
 	public void handleFormulaResult(SymbolicAnimationItem item, AbstractCommand cmd) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if(item.getType() == SymbolicAnimationType.FIND_VALID_STATE) {

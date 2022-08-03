@@ -12,7 +12,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.symbolic.ISymbolicResultHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,7 @@ public class SymbolicAnimationChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationChecker.class);
 
 	private final CurrentTrace currentTrace;
-	private final ISymbolicResultHandler<SymbolicAnimationItem> resultHandler;
+	private final SymbolicAnimationResultHandler resultHandler;
 	private final CliTaskExecutor cliExecutor;
 
 	@Inject
