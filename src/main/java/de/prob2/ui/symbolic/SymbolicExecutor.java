@@ -2,7 +2,6 @@ package de.prob2.ui.symbolic;
 
 import com.google.inject.Injector;
 
-import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -17,7 +16,6 @@ public abstract class SymbolicExecutor {
 	protected SymbolicExecutor(final CurrentTrace currentTrace, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.cliExecutor = injector.getInstance(CliTaskExecutor.class);
-		injector.getInstance(DisablePropertyController.class).addDisableExpression(this.runningProperty());
 	}
 	
 	public void interrupt() {

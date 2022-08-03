@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StopActions;
 
 import javafx.beans.binding.BooleanExpression;
@@ -38,7 +39,7 @@ public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 	private final SetProperty<Future<?>> currentTasks;
 
 	@Inject
-	private CliTaskExecutor(final StopActions stopActions) {
+	private CliTaskExecutor(final DisablePropertyController disablePropertyController, final StopActions stopActions) {
 		super(
 				1, 1, 0, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<>(),
@@ -47,6 +48,7 @@ public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 
 		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new CopyOnWriteArraySet<>()));
 
+		disablePropertyController.addDisableExpression(this.runningProperty());
 		stopActions.add(this::shutdownNow);
 	}
 

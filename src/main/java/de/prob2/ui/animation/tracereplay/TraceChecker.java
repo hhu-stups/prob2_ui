@@ -28,7 +28,6 @@ import de.prob.check.tracereplay.TransitionReplayPrecision;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -50,14 +49,12 @@ public class TraceChecker {
 	private final I18n i18n;
 
 	@Inject
-	private TraceChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager,
-						 final DisablePropertyController disablePropertyController, final I18n i18n) {
+	private TraceChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager, final I18n i18n) {
 		this.cliExecutor = cliExecutor;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.i18n = i18n;
-		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
 	public void checkAll(List<ReplayTrace> replayTraces) {
