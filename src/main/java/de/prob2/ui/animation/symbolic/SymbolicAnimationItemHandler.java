@@ -53,7 +53,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 				resultHandler.handleFormulaResult(item, r);
 			} else {
 				LOGGER.error("Exception during symbolic animation", e);
-				resultHandler.handleFormulaResult(item, e);
+				resultHandler.handleFormulaException(item, e);
 			}
 		});
 	}

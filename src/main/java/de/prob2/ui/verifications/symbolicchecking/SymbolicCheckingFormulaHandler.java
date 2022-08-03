@@ -68,7 +68,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 				resultHandler.handleFormulaResult(item, r);
 			} else {
 				LOGGER.error("Exception during symbolic checking", e);
-				resultHandler.handleFormulaResult(item, e);
+				resultHandler.handleFormulaException(item, e);
 			}
 		});
 	}
@@ -80,7 +80,7 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 				resultHandler.handleFormulaResult(item, r);
 			} else {
 				LOGGER.error("Exception during symbolic checking", e);
-				resultHandler.handleFormulaResult(item, e);
+				resultHandler.handleFormulaException(item, e);
 			}
 		});
 	}

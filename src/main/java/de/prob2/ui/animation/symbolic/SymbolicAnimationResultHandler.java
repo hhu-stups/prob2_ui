@@ -8,11 +8,6 @@ import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.NoTraceFoundException;
 import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.check.CheckError;
-import de.prob.check.CheckInterrupted;
-import de.prob.check.IModelCheckingResult;
-import de.prob.check.ModelCheckOk;
-import de.prob.check.NotYetFinished;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
@@ -74,17 +69,14 @@ public class SymbolicAnimationResultHandler {
 		item.setResultItem(new CheckingResultItem(checked, msgKey, msgKey));
 	}
 	
-	public void handleFormulaResult(SymbolicAnimationItem item, Object result) {
+	public void handleFormulaException(SymbolicAnimationItem item, Throwable result) {
 		CheckingResultItem resultItem = null;
-		if(result instanceof ModelCheckOk) {
-			resultItem = new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.result.succeeded.header",
-					"animation.symbolic.result.succeeded.message");
-		} else if(result instanceof ProBError || result instanceof CliError || result instanceof CheckError || result instanceof EvaluationException) {
+		if(result instanceof ProBError || result instanceof CliError || result instanceof EvaluationException) {
 			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
 					"common.result.message", result);
-		} else if(result instanceof NoTraceFoundException || result instanceof NotYetFinished || result instanceof CheckInterrupted) {
+		} else if(result instanceof NoTraceFoundException) {
 			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
-					"common.result.message", ((IModelCheckingResult) result).getMessage());
+					"common.result.message", result.getMessage());
 		}
 		item.setResultItem(resultItem);
 	}

@@ -38,20 +38,16 @@ public class SymbolicCheckingResultHandler {
 		this.currentTrace = currentTrace;
 	}
 	
-	public void handleFormulaResult(SymbolicCheckingFormulaItem item, Object result) {
+	public void handleFormulaResult(SymbolicCheckingFormulaItem item, IModelCheckingResult result) {
 		CheckingResultItem res;
 		if (result instanceof ModelCheckOk) {
 			res = new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success");
 		} else if (result instanceof CBCInvariantViolationFound || result instanceof CBCDeadlockFound || result instanceof RefinementCheckCounterExample) {
 			res = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample");
-		} else if (result instanceof CommandInterruptedException) {
-			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", ((CommandInterruptedException)result).getMessage());
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
-			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", ((IModelCheckingResult)result).getMessage());
-		} else if (result instanceof Throwable) {
-			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", ((Throwable)result).getMessage());
+			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage());
 		} else if (result instanceof CheckError) {
-			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", ((IModelCheckingResult)result).getMessage());
+			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", result.getMessage());
 		} else {
 			throw new AssertionError("Unhandled symbolic checking result type: " + result.getClass());
 		}
@@ -71,6 +67,16 @@ public class SymbolicCheckingResultHandler {
 			counterExamples = Collections.emptyList();
 		}
 		item.getCounterExamples().setAll(counterExamples);
+	}
+	
+	public void handleFormulaException(SymbolicCheckingFormulaItem item, Throwable result) {
+		CheckingResultItem res;
+		if (result instanceof CommandInterruptedException) {
+			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage());
+		} else {
+			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", result.getMessage());
+		}
+		item.setResultItem(res);
 	}
 	
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
