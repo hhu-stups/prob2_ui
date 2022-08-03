@@ -43,19 +43,19 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		return machine.getSymbolicAnimationFormulas();
 	}
 
-	private <T extends AbstractCommand> CompletableFuture<T> checkItem(SymbolicAnimationItem item, T cmd, final StateSpace stateSpace) {
-		final CompletableFuture<T> future = cliExecutor.submit(() -> {
+	private CompletableFuture<SymbolicAnimationItem> checkItem(SymbolicAnimationItem item, AbstractCommand cmd, final StateSpace stateSpace) {
+		final CompletableFuture<SymbolicAnimationItem> future = cliExecutor.submit(() -> {
 			stateSpace.execute(cmd);
-			return cmd;
+			return item;
 		});
 		return future.exceptionally(e -> {
 			LOGGER.error("Exception during symbolic animation", e);
 			resultHandler.handleFormulaException(item, e);
-			return cmd;
+			return item;
 		});
 	}
 
-	public CompletableFuture<ConstraintBasedSequenceCheckCommand> handleSequence(SymbolicAnimationItem item) {
+	public CompletableFuture<SymbolicAnimationItem> handleSequence(SymbolicAnimationItem item) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new ClassicalB("1=1", FormulaExpand.EXPAND));
 		return checkItem(item, cmd, currentTrace.getStateSpace()).thenApply(r -> {
@@ -64,7 +64,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		});
 	}
 
-	public CompletableFuture<FindStateCommand> findValidState(SymbolicAnimationItem item) {
+	public CompletableFuture<SymbolicAnimationItem> findValidState(SymbolicAnimationItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode(), FormulaExpand.EXPAND), true);
 		return checkItem(item, cmd, stateSpace).thenApply(r -> {
@@ -78,7 +78,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		if(!item.selected()) {
 			return;
 		}
-		final CompletableFuture<?> future;
+		final CompletableFuture<SymbolicAnimationItem> future;
 		switch(item.getType()) {
 			case SEQUENCE:
 				future = handleSequence(item);
