@@ -3,7 +3,6 @@ package de.prob2.ui.animation.symbolic;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.command.NoTraceFoundException;
@@ -11,18 +10,13 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 @Singleton
 public class SymbolicAnimationResultHandler {
-	private final CurrentTrace currentTrace;
-	
 	@Inject
-	public SymbolicAnimationResultHandler(final CurrentTrace currentTrace) {
-		this.currentTrace = currentTrace;
-	}
+	public SymbolicAnimationResultHandler() {}
 	
 	public void handleFindValidState(SymbolicAnimationItem item, FindStateCommand cmd, StateSpace stateSpace) {
 		FindStateCommand.ResultType result = cmd.getResult();
@@ -80,15 +74,4 @@ public class SymbolicAnimationResultHandler {
 		}
 		item.setResultItem(resultItem);
 	}
-
-	public void handleFormulaResult(SymbolicAnimationItem item, AbstractCommand cmd) {
-		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicAnimationType.FIND_VALID_STATE) {
-			handleFindValidState(item, (FindStateCommand) cmd, stateSpace);
-		} else if(item.getType() == SymbolicAnimationType.SEQUENCE) {
-			handleSequence(item, (ConstraintBasedSequenceCheckCommand) cmd);
-		}
-	}
-	
-
 }

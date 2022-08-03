@@ -48,26 +48,29 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 			stateSpace.execute(cmd);
 			return cmd;
 		});
-		return future.whenComplete((r, e) -> {
-			if (e == null) {
-				resultHandler.handleFormulaResult(item, r);
-			} else {
-				LOGGER.error("Exception during symbolic animation", e);
-				resultHandler.handleFormulaException(item, e);
-			}
+		return future.exceptionally(e -> {
+			LOGGER.error("Exception during symbolic animation", e);
+			resultHandler.handleFormulaException(item, e);
+			return cmd;
 		});
 	}
 
 	public CompletableFuture<ConstraintBasedSequenceCheckCommand> handleSequence(SymbolicAnimationItem item) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new ClassicalB("1=1", FormulaExpand.EXPAND));
-		return checkItem(item, cmd, currentTrace.getStateSpace());
+		return checkItem(item, cmd, currentTrace.getStateSpace()).thenApply(r -> {
+			resultHandler.handleSequence(item, cmd);
+			return r;
+		});
 	}
 
 	public CompletableFuture<FindStateCommand> findValidState(SymbolicAnimationItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode(), FormulaExpand.EXPAND), true);
-		return checkItem(item, cmd, stateSpace);
+		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+			resultHandler.handleFindValidState(item, cmd, stateSpace);
+			return r;
+		});
 	}
 
 	@Override

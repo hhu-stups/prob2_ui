@@ -63,13 +63,10 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 			stateSpace.execute(cmd);
 			return cmd;
 		});
-		return future.whenComplete((r, e) -> {
-			if (e == null) {
-				resultHandler.handleFormulaResult(item, r);
-			} else {
-				LOGGER.error("Exception during symbolic checking", e);
-				resultHandler.handleFormulaException(item, e);
-			}
+		return future.exceptionally(e -> {
+			LOGGER.error("Exception during symbolic checking", e);
+			resultHandler.handleFormulaException(item, e);
+			return cmd;
 		});
 	}
 	
@@ -102,32 +99,47 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	public CompletableFuture<ConstraintBasedRefinementCheckCommand> handleRefinement(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedRefinementCheckCommand cmd = new ConstraintBasedRefinementCheckCommand();
-		return checkItem(item, cmd, stateSpace);
+		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+			resultHandler.handleRefinementChecking(item, cmd);
+			return r;
+		});
 	}
 	
 	public CompletableFuture<ConstraintBasedAssertionCheckCommand> handleStaticAssertions(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
-		return checkItem(item, cmd, stateSpace);
+		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+			resultHandler.handleAssertionChecking(item, cmd, stateSpace);
+			return r;
+		});
 	}
 
 	public CompletableFuture<ConstraintBasedAssertionCheckCommand> handleDynamicAssertions(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
-		return checkItem(item, cmd, stateSpace);
+		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+			resultHandler.handleAssertionChecking(item, cmd, stateSpace);
+			return r;
+		});
 	}
 
 	public CompletableFuture<CheckWellDefinednessCommand> handleWellDefinedness(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		CheckWellDefinednessCommand cmd = new CheckWellDefinednessCommand();
-		return checkItem(item, cmd, stateSpace);
+		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+			resultHandler.handleWellDefinednessChecking(item, cmd);
+			return r;
+		});
 	}
 	
 	public CompletableFuture<SymbolicModelcheckCommand> handleSymbolic(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		final SymbolicModelcheckCommand.Algorithm algorithm = SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode());
 		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(algorithm);
-		return checkItem(item, cmd, stateSpace);
+		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+			resultHandler.handleSymbolicChecking(item, cmd);
+			return r;
+		});
 	}
 	
 	public CompletableFuture<IModelCheckingResult> handleDeadlock(SymbolicCheckingFormulaItem item) {
@@ -139,7 +151,10 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	public CompletableFuture<GetRedundantInvariantsCommand> findRedundantInvariants(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		return checkItem(item, cmd, stateSpace);
+		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+			resultHandler.handleFindRedundantInvariants(item, cmd);
+			return r;
+		});
 	}
 	
 	@Override

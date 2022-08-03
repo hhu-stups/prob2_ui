@@ -8,7 +8,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.CommandInterruptedException;
-import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.CheckWellDefinednessCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
@@ -76,21 +75,6 @@ public class SymbolicCheckingResultHandler {
 			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", result.getMessage());
 		}
 		item.setResultItem(res);
-	}
-	
-	public void handleFormulaResult(SymbolicCheckingFormulaItem item, AbstractCommand cmd) {
-		StateSpace stateSpace = currentTrace.getStateSpace();
-		if(item.getType() == SymbolicCheckingType.SYMBOLIC_MODEL_CHECK) {
-			handleSymbolicChecking(item, (SymbolicModelcheckCommand) cmd);
-		} else if(item.getType() == SymbolicCheckingType.CHECK_STATIC_ASSERTIONS || item.getType() == SymbolicCheckingType.CHECK_DYNAMIC_ASSERTIONS) {
-			handleAssertionChecking(item, (ConstraintBasedAssertionCheckCommand) cmd, stateSpace);
-		} else if (item.getType() == SymbolicCheckingType.CHECK_WELL_DEFINEDNESS) {
-			handleWellDefinednessChecking(item, (CheckWellDefinednessCommand)cmd);
-		} else if(item.getType() == SymbolicCheckingType.CHECK_REFINEMENT) {
-			handleRefinementChecking(item, (ConstraintBasedRefinementCheckCommand) cmd);
-		} else if(item.getType() == SymbolicCheckingType.FIND_REDUNDANT_INVARIANTS) {
-			handleFindRedundantInvariants(item, (GetRedundantInvariantsCommand) cmd);
-		}
 	}
 	
 	public void handleFindRedundantInvariants(SymbolicCheckingFormulaItem item, GetRedundantInvariantsCommand cmd) {
