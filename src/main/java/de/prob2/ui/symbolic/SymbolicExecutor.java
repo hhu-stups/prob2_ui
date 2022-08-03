@@ -1,9 +1,12 @@
 package de.prob2.ui.symbolic;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.google.inject.Injector;
 
 import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
+import de.prob.check.IModelCheckingResult;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
@@ -46,18 +49,16 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 	}
 	
 	public void checkItem(T item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
-		cliExecutor.submit(() -> {
-			RuntimeException exception = null;
-			try {
-				stateSpace.execute(cmd);
-			} catch (RuntimeException e) {
-				LOGGER.error("Exception during symbolic checking", e);
-				exception = e;
-			}
-			if (exception == null) {
-				resultHandler.handleFormulaResult(item, cmd);
+		final CompletableFuture<AbstractCommand> future = cliExecutor.submit(() -> {
+			stateSpace.execute(cmd);
+			return cmd;
+		});
+		future.whenComplete((r, e) -> {
+			if (e == null) {
+				resultHandler.handleFormulaResult(item, r);
 			} else {
-				resultHandler.handleFormulaResult(item, exception);
+				LOGGER.error("Exception during symbolic checking", e);
+				resultHandler.handleFormulaResult(item, e);
 			}
 			if(!checkAll) {
 				updateTrace(item);
@@ -66,15 +67,14 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 	}
 	
 	public void checkItem(IModelCheckJob checker, T item, boolean checkAll) {
-		cliExecutor.submit(() -> {
-			Object result;
-			try {
-				result = checker.call();
-			} catch (Exception e) {
-				LOGGER.error("Could not check CBC Deadlock", e);
-				result = e;
+		final CompletableFuture<IModelCheckingResult> future = cliExecutor.submit(checker);
+		future.whenComplete((r, e) -> {
+			if (e == null) {
+				resultHandler.handleFormulaResult(item, r);
+			} else {
+				LOGGER.error("Exception during symbolic checking", e);
+				resultHandler.handleFormulaResult(item, e);
 			}
-			resultHandler.handleFormulaResult(item, result);
 			if(!checkAll) {
 				updateTrace(item);
 			}
