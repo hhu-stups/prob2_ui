@@ -11,6 +11,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -41,7 +42,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					checkItem.disableProperty().bind(executor.runningProperty().or(to.selectedProperty().not()));
+					checkItem.disableProperty().bind(cliExecutor.runningProperty().or(to.selectedProperty().not()));
 				}
 			});
 
@@ -108,8 +109,8 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
-	                             final SymbolicAnimationChecker symbolicChecker, final Injector injector) {
-		super(i18n, currentTrace, currentProject, injector, symbolicChecker, symbolicCheckHandler);
+	                             final CliTaskExecutor cliExecutor, final Injector injector) {
+		super(i18n, currentTrace, currentProject, injector, cliExecutor, symbolicCheckHandler);
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}

@@ -7,6 +7,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -65,20 +66,19 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 
 	protected final Injector injector;
 	
-	protected final SymbolicExecutor executor;
-	
+	protected CliTaskExecutor cliExecutor;
 	protected final SymbolicFormulaHandler<T> formulaHandler;
 
 	protected final CheckBox selectAll;
 	
 	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace,
-	                    final CurrentProject currentProject, final Injector injector, final SymbolicExecutor executor,
+	                    final CurrentProject currentProject, final Injector injector, final CliTaskExecutor cliExecutor,
 	                    final SymbolicFormulaHandler<T> formulaHandler) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.executor = executor;
+		this.cliExecutor = cliExecutor;
 		this.formulaHandler = formulaHandler;
 		this.selectAll = new CheckBox();
 	}
@@ -113,7 +113,7 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 			}
 		});
 		checkMachineButton.disableProperty().bind(partOfDisableBinding.or(noFormulas.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
-		cancelButton.disableProperty().bind(executor.runningProperty().not());
+		cancelButton.disableProperty().bind(cliExecutor.runningProperty().not());
 		tvFormula.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -138,6 +138,7 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	
 	@FXML
 	public void cancel() {
-		executor.interrupt();
+		cliExecutor.interruptAll();
+		currentTrace.getStateSpace().sendInterrupt();
 	}
 }

@@ -5,7 +5,6 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.AbstractCommand;
@@ -16,21 +15,21 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.symbolic.ISymbolicResultHandler;
-import de.prob2.ui.symbolic.SymbolicExecutor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class SymbolicFormulaChecker extends SymbolicExecutor {
+public class SymbolicFormulaChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicFormulaChecker.class);
 	
+	protected final CurrentTrace currentTrace;
 	protected final ISymbolicResultHandler<SymbolicCheckingFormulaItem> resultHandler;
 	private final CliTaskExecutor cliExecutor;
 	
 	@Inject
-	public SymbolicFormulaChecker(final CurrentTrace currentTrace, final SymbolicCheckingResultHandler resultHandler, final Injector injector, final CliTaskExecutor cliExecutor) {
-		super(currentTrace, injector);
+	public SymbolicFormulaChecker(final CurrentTrace currentTrace, final SymbolicCheckingResultHandler resultHandler, final CliTaskExecutor cliExecutor) {
+		this.currentTrace = currentTrace;
 		this.resultHandler = resultHandler;
 		this.cliExecutor = cliExecutor;
 	}
