@@ -1,21 +1,16 @@
 package de.prob2.ui.symbolic;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.inject.Injector;
 
 import de.prob.animator.command.AbstractCommand;
 import de.prob.check.IModelCheckJob;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.DisablePropertyController;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,34 +22,24 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 	protected final CurrentTrace currentTrace;
 	
 	protected final ISymbolicResultHandler<T> resultHandler;
-
-	protected final List<IModelCheckJob> currentJobs;
 	
-	protected final ListProperty<Thread> currentJobThreads;
+	private final CliTaskExecutor cliExecutor;
 	
 	
 	public SymbolicExecutor(final CurrentTrace currentTrace, final ISymbolicResultHandler<T> resultHandler, final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.resultHandler = resultHandler;
-		this.currentJobs = new ArrayList<>();
-		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
+		this.cliExecutor = injector.getInstance(CliTaskExecutor.class);
 		injector.getInstance(DisablePropertyController.class).addDisableExpression(this.runningProperty());
 	}
 	
 	public void interrupt() {
-		List<Thread> removedThreads = new ArrayList<>();
-		for (Thread thread : currentJobThreads) {
-			thread.interrupt();
-			removedThreads.add(thread);
-		}
-		List<IModelCheckJob> removedJobs = new ArrayList<>(currentJobs);
+		cliExecutor.interruptAll();
 		currentTrace.getStateSpace().sendInterrupt();
-		currentJobThreads.removeAll(removedThreads);
-		currentJobs.removeAll(removedJobs);
 	}
 	
 	public BooleanExpression runningProperty() {
-		return currentJobThreads.emptyProperty().not();
+		return cliExecutor.runningProperty();
 	}
 	
 	public boolean isRunning() {
@@ -62,7 +47,7 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 	}
 	
 	public void checkItem(T item, AbstractCommand cmd, final StateSpace stateSpace, boolean checkAll) {
-		Thread checkingThread = new Thread(() -> {
+		cliExecutor.submit(() -> {
 			RuntimeException exception = null;
 			try {
 				stateSpace.execute(cmd);
@@ -70,7 +55,6 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 				LOGGER.error("Exception during symbolic checking", e);
 				exception = e;
 			}
-			Thread currentThread = Thread.currentThread();
 			final RuntimeException finalException = exception;
 			Platform.runLater(() -> {
 				if (finalException == null) {
@@ -82,15 +66,11 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 					updateTrace(item);
 				}
 			});
-			currentJobThreads.remove(currentThread);
-		}, "Symbolic Formula Checking Thread");
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		});
 	}
 	
 	public void checkItem(IModelCheckJob checker, T item, boolean checkAll) {
-		Thread checkingThread = new Thread(() -> {
-			currentJobs.add(checker);
+		cliExecutor.submit(() -> {
 			Object result;
 			try {
 				result = checker.call();
@@ -105,11 +85,7 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 					updateTrace(item);
 				}
 			});
-			currentJobs.remove(checker);
-			currentJobThreads.remove(Thread.currentThread());
-		}, "Symbolic Formula Checking Thread");
-		currentJobThreads.add(checkingThread);
-		checkingThread.start();
+		});
 	}
 	
 	protected abstract void updateTrace(T item);
