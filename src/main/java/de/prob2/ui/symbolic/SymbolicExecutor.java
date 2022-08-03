@@ -9,7 +9,6 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 
 import org.slf4j.Logger;
@@ -55,17 +54,14 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 				LOGGER.error("Exception during symbolic checking", e);
 				exception = e;
 			}
-			final RuntimeException finalException = exception;
-			Platform.runLater(() -> {
-				if (finalException == null) {
-					resultHandler.handleFormulaResult(item, cmd);
-				} else {
-					resultHandler.handleFormulaResult(item, finalException);
-				}
-				if(!checkAll) {
-					updateTrace(item);
-				}
-			});
+			if (exception == null) {
+				resultHandler.handleFormulaResult(item, cmd);
+			} else {
+				resultHandler.handleFormulaResult(item, exception);
+			}
+			if(!checkAll) {
+				updateTrace(item);
+			}
 		});
 	}
 	
@@ -78,13 +74,10 @@ public abstract class SymbolicExecutor<T extends SymbolicItem<?>> {
 				LOGGER.error("Could not check CBC Deadlock", e);
 				result = e;
 			}
-			final Object finalResult = result;
-			Platform.runLater(() -> {
-				resultHandler.handleFormulaResult(item, finalResult);
-				if(!checkAll) {
-					updateTrace(item);
-				}
-			});
+			resultHandler.handleFormulaResult(item, result);
+			if(!checkAll) {
+				updateTrace(item);
+			}
 		});
 	}
 	
