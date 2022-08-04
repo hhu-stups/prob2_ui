@@ -100,7 +100,7 @@ public class SimulationChoosingStage extends Stage {
 			final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(simulation, newItem);
 			lastItem = existingItem.orElse(newItem);
 			this.close();
-			this.simulationItemHandler.checkItem(existingItem.orElse(newItem), false);
+			this.simulationItemHandler.checkItem(existingItem.orElse(newItem));
 		});
 	}
 

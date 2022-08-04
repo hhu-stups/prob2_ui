@@ -285,7 +285,7 @@ public class VOChecker {
 		} else if (validationTask instanceof ReplayTrace) {
 			traceChecker.checkNoninteractive((ReplayTrace) validationTask);
 		} else if (validationTask instanceof SimulationItem) {
-			simulationItemHandler.checkItem((SimulationItem) validationTask, false);
+			simulationItemHandler.checkItem((SimulationItem) validationTask);
 		} else {
 			throw new AssertionError("Unhandled validation task type: " + validationTask.getClass());
 		}

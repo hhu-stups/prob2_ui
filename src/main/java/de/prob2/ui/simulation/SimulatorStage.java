@@ -102,7 +102,7 @@ public class SimulatorStage extends Stage {
 
 				MenuItem checkItem = new MenuItem(i18n.translate("simulation.contextMenu.check"));
 				checkItem.disableProperty().bind(configurationPath.isNull().or(simulationItemHandler.runningProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
-				checkItem.setOnAction(e-> simulationItemHandler.checkItem(this.getItem(), false));
+				checkItem.setOnAction(e-> simulationItemHandler.checkItem(this.getItem()));
 
 				MenuItem removeItem = new MenuItem(i18n.translate("simulation.contextMenu.remove"));
 				removeItem.setOnAction(e -> simulationItemHandler.removeItem(cbSimulation.getSelectionModel().getSelectedItem(), this.getItem()));
@@ -362,7 +362,7 @@ public class SimulatorStage extends Stage {
 			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null &&
 				configurationPath.get() != null && !simulationItemHandler.runningProperty().get() && lastSimulator.get() != null &&
 				!lastSimulator.get().isRunning()) {
-				simulationItemHandler.checkItem(item, false);
+				simulationItemHandler.checkItem(item);
 			}
 		});
 

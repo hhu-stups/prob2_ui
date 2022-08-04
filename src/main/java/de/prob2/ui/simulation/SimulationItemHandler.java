@@ -129,7 +129,7 @@ public class SimulationItemHandler {
 		thread.start();
 	}
 
-	private void handleMonteCarloSimulation(SimulationItem item, boolean checkAll) {
+	private void handleMonteCarloSimulation(SimulationItem item) {
 		int executions = (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
@@ -138,7 +138,7 @@ public class SimulationItemHandler {
 		runAndCheck(item, monteCarlo);
 	}
 
-	private void handleHypothesisTest(SimulationItem item, boolean checkAll) {
+	private void handleHypothesisTest(SimulationItem item) {
 		int executions = (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
@@ -160,7 +160,7 @@ public class SimulationItemHandler {
 		runAndCheck(item, hypothesisChecker);
 	}
 
-	private void handleEstimation(SimulationItem item, boolean checkAll) {
+	private void handleEstimation(SimulationItem item) {
 		Trace trace = currentTrace.get();
 		int executions = (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
@@ -183,7 +183,7 @@ public class SimulationItemHandler {
 		runAndCheck(item, simulationEstimator);
 	}
 
-	public void checkItem(SimulationItem item, boolean checkAll) {
+	public void checkItem(SimulationItem item) {
 		/*if(!item.selected()) {
 			return;
 		}*/
@@ -191,13 +191,13 @@ public class SimulationItemHandler {
 		SimulationType type = item.getType();
 		switch(type) {
 			case MONTE_CARLO_SIMULATION:
-				handleMonteCarloSimulation(item, checkAll);
+				handleMonteCarloSimulation(item);
 				break;
 			case HYPOTHESIS_TEST:
-				handleHypothesisTest(item, checkAll);
+				handleHypothesisTest(item);
 				break;
 			case ESTIMATION:
-				handleEstimation(item, checkAll);
+				handleEstimation(item);
 				break;
 			default:
 				break;
@@ -207,7 +207,7 @@ public class SimulationItemHandler {
 	public void handleMachine(SimulationModel simulationModel) {
 		Thread thread = new Thread(() -> {
 			for (SimulationItem item : simulationModel.getSimulationItems()) {
-				this.checkItem(item, true);
+				this.checkItem(item);
 				if(Thread.currentThread().isInterrupted()) {
 					break;
 				}
