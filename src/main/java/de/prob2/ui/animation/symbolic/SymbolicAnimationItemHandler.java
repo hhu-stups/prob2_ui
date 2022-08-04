@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.ClassicalB;
@@ -43,12 +42,8 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		return machine.getSymbolicAnimationFormulas();
 	}
 
-	private CompletableFuture<SymbolicAnimationItem> checkItem(SymbolicAnimationItem item, AbstractCommand cmd, final StateSpace stateSpace) {
-		final CompletableFuture<SymbolicAnimationItem> future = cliExecutor.submit(() -> {
-			stateSpace.execute(cmd);
-			return item;
-		});
-		return future.exceptionally(e -> {
+	private CompletableFuture<SymbolicAnimationItem> checkItem(final SymbolicAnimationItem item, final Runnable task) {
+		return cliExecutor.submit(task, item).exceptionally(e -> {
 			LOGGER.error("Exception during symbolic animation", e);
 			resultHandler.handleFormulaException(item, e);
 			return item;
@@ -58,18 +53,18 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 	public CompletableFuture<SymbolicAnimationItem> handleSequence(SymbolicAnimationItem item) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new ClassicalB("1=1", FormulaExpand.EXPAND));
-		return checkItem(item, cmd, currentTrace.getStateSpace()).thenApply(r -> {
+		return checkItem(item, () -> {
+			currentTrace.getStateSpace().execute(cmd);
 			resultHandler.handleSequence(item, cmd);
-			return r;
 		});
 	}
 
 	public CompletableFuture<SymbolicAnimationItem> findValidState(SymbolicAnimationItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode(), FormulaExpand.EXPAND), true);
-		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+		return checkItem(item, () -> {
+			stateSpace.execute(cmd);
 			resultHandler.handleFindValidState(item, cmd, stateSpace);
-			return r;
 		});
 	}
 

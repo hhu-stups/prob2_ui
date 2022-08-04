@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.CheckWellDefinednessCommand;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
@@ -19,8 +18,6 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCInvariantChecker;
-import de.prob.check.IModelCheckJob;
-import de.prob.check.IModelCheckingResult;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
@@ -58,25 +55,8 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		}
 	}
 	
-	private CompletableFuture<SymbolicCheckingFormulaItem> checkItem(SymbolicCheckingFormulaItem item, AbstractCommand cmd, final StateSpace stateSpace) {
-		final CompletableFuture<SymbolicCheckingFormulaItem> future = cliExecutor.submit(() -> {
-			stateSpace.execute(cmd);
-			return item;
-		});
-		return future.exceptionally(e -> {
-			LOGGER.error("Exception during symbolic checking", e);
-			resultHandler.handleFormulaException(item, e);
-			return item;
-		});
-	}
-	
-	private CompletableFuture<SymbolicCheckingFormulaItem> checkItem(IModelCheckJob checker, SymbolicCheckingFormulaItem item) {
-		final CompletableFuture<SymbolicCheckingFormulaItem> future = cliExecutor.submit(() -> {
-			final IModelCheckingResult res = checker.call();
-			resultHandler.handleFormulaResult(item, res);
-			return item;
-		});
-		return future.exceptionally(e -> {
+	private CompletableFuture<SymbolicCheckingFormulaItem> checkItem(final SymbolicCheckingFormulaItem item, final Runnable task) {
+		return cliExecutor.submit(task, item).exceptionally(e -> {
 			LOGGER.error("Exception during symbolic checking", e);
 			resultHandler.handleFormulaException(item, e);
 			return item;
@@ -94,42 +74,42 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 			eventNames.add(item.getCode());
 		}
 		CBCInvariantChecker checker = new CBCInvariantChecker(currentTrace.getStateSpace(), eventNames);
-		return checkItem(checker, item);
+		return checkItem(item, () -> resultHandler.handleFormulaResult(item, checker.call()));
 	}
 		
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleRefinement(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedRefinementCheckCommand cmd = new ConstraintBasedRefinementCheckCommand();
-		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+		return checkItem(item, () -> {
+			stateSpace.execute(cmd);
 			resultHandler.handleRefinementChecking(item, cmd);
-			return r;
 		});
 	}
 	
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleStaticAssertions(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
-		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+		return checkItem(item, () -> {
+			stateSpace.execute(cmd);
 			resultHandler.handleAssertionChecking(item, cmd, stateSpace);
-			return r;
 		});
 	}
 
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleDynamicAssertions(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
-		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+		return checkItem(item, () -> {
+			stateSpace.execute(cmd);
 			resultHandler.handleAssertionChecking(item, cmd, stateSpace);
-			return r;
 		});
 	}
 
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleWellDefinedness(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		CheckWellDefinednessCommand cmd = new CheckWellDefinednessCommand();
-		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+		return checkItem(item, () -> {
+			stateSpace.execute(cmd);
 			resultHandler.handleWellDefinednessChecking(item, cmd);
-			return r;
 		});
 	}
 	
@@ -137,24 +117,24 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		final SymbolicModelcheckCommand.Algorithm algorithm = SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode());
 		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(algorithm);
-		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+		return checkItem(item, () -> {
+			stateSpace.execute(cmd);
 			resultHandler.handleSymbolicChecking(item, cmd);
-			return r;
 		});
 	}
 	
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleDeadlock(SymbolicCheckingFormulaItem item) {
 		IEvalElement constraint = new ClassicalB(item.getCode(), FormulaExpand.EXPAND);
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(currentTrace.getStateSpace(), constraint);
-		return checkItem(checker, item);
+		return checkItem(item, () -> resultHandler.handleFormulaResult(item, checker.call()));
 	}
 	
 	public CompletableFuture<SymbolicCheckingFormulaItem> findRedundantInvariants(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		return checkItem(item, cmd, stateSpace).thenApply(r -> {
+		return checkItem(item, () -> {
+			stateSpace.execute(cmd);
 			resultHandler.handleFindRedundantInvariants(item, cmd);
-			return r;
 		});
 	}
 	
