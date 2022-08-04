@@ -5,10 +5,6 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
-import de.prob.animator.command.NoTraceFoundException;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.exception.CliError;
-import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -64,14 +60,6 @@ public class SymbolicAnimationResultHandler {
 	}
 	
 	public void handleFormulaException(SymbolicAnimationItem item, Throwable result) {
-		CheckingResultItem resultItem = null;
-		if(result instanceof ProBError || result instanceof CliError || result instanceof EvaluationException) {
-			resultItem = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header",
-					"common.result.message", result);
-		} else if(result instanceof NoTraceFoundException) {
-			resultItem = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header",
-					"common.result.message", result.getMessage());
-		}
-		item.setResultItem(resultItem);
+		item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", result));
 	}
 }
