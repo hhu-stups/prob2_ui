@@ -1,5 +1,15 @@
 package de.prob2.ui.simulation.configuration;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,16 +17,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonReader;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.Transition;
@@ -29,10 +29,12 @@ public class SimulationFileHandler {
 			.setPrettyPrinting()
 			.create();
 
-	public static SimulationConfiguration constructConfigurationFromJSON(File inputFile) throws IOException, JsonSyntaxException {
+	public static SimulationConfiguration constructConfigurationFromJSON(Path inputFile) throws IOException, JsonSyntaxException {
 		Gson gson = new Gson();
-		JsonReader reader = new JsonReader(new FileReader(inputFile));
-		JsonObject simulationFile = gson.fromJson(reader, JsonObject.class);
+		final JsonObject simulationFile;
+		try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
+			simulationFile = gson.fromJson(reader, JsonObject.class);
+		}
 		List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
 		final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
 		return new SimulationConfiguration(activationConfigurations, metadata);

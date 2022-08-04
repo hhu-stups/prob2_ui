@@ -1,27 +1,27 @@
 package de.prob2.ui.simulation;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
-import de.prob.model.eventb.EventBPackageModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
+
 import javafx.scene.control.Alert;
 import javafx.stage.Window;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class SimulationHelperFunctions {
 
@@ -49,9 +49,9 @@ public class SimulationHelperFunctions {
 		}
 	}
 
-	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, File file) {
+	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, Path path) {
 		try {
-			simulator.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(file));
+			simulator.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(path));
 		} catch (IOException e) {
 			LOGGER.debug("Tried to load simulation configuration file");
 			alert(stageManager, window, e, "simulation.error.header.fileNotFound","simulation.error.body.fileNotFound");

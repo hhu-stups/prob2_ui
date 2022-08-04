@@ -1,12 +1,21 @@
 package de.prob2.ui.simulation;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
@@ -14,19 +23,12 @@ import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
+
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-
-import javax.inject.Inject;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Singleton
 public class SimulationItemHandler {
@@ -132,7 +134,7 @@ public class SimulationItemHandler {
 		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationMonteCarlo monteCarlo = new SimulationMonteCarlo(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), monteCarlo, path.toFile());
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), monteCarlo, path);
 		runAndCheck(item, monteCarlo);
 	}
 
@@ -154,7 +156,7 @@ public class SimulationItemHandler {
 		}
 
 		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, currentTrace, executions, maxStepsBeforeProperty, checkingType, hypothesisCheckingType, probability, significance, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path.toFile());
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path);
 		runAndCheck(item, hypothesisChecker);
 	}
 
@@ -177,7 +179,7 @@ public class SimulationItemHandler {
 		}
 
 		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, currentTrace, executions, maxStepsBeforeProperty, checkingType, estimationType, desiredValue, epsilon, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator, path.toFile());
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator, path);
 		runAndCheck(item, simulationEstimator);
 	}
 

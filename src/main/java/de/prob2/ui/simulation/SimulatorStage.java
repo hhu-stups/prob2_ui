@@ -407,7 +407,7 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
 			if (lastSimulator.isNull().get() || !lastSimulator.get().equals(realTimeSimulator)) {
 				this.time = 0;
-				SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
+				SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
 			}
 			realTimeSimulator.run();
 			startTimer(realTimeSimulator);
@@ -572,7 +572,7 @@ public class SimulatorStage extends Stage {
 			lbTime.setText("");
 			this.time = 0;
 			simulation.reset();
-			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get().toFile());
+			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
 			loadSimulationItems();
 		}
 	}
