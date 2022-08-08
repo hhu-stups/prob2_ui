@@ -20,6 +20,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+<?import javafx.scene.control.TextArea?>
 <fx:root title="%vomanager.title" type="VOManagerStage" width="1200" height="800" minHeight="600" minWidth="800" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -69,10 +70,16 @@
 							</placeholder>
 						</TreeTableView>
 					</VBox>
-					<StackPane>
-						<RequirementsEditingBox fx:id="requirementEditingBox" VBox.vgrow="NEVER"/>
-						<VOEditingBox fx:id="voEditingBox" VBox.vgrow="NEVER"/>
-					</StackPane>
+					<VBox spacing="5.0">
+						<StackPane>
+							<RequirementsEditingBox fx:id="requirementEditingBox" VBox.vgrow="NEVER"/>
+							<VOEditingBox fx:id="voEditingBox" VBox.vgrow="NEVER"/>
+						</StackPane>
+						<VBox spacing="5.0">
+							<Label text="%vomanager.feedback.validation.title"/>
+							<TextArea editable="false" fx:id="taFeedback"/>
+						</VBox>
+					</VBox>
 				</SplitPane>
 			</StackPane>
 		</Scene>

@@ -5,8 +5,8 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
 import de.prob2.ui.vomanager.ValidationObligation;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 public class VOFeedbackManager {
 
 	public Map<String, VOValidationFeedback> computeValidationFeedback(List<ValidationObligation> validationObligations) {
-		Map<String, VOValidationFeedback> result = new HashMap<>();
-		Set<String> dependentVOs = new HashSet<>();
-		Set<String> dependentVTs = new HashSet<>();
-		Set<String> dependentRequirements = new HashSet<>();
+		Map<String, VOValidationFeedback> result = new LinkedHashMap<>();
+		Set<String> dependentVOs = new LinkedHashSet<>();
+		Set<String> dependentVTs = new LinkedHashSet<>();
+		Set<String> dependentRequirements = new LinkedHashSet<>();
 		for(ValidationObligation vo : validationObligations) {
 			// For each failed VO
 			if(vo.getChecked() == Checked.FAIL) {
@@ -45,7 +45,7 @@ public class VOFeedbackManager {
 	}
 
 	private Set<ValidationObligation> computeDependentVOs(String currentVO, List<ValidationObligation> validationObligations, Set<String> dependentVTs) {
-		Set<ValidationObligation> result = new HashSet<>();
+		Set<ValidationObligation> result = new LinkedHashSet<>();
 		for(String dependentVT : dependentVTs) {
 			for(ValidationObligation vo : validationObligations) {
 				if(vo.getId().equals(currentVO)) {
@@ -69,10 +69,10 @@ public class VOFeedbackManager {
 	}
 
 	private Set<VOEvolutionFeedback> computeEvolutionFeedback(Map<String, VOValidationFeedback> prevFeedback, Map<String, VOValidationFeedback> currentFeedback) {
-		Set<VOEvolutionFeedback> result = new HashSet<>();
-		Set<String> conVOs = new HashSet<>();
-		Set<String> conVTs = new HashSet<>();
-		Set<String> conReqs = new HashSet<>();
+		Set<VOEvolutionFeedback> result = new LinkedHashSet<>();
+		Set<String> conVOs = new LinkedHashSet<>();
+		Set<String> conVTs = new LinkedHashSet<>();
+		Set<String> conReqs = new LinkedHashSet<>();
 
 		// Compute contradicting VOs
 		for(String prevVO : prevFeedback.keySet()) {
