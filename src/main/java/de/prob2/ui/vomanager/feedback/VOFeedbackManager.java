@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager.feedback;
 
+import com.google.inject.Singleton;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
 import de.prob2.ui.vomanager.ValidationObligation;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Singleton
 public class VOFeedbackManager {
 
 	public Map<String, VOValidationFeedback> computeValidationFeedback(List<ValidationObligation> validationObligations) {
@@ -35,7 +37,7 @@ public class VOFeedbackManager {
 
 				// Determine possible error sources in requirements
 				dependentRequirements.addAll(computeDependentRequirements(computeDependentVOs(validationObligations, dependentVTs)));
-				
+
 				result.put(vo.getId(), new VOValidationFeedback(vo.getId(), dependentVOs, dependentVTs, dependentRequirements));
 			}
 		}
