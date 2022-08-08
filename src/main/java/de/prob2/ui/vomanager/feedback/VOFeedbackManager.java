@@ -31,12 +31,12 @@ public class VOFeedbackManager {
 						.collect(Collectors.toList()));
 
 				// Determine other VOs using VTs that are possible error sources
-				dependentVOs.addAll(computeDependentVOs(validationObligations, dependentVTs)
+				dependentVOs.addAll(computeDependentVOs(vo.getId(), validationObligations, dependentVTs)
 						.stream()
 						.map(ValidationObligation::getId).collect(Collectors.toList()));
 
 				// Determine possible error sources in requirements
-				dependentRequirements.addAll(computeDependentRequirements(computeDependentVOs(validationObligations, dependentVTs)));
+				dependentRequirements.addAll(computeDependentRequirements(computeDependentVOs(vo.getId(), validationObligations, dependentVTs)));
 
 				result.put(vo.getId(), new VOValidationFeedback(vo.getId(), dependentVOs, dependentVTs, dependentRequirements));
 			}
@@ -44,10 +44,13 @@ public class VOFeedbackManager {
 		return result;
 	}
 
-	private Set<ValidationObligation> computeDependentVOs(List<ValidationObligation> validationObligations, Set<String> dependentVTs) {
+	private Set<ValidationObligation> computeDependentVOs(String currentVO, List<ValidationObligation> validationObligations, Set<String> dependentVTs) {
 		Set<ValidationObligation> result = new HashSet<>();
 		for(String dependentVT : dependentVTs) {
 			for(ValidationObligation vo : validationObligations) {
+				if(vo.getId().equals(currentVO)) {
+					continue;
+				}
 				if(vo.getTasks().stream()
 						.map(IValidationTask::getId)
 						.collect(Collectors.toList())
