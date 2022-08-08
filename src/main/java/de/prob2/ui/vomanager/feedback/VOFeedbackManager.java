@@ -19,15 +19,23 @@ public class VOFeedbackManager {
 		Set<String> dependentVTs = new HashSet<>();
 		Set<String> dependentRequirements = new HashSet<>();
 		for(ValidationObligation vo : validationObligations) {
+			// For each failed VO
 			if(vo.getChecked() == Checked.FAIL) {
+
+				// Determine possible error sources in VTs
 				dependentVTs.addAll(vo.getTasks().stream()
 						.filter(task -> task.getChecked() == Checked.FAIL)
 						.map(IValidationTask::getId)
 						.collect(Collectors.toList()));
+
+				// Determine other VOs using VTs that are possible error sources
 				dependentVOs.addAll(computeDependentVOs(validationObligations, dependentVTs)
 						.stream()
 						.map(ValidationObligation::getId).collect(Collectors.toList()));
+
+				// Determine possible error sources in requirements
 				dependentRequirements.addAll(computeDependentRequirements(computeDependentVOs(validationObligations, dependentVTs)));
+				
 				result.put(vo.getId(), new VOValidationFeedback(vo.getId(), dependentVOs, dependentVTs, dependentRequirements));
 			}
 		}
@@ -53,6 +61,36 @@ public class VOFeedbackManager {
 		return dependentVOs.stream()
 				.map(ValidationObligation::getRequirement)
 				.collect(Collectors.toSet());
+	}
+
+	private Set<VOEvolutionFeedback> computeEvolutionFeedback(Map<String, VOValidationFeedback> prevFeedback, Map<String, VOValidationFeedback> currentFeedback) {
+		Set<VOEvolutionFeedback> result = new HashSet<>();
+		Set<String> conVOs = new HashSet<>();
+		Set<String> conVTs = new HashSet<>();
+		Set<String> conReqs = new HashSet<>();
+
+		// Compute contradicting VOs
+		for(String prevVO : prevFeedback.keySet()) {
+			if(!currentFeedback.containsKey(prevVO)) {
+				conVOs.add(prevVO);
+			}
+		}
+
+		// Compute contradicting VTs and requirements
+		for(String vo : conVOs) {
+			conVTs.addAll(prevFeedback.get(vo).getDependentVTs());
+			conReqs.addAll(prevFeedback.get(vo).getDependentRequirements());
+		}
+
+		// Compute contradicting results
+		for (String currentVO : currentFeedback.keySet()) {
+			if(!prevFeedback.containsKey(currentVO)) {
+				VOValidationFeedback feedback = currentFeedback.get(currentVO);
+				result.add(new VOEvolutionFeedback(currentVO, conVOs, feedback.getDependentVTs(), conVTs, feedback.getDependentRequirements(), conReqs));
+			}
+		}
+
+		return result;
 	}
 
 }
