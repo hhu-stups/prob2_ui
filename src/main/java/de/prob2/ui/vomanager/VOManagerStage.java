@@ -216,6 +216,7 @@ public class VOManagerStage extends Stage {
 	private void updateVTsFromMachine(Machine machine) {
 		for(String key : machine.getValidationTasks().keySet()) {
 			IValidationTask validationTask = machine.getValidationTasks().get(key);
+			validationTask.checkedProperty().addListener((observable, from, to) -> showFeedback());
 			voChecker.registerTask(key, null); // TODO
 		}
 		machine.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
@@ -327,7 +328,6 @@ public class VOManagerStage extends Stage {
 		if(currentProject.getCurrentMachine() == null) {
 			return;
 		}
-		currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getCurrentMachine().getValidationObligations());
 		showFeedback();
 	}
 
@@ -375,7 +375,8 @@ public class VOManagerStage extends Stage {
 		}
 	}
 
-	private void showFeedback() {
+	public void showFeedback() {
+		currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getCurrentMachine().getValidationObligations());
 		taFeedback.clear();
 		if(currentFeedback == null) {
 			return;

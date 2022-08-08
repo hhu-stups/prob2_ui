@@ -83,7 +83,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	}
 
 
-	public ValidationObligation changeRequirement(String requirement){
+	public ValidationObligation changeRequirement(String requirement) {
 		return new ValidationObligation(this.id, this.expression, requirement, this.previousVersions);
 	}
 
@@ -117,7 +117,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	}
 
 	@JsonIgnore
-	public List<ValidationObligation> getPreviousVersions(){
+	public List<ValidationObligation> getPreviousVersions() {
 		return previousVersions;
 	}
 
