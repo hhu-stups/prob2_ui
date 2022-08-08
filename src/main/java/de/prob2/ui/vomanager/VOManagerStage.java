@@ -324,6 +324,9 @@ public class VOManagerStage extends Stage {
 			item.setExpanded(true);
 		}
 		tvRequirements.setRoot(root);
+		if(currentProject.getCurrentMachine() == null) {
+			return;
+		}
 		currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getCurrentMachine().getValidationObligations());
 		showFeedback();
 	}
@@ -377,17 +380,27 @@ public class VOManagerStage extends Stage {
 		if(currentFeedback == null) {
 			return;
 		}
-		for(String vo : currentFeedback.keySet()) {
-			VOValidationFeedback validationFeedback = currentFeedback.get(vo);
-			taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", vo));
-			taFeedback.appendText("\n");
-			taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVOs", validationFeedback.getDependentVOs().toString()));
-			taFeedback.appendText("\n");
-			taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVTs", validationFeedback.getDependentVTs().toString()));
-			taFeedback.appendText("\n");
-			taFeedback.appendText(i18n.translate("vomanager.feedback.dependentRequirements", validationFeedback.getDependentRequirements().toString()));
-			taFeedback.appendText("\n");
-			taFeedback.appendText("\n");
+		if(currentFeedback.isEmpty()) {
+			for(ValidationObligation validationObligation : currentProject.getCurrentMachine().getValidationObligations()) {
+				if(validationObligation.getChecked() == Checked.NOT_CHECKED) {
+					taFeedback.appendText(i18n.translate("vomanager.feedback.notChecked"));
+					return;
+				}
+			}
+			taFeedback.appendText(i18n.translate("vomanager.feedback.successful"));
+		} else {
+			for (String vo : currentFeedback.keySet()) {
+				VOValidationFeedback validationFeedback = currentFeedback.get(vo);
+				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", vo));
+				taFeedback.appendText("\n");
+				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVOs", validationFeedback.getDependentVOs().toString()));
+				taFeedback.appendText("\n");
+				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVTs", validationFeedback.getDependentVTs().toString()));
+				taFeedback.appendText("\n");
+				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentRequirements", validationFeedback.getDependentRequirements().toString()));
+				taFeedback.appendText("\n");
+				taFeedback.appendText("\n");
+			}
 		}
 	}
 
