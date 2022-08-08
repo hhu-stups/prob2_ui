@@ -26,6 +26,8 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.TreeCheckedCell;
 
+import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
+import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -91,6 +93,8 @@ public class VOManagerStage extends Stage {
 
 	private final RequirementHandler requirementHandler;
 
+	private final VOFeedbackManager feedbackManager;
+
 	private final I18n i18n;
 
 	private final ObjectProperty<EditType> editTypeProperty;
@@ -99,15 +103,19 @@ public class VOManagerStage extends Stage {
 
 	private final Map<String, List<String>> refinementChain;
 
+	private Map<String, VOValidationFeedback> currentFeedback;
+
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-			final VOChecker voChecker, final VOErrorHandler voErrorHandler, final RequirementHandler requirementHandler, final I18n i18n) {
+						  final VOChecker voChecker, final VOErrorHandler voErrorHandler, final RequirementHandler requirementHandler,
+						  final VOFeedbackManager feedbackManager, final I18n i18n) {
 		super();
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voChecker = voChecker;
 		this.voErrorHandler = voErrorHandler;
 		this.requirementHandler = requirementHandler;
+		this.feedbackManager = feedbackManager;
 		this.i18n = i18n;
 		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
@@ -312,6 +320,7 @@ public class VOManagerStage extends Stage {
 			item.setExpanded(true);
 		}
 		tvRequirements.setRoot(root);
+		currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getCurrentMachine().getValidationObligations());
 	}
 
 	private void updateMachineRequirementsTable(TreeItem<INameable> root) {
