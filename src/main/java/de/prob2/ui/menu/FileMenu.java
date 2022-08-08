@@ -1,12 +1,18 @@
 package de.prob2.ui.menu;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
+import de.prob.animator.command.GetInternalRepresentationCommand;
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.animator.domainobjects.FormulaTranslationMode;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.eventb.EventBPackageModel;
 import de.prob.model.eventb.translate.ModelToXML;
@@ -14,7 +20,6 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.scripting.Api;
 import de.prob.statespace.FormalismType;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.WarningAlert;
@@ -26,6 +31,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
+
 import javafx.beans.InvalidationListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,12 +41,6 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,20 +189,18 @@ public class FileMenu extends Menu {
 		if (path == null) {
 			return;
 		}
-		
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		final String code;
+
+		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
 		if (event.getSource() == exportAsClassicalBAsciiItem) {
-			final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
-			stateSpace.execute(cmd);
-			code = cmd.getPrettyPrint();
+			cmd.setTranslationMode(FormulaTranslationMode.ASCII);
 		} else if (event.getSource() == exportAsClassicalBUnicodeItem) {
-			final GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
-			stateSpace.execute(cmd);
-			code = cmd.getPrettyPrint();
+			cmd.setTranslationMode(FormulaTranslationMode.UNICODE);
 		} else {
 			throw new AssertionError();
 		}
+
+		currentTrace.getStateSpace().execute(cmd);
+		final String code = cmd.getPrettyPrint();
 
 		try {
 			Files.write(path, Arrays.asList(code.split("\n")));

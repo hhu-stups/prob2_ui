@@ -8,8 +8,8 @@ import java.nio.file.Path;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
+import de.prob.animator.command.GetInternalRepresentationCommand;
+import de.prob.animator.domainobjects.FormulaTranslationMode;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.CSPModel;
@@ -105,15 +105,10 @@ public final class ViewCodeStage extends Stage {
 	}
 	
 	public void setCode() {
-		if(cbUnicode.isSelected()) {
-			final GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
-			this.currentTrace.getStateSpace().execute(cmd);
-			this.codeProperty().set(cmd.getPrettyPrint());
-		} else {
-			final GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
-			this.currentTrace.getStateSpace().execute(cmd);
-			this.codeProperty().set(cmd.getPrettyPrint());
-		}
+		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
+		cmd.setTranslationMode(cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
+		this.currentTrace.getStateSpace().execute(cmd);
+		this.codeProperty().set(cmd.getPrettyPrint());
 	}
 	
 	@FXML

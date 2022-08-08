@@ -22,9 +22,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintCommand;
-import de.prob.animator.command.GetInternalRepresentationPrettyPrintUnicodeCommand;
+import de.prob.animator.command.GetInternalRepresentationCommand;
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.animator.domainobjects.FormulaTranslationMode;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.EventBFactory;
@@ -271,15 +271,10 @@ public class BEditorView extends BorderPane {
 		if(stateSpace == null) {
 			return;
 		}
-		if(cbUnicode.isSelected()) {
-			GetInternalRepresentationPrettyPrintUnicodeCommand cmd = new GetInternalRepresentationPrettyPrintUnicodeCommand();
-			stateSpace.execute(cmd);
-			this.setEditorText(cmd.getPrettyPrint(), machinePath);
-		} else {
-			GetInternalRepresentationPrettyPrintCommand cmd = new GetInternalRepresentationPrettyPrintCommand();
-			stateSpace.execute(cmd);
-			this.setEditorText(cmd.getPrettyPrint(), machinePath);
-		}
+		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
+		cmd.setTranslationMode(cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
+		stateSpace.execute(cmd);
+		this.setEditorText(cmd.getPrettyPrint(), machinePath);
 		beditor.setEditable(false);
 	}
 	
