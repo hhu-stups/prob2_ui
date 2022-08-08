@@ -17,25 +17,23 @@ public class VOFeedbackManager {
 
 	public Map<String, VOValidationFeedback> computeValidationFeedback(List<ValidationObligation> validationObligations) {
 		Map<String, VOValidationFeedback> result = new LinkedHashMap<>();
-		Set<String> dependentVOs = new LinkedHashSet<>();
-		Set<String> dependentVTs = new LinkedHashSet<>();
-		Set<String> dependentRequirements = new LinkedHashSet<>();
 		for(ValidationObligation vo : validationObligations) {
+			Set<String> dependentRequirements = new LinkedHashSet<>();
 			// For each failed VO
 			if(vo.getChecked() == Checked.FAIL) {
 
 				// Determine possible error sources in VTs
-				dependentVTs.addAll(vo.getTasks().stream()
+				Set<String> dependentVTs = vo.getTasks().stream()
 						.filter(task -> task.getChecked() == Checked.FAIL)
-						.map(IValidationTask::getId)
-						.collect(Collectors.toList()));
+						.map(IValidationTask::getId).collect(Collectors.toCollection(LinkedHashSet::new));
 
 				// Determine other VOs using VTs that are possible error sources
-				dependentVOs.addAll(computeDependentVOs(vo.getId(), validationObligations, dependentVTs)
+				Set<String> dependentVOs = computeDependentVOs(vo.getId(), validationObligations, dependentVTs)
 						.stream()
-						.map(ValidationObligation::getId).collect(Collectors.toList()));
+						.map(ValidationObligation::getId).collect(Collectors.toCollection(LinkedHashSet::new));
 
 				// Determine possible error sources in requirements
+				dependentRequirements.add(vo.getRequirement());
 				dependentRequirements.addAll(computeDependentRequirements(computeDependentVOs(vo.getId(), validationObligations, dependentVTs)));
 
 				result.put(vo.getId(), new VOValidationFeedback(vo.getId(), dependentVOs, dependentVTs, dependentRequirements));
