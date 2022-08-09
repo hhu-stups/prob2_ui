@@ -5,7 +5,6 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
 import de.prob2.ui.vomanager.ValidationObligation;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
