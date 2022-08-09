@@ -8,14 +8,17 @@ public class VOValidationFeedback {
 
 	private final String voID;
 
+	private final String requirement;
+
 	private final Set<String> dependentVOs;
 
 	private final Set<String> dependentVTs;
 
 	private final Set<String> dependentRequirements;
 
-	public VOValidationFeedback(String voID, Set<String> dependentVOs, Set<String> dependentVTs, Set<String> dependentRequirements) {
+	public VOValidationFeedback(String voID, String requirement, Set<String> dependentVOs, Set<String> dependentVTs, Set<String> dependentRequirements) {
 		this.voID = voID;
+		this.requirement = requirement;
 		this.dependentVOs = dependentVOs;
 		this.dependentVTs = dependentVTs;
 		this.dependentRequirements = dependentRequirements;
@@ -23,6 +26,10 @@ public class VOValidationFeedback {
 
 	public String getVoID() {
 		return voID;
+	}
+
+	public String getRequirement() {
+		return requirement;
 	}
 
 	public Set<String> getDependentVOs() {
@@ -54,6 +61,7 @@ public class VOValidationFeedback {
 	public String toString() {
 		return new StringJoiner(", ", VOValidationFeedback.class.getSimpleName() + "[", "]")
 				.add("voID='" + voID + "'")
+				.add("requirement=" + requirement)
 				.add("dependentVOs=" + dependentVOs)
 				.add("dependentVTs=" + dependentVTs)
 				.add("dependentRequirements=" + dependentRequirements)

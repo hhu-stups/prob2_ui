@@ -392,7 +392,7 @@ public class VOManagerStage extends Stage {
 		} else {
 			for (String vo : currentFeedback.keySet()) {
 				VOValidationFeedback validationFeedback = currentFeedback.get(vo);
-				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", vo));
+				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", validationFeedback.getRequirement(), vo));
 				taFeedback.appendText("\n");
 				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVOs", validationFeedback.getDependentVOs().toString()));
 				taFeedback.appendText("\n");
