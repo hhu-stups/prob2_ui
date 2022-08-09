@@ -5,6 +5,10 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
 import de.prob2.ui.vomanager.ValidationObligation;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,8 +19,30 @@ import java.util.stream.Collectors;
 @Singleton
 public class VOFeedbackManager {
 
+	public Map<String, Set<String>> computeFullDependencies(List<ValidationObligation> validationObligations) {
+		Map<String, Set<String>> result = new HashMap<>();
+		for(ValidationObligation vo1 : validationObligations) {
+			for(ValidationObligation vo2 : validationObligations) {
+				if(vo1.getTasks().stream()
+						.map(IValidationTask::getId)
+						.collect(Collectors.toList())
+						.containsAll(vo2.getTasks().stream()
+								.map(IValidationTask::getId)
+								.collect(Collectors.toList()))) {
+					if(result.containsKey(vo2.getId())) {
+						result.get(vo2.getId()).add(vo1.getId());
+					} else {
+						result.put(vo2.getId(), new HashSet<>(Collections.singletonList(vo1.getId())));
+					}
+				}
+			}
+		}
+		return result;
+	}
+
 	public Map<String, VOValidationFeedback> computeValidationFeedback(List<ValidationObligation> validationObligations) {
 		Map<String, VOValidationFeedback> result = new LinkedHashMap<>();
+		Map<String, Set<String>> fullDependencies = computeFullDependencies(validationObligations);
 		for(ValidationObligation vo : validationObligations) {
 			Set<String> dependentRequirements = new LinkedHashSet<>();
 			// For each failed VO
@@ -28,13 +54,13 @@ public class VOFeedbackManager {
 						.map(IValidationTask::getId).collect(Collectors.toCollection(LinkedHashSet::new));
 
 				// Determine other VOs using VTs that are possible error sources
-				Set<String> dependentVOs = computeDependentVOs(vo.getId(), validationObligations, dependentVTs)
+				Set<String> dependentVOs = computeDependentVOs(vo.getId(), validationObligations, dependentVTs, fullDependencies)
 						.stream()
 						.map(ValidationObligation::getId).collect(Collectors.toCollection(LinkedHashSet::new));
 
 				// Determine possible error sources in requirements
 				dependentRequirements.add(vo.getRequirement());
-				dependentRequirements.addAll(computeDependentRequirements(computeDependentVOs(vo.getId(), validationObligations, dependentVTs)));
+				dependentRequirements.addAll(computeDependentRequirements(computeDependentVOs(vo.getId(), validationObligations, dependentVTs, fullDependencies)));
 
 				result.put(vo.getId(), new VOValidationFeedback(vo.getId(), dependentVOs, dependentVTs, dependentRequirements));
 			}
@@ -42,7 +68,8 @@ public class VOFeedbackManager {
 		return result;
 	}
 
-	private Set<ValidationObligation> computeDependentVOs(String currentVO, List<ValidationObligation> validationObligations, Set<String> dependentVTs) {
+	private Set<ValidationObligation> computeDependentVOs(String currentVO, List<ValidationObligation> validationObligations, Set<String> dependentVTs,
+														  Map<String, Set<String>> fullDependencies) {
 		Set<ValidationObligation> result = new LinkedHashSet<>();
 		for(String dependentVT : dependentVTs) {
 			for(ValidationObligation vo : validationObligations) {
@@ -52,7 +79,7 @@ public class VOFeedbackManager {
 				if(vo.getTasks().stream()
 						.map(IValidationTask::getId)
 						.collect(Collectors.toList())
-						.contains(dependentVT)) {
+						.contains(dependentVT) && !fullDependencies.get(vo.getId()).contains(currentVO)) {
 					result.add(vo);
 				}
 			}
