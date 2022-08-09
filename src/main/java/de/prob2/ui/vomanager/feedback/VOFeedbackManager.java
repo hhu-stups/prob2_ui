@@ -29,10 +29,10 @@ public class VOFeedbackManager {
 						.containsAll(vo2.getTasks().stream()
 								.map(IValidationTask::getId)
 								.collect(Collectors.toList()))) {
-					if(result.containsKey(vo2.getId())) {
-						result.get(vo2.getId()).add(vo1.getId());
+					if(result.containsKey(vo1.getId())) {
+						result.get(vo1.getId()).add(vo2.getId());
 					} else {
-						result.put(vo2.getId(), new HashSet<>(Collections.singletonList(vo1.getId())));
+						result.put(vo1.getId(), new HashSet<>(Collections.singletonList(vo2.getId())));
 					}
 				}
 			}
