@@ -189,7 +189,7 @@ public class VOEditingBox extends VBox {
 				voChecker.parseAndCheckVOExpression(newVo, false);
 				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
 
-				if (nameExists(currentVOName(), oldVo)) {
+				if (oldVo != null && nameExists(currentVOName(), oldVo)) {
 					warnAlreadyExists();
 					return;
 				}

@@ -161,7 +161,7 @@ public class VOManagerStage extends Stage {
 
 		tvRequirements.setOnMouseClicked(e-> {
 			TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
+			if (treeItem != null && e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
 				checkItem(treeItem);
 			}
 		});
@@ -452,7 +452,7 @@ public class VOManagerStage extends Stage {
 	}
 
 	public INameable getSelectedRequirement() {
-		return tvRequirements.getSelectionModel().getSelectedItem().getValue();
+		return tvRequirements.getSelectionModel().getSelectedItem() == null ? null : tvRequirements.getSelectionModel().getSelectedItem().getValue();
 	}
 
 	public void replaceCurrentValidationObligation(final ValidationObligation newVo) {
