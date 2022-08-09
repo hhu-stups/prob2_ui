@@ -59,7 +59,7 @@ public class VOFeedbackManager {
 						.map(ValidationObligation::getId).collect(Collectors.toCollection(LinkedHashSet::new));
 
 				// Determine possible error sources in requirements
-				dependentRequirements.addAll(computeDependentRequirements(computeDependentVOs(vo.getId(), validationObligations, dependentVTs, fullDependencies)));
+				dependentRequirements.addAll(computeDependentRequirements(vo.getRequirement(), computeDependentVOs(vo.getId(), validationObligations, dependentVTs, fullDependencies)));
 
 				result.put(vo.getId(), new VOValidationFeedback(vo.getId(), vo.getRequirement(), dependentVOs, dependentVTs, dependentRequirements));
 			}
@@ -86,9 +86,10 @@ public class VOFeedbackManager {
 		return result;
 	}
 
-	private Set<String> computeDependentRequirements(Set<ValidationObligation> dependentVOs) {
+	private Set<String> computeDependentRequirements(String currentRequirement, Set<ValidationObligation> dependentVOs) {
 		return dependentVOs.stream()
 				.map(ValidationObligation::getRequirement)
+				.filter(req -> !req.equals(currentRequirement))
 				.collect(Collectors.toSet());
 	}
 
