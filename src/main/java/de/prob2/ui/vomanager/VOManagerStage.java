@@ -231,7 +231,7 @@ public class VOManagerStage extends Stage {
 	private void updateVOsFromMachine(Machine machine) {
 		for(ValidationObligation vo : machine.getValidationObligations()) {
 			try {
-				voChecker.parseAndCheckVOExpression(vo, false);
+				voChecker.parseVO(vo);
 			} catch (VOParseException e) {
 				voErrorHandler.handleError(this, e);
 			}

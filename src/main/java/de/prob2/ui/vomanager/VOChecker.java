@@ -97,7 +97,7 @@ public class VOChecker {
 		voParser.deregisterTask(id);
 	}
 
-	public void parseAndCheckVOExpression(ValidationObligation vo, boolean check) throws VOParseException {
+	public void parseVO(ValidationObligation vo) throws VOParseException {
 		final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
 		Machine machine = currentProject.getCurrentMachine();
 		expression.getAllTasks().forEach(taskExpr -> {
@@ -110,9 +110,6 @@ public class VOChecker {
 			taskExpr.setTask(validationTask);
 		});
 		vo.setParsedExpression(expression);
-		if (check) {
-			checkVOExpression(expression);
-		}
 	}
 
 	private void checkVOExpression(IValidationExpression expression) {
@@ -147,13 +144,16 @@ public class VOChecker {
 		// TODO: Implement short circuiting
 	}
 
-	private void checkSequentialExpression(SequentialValidationExpression ast) {
+	private void checkSequentialExpression(SequentialValidationExpression expression) {
 		// TODO
 	}
 
 
 	public void checkVO(ValidationObligation validationObligation) throws VOParseException {
-		parseAndCheckVOExpression(validationObligation, true);
+		if (validationObligation.getParsedExpression() == null) {
+			this.parseVO(validationObligation);
+		}
+		checkVOExpression(validationObligation.getParsedExpression());
 	}
 
 	public void checkVT(IValidationTask validationTask) {
