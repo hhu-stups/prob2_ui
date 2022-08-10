@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,7 +16,6 @@ import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.IEvalElement;
-import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
@@ -185,9 +183,8 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 			});
 			return;
 		}
-		boolean noDotAvailable = dotLocal.isEmpty() || !Files.exists(Paths.get(dotLocal));
 		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
-		if (!Thread.currentThread().isInterrupted() && !noDotAvailable) {
+		if (!Thread.currentThread().isInterrupted()) {
 			final byte[] svgData = new DotCall(dotLocal)
 					.layoutEngine(dotEngineLocal)
 					.outputFormat(DotOutputFormat.SVG)
