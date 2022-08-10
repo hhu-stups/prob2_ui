@@ -1,5 +1,7 @@
 package de.prob2.ui.vomanager;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -12,6 +14,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -112,40 +115,60 @@ public class VOChecker {
 		vo.setParsedExpression(expression);
 	}
 
-	private void checkVOExpression(IValidationExpression expression) {
+	private CompletableFuture<?> checkVOExpression(IValidationExpression expression) {
 		if (expression instanceof ValidationTaskExpression) {
-			checkVT(((ValidationTaskExpression)expression).getTask());
+			return checkVT(((ValidationTaskExpression)expression).getTask());
 		} else if (expression instanceof NotValidationExpression) {
-			checkNotExpression((NotValidationExpression)expression);
+			return checkNotExpression((NotValidationExpression)expression);
 		} else if (expression instanceof AndValidationExpression) {
-			checkAndExpression((AndValidationExpression)expression);
+			return checkAndExpression((AndValidationExpression)expression);
 		} else if (expression instanceof OrValidationExpression) {
-			checkOrExpression((OrValidationExpression)expression);
+			return checkOrExpression((OrValidationExpression)expression);
 		} else if (expression instanceof SequentialValidationExpression) {
-			checkSequentialExpression((SequentialValidationExpression)expression);
+			return checkSequentialExpression((SequentialValidationExpression)expression);
 		} else {
 			throw new RuntimeException("VO expression type is unknown: " + expression.getClass());
 		}
 	}
 
-	private void checkNotExpression(NotValidationExpression expression) {
-		checkVOExpression(expression.getExpression());
+	private CompletableFuture<?> checkNotExpression(NotValidationExpression expression) {
+		return checkVOExpression(expression.getExpression());
 	}
 
-	private void checkAndExpression(AndValidationExpression expression) {
-		checkVOExpression(expression.getLeft());
-		checkVOExpression(expression.getRight());
-		// TODO: Implement short circuiting
+	private CompletableFuture<?> checkAndExpression(AndValidationExpression expression) {
+		return checkVOExpression(expression.getLeft()).thenCompose(r -> {
+			final CompletableFuture<?> future;
+			if (expression.getLeft().getChecked() == Checked.SUCCESS) {
+				future = checkVOExpression(expression.getRight());
+			} else {
+				future = CompletableFuture.completedFuture(r);
+			}
+			return future;
+		});
 	}
 
-	private void checkOrExpression(OrValidationExpression expression) {
-		checkVOExpression(expression.getLeft());
-		checkVOExpression(expression.getRight());
-		// TODO: Implement short circuiting
+	private CompletableFuture<?> checkOrExpression(OrValidationExpression expression) {
+		return checkVOExpression(expression.getLeft()).thenCompose(r -> {
+			final CompletableFuture<?> future;
+			if (expression.getLeft().getChecked() == Checked.SUCCESS) {
+				future = CompletableFuture.completedFuture(r);
+			} else {
+				future = checkVOExpression(expression.getRight());
+			}
+			return future;
+		});
 	}
 
-	private void checkSequentialExpression(SequentialValidationExpression expression) {
-		// TODO
+	private CompletableFuture<?> checkSequentialExpression(SequentialValidationExpression expression) {
+		return checkVOExpression(expression.getLeft()).thenCompose(r -> {
+			final CompletableFuture<?> future;
+			if (expression.getLeft().getChecked() == Checked.SUCCESS) {
+				future = checkVOExpression(expression.getRight());
+			} else {
+				future = CompletableFuture.completedFuture(r);
+			}
+			return future;
+		});
 	}
 
 
@@ -156,21 +179,22 @@ public class VOChecker {
 		checkVOExpression(validationObligation.getParsedExpression());
 	}
 
-	public void checkVT(IValidationTask validationTask) {
-		// FIXME Currently ignores exceptions from CompletableFutures!
-		// (Those normally should never happen, but still...)
+	private CompletableFuture<?> checkVT(IValidationTask validationTask) {
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
+			return CompletableFuture.completedFuture(null);
 		} else if (validationTask instanceof ModelCheckingItem) {
-			modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask);
+			return modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask);
 		} else if (validationTask instanceof LTLFormulaItem) {
-			ltlChecker.checkFormulaNoninteractive((LTLFormulaItem) validationTask);
+			return ltlChecker.checkFormulaNoninteractive((LTLFormulaItem) validationTask);
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
-			symbolicChecker.handleItemNoninteractive((SymbolicCheckingFormulaItem) validationTask);
+			return symbolicChecker.handleItemNoninteractive((SymbolicCheckingFormulaItem) validationTask);
 		} else if (validationTask instanceof ReplayTrace) {
-			traceChecker.checkNoninteractive((ReplayTrace) validationTask);
+			return traceChecker.checkNoninteractive((ReplayTrace) validationTask);
 		} else if (validationTask instanceof SimulationItem) {
 			simulationItemHandler.checkItem((SimulationItem) validationTask);
+			// TODO Make SimulationItemHandler return a correct CompletableFuture!
+			return CompletableFuture.completedFuture(null);
 		} else {
 			throw new AssertionError("Unhandled validation task type: " + validationTask.getClass());
 		}
