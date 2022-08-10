@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -16,6 +17,7 @@ import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandStage;
@@ -150,17 +152,38 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
 		this.dot = dotLocal;
 		this.dotEngine = dotEngineLocal;
+		Path dotLocalPath = Paths.get(dotLocal);
 		// Make sure dot is available, else react with proper error message
 		if (dotLocal.isEmpty()) {
 			Platform.runLater(() -> {
 				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.emptyDotPath.header", "dotty.error.emptyDotPath.message").show();
 				this.close();
 			});
-		} else if (!Files.exists(Paths.get(dotLocal))) {
+			return;
+		} else if (!Files.exists(dotLocalPath)) {
 			Platform.runLater(() -> {
 				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.dotNotFound.header", "dotty.error.dotNotFound.message", dotLocal).show();
 				this.close();
 			});
+			return;
+		} else if (!Files.isRegularFile(dotLocalPath)) {
+			Platform.runLater(() -> {
+				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.noRegularFile.header", "dotty.error.noRegularFile.message", dotLocal).show();
+				this.close();
+			});
+			return;
+		} else if (!Files.isReadable(dotLocalPath)) {
+			Platform.runLater(() -> {
+				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.noReadableFile.header", "dotty.error.noReadableFile.message", dotLocal).show();
+				this.close();
+			});
+			return;
+		} else if (!Files.isExecutable(dotLocalPath)) {
+			Platform.runLater(() -> {
+				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.noExecutableFile.header", "dotty.error.noExecutableFile.message", dotLocal).show();
+				this.close();
+			});
+			return;
 		}
 		boolean noDotAvailable = dotLocal.isEmpty() || !Files.exists(Paths.get(dotLocal));
 		this.currentDotContent.set(item.visualizeAsDotToBytes(formulas));
