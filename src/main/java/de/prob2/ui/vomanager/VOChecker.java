@@ -102,36 +102,36 @@ public class VOChecker {
 		voParser.deregisterTask(id);
 	}
 
-	public void parseAndCheckVOExpression(ValidationObligation VO, boolean check) throws VOParseException {
-		VO.getTasks().clear();
-		String expression = VO.getExpression();
+	public void parseAndCheckVOExpression(ValidationObligation vo, boolean check) throws VOParseException {
+		vo.getTasks().clear();
+		String expression = vo.getExpression();
 		Start ast = voParser.parseFormula(expression);
-		VO.setExpressionAst(ast.getPVo(), this);
+		vo.setExpressionAst(ast.getPVo(), this);
 		//voParser.semanticCheck(ast); // TODO
-		parseAndCheckVOExpression(ast.getPVo(), VO, check);
+		parseAndCheckVOExpression(ast.getPVo(), vo, check);
 	}
 
-	private void parseAndCheckVOExpression(PVo ast, ValidationObligation VO, boolean check) {
+	private void parseAndCheckVOExpression(PVo ast, ValidationObligation vo, boolean check) {
 		if(ast instanceof AIdentifierVo) {
-			parseAndCheckAtomicExpression((AIdentifierVo) ast, VO, check);
+			parseAndCheckAtomicExpression((AIdentifierVo) ast, vo, check);
 		} else if(ast instanceof ANotVo) {
-			parseAndCheckNotExpression((ANotVo) ast, VO, check);
+			parseAndCheckNotExpression((ANotVo) ast, vo, check);
 		} else if(ast instanceof AAndVo) {
-			parseAndCheckAndExpression((AAndVo) ast, VO, check);
+			parseAndCheckAndExpression((AAndVo) ast, vo, check);
 		} else if(ast instanceof AOrVo) {
-			parseAndCheckOrExpression((AOrVo) ast, VO, check);
+			parseAndCheckOrExpression((AOrVo) ast, vo, check);
 		} else if(ast instanceof AImpliesVo) {
-			parseAndCheckImpliesExpression((AImpliesVo) ast, VO, check);
+			parseAndCheckImpliesExpression((AImpliesVo) ast, vo, check);
 		} else if(ast instanceof AEquivalentVo) {
-			parseAndCheckEquivalentExpression((AEquivalentVo) ast, VO, check);
+			parseAndCheckEquivalentExpression((AEquivalentVo) ast, vo, check);
 		} else if(ast instanceof ASequentialVo) {
-			parseAndCheckSequentialExpression((ASequentialVo) ast, VO, check);
+			parseAndCheckSequentialExpression((ASequentialVo) ast, vo, check);
 		} else {
 			throw new RuntimeException("VO expression type is unknown: " + ast.getClass());
 		}
 	}
 
-	private void parseAndCheckAtomicExpression(AIdentifierVo ast, ValidationObligation VO, boolean check) {
+	private void parseAndCheckAtomicExpression(AIdentifierVo ast, ValidationObligation vo, boolean check) {
 		Machine machine = currentProject.getCurrentMachine();
 		IValidationTask validationTask;
 		if (machine.getValidationTasks().containsKey(ast.getIdentifierLiteral().getText())) {
@@ -139,37 +139,37 @@ public class VOChecker {
 		} else {
 			validationTask = new ValidationTaskNotFound(ast.getIdentifierLiteral().getText());
 		}
-		VO.getTasks().add(validationTask);
+		vo.getTasks().add(validationTask);
 		if(check) {
 			checkVT(validationTask);
 		}
 	}
 
-	private void parseAndCheckNotExpression(ANotVo ast, ValidationObligation VO, boolean check) {
-		parseAndCheckVOExpression(ast.getVo(), VO, check);
+	private void parseAndCheckNotExpression(ANotVo ast, ValidationObligation vo, boolean check) {
+		parseAndCheckVOExpression(ast.getVo(), vo, check);
 	}
 
-	private void parseAndCheckAndExpression(AAndVo ast, ValidationObligation VO, boolean check) {
-		parseAndCheckVOExpression(ast.getLeft(), VO, check);
-		parseAndCheckVOExpression(ast.getRight(), VO, check);
+	private void parseAndCheckAndExpression(AAndVo ast, ValidationObligation vo, boolean check) {
+		parseAndCheckVOExpression(ast.getLeft(), vo, check);
+		parseAndCheckVOExpression(ast.getRight(), vo, check);
 		// TODO: Implement short circuiting
 	}
 
-	private void parseAndCheckOrExpression(AOrVo ast, ValidationObligation VO, boolean check) {
-		parseAndCheckVOExpression(ast.getLeft(), VO, check);
-		parseAndCheckVOExpression(ast.getRight(), VO, check);
+	private void parseAndCheckOrExpression(AOrVo ast, ValidationObligation vo, boolean check) {
+		parseAndCheckVOExpression(ast.getLeft(), vo, check);
+		parseAndCheckVOExpression(ast.getRight(), vo, check);
 		// TODO: Implement short circuiting
 	}
 
-	private void parseAndCheckImpliesExpression(AImpliesVo ast, ValidationObligation VO, boolean check) {
-		parseAndCheckOrExpression(new AOrVo(new ANotVo(ast.getLeft().clone()), ast.getRight().clone()), VO, check);
+	private void parseAndCheckImpliesExpression(AImpliesVo ast, ValidationObligation vo, boolean check) {
+		parseAndCheckOrExpression(new AOrVo(new ANotVo(ast.getLeft().clone()), ast.getRight().clone()), vo, check);
 	}
 
-	private void parseAndCheckEquivalentExpression(AEquivalentVo ast, ValidationObligation VO, boolean check) {
-		parseAndCheckAndExpression(new AAndVo(new AImpliesVo(ast.getLeft().clone(), ast.getRight().clone()), new AImpliesVo(ast.getRight().clone(), ast.getLeft().clone())), VO, check);
+	private void parseAndCheckEquivalentExpression(AEquivalentVo ast, ValidationObligation vo, boolean check) {
+		parseAndCheckAndExpression(new AAndVo(new AImpliesVo(ast.getLeft().clone(), ast.getRight().clone()), new AImpliesVo(ast.getRight().clone(), ast.getLeft().clone())), vo, check);
 	}
 
-	private void parseAndCheckSequentialExpression(ASequentialVo ast, ValidationObligation VO, boolean check) {
+	private void parseAndCheckSequentialExpression(ASequentialVo ast, ValidationObligation vo, boolean check) {
 		// TODO
 	}
 
@@ -179,27 +179,27 @@ public class VOChecker {
 	}
 
 
-	public Checked updateVOExpression(PVo ast, ValidationObligation VO) {
+	public Checked updateVOExpression(PVo ast, ValidationObligation vo) {
 		if(ast instanceof AIdentifierVo) {
-			return updateAtomicExpression((AIdentifierVo) ast, VO);
+			return updateAtomicExpression((AIdentifierVo) ast, vo);
 		} else if(ast instanceof ANotVo) {
-			return updateNotExpression((ANotVo) ast, VO);
+			return updateNotExpression((ANotVo) ast, vo);
 		} else if(ast instanceof AAndVo) {
-			return updateAndExpression((AAndVo) ast, VO);
+			return updateAndExpression((AAndVo) ast, vo);
 		} else if(ast instanceof AOrVo) {
-			return updateOrExpression((AOrVo) ast, VO);
+			return updateOrExpression((AOrVo) ast, vo);
 		} else if(ast instanceof AImpliesVo) {
-			return updateImpliesExpression((AImpliesVo) ast, VO);
+			return updateImpliesExpression((AImpliesVo) ast, vo);
 		} else if(ast instanceof AEquivalentVo) {
-			return updateEquivalentExpression((AEquivalentVo) ast, VO);
+			return updateEquivalentExpression((AEquivalentVo) ast, vo);
 		} else if(ast instanceof ASequentialVo) {
-			return updateSequentialExpression((ASequentialVo) ast, VO);
+			return updateSequentialExpression((ASequentialVo) ast, vo);
 		} else {
 			throw new RuntimeException("VO expression type is unknown: " + ast.getClass());
 		}
 	}
 
-	public Checked updateAtomicExpression(AIdentifierVo ast, ValidationObligation VO) {
+	public Checked updateAtomicExpression(AIdentifierVo ast, ValidationObligation vo) {
 		Machine machine = currentProject.getCurrentMachine();
 		if (machine.getValidationTasks().containsKey(ast.getIdentifierLiteral().getText())) {
 			return machine.getValidationTasks().get(ast.getIdentifierLiteral().getText()).getChecked();
@@ -208,8 +208,8 @@ public class VOChecker {
 		}
 	}
 
-	public Checked updateNotExpression(ANotVo ast, ValidationObligation VO) {
-		Checked exprRes = updateVOExpression(ast.getVo(), VO);
+	public Checked updateNotExpression(ANotVo ast, ValidationObligation vo) {
+		Checked exprRes = updateVOExpression(ast.getVo(), vo);
 		if (exprRes == Checked.PARSE_ERROR) {
 			return Checked.PARSE_ERROR;
 		} else if (exprRes == Checked.SUCCESS) {
@@ -220,14 +220,14 @@ public class VOChecker {
 		return Checked.UNKNOWN;
 	}
 
-	public Checked updateAndExpression(AAndVo ast, ValidationObligation VO) {
-		Checked leftRes = updateVOExpression(ast.getLeft(), VO);
+	public Checked updateAndExpression(AAndVo ast, ValidationObligation vo) {
+		Checked leftRes = updateVOExpression(ast.getLeft(), vo);
 		if (leftRes == Checked.PARSE_ERROR) {
 			return Checked.PARSE_ERROR;
 		} else if (leftRes == Checked.FAIL) {
 			return Checked.FAIL;
 		}
-		Checked rightRes = updateVOExpression(ast.getRight(), VO);
+		Checked rightRes = updateVOExpression(ast.getRight(), vo);
 		if (rightRes == Checked.PARSE_ERROR) {
 			return Checked.PARSE_ERROR;
 		} else if (rightRes == Checked.FAIL) {
@@ -239,14 +239,14 @@ public class VOChecker {
 		return Checked.UNKNOWN;
 	}
 
-	public Checked updateOrExpression(AOrVo ast, ValidationObligation VO) {
-		Checked leftRes = updateVOExpression(ast.getLeft(), VO);
+	public Checked updateOrExpression(AOrVo ast, ValidationObligation vo) {
+		Checked leftRes = updateVOExpression(ast.getLeft(), vo);
 		if (leftRes == Checked.PARSE_ERROR) {
 			return Checked.PARSE_ERROR;
 		} else if (leftRes == Checked.SUCCESS) {
 			return Checked.SUCCESS;
 		}
-		Checked rightRes = updateVOExpression(ast.getRight(), VO);
+		Checked rightRes = updateVOExpression(ast.getRight(), vo);
 		if (rightRes == Checked.PARSE_ERROR) {
 			return Checked.PARSE_ERROR;
 		} else if (rightRes == Checked.SUCCESS) {
@@ -258,15 +258,15 @@ public class VOChecker {
 		return Checked.UNKNOWN;
 	}
 
-	public Checked updateImpliesExpression(AImpliesVo ast, ValidationObligation VO) {
-		return updateOrExpression(new AOrVo(new ANotVo(ast.getLeft().clone()), ast.getRight().clone()), VO);
+	public Checked updateImpliesExpression(AImpliesVo ast, ValidationObligation vo) {
+		return updateOrExpression(new AOrVo(new ANotVo(ast.getLeft().clone()), ast.getRight().clone()), vo);
 	}
 
-	public Checked updateEquivalentExpression(AEquivalentVo ast, ValidationObligation VO) {
-		return updateAndExpression(new AAndVo(new AImpliesVo(ast.getLeft().clone(), ast.getRight().clone()), new AImpliesVo(ast.getRight().clone(), ast.getLeft().clone())), VO);
+	public Checked updateEquivalentExpression(AEquivalentVo ast, ValidationObligation vo) {
+		return updateAndExpression(new AAndVo(new AImpliesVo(ast.getLeft().clone(), ast.getRight().clone()), new AImpliesVo(ast.getRight().clone(), ast.getLeft().clone())), vo);
 	}
 
-	public Checked updateSequentialExpression(ASequentialVo ast, ValidationObligation VO) {
+	public Checked updateSequentialExpression(ASequentialVo ast, ValidationObligation vo) {
 		// TODO
 		return Checked.UNKNOWN;
 	}
