@@ -107,6 +107,7 @@ public final class ViewCodeStage extends Stage {
 	public void setCode() {
 		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
 		cmd.setTranslationMode(cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
+		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
 		this.currentTrace.getStateSpace().execute(cmd);
 		this.codeProperty().set(cmd.getPrettyPrint());
 	}

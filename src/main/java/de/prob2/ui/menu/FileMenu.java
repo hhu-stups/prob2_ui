@@ -198,6 +198,7 @@ public class FileMenu extends Menu {
 		} else {
 			throw new AssertionError();
 		}
+		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
 
 		currentTrace.getStateSpace().execute(cmd);
 		final String code = cmd.getPrettyPrint();

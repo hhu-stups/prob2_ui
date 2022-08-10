@@ -273,6 +273,7 @@ public class BEditorView extends BorderPane {
 		}
 		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
 		cmd.setTranslationMode(cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
+		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
 		stateSpace.execute(cmd);
 		this.setEditorText(cmd.getPrettyPrint(), machinePath);
 		beditor.setEditable(false);
