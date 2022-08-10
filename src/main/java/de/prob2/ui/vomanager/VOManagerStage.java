@@ -15,7 +15,6 @@ import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.StateSpace;
 import de.prob.voparser.VOParseException;
-import de.prob.voparser.VOParser;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -25,9 +24,9 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.TreeCheckedCell;
-
 import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -230,11 +229,9 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void updateVOsFromMachine(Machine machine) {
-		VOParser voParser = new VOParser();
 		for(ValidationObligation vo : machine.getValidationObligations()) {
 			try {
 				voChecker.parseAndCheckVOExpression(vo, false);
-				vo.setExpressionAst(voParser.parseFormula(vo.getExpression()).getPVo(), voChecker);
 			} catch (VOParseException e) {
 				voErrorHandler.handleError(this, e);
 			}

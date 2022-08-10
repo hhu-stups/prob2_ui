@@ -1,17 +1,18 @@
 package de.prob2.ui.vomanager;
 
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import de.prob.voparser.node.PVo;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.vomanager.ast.IValidationExpression;
+import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
@@ -32,7 +33,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	private final List<ValidationObligation> previousVersions;
 
 	@JsonIgnore
-	private PVo expressionAst;
+	private IValidationExpression parsedExpression;
 
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
@@ -58,13 +59,16 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		this.previousVersions = previousVersions;
 	}
 
-	public void setExpressionAst(PVo expressionAst, VOChecker voChecker) {
-		this.expressionAst = expressionAst;
-		addCheckedListener(voChecker);
+	public void setParsedExpression(final IValidationExpression expression) {
+		this.parsedExpression = expression;
+		this.getTasks().setAll(expression.getAllTasks()
+			.map(ValidationTaskExpression::getTask)
+			.collect(Collectors.toList()));
+		addCheckedListener();
 	}
 
-	private void addCheckedListener(VOChecker voChecker) {
-		final InvalidationListener checkedListener = o -> this.checked.set(voChecker.updateVOExpression(expressionAst, this));
+	private void addCheckedListener() {
+		final InvalidationListener checkedListener = o -> this.checked.set(this.parsedExpression.getChecked());
 		this.getTasks().addListener((ListChangeListener<IValidationTask>)o -> {
 			while (o.next()) {
 				if (o.wasRemoved()) {
@@ -108,8 +112,8 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		return expression;
 	}
 
-	public PVo getExpressionAst() {
-		return expressionAst;
+	public IValidationExpression getParsedExpression() {
+		return parsedExpression;
 	}
 
 	public String getRequirement() {
