@@ -128,10 +128,8 @@ public class TraceChecker {
 			} else {
 				res = Checked.PARSE_ERROR;
 			}
-			Platform.runLater(() -> {
-				replayTrace.setProgress(-1);
-				replayTrace.setChecked(res);
-			});
+			replayTrace.setChecked(res);
+			Platform.runLater(() -> replayTrace.setProgress(-1));
 		});
 	}
 

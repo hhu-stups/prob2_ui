@@ -21,6 +21,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -118,7 +119,7 @@ public class TraceViewHandler {
 			final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
 			statusIcon.getStyleClass().add("status-icon");
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
-			trace.checkedProperty().addListener((o, from, to) -> updateStatusIcon(statusIcon, to));
+			trace.checkedProperty().addListener((o, from, to) -> Platform.runLater(() -> updateStatusIcon(statusIcon, to)));
 			updateStatusIcon(statusIcon, trace.getChecked());
 
 			final ProgressIndicator replayProgress = new ProgressBar();
