@@ -78,7 +78,6 @@ public class TraceFileHandler extends ProBFileHandler {
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content";
 			messageContent.add(path);
 		}
-		LOGGER.info(String.valueOf(messageContent.size()));
 		stageManager.makeAlert(
 				Alert.AlertType.ERROR,
 				Arrays.asList(ButtonType.YES, ButtonType.NO),
