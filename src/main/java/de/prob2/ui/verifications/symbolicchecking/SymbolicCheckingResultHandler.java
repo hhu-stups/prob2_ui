@@ -80,17 +80,17 @@ public class SymbolicCheckingResultHandler {
 	public void handleFindRedundantInvariants(SymbolicCheckingFormulaItem item, GetRedundantInvariantsCommand cmd) {
 		List<String> result = cmd.getRedundantInvariants();
 		if (result.isEmpty()) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound", Checked.SUCCESS);
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound"));
 		} else {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found", cmd.isTimeout() ? Checked.TIMEOUT : Checked.FAIL, String.join("\n", result));
+			item.setResultItem(new CheckingResultItem(cmd.isTimeout() ? Checked.TIMEOUT : Checked.FAIL, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found", String.join("\n", result)));
 		}
 	}
 	
 	public void handleWellDefinednessChecking(final SymbolicCheckingFormulaItem item, final CheckWellDefinednessCommand cmd) {
 		if (cmd.getDischargedCount().equals(cmd.getTotalCount())) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", Checked.SUCCESS, cmd.getTotalCount());
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", cmd.getTotalCount()));
 		} else {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", Checked.FAIL, cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount()));
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount())));
 		}
 	}
 	
@@ -98,13 +98,13 @@ public class SymbolicCheckingResultHandler {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if (result == null) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message", Checked.FAIL);
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message"));
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.noViolationFound", Checked.SUCCESS, msg);
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.refinementChecking.result.noViolationFound", msg));
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.violationFound", Checked.FAIL, msg);
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.refinementChecking.result.violationFound", msg));
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.interrupted", Checked.INTERRUPTED, msg);
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.refinementChecking.result.interrupted", msg));
 		}
 	}
 	
@@ -112,17 +112,17 @@ public class SymbolicCheckingResultHandler {
 		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
 		switch(result) {
 			case NO_COUNTER_EXAMPLE_EXISTS:
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleExists", Checked.SUCCESS);
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleExists"));
 				break;
 			case NO_COUNTER_EXAMPLE_FOUND:
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleFound", Checked.SUCCESS);
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleFound"));
 				break;
 			case COUNTER_EXAMPLE:
 				item.getCounterExamples().add(cmd.getTrace(stateSpace));
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.assertionChecking.result.counterExampleFound", Checked.FAIL);
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.assertionChecking.result.counterExampleFound"));
 				break;
 			case INTERRUPTED:
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.assertionChecking.result.interrupted", Checked.INTERRUPTED);
+				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.assertionChecking.result.interrupted"));
 				break;
 			default:
 				break;
@@ -133,26 +133,22 @@ public class SymbolicCheckingResultHandler {
 		SymbolicModelcheckCommand.ResultType result = cmd.getResult();
 		switch(result) {
 			case SUCCESSFUL:
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success", Checked.SUCCESS);
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success"));
 				break;
 			case COUNTER_EXAMPLE:
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample", Checked.FAIL);
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample"));
 				break;
 			case TIMEOUT:
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout", Checked.TIMEOUT);
+				item.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout"));
 				break;
 			case INTERRUPTED:
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.interrupted", Checked.INTERRUPTED);
+				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.interrupted"));
 				break;
 			case LIMIT_REACHED:
-				showCheckingResult(item, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached", Checked.LIMIT_REACHED);
+				item.setResultItem(new CheckingResultItem(Checked.LIMIT_REACHED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached"));
 				break;
 			default:
 				break;
 		}
-	}
-		
-	private static void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, Checked checked, Object... messageParams) {
-		item.setResultItem(new CheckingResultItem(checked, msg, messageParams));
 	}
 }

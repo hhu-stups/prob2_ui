@@ -32,14 +32,10 @@ public class TestCaseGenerationResultHandler {
 		this.injector = injector;
 	}
 	
-	private void showCheckingResult(TestCaseGenerationItem item, Checked checked, String msgKey) {
-		item.setResultItem(new CheckingResultItem(checked, msgKey));
-	}
-	
 	public void handleTestCaseGenerationResult(TestCaseGenerationItem item, Object result) {
 		item.getExamples().clear();
 		if(!(result instanceof TestCaseGeneratorResult)) {
-			showCheckingResult(item, Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound");
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
 			return;
 		}
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
@@ -48,13 +44,13 @@ public class TestCaseGenerationResultHandler {
 		List<TraceInformationItem> uncoveredOperations = extractUncoveredOperations(testCaseGeneratorResult);
 
 		if(testCaseGeneratorResult.isInterrupted()) {
-			showCheckingResult(item, Checked.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted");
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted"));
 		} else if(traces.isEmpty()) {
-			showCheckingResult(item, Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound");
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
 		} else if(!uncoveredOperations.isEmpty()) {
-			showCheckingResult(item, Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated");
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated"));
 		} else {
-			showCheckingResult(item, Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found");
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
 		}
 		item.getExamples().addAll(traces);
 		item.getTraceInformation().setAll(traceInformation);

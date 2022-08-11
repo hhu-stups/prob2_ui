@@ -19,14 +19,14 @@ public class SymbolicAnimationResultHandler {
 		item.getExamples().clear();
 		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
 		if (result == FindStateCommand.ResultType.STATE_FOUND) {
-			showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found");
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
 			item.getExamples().add(cmd.getTrace(stateSpace));
 		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
-			showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound");
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
 		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted");
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
 		} else {
-			showCheckingResult(item, Checked.PARSE_ERROR, "animation.symbolic.resultHandler.findValidState.result.error");
+			item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "animation.symbolic.resultHandler.findValidState.result.error"));
 		}
 	}
 	
@@ -35,28 +35,24 @@ public class SymbolicAnimationResultHandler {
 		item.getExamples().clear();
 		switch(result) {
 			case PATH_FOUND:
-				showCheckingResult(item, Checked.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found");
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found"));
 				item.getExamples().add(cmd.getTrace());
 				break;
 			case NO_PATH_FOUND:
-				showCheckingResult(item, Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound");
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound"));
 				break;
-			case TIMEOUT: 
-				showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.timeout");
+			case TIMEOUT:
+				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.timeout"));
 				break;
-			case INTERRUPTED: 
-				showCheckingResult(item, Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted");
+			case INTERRUPTED:
+				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted"));
 				break;
 			case ERROR:
-				showCheckingResult(item, Checked.PARSE_ERROR, "animation.symbolic.resultHandler.sequence.result.error");
+				item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "animation.symbolic.resultHandler.sequence.result.error"));
 				break;
 			default:
 				break;
 		}
-	}
-	
-	private void showCheckingResult(SymbolicAnimationItem item, Checked checked, String msgKey) {
-		item.setResultItem(new CheckingResultItem(checked, msgKey));
 	}
 	
 	public void handleFormulaException(SymbolicAnimationItem item, Throwable result) {
