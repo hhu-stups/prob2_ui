@@ -35,6 +35,6 @@ public interface FormattableAdapter<T> {
 	}
 
 	static <T extends Enum<T>> FormattableAdapter<T> enumNameAdapter(String prefix) {
-		return adapter(object -> prefix + '.' + StringUtil.snakeCaseToCamelCase(object.name()));
+		return adapter(object -> prefix + '.' + object.name());
 	}
 }
