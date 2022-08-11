@@ -123,11 +123,11 @@ public class LTLFormulaChecker {
 		}
 		
 		if (result instanceof LTLOk) {
-			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.ltl.result.succeeded.message"));
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.ltl.result.succeeded.message"));
 		} else if (result instanceof LTLCounterExample) {
-			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.ltl.result.counterExampleFound.message"));
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.ltl.result.counterExampleFound.message"));
 		} else if (result instanceof LTLNotYetFinished || result instanceof CheckInterrupted) {
-			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage()));
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage()));
 		} else {
 			throw new AssertionError("Unhandled LTL checking result type: " + result.getClass());
 		}
@@ -139,7 +139,7 @@ public class LTLFormulaChecker {
 		if(errorMessage.isEmpty()) {
 			errorMessage = "Parse Error in typed formula";
 		}
-		item.setResultItem(new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.couldNotParseFormula.header", "common.result.message", errorMessage));
+		item.setResultItem(new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.message", errorMessage));
 	}
 	
 	public void checkFormula(LTLFormulaItem item, Machine machine) {

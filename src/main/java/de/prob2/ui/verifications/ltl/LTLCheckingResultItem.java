@@ -10,9 +10,9 @@ public class LTLCheckingResultItem extends CheckingResultItem {
 
 	private List<ErrorItem> errorMarkers;
 	
-	public LTLCheckingResultItem(Checked checked, List<ErrorItem> errorMarkers, String headerBundleKey, String messageBundleKey,
+	public LTLCheckingResultItem(Checked checked, List<ErrorItem> errorMarkers, String messageBundleKey,
 			Object... messageParams) {
-		super(checked, headerBundleKey, messageBundleKey, messageParams);
+		super(checked, messageBundleKey, messageParams);
 		this.errorMarkers = errorMarkers;
 	}
 	

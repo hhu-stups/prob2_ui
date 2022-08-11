@@ -9,13 +9,11 @@ import javafx.scene.layout.Region;
 public class CheckingResultItem {
 	
 	private Checked checked;
-	private String headerBundleKey;
 	private String messageBundleKey;
 	private Object[] messageParams;
 	
-	public CheckingResultItem(Checked checked, String headerBundleKey, String messageBundleKey, Object... messageParams) {
+	public CheckingResultItem(Checked checked, String messageBundleKey, Object... messageParams) {
 		this.checked = checked;
-		this.headerBundleKey = headerBundleKey;
 		this.messageBundleKey = messageBundleKey;
 		this.messageParams = messageParams;
 	}
@@ -25,7 +23,15 @@ public class CheckingResultItem {
 	}
 	
 	public String getHeaderBundleKey() {
-		return headerBundleKey;
+		switch (this.getChecked()) {
+			case SUCCESS: return "verifications.result.succeeded.header";
+			case FAIL: return "verifications.result.failed.header";
+			case TIMEOUT: return "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout";
+			case INTERRUPTED: return "common.result.interrupted.header";
+			case PARSE_ERROR: return "common.result.couldNotParseFormula.header";
+			case LIMIT_REACHED: return "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached";
+			default: throw new IllegalArgumentException("Unhandled checked status: " + this.getChecked());
+		}
 	}
 	
 	public String getMessageBundleKey() {

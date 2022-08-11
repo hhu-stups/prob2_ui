@@ -39,13 +39,13 @@ public class SymbolicCheckingResultHandler {
 	public void handleFormulaResult(SymbolicCheckingFormulaItem item, IModelCheckingResult result) {
 		CheckingResultItem res;
 		if (result instanceof ModelCheckOk) {
-			res = new CheckingResultItem(Checked.SUCCESS, "verifications.result.succeeded.header", "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success");
+			res = new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success");
 		} else if (result instanceof CBCInvariantViolationFound || result instanceof CBCDeadlockFound) {
-			res = new CheckingResultItem(Checked.FAIL, "verifications.result.counterExampleFound.header", "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample");
+			res = new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample");
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
-			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage());
+			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage());
 		} else if (result instanceof CheckError) {
-			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", result.getMessage());
+			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", result.getMessage());
 		} else {
 			throw new AssertionError("Unhandled symbolic checking result type: " + result.getClass());
 		}
@@ -70,9 +70,9 @@ public class SymbolicCheckingResultHandler {
 	public void handleFormulaException(SymbolicCheckingFormulaItem item, Throwable result) {
 		CheckingResultItem res;
 		if (result instanceof CommandInterruptedException) {
-			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.interrupted.header", "common.result.message", result.getMessage());
+			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage());
 		} else {
-			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", result.getMessage());
+			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", result.getMessage());
 		}
 		item.setResultItem(res);
 	}
@@ -82,16 +82,15 @@ public class SymbolicCheckingResultHandler {
 		if (result.isEmpty()) {
 			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound", Checked.SUCCESS);
 		} else {
-			final String header = cmd.isTimeout() ? "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.timeout" : "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found";
-			showCheckingResult(item, header, "common.literal", Checked.FAIL, String.join("\n", result));
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found", cmd.isTimeout() ? Checked.TIMEOUT : Checked.FAIL, String.join("\n", result));
 		}
 	}
 	
 	public void handleWellDefinednessChecking(final SymbolicCheckingFormulaItem item, final CheckWellDefinednessCommand cmd) {
 		if (cmd.getDischargedCount().equals(cmd.getTotalCount())) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.header", "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", Checked.SUCCESS, cmd.getTotalCount());
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", Checked.SUCCESS, cmd.getTotalCount());
 		} else {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.header", "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", Checked.FAIL, cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount()));
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", Checked.FAIL, cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount()));
 		}
 	}
 	
@@ -99,13 +98,13 @@ public class SymbolicCheckingResultHandler {
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if (result == null) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.header", "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message", Checked.FAIL);
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message", Checked.FAIL);
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.noViolationFound", "common.literal", Checked.SUCCESS, msg);
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.noViolationFound", Checked.SUCCESS, msg);
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.violationFound", "common.literal", Checked.FAIL, msg);
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.violationFound", Checked.FAIL, msg);
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.INTERRUPTED) {
-			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.interrupted", "common.literal", Checked.INTERRUPTED, msg);
+			showCheckingResult(item, "verifications.symbolicchecking.resultHandler.refinementChecking.result.interrupted", Checked.INTERRUPTED, msg);
 		}
 	}
 	
@@ -153,11 +152,7 @@ public class SymbolicCheckingResultHandler {
 		}
 	}
 		
-	private void showCheckingResult(SymbolicCheckingFormulaItem item, String header, String msg, Checked checked, Object... messageParams) {
-		item.setResultItem(new CheckingResultItem(checked, header, msg, messageParams));
-	}
-	
-	private void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, Checked checked) {
-		showCheckingResult(item, msg, msg, checked);
+	private static void showCheckingResult(SymbolicCheckingFormulaItem item, String msg, Checked checked, Object... messageParams) {
+		item.setResultItem(new CheckingResultItem(checked, msg, messageParams));
 	}
 }

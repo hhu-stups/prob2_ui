@@ -33,14 +33,14 @@ public class LTLPatternParser {
 		CheckingResultItem resultItem;
 		// Empty Patterns do not have parse errors which is a little bit confusing
 		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
-			resultItem = new LTLCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully", "verifications.result.patternParsedSuccessfully");
+			resultItem = new LTLCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully");
 		} else {
 			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {
-				resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header", "verifications.ltl.pattern.empty");
+				resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.ltl.pattern.empty");
 			} else {
 				final String msg = parseListener.getErrorMarkers().stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
-				resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.result.couldNotParsePattern.header", "common.result.message", msg);
+				resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.ltl.pattern.couldNotParsePattern", msg);
 			}
 		}
 		item.setResultItem(resultItem);

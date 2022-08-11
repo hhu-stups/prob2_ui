@@ -32,12 +32,8 @@ public class TestCaseGenerationResultHandler {
 		this.injector = injector;
 	}
 	
-	private void showCheckingResult(TestCaseGenerationItem item, Checked checked, String headerKey, String msgKey, Object... msgParams) {
-		item.setResultItem(new CheckingResultItem(checked, headerKey, msgKey, msgParams));
-	}
-	
 	private void showCheckingResult(TestCaseGenerationItem item, Checked checked, String msgKey) {
-		showCheckingResult(item, checked, msgKey, msgKey);
+		item.setResultItem(new CheckingResultItem(checked, msgKey));
 	}
 	
 	public void handleTestCaseGenerationResult(TestCaseGenerationItem item, Object result) {

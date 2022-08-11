@@ -56,10 +56,10 @@ public class SymbolicAnimationResultHandler {
 	}
 	
 	private void showCheckingResult(SymbolicAnimationItem item, Checked checked, String msgKey) {
-		item.setResultItem(new CheckingResultItem(checked, msgKey, msgKey));
+		item.setResultItem(new CheckingResultItem(checked, msgKey));
 	}
 	
 	public void handleFormulaException(SymbolicAnimationItem item, Throwable result) {
-		item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "common.result.couldNotParseFormula.header", "common.result.message", result));
+		item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", result));
 	}
 }
