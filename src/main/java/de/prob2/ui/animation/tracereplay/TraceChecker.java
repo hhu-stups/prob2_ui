@@ -67,8 +67,8 @@ public class TraceChecker {
 		}
 
 		return checkNoninteractive(replayTrace).whenComplete((r, e) -> {
-			showTestError(r.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
 			if (e == null) {
+				showTestError(r.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
 					if (!r.getReplayedTrace().getErrors().isEmpty()) {
@@ -78,7 +78,7 @@ public class TraceChecker {
 					}
 				}
 			} else {
-				Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(r.getAbsoluteLocation(), e));
+				Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace.getAbsoluteLocation(), e));
 			}
 		});
 	}
