@@ -267,10 +267,4 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 			return r;
 		});
 	}
-	
-	@Override
-	public void handleMachine(Machine machine) {
-		machine.getSymbolicCheckingFormulas().forEach(item -> handleItem(item, true));
-	}
-		
 }

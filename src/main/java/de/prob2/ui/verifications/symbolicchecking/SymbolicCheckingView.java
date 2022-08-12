@@ -135,4 +135,9 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	public void addFormula() {
 		injector.getInstance(SymbolicCheckingChoosingStage.class).showAndWait();
 	}
+	
+	@FXML
+	public void checkMachine() {
+		currentProject.getCurrentMachine().getSymbolicCheckingFormulas().forEach(item -> formulaHandler.handleItem(item, true));
+	}
 }

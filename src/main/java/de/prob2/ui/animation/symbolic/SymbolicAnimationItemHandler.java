@@ -128,10 +128,4 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 			return r;
 		});
 	}
-	
-	@Override
-	public void handleMachine(Machine machine) {
-		machine.getSymbolicAnimationFormulas().forEach(item -> handleItem(item, true));
-	}
-	
 }

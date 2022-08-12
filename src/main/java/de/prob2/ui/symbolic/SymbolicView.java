@@ -131,12 +131,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	}
 	
 	@FXML
-	public void checkMachine() {
-		Machine machine = currentProject.getCurrentMachine();
-		formulaHandler.handleMachine(machine);
-	}
-	
-	@FXML
 	public void cancel() {
 		cliExecutor.interruptAll();
 		currentTrace.getStateSpace().sendInterrupt();

@@ -131,4 +131,9 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	public void addFormula() {
 		injector.getInstance(SymbolicAnimationChoosingStage.class).showAndWait();
 	}
+	
+	@FXML
+	public void checkMachine() {
+		currentProject.getCurrentMachine().getSymbolicAnimationFormulas().forEach(item -> formulaHandler.handleItem(item, true));
+	}
 }

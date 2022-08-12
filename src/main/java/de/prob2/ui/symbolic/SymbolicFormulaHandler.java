@@ -29,5 +29,4 @@ public interface SymbolicFormulaHandler<T extends SymbolicItem<?>> {
 	
 	public CompletableFuture<T> handleItemNoninteractive(T item);
 	public CompletableFuture<T> handleItem(T item, boolean checkAll);
-	public void handleMachine(Machine machine);
 }
