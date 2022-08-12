@@ -18,6 +18,8 @@ import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +29,11 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationItemHandler.class);
 
 	private final CurrentTrace currentTrace;
-	private final SymbolicAnimationResultHandler resultHandler;
 	private final CliTaskExecutor cliExecutor;
 
 	@Inject
-	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace, final SymbolicAnimationResultHandler resultHandler, final CliTaskExecutor cliExecutor) {
+	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor) {
 		this.currentTrace = currentTrace;
-		this.resultHandler = resultHandler;
 		this.cliExecutor = cliExecutor;
 	}
 
@@ -45,7 +45,7 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 	private CompletableFuture<SymbolicAnimationItem> checkItem(final SymbolicAnimationItem item, final Runnable task) {
 		return cliExecutor.submit(task, item).exceptionally(e -> {
 			LOGGER.error("Exception during symbolic animation", e);
-			resultHandler.handleFormulaException(item, e);
+			item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", e));
 			return item;
 		});
 	}
@@ -55,7 +55,28 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new ClassicalB("1=1", FormulaExpand.EXPAND));
 		return checkItem(item, () -> {
 			currentTrace.getStateSpace().execute(cmd);
-			resultHandler.handleSequence(item, cmd);
+			ConstraintBasedSequenceCheckCommand.ResultType result = cmd.getResult();
+			item.getExamples().clear();
+			switch(result) {
+				case PATH_FOUND:
+					item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found"));
+					item.getExamples().add(cmd.getTrace());
+					break;
+				case NO_PATH_FOUND:
+					item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound"));
+					break;
+				case TIMEOUT:
+					item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.timeout"));
+					break;
+				case INTERRUPTED:
+					item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted"));
+					break;
+				case ERROR:
+					item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "animation.symbolic.resultHandler.sequence.result.error"));
+					break;
+				default:
+					break;
+			}
 		});
 	}
 
@@ -64,7 +85,19 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode(), FormulaExpand.EXPAND), true);
 		return checkItem(item, () -> {
 			stateSpace.execute(cmd);
-			resultHandler.handleFindValidState(item, cmd, stateSpace);
+			FindStateCommand.ResultType result = cmd.getResult();
+			item.getExamples().clear();
+			// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
+			if (result == FindStateCommand.ResultType.STATE_FOUND) {
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
+				item.getExamples().add(cmd.getTrace(stateSpace));
+			} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
+			} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
+				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
+			} else {
+				item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "animation.symbolic.resultHandler.findValidState.result.error"));
+			}
 		});
 	}
 
