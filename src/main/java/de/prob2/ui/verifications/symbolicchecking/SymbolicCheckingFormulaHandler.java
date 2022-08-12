@@ -86,24 +86,15 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		});
 	}
 	
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleStaticAssertions(SymbolicCheckingFormulaItem item) {
+	public CompletableFuture<SymbolicCheckingFormulaItem> handleAssertions(SymbolicCheckingFormulaItem item, ConstraintBasedAssertionCheckCommand.CheckingType type) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
+		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(type, stateSpace);
 		return checkItem(item, () -> {
 			stateSpace.execute(cmd);
 			resultHandler.handleAssertionChecking(item, cmd, stateSpace);
 		});
 	}
-
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleDynamicAssertions(SymbolicCheckingFormulaItem item) {
-		StateSpace stateSpace = currentTrace.getStateSpace();
-		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
-		return checkItem(item, () -> {
-			stateSpace.execute(cmd);
-			resultHandler.handleAssertionChecking(item, cmd, stateSpace);
-		});
-	}
-
+	
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleWellDefinedness(SymbolicCheckingFormulaItem item) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		CheckWellDefinednessCommand cmd = new CheckWellDefinednessCommand();
@@ -146,9 +137,9 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 			case CHECK_REFINEMENT:
 				return handleRefinement(item);
 			case CHECK_STATIC_ASSERTIONS:
-				return handleStaticAssertions(item);
+				return handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.STATIC);
 			case CHECK_DYNAMIC_ASSERTIONS:
-				return handleDynamicAssertions(item);
+				return handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC);
 			case CHECK_WELL_DEFINEDNESS:
 				return handleWellDefinedness(item);
 			case DEADLOCK:
