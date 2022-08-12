@@ -7,16 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.prob.statespace.Trace;
 import de.prob2.ui.symbolic.SymbolicItem;
 
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 public class SymbolicAnimationItem extends SymbolicItem<SymbolicAnimationType> {
 	private final SymbolicAnimationType type;
 	
 	@JsonIgnore
-	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
+	private final ObjectProperty<Trace> example = new SimpleObjectProperty<>(this, "example", null);
 
 	@JsonCreator
 	public SymbolicAnimationItem(
@@ -35,15 +33,18 @@ public class SymbolicAnimationItem extends SymbolicItem<SymbolicAnimationType> {
 	@Override
 	public void reset() {
 		super.reset();
-		this.examples.clear();
+		this.setExample(null);
 	}
 
-
-	public ObservableList<Trace> getExamples() {
-		return examples.get();
+	public ObjectProperty<Trace> exampleProperty() {
+		return this.example;
 	}
 
-	public ListProperty<Trace> examplesProperty() {
-		return examples;
+	public Trace getExample() {
+		return this.exampleProperty().get();
+	}
+
+	public void setExample(final Trace example) {
+		this.exampleProperty().set(example);
 	}
 }

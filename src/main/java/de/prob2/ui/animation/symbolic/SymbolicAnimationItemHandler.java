@@ -56,11 +56,11 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		return checkItem(item, () -> {
 			currentTrace.getStateSpace().execute(cmd);
 			ConstraintBasedSequenceCheckCommand.ResultType result = cmd.getResult();
-			item.getExamples().clear();
+			item.setExample(null);
 			switch(result) {
 				case PATH_FOUND:
 					item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found"));
-					item.getExamples().add(cmd.getTrace());
+					item.setExample(cmd.getTrace());
 					break;
 				case NO_PATH_FOUND:
 					item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound"));
@@ -86,11 +86,11 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		return checkItem(item, () -> {
 			stateSpace.execute(cmd);
 			FindStateCommand.ResultType result = cmd.getResult();
-			item.getExamples().clear();
+			item.setExample(null);
 			// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
 			if (result == FindStateCommand.ResultType.STATE_FOUND) {
 				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
-				item.getExamples().add(cmd.getTrace(stateSpace));
+				item.setExample(cmd.getTrace(stateSpace));
 			} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
 				item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
 			} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
@@ -120,9 +120,9 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		}
 		return handleItemNoninteractive(item).thenApply(r -> {
 			if(!checkAll) {
-				List<Trace> examples = item.getExamples();
-				if(!examples.isEmpty()) {
-					currentTrace.set(examples.get(0));
+				final Trace example = item.getExample();
+				if (example != null) {
+					currentTrace.set(example);
 				}
 			}
 			return r;

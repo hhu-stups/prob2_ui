@@ -1,13 +1,10 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -17,12 +14,10 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicView;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -60,25 +55,17 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			});
 			
 
-			Menu showStateItem = new Menu(i18n.translate("animation.symbolic.view.contextMenu.showFoundPaths"));
-			showStateItem.setDisable(true);
+			MenuItem showStateItem = new MenuItem(i18n.translate("animation.symbolic.view.contextMenu.showFoundTrace"));
+			showStateItem.setOnAction(e -> currentTrace.set(row.getItem().getExample()));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
 
 
 			row.itemProperty().addListener((observable, from, to) -> {
-				final InvalidationListener updateExamplesListener = o -> showExamples(to, showStateItem);
-
-				if (from != null) {
-					from.examplesProperty().removeListener(updateExamplesListener);
-				}
-
 				if(to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
-					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
-					to.examplesProperty().addListener(updateExamplesListener);
-					updateExamplesListener.invalidated(null);
+					showStateItem.disableProperty().bind(to.exampleProperty().isNull());
 				}
 			});
 			
@@ -90,17 +77,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 					.otherwise(contextMenu));			
 
 			return row;
-		}
-
-		private void showExamples(SymbolicAnimationItem item, Menu exampleItem) {
-			exampleItem.getItems().clear();
-			List<Trace> examples = item.getExamples();
-			for(int i = 0; i < examples.size(); i++) {
-				MenuItem traceItem = new MenuItem(i18n.translate("animation.symbolic.view.contextMenu.showExample", i + 1));
-				final int index = i;
-				traceItem.setOnAction(e-> currentTrace.set((examples.get(index))));
-				exampleItem.getItems().add(traceItem);
-			}
 		}
 	}
 	
