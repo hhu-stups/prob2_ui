@@ -122,7 +122,7 @@ public class RequirementsEditingBox extends VBox {
 		if(!tfName.getText().trim().isEmpty() && !taRequirement.getText().trim().isEmpty()) {
 			boolean nameExists = nameExists();
 			addRequirement(nameExists);
-		    voManagerStage.closeEditingBox();
+			voManagerStage.closeEditingBox();
 		} else {
 			warnNotValid();
 		}

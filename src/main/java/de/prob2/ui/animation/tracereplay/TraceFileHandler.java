@@ -156,8 +156,8 @@ public class TraceFileHandler extends ProBFileHandler {
 
 	public void save(Trace trace, Path location, String createdBy) throws IOException {
 		JsonMetadata jsonMetadata = updateMetadataBuilder(TraceJsonFile.metadataBuilder())
-				                            .withCreator(createdBy)
-				                            .build();
+			.withCreator(createdBy)
+			.build();
 		traceManager.save(location, new TraceJsonFile(trace, jsonMetadata));
 	}
 

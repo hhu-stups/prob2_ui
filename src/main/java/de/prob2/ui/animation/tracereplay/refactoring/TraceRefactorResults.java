@@ -111,12 +111,12 @@ public class TraceRefactorResults extends Dialog<List<PersistentTrace>> {
 			Set<RenamingDelta> renamingDeltaHelper = new HashSet<>(selectedRenamingDelta);
 			HashMap<String, Map<TraceExplorer.MappingNames, Map<String, String>>> mappingHelper = new HashMap<>(selectedMapping);
 			List<PersistentTransition> selectedTrace = traceChecker.getTraceModifier()
-					                                           .getChangelogPhase3II()
-					                                           .get(renamingDeltaHelper)
-					                                           .get(mappingHelper)
-					                                           .stream()
-					                                           .flatMap(delta -> delta.getNewTransitions().stream())
-					                                           .collect(toList());
+				.getChangelogPhase3II()
+				.get(renamingDeltaHelper)
+				.get(mappingHelper)
+				.stream()
+				.flatMap(delta -> delta.getNewTransitions().stream())
+				.collect(toList());
 			if (param.getButtonData() == ButtonBar.ButtonData.NO) {
 				return singletonList(oldTrace);
 			} else {
@@ -307,12 +307,12 @@ public class TraceRefactorResults extends Dialog<List<PersistentTrace>> {
 
 
 		Map<Pair<String, String>, RenamingDelta> changeToDelta = typeIIWithCandidates
-				                                                         .entrySet()
-				                                                         .stream()
-				                                                         .flatMap(entry -> entry.getValue()
-						                                                                           .stream()
-						                                                                           .map(delta -> new Pair<>(new Pair<>(delta.getOriginalName(), delta.getDeltaName()), delta)))
-				                                                         .collect(toMap(Pair::getKey, Pair::getValue));
+			.entrySet()
+			.stream()
+			.flatMap(entry -> entry.getValue()
+				.stream()
+				.map(delta -> new Pair<>(new Pair<>(delta.getOriginalName(), delta.getDeltaName()), delta)))
+			.collect(toMap(Pair::getKey, Pair::getValue));
 
 		Map<String, OperationInfo> operationInfoMap = traceChecker.getOldOperationInfos();
 
@@ -519,19 +519,19 @@ public class TraceRefactorResults extends Dialog<List<PersistentTrace>> {
 			cleanedMapping = mappings;
 		} else {
 			cleanedMapping = mappings.entrySet()
-					                 .stream()
-					                 .filter(entry -> !entry.getKey().equals(entry.getValue()))
-					                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+				.stream()
+				.filter(entry -> !entry.getKey().equals(entry.getValue()))
+				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 		}
 
 		Set<String> voidCards = oldIds.stream()
-				                        .filter(entry -> !mappings.containsKey(entry))
-				                        .collect(Collectors.toSet());
+			.filter(entry -> !mappings.containsKey(entry))
+			.collect(Collectors.toSet());
 		Set<String> dummyVoidCards = IntStream.range(0, voidCards.size()).mapToObj(element -> "void").collect(Collectors.toSet());
 
 		Set<String> wildCards = newIds.stream()
-				                        .filter(entry -> !mappings.containsValue(entry))
-				                        .collect(Collectors.toSet());
+			.filter(entry -> !mappings.containsValue(entry))
+			.collect(Collectors.toSet());
 		Set<String> dummyWildCards = IntStream.range(0, wildCards.size()).mapToObj(element -> "???").collect(Collectors.toSet());
 
 		Map<String, String> mappingKeysVar =

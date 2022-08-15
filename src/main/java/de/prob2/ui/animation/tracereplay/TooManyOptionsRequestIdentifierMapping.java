@@ -60,8 +60,8 @@ public class TooManyOptionsRequestIdentifierMapping extends Dialog<Map<String, S
 
 		this.setResultConverter(
 				param -> internalView.entrySet()
-						         .stream()
-						         .collect(toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()))
+					.stream()
+					.collect(toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()))
 		);
 	}
 

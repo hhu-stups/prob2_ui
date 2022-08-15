@@ -72,8 +72,8 @@ public class PreferencesDialog extends Dialog<Preference> {
 
 		List<Preference> preferencesList = currentProject.getPreferences();
 		preferencesNamesSet = preferencesList.stream()
-				                      .map(Preference::getName)
-				                      .collect(Collectors.toCollection(HashSet::new));
+			.map(Preference::getName)
+			.collect(Collectors.toCollection(HashSet::new));
 
 		Button okButton = (Button) this.getDialogPane().lookupButton(okButtonType);
 		okButton.setDisable(true);

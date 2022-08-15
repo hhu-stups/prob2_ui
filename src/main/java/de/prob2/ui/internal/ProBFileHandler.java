@@ -64,7 +64,7 @@ public abstract class ProBFileHandler {
 
 	protected JsonMetadataBuilder updateMetadataBuilder(final JsonMetadataBuilder builder) {
 		return builder
-				       .withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-				       .withModelName(currentProject.getCurrentMachine().getName());
+			.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+			.withModelName(currentProject.getCurrentMachine().getName());
 	}
 }

@@ -249,8 +249,8 @@ final class BLexerSyntaxHighlighting {
 			TInclusion.class, TNonInclusion.class, TStrictInclusion.class, TStrictNonInclusion.class
 			); // short ASCII/Unicode predicates
 		addBTokens("editor_operators",
-		    TMaplet.class, TPrj1.class, TPrj2.class,
-		    TRec.class,
+			TMaplet.class, TPrj1.class, TPrj2.class,
+			TRec.class,
 			TDomainRestriction.class, TDomainSubtraction.class,
 			TUnion.class, TIntersection.class, TSetSubtraction.class,
 			TRangeRestriction.class, TRangeSubtraction.class,
@@ -267,10 +267,10 @@ final class BLexerSyntaxHighlighting {
 			TInsertEndSequence.class, TInsertStartSequence.class
 			); // short ASCII/Unicode operators
 		addBTokens("editor_logical", TConjunction.class, TForAny.class, TExists.class,
-		    TImplies.class, TLogicalOr.class, TEquivalence.class, TNot.class,
-		    TBoolCast.class, TBfalse.class,
-		    TTruthPredicate.class // btrue
-		    );
+			TImplies.class, TLogicalOr.class, TEquivalence.class, TNot.class,
+			TBoolCast.class, TBfalse.class,
+			TTruthPredicate.class // btrue
+			);
 		addBTokens("editor_arithmetic", TDoubleEqual.class, TEqual.class,
 			TGreaterEqual.class, TLessEqual.class, 
 			TSucc.class, TPred.class,
@@ -298,7 +298,7 @@ final class BLexerSyntaxHighlighting {
 			TChoice.class, TOr.class,
 			TWhere.class, TOf.class, TEnd.class);
 		addBTokens("editor_keyword", TMachine.class, TOperations.class, TLocalOperations.class, 
-		    TRefinement.class, TImplementation.class,
+			TRefinement.class, TImplementation.class,
 			TAssertions.class, TInitialisation.class, TSees.class, TPromotes.class,
 			TUses.class, TIncludes.class, TImports.class, TRefines.class, TExtends.class, TSystem.class,
 			TModel.class, TInvariant.class, TConcreteVariables.class,

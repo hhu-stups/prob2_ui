@@ -367,7 +367,7 @@ public final class HistoryChartStage extends Stage {
 
 				// Update the upper bound of the X axis of the separate chart
 				separateXAxis.setUpperBound(change.getList().isEmpty() ? 1.0
-						                            : change.getList().get(change.getList().size() - 1).getXValue().doubleValue());
+					: change.getList().get(change.getList().size() - 1).getXValue().doubleValue());
 			});
 
 			separateChart.setMinWidth(160);

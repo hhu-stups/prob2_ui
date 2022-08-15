@@ -80,9 +80,9 @@ public class CSVWriter implements Closeable {
 		}
 
 		String record = fields.stream()
-				                .map(Object::toString)
-				                .map(settings::quoteAndEscapeIfNecessary)
-				                .collect(Collectors.joining(String.valueOf(settings.delimiter()), "", settings.lineSeparator()));
+			.map(Object::toString)
+			.map(settings::quoteAndEscapeIfNecessary)
+			.collect(Collectors.joining(String.valueOf(settings.delimiter()), "", settings.lineSeparator()));
 		writer.write(record);
 		if (flushAfterRecord) {
 			writer.flush();

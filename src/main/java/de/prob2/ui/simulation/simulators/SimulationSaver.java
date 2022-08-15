@@ -43,8 +43,8 @@ public class SimulationSaver extends ProBFileHandler {
 		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveTimedTrace.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, SIMULATION_EXTENSION);
 		if (path != null) {
 			JsonMetadata jsonMetadata = updateMetadataBuilder(SimulationConfiguration.metadataBuilder())
-					                            .withCreator(createdBy)
-					                            .build();
+				.withCreator(createdBy)
+				.build();
 			saveConfiguration(trace, timestamps, path, jsonMetadata);
 		}
 	}
@@ -73,8 +73,8 @@ public class SimulationSaver extends ProBFileHandler {
 			for (int i = 1; i <= numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
 				JsonMetadata jsonMetadata = updateMetadataBuilder(SimulationConfiguration.metadataBuilder())
-						                            .withCreator(item.createdByForMetadata())
-						                            .build();
+					.withCreator(item.createdByForMetadata())
+					.build();
 				this.saveConfiguration(traces.get(i - 1), timestamps.get(i - 1), traceFilePath, jsonMetadata);
 			}
 		} catch (IOException e) {

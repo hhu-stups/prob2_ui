@@ -478,14 +478,14 @@ public final class I18n {
 	private Object[] evaluateArguments(Object... arguments) {
 		Objects.requireNonNull(arguments, "arguments");
 		return Arrays.stream(arguments)
-				       .map(this::evaluateArgument)
-				       .toArray();
+			.map(this::evaluateArgument)
+			.toArray();
 	}
 
 	private static ObservableValue<?>[] collectDependencies(Object keyOrPattern, Object... arguments) {
 		return Stream.concat(Stream.of(keyOrPattern), Arrays.stream(arguments))
-				       .filter(arg -> arg instanceof ObservableValue)
-				       .map(arg -> (ObservableValue<?>) arg)
-				       .toArray(ObservableValue[]::new);
+			.filter(arg -> arg instanceof ObservableValue)
+			.map(arg -> (ObservableValue<?>) arg)
+			.toArray(ObservableValue[]::new);
 	}
 }

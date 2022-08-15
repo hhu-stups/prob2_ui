@@ -52,10 +52,10 @@ public final class SafeBindings {
 			@Override
 			public ObservableList<?> getDependencies() {
 				return copiedDependencies.length == 0 ?
-						       FXCollections.emptyObservableList()
-						       : copiedDependencies.length == 1 ?
-								         FXCollections.singletonObservableList(copiedDependencies[0])
-								         : FXCollections.unmodifiableObservableList(FXCollections.observableArrayList(copiedDependencies));
+					FXCollections.emptyObservableList()
+					: copiedDependencies.length == 1 ?
+						FXCollections.singletonObservableList(copiedDependencies[0])
+						: FXCollections.unmodifiableObservableList(FXCollections.observableArrayList(copiedDependencies));
 			}
 		};
 	}
