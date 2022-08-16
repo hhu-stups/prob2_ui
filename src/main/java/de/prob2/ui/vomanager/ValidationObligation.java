@@ -55,7 +55,13 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		this.requirement = requirement;
 		this.previousVersions = previousVersions;
 
-		final InvalidationListener checkedListener = o -> this.checked.set(this.parsedExpression.getChecked());
+		final InvalidationListener checkedListener = o -> {
+			if (this.parsedExpression == null) {
+				this.checked.set(Checked.PARSE_ERROR);
+			} else {
+				this.checked.set(this.parsedExpression.getChecked());
+			}
+		};
 		this.getTasks().addListener((ListChangeListener<IValidationTask>)o -> {
 			while (o.next()) {
 				if (o.wasRemoved()) {
@@ -76,6 +82,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	public void setParsedExpression(final IValidationExpression expression) {
 		this.parsedExpression = expression;
 		if (expression == null) {
+			this.checked.set(Checked.PARSE_ERROR);
 			this.getTasks().clear();
 		} else {
 			this.getTasks().setAll(expression.getAllTasks()

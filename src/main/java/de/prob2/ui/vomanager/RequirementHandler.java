@@ -45,10 +45,13 @@ public class RequirementHandler {
 		if (validationObligations.isEmpty()) {
 			requirement.setChecked(Checked.NOT_CHECKED);
 		} else {
+			final boolean parseError = getVOStream(project, machine, requirement, setting).anyMatch(Checked.PARSE_ERROR::equals);
 			final boolean failed = getVOStream(project, machine, requirement, setting).anyMatch(Checked.FAIL::equals);
 			final boolean success = !failed && getVOStream(project, machine, requirement, setting).allMatch(Checked.SUCCESS::equals);
 			final boolean timeout = !failed && getVOStream(project, machine, requirement, setting).anyMatch(Checked.TIMEOUT::equals);
-			if (success) {
+			if (parseError) {
+				requirement.setChecked(Checked.PARSE_ERROR);
+			} else if (success) {
 				requirement.setChecked(Checked.SUCCESS);
 			} else if (failed) {
 				requirement.setChecked(Checked.FAIL);
