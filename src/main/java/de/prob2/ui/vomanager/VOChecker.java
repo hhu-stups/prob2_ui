@@ -101,17 +101,22 @@ public class VOChecker {
 	}
 
 	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
-		final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
-		expression.getAllTasks().forEach(taskExpr -> {
-			IValidationTask validationTask;
-			if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
-				validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
-			} else {
-				validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
-			}
-			taskExpr.setTask(validationTask);
-		});
-		vo.setParsedExpression(expression);
+		try {
+			final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
+			expression.getAllTasks().forEach(taskExpr -> {
+				IValidationTask validationTask;
+				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
+					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
+				} else {
+					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
+				}
+				taskExpr.setTask(validationTask);
+			});
+			vo.setParsedExpression(expression);
+		} catch (VOParseException e) {
+			vo.setParsedExpression(null);
+			throw e;
+		}
 	}
 
 	private CompletableFuture<?> checkVOExpression(IValidationExpression expression) {

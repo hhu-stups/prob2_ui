@@ -75,9 +75,13 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 
 	public void setParsedExpression(final IValidationExpression expression) {
 		this.parsedExpression = expression;
-		this.getTasks().setAll(expression.getAllTasks()
-			.map(ValidationTaskExpression::getTask)
-			.collect(Collectors.toList()));
+		if (expression == null) {
+			this.getTasks().clear();
+		} else {
+			this.getTasks().setAll(expression.getAllTasks()
+				.map(ValidationTaskExpression::getTask)
+				.collect(Collectors.toList()));
+		}
 	}
 
 	public ValidationObligation changeRequirement(String requirement) {
