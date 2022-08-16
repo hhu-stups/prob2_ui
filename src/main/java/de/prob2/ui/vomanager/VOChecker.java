@@ -65,12 +65,10 @@ public class VOChecker {
 	}
 
 	private void updateOnMachine(Machine machine) {
-		if(machine != null) {
-			updateVOsFromMachine(machine);
+		if (machine == null) {
+			return;
 		}
-	}
 
-	private void updateVOsFromMachine(Machine machine) {
 		for(ValidationObligation vo : machine.getValidationObligations()) {
 			try {
 				parseVO(machine, vo);
