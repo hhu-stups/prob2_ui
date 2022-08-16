@@ -53,10 +53,10 @@ public class SimulationHelperFunctions {
 		try {
 			simulator.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(path));
 		} catch (IOException e) {
-			LOGGER.debug("Tried to load simulation configuration file");
+			LOGGER.debug("Tried to load simulation configuration file", e);
 			alert(stageManager, window, e, "simulation.error.header.fileNotFound","simulation.error.body.fileNotFound");
 		} catch (RuntimeException e) {
-			LOGGER.debug("Errors in simulation configuration file detected");
+			LOGGER.debug("Errors in simulation configuration file detected", e);
 			alert(stageManager, window, e, "simulation.error.header.configurationError", "simulation.error.body.configurationError");
 		}
 	}
