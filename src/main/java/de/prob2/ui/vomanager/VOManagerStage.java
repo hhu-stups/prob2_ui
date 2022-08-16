@@ -32,7 +32,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -47,9 +46,6 @@ import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @FXMLInjected
 @Singleton
 public class VOManagerStage extends Stage {
@@ -61,8 +57,6 @@ public class VOManagerStage extends Stage {
 	public enum Mode {
 		NONE, REQUIREMENT, VO
 	}
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(VOManagerStage.class);
 
 	@FXML
 	private TreeTableView<INameable> tvRequirements;
@@ -183,10 +177,13 @@ public class VOManagerStage extends Stage {
 			}
 		});
 
-		currentProject.addListener((observable, from, to) -> voChecker.deregisterAllTasks());
-		ChangeListener<Machine> listener = (observable, from, to) -> updateOnMachine(to);
-		currentProject.currentMachineProperty().addListener(listener);
-		updateOnMachine(currentProject.getCurrentMachine());
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				for (final IValidationTask vt : to.getValidationTasks().values()) {
+					vt.checkedProperty().addListener(o1 -> showFeedback());
+				}
+			}
+		});
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> initializeRefinementHierarchy(to));
 		initializeRefinementHierarchy(currentTrace.getStateSpace());
 	}
@@ -206,40 +203,6 @@ public class VOManagerStage extends Stage {
 			}
 		} catch (VOParseException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
-		}
-	}
-
-	private void updateOnMachine(Machine machine) {
-		voChecker.deregisterAllTasks();
-		if(machine != null) {
-			updateVTsFromMachine(machine);
-			updateVOsFromMachine(machine);
-		}
-	}
-
-	private void updateVTsFromMachine(Machine machine) {
-		for(String key : machine.getValidationTasks().keySet()) {
-			IValidationTask validationTask = machine.getValidationTasks().get(key);
-			validationTask.checkedProperty().addListener((observable, from, to) -> showFeedback());
-			voChecker.registerTask(key, null); // TODO
-		}
-		machine.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
-			if(o.wasRemoved()) {
-				voChecker.registerTask(o.getKey(), null); // TODO
-			}
-			if(o.wasAdded()) {
-				voChecker.deregisterTask(o.getKey());
-			}
-		});
-	}
-
-	private void updateVOsFromMachine(Machine machine) {
-		for(ValidationObligation vo : machine.getValidationObligations()) {
-			try {
-				voChecker.parseVO(machine, vo);
-			} catch (VOParseException e) {
-				LOGGER.warn("Parse error in validation expression", e);
-			}
 		}
 	}
 

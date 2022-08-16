@@ -28,8 +28,14 @@ import de.prob2.ui.vomanager.ast.OrValidationExpression;
 import de.prob2.ui.vomanager.ast.SequentialValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
+import javafx.collections.MapChangeListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public class VOChecker {
+	private static final Logger LOGGER = LoggerFactory.getLogger(VOChecker.class);
 
 	private final CurrentProject currentProject;
 
@@ -59,6 +65,42 @@ public class VOChecker {
 		this.symbolicChecker = symbolicChecker;
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
+
+		currentProject.addListener((observable, from, to) -> deregisterAllTasks());
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateOnMachine(to));
+		updateOnMachine(currentProject.getCurrentMachine());
+	}
+
+	private void updateOnMachine(Machine machine) {
+		deregisterAllTasks();
+		if(machine != null) {
+			updateVTsFromMachine(machine);
+			updateVOsFromMachine(machine);
+		}
+	}
+
+	private void updateVTsFromMachine(Machine machine) {
+		for(String key : machine.getValidationTasks().keySet()) {
+			registerTask(key, null); // TODO
+		}
+		machine.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
+			if(o.wasRemoved()) {
+				registerTask(o.getKey(), null); // TODO
+			}
+			if(o.wasAdded()) {
+				deregisterTask(o.getKey());
+			}
+		});
+	}
+
+	private void updateVOsFromMachine(Machine machine) {
+		for(ValidationObligation vo : machine.getValidationObligations()) {
+			try {
+				parseVO(machine, vo);
+			} catch (VOParseException e) {
+				LOGGER.warn("Parse error in validation expression", e);
+			}
+		}
 	}
 
 	public void checkRequirement(Requirement requirement, Machine machine, VOManagerSetting setting) throws VOParseException{
