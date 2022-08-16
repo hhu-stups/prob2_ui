@@ -47,6 +47,9 @@ import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
 @Singleton
 public class VOManagerStage extends Stage {
@@ -58,6 +61,8 @@ public class VOManagerStage extends Stage {
 	public enum Mode {
 		NONE, REQUIREMENT, VO
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(VOManagerStage.class);
 
 	@FXML
 	private TreeTableView<INameable> tvRequirements;
@@ -233,7 +238,7 @@ public class VOManagerStage extends Stage {
 			try {
 				voChecker.parseVO(machine, vo);
 			} catch (VOParseException e) {
-				voErrorHandler.handleError(this, e);
+				LOGGER.warn("Parse error in validation expression", e);
 			}
 		}
 	}
