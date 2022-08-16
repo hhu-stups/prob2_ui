@@ -197,7 +197,7 @@ public class VOManagerStage extends Stage {
 				Machine selectedMachine = setting == VOManagerSetting.MACHINE ? (Machine) treeItem.getParent().getValue() : null;
 				voChecker.checkRequirement((Requirement) item, selectedMachine, setting);
 			} else if (item instanceof ValidationObligation) {
-				voChecker.checkVO((ValidationObligation) item);
+				voChecker.checkVO(getMachineForItem(treeItem), (ValidationObligation) item);
 			}
 		} catch (VOParseException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
@@ -231,7 +231,7 @@ public class VOManagerStage extends Stage {
 	private void updateVOsFromMachine(Machine machine) {
 		for(ValidationObligation vo : machine.getValidationObligations()) {
 			try {
-				voChecker.parseVO(vo);
+				voChecker.parseVO(machine, vo);
 			} catch (VOParseException e) {
 				voErrorHandler.handleError(this, e);
 			}

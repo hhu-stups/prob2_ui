@@ -186,7 +186,8 @@ public class VOEditingBox extends VBox {
 		if(voIsValid) {
 			try {
 				final ValidationObligation newVo = createNewFromCurrentSelection();
-				voChecker.parseVO(newVo);
+				Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
+				voChecker.parseVO(machine, newVo);
 				final ValidationObligation oldVo = (ValidationObligation) voManagerStage.getSelectedRequirement();
 
 				if (oldVo != null && nameExists(currentVOName(), oldVo)) {
@@ -194,7 +195,6 @@ public class VOEditingBox extends VBox {
 					return;
 				}
 
-				Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
 				machine.getValidationObligations().add(newVo);
 				requirementHandler.initListenerForVO(cbLinkRequirementChoice.getValue(), newVo);
 			} catch (VOParseException e) {
@@ -216,7 +216,8 @@ public class VOEditingBox extends VBox {
 				List<ValidationObligation> validationObligationList = new ArrayList<>(oldVo.getPreviousVersions());
 				validationObligationList.add(oldVo);
 				final ValidationObligation newVo = createNewFromCurrentSelection(validationObligationList);
-				voChecker.parseVO(newVo);
+				Machine machine = cbVOLinkMachineChoice.getSelectionModel().getSelectedItem();
+				voChecker.parseVO(machine, newVo);
 
 				if (nameExists(currentVOName(), oldVo)) {
 					warnAlreadyExists();

@@ -74,7 +74,7 @@ public class VOChecker {
 		for(Machine machine : currentProject.getMachines()) {
 			for (ValidationObligation validationObligation : machine.getValidationObligations()) {
 				if(validationObligation.getRequirement().equals(requirement.getName())) {
-					this.checkVO(validationObligation);
+					this.checkVO(machine, validationObligation);
 				}
 			}
 		}
@@ -83,7 +83,7 @@ public class VOChecker {
 	private void checkRequirementOnMachineView(Requirement requirement, Machine machine) throws VOParseException {
 		for (ValidationObligation validationObligation : machine.getValidationObligations()) {
 			if(validationObligation.getRequirement().equals(requirement.getName())) {
-				this.checkVO(validationObligation);
+				this.checkVO(machine, validationObligation);
 			}
 		}
 	}
@@ -100,9 +100,8 @@ public class VOChecker {
 		voParser.deregisterTask(id);
 	}
 
-	public void parseVO(ValidationObligation vo) throws VOParseException {
+	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
 		final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
-		Machine machine = currentProject.getCurrentMachine();
 		expression.getAllTasks().forEach(taskExpr -> {
 			IValidationTask validationTask;
 			if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
@@ -172,9 +171,9 @@ public class VOChecker {
 	}
 
 
-	public void checkVO(ValidationObligation validationObligation) throws VOParseException {
+	public void checkVO(Machine machine, ValidationObligation validationObligation) throws VOParseException {
 		if (validationObligation.getParsedExpression() == null) {
-			this.parseVO(validationObligation);
+			this.parseVO(machine, validationObligation);
 		}
 		checkVOExpression(validationObligation.getParsedExpression());
 	}
