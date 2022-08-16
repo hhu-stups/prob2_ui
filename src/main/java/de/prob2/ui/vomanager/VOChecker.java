@@ -7,7 +7,6 @@ import com.google.inject.Singleton;
 
 import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
-import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -66,13 +65,13 @@ public class VOChecker {
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
 
-		currentProject.addListener((observable, from, to) -> deregisterAllTasks());
+		currentProject.addListener((observable, from, to) -> voParser.getTasks().clear());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateOnMachine(to));
 		updateOnMachine(currentProject.getCurrentMachine());
 	}
 
 	private void updateOnMachine(Machine machine) {
-		deregisterAllTasks();
+		voParser.getTasks().clear();
 		if(machine != null) {
 			updateVTsFromMachine(machine);
 			updateVOsFromMachine(machine);
@@ -81,14 +80,16 @@ public class VOChecker {
 
 	private void updateVTsFromMachine(Machine machine) {
 		for(String key : machine.getValidationTasks().keySet()) {
-			registerTask(key, null); // TODO
+			// TODO
+			voParser.registerTask(key, null);
 		}
 		machine.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
 			if(o.wasRemoved()) {
-				registerTask(o.getKey(), null); // TODO
+				// TODO
+				voParser.registerTask(o.getKey(), null);
 			}
 			if(o.wasAdded()) {
-				deregisterTask(o.getKey());
+				voParser.deregisterTask(o.getKey());
 			}
 		});
 	}
@@ -128,18 +129,6 @@ public class VOChecker {
 				this.checkVO(machine, validationObligation);
 			}
 		}
-	}
-
-	public void registerTask(String id, VTType type) {
-		voParser.registerTask(id, type);
-	}
-
-	public void deregisterAllTasks() {
-		voParser.getTasks().clear();
-	}
-
-	public void deregisterTask(String id) {
-		voParser.deregisterTask(id);
 	}
 
 	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
