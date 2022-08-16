@@ -45,10 +45,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 	public ValidationObligation(@JsonProperty("id") String id,
 								@JsonProperty("expression") String expression,
 								@JsonProperty("requirement") String requirement) {
-		this.id = id;
-		this.expression = expression;
-		this.requirement = requirement;
-		this.previousVersions = Collections.emptyList();
+		this(id, expression, requirement, Collections.emptyList());
 	}
 
 
@@ -57,17 +54,7 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		this.expression = expression;
 		this.requirement = requirement;
 		this.previousVersions = previousVersions;
-	}
 
-	public void setParsedExpression(final IValidationExpression expression) {
-		this.parsedExpression = expression;
-		this.getTasks().setAll(expression.getAllTasks()
-			.map(ValidationTaskExpression::getTask)
-			.collect(Collectors.toList()));
-		addCheckedListener();
-	}
-
-	private void addCheckedListener() {
 		final InvalidationListener checkedListener = o -> this.checked.set(this.parsedExpression.getChecked());
 		this.getTasks().addListener((ListChangeListener<IValidationTask>)o -> {
 			while (o.next()) {
@@ -86,6 +73,12 @@ public class ValidationObligation implements IAbstractRequirement, INameable {
 		});
 	}
 
+	public void setParsedExpression(final IValidationExpression expression) {
+		this.parsedExpression = expression;
+		this.getTasks().setAll(expression.getAllTasks()
+			.map(ValidationTaskExpression::getTask)
+			.collect(Collectors.toList()));
+	}
 
 	public ValidationObligation changeRequirement(String requirement) {
 		return new ValidationObligation(this.id, this.expression, requirement, this.previousVersions);
