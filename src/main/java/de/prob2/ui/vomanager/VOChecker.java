@@ -27,8 +27,6 @@ import de.prob2.ui.vomanager.ast.OrValidationExpression;
 import de.prob2.ui.vomanager.ast.SequentialValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
-import javafx.collections.MapChangeListener;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,13 +48,10 @@ public class VOChecker {
 
 	private final SimulationItemHandler simulationItemHandler;
 
-	private final VOParser voParser;
-
 	@Inject
 	public VOChecker(final CurrentProject currentProject, final RequirementHandler requirementHandler, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
 					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
-		this.voParser = new VOParser();
 		this.currentProject = currentProject;
 		this.requirementHandler = requirementHandler;
 		this.modelchecker = modelchecker;
@@ -65,33 +60,14 @@ public class VOChecker {
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
 
-		currentProject.addListener((observable, from, to) -> voParser.getTasks().clear());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateOnMachine(to));
 		updateOnMachine(currentProject.getCurrentMachine());
 	}
 
 	private void updateOnMachine(Machine machine) {
-		voParser.getTasks().clear();
 		if(machine != null) {
-			updateVTsFromMachine(machine);
 			updateVOsFromMachine(machine);
 		}
-	}
-
-	private void updateVTsFromMachine(Machine machine) {
-		for(String key : machine.getValidationTasks().keySet()) {
-			// TODO
-			voParser.registerTask(key, null);
-		}
-		machine.getValidationTasks().addListener((MapChangeListener<? super String, ? super IValidationTask>) o -> {
-			if(o.wasRemoved()) {
-				// TODO
-				voParser.registerTask(o.getKey(), null);
-			}
-			if(o.wasAdded()) {
-				voParser.deregisterTask(o.getKey());
-			}
-		});
 	}
 
 	private void updateVOsFromMachine(Machine machine) {
@@ -132,6 +108,9 @@ public class VOChecker {
 	}
 
 	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
+		final VOParser voParser = new VOParser();
+		// TODO Set correct VT types instead of null
+		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, null));
 		try {
 			final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
 			expression.getAllTasks().forEach(taskExpr -> {
