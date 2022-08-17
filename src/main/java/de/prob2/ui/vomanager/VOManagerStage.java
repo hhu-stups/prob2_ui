@@ -62,10 +62,10 @@ public class VOManagerStage extends Stage {
 	private TreeTableView<INameable> tvRequirements;
 
 	@FXML
-	private TreeTableColumn<INameable, Checked> requirementStatusColumn;
+	private TreeTableColumn<INameable, String> requirementNameColumn;
 
 	@FXML
-	private TreeTableColumn<INameable, String> requirementNameColumn;
+	private TreeTableColumn<INameable, Checked> requirementStatusColumn;
 
 	@FXML
 	private MenuButton btAddRequirementVO;
@@ -134,9 +134,9 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void initializeTables() {
+		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
-		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 
 		tvRequirements.setRowFactory(table -> {
 			final TreeTableRow<INameable> row = new TreeTableRow<>();
