@@ -13,7 +13,9 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -92,9 +94,6 @@ public class BEditorView extends BorderPane {
 	@FXML 
 	private CheckBox cbUnicode;
 
-	/*@FXML
-	private VirtualizedScrollPane<BEditor> virtualizedScrollPane;*/
-
 	private final StageManager stageManager;
 	private final I18n i18n;
 	private final CurrentProject currentProject;
@@ -109,8 +108,9 @@ public class BEditorView extends BorderPane {
 	private Thread watchThread;
 	private WatchKey key;
 	private StyleSpans<Collection<String>> highlighting;
-	//private final HashMap<Path, Double> scrollPositionList = new HashMap<>();
-	//private boolean switched = false;
+	/*private final HashMap<Path, Double> scrollPositionList = new HashMap<>();
+	private boolean start = true;
+	private LocalDateTime startTime;*/
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
@@ -189,37 +189,28 @@ public class BEditorView extends BorderPane {
 			if(to == null) {
 				return;
 			}
-			/*if (from != null) {
-				System.out.println(from + " " +virtualizedScrollPane.estimatedScrollYProperty().getValue());
-				switched = true;
-				//scrollPositionList.put(from, virtualizedScrollPane.estimatedScrollYProperty().getValue());
-			}*/
 			switchMachine(to);
 		});
 		
 		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
 		
 		helpButton.setHelpContent("mainView.editor", null);
-
-		/*beditor.beingUpdatedProperty().addListener((obs, from, to) -> {
-			if (to && switched) {
-				System.out.println(machineChoice.getSelectionModel().getSelectedItem() + " changed: " + virtualizedScrollPane.estimatedScrollYProperty().getValue());
-				setScrollPosition(machineChoice.getSelectionModel().getSelectedItem());
-			}
-		});*/
 	}
 
-	/*private void setScrollPosition(Path machinePath) {
-		// Set initial scroll position if absent
-		scrollPositionList.putIfAbsent(machinePath, 0.0);
-		// Restore old position if possible
-		Platform.runLater(() -> {
-			System.out.println("set value: " + scrollPositionList.get(machinePath));
-			//virtualizedScrollPane.estimatedScrollYProperty().setValue(scrollPositionList.get(machinePath));
-			System.out.println("scroll Y by " + (scrollPositionList.get(machinePath) - virtualizedScrollPane.getEstimatedScrollY()));
-			beditor.scrollYBy(scrollPositionList.get(machinePath) - beditor.getEstimatedScrollY());
-			//virtualizedScrollPane.scrollYBy(scrollPositionList.get(machinePath) - virtualizedScrollPane.getEstimatedScrollY());
-		});
+	/*void updateScrollPosition(double position) {
+		if (start) {
+			startTime = LocalDateTime.now();
+			start = false;
+		} else if (startTime.plusNanos(500).isBefore(LocalDateTime.now())) {
+			start = true;
+			if (machineChoice.getValue()!=null) {
+				scrollPositionList.put(machineChoice.getValue(), position);
+				System.out.println("machine: " + machineChoice.getValue());
+				System.out.println("position: " + position);
+			} else {
+				System.out.println("selected is null");
+			}
+		}
 	}*/
 	
 	private void updateSaved() {
@@ -243,9 +234,13 @@ public class BEditorView extends BorderPane {
 		registerFile(machinePath);
 		loadText(machinePath);
 		beditor.clearHistory();
-		/*//setScrollPosition(machinePath);
-		switched = false;*/
+		// scrollPositionList.putIfAbsent(machinePath, 0.0);
+		// setScrollPosition(machinePath);
 	}
+
+	/*private void setScrollPosition(final Path machinePath) {
+		beditor.estimatedScrollYProperty().setValue(scrollPositionList.get(machinePath));
+	}*/
 	
 	private void loadText(Path machinePath) {
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
