@@ -5,10 +5,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -204,7 +204,8 @@ final class ProB2UIJacksonModule extends Module {
 			new StdDelegatingSerializer(ModelCheckingOptions.class, new StdConverter<ModelCheckingOptions, Set<ModelCheckingOptions.Options>>() {
 				@Override
 				public Set<ModelCheckingOptions.Options> convert(final ModelCheckingOptions value) {
-					final Set<ModelCheckingOptions.Options> options = new HashSet<>(value.getPrologOptions());
+					// Use TreeSet to sort options so they have a consistent stable order when written to JSON.
+					final Set<ModelCheckingOptions.Options> options = new TreeSet<>(value.getPrologOptions());
 					// Search strategy is now stored in a separate field.
 					// Compare enum values by string name to avoid deprecation warnings
 					// (and future compile errors once they are removed from ProB 2).
