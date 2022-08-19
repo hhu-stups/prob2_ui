@@ -10,11 +10,13 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.json.JsonMetadata;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
@@ -149,6 +151,11 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public void startAnimation(Machine m, Preference p) {
+		final StateSpace stateSpace = currentTrace.getStateSpace();
+		if (stateSpace != null) {
+			stateSpace.sendInterrupt();
+		}
+		injector.getInstance(CliTaskExecutor.class).interruptAll();
 		injector.getInstance(BEditorView.class).getErrors().clear();
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		machineLoader.loadAsync(m, p.getPreferences());

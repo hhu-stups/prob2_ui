@@ -20,7 +20,6 @@ import com.google.inject.Singleton;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
@@ -239,7 +238,6 @@ public class MachinesTab extends Tab {
 				startMachine(machinesList.getSelectionModel().getSelectedItem());
 			}
 		});
-		machinesList.disableProperty().bind(injector.getInstance(DisablePropertyController.class).disableProperty());
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof DescriptionView && !to.contains((Machine) ((DescriptionView) node).getDescribable())) {
