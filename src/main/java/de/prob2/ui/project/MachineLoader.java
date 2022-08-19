@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,7 +26,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.ErrorDisplayFilter;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.output.PrologOutput;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.preferences.GlobalPreferences;
@@ -55,7 +56,7 @@ public class MachineLoader {
 	private final ErrorDisplayFilter errorDisplayFilter;
 	private final PrologOutput prologOutput;
 	private final StatusBar statusBar;
-	private final StopActions stopActions;
+	private final CliTaskExecutor cliExecutor;
 	private final Injector injector;
 
 	private final ReadOnlyBooleanWrapper loading;
@@ -73,7 +74,7 @@ public class MachineLoader {
 		final ErrorDisplayFilter errorDisplayFilter,
 		final PrologOutput prologOutput,
 		final StatusBar statusBar,
-		final StopActions stopActions,
+		final CliTaskExecutor cliExecutor,
 		final Injector injector
 	) {
 		this.currentProject = currentProject;
@@ -83,7 +84,7 @@ public class MachineLoader {
 		this.errorDisplayFilter = errorDisplayFilter;
 		this.prologOutput = prologOutput;
 		this.statusBar = statusBar;
-		this.stopActions = stopActions;
+		this.cliExecutor = cliExecutor;
 		this.injector = injector;
 
 		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
@@ -253,8 +254,8 @@ public class MachineLoader {
 		}
 	}
 
-	public void loadAsync(Machine machine, Map<String, String> pref) {
-		final Thread machineLoader = new Thread(() -> {
+	public CompletableFuture<?> loadAsync(Machine machine, Map<String, String> pref) {
+		return this.cliExecutor.submit(() -> {
 			try {
 				this.load(machine, pref);
 			} catch (EventBFileNotFoundException e) {
@@ -282,9 +283,7 @@ public class MachineLoader {
 						.makeExceptionAlert(e, "", "project.machineLoader.alerts.couldNotOpen.content", machine.getName())
 						.showAndWait());
 			}
-		}, "Machine Loader");
-		this.stopActions.add(machineLoader::interrupt);
-		machineLoader.start();
+		});
 	}
 
 	private void setLoadingStatus(final StatusBar.LoadingStatus loadingStatus) {
