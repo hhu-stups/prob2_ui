@@ -49,6 +49,7 @@
 			<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#addRequirement"/>
 			<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceRequirement"/>
 			<Button fx:id="historyVOButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyRequirement"/>
+			<Button fx:id="refineVOButton" styleClass="button-blue" text="%common.buttons.refine" onAction="#refineRequirement"/>
 		</HBox>
 
 	</VBox>

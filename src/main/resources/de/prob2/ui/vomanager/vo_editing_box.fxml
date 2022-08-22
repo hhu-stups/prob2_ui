@@ -46,6 +46,7 @@
 			<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.add" onAction="#addVO"/>
 			<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceVO"/>
 			<Button fx:id="historyVOButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyVO"/>
+			<Button fx:id="refineVOButton" styleClass="button-blue" text="%common.buttons.refine" onAction="#refineVO"/>
 		</HBox>
 
 		<TableView fx:id="vtTable">

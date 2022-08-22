@@ -143,6 +143,10 @@ public class RequirementsEditingBox extends VBox {
 		currentProject.addRequirement(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText()));
 	}
 
+	@FXML
+	private void refineRequirement(){
+
+	}
 
 	public void resetRequirementEditing() {
 		cbRequirementChoice.getSelectionModel().clearSelection();

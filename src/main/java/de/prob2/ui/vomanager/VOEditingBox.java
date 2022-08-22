@@ -255,6 +255,10 @@ public class VOEditingBox extends VBox {
 		table.toFront();
 	}
 
+	@FXML
+	private void refineVO(){
+
+	}
 
 
 	private void warnNotValid() {
