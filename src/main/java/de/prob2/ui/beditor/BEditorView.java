@@ -108,6 +108,7 @@ public class BEditorView extends BorderPane {
 	private Thread watchThread;
 	private WatchKey key;
 	private StyleSpans<Collection<String>> highlighting;
+	//private final HashMap<Path, Integer> caretPositionList = new HashMap<>();
 	/*private final HashMap<Path, Double> scrollPositionList = new HashMap<>();
 	private boolean start = true;
 	private LocalDateTime startTime;*/
@@ -173,6 +174,7 @@ public class BEditorView extends BorderPane {
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (to == null) {
 				machineChoice.getItems().clear();
+				//caretPositionList.clear();
 				//scrollPositionList.clear();
 				this.setHint();
 			} else {
@@ -180,6 +182,7 @@ public class BEditorView extends BorderPane {
 				// Until that happens, display only the main machine.
 				machineChoice.getItems().setAll(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
 				machineChoice.getSelectionModel().selectFirst();
+				//beditor.caretPositionProperty().addListener((obs, oldValue, newValue) -> injector.getInstance(BEditorView.class).updateCaretPosition(newValue));
 			}
 		});
 		
@@ -212,6 +215,13 @@ public class BEditorView extends BorderPane {
 			}
 		}
 	}*/
+
+	/*void updateCaretPosition(int position) {
+		if (machineChoice.getValue()!=null) {
+			caretPositionList.put(machineChoice.getValue(), position);
+			System.out.println(machineChoice.getValue().getFileName() + " " + position);
+		}
+	}*/
 	
 	private void updateSaved() {
 		this.saved.set(this.getPath() == null || Objects.equals(this.lastSavedText.get(), this.beditor.getText()));
@@ -234,9 +244,18 @@ public class BEditorView extends BorderPane {
 		registerFile(machinePath);
 		loadText(machinePath);
 		beditor.clearHistory();
+		//caretPositionList.putIfAbsent(machinePath, 0);
+		//setCaretPosition(machinePath);
 		// scrollPositionList.putIfAbsent(machinePath, 0.0);
 		// setScrollPosition(machinePath);
 	}
+
+	/*private void setCaretPosition(final Path machinePath) {
+		beditor.requestFocus();
+		beditor.moveTo(caretPositionList.get(machinePath));
+		System.out.println("move " + machinePath.getFileName() + " to " + caretPositionList.get(machinePath));
+		beditor.requestFollowCaret();
+	}*/
 
 	/*private void setScrollPosition(final Path machinePath) {
 		beditor.estimatedScrollYProperty().setValue(scrollPositionList.get(machinePath));
