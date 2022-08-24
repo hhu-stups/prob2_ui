@@ -1,6 +1,5 @@
 package de.prob2.ui.error;
 
-import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +24,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.util.Callback;
-import jdk.internal.agent.FileSystem;
 
 @FXMLInjected
 public final class ErrorTableView extends TreeTableView<Object> {
