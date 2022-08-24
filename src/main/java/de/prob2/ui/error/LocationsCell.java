@@ -15,10 +15,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
 
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 import org.fxmisc.richtext.model.StyleSpans;
@@ -40,21 +37,17 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 			this.setGraphic(null);
 		} else if (item instanceof ErrorItem) {
 			final VBox vbox = new VBox();
+			I18n i18n = injector.getInstance(I18n.class);
 			for (final ErrorItem.Location location : ((ErrorItem)item).getLocations()) {
 				final StringBuilder sb = new StringBuilder();
-				I18n i18n = injector.getInstance(I18n.class);
-				sb.append(i18n.translate("error.errorTable.columns.locations.line"));
 				sb.append(location.getStartLine());
-				sb.append(", ");
-				sb.append(i18n.translate("error.errorTable.columns.locations.column"));
+				sb.append(":");
 				sb.append(location.getStartColumn());
 				
 				if (location.getStartLine() != location.getEndLine() || location.getStartColumn() != location.getEndColumn()) {
 					sb.append(i18n.translate("error.errorTable.columns.locations.to"));
-					sb.append(i18n.translate("error.errorTable.columns.locations.line"));
 					sb.append(location.getEndLine());
-					sb.append(", ");
-					sb.append(i18n.translate("error.errorTable.columns.locations.column"));
+					sb.append(":");
 					sb.append(location.getEndColumn());
 				}
 				// Add ContextMenu for every location to be able to jump to each of them
@@ -69,12 +62,16 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 				vbox.getChildren().add(locationLabel);
 			}
 			this.setGraphic(vbox);
-			// If the TreeTableRow is double clicked the BEditorView will jump to the first error corresponding to the file
+			// If the TreeTableRow is double clicked the BEditorView will jump to the first error location corresponding to the ErrorItem
+			ErrorItem.Location firstError = ((ErrorItem)item).getLocations().get(0);
 			this.getTreeTableRow().setOnMouseClicked(e -> {
 				if (e.getClickCount() == 2) {
-					jumpToResource(((ErrorItem)item).getLocations().get(0));
+					jumpToResource(firstError);
 				}
 			});
+			String lineAndColumn = i18n.translate("error.errorTable.columns.locations.line") + firstError.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + firstError.getStartColumn();
+			String tooltipText = i18n.translate("error.errorTable.location.tooltip", lineAndColumn, firstError.getFilename());
+			this.getTreeTableRow().setTooltip(new Tooltip(tooltipText));
 		} else {
 			throw new AssertionError("Invalid table element type: " + item.getClass());
 		}

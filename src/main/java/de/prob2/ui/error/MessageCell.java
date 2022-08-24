@@ -8,6 +8,8 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.text.Text;
 
+import java.nio.file.FileSystems;
+
 final class MessageCell extends TreeTableCell<Object, Object> {
 	@Inject
 	private MessageCell() {}
@@ -20,7 +22,7 @@ final class MessageCell extends TreeTableCell<Object, Object> {
 			this.setText(null);
 			this.setGraphic(null);
 		} else if (item instanceof String) {
-			this.setText((String)item);
+			this.setText(((String) item).substring(((String) item).lastIndexOf(FileSystems.getDefault().getSeparator())+1));
 			this.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
 			this.setGraphic(null);
 		} else if (item instanceof ErrorItem) {
