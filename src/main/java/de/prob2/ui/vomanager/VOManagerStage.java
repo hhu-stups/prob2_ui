@@ -167,8 +167,10 @@ public class VOManagerStage extends Stage {
 		tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null && to.getValue() != null) {
 				INameable item = to.getValue();
-				if(item instanceof Requirement || item instanceof ValidationObligation) {
-					showRequirement((IAbstractRequirement) item);
+				if(item instanceof Requirement) {
+					requirementEditingBox.showRequirement((Requirement)item, true);
+				} else if(item instanceof ValidationObligation) {
+					voEditingBox.showValidationObligation((ValidationObligation)item, true);
 				} else {
 					switchMode(EditType.NONE, Mode.NONE);
 				}
@@ -398,14 +400,6 @@ public class VOManagerStage extends Stage {
 			getMachineForItem(item).getValidationObligations().remove((ValidationObligation)item.getValue());
 		}
 		// Machine items cannot be manually removed (they disappear when all their children are removed)
-	}
-
-	private void showRequirement(IAbstractRequirement requirement) {
-		if(requirement instanceof Requirement) {
-			requirementEditingBox.showRequirement((Requirement) requirement, true);
-		} else if(requirement instanceof ValidationObligation) {
-			voEditingBox.showValidationObligation((ValidationObligation) requirement, true);
-		}
 	}
 
 	public EditType getEditType() {

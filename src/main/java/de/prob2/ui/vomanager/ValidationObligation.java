@@ -21,7 +21,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-public class ValidationObligation implements IAbstractRequirement, INameable {
+public class ValidationObligation implements INameable {
 
 	private final String id;
 

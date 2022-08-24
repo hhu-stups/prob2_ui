@@ -14,7 +14,7 @@ import de.prob2.ui.verifications.Checked;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class Requirement implements IAbstractRequirement, INameable {
+public class Requirement implements INameable {
 
 	private final String name;
 
