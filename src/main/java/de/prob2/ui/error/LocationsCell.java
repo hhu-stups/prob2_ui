@@ -64,20 +64,25 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 				vbox.getChildren().add(locationLabel);
 			}
 			this.setGraphic(vbox);
+			// this.getTreeTableRow() is deprecated since JavaFX 17
+			// and the replacement this.getTableRow() was only introduced in JavaFX 17.
+			// To stay compatible with older JavaFX versions without causing deprecation warnings on newer versions,
+			// go through this.tableRowProperty() instead.
+			final TreeTableRow<?> row = this.tableRowProperty().get();
 			if (!locations.isEmpty()) {
 				// If the TreeTableRow is double clicked the BEditorView will jump to the first error location corresponding to the ErrorItem
 				ErrorItem.Location firstError = locations.get(0);
-				this.getTreeTableRow().setOnMouseClicked(e -> {
+				row.setOnMouseClicked(e -> {
 					if (e.getClickCount() == 2) {
 						jumpToResource(firstError);
 					}
 				});
 				String lineAndColumn = i18n.translate("error.errorTable.columns.locations.line") + firstError.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + firstError.getStartColumn();
 				String tooltipText = i18n.translate("error.errorTable.location.tooltip", lineAndColumn, firstError.getFilename());
-				this.getTreeTableRow().setTooltip(new Tooltip(tooltipText));
+				row.setTooltip(new Tooltip(tooltipText));
 			} else {
-				this.getTreeTableRow().setOnMouseClicked(null);
-				this.getTreeTableRow().setTooltip(null);
+				row.setOnMouseClicked(null);
+				row.setTooltip(null);
 			}
 		} else {
 			throw new AssertionError("Invalid table element type: " + item.getClass());
