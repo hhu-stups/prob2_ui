@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -38,7 +39,8 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 		} else if (item instanceof ErrorItem) {
 			final VBox vbox = new VBox();
 			I18n i18n = injector.getInstance(I18n.class);
-			for (final ErrorItem.Location location : ((ErrorItem)item).getLocations()) {
+			final List<ErrorItem.Location> locations = ((ErrorItem)item).getLocations();
+			for (final ErrorItem.Location location : locations) {
 				final StringBuilder sb = new StringBuilder();
 				sb.append(location.getStartLine());
 				sb.append(":");
@@ -62,16 +64,21 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 				vbox.getChildren().add(locationLabel);
 			}
 			this.setGraphic(vbox);
-			// If the TreeTableRow is double clicked the BEditorView will jump to the first error location corresponding to the ErrorItem
-			ErrorItem.Location firstError = ((ErrorItem)item).getLocations().get(0);
-			this.getTreeTableRow().setOnMouseClicked(e -> {
-				if (e.getClickCount() == 2) {
-					jumpToResource(firstError);
-				}
-			});
-			String lineAndColumn = i18n.translate("error.errorTable.columns.locations.line") + firstError.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + firstError.getStartColumn();
-			String tooltipText = i18n.translate("error.errorTable.location.tooltip", lineAndColumn, firstError.getFilename());
-			this.getTreeTableRow().setTooltip(new Tooltip(tooltipText));
+			if (!locations.isEmpty()) {
+				// If the TreeTableRow is double clicked the BEditorView will jump to the first error location corresponding to the ErrorItem
+				ErrorItem.Location firstError = locations.get(0);
+				this.getTreeTableRow().setOnMouseClicked(e -> {
+					if (e.getClickCount() == 2) {
+						jumpToResource(firstError);
+					}
+				});
+				String lineAndColumn = i18n.translate("error.errorTable.columns.locations.line") + firstError.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + firstError.getStartColumn();
+				String tooltipText = i18n.translate("error.errorTable.location.tooltip", lineAndColumn, firstError.getFilename());
+				this.getTreeTableRow().setTooltip(new Tooltip(tooltipText));
+			} else {
+				this.getTreeTableRow().setOnMouseClicked(null);
+				this.getTreeTableRow().setTooltip(null);
+			}
 		} else {
 			throw new AssertionError("Invalid table element type: " + item.getClass());
 		}
