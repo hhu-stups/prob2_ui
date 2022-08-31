@@ -53,15 +53,17 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 					sb.append(location.getEndColumn());
 				}
 				// Add ContextMenu for every location to be able to jump to each of them
-				ContextMenu contextMenu = new ContextMenu();
-				MenuItem menuItem = new MenuItem(i18n.translate("error.errorTable.location.jumpTo",
-						i18n.translate("error.errorTable.columns.locations.line") + location.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + location.getStartColumn()));
-				menuItem.setOnAction(e -> jumpToResource(location));
-				contextMenu.getItems().add(menuItem);
+				if (!location.getFilename().isEmpty()) {
+					ContextMenu contextMenu = new ContextMenu();
+					MenuItem menuItem = new MenuItem(i18n.translate("error.errorTable.location.jumpTo",
+							i18n.translate("error.errorTable.columns.locations.line") + location.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + location.getStartColumn()));
+					menuItem.setOnAction(e -> jumpToResource(location));
+					contextMenu.getItems().add(menuItem);
 
-				Label locationLabel = new Label(sb.toString());
-				locationLabel.setContextMenu(contextMenu);
-				vbox.getChildren().add(locationLabel);
+					Label locationLabel = new Label(sb.toString());
+					locationLabel.setContextMenu(contextMenu);
+					vbox.getChildren().add(locationLabel);
+				}
 			}
 			this.setGraphic(vbox);
 			// this.getTreeTableRow() is deprecated since JavaFX 17
@@ -72,14 +74,18 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 			if (!locations.isEmpty()) {
 				// If the TreeTableRow is double clicked the BEditorView will jump to the first error location corresponding to the ErrorItem
 				ErrorItem.Location firstError = locations.get(0);
-				row.setOnMouseClicked(e -> {
-					if (e.getClickCount() == 2) {
-						jumpToResource(firstError);
-					}
-				});
-				String lineAndColumn = i18n.translate("error.errorTable.columns.locations.line") + firstError.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + firstError.getStartColumn();
-				String tooltipText = i18n.translate("error.errorTable.location.tooltip", lineAndColumn, firstError.getFilename());
-				row.setTooltip(new Tooltip(tooltipText));
+				if (firstError.getFilename().isEmpty()) {
+					// TODO Investigate the empty filenames and the corresponding locations given
+				} else {
+					row.setOnMouseClicked(e -> {
+						if (e.getClickCount() == 2) {
+							jumpToResource(firstError);
+						}
+					});
+					String lineAndColumn = i18n.translate("error.errorTable.columns.locations.line") + firstError.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + firstError.getStartColumn();
+					String tooltipText = i18n.translate("error.errorTable.location.tooltip", lineAndColumn, firstError.getFilename());
+					row.setTooltip(new Tooltip(tooltipText));
+				}
 			} else {
 				row.setOnMouseClicked(null);
 				row.setTooltip(null);
