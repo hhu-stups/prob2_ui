@@ -63,7 +63,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 
 	@FXML
 	protected TextArea taFormula;
-	
+
+	@FXML
+	protected Button evaluateFormulaButton;
+
 	@FXML
 	protected TextArea taErrors;
 
@@ -162,11 +165,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		taFormula.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
 				if (!e.isShiftDown()) {
-					T item = lvChoice.getSelectionModel().getSelectedItem();
-					if (item == null) {
-						return;
-					}
-					visualize(item);
+					evaluateFormula();
 					e.consume();
 				} else {
 					taFormula.insertText(taFormula.getCaretPosition(), "\n");
@@ -179,6 +178,16 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			final T item = lvChoice.getSelectionModel().getSelectedItem();
 			return item == null || item.getRelevantPreferences().isEmpty();
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
+	}
+
+	@FXML
+	private void evaluateFormula() {
+		T item = lvChoice.getSelectionModel().getSelectedItem();
+		if (item == null) {
+			return;
+		}
+
+		visualize(item);
 	}
 	
 	@FXML
