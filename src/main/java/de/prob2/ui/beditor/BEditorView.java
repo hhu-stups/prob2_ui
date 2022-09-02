@@ -125,7 +125,6 @@ public class BEditorView extends BorderPane {
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
-		System.out.println("setting saved to " + this.saved.get());
 		this.errors = FXCollections.observableArrayList();
 		this.watchThread = null;
 		this.key = null;
@@ -145,6 +144,8 @@ public class BEditorView extends BorderPane {
 		saved.addListener(o -> this.updateErrors());
 		errors.addListener((InvalidationListener) o -> this.updateErrors());
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
+			System.out.println("[" + Thread.currentThread().getName() + "] currentTrace.stateSpace changed: from=" + from + " to=" + to);
+			new Exception().printStackTrace(System.out);
 			if (to == null) {
 				return;
 			}
@@ -171,6 +172,8 @@ public class BEditorView extends BorderPane {
 		});
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			System.out.println("[" + Thread.currentThread().getName() + "] currentProject.currentMachine changed: from=" + from + " to=" + to);
+			new Exception().printStackTrace(System.out);
 			if (to == null) {
 				machineChoice.getItems().clear();
 				//caretPositionList.clear();
@@ -188,6 +191,8 @@ public class BEditorView extends BorderPane {
 		currentProject.addListener((observable, from, to) -> resetWatching());
 
 		machineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			System.out.println("[" + Thread.currentThread().getName() + "] selectedItem changed: from=" + from + " to=" + to);
+			new Exception().printStackTrace(System.out);
 			if (to == null) {
 				return;
 			}
@@ -404,12 +409,11 @@ public class BEditorView extends BorderPane {
 
 	@FXML
 	public void handleSave() {
+		System.out.println("[" + Thread.currentThread().getName() + "] handleSave");
 		resetWatching();
-		lastSavedText.set(beditor.getText());
 		assert this.getPath() != null;
 		try {
 			Files.write(this.getPath(), beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
-			registerFile(this.getPath());
 		} catch (IOException e) {
 			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
 			alert.initOwner(this.getScene().getWindow());
@@ -417,7 +421,25 @@ public class BEditorView extends BorderPane {
 			LOGGER.error("Could not save file: {}", path, e);
 			return;
 		}
+		lastSavedText.set(beditor.getText());
+		System.out.println("saved, registering watcher...");
+		registerFile(this.getPath());
+
+		System.out.println("reloading...");
+		Path selected = machineChoice.getSelectionModel().getSelectedItem();
+		System.out.println("selected: " + selected);
 		currentProject.reloadCurrentMachine();
+		System.out.println("reloaded");
+		Platform.runLater(()-> {
+			System.out.println("[" + Thread.currentThread().getName() + "] handleSave#runLater");
+			if (machineChoice.getItems().contains(selected)) {
+				System.out.println("contains!");
+				selectMachine(selected);
+			}
+			System.out.println("done handleSave#runLater");
+		});
+		System.out.println("done handleSave");
+		new Exception().printStackTrace(System.out);
 	}
 
 	private void resetWatching() {
