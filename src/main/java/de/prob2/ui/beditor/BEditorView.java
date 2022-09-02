@@ -13,16 +13,11 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -70,34 +65,31 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import difflib.DiffUtils;
-import difflib.Patch;
-
 @FXMLInjected
 @Singleton
 public class BEditorView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorView.class);
 	private static final Charset EDITOR_CHARSET = StandardCharsets.UTF_8;
 
-	@FXML 
+	@FXML
 	private Button saveButton;
-	
-	@FXML 
+
+	@FXML
 	private Button openExternalButton;
-	
-	@FXML 
+
+	@FXML
 	private Label warningLabel;
-	
-	@FXML 
+
+	@FXML
 	private BEditor beditor;
-	
-	@FXML 
+
+	@FXML
 	private HelpButton helpButton;
-	
-	@FXML 
+
+	@FXML
 	private ChoiceBox<Path> machineChoice;
-	
-	@FXML 
+
+	@FXML
 	private CheckBox cbUnicode;
 
 	private final StageManager stageManager;
@@ -110,7 +102,7 @@ public class BEditorView extends BorderPane {
 	private final StringProperty lastSavedText;
 	private final BooleanProperty saved;
 	private final ObservableList<ErrorItem> errors;
-	
+
 	private Thread watchThread;
 	private WatchKey key;
 	private StyleSpans<Collection<String>> highlighting;
@@ -122,9 +114,9 @@ public class BEditorView extends BorderPane {
 	@Inject
 	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
 		/*
-		*	TODO: remember scroll position.
-		*   Getting scrollbar values does not work. Getting estimated y values of Virtualized Scroll Pane does produce weird values (Code area refreshing too often?)
-		*/
+		 *	TODO: remember scroll position.
+		 *   Getting scrollbar values does not work. Getting estimated y values of Virtualized Scroll Pane does produce weird values (Code area refreshing too often?)
+		 */
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentProject = currentProject;
@@ -151,9 +143,9 @@ public class BEditorView extends BorderPane {
 		beditor.textProperty().addListener(o -> this.updateSaved());
 		path.addListener(o -> this.updateSaved());
 		saved.addListener(o -> this.updateErrors());
-		errors.addListener((InvalidationListener)o -> this.updateErrors());
+		errors.addListener((InvalidationListener) o -> this.updateErrors());
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			if(to == null) {
+			if (to == null) {
 				return;
 			}
 			updateIncludedMachines();
@@ -161,23 +153,23 @@ public class BEditorView extends BorderPane {
 		saveButton.disableProperty().bind(saved);
 		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(Bindings.when(saved)
-			.then("")
-			.otherwise(i18n.translate("beditor.unsavedWarning"))
+				                                 .then("")
+				                                 .otherwise(i18n.translate("beditor.unsavedWarning"))
 		);
 		setHint();
-		
+
 		machineChoice.setConverter(new StringConverter<Path>() {
 			@Override
 			public String toString(final Path object) {
 				return object == null ? "" : object.getFileName().toString();
 			}
-			
+
 			@Override
 			public Path fromString(final String string) {
 				throw new AssertionError("Should never be called");
 			}
 		});
-		
+
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
 			if (to == null) {
 				machineChoice.getItems().clear();
@@ -192,18 +184,18 @@ public class BEditorView extends BorderPane {
 				//beditor.caretPositionProperty().addListener((obs, oldValue, newValue) -> injector.getInstance(BEditorView.class).updateCaretPosition(newValue));
 			}
 		});
-		
+
 		currentProject.addListener((observable, from, to) -> resetWatching());
-		
+
 		machineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to == null) {
+			if (to == null) {
 				return;
 			}
 			switchMachine(to);
 		});
-		
+
 		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
-		
+
 		helpButton.setHelpContent("mainView.editor", null);
 	}
 
@@ -229,7 +221,7 @@ public class BEditorView extends BorderPane {
 			System.out.println(machineChoice.getValue().getFileName() + " " + position);
 		}
 	}*/
-	
+
 	private void updateSaved() {
 		boolean newSaved = getPath() == null;
 		if (!newSaved) {
@@ -248,19 +240,19 @@ public class BEditorView extends BorderPane {
 
 		this.saved.set(newSaved);
 	}
-	
+
 	private void updateErrors() {
 		if (this.savedProperty().get()) {
 			this.beditor.getErrors().setAll(this.getErrors().stream()
-				.filter(error -> error.getLocations().stream()
-					.map(ErrorItem.Location::getFilename)
-					.anyMatch(this::isCurrentEditorFile))
-				.collect(Collectors.toList()));
+					                                .filter(error -> error.getLocations().stream()
+							                                                 .map(ErrorItem.Location::getFilename)
+							                                                 .anyMatch(this::isCurrentEditorFile))
+					                                .collect(Collectors.toList()));
 		} else {
 			this.beditor.getErrors().clear();
 		}
 	}
-	
+
 	private void switchMachine(final Path machinePath) {
 		resetWatching();
 		registerFile(machinePath);
@@ -282,7 +274,7 @@ public class BEditorView extends BorderPane {
 	/*private void setScrollPosition(final Path machinePath) {
 		beditor.estimatedScrollYProperty().setValue(scrollPositionList.get(machinePath));
 	}*/
-	
+
 	private void loadText(Path machinePath) {
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
 			final StateSpace stateSpace = currentTrace.getStateSpace();
@@ -302,9 +294,9 @@ public class BEditorView extends BorderPane {
 			setText(machinePath);
 		}
 	}
-	
+
 	private void showInternalRepresentation(StateSpace stateSpace, Path machinePath) {
-		if(stateSpace == null) {
+		if (stateSpace == null) {
 			return;
 		}
 		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
@@ -314,11 +306,11 @@ public class BEditorView extends BorderPane {
 		this.setEditorText(cmd.getPrettyPrint(), machinePath);
 		beditor.setEditable(false);
 	}
-	
+
 	private void updateIncludedMachines() {
 		final AbstractModel model = currentTrace.getModel();
 		if (model instanceof ClassicalBModel) {
-			machineChoice.getItems().setAll(((ClassicalBModel)model).getLoadedMachineFiles());
+			machineChoice.getItems().setAll(((ClassicalBModel) model).getLoadedMachineFiles());
 		} else {
 			// TODO: We could extract the refinement hierarchy via model.getMachines() or model.calculateDependencies on the EventBModel.
 			// Here, we have the problem that the current project might not include all of them refined machines
@@ -327,7 +319,7 @@ public class BEditorView extends BorderPane {
 		}
 		machineChoice.getSelectionModel().selectFirst();
 	}
-	
+
 	private void registerFile(Path path) {
 		Path directory = path.getParent();
 		WatchService watcher;
@@ -370,7 +362,7 @@ public class BEditorView extends BorderPane {
 	public void setPath(final Path path) {
 		this.pathProperty().set(path);
 	}
-	
+
 	public ReadOnlyBooleanProperty savedProperty() {
 		return saved;
 	}
@@ -389,7 +381,7 @@ public class BEditorView extends BorderPane {
 		}
 		beditor.setEditable(true);
 	}
-	
+
 	private void setText(Path path) {
 		String text;
 		try (final Stream<String> lines = Files.lines(path)) {
@@ -427,12 +419,12 @@ public class BEditorView extends BorderPane {
 		}
 		currentProject.reloadCurrentMachine();
 	}
-	
+
 	private void resetWatching() {
-		if(watchThread != null) {
+		if (watchThread != null) {
 			watchThread.interrupt();
 		}
-		if(key != null) {
+		if (key != null) {
 			key.reset();
 		}
 	}
