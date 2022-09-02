@@ -125,7 +125,6 @@ public class BEditorView extends BorderPane {
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
-		System.out.println("setting saved to " + this.saved.get());
 		this.errors = FXCollections.observableArrayList();
 		this.watchThread = null;
 		this.key = null;
