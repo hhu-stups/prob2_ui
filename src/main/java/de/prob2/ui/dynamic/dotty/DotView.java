@@ -180,7 +180,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				LOGGER.error("could not visualize graph with dot (command={}, layoutEngine={}, outputFormat={})", dotLocal, dotEngineLocal, outputFormat, e);
 				Platform.runLater(() -> {
 					this.stageManager.makeExceptionAlert(e, "dotty.error.dotVisualization.message").show();
-					this.close();
 				});
 				return;
 			}
