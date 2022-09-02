@@ -14,12 +14,15 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -66,6 +69,9 @@ import javafx.util.StringConverter;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import difflib.DiffUtils;
+import difflib.Patch;
 
 @FXMLInjected
 @Singleton
@@ -127,6 +133,7 @@ public class BEditorView extends BorderPane {
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
 		this.saved = new SimpleBooleanProperty(this, "saved", true);
+		System.out.println("setting saved to " + this.saved.get());
 		this.errors = FXCollections.observableArrayList();
 		this.watchThread = null;
 		this.key = null;
@@ -224,7 +231,22 @@ public class BEditorView extends BorderPane {
 	}*/
 	
 	private void updateSaved() {
-		this.saved.set(this.getPath() == null || Objects.equals(this.lastSavedText.get(), this.beditor.getText()));
+		boolean newSaved = getPath() == null;
+		if (!newSaved) {
+			String lastSaved = this.lastSavedText.get();
+			if (lastSaved == null) {
+				lastSaved = "";
+			}
+
+			String editor = this.beditor.getText();
+			if (editor == null) {
+				editor = "";
+			}
+
+			newSaved = Arrays.equals(lastSaved.split("(\r)?\n"), editor.split("(\r)?\n"));
+		}
+
+		this.saved.set(newSaved);
 	}
 	
 	private void updateErrors() {
