@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.ltl.formula;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -86,5 +87,11 @@ public class LTLFormulaItem extends AbstractCheckableItem implements IValidation
 		return Objects.equals(this.getId(), other.getId())
 			&& this.getCode().equals(other.getCode())
 			&& this.getDescription().equals(other.getDescription());
+	}
+
+	@Override
+	@JsonIgnore
+	public String toString() {
+		return String.format(Locale.ROOT, "%s(%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getCode());
 	}
 }

@@ -65,4 +65,9 @@ public final class AndValidationExpression implements IValidationExpression {
 			return Checked.UNKNOWN;
 		}
 	}
+
+	@Override
+	public String toString(){
+		return left.toString() + " & " + right.toString();
+	}
 }

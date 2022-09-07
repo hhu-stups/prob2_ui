@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -75,5 +76,11 @@ public class SymbolicCheckingFormulaItem extends SymbolicItem<SymbolicCheckingTy
 	public void reset() {
 		super.reset();
 		this.counterExamples.clear();
+	}
+
+	@Override
+	@JsonIgnore
+	public String toString() {
+		return String.format(Locale.ROOT, "%s(%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getCode());
 	}
 }

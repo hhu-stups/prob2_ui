@@ -43,4 +43,9 @@ public final class SequentialValidationExpression implements IValidationExpressi
 			return leftRes;
 		}
 	}
+
+	@Override
+	public String toString(){
+		return left.toString() + ";" + right.toString();
+	}
 }

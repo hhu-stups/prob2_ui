@@ -38,4 +38,9 @@ public final class NotValidationExpression implements IValidationExpression {
 			return Checked.UNKNOWN;
 		}
 	}
+
+	@Override
+	public String toString(){
+		return "!"+ expression.getChildren().toString();
+	}
 }

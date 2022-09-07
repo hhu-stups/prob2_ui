@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -286,5 +287,11 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 			return false;
 		}
 		return location.equals(((ReplayTrace) obj).getLocation());
+	}
+
+	@Override
+	@JsonIgnore
+	public String toString() {
+		return String.format(Locale.ROOT, "%s(%s)", this.getClass().getSimpleName(), this.getId());
 	}
 }

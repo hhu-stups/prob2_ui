@@ -45,4 +45,9 @@ public final class ValidationTaskExpression implements IValidationExpression {
 	public Checked getChecked() {
 		return this.getTask().getChecked();
 	}
+
+	@Override
+	public String toString(){
+		return task.toString();
+	}
 }

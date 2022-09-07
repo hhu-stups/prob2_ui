@@ -9,4 +9,8 @@ public interface IValidationTask extends IExecutableItem {
 	String getId();
 	@JsonIgnore
 	String getTaskDescription(I18n i18n);
+
+	@Override
+	@JsonIgnore
+	public String toString();
 }

@@ -49,4 +49,6 @@ public interface IValidationExpression {
 	}
 	
 	public abstract Checked getChecked();
+
+	String toString();
 }

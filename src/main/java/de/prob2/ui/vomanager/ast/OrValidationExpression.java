@@ -62,4 +62,9 @@ public final class OrValidationExpression implements IValidationExpression {
 			return Checked.UNKNOWN;
 		}
 	}
+
+	@Override
+	public String toString(){
+		return left.toString() + " or " + right.toString();
+	}
 }

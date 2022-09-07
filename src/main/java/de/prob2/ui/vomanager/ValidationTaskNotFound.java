@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 
@@ -7,6 +8,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
+import java.util.Locale;
 
 /**
  * Placeholder representing an invalid validation task ID that appeared in a VO expression.
@@ -54,5 +57,11 @@ public final class ValidationTaskNotFound implements IValidationTask {
 	@Override
 	public String getTaskDescription(final I18n i18n) {
 		return i18n.translate("vomanager.validationTaskNotFound");
+	}
+
+	@Override
+	@JsonIgnore
+	public String toString() {
+		return String.format(Locale.ROOT, "%s(%s)", this.getClass().getSimpleName(), this.getId());
 	}
 }

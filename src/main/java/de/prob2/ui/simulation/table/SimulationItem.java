@@ -315,4 +315,10 @@ public class SimulationItem implements IValidationTask {
 		String createdBy = "Simulation: " + getTypeAsName() + "; " + getConfiguration();
 		return createdBy.replaceAll("\n", " ");
 	}
+
+	@Override
+	@JsonIgnore
+	public String toString() {
+		return String.format(Locale.ROOT, "%s(%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getInformation());
+	}
 }
