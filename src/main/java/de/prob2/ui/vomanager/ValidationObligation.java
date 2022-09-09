@@ -33,6 +33,9 @@ public class ValidationObligation implements INameable {
 	private final List<ValidationObligation> previousVersions;
 
 	@JsonIgnore
+	private final ValidationObligation parent ;
+
+	@JsonIgnore
 	private IValidationExpression parsedExpression;
 
 	@JsonIgnore
@@ -45,15 +48,19 @@ public class ValidationObligation implements INameable {
 	public ValidationObligation(@JsonProperty("id") String id,
 								@JsonProperty("expression") String expression,
 								@JsonProperty("requirement") String requirement) {
-		this(id, expression, requirement, Collections.emptyList());
+		this(id, expression, requirement, Collections.emptyList(), null);
 	}
 
 
-	public ValidationObligation(String id, String expression, String requirement, List<ValidationObligation> previousVersions) {
+
+
+
+	public ValidationObligation(String id, String expression, String requirement, List<ValidationObligation> previousVersions, ValidationObligation parent) {
 		this.id = id;
 		this.expression = expression;
 		this.requirement = requirement;
 		this.previousVersions = previousVersions;
+		this.parent = parent;
 
 		final InvalidationListener checkedListener = o -> {
 			if (this.parsedExpression == null) {
@@ -92,7 +99,7 @@ public class ValidationObligation implements INameable {
 	}
 
 	public ValidationObligation changeRequirement(String requirement) {
-		return new ValidationObligation(this.id, this.expression, requirement, this.previousVersions);
+		return new ValidationObligation(this.id, this.expression, requirement, this.previousVersions, this.getParent());
 	}
 
 
@@ -158,4 +165,7 @@ public class ValidationObligation implements INameable {
 		return String.format(Locale.ROOT, "ValidationObligation{checked = %s, id = %s, expression = %s, requirement = %s}", checked.get(), id, expression, requirement);
 	}
 
+	public ValidationObligation getParent() {
+		return parent;
+	}
 }

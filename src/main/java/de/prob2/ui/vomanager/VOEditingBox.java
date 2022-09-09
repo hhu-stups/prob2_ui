@@ -244,7 +244,7 @@ public class VOEditingBox extends VBox {
 	}
 
 	private ValidationObligation createNewFromCurrentSelection(List<ValidationObligation> parents){
-		return new ValidationObligation(currentVOName(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName(), parents);
+		return new ValidationObligation(currentVOName(), cbVOExpression.getValue(), cbLinkRequirementChoice.getValue().getName(), parents, null);
 	}
 
 	@FXML

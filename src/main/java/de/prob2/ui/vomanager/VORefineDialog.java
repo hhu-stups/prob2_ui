@@ -9,6 +9,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 
@@ -59,7 +60,7 @@ public class VORefineDialog extends Stage {
 	private void refine(){
 
 		try {
-			ValidationObligation newVo = new ValidationObligation(oldVO.getId()+"_refine", newVOExpression.getText(), oldVO.getRequirement());
+			ValidationObligation newVo = new ValidationObligation(oldVO.getId()+"_refine", newVOExpression.getText(), oldVO.getRequirement(), Collections.emptyList(), oldVO);
 			Machine machine = currentProject.getMachines().stream().filter(entry -> entry.getName().equals(targetMenu.getValue())).collect(Collectors.toList()).get(0);
 			voChecker.parseVO(machine, newVo);
 
