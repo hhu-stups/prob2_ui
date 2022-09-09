@@ -28,6 +28,7 @@
 				<TextArea editable="false" fx:id="oldVOExpression"/>
 				<Label text="%vomanager.refining.vo.new"/>
 				<TextArea fx:id="newVOExpression"/>
+				<ComboBox fx:id="targetMenu" />
 				<HBox>
 					<Button  styleClass="button-blue" text="%common.buttons.refine" onAction="#refine"/>
 					<Button  styleClass="button-blue" text="%common.buttons.cancel" onAction="#cancel"/>

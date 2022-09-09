@@ -257,7 +257,7 @@ public class VOEditingBox extends VBox {
 
 	@FXML
 	private void refineVO(){
-		Stage table = new VORefineDialog(cbVOExpression.getValue());
+		Stage table = new VORefineDialog(currentProject, (ValidationObligation) voManagerStage.getSelectedRequirement(), voChecker, requirementHandler, cbLinkRequirementChoice, voErrorHandler);
 		stageManager.loadFXML(table, "vo_refine_dialog.fxml", this.getClass().getName());
 		table.show();
 		table.toFront();
