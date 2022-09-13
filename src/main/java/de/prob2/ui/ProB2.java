@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ch.qos.logback.classic.ClassicConstants;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -60,8 +62,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.util.ContextInitializer;
 
 public class ProB2 extends Application {
 
@@ -136,8 +136,8 @@ public class ProB2 extends Application {
 
 	@Override
 	public void init() {
-		if (!System.getProperties().containsKey(ContextInitializer.CONFIG_FILE_PROPERTY)) {
-			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "de/prob2/ui/logback_config.xml");
+		if (!System.getProperties().containsKey(ClassicConstants.CONFIG_FILE_PROPERTY)) {
+			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "de/prob2/ui/logback_config.xml");
 		}
 
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
