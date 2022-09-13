@@ -102,7 +102,7 @@ public class ModelcheckingStage extends Stage {
 			} catch (NumberFormatException e) {
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.invalidInput");
 				alert.initOwner(this);
-				alert.showAndWait();;
+				alert.showAndWait();
 			}
 		});
 		this.tfFindGoal.visibleProperty().bind(findGoal.selectedProperty());
@@ -148,7 +148,6 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void cancel() {
-		this.result = null;
 		this.hide();
 	}
 
@@ -188,5 +187,7 @@ public class ModelcheckingStage extends Stage {
 		} else {
 			findGoal.setSelected(false);
 		}
+
+		result = item;
 	}
 }
