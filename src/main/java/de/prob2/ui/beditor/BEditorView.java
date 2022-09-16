@@ -108,6 +108,7 @@ public class BEditorView extends BorderPane {
 	private Thread watchThread;
 	private WatchKey key;
 	private StyleSpans<Collection<String>> highlighting;
+	private boolean changingText;
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
@@ -142,8 +143,6 @@ public class BEditorView extends BorderPane {
 		saved.addListener(o -> this.updateErrors());
 		errors.addListener((InvalidationListener) o -> this.updateErrors());
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			System.out.println("[" + Thread.currentThread().getName() + "] currentTrace.stateSpace changed: from=" + from + " to=" + to);
-			new Exception().printStackTrace(System.out);
 			if (to == null) {
 				return;
 			}
@@ -170,8 +169,6 @@ public class BEditorView extends BorderPane {
 		});
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			System.out.println("[" + Thread.currentThread().getName() + "] currentProject.currentMachine changed: from=" + from + " to=" + to);
-			new Exception().printStackTrace(System.out);
 			if (to == null) {
 				machineChoice.getItems().clear();
 				this.setHint();
@@ -187,29 +184,38 @@ public class BEditorView extends BorderPane {
 		});
 
 		beditor.caretPositionProperty().addListener((observable, from, to) -> {
-			Machine m = currentProject.getCurrentMachine();
-			if (m != null) {
-				Path machine = machineChoice.getSelectionModel().getSelectedItem();
-				if (machine != null) {
-					m.getCachedEditorState().setCaretPosition(machine, to);
+			if (!changingText) {
+				// System.out.println("[" + machineChoice.getSelectionModel().getSelectedItem() + "] caretPosition: " + to);
+				Machine m = currentProject.getCurrentMachine();
+				if (m != null) {
+					Path machine = machineChoice.getSelectionModel().getSelectedItem();
+					if (machine != null) {
+						m.getCachedEditorState().setCaretPosition(machine, to);
+					}
 				}
 			}
 		});
 		beditor.estimatedScrollXProperty().addListener((observable, from, to) -> {
-			Machine m = currentProject.getCurrentMachine();
-			if (m != null) {
-				Path machine = machineChoice.getSelectionModel().getSelectedItem();
-				if (machine != null) {
-					m.getCachedEditorState().setScrollXPosition(machine, to);
+			if (!changingText) {
+				// System.out.println("[" + machineChoice.getSelectionModel().getSelectedItem() + "] scrollXPosition: " + to);
+				Machine m = currentProject.getCurrentMachine();
+				if (m != null) {
+					Path machine = machineChoice.getSelectionModel().getSelectedItem();
+					if (machine != null) {
+						m.getCachedEditorState().setScrollXPosition(machine, to);
+					}
 				}
 			}
 		});
 		beditor.estimatedScrollYProperty().addListener((observable, from, to) -> {
-			Machine m = currentProject.getCurrentMachine();
-			if (m != null) {
-				Path machine = machineChoice.getSelectionModel().getSelectedItem();
-				if (machine != null) {
-					m.getCachedEditorState().setScrollYPosition(machine, to);
+			if (!changingText) {
+				// System.out.println("[" + machineChoice.getSelectionModel().getSelectedItem() + "] scrollYPosition: " + to);
+				Machine m = currentProject.getCurrentMachine();
+				if (m != null) {
+					Path machine = machineChoice.getSelectionModel().getSelectedItem();
+					if (machine != null) {
+						m.getCachedEditorState().setScrollYPosition(machine, to);
+					}
 				}
 			}
 		});
@@ -217,8 +223,7 @@ public class BEditorView extends BorderPane {
 		currentProject.addListener((observable, from, to) -> resetWatching());
 
 		machineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			System.out.println("[" + Thread.currentThread().getName() + "] selectedItem changed: from=" + from + " to=" + to);
-			new Exception().printStackTrace(System.out);
+			// System.out.println("[" + Thread.currentThread().getName() + "] selectedItem changed: from=" + from + " to=" + to);
 			if (to == null) {
 				return;
 			}
@@ -269,18 +274,21 @@ public class BEditorView extends BorderPane {
 
 		currentProject.getCurrentMachine().getCachedEditorState().setSelectedMachine(machinePath);
 
+		beditor.requestFocus();
 		TextAreaState textAreaState = currentProject.getCurrentMachine().getCachedEditorState().getTextAreaState(machinePath);
-		setCaretPosition(textAreaState.caretPosition);
-		setScrollPosition(textAreaState.scrollXPosition, textAreaState.scrollYPosition);
+		if (textAreaState != null) {
+			restoreState(textAreaState);
+		}
 	}
 
-	private void setCaretPosition(int caretPos) {
-		beditor.moveTo(caretPos);
-	}
+	private void restoreState(TextAreaState textAreaState) {
+		// System.out.println("[" + machineChoice.getSelectionModel().getSelectedItem() + "] restoring: " + textAreaState);
+		beditor.moveTo(textAreaState.caretPosition);
+		beditor.requestFollowCaret();
 
-	private void setScrollPosition(double scrollXPosition, double scrollYPosition) {
-		beditor.estimatedScrollXProperty().setValue(scrollXPosition);
-		beditor.estimatedScrollYProperty().setValue(scrollYPosition);
+		// TODO: scroll to old position
+		// beditor.estimatedScrollXProperty().setValue(textAreaState.scrollXPosition);
+		// beditor.estimatedScrollYProperty().setValue(textAreaState.scrollYPosition);
 	}
 
 	private void loadText(Path machinePath) {
@@ -316,8 +324,6 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void updateIncludedMachines() {
-		System.out.println("[" + Thread.currentThread().getName() + "] updateIncludedMachines");
-		new Exception().printStackTrace(System.out);
 		final AbstractModel model = currentTrace.getModel();
 		if (model instanceof ClassicalBModel) {
 			machineChoice.getItems().setAll(((ClassicalBModel) model).getLoadedMachineFiles());
@@ -389,13 +395,16 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void setEditorText(String text, Path path) {
+		changingText = true;
 		this.setPath(path);
 		this.lastSavedText.set(text);
 		if (!beditor.getText().equals(text)) {
-			beditor.clear();
-			beditor.appendText(text);
+			beditor.replaceText(text);
+			// beditor.moveTo(0);
+			// beditor.requestFollowCaret();
 		}
 		beditor.setEditable(true);
+		changingText = false;
 	}
 
 	private void setText(Path path) {
@@ -420,7 +429,6 @@ public class BEditorView extends BorderPane {
 
 	@FXML
 	public void handleSave() {
-		System.out.println("[" + Thread.currentThread().getName() + "] handleSave");
 		resetWatching();
 		assert this.getPath() != null;
 		try {
@@ -433,24 +441,9 @@ public class BEditorView extends BorderPane {
 			return;
 		}
 		lastSavedText.set(beditor.getText());
-		System.out.println("saved, registering watcher...");
 		registerFile(this.getPath());
 
-		System.out.println("reloading...");
-		Path selected = machineChoice.getSelectionModel().getSelectedItem();
-		System.out.println("selected: " + selected);
 		currentProject.reloadCurrentMachine();
-		System.out.println("reloaded");
-		Platform.runLater(() -> {
-			System.out.println("[" + Thread.currentThread().getName() + "] handleSave#runLater");
-			/*if (machineChoice.getItems().contains(selected)) {
-				System.out.println("contains!");
-				selectMachine(selected);
-			}
-			System.out.println("done handleSave#runLater");*/
-		});
-		System.out.println("done handleSave");
-		new Exception().printStackTrace(System.out);
 	}
 
 	private void resetWatching() {

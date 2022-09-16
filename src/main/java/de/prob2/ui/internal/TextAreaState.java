@@ -29,4 +29,13 @@ public class TextAreaState {
 	public TextAreaState withScrollYPosition(double scrollYPosition) {
 		return new TextAreaState(caretPosition, scrollXPosition, scrollYPosition);
 	}
+
+	@Override
+	public String toString() {
+		return "TextAreaState{" +
+				       "caretPosition=" + caretPosition +
+				       ", scrollXPosition=" + scrollXPosition +
+				       ", scrollYPosition=" + scrollYPosition +
+				       '}';
+	}
 }
