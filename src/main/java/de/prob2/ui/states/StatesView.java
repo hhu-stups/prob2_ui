@@ -30,11 +30,11 @@ import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
@@ -151,7 +151,7 @@ public final class StatesView extends StackPane {
 				this.updateRootAsync(trace, trace, filterState.getText());
 			}
 		});
-		
+
 		this.showExpandedFormulasButton.selectedProperty().addListener((o, from, to) -> {
 			final FontAwesome.Glyph glyph;
 			if (to) {
@@ -161,7 +161,7 @@ public final class StatesView extends StackPane {
 			}
 			((Glyph)this.showExpandedFormulasButton.getGraphic()).setIcon(glyph);
 		});
-		
+
 		tv.setRowFactory(view -> initTableRow());
 
 		this.tvName.setCellFactory(col -> new NameCell(this.showExpandedFormulasButton.selectedProperty()));
@@ -190,7 +190,7 @@ public final class StatesView extends StackPane {
 					PersistenceUtils.setAbsoluteColumnWidths(tv, configData.statesViewColumnsWidth);
 				}
 			}
-			
+
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.statesViewColumnsWidth = PersistenceUtils.getAbsoluteColumnWidths(tv);
@@ -381,13 +381,26 @@ public final class StatesView extends StackPane {
 	}
 
 	private ExpandedFormula expandFormulaWithCaching(final BVisual2Formula formula) {
-		return this.formulaStructureCache.computeIfAbsent(formula, BVisual2Formula::expandStructureNonrecursive);
+		ExpandedFormula value = this.formulaStructureCache.get(formula);
+		if (value != null) {
+			return value;
+		}
+
+		ExpandedFormula newValue = formula.expandStructureNonrecursive();
+		this.formulaStructureCache.put(formula, newValue);
+		return newValue;
 	}
 
 	private BVisual2Value evaluateFormulaWithCaching(final BVisual2Formula formula, final State state) {
-		return this.formulaValueCache
-			.computeIfAbsent(state, s -> new HashMap<>())
-			.computeIfAbsent(formula, f -> f.evaluate(state));
+		Map<BVisual2Formula, BVisual2Value> cacheByState = this.formulaValueCache.computeIfAbsent(state, s -> new HashMap<>());
+		BVisual2Value value = cacheByState.get(formula);
+		if (value != null) {
+			return value;
+		}
+
+		BVisual2Value newValue = formula.evaluate(state);
+		cacheByState.put(formula, newValue);
+		return newValue;
 	}
 
 	private Map<BVisual2Formula, BVisual2Value> getFormulaValueCacheForState(final State state) {
@@ -396,7 +409,7 @@ public final class StatesView extends StackPane {
 
 	/**
 	 * Add the given expanded formula structures (and their children, recursively) to the cache.
-	 * 
+	 *
 	 * @param expandedStructures the expanded formula values to add
 	 */
 	private void addFormulaStructuresToCache(final Collection<? extends ExpandedFormula> expandedStructures) {
@@ -423,7 +436,7 @@ public final class StatesView extends StackPane {
 	/**
 	 * <p>Evaluate the given formulas and cache their values, if they are not already present in the cache.</p>
 	 * <p>This is faster than evaluating each formula individually via {@link StateItem} and {@link #evaluateFormulaWithCaching(BVisual2Formula, State)}, because this method internally evaluates all formulas in a single Prolog command, instead of one command per formula.</p>
-	 * 
+	 *
 	 * @param formulas the formulas for which to cache the values
 	 * @param state the state in which to evaluate the formulas
 	 */
@@ -444,12 +457,12 @@ public final class StatesView extends StackPane {
 				.map(TreeItem::getValue)
 				.map(StateItem::getFormula)
 				.collect(Collectors.toList());
-			
+
 			if (to) {
 				visibleFormulas.addAll(subformulas);
 			} else {
 				visibleFormulas.removeAll(subformulas);
-				
+
 				// When treeItem is collapsed, also collapse all of its children.
 				// This will recurse automatically as the children's listeners for tracking visibility are fired.
 				// JavaFX does not do this automatically by default,
@@ -480,7 +493,7 @@ public final class StatesView extends StackPane {
 	 * The next level of the tree (the children's children) is generated only once treeItem is expanded by the user.
 	 * (If treeItem is already expanded once this method is called, the next level is generated immediately.)
 	 * </p>
-	 * 
+	 *
 	 * @param treeItem the tree item into which the children should be generated
 	 * @param subformulas the subformulas of treeItem's formula, from which the children are generated
 	 * @param currentState the current state (never null), used to display the formula's current value
@@ -570,7 +583,7 @@ public final class StatesView extends StackPane {
 	 * it is generated lazily using {@link #addSubformulaItemsUnfiltered(TreeItem, List, State, State)} and not recursively,
 	 * but this usually doesn't make a big performance difference.
 	 * </p>
-	 * 
+	 *
 	 * @param treeItem the tree item into which the children should be generated
 	 * @param subformulas the subformulas of treeItem's formula, from which the children are generated
 	 * @param currentState the current state (never null), used to display the formula's current value
