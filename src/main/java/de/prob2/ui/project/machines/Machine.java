@@ -2,10 +2,8 @@ package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -16,12 +14,10 @@ import com.google.common.io.MoreFiles;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
-import de.prob.voparser.VOParseException;
-import de.prob.voparser.VOParser;
-import de.prob.voparser.node.Start;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.simulation.SimulationModel;
@@ -35,7 +31,6 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.INameable;
 import de.prob2.ui.vomanager.IValidationTask;
 import de.prob2.ui.vomanager.ValidationObligation;
-import de.prob2.ui.vomanager.ValidationTaskNotFound;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -142,6 +137,8 @@ public class Machine implements DescriptionView.Describable, INameable {
 	@JsonIgnore
 	private final MapProperty<String, IValidationTask> validationTasks;
 	private final ListChangeListener<IValidationTask> validationTaskListener;
+	@JsonIgnore
+	private final CachedEditorState cachedEditorState;
 
 	// When deserializing from JSON,
 	// all fields that are not listed as constructor parameters
@@ -182,6 +179,9 @@ public class Machine implements DescriptionView.Describable, INameable {
 				}
 			}
 		};
+
+		this.cachedEditorState = new CachedEditorState();
+
 		this.initListeners();
 	}
 	
@@ -583,6 +583,18 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.historyChartItems.setValue(FXCollections.observableArrayList(historyChartItems));
 	}
 
+	public PatternManager getPatternManager() {
+		return patternManager;
+	}
+
+	public void clearPatternManager() {
+		patternManager.getPatterns().clear();
+	}
+
+	public CachedEditorState getCachedEditorState() {
+		return cachedEditorState;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (other == this) {
@@ -594,22 +606,14 @@ public class Machine implements DescriptionView.Describable, INameable {
 		Machine otherMachine = (Machine) other;
 		return this.getLocation().equals(otherMachine.getLocation());
 	}
-	
-	@Override
-	public String toString() {
-		return this.getName();
-	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.getLocation());
 	}
-	
-	public PatternManager getPatternManager() {
-		return patternManager;
-	}
-	
-	public void clearPatternManager() {
-		patternManager.getPatterns().clear();
+
+	@Override
+	public String toString() {
+		return this.getName();
 	}
 }

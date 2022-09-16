@@ -35,10 +35,12 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.TextAreaState;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -106,10 +108,6 @@ public class BEditorView extends BorderPane {
 	private Thread watchThread;
 	private WatchKey key;
 	private StyleSpans<Collection<String>> highlighting;
-	//private final HashMap<Path, Integer> caretPositionList = new HashMap<>();
-	/*private final HashMap<Path, Double> scrollPositionList = new HashMap<>();
-	private boolean start = true;
-	private LocalDateTime startTime;*/
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
@@ -176,15 +174,43 @@ public class BEditorView extends BorderPane {
 			new Exception().printStackTrace(System.out);
 			if (to == null) {
 				machineChoice.getItems().clear();
-				//caretPositionList.clear();
-				//scrollPositionList.clear();
 				this.setHint();
 			} else {
 				// The correct list of included machines is available once the machine is fully loaded.
-				// Until that happens, display only the main machine.
+				// Until that happens, display only the main machine and the cached selection.
 				machineChoice.getItems().setAll(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
-				machineChoice.getSelectionModel().selectFirst();
-				//beditor.caretPositionProperty().addListener((obs, oldValue, newValue) -> injector.getInstance(BEditorView.class).updateCaretPosition(newValue));
+				Path selectedMachine = to.getCachedEditorState().getSelectedMachine();
+				if (selectedMachine != null) {
+					selectMachine(selectedMachine);
+				}
+			}
+		});
+
+		beditor.caretPositionProperty().addListener((observable, from, to) -> {
+			Machine m = currentProject.getCurrentMachine();
+			if (m != null) {
+				Path machine = machineChoice.getSelectionModel().getSelectedItem();
+				if (machine != null) {
+					m.getCachedEditorState().setCaretPosition(machine, to);
+				}
+			}
+		});
+		beditor.estimatedScrollXProperty().addListener((observable, from, to) -> {
+			Machine m = currentProject.getCurrentMachine();
+			if (m != null) {
+				Path machine = machineChoice.getSelectionModel().getSelectedItem();
+				if (machine != null) {
+					m.getCachedEditorState().setScrollXPosition(machine, to);
+				}
+			}
+		});
+		beditor.estimatedScrollYProperty().addListener((observable, from, to) -> {
+			Machine m = currentProject.getCurrentMachine();
+			if (m != null) {
+				Path machine = machineChoice.getSelectionModel().getSelectedItem();
+				if (machine != null) {
+					m.getCachedEditorState().setScrollYPosition(machine, to);
+				}
 			}
 		});
 
@@ -203,29 +229,6 @@ public class BEditorView extends BorderPane {
 
 		helpButton.setHelpContent("mainView.editor", null);
 	}
-
-	/*void updateScrollPosition(double position) {
-		if (start) {
-			startTime = LocalDateTime.now();
-			start = false;
-		} else if (startTime.plusNanos(500).isBefore(LocalDateTime.now())) {
-			start = true;
-			if (machineChoice.getValue()!=null) {
-				scrollPositionList.put(machineChoice.getValue(), position);
-				System.out.println("machine: " + machineChoice.getValue());
-				System.out.println("position: " + position);
-			} else {
-				System.out.println("selected is null");
-			}
-		}
-	}*/
-
-	/*void updateCaretPosition(int position) {
-		if (machineChoice.getValue()!=null) {
-			caretPositionList.put(machineChoice.getValue(), position);
-			System.out.println(machineChoice.getValue().getFileName() + " " + position);
-		}
-	}*/
 
 	private void updateSaved() {
 		boolean newSaved = getPath() == null;
@@ -263,22 +266,22 @@ public class BEditorView extends BorderPane {
 		registerFile(machinePath);
 		loadText(machinePath);
 		beditor.clearHistory();
-		//caretPositionList.putIfAbsent(machinePath, 0);
-		//setCaretPosition(machinePath);
-		// scrollPositionList.putIfAbsent(machinePath, 0.0);
-		// setScrollPosition(machinePath);
+
+		currentProject.getCurrentMachine().getCachedEditorState().setSelectedMachine(machinePath);
+
+		TextAreaState textAreaState = currentProject.getCurrentMachine().getCachedEditorState().getTextAreaState(machinePath);
+		setCaretPosition(textAreaState.caretPosition);
+		setScrollPosition(textAreaState.scrollXPosition, textAreaState.scrollYPosition);
 	}
 
-	/*private void setCaretPosition(final Path machinePath) {
-		beditor.requestFocus();
-		beditor.moveTo(caretPositionList.get(machinePath));
-		System.out.println("move " + machinePath.getFileName() + " to " + caretPositionList.get(machinePath));
-		beditor.requestFollowCaret();
-	}*/
+	private void setCaretPosition(int caretPos) {
+		beditor.moveTo(caretPos);
+	}
 
-	/*private void setScrollPosition(final Path machinePath) {
-		beditor.estimatedScrollYProperty().setValue(scrollPositionList.get(machinePath));
-	}*/
+	private void setScrollPosition(double scrollXPosition, double scrollYPosition) {
+		beditor.estimatedScrollXProperty().setValue(scrollXPosition);
+		beditor.estimatedScrollYProperty().setValue(scrollYPosition);
+	}
 
 	private void loadText(Path machinePath) {
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
@@ -313,6 +316,8 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void updateIncludedMachines() {
+		System.out.println("[" + Thread.currentThread().getName() + "] updateIncludedMachines");
+		new Exception().printStackTrace(System.out);
 		final AbstractModel model = currentTrace.getModel();
 		if (model instanceof ClassicalBModel) {
 			machineChoice.getItems().setAll(((ClassicalBModel) model).getLoadedMachineFiles());
@@ -322,7 +327,13 @@ public class BEditorView extends BorderPane {
 			// Still, could we assume that the machine is located in the same folder as the loaded machine? If yes, then it might still be possible to implement this feature
 			machineChoice.getItems().setAll(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
 		}
-		machineChoice.getSelectionModel().selectFirst();
+
+		Path selectedMachine = currentProject.getCurrentMachine().getCachedEditorState().getSelectedMachine();
+		if (selectedMachine != null) {
+			selectMachine(selectedMachine);
+		} else {
+			machineChoice.getSelectionModel().selectFirst();
+		}
 	}
 
 	private void registerFile(Path path) {
@@ -430,13 +441,13 @@ public class BEditorView extends BorderPane {
 		System.out.println("selected: " + selected);
 		currentProject.reloadCurrentMachine();
 		System.out.println("reloaded");
-		Platform.runLater(()-> {
+		Platform.runLater(() -> {
 			System.out.println("[" + Thread.currentThread().getName() + "] handleSave#runLater");
-			if (machineChoice.getItems().contains(selected)) {
+			/*if (machineChoice.getItems().contains(selected)) {
 				System.out.println("contains!");
 				selectMachine(selected);
 			}
-			System.out.println("done handleSave#runLater");
+			System.out.println("done handleSave#runLater");*/
 		});
 		System.out.println("done handleSave");
 		new Exception().printStackTrace(System.out);
