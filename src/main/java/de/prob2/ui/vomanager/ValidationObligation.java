@@ -165,6 +165,7 @@ public class ValidationObligation implements INameable {
 		return String.format(Locale.ROOT, "ValidationObligation{checked = %s, id = %s, expression = %s, requirement = %s}", checked.get(), id, expression, requirement);
 	}
 
+	@JsonIgnore //TODO Fix this when making history and refinement saving persistent
 	public ValidationObligation getParent() {
 		return parent;
 	}

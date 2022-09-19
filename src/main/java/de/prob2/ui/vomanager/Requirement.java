@@ -26,6 +26,8 @@ public class Requirement implements INameable {
 
 	private final List<Requirement> previousVersions;
 
+	private final Requirement parent;
+
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
@@ -34,19 +36,16 @@ public class Requirement implements INameable {
 			@JsonProperty("introducedAt") String introducedAt,
 			@JsonProperty("type") RequirementType type,
 			@JsonProperty("text") String text) {
-		this.name = name;
-		this.introducedAt = introducedAt;
-		this.type = type;
-		this.text = text;
-		this.previousVersions = Collections.emptyList();
+		this(name, introducedAt, type, text, Collections.emptyList(), null);
 	}
 
-	public Requirement(String name, String introducedAt, RequirementType type, String text, List<Requirement> previousVersions) {
+	public Requirement(String name, String introducedAt, RequirementType type, String text, List<Requirement> previousVersions, Requirement parent) {
 		this.name = name;
 		this.introducedAt = introducedAt;
 		this.type = type;
 		this.text = text;
 		this.previousVersions = previousVersions;
+		this.parent = parent;
 	}
 
 
@@ -99,5 +98,10 @@ public class Requirement implements INameable {
 	@Override
 	public String toString() {
 		return String.format(Locale.ROOT, "Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s}", checked, name, introducedAt, type, text);
+	}
+
+	@JsonIgnore //TODO Fix this when making history and refinement saving persistent
+	public Requirement getParent(){
+		return parent;
 	}
 }

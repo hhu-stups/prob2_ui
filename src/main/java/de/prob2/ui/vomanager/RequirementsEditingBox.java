@@ -82,9 +82,9 @@ public class RequirementsEditingBox extends VBox {
 			warnAlreadyExists();
 			return;
 		}
-		ArrayList<Requirement> parents = new ArrayList<>(oldRequirement.getPreviousVersions());
-		parents.add(oldRequirement);
-		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText(), parents);
+		ArrayList<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
+		predecessors.add(oldRequirement);
+		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue().toString(), cbRequirementChoice.getValue(), taRequirement.getText(), predecessors, null);
 		currentProject.replaceRequirement(oldRequirement, newRequirement);
 
 		updateVOs(oldRequirement, newRequirement);
