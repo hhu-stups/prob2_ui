@@ -2,6 +2,7 @@ package de.prob2.ui.project;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -17,20 +18,16 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.vomanager.Requirement;
 
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-
 public class Project implements HasMetadata {
 	public static final String FILE_TYPE = "Project";
 	public static final int CURRENT_FORMAT_VERSION = 30;
 	
-	private String name;
-	private String description;
-	private List<Machine> machines;
-	private final ListProperty<Requirement> requirements;
-	private List<Preference> preferences;
-	private JsonMetadata metadata;
+	private final String name;
+	private final String description;
+	private final List<Machine> machines;
+	private final List<Requirement> requirements;
+	private final List<Preference> preferences;
+	private final JsonMetadata metadata;
 	@JsonIgnore
 	private Path location;
 
@@ -47,8 +44,7 @@ public class Project implements HasMetadata {
 		this.name = name;
 		this.description = description;
 		this.machines = new ArrayList<>(machines);
-		this.requirements = new SimpleListProperty<>(this, "requirements", FXCollections.observableArrayList());
-		this.requirements.setAll(requirements);
+		this.requirements = new ArrayList<>(requirements);
 		this.preferences = new ArrayList<>(preferences);
 		this.metadata = metadata;
 		this.location = location;
@@ -64,24 +60,12 @@ public class Project implements HasMetadata {
 		return name;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	public String getDescription() {
 		return description;
 	}
 	
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public List<Machine> getMachines() {
-		return machines;
-	}
-	
-	public void setMachines(List<Machine> machines) {
-		this.machines = machines;
+		return Collections.unmodifiableList(machines);
 	}
 	
 	public Machine getMachine(final String name) {
@@ -102,11 +86,7 @@ public class Project implements HasMetadata {
 	}
 	
 	public List<Preference> getPreferences() {
-		return preferences;
-	}
-
-	public void setPreferences(List<Preference> preferences) {
-		this.preferences = preferences;
+		return Collections.unmodifiableList(preferences);
 	}
 	
 	public Preference getPreference(final String name) {
@@ -121,16 +101,8 @@ public class Project implements HasMetadata {
 		throw new NoSuchElementException("Could not find preference with name " + name);
 	}
 
-	public ListProperty<Requirement> requirementsProperty() {
-		return requirements;
-	}
-
 	public List<Requirement> getRequirements() {
-		return requirements.get();
-	}
-
-	public void setRequirements(List<Requirement> requirements) {
-		this.requirements.setAll(requirements);
+		return Collections.unmodifiableList(requirements);
 	}
 
 	@Override

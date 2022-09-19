@@ -241,21 +241,19 @@ public class VOManagerStage extends Stage {
 				for (Requirement requirement : from.getRequirements()) {
 					requirementHandler.resetListeners(from, requirement);
 				}
-				from.requirementsProperty().removeListener(updateListener);
 				for (final Machine machine : from.getMachines()) {
 					machine.validationObligationsProperty().removeListener(updateListener);
 				}
 			}
 
 			if (to != null) {
-				btAddVO.disableProperty().bind(to.requirementsProperty().emptyProperty());
+				btAddVO.setDisable(to.getRequirements().isEmpty());
 
 				for(Requirement requirement : to.getRequirements()) {
 					// TODO: Distinguish between two views for tvRequirements
 					requirementHandler.initListeners(to, null, requirement, VOManagerSetting.REQUIREMENT);
 				}
 
-				to.requirementsProperty().addListener(updateListener);
 				for (final Machine machine : to.getMachines()) {
 					machine.validationObligationsProperty().addListener(updateListener);
 				}
