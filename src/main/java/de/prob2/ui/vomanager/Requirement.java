@@ -97,7 +97,7 @@ public class Requirement implements INameable {
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ROOT, "Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s}", checked, name, introducedAt, type, text);
+		return String.format(Locale.ROOT, "Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s}", this.getChecked(), name, introducedAt, type, text);
 	}
 
 	@JsonIgnore //TODO Fix this when making history and refinement saving persistent
