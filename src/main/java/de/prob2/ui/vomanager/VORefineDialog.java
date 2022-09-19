@@ -72,6 +72,7 @@ public class VORefineDialog extends Stage {
 			voErrorHandler.handleError(this.getScene().getWindow(), e);
 		}
 
+		this.close();
 	}
 
 	@FXML
