@@ -19,7 +19,7 @@
 <?import javafx.collections.FXCollections?>
 <?import de.prob2.ui.vomanager.ValidationObligation?>
 <?import javafx.scene.control.TextArea?>
-<fx:root title="%vomanager.title" type="VORefineDialog" width="600" height="400" minHeight="600" minWidth="400" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root title="%vomanager.refining.vo.title" type="VORefineDialog" width="600" height="400" minHeight="600" minWidth="400" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 
 	<scene>
 		<Scene stylesheets="@/prob.css">

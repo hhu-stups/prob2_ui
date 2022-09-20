@@ -10,18 +10,24 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.Scene?>
-<?import de.prob2.ui.vomanager.VORefineDialog?>
+<?import de.prob2.ui.vomanager.RequirementRefineDialog?>
 <?import javafx.scene.control.TextArea?>
-<fx:root title="%vomanager.title" type="VORefineDialog" width="600" height="400" minHeight="600" minWidth="400" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.CheckBox?>
+<fx:root title="%vomanager.refining.requirement.title" type="RequirementRefineDialog" width="600" height="400" minHeight="600" minWidth="400" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<VBox>
-				<Label text="%vomanager.refining.vo.old"/>
+				<Label text="%vomanager.refining.requirement.old"/>
 				<TextArea editable="false" fx:id="oldRequirement"/>
-				<Label text="%vomanager.refining.vo.new"/>
+				<Label text="%vomanager.refining.requirement.new"/>
 				<TextArea fx:id="newRequirement"/>
-				<ComboBox fx:id="targetMenu" />
+				<HBox>
+					<ComboBox fx:id="targetMenu" />
+						<CheckBox fx:id="checkBox" />
+						<Label text="%vomanager.refining.requirement.keep"/>
+				</HBox>
 				<HBox>
 					<Button  styleClass="button-blue" text="%common.buttons.refine" onAction="#refine"/>
 					<Button  styleClass="button-blue" text="%common.buttons.cancel" onAction="#cancel"/>
