@@ -169,4 +169,10 @@ public class ValidationObligation implements INameable {
 	public ValidationObligation getParent() {
 		return parent;
 	}
+
+
+	@JsonIgnore
+	public ValidationObligation replaceRequirement(String newRequirement){
+		return new ValidationObligation(this.getId()+"refined_requirement", this.getExpression(), requirement, Collections.emptyList(), this.getParent());
+	}
 }

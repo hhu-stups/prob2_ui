@@ -145,7 +145,10 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private void refineRequirement(){
-
+		Stage requirementRefineDialog = new RequirementRefineDialog(currentProject, (Requirement) voManagerStage.getSelectedRequirement(), requirementHandler);
+		stageManager.loadFXML(requirementRefineDialog, "requirements_refine_dialog.fxml", this.getClass().getName());
+		requirementRefineDialog.show();
+		requirementRefineDialog.toFront();
 	}
 
 	public void resetRequirementEditing() {
