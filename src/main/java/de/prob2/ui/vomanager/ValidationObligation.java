@@ -1,14 +1,12 @@
 package de.prob2.ui.vomanager;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
@@ -21,16 +19,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-public class ValidationObligation implements INameable {
-
-	private final String id;
+public final class ValidationObligation implements INameable {
+	private final String machine;
 
 	private final String expression;
-
-	private final String requirement;
-
-	@JsonIgnore
-	private final List<ValidationObligation> previousVersions;
 
 	@JsonIgnore
 	private final ValidationObligation parent ;
@@ -45,21 +37,20 @@ public class ValidationObligation implements INameable {
 	private final ObservableList<IValidationTask> tasks = FXCollections.observableArrayList();
 
 	@JsonCreator
-	public ValidationObligation(@JsonProperty("id") String id,
-								@JsonProperty("expression") String expression,
-								@JsonProperty("requirement") String requirement) {
-		this(id, expression, requirement, Collections.emptyList(), null);
+	public ValidationObligation(
+		@JsonProperty("machine") String machine,
+		@JsonProperty("expression") String expression
+	) {
+		this(machine, expression, null);
 	}
 
 
 
 
 
-	public ValidationObligation(String id, String expression, String requirement, List<ValidationObligation> previousVersions, ValidationObligation parent) {
-		this.id = id;
+	public ValidationObligation(String machine, String expression, ValidationObligation parent) {
+		this.machine = machine;
 		this.expression = expression;
-		this.requirement = requirement;
-		this.previousVersions = previousVersions;
 		this.parent = parent;
 
 		final InvalidationListener checkedListener = o -> {
@@ -98,11 +89,6 @@ public class ValidationObligation implements INameable {
 		}
 	}
 
-	public ValidationObligation changeRequirement(String requirement) {
-		return new ValidationObligation(this.id, this.expression, requirement, this.previousVersions, this.getParent());
-	}
-
-
 	public ObjectProperty<Checked> checkedProperty() {
 		return checked;
 	}
@@ -115,8 +101,8 @@ public class ValidationObligation implements INameable {
 		return this.tasks;
 	}
 
-	public String getId() {
-		return id;
+	public String getMachine() {
+		return this.machine;
 	}
 
 	public String getExpression() {
@@ -127,52 +113,40 @@ public class ValidationObligation implements INameable {
 		return parsedExpression;
 	}
 
-	public String getRequirement() {
-		return requirement;
-	}
-
-	@JsonIgnore
-	public List<ValidationObligation> getPreviousVersions() {
-		return previousVersions;
-	}
-
-
 	@Override
 	@JsonIgnore
 	public String getName() {
-		if (this.getId() == null) {
-			return this.getExpression();
-		} else {
-			return "[" + this.getId() + "] " + this.getExpression();
-		}
+		return this.getExpression();
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		ValidationObligation that = (ValidationObligation) o;
-		return Objects.equals(id, that.id) && Objects.equals(expression, that.expression) && Objects.equals(requirement, that.requirement);
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || this.getClass() != obj.getClass()) {
+			return false;
+		}
+		final ValidationObligation other = (ValidationObligation)obj;
+		return this.getMachine().equals(other.getMachine())
+			&& this.getExpression().equals(other.getExpression());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, expression, requirement);
+		return Objects.hash(this.getMachine(), this.getExpression());
 	}
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ROOT, "ValidationObligation{checked = %s, id = %s, expression = %s, requirement = %s}", checked.get(), id, expression, requirement);
+		return MoreObjects.toStringHelper(this)
+			.add("machine", machine)
+			.add("expression", expression)
+			.toString();
 	}
 
 	@JsonIgnore //TODO Fix this when making history and refinement saving persistent
 	public ValidationObligation getParent() {
 		return parent;
-	}
-
-
-	@JsonIgnore
-	public ValidationObligation replaceRequirement(String newRequirement){
-		return new ValidationObligation(this.getId()+"refined_requirement", this.getExpression(), requirement, Collections.emptyList(), this.getParent());
 	}
 }

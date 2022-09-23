@@ -69,12 +69,14 @@ public class VOChecker {
 			return;
 		}
 
-		for(ValidationObligation vo : machine.getValidationObligations()) {
-			try {
-				parseVO(machine, vo);
-			} catch (VOParseException e) {
-				LOGGER.warn("Parse error in validation expression", e);
-			}
+		for (final Requirement requirement : currentProject.getRequirements()) {
+			requirement.getValidationObligation(machine).ifPresent(vo -> {
+				try {
+					parseVO(machine, vo);
+				} catch (VOParseException e) {
+					LOGGER.warn("Parse error in validation expression", e);
+				}
+			});
 		}
 	}
 
@@ -84,24 +86,19 @@ public class VOChecker {
 		} else if(setting == VOManagerSetting.MACHINE) {
 			checkRequirementOnMachineView(requirement, machine);
 		}
-		requirementHandler.updateChecked(currentProject.get(), machine, requirement, setting);
+		requirementHandler.updateChecked(machine, requirement, setting);
 	}
 
 	private void checkRequirementOnRequirementView(Requirement requirement) throws VOParseException {
-		for(Machine machine : currentProject.getMachines()) {
-			for (ValidationObligation validationObligation : machine.getValidationObligations()) {
-				if(validationObligation.getRequirement().equals(requirement.getName())) {
-					this.checkVO(machine, validationObligation);
-				}
-			}
+		for (final ValidationObligation vo : requirement.getValidationObligations()) {
+			final Machine machine = currentProject.get().getMachine(vo.getMachine());
+			this.checkVO(machine, vo);
 		}
 	}
 
 	private void checkRequirementOnMachineView(Requirement requirement, Machine machine) throws VOParseException {
-		for (ValidationObligation validationObligation : machine.getValidationObligations()) {
-			if(validationObligation.getRequirement().equals(requirement.getName())) {
-				this.checkVO(machine, validationObligation);
-			}
+		for (final ValidationObligation vo : requirement.getValidationObligations()) {
+			this.checkVO(machine, vo);
 		}
 	}
 

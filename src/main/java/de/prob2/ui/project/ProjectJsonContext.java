@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +20,9 @@ import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 
 class ProjectJsonContext extends JacksonManager.Context<Project> {
+	// From VOParser.scc:
+	// identifier_literal = (letter | underscore) (letter | underscore | digit | dot | comma)*;
+	private static final Pattern VALIDATION_TASK_ID_PATTERN = Pattern.compile("^[A-Za-z_][A-Za-z0-9_.,]*$");
 
 	private Path location;
 
@@ -723,6 +727,50 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 	
+	private static void updateV30Project(final ObjectNode project) {
+		final ArrayNode requirements = checkArray(project.get("requirements"));
+		final Map<String, ArrayNode> vosByRequirement = new HashMap<>();
+		requirements.forEach(requirementNode -> {
+			final ObjectNode requirement = checkObject(requirementNode);
+			final ArrayNode vosForRequirement = requirement.putArray("validationObligations");
+			vosByRequirement.put(checkText(requirement.get("name")), vosForRequirement);
+		});
+		
+		final ArrayNode machines = checkArray(project.get("machines"));
+		machines.forEach(machineNode -> {
+			final ObjectNode machine = checkObject(machineNode);
+			final String machineName = checkText(machine.get("name"));
+			final ArrayNode vosForMachine = checkArray(machine.remove("validationObligations"));
+			final Map<String, String> expressionsByRequirement = new HashMap<>();
+			vosForMachine.forEach(voNode -> {
+				final ObjectNode vo = checkObject(voNode);
+				String expression = checkText(vo.get("expression"));
+				final boolean needsParentheses = !VALIDATION_TASK_ID_PATTERN.matcher(expression).matches();
+				
+				final String requirementName = checkText(vo.get("requirement"));
+				if (expressionsByRequirement.containsKey(requirementName)) {
+					// If there were multiple validation obligations for the same machine and requirement,
+					// join them using a conjunction.
+					// To avoid operator precedence issues,
+					// add parentheses around everything that's not just a simple task ID.
+					if (needsParentheses) {
+						expression = "(" + expression + ")";
+					}
+					expression = expressionsByRequirement.get(requirementName) + " & " + expression;
+				}
+				expressionsByRequirement.put(requirementName, expression);
+			});
+			
+			expressionsByRequirement.forEach((requirementName, expression) -> {
+				final ArrayNode vosForRequirement = vosByRequirement.get(requirementName);
+				final ObjectNode vo = vosForRequirement.objectNode();
+				vo.put("machine", machineName);
+				vo.put("expression", expression);
+				vosForRequirement.add(vo);
+			});
+		});
+	}
+	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -833,6 +881,10 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				updateV29Machine(machine);
 			}
 		});
+		
+		if (oldVersion <= 30) {
+			updateV30Project(oldObject);
+		}
 		
 		return oldObject;
 	}

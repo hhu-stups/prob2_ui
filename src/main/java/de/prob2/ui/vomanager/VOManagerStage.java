@@ -1,9 +1,14 @@
 package de.prob2.ui.vomanager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -27,7 +32,6 @@ import de.prob2.ui.verifications.TreeCheckedCell;
 import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -170,7 +174,7 @@ public class VOManagerStage extends Stage {
 				if(item instanceof Requirement) {
 					requirementEditingBox.showRequirement((Requirement)item, true);
 				} else if(item instanceof ValidationObligation) {
-					voEditingBox.showValidationObligation((ValidationObligation)item, true);
+					voEditingBox.showValidationObligation((ValidationObligation)item, getRequirementForItem(to), true);
 				} else {
 					switchMode(EditType.NONE, Mode.NONE);
 				}
@@ -230,33 +234,21 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void initializeListenerOnProjectChange() {
-		final InvalidationListener updateListener = o -> this.updateRequirementsTable();
 		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
 			btAddVO.disableProperty().unbind();
 			final List<Machine> machines = to == null ? Collections.emptyList() : to.getMachines();
 			requirementEditingBox.updateLinkedMachines(machines);
 			voEditingBox.updateLinkedMachines(machines);
-
-			if(from != null) {
-				for (Requirement requirement : from.getRequirements()) {
-					requirementHandler.resetListeners(from, requirement);
-				}
-				for (final Machine machine : from.getMachines()) {
-					machine.validationObligationsProperty().removeListener(updateListener);
-				}
-			}
+			requirementHandler.resetListeners();
 
 			if (to != null) {
 				btAddVO.setDisable(to.getRequirements().isEmpty());
 
 				for(Requirement requirement : to.getRequirements()) {
 					// TODO: Distinguish between two views for tvRequirements
-					requirementHandler.initListeners(to, null, requirement, VOManagerSetting.REQUIREMENT);
+					requirementHandler.initListeners(null, requirement, VOManagerSetting.REQUIREMENT);
 				}
 
-				for (final Machine machine : to.getMachines()) {
-					machine.validationObligationsProperty().addListener(updateListener);
-				}
 				updateRequirementsTable();
 			} else {
 				tvRequirements.setRoot(null);
@@ -302,11 +294,9 @@ public class VOManagerStage extends Stage {
 			for (Requirement requirement : currentProject.getRequirements()) {
 				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
 					TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
-						if (validationObligation.getRequirement().equals(requirement.getName())) {
-							requirementItem.getChildren().add(new TreeItem<>(validationObligation));
-						}
-					}
+					requirement.getValidationObligation(machine).ifPresent(vo ->
+						requirementItem.getChildren().add(new TreeItem<>(vo))
+					);
 					// Show the requirement under the machine where it was introduced
 					// and under any other machines that have corresponding VOs.
 					if (requirement.getIntroducedAt().equals(machine.getName()) || !requirementItem.getChildren().isEmpty()) {
@@ -323,17 +313,11 @@ public class VOManagerStage extends Stage {
 	private void updateRequirementsMachineTable(TreeItem<INameable> root) {
 		for(Requirement requirement : currentProject.getRequirements()) {
 			TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-			for(Machine machine : currentProject.getMachines()) {
-				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
-					TreeItem<INameable> machineItem = new TreeItem<>(machine);
-					for (ValidationObligation validationObligation : machine.getValidationObligations()) {
-						if (validationObligation.getRequirement().equals(requirement.getName())) {
-							machineItem.getChildren().add(new TreeItem<>(validationObligation));
-						}
-					}
-					if (!machineItem.getChildren().isEmpty()) {
-						requirementItem.getChildren().add(machineItem);
-					}
+			for (final ValidationObligation vo : requirement.getValidationObligations()) {
+				if (currentTrace.getModel() == null || (refinementChain.containsKey(vo.getMachine()) && refinementChain.get(vo.getMachine()).contains(requirement.getIntroducedAt()))) {
+					TreeItem<INameable> machineItem = new TreeItem<>(currentProject.get().getMachine(vo.getMachine()));
+					machineItem.getChildren().add(new TreeItem<>(vo));
+					requirementItem.getChildren().add(machineItem);
 				}
 			}
 			root.getChildren().add(requirementItem);
@@ -341,25 +325,23 @@ public class VOManagerStage extends Stage {
 	}
 
 	public void showFeedback() {
-		currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getCurrentMachine().getValidationObligations());
+		currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getRequirements(), currentProject.getCurrentMachine());
 		taFeedback.clear();
 		if(currentFeedback == null) {
 			return;
 		}
 		if(currentFeedback.isEmpty()) {
-			for(ValidationObligation validationObligation : currentProject.getCurrentMachine().getValidationObligations()) {
-				if(validationObligation.getChecked() == Checked.NOT_CHECKED) {
+			for (Requirement requirement : currentProject.getRequirements()) {
+				final Optional<ValidationObligation> vo = requirement.getValidationObligation(currentProject.getCurrentMachine());
+				if (vo.isPresent() && vo.get().getChecked() == Checked.NOT_CHECKED) {
 					taFeedback.appendText(i18n.translate("vomanager.feedback.notChecked"));
 					return;
 				}
 			}
 			taFeedback.appendText(i18n.translate("vomanager.feedback.successful"));
 		} else {
-			for (String vo : currentFeedback.keySet()) {
-				VOValidationFeedback validationFeedback = currentFeedback.get(vo);
-				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", validationFeedback.getRequirement(), vo));
-				taFeedback.appendText("\n");
-				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVOs", validationFeedback.getDependentVOs().toString()));
+			for (VOValidationFeedback validationFeedback : currentFeedback.values()) {
+				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", validationFeedback.getRequirement()));
 				taFeedback.appendText("\n");
 				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVTs", validationFeedback.getDependentVTs().toString()));
 				taFeedback.appendText("\n");
@@ -391,11 +373,26 @@ public class VOManagerStage extends Stage {
 		}
 	}
 
+	private static Requirement getRequirementForItem(final TreeItem<INameable> treeItem) {
+		final TreeItem<INameable> parentItem = treeItem.getParent();
+		if (parentItem.getValue() instanceof Requirement) {
+			return (Requirement) parentItem.getValue();
+		} else {
+			return (Requirement) parentItem.getParent().getValue();
+		}
+	}
+
 	private void removeItem(TreeItem<INameable> item) {
 		if (item.getValue() instanceof Requirement) {
 			currentProject.removeRequirement((Requirement)item.getValue());
 		} else if (item.getValue() instanceof ValidationObligation) {
-			getMachineForItem(item).getValidationObligations().remove((ValidationObligation)item.getValue());
+			final Requirement oldRequirement = getRequirementForItem(item);
+			final Set<ValidationObligation> updatedVos = new HashSet<>(oldRequirement.getValidationObligations());
+			updatedVos.remove((ValidationObligation)item.getValue());
+			final List<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
+			predecessors.add(oldRequirement);
+			final Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getType(), oldRequirement.getText(), updatedVos, predecessors, oldRequirement.getParent());
+			currentProject.replaceRequirement(oldRequirement, updatedRequirement);
 		}
 		// Machine items cannot be manually removed (they disappear when all their children are removed)
 	}
@@ -415,13 +412,15 @@ public class VOManagerStage extends Stage {
 	public void replaceCurrentValidationObligation(final ValidationObligation newVo) {
 		final TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
 		final ValidationObligation oldVo = (ValidationObligation)treeItem.getValue();
-		final Machine machine = getMachineForItem(treeItem);
-		machine.getValidationObligations().set(machine.getValidationObligations().indexOf(oldVo), newVo);
-	}
+		final Requirement oldRequirement = getRequirementForItem(treeItem);
+		final Set<ValidationObligation> updatedVos = new HashSet<>(oldRequirement.getValidationObligations());
+		updatedVos.remove(oldVo);
+		updatedVos.add(newVo);
 
-	public ValidationObligation getCurrentValidationObligation() {
-		final TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-		return (ValidationObligation) treeItem.getValue();
+		final List<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
+		predecessors.add(oldRequirement);
+		final Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getType(), oldRequirement.getText(), updatedVos, predecessors, oldRequirement.getParent());
+		currentProject.replaceRequirement(oldRequirement, updatedRequirement);
 	}
 
 	private void resolveRefinementHierarchy(AbstractModel model) {

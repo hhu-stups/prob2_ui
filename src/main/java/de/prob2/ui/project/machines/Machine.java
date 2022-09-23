@@ -30,7 +30,6 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.INameable;
 import de.prob2.ui.vomanager.IValidationTask;
-import de.prob2.ui.vomanager.ValidationObligation;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -59,7 +58,6 @@ import javafx.collections.ObservableMap;
 	"location",
 	"lastUsedPreferenceName",
 	"validationTasks",
-	"validationObligations",
 	"ltlFormulas",
 	"ltlPatterns",
 	"symbolicCheckingFormulas",
@@ -118,7 +116,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final StringProperty description;
 	private final Path location;
 	private final StringProperty lastUsedPreferenceName;
-	private final ListProperty<ValidationObligation> validationObligations;
 	private final ListProperty<LTLFormulaItem> ltlFormulas;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
@@ -153,7 +150,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = location;
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
-		this.validationObligations = new SimpleListProperty<>(this, "validationObligations", FXCollections.observableArrayList());
 		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
@@ -258,7 +254,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.nameProperty().addListener(changedListener);
 		this.descriptionProperty().addListener(changedListener);
 		this.lastUsedPreferenceNameProperty().addListener(changedListener);
-		this.validationObligationsProperty().addListener(changedListener);
 		this.ltlFormulasProperty().addListener(changedListener);
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicCheckingFormulasProperty().addListener(changedListener);
@@ -424,20 +419,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 	@JsonIgnore
 	public ObservableMap<String, IValidationTask> getValidationTasks() {
 		return this.validationTasksProperty().get();
-	}
-
-	public ListProperty<ValidationObligation> validationObligationsProperty() {
-		return validationObligations;
-	}
-
-	@JsonProperty("validationObligations")
-	public List<ValidationObligation> getValidationObligations() {
-		return validationObligations.get();
-	}
-
-	@JsonProperty("validationObligations")
-	public void setValidationObligations(final List<ValidationObligation> validationObligations) {
-		this.validationObligations.setAll(validationObligations);
 	}
 
 	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {

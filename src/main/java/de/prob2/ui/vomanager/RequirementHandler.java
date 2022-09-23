@@ -1,54 +1,49 @@
 package de.prob2.ui.vomanager;
 
-import com.google.inject.Singleton;
-import de.prob2.ui.project.Project;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import javafx.beans.value.ChangeListener;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.Stream;
+
+import com.google.inject.Singleton;
+
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+
+import javafx.beans.value.ChangeListener;
 
 @Singleton
 public class RequirementHandler {
 
 	private final Map<Requirement, ChangeListener<Checked>> listenerMap = new HashMap<>();
 
-	private Stream<Checked> getVOStream(Project project, Machine machine, Requirement requirement, VOManagerSetting setting) {
-		return getValidationObligations(project, machine, requirement, setting).stream()
+	private Stream<Checked> getVOStream(Machine machine, Requirement requirement, VOManagerSetting setting) {
+		return getValidationObligations(machine, requirement, setting).stream()
 				.map(ValidationObligation::getChecked);
 	}
 
-	private List<ValidationObligation> getValidationObligations(Project project, Machine machine, Requirement requirement, VOManagerSetting setting) {
-		List<ValidationObligation> validationObligations = new ArrayList<>();
-		if(setting == VOManagerSetting.REQUIREMENT) {
-			// machine is not used here
-			project.getMachines().forEach(mch -> validationObligations.addAll(getVOsFromMachine(mch, requirement)));
-		} else if(setting == VOManagerSetting.MACHINE) {
-			validationObligations.addAll(getVOsFromMachine(machine, requirement));
+	private List<ValidationObligation> getValidationObligations(Machine machine, Requirement requirement, VOManagerSetting setting) {
+		if (setting == VOManagerSetting.REQUIREMENT) {
+			return new ArrayList<>(requirement.getValidationObligations());
+		} else {
+			return requirement.getValidationObligation(machine)
+				.map(Collections::singletonList)
+				.orElse(Collections.emptyList());
 		}
-		return validationObligations;
 	}
 
-	private List<ValidationObligation> getVOsFromMachine(Machine machine, Requirement requirement) {
-		return machine.getValidationObligations().stream()
-				.filter(vo -> vo.getRequirement().equals(requirement.getName()))
-				.collect(Collectors.toList());
-	}
-
-	public void updateChecked(Project project, Machine machine, Requirement requirement, VOManagerSetting setting) {
-		List<ValidationObligation> validationObligations = this.getValidationObligations(project, machine, requirement, setting);
+	public void updateChecked(Machine machine, Requirement requirement, VOManagerSetting setting) {
+		List<ValidationObligation> validationObligations = this.getValidationObligations(machine, requirement, setting);
 		if (validationObligations.isEmpty()) {
 			requirement.setChecked(Checked.NOT_CHECKED);
 		} else {
-			final boolean parseError = getVOStream(project, machine, requirement, setting).anyMatch(Checked.PARSE_ERROR::equals);
-			final boolean failed = getVOStream(project, machine, requirement, setting).anyMatch(Checked.FAIL::equals);
-			final boolean success = !failed && getVOStream(project, machine, requirement, setting).allMatch(Checked.SUCCESS::equals);
-			final boolean timeout = !failed && getVOStream(project, machine, requirement, setting).anyMatch(Checked.TIMEOUT::equals);
+			final boolean parseError = getVOStream(machine, requirement, setting).anyMatch(Checked.PARSE_ERROR::equals);
+			final boolean failed = getVOStream(machine, requirement, setting).anyMatch(Checked.FAIL::equals);
+			final boolean success = !failed && getVOStream(machine, requirement, setting).allMatch(Checked.SUCCESS::equals);
+			final boolean timeout = !failed && getVOStream(machine, requirement, setting).anyMatch(Checked.TIMEOUT::equals);
 			if (parseError) {
 				requirement.setChecked(Checked.PARSE_ERROR);
 			} else if (success) {
@@ -63,32 +58,29 @@ public class RequirementHandler {
 		}
 	}
 
-	public void resetListeners(Project project, Requirement requirement) {
-		for(Machine machine : project.getMachines()) {
-			for(ValidationObligation validationObligation : machine.getValidationObligations()) {
-				if(listenerMap.containsKey(requirement)) {
-					validationObligation.checkedProperty().removeListener(listenerMap.get(requirement));
-				}
+	public void resetListeners() {
+		listenerMap.forEach((req, listener) -> {
+			for (final ValidationObligation vo : req.getValidationObligations()) {
+				vo.checkedProperty().removeListener(listener);
 			}
-		}
-		listenerMap.remove(requirement);
+		});
+		listenerMap.clear();
 	}
 
-	public void initListeners(Project project, Machine machine, Requirement requirement, VOManagerSetting setting) {
+	public void initListeners(Machine machine, Requirement requirement, VOManagerSetting setting) {
+		if (listenerMap.containsKey(requirement)) {
+			final ChangeListener<Checked> oldListener = listenerMap.get(requirement);
+			for (final ValidationObligation vo : requirement.getValidationObligations()) {
+				vo.checkedProperty().removeListener(oldListener);
+			}
+		}
+
 		// TODO: We should distinguish between requirement and requirement tree item. A requirement is linked to all machines while a requirement in a machine-based view is linked to a machine only
-		listenerMap.put(requirement, (observable, from, to) -> updateChecked(project, machine, requirement, setting));
-		for(Machine mch : project.getMachines()) {
-			for(ValidationObligation validationObligation : mch.getValidationObligations()) {
-				initListenerForVO(requirement, validationObligation);
-			}
+		final ChangeListener<Checked> newListener = (observable, from, to) -> updateChecked(machine, requirement, setting);
+		listenerMap.put(requirement, newListener);
+		for (final ValidationObligation vo : requirement.getValidationObligations()) {
+			vo.checkedProperty().addListener(newListener);
 		}
+		updateChecked(machine, requirement, setting);
 	}
-
-	public void initListenerForVO(Requirement requirement, ValidationObligation validationObligation) {
-		validationObligation.checkedProperty().addListener(listenerMap.get(requirement));
-		Checked checked = validationObligation.getChecked();
-		validationObligation.checkedProperty().set(Checked.UNKNOWN);
-		validationObligation.checkedProperty().set(checked);
-	}
-
 }

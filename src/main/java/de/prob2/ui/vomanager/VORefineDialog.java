@@ -1,17 +1,18 @@
 package de.prob2.ui.vomanager;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import de.prob.voparser.VOParseException;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-
-import java.util.Collections;
-import java.util.stream.Collectors;
-
 
 public class VORefineDialog extends Stage {
 
@@ -31,17 +32,14 @@ public class VORefineDialog extends Stage {
 
 	private final VOChecker voChecker;
 
-	private final RequirementHandler requirementHandler;
-
 	private final ChoiceBox<Requirement> cbLinkRequirementChoice;
 
 	private final VOErrorHandler voErrorHandler;
 
-	public VORefineDialog(CurrentProject currentProject, ValidationObligation oldVo, VOChecker voChecker, RequirementHandler requirementHandler, ChoiceBox<Requirement> cbLinkRequirementChoice, VOErrorHandler voErrorHandler){
+	public VORefineDialog(CurrentProject currentProject, ValidationObligation oldVo, VOChecker voChecker, ChoiceBox<Requirement> cbLinkRequirementChoice, VOErrorHandler voErrorHandler){
 		this.currentProject = currentProject;
 		this.oldVO = oldVo;
 		this.voChecker = voChecker;
-		this.requirementHandler = requirementHandler;
 		this.cbLinkRequirementChoice = cbLinkRequirementChoice;
 		this.voErrorHandler = voErrorHandler;
 	}
@@ -60,12 +58,15 @@ public class VORefineDialog extends Stage {
 	private void refine(){
 
 		try {
-			ValidationObligation newVo = new ValidationObligation(oldVO.getId()+"_refine", newVOExpression.getText(), oldVO.getRequirement(), Collections.emptyList(), oldVO);
+			ValidationObligation newVo = new ValidationObligation(oldVO.getMachine(), newVOExpression.getText(), oldVO);
 			Machine machine = currentProject.getMachines().stream().filter(entry -> entry.getName().equals(targetMenu.getValue())).collect(Collectors.toList()).get(0);
 			voChecker.parseVO(machine, newVo);
 
-			machine.getValidationObligations().add(newVo);
-			requirementHandler.initListenerForVO(cbLinkRequirementChoice.getValue(), newVo);
+			final Requirement oldRequirement = cbLinkRequirementChoice.getValue();
+			final Set<ValidationObligation> updatedVos = new HashSet<>(oldRequirement.getValidationObligations());
+			updatedVos.add(newVo);
+			final Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getType(), oldRequirement.getText(), updatedVos);
+			currentProject.replaceRequirement(oldRequirement, updatedRequirement);
 
 			this.close();
 		} catch (VOParseException e) {

@@ -1,14 +1,20 @@
 package de.prob2.ui.vomanager;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 
 import javafx.beans.property.ObjectProperty;
@@ -24,6 +30,10 @@ public class Requirement implements INameable {
 
 	private final String text;
 
+	private final Map<String, ValidationObligation> validationObligationsByMachine;
+
+	private final Set<ValidationObligation> validationObligations;
+
 	private final List<Requirement> previousVersions;
 
 	private final Requirement parent;
@@ -35,19 +45,47 @@ public class Requirement implements INameable {
 	public Requirement(@JsonProperty("name") String name,
 			@JsonProperty("introducedAt") String introducedAt,
 			@JsonProperty("type") RequirementType type,
-			@JsonProperty("text") String text) {
-		this(name, introducedAt, type, text, Collections.emptyList(), null);
+			@JsonProperty("text") String text,
+			@JsonProperty("validationObligations") Set<ValidationObligation> validationObligations
+	) {
+		this(name, introducedAt, type, text, validationObligations, Collections.emptyList(), null);
 	}
 
-	public Requirement(String name, String introducedAt, RequirementType type, String text, List<Requirement> previousVersions, Requirement parent) {
+	public Requirement(
+		String name,
+		String introducedAt,
+		RequirementType type,
+		String text,
+		Set<ValidationObligation> validationObligations,
+		List<Requirement> previousVersions,
+		Requirement parent
+	) {
 		this.name = name;
 		this.introducedAt = introducedAt;
 		this.type = type;
 		this.text = text;
+		this.validationObligationsByMachine = groupVosByMachine(validationObligations);
+		// The collection returned by TreeMap.values() doesn't support equals/hashCode properly,
+		// so we have to copy it into a Set,
+		// which has guaranteed behavior for equals/hashCode.
+		// Use LinkedHashSet to maintain the order from the map.
+		this.validationObligations = new LinkedHashSet<>(this.validationObligationsByMachine.values());
+		assert this.validationObligations.size() == this.validationObligationsByMachine.size();
 		this.previousVersions = previousVersions;
 		this.parent = parent;
 	}
 
+	private static Map<String, ValidationObligation> groupVosByMachine(final Set<ValidationObligation> vos) {
+		// Use TreeMap to ensure a stable order (sorted by machine name) when saving to JSON.
+		final Map<String, ValidationObligation> vosByMachine = new TreeMap<>();
+		for (final ValidationObligation vo : vos) {
+			if (vosByMachine.containsKey(vo.getMachine())) {
+				throw new IllegalArgumentException("Duplicate validation obligation for machine " + vo.getMachine());
+			}
+			vosByMachine.put(vo.getMachine(), vo);
+		}
+		return vosByMachine;
+	}
 
 	@JsonIgnore
 	public List<Requirement> getPreviousVersions(){
@@ -70,6 +108,23 @@ public class Requirement implements INameable {
 		return text;
 	}
 
+	@JsonIgnore
+	public Map<String, ValidationObligation> getValidationObligationsByMachine() {
+		return Collections.unmodifiableMap(this.validationObligationsByMachine);
+	}
+
+	public Set<ValidationObligation> getValidationObligations() {
+		return Collections.unmodifiableSet(this.validationObligations);
+	}
+
+	public Optional<ValidationObligation> getValidationObligation(final String machineName) {
+		return Optional.ofNullable(this.getValidationObligationsByMachine().get(machineName));
+	}
+
+	public Optional<ValidationObligation> getValidationObligation(final Machine machine) {
+		return this.getValidationObligation(machine.getName());
+	}
+
 	public ObjectProperty<Checked> checkedProperty() {
 		return checked;
 	}
@@ -87,17 +142,17 @@ public class Requirement implements INameable {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Requirement that = (Requirement) o;
-		return Objects.equals(name, that.name) && Objects.equals(introducedAt, that.introducedAt) && type == that.type && Objects.equals(text, that.text);
+		return Objects.equals(name, that.name) && Objects.equals(introducedAt, that.introducedAt) && type == that.type && Objects.equals(text, that.text) && getValidationObligations().equals(that.getValidationObligations());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, introducedAt, type, text);
+		return Objects.hash(name, introducedAt, type, text, getValidationObligations());
 	}
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ROOT, "Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s}", this.getChecked(), name, introducedAt, type, text);
+		return String.format(Locale.ROOT, "Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s, validationObligations = %s}", this.getChecked(), name, introducedAt, type, text, getValidationObligations());
 	}
 
 	@JsonIgnore //TODO Fix this when making history and refinement saving persistent
