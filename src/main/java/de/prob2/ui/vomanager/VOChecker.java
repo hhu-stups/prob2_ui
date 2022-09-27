@@ -1,10 +1,14 @@
 package de.prob2.ui.vomanager;
 
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.check.ModelCheckingOptions;
+import de.prob.statespace.Trace;
 import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
 import de.prob.voparser.VTType;
@@ -13,6 +17,7 @@ import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
+import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
@@ -21,6 +26,7 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.OrValidationExpression;
@@ -128,10 +134,23 @@ public class VOChecker {
 		if(validationTask instanceof ReplayTrace) {
 			return VTType.TRACE_REPLAY;
 		} else if(validationTask instanceof SimulationItem) {
+			SimulationType simulationType = ((SimulationItem) validationTask).getType();
+			if(simulationType == SimulationType.HYPOTHESIS_TEST || simulationType == SimulationType.ESTIMATION) {
+				return VTType.CHECKING_PROP;
+			} else if(simulationType == SimulationType.MONTE_CARLO_SIMULATION) {
+				return VTType.EXPLORING_STATE_SPACE;
+			}
+			// TODO: Implement a single simulation
 			return VTType.SEARCHING_GOAL;
 		} else if(validationTask instanceof LTLFormulaItem) {
 			return VTType.CHECKING_PROP;
 		} else if(validationTask instanceof ModelCheckingItem) {
+			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
+			if(options.size() == 0) {
+				return VTType.EXPLORING_STATE_SPACE;
+			} else if(options.contains(ModelCheckingOptions.Options.FIND_GOAL)) {
+				return VTType.SEARCHING_GOAL;
+			}
 			return VTType.CHECKING_PROP;
 		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
 			return VTType.CHECKING_PROP;
