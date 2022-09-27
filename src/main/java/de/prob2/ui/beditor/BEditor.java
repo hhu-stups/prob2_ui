@@ -167,9 +167,6 @@ public class BEditor extends CodeArea {
 		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_END, e -> this.errorPopup.hide());
 
 		styleProperty().bind(Bindings.format(Locale.ROOT, "-fx-font-size: %dpx;", fontSize.fontSizeProperty()));
-
-		// TODO Investigate why code area seems to update position multiple times (causing jumping in text wildly) and why position seems to be not reset by switching to other file
-		//estimatedScrollYProperty().addListener(((observable, oldValue, newValue) -> injector.getInstance(BEditorView.class).updateScrollPosition(newValue)));
 	}
 
 	@Override
