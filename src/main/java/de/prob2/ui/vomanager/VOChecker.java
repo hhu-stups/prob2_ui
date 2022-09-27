@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 
 import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
+import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -22,7 +23,6 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
-import de.prob2.ui.vomanager.ast.NotValidationExpression;
 import de.prob2.ui.vomanager.ast.OrValidationExpression;
 import de.prob2.ui.vomanager.ast.SequentialValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
@@ -105,7 +105,7 @@ public class VOChecker {
 	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
 		final VOParser voParser = new VOParser();
 		// TODO Set correct VT types instead of null
-		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, null));
+		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
 		try {
 			final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
 			expression.getAllTasks().forEach(taskExpr -> {
@@ -124,11 +124,24 @@ public class VOChecker {
 		}
 	}
 
+	public VTType extractType(IValidationTask validationTask) {
+		if(validationTask instanceof ReplayTrace) {
+			return VTType.TRACE_REPLAY;
+		} else if(validationTask instanceof SimulationItem) {
+			return VTType.MODEL_CHECKING_GOAL;
+		} else if(validationTask instanceof LTLFormulaItem) {
+			return VTType.MODEL_CHECKING_PROP;
+		} else if(validationTask instanceof ModelCheckingItem) {
+			return VTType.MODEL_CHECKING_PROP;
+		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
+			return VTType.MODEL_CHECKING_PROP;
+		}
+		return null;
+	}
+
 	private CompletableFuture<?> checkVOExpression(IValidationExpression expression) {
 		if (expression instanceof ValidationTaskExpression) {
 			return checkVT(((ValidationTaskExpression)expression).getTask());
-		} else if (expression instanceof NotValidationExpression) {
-			return checkNotExpression((NotValidationExpression)expression);
 		} else if (expression instanceof AndValidationExpression) {
 			return checkAndExpression((AndValidationExpression)expression);
 		} else if (expression instanceof OrValidationExpression) {
@@ -138,10 +151,6 @@ public class VOChecker {
 		} else {
 			throw new RuntimeException("VO expression type is unknown: " + expression.getClass());
 		}
-	}
-
-	private CompletableFuture<?> checkNotExpression(NotValidationExpression expression) {
-		return checkVOExpression(expression.getExpression());
 	}
 
 	private CompletableFuture<?> checkAndExpression(AndValidationExpression expression) {

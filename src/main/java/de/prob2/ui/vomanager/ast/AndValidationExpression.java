@@ -3,8 +3,6 @@ package de.prob2.ui.vomanager.ast;
 import java.util.stream.Stream;
 
 import de.prob.voparser.node.AAndVo;
-import de.prob.voparser.node.AEquivalentVo;
-import de.prob.voparser.node.AImpliesVo;
 import de.prob2.ui.verifications.Checked;
 
 public final class AndValidationExpression implements IValidationExpression {
@@ -21,13 +19,6 @@ public final class AndValidationExpression implements IValidationExpression {
 			IValidationExpression.fromAst(ast.getLeft()),
 			IValidationExpression.fromAst(ast.getRight())
 		);
-	}
-	
-	public static AndValidationExpression fromAst(final AEquivalentVo ast) {
-		return fromAst(new AAndVo(
-			new AImpliesVo(ast.getLeft().clone(), ast.getRight().clone()),
-			new AImpliesVo(ast.getRight().clone(), ast.getLeft().clone())
-		));
 	}
 	
 	public IValidationExpression getLeft() {

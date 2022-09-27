@@ -2,8 +2,6 @@ package de.prob2.ui.vomanager.ast;
 
 import java.util.stream.Stream;
 
-import de.prob.voparser.node.AImpliesVo;
-import de.prob.voparser.node.ANotVo;
 import de.prob.voparser.node.AOrVo;
 import de.prob2.ui.verifications.Checked;
 
@@ -21,10 +19,6 @@ public final class OrValidationExpression implements IValidationExpression {
 			IValidationExpression.fromAst(ast.getLeft()),
 			IValidationExpression.fromAst(ast.getRight())
 		);
-	}
-	
-	public static OrValidationExpression fromAst(final AImpliesVo ast) {
-		return fromAst(new AOrVo(new ANotVo(ast.getLeft().clone()), ast.getRight().clone()));
 	}
 	
 	public IValidationExpression getLeft() {
