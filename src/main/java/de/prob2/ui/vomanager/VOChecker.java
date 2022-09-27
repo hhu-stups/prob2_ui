@@ -128,13 +128,13 @@ public class VOChecker {
 		if(validationTask instanceof ReplayTrace) {
 			return VTType.TRACE_REPLAY;
 		} else if(validationTask instanceof SimulationItem) {
-			return VTType.MODEL_CHECKING_GOAL;
+			return VTType.SEARCHING_GOAL;
 		} else if(validationTask instanceof LTLFormulaItem) {
-			return VTType.MODEL_CHECKING_PROP;
+			return VTType.CHECKING_PROP;
 		} else if(validationTask instanceof ModelCheckingItem) {
-			return VTType.MODEL_CHECKING_PROP;
+			return VTType.CHECKING_PROP;
 		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
-			return VTType.MODEL_CHECKING_PROP;
+			return VTType.CHECKING_PROP;
 		}
 		return null;
 	}
