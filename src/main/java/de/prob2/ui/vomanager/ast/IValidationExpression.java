@@ -29,7 +29,7 @@ public interface IValidationExpression {
 	
 	public static IValidationExpression parse(final VOParser parser, final String expression) throws VOParseException {
 		final Start ast = parser.parseFormula(expression);
-		//voParser.semanticCheck(ast); // TODO
+		parser.semanticCheck(ast);
 		return fromAst(ast.getPVo());
 	}
 	

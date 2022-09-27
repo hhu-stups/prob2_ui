@@ -110,7 +110,6 @@ public class VOChecker {
 
 	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
 		final VOParser voParser = new VOParser();
-		// TODO Set correct VT types instead of null
 		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
 		try {
 			final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
@@ -146,12 +145,13 @@ public class VOChecker {
 			return VTType.CHECKING_PROP;
 		} else if(validationTask instanceof ModelCheckingItem) {
 			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
-			if(options.size() == 0) {
-				return VTType.EXPLORING_STATE_SPACE;
-			} else if(options.contains(ModelCheckingOptions.Options.FIND_GOAL)) {
+			if(options.contains(ModelCheckingOptions.Options.FIND_GOAL) || !((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
 				return VTType.SEARCHING_GOAL;
 			}
-			return VTType.CHECKING_PROP;
+			if(options.contains(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS) || options.contains(ModelCheckingOptions.Options.FIND_DEADLOCKS)) {
+				return VTType.CHECKING_PROP;
+			}
+			return VTType.EXPLORING_STATE_SPACE;
 		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
 			return VTType.CHECKING_PROP;
 		}
