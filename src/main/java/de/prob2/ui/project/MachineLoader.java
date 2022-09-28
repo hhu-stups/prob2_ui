@@ -261,6 +261,7 @@ public class MachineLoader {
 			} catch (EventBFileNotFoundException e) {
 				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
 				if(!e.refreshProject()) {
+				    // the source file (e.g. .bum) does not exist
 					Platform.runLater(() -> stageManager
 							.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
 									"project.machineLoader.alerts.fileNotFound.content", e.getPath())
