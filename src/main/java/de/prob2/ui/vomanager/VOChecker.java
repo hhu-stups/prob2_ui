@@ -131,7 +131,7 @@ public class VOChecker {
 
 	public VTType extractType(IValidationTask validationTask) {
 		if(validationTask instanceof ReplayTrace) {
-			return VTType.TRACE_REPLAY;
+			return VTType.TRACE;
 		} else if(validationTask instanceof SimulationItem) {
 			SimulationType simulationType = ((SimulationItem) validationTask).getType();
 			if(simulationType == SimulationType.HYPOTHESIS_TEST || simulationType == SimulationType.ESTIMATION) {
@@ -140,13 +140,13 @@ public class VOChecker {
 				return VTType.EXPLORING_STATE_SPACE;
 			}
 			// TODO: Implement a single simulation
-			return VTType.SEARCHING_GOAL;
+			return VTType.TRACE;
 		} else if(validationTask instanceof LTLFormulaItem) {
 			return VTType.CHECKING_PROP;
 		} else if(validationTask instanceof ModelCheckingItem) {
 			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
 			if(options.contains(ModelCheckingOptions.Options.FIND_GOAL) || !((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
-				return VTType.SEARCHING_GOAL;
+				return VTType.TRACE;
 			}
 			if(options.contains(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS) || options.contains(ModelCheckingOptions.Options.FIND_DEADLOCKS)) {
 				return VTType.CHECKING_PROP;
