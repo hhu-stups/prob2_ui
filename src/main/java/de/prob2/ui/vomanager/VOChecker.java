@@ -11,6 +11,7 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob.statespace.Trace;
 import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
+import de.prob.voparser.VOScopeChecker;
 import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
@@ -134,26 +135,22 @@ public class VOChecker {
 			return VTType.TRACE;
 		} else if(validationTask instanceof SimulationItem) {
 			SimulationType simulationType = ((SimulationItem) validationTask).getType();
-			if(simulationType == SimulationType.HYPOTHESIS_TEST || simulationType == SimulationType.ESTIMATION) {
-				return VTType.CHECKING_PROP;
-			} else if(simulationType == SimulationType.MONTE_CARLO_SIMULATION) {
-				return VTType.EXPLORING_STATE_SPACE;
+			if(simulationType == SimulationType.MONTE_CARLO_SIMULATION || simulationType == SimulationType.HYPOTHESIS_TEST || simulationType == SimulationType.ESTIMATION) {
+				return VTType.EXPLORE;
 			}
 			// TODO: Implement a single simulation
 			return VTType.TRACE;
 		} else if(validationTask instanceof LTLFormulaItem) {
-			return VTType.CHECKING_PROP;
+			return VTType.EXPLORE;
 		} else if(validationTask instanceof ModelCheckingItem) {
 			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
 			if(options.contains(ModelCheckingOptions.Options.FIND_GOAL) || !((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
 				return VTType.TRACE;
 			}
-			if(options.contains(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS) || options.contains(ModelCheckingOptions.Options.FIND_DEADLOCKS)) {
-				return VTType.CHECKING_PROP;
-			}
-			return VTType.EXPLORING_STATE_SPACE;
+			// Otherwise invariant/deadlock checking, or just covering state space
+			return VTType.EXPLORE;
 		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
-			return VTType.CHECKING_PROP;
+			return VTType.STATIC;
 		}
 		return null;
 	}
