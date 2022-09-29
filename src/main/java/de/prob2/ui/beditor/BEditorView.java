@@ -461,10 +461,18 @@ public class BEditorView extends BorderPane {
 	}
 
 	private boolean isCurrentEditorFile(final String filename) {
+		if (getPath() == null) {
+			throw new IllegalStateException("cannot compare file to currently opened file because there is no opened file");
+		}
+
+		if (filename == null || filename.isEmpty()) {
+			return false;
+		}
+
 		try {
 			return Files.isSameFile(Paths.get(filename), this.getPath());
 		} catch (IOException e) {
-			LOGGER.info("Failed to check if file is identical to editor file", e);
+			LOGGER.warn("Failed to check if file is identical to editor file", e);
 			return false;
 		}
 	}
