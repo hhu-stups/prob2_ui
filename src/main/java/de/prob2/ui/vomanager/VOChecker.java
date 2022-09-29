@@ -1,6 +1,5 @@
 package de.prob2.ui.vomanager;
 
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -8,10 +7,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.check.ModelCheckingOptions;
-import de.prob.statespace.Trace;
 import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
-import de.prob.voparser.VOScopeChecker;
 import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
@@ -27,7 +24,6 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.OrValidationExpression;
