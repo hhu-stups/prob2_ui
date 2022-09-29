@@ -471,7 +471,7 @@ public class BEditorView extends BorderPane {
 
 		try {
 			return Files.isSameFile(Paths.get(filename), this.getPath());
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOGGER.warn("Failed to check if file is identical to editor file", e);
 			return false;
 		}
