@@ -1,7 +1,7 @@
 package de.prob2.ui.vomanager;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +12,8 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,10 +21,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.converter.DefaultStringConverter;
 
 @FXMLInjected
 @Singleton
@@ -39,6 +47,21 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private ChoiceBox<String> cbRequirementLinkMachineChoice;
+
+	@FXML
+	private Button removeVoButton;
+
+	@FXML
+	private TableView<ValidationObligation> voTable;
+
+	@FXML
+	private TableColumn<ValidationObligation, Checked> voStatusColumn;
+
+	@FXML
+	private TableColumn<ValidationObligation, String> voMachineColumn;
+
+	@FXML
+	private TableColumn<ValidationObligation, String> voExpressionColumn;
 
 	@FXML
 	private Button applyButton;
@@ -66,8 +89,58 @@ public class RequirementsEditingBox extends VBox {
 	private void initialize() {
 		cbRequirementLinkMachineChoice.setItems(linkedMachineNames);
 		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
+
+		removeVoButton.disableProperty().bind(voTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
+
+		voStatusColumn.setCellFactory(features -> new CheckedCell<>());
+		voStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+
+		voMachineColumn.setCellFactory(features -> new TableCell<ValidationObligation, String>() {
+			@Override
+			protected void updateItem(final String item, final boolean empty) {
+				super.updateItem(item, empty);
+
+				this.setText(null);
+				if (empty) {
+					this.setGraphic(null);
+				} else {
+					final ChoiceBox<String> machineChoiceBox = new ChoiceBox<>(linkedMachineNames);
+					machineChoiceBox.getSelectionModel().select(item);
+					machineChoiceBox.setOnAction(e -> {
+						final String machine = machineChoiceBox.getValue();
+						if (machine == null) {
+							return;
+						}
+						final ValidationObligation existingVo = voTable.getItems().get(this.getIndex());
+						final ValidationObligation changedVo = new ValidationObligation(machine, existingVo.getExpression());
+						voTable.getItems().set(this.getIndex(), changedVo);
+					});
+					this.setGraphic(machineChoiceBox);
+				}
+			}
+		});
+		voMachineColumn.setCellValueFactory(new PropertyValueFactory<>("machine"));
+
+		voExpressionColumn.setCellFactory(features -> new TextFieldTableCell<>(new DefaultStringConverter()));
+		voExpressionColumn.setCellValueFactory(new PropertyValueFactory<>("expression"));
+		voExpressionColumn.setOnEditCommit(e -> {
+			final int row = e.getTablePosition().getRow();
+			final ValidationObligation existingVo = voTable.getItems().get(row);
+			final ValidationObligation changedVo = new ValidationObligation(existingVo.getMachine(), e.getNewValue());
+			voTable.getItems().set(row, changedVo);
+		});
 	}
 
+	@FXML
+	private void addVo() {
+		voTable.getItems().add(new ValidationObligation(linkedMachineNames.get(0), ""));
+		voTable.edit(voTable.getItems().size(), voExpressionColumn);
+	}
+
+	@FXML
+	private void removeVo() {
+		voTable.getItems().remove(voTable.getSelectionModel().getSelectedIndex());
+	}
 
 	@FXML
 	public void replaceRequirement(){
@@ -81,7 +154,7 @@ public class RequirementsEditingBox extends VBox {
 		}
 		ArrayList<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
 		predecessors.add(oldRequirement);
-		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), oldRequirement.getValidationObligations(), predecessors, null);
+		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
 		currentProject.replaceRequirement(oldRequirement, newRequirement);
 	}
 
@@ -116,7 +189,7 @@ public class RequirementsEditingBox extends VBox {
 			warnAlreadyExists();
 			return;
 		}
-		currentProject.addRequirement(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptySet()));
+		currentProject.addRequirement(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), new HashSet<>(voTable.getItems())));
 	}
 
 	@FXML
@@ -131,6 +204,7 @@ public class RequirementsEditingBox extends VBox {
 		cbRequirementChoice.getSelectionModel().clearSelection();
 		taRequirement.clear();
 		tfName.clear();
+		voTable.getItems().clear();
 		voManagerStage.clearRequirementsSelection();
 	}
 
@@ -145,6 +219,7 @@ public class RequirementsEditingBox extends VBox {
 		cbRequirementLinkMachineChoice.getSelectionModel().select(requirement.getIntroducedAt());
 		cbRequirementChoice.getSelectionModel().select(requirement.getType());
 		taRequirement.setText(requirement.getText());
+		voTable.getItems().setAll(requirement.getValidationObligations());
 	}
 
 	private void warnNotValid() {
