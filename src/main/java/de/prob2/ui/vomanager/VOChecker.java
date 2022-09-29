@@ -140,7 +140,9 @@ public class VOChecker {
 			return VTType.EXPLORE;
 		} else if(validationTask instanceof ModelCheckingItem) {
 			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
-			if(options.contains(ModelCheckingOptions.Options.FIND_GOAL) || !((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
+			if(options.contains(ModelCheckingOptions.Options.FIND_GOAL) ||
+				((ModelCheckingItem) validationTask).getGoal() == null ||
+				!((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
 				return VTType.TRACE;
 			}
 			// Otherwise invariant/deadlock checking, or just covering state space
