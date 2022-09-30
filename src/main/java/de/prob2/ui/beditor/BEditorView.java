@@ -461,12 +461,12 @@ public class BEditorView extends BorderPane {
 	}
 
 	private boolean isCurrentEditorFile(final String filename) {
-		if (getPath() == null) {
-			throw new IllegalStateException("cannot compare file to currently opened file because there is no opened file");
+		if (filename == null || filename.isEmpty()) {
+			throw new IllegalArgumentException("cannot compare current file with empty path");
 		}
 
-		if (filename == null || filename.isEmpty()) {
-			return false;
+		if (getPath() == null) {
+			throw new IllegalStateException("cannot compare file " + filename + " to currently opened file because there is no opened file");
 		}
 
 		try {
