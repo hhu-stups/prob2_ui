@@ -251,6 +251,7 @@ public class VisBStage extends Stage {
 		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
 		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
 
+		LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
 		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
 		this.webView.getEngine().setOnError(this::treatJavascriptError);
 
