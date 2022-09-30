@@ -1,7 +1,6 @@
 package de.prob2.ui.vomanager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +34,8 @@ import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
@@ -138,7 +139,44 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void initializeTables() {
-		requirementNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
+		requirementNameColumn.setCellValueFactory(features -> {
+			final TreeItem<INameable> treeItem = features.getValue();
+			final INameable value = treeItem.getValue();
+			if (value == null) {
+				return null;
+			}
+			
+			final StringProperty name;
+			if (value instanceof Machine) {
+				name = ((Machine)value).nameProperty();
+			} else {
+				name = new SimpleStringProperty(value.getName());
+			}
+			
+			final INameable parentValue = treeItem.getParent().getValue();
+			
+			if (parentValue == null || value instanceof ValidationObligation) {
+				// Top-level item - show just the name.
+				return name;
+			} else {
+				// Second-level item - also show validation expression (if any) for this machine/requirement combination.
+				final Machine machine;
+				final Requirement requirement;
+				if (value instanceof Machine) {
+					machine = (Machine)value;
+					requirement = (Requirement)parentValue;
+				} else if (value instanceof Requirement) {
+					machine = (Machine)parentValue;
+					requirement = (Requirement)value;
+				} else {
+					throw new AssertionError("Unhandled type in VO tree: " + value.getClass());
+				}
+				
+				return requirement.getValidationObligation(machine)
+					.map(vo -> Bindings.format("%s: %s", name, vo.getExpression()))
+					.orElse(name);
+			}
+		});
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("checked"));
 
