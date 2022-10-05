@@ -58,11 +58,6 @@ import javafx.stage.Stage;
 @FXMLInjected
 @Singleton
 public class VOManagerStage extends Stage {
-
-	public enum EditType {
-		NONE, MODIFY;
-	}
-
 	public enum Mode {
 		NONE, REQUIREMENT, VO
 	}
@@ -106,8 +101,6 @@ public class VOManagerStage extends Stage {
 
 	private final I18n i18n;
 
-	private final ObjectProperty<EditType> editTypeProperty;
-
 	private final ObjectProperty<Mode> modeProperty;
 
 	private final Map<String, List<String>> refinementChain;
@@ -125,7 +118,6 @@ public class VOManagerStage extends Stage {
 		this.voErrorHandler = voErrorHandler;
 		this.feedbackManager = feedbackManager;
 		this.i18n = i18n;
-		this.editTypeProperty = new SimpleObjectProperty<>(EditType.NONE);
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.refinementChain = new HashMap<>();
 		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
@@ -262,10 +254,10 @@ public class VOManagerStage extends Stage {
 				} else if(item instanceof ValidationObligation) {
 					voEditingBox.showValidationObligation((ValidationObligation)item, getRequirementForItem(to), true);
 				} else {
-					switchMode(EditType.NONE, Mode.NONE);
+					switchMode(Mode.NONE);
 				}
 			} else {
-				switchMode(EditType.NONE, Mode.NONE);
+				switchMode(Mode.NONE);
 			}
 		});
 
@@ -310,8 +302,8 @@ public class VOManagerStage extends Stage {
 		requirementEditingBox.setVoManagerStage(this);
 		voEditingBox.setVoManagerStage(this);
 
-		requirementEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.REQUIREMENT, editTypeProperty, modeProperty));
-		voEditingBox.visibleProperty().bind(Bindings.createBooleanBinding(() -> editTypeProperty.get() != EditType.NONE && modeProperty.get() == Mode.VO, editTypeProperty, modeProperty));
+		requirementEditingBox.visibleProperty().bind(modeProperty.isEqualTo(Mode.REQUIREMENT));
+		voEditingBox.visibleProperty().bind(modeProperty.isEqualTo(Mode.VO));
 	}
 
 	private void initializeChoiceBoxes() {
@@ -333,20 +325,19 @@ public class VOManagerStage extends Stage {
 				tvRequirements.setRoot(null);
 			}
 
-			switchMode(EditType.NONE, Mode.NONE);
+			switchMode(Mode.NONE);
 			btAddRequirementVO.setDisable(to == null);
 		};
 		currentProject.addListener(projectChangeListener);
 		projectChangeListener.changed(null, null, currentProject.get());
 	}
 
-	public void switchMode(EditType editType, Mode mode) {
-		editTypeProperty.set(editType);
+	public void switchMode(Mode mode) {
 		modeProperty.set(mode);
 	}
 
 	public void closeEditingBox() {
-		this.switchMode(EditType.NONE, Mode.NONE);
+		this.switchMode(Mode.NONE);
 	}
 
 	public void updateRequirementsTable() {
@@ -434,13 +425,13 @@ public class VOManagerStage extends Stage {
 	@FXML
 	public void addRequirement() {
 		requirementEditingBox.resetRequirementEditing();
-		switchMode(EditType.MODIFY, Mode.REQUIREMENT);
+		switchMode(Mode.REQUIREMENT);
 	}
 
 	@FXML
 	public void addVO() {
 		voEditingBox.resetVOEditing();
-		switchMode(EditType.MODIFY, Mode.VO);
+		switchMode(Mode.VO);
 	}
 
 	private static Machine getMachineForItem(final TreeItem<INameable> treeItem) {
@@ -474,10 +465,6 @@ public class VOManagerStage extends Stage {
 			currentProject.replaceRequirement(oldRequirement, updatedRequirement);
 		}
 		// Machine items cannot be manually removed (they disappear when all their children are removed)
-	}
-
-	public EditType getEditType() {
-		return editTypeProperty.get();
 	}
 
 	public void clearRequirementsSelection() {

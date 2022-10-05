@@ -142,7 +142,7 @@ public class VOEditingBox extends VBox {
 
 	public void showValidationObligation(ValidationObligation validationObligation, Requirement requirement, boolean edit) {
 		if(edit) {
-			voManagerStage.switchMode(VOManagerStage.EditType.MODIFY, VOManagerStage.Mode.VO);
+			voManagerStage.switchMode(VOManagerStage.Mode.VO);
 		}
 		if(validationObligation == null) {
 			return;
